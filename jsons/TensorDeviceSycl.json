@@ -12,22 +12,10 @@
     "insertText": "QueueInterface"
   },
   {
-    "label": "members",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "members"
-  },
-  {
     "label": "SyclDeviceBase",
     "kind": "Type",
     "detail": "struct declaration",
     "insertText": "SyclDeviceBase"
-  },
-  {
-    "label": "which",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "which"
   },
   {
     "label": "SyclDevice",
@@ -36,10 +24,118 @@
     "insertText": "SyclDevice"
   },
   {
-    "label": "lock()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (# if)",
+    "insertText": "defined(EIGEN_USE_SYCL) && !defined(EIGEN_CXX11_TENSOR_TENSOR_DEVICE_SYCL_H)"
+  },
+  {
+    "label": "SyclDeviceInfo()",
+    "kind": "Method",
+    "detail": "Function (namespace TensorSycl { namespace internal { struct SyclDeviceInfo {)",
+    "insertText": "SyclDeviceInfo(cl::sycl::queue queue) : local_mem_type( queue.get_device() .template get_info<cl::sycl::info::device::local_mem_type>()), max_work_item_sizes( queue.get_device() .template get_info< cl::sycl::info::device::max_work_item_sizes>()), max_mem_alloc_size( queue.get_device() .template get_info< cl::sycl::info::device::max_mem_alloc_size>()), max_compute_units(queue.get_device() .template get_info< cl::sycl::info::device::max_compute_units>()), max_work_group_size( queue.get_device() .template get_info< cl::sycl::info::device::max_work_group_size>()), local_mem_size( queue.get_device() .template get_info<cl::sycl::info::device::local_mem_size>()), platform_name(queue.get_device() .get_platform() .template get_info<cl::sycl::info::platform::name>()), device_name(queue.get_device() .template get_info<cl::sycl::info::device::name>()), device_vendor( queue.get_device() .template get_info<cl::sycl::info::device::vendor>())"
+  },
+  {
+    "label": "get_sycl_supported_devices()",
+    "kind": "Method",
+    "detail": "Function (} cl::sycl::info::local_mem_type local_mem_type ; cl::sycl::id<3> max_work_item_sizes ; unsigned long max_mem_alloc_size ; unsigned long max_compute_units ; unsigned long max_work_group_size ; size_t local_mem_size ; std::string platform_name ; std::string device_name ; std::string device_vendor ; } ; } } typedef TensorSycl::internal::buffer_data_type_t buffer_scalar_t ; EIGEN_STRONG_INLINE auto)",
+    "insertText": "get_sycl_supported_devices() -> decltype(cl::sycl::device::get_devices())"
+  },
+  {
+    "label": "device()",
+    "kind": "Method",
+    "detail": "Function (# ifdef EIGEN_SYCL_USE_DEFAULT_SELECTOR return { cl::)",
+    "insertText": "device(cl::sycl::default_selector())"
+  },
+  {
+    "label": "get_platforms()",
+    "kind": "Method",
+    "detail": "Function (# else std::vector<cl::sycl::device> supported_devices ; auto platform_list = cl::sycl::)",
+    "insertText": "get_platforms()"
+  },
+  {
+    "label": "get_devices()",
+    "kind": "Method",
+    "detail": "Function (auto device_list = platform .)",
+    "insertText": "get_devices()"
+  },
+  {
+    "label": "name()",
+    "kind": "Method",
+    "detail": "Function (auto platform_name = platform . template get_info<cl::sycl::info::)",
+    "insertText": "name()"
+  },
+  {
+    "label": "transform()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "transform(platform_name.begin(), platform_name.end(), platform_name.begin(), ::tolower)"
+  },
+  {
+    "label": "vendor()",
+    "kind": "Method",
+    "detail": "Function (auto vendor = device . template get_info<cl::sycl::info::)",
+    "insertText": "vendor()"
+  },
+  {
+    "label": "transform()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "transform(vendor.begin(), vendor.end(), vendor.begin(), ::tolower)"
+  },
+  {
+    "label": "unsupported_condition()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "unsupported_condition(device.is_cpu() && platform_name.find(\"amd\") != std::string::npos && vendor.find(\"apu\") == std::string::npos) || (platform_name.find(\"experimental\") != std::string::npos) || device.is_host()"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (supported_devices .)",
+    "insertText": "push_back(device)"
+  },
+  {
+    "label": "QueueInterface()",
+    "kind": "Method",
+    "detail": "Function (} } } return supported_devices ; # endif } class QueueInterface { public : template<DeviceOrSelector>)",
+    "insertText": "QueueInterface(const DeviceOrSelector &dev_or_sel, cl::sycl::async_handler handler, unsigned num_threads = std::thread::hardware_concurrency()) : m_queue(dev_or_sel, handler), #ifdef EIGEN_SYCL_USE_PROGRAM_CLASS m_prog(m_queue.get_context(), get_sycl_supported_devices()), #endif m_thread_pool(num_threads), m_device_info(m_queue)"
+  },
+  {
+    "label": "DeviceOrSelector()",
+    "kind": "Method",
+    "detail": "Function (# ifdef EIGEN_SYCL_USE_PROGRAM_CLASS m_prog . build_with_kernel_type<)",
+    "insertText": "DeviceOrSelector()"
+  },
+  {
+    "label": "f()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "f(cl::sycl::handler &cgh)"
+  },
+  {
+    "label": "DeviceOrSelector()",
+    "kind": "Method",
+    "detail": "Function (cgh . single_task<)",
+    "insertText": "DeviceOrSelector(m_prog.get_kernel<DeviceOrSelector>(), [=]() {})"
+  },
+  {
+    "label": "EIGEN_SYCL_TRY_CATCH()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "EIGEN_SYCL_TRY_CATCH(m_queue.submit(f))"
+  },
+  {
+    "label": "QueueInterface()",
+    "kind": "Method",
+    "detail": "Function (# endif } template<DeviceOrSelector>)",
+    "insertText": "QueueInterface(const DeviceOrSelector &dev_or_sel, unsigned num_threads = std::thread::hardware_concurrency()) : QueueInterface(dev_or_sel, [this](cl::sycl::exception_list l) { this->exception_caught_ = this->sycl_async_handler(l); }, num_threads)"
+  },
+  {
+    "label": "program()",
+    "kind": "Method",
+    "detail": "Function (} # ifdef EIGEN_SYCL_USE_PROGRAM_CLASS EIGEN_STRONG_INLINE cl::sycl::program&)",
+    "insertText": "program()"
   },
   {
     "label": "lock()",
@@ -48,123 +144,993 @@
     "insertText": "lock(pmapper_mutex_)"
   },
   {
-    "label": "lock()",
+    "label": "detach_buffer()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "detach_buffer(void *p)"
   },
   {
-    "label": "lock()",
+    "label": "false()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (TensorSycl::internal::SYCLfree<)",
+    "insertText": "false(p, pMapper)"
   },
   {
-    "label": "lock()",
+    "label": "allocate()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (} EIGEN_STRONG_INLINE void*)",
+    "insertText": "allocate(size_t num_bytes)"
   },
   {
-    "label": "lock()",
+    "label": "if()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (# if EIGEN_MAX_ALIGN_BYTES> 0 size_t align = num_bytes % EIGEN_MAX_ALIGN_BYTES ;)",
+    "insertText": "if(align > 0)"
   },
   {
-    "label": "lock()",
+    "label": "allocate_temp()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (} EIGEN_STRONG_INLINE void*)",
+    "insertText": "allocate_temp(size_t num_bytes)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# ifndef EIGEN_SYCL_NO_REUSE_BUFFERS)",
+    "insertText": "if(scratch_buffers.empty())"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (; } else {)",
+    "insertText": "for(auto it = scratch_buffers.begin(); it != scratch_buffers.end();)"
+  },
+  {
+    "label": "get_buffer()",
+    "kind": "Method",
+    "detail": "Function (auto buff = pMapper .)",
+    "insertText": "get_buffer(*it)"
+  },
+  {
+    "label": "erase()",
+    "kind": "Method",
+    "detail": "Function (auto ptr =* it ; scratch_buffers .)",
+    "insertText": "erase(it)"
+  },
+  {
+    "label": "SYCLmalloc()",
+    "kind": "Method",
+    "detail": "Function (} # else return TensorSycl::)",
+    "insertText": "SYCLmalloc(num_bytes, pMapper)"
+  },
+  {
+    "label": "get()",
+    "kind": "Method",
+    "detail": "Function (# endif } template<data_t> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE TensorSycl::internal::RangeAccess<cl::sycl::access::mode::read_write,data_t>)",
+    "insertText": "get(data_t *data)"
+  },
+  {
+    "label": "get()",
+    "kind": "Method",
+    "detail": "Function (} template<data_t> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE data_t*)",
+    "insertText": "get(TensorSycl::internal::RangeAccess<cl::sycl::access::mode::read_write, data_t> data)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "deallocate_temp(void *p)"
+  },
+  {
+    "label": "insert()",
+    "kind": "Method",
+    "detail": "Function (# ifndef EIGEN_SYCL_NO_REUSE_BUFFERS scratch_buffers .)",
+    "insertText": "insert(p)"
+  },
+  {
+    "label": "SYCLfree()",
+    "kind": "Method",
+    "detail": "Function (# else TensorSycl::)",
+    "insertText": "SYCLfree(p, pMapper)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (# endif } template<cl::sycl::access::mode AcMd,T> EIGEN_STRONG_INLINE void)",
+    "insertText": "deallocate_temp(const TensorSycl::internal::RangeAccess<AcMd, T> &p)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "deallocate_temp(p.get_virtual_pointer())"
+  },
+  {
+    "label": "deallocate()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "deallocate(void *p)"
+  },
+  {
+    "label": "deallocate_all()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "deallocate_all()"
+  },
+  {
+    "label": "SYCLfreeAll()",
+    "kind": "Method",
+    "detail": "Function (TensorSycl::)",
+    "insertText": "SYCLfreeAll(pMapper)"
+  },
+  {
+    "label": "clear()",
+    "kind": "Method",
+    "detail": "Function (# ifndef EIGEN_SYCL_NO_REUSE_BUFFERS scratch_buffers .)",
+    "insertText": "clear()"
+  },
+  {
+    "label": "memcpyHostToDevice()",
+    "kind": "Method",
+    "detail": "Function (# endif } EIGEN_STRONG_INLINE void)",
+    "insertText": "memcpyHostToDevice(void *dst, const void *src, size_t n, std::function<void()> callback)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const auto write_mode = cl::sycl::access::mode::discard_write ; const auto global_access = cl::sycl::access::target::global_buffer ; typedef cl::sycl::accessor<buffer_scalar_t,1,write_mode,global_access> write_accessor ;)",
+    "insertText": "if(n == 0)"
+  },
+  {
+    "label": "write_mode()",
+    "kind": "Method",
+    "detail": "Function (write_accessor dst_acc = get_range_accessor<)",
+    "insertText": "write_mode(cgh, dst, n)"
+  },
+  {
+    "label": "const()",
+    "kind": "Method",
+    "detail": "Function (buffer_scalar_t const* ptr = static_cast<buffer_scalar_t)",
+    "insertText": "const(src)"
+  },
+  {
+    "label": "non_deleter()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "non_deleter(buffer_scalar_t const *)"
   },
   {
     "label": "s_ptr()",
     "kind": "Method",
-    "detail": "Function (buffer_scalar_t>)",
+    "detail": "Function (} ; std::shared_ptr<const buffer_scalar_t>)",
     "insertText": "s_ptr(ptr, non_deleter)"
   },
   {
-    "label": "s_ptr()",
+    "label": "copy()",
     "kind": "Method",
-    "detail": "Function (std::shared_ptr<buffer_scalar_t>)",
-    "insertText": "s_ptr(ptr, non_deleter)"
+    "detail": "Function (cgh .)",
+    "insertText": "copy(s_ptr, dst_acc)"
   },
   {
-    "label": "lock()",
+    "label": "EIGEN_SYCL_TRY_CATCH()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (} ; cl::sycl::event e ;)",
+    "insertText": "EIGEN_SYCL_TRY_CATCH(e = m_queue.submit(f))"
   },
   {
-    "label": "lock()",
+    "label": "synchronize_and_callback()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (void)",
+    "insertText": "synchronize_and_callback(e, callback)"
   },
   {
-    "label": "lock()",
+    "label": "memcpyDeviceToHost()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "memcpyDeviceToHost(void *dst, const void *src, size_t n, std::function<void()> callback)"
   },
   {
-    "label": "lock()",
+    "label": "read_mode()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (read_accessor src_acc = get_range_accessor<)",
+    "insertText": "read_mode(cgh, src, n)"
   },
   {
-    "label": "lock()",
+    "label": "buffer_scalar_t()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(pmapper_mutex_)"
+    "detail": "Function (buffer_scalar_t* ptr = static_cast<)",
+    "insertText": "buffer_scalar_t(dst)"
+  },
+  {
+    "label": "non_deleter()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "non_deleter(buffer_scalar_t *)"
+  },
+  {
+    "label": "copy()",
+    "kind": "Method",
+    "detail": "Function (cgh .)",
+    "insertText": "copy(src_acc, s_ptr)"
+  },
+  {
+    "label": "memcpy()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "memcpy(void *dst, const void *src, size_t n)"
+  },
+  {
+    "label": "copy()",
+    "kind": "Method",
+    "detail": "Function (cgh .)",
+    "insertText": "copy(src_acc, dst_acc)"
+  },
+  {
+    "label": "async_synchronize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "async_synchronize(e)"
+  },
+  {
+    "label": "memset()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "memset(void *data, int c, size_t n)"
+  },
+  {
+    "label": "write_mode()",
+    "kind": "Method",
+    "detail": "Function (auto dst_acc = get_range_accessor<)",
+    "insertText": "write_mode(cgh, data, n)"
+  },
+  {
+    "label": "fill()",
+    "kind": "Method",
+    "detail": "Function (cgh .)",
+    "insertText": "fill(dst_acc, static_cast<buffer_scalar_t>(static_cast<uint8_t>(c)))"
+  },
+  {
+    "label": "get_range_accessor()",
+    "kind": "Method",
+    "detail": "Function (} template<cl::sycl::access::mode AcMd,T> EIGEN_STRONG_INLINE TensorSycl::internal::RangeAccess<AcMd,T>)",
+    "insertText": "get_range_accessor(const void *ptr)"
+  },
+  {
+    "label": "get_buffer()",
+    "kind": "Method",
+    "detail": "Function (auto original_buffer = pMapper .)",
+    "insertText": "get_buffer(ptr)"
+  },
+  {
+    "label": "get_offset()",
+    "kind": "Method",
+    "detail": "Function (const ptrdiff_t offset = pMapper .)",
+    "insertText": "get_offset(ptr)"
+  },
+  {
+    "label": "sizeof()",
+    "kind": "Method",
+    "detail": "Function (const ptrdiff_t typed_offset = offset /)",
+    "insertText": "sizeof(T)"
+  },
+  {
+    "label": "eigen_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "eigen_assert(typed_offset >= 0)"
+  },
+  {
+    "label": "get_size()",
+    "kind": "Method",
+    "detail": "Function (const auto typed_size = original_buffer .)",
+    "insertText": "get_size() / sizeof(T)"
+  },
+  {
+    "label": "type()",
+    "kind": "Method",
+    "detail": "Function (auto buffer = original_buffer . template reinterpret<Eigen::internal::remove_const<T)",
+    "insertText": "type(cl::sycl::range<1>(typed_size))"
+  },
+  {
+    "label": "get_count()",
+    "kind": "Method",
+    "detail": "Function (const ptrdiff_t size = buffer .)",
+    "insertText": "get_count()"
+  },
+  {
+    "label": "eigen_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "eigen_assert(size >= 0)"
+  },
+  {
+    "label": "internal_ptr_t()",
+    "kind": "Method",
+    "detail": "Function (typedef cl::sycl::accessor<Eigen::internal::remove_const<T>::type,1,AcMd,global_access,is_place_holder> placeholder_accessor_t ; const auto start_ptr = static_cast<)",
+    "insertText": "internal_ptr_t(ptr)"
+  },
+  {
+    "label": "get_range_accessor()",
+    "kind": "Method",
+    "detail": "Function (} template<cl::sycl::access::mode AcMd,Index> EIGEN_STRONG_INLINE cl::sycl::accessor<buffer_scalar_t,1,AcMd,cl::sycl::access::target::global_buffer>)",
+    "insertText": "get_range_accessor(cl::sycl::handler &cgh, const void *ptr, const Index n_bytes)"
+  },
+  {
+    "label": "eigen_assert()",
+    "kind": "Method",
+    "detail": "Function (const auto global_access = cl::sycl::access::target::global_buffer ;)",
+    "insertText": "eigen_assert(n_bytes >= 0)"
+  },
+  {
+    "label": "eigen_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "eigen_assert(offset >= 0)"
+  },
+  {
+    "label": "eigen_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "eigen_assert(offset + n_bytes <= buffer.get_size())"
+  },
+  {
+    "label": "get_sycl_accessor()",
+    "kind": "Method",
+    "detail": "Function (} template<cl::sycl::access::mode AcMd> EIGEN_STRONG_INLINE cl::sycl::accessor<buffer_scalar_t,1,AcMd,cl::sycl::access::target::global_buffer>)",
+    "insertText": "get_sycl_accessor(cl::sycl::handler &cgh, const void *ptr)"
+  },
+  {
+    "label": "get_sycl_buffer()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE cl::sycl::buffer<buffer_scalar_t,1>)",
+    "insertText": "get_sycl_buffer(const void *ptr)"
+  },
+  {
+    "label": "get_offset()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE ptrdiff_t)",
+    "insertText": "get_offset(const void *ptr)"
+  },
+  {
+    "label": "binary_kernel_launcher()",
+    "kind": "Method",
+    "detail": "Function (} template<OutScalar,sycl_kernel,Lhs,Rhs,OutPtr,Range,Index,. . . T> EIGEN_ALWAYS_INLINE void)",
+    "insertText": "binary_kernel_launcher(const Lhs &lhs, const Rhs &rhs, OutPtr outptr, Range thread_range, Index scratchSize, T... var)"
+  },
+  {
+    "label": "kernel_functor()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "kernel_functor(cl::sycl::handler &cgh)"
+  },
+  {
+    "label": "bind()",
+    "kind": "Method",
+    "detail": "Function (lhs .)",
+    "insertText": "bind(cgh)"
+  },
+  {
+    "label": "scratch()",
+    "kind": "Method",
+    "detail": "Function (typedef cl::sycl::accessor<OutScalar,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> LocalAccessor ; LocalAccessor)",
+    "insertText": "scratch(cl::sycl::range<1>(scratchSize), cgh)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (cgh .)",
+    "insertText": "parallel_for(#ifdef EIGEN_SYCL_USE_PROGRAM_CLASS program().template get_kernel<sycl_kernel>(), #endif thread_range, sycl_kernel(scratch, lhs, rhs, outptr, var...))"
+  },
+  {
+    "label": "EIGEN_SYCL_TRY_CATCH()",
+    "kind": "Method",
+    "detail": "Function (} ; cl::sycl::event e ;)",
+    "insertText": "EIGEN_SYCL_TRY_CATCH(e = m_queue.submit(kernel_functor))"
+  },
+  {
+    "label": "unary_kernel_launcher()",
+    "kind": "Method",
+    "detail": "Function (} template<OutScalar,sycl_kernel,InPtr,OutPtr,Range,Index,. . . T> EIGEN_ALWAYS_INLINE void)",
+    "insertText": "unary_kernel_launcher(const InPtr &inptr, OutPtr &outptr, Range thread_range, Index scratchSize, T... var)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (cgh .)",
+    "insertText": "parallel_for(#ifdef EIGEN_SYCL_USE_PROGRAM_CLASS program().template get_kernel<sycl_kernel>(), #endif thread_range, sycl_kernel(scratch, inptr, outptr, var...))"
+  },
+  {
+    "label": "nullary_kernel_launcher()",
+    "kind": "Method",
+    "detail": "Function (} template<OutScalar,sycl_kernel,InPtr,Range,Index,. . . T> EIGEN_ALWAYS_INLINE void)",
+    "insertText": "nullary_kernel_launcher(const InPtr &inptr, Range thread_range, Index scratchSize, T... var)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (cgh .)",
+    "insertText": "parallel_for(#ifdef EIGEN_SYCL_USE_PROGRAM_CLASS program().template get_kernel<sycl_kernel>(), #endif thread_range, sycl_kernel(scratch, inptr, var...))"
   },
   {
     "label": "synchronize()",
     "kind": "Method",
-    "detail": "Function (EIGEN_SYCL_ASYNC_EXECUTION)",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
     "insertText": "synchronize()"
   },
   {
-    "label": "getPowerOfTwo()",
+    "label": "wait_and_throw()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "getPowerOfTwo(m_device_info.max_work_group_size, false)"
+    "detail": "Function (# ifdef EIGEN_EXCEPTIONS m_queue .)",
+    "insertText": "wait_and_throw()"
+  },
+  {
+    "label": "wait()",
+    "kind": "Method",
+    "detail": "Function (# else m_queue .)",
+    "insertText": "wait()"
+  },
+  {
+    "label": "async_synchronize()",
+    "kind": "Method",
+    "detail": "Function (# endif } EIGEN_STRONG_INLINE void)",
+    "insertText": "async_synchronize(cl::sycl::event e)"
+  },
+  {
+    "label": "set_latest_event()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "set_latest_event(e)"
+  },
+  {
+    "label": "parallel_for_setup()",
+    "kind": "Method",
+    "detail": "Function (# endif } template<Index> EIGEN_STRONG_INLINE void)",
+    "insertText": "parallel_for_setup(Index n, Index &tileSize, Index &rng, Index &GRange)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (tileSize = static_cast<)",
+    "insertText": "Index(getNearestPowerOfTwoWorkGroupSize())"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (tileSize =)",
+    "insertText": "min(static_cast<Index>(EIGEN_SYCL_LOCAL_THREAD_DIM0 * EIGEN_SYCL_LOCAL_THREAD_DIM1), static_cast<Index>(tileSize))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (rng = n ;)",
+    "insertText": "if(rng == 0) rng = static_cast<Index>(1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (GRange = rng ;)",
+    "insertText": "if(tileSize > GRange)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Index xMode = static_cast<)",
+    "insertText": "Index(GRange % tileSize)"
+  },
+  {
+    "label": "parallel_for_setup()",
+    "kind": "Method",
+    "detail": "Function (} } template<Index> EIGEN_STRONG_INLINE void)",
+    "insertText": "parallel_for_setup(const std::array<Index, 2> &input_dim, cl::sycl::range<2> &global_range, cl::sycl::range<2> &local_range)"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (max_workgroup_Size =)",
+    "insertText": "min(static_cast<Index>(EIGEN_SYCL_LOCAL_THREAD_DIM0 * EIGEN_SYCL_LOCAL_THREAD_DIM1), static_cast<Index>(max_workgroup_Size))"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Index pow_of_2 = static_cast<)",
+    "insertText": "Index(std::log2(max_workgroup_Size))"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (local_range [ 1 ] = static_cast<)",
+    "insertText": "Index(std::pow(2, static_cast<Index>(pow_of_2 / 2)))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (input_range [ 1 ] = input_dim [ 1 ] ;)",
+    "insertText": "if(input_range[1] == 0) input_range[1] = static_cast<Index>(1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (global_range [ 1 ] = input_range [ 1 ] ;)",
+    "insertText": "if(local_range[1] > global_range[1])"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Index xMode = static_cast<)",
+    "insertText": "Index(global_range[1] % local_range[1])"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (} local_range [ 0 ] = static_cast<)",
+    "insertText": "Index(max_workgroup_Size / local_range[1])"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (input_range [ 0 ] = input_dim [ 0 ] ;)",
+    "insertText": "if(input_range[0] == 0) input_range[0] = static_cast<Index>(1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (global_range [ 0 ] = input_range [ 0 ] ;)",
+    "insertText": "if(local_range[0] > global_range[0])"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Index xMode = static_cast<)",
+    "insertText": "Index(global_range[0] % local_range[0])"
+  },
+  {
+    "label": "parallel_for_setup()",
+    "kind": "Method",
+    "detail": "Function (} } template<Index> EIGEN_STRONG_INLINE void)",
+    "insertText": "parallel_for_setup(const std::array<Index, 3> &input_dim, cl::sycl::range<3> &global_range, cl::sycl::range<3> &local_range)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (local_range [ 2 ] = static_cast<)",
+    "insertText": "Index(std::pow(2, static_cast<Index>(pow_of_2 / 3)))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (input_range [ 2 ] = input_dim [ 2 ] ;)",
+    "insertText": "if(input_range[2] == 0) input_range[1] = static_cast<Index>(1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (global_range [ 2 ] = input_range [ 2 ] ;)",
+    "insertText": "if(local_range[2] > global_range[2])"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Index xMode = static_cast<)",
+    "insertText": "Index(global_range[2] % local_range[2])"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (} pow_of_2 = static_cast<)",
+    "insertText": "Index(std::log2(static_cast<Index>(max_workgroup_Size / local_range[2])))"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (} local_range [ 0 ] = static_cast<)",
+    "insertText": "Index(max_workgroup_Size / (local_range[1] * local_range[2]))"
+  },
+  {
+    "label": "has_local_memory()",
+    "kind": "Method",
+    "detail": "Function (} } EIGEN_STRONG_INLINE bool)",
+    "insertText": "has_local_memory()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if !)",
+    "insertText": "defined(EIGEN_SYCL_LOCAL_MEM) && defined(EIGEN_SYCL_NO_LOCAL_MEM)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(EIGEN_SYCL_LOCAL_MEM) && !defined(EIGEN_SYCL_NO_LOCAL_MEM)"
+  },
+  {
+    "label": "max_buffer_size()",
+    "kind": "Method",
+    "detail": "Function (# else return m_device_info . local_mem_type = = cl::sycl::info::local_mem_type::local ; # endif } EIGEN_STRONG_INLINE unsigned long)",
+    "insertText": "max_buffer_size()"
+  },
+  {
+    "label": "getPlatformName()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE std::string)",
+    "insertText": "getPlatformName()"
+  },
+  {
+    "label": "wGSize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "wGSize(wGSize >> 1)"
+  },
+  {
+    "label": "wGSize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "wGSize(wGSize >> 2)"
+  },
+  {
+    "label": "wGSize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "wGSize(wGSize >> 4)"
+  },
+  {
+    "label": "wGSize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "wGSize(wGSize >> 8)"
+  },
+  {
+    "label": "wGSize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "wGSize(wGSize >> 16)"
+  },
+  {
+    "label": "wGSize()",
+    "kind": "Method",
+    "detail": "Function (# if EIGEN_ARCH_x86_64 | | EIGEN_ARCH_ARM64 | | EIGEN_OS_WIN64)",
+    "insertText": "wGSize(wGSize >> 32)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (# endif)",
+    "insertText": "return((!roundUp) ? (wGSize - (wGSize >> 1)) : ++wGSize)"
+  },
+  {
+    "label": "sycl_queue()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE cl::sycl::queue&)",
+    "insertText": "sycl_queue()"
+  },
+  {
+    "label": "get_latest_event()",
+    "kind": "Method",
+    "detail": "Function (} return ! exception_caught_ ; } EIGEN_STRONG_INLINE cl::sycl::event)",
+    "insertText": "get_latest_event()"
   },
   {
     "label": "lock()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
+    "detail": "Function (# ifdef EIGEN_SYCL_STORE_LATEST_EVENT std::lock_guard<std::mutex>)",
     "insertText": "lock(event_mutex_)"
   },
   {
     "label": "eigen_assert()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
     "insertText": "eigen_assert(false)"
   },
   {
-    "label": "lock()",
+    "label": "QueueInterface()",
     "kind": "Method",
-    "detail": "Function (std::lock_guard<std::mutex>)",
-    "insertText": "lock(event_mutex_)"
+    "detail": "Function (# endif } ~)",
+    "insertText": "QueueInterface()"
+  },
+  {
+    "label": "set_latest_event()",
+    "kind": "Method",
+    "detail": "Function (# endif } protected : EIGEN_STRONG_INLINE void)",
+    "insertText": "set_latest_event(cl::sycl::event e)"
+  },
+  {
+    "label": "get_id()",
+    "kind": "Method",
+    "detail": "Function (latest_events_ [ std::)",
+    "insertText": "get_id()"
   },
   {
     "label": "EIGEN_UNUSED_VARIABLE()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
     "insertText": "EIGEN_UNUSED_VARIABLE(e)"
+  },
+  {
+    "label": "synchronize_and_callback()",
+    "kind": "Method",
+    "detail": "Function (# endif } void)",
+    "insertText": "synchronize_and_callback(cl::sycl::event e, const std::function<void()> &callback)"
+  },
+  {
+    "label": "callback_()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "callback_()"
+  },
+  {
+    "label": "event()",
+    "kind": "Method",
+    "detail": "Function (# ifdef EIGEN_EXCEPTIONS cl::)",
+    "insertText": "event(e).wait_and_throw()"
+  },
+  {
+    "label": "event()",
+    "kind": "Method",
+    "detail": "Function (# else cl::)",
+    "insertText": "event(e).wait()"
   },
   {
     "label": "callback()",
     "kind": "Method",
-    "detail": "Function (endif)",
+    "detail": "Function (# endif)",
     "insertText": "callback()"
+  },
+  {
+    "label": "Schedule()",
+    "kind": "Method",
+    "detail": "Function (} ; m_thread_pool .)",
+    "insertText": "Schedule(std::move(callback_))"
+  },
+  {
+    "label": "sycl_async_handler()",
+    "kind": "Method",
+    "detail": "Function (# endif } } bool)",
+    "insertText": "sycl_async_handler(cl::sycl::exception_list exceptions)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (bool exception_caught = false ;)",
+    "insertText": "for(const auto &e : exceptions)"
+  },
+  {
+    "label": "EIGEN_THROW_X()",
+    "kind": "Method",
+    "detail": "Function (exception_caught = true ;)",
+    "insertText": "EIGEN_THROW_X(e)"
+  },
+  {
+    "label": "SyclDeviceBase()",
+    "kind": "Method",
+    "detail": "Function (} } return exception_caught ; } bool exception_caught_ = false ; std::mutex pmapper_mutex_ ; # ifdef EIGEN_SYCL_STORE_LATEST_EVENT std::mutex event_mutex_ ; std::unordered_map<std::thread::id,cl::sycl::event> latest_events_ ; # endif TensorSycl::internal::PointerMapper pMapper ; # ifndef EIGEN_SYCL_NO_REUSE_BUFFERS std::unordered_set<void*> scratch_buffers ; # endif cl::sycl::queue m_queue ; # ifdef EIGEN_SYCL_USE_PROGRAM_CLASS cl::sycl::program m_prog ; # endif Eigen::ThreadPool m_thread_pool ; const TensorSycl::internal::SyclDeviceInfo m_device_info ; } ; struct SyclDeviceBase { const QueueInterface* m_queue_stream ;)",
+    "insertText": "SyclDeviceBase(const QueueInterface *queue_stream) : m_queue_stream(queue_stream)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE const QueueInterface*)",
+    "insertText": "queue_stream()"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->parallel_for_setup(n, tileSize, rng, GRange)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->parallel_for_setup(input_dim, global_range, local_range)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->deallocate(p)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "deallocate_temp(void *buffer)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->deallocate_temp(buffer)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (} template<cl::sycl::access::mode AcMd,T> EIGEN_STRONG_INLINE void)",
+    "insertText": "deallocate_temp(const TensorSycl::internal::RangeAccess<AcMd, T> &buffer)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->deallocate_all()"
+  },
+  {
+    "label": "attach_buffer()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void*)",
+    "insertText": "attach_buffer(cl::sycl::buffer<buffer_scalar_t, 1> &buf)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->detach_buffer(p)"
+  },
+  {
+    "label": "isDeviceSuitable()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE bool)",
+    "insertText": "isDeviceSuitable()"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->memcpyHostToDevice(dst, src, n, callback)"
+  },
+  {
+    "label": "memcpyDeviceToHost()",
+    "kind": "Method",
+    "detail": "Function (} template<Index> EIGEN_STRONG_INLINE void)",
+    "insertText": "memcpyDeviceToHost(void *dst, const Index *src, size_t n, std::function<void()> callback = {})"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->memcpyDeviceToHost(dst, src, n, callback)"
+  },
+  {
+    "label": "memcpy()",
+    "kind": "Method",
+    "detail": "Function (} template<Index> EIGEN_STRONG_INLINE void)",
+    "insertText": "memcpy(void *dst, const Index *src, size_t n)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->memcpy(dst, src, n)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->memset(data, c, n)"
   },
   {
     "label": "firstLevelCacheSize()",
     "kind": "Method",
-    "detail": "Function (return)",
+    "detail": "Function (} # endif EIGEN_STRONG_INLINE size_t)",
     "insertText": "firstLevelCacheSize()"
+  },
+  {
+    "label": "getNumSyclMultiProcessors()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE unsigned long)",
+    "insertText": "getNumSyclMultiProcessors()"
+  },
+  {
+    "label": "maxSyclThreadsPerBlock()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE unsigned long)",
+    "insertText": "maxSyclThreadsPerBlock()"
+  },
+  {
+    "label": "maxWorkItemSizes()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE cl::sycl::id<3>)",
+    "insertText": "maxWorkItemSizes()"
+  },
+  {
+    "label": "maxSyclThreadsPerMultiProcessor()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE unsigned long)",
+    "insertText": "maxSyclThreadsPerMultiProcessor()"
+  },
+  {
+    "label": "sharedMemPerBlock()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE size_t)",
+    "insertText": "sharedMemPerBlock()"
+  },
+  {
+    "label": "getNearestPowerOfTwoWorkGroupSize()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE size_t)",
+    "insertText": "getNearestPowerOfTwoWorkGroupSize()"
+  },
+  {
+    "label": "getPowerOfTwo()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE size_t)",
+    "insertText": "getPowerOfTwo(size_t val, bool roundUp)"
+  },
+  {
+    "label": "majorDeviceVersion()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE int)",
+    "insertText": "majorDeviceVersion()"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->synchronize()"
+  },
+  {
+    "label": "async_synchronize()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE void)",
+    "insertText": "async_synchronize(cl::sycl::event e = cl::sycl::event())"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->async_synchronize(e)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE bool)",
+    "insertText": "ok()"
+  },
+  {
+    "label": "getDeviceName()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE std::string)",
+    "insertText": "getDeviceName()"
+  },
+  {
+    "label": "getDeviceVendor()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE std::string)",
+    "insertText": "getDeviceVendor()"
+  },
+  {
+    "label": "binary_kernel_launcher()",
+    "kind": "Method",
+    "detail": "Function (} template<OutScalar,KernelType,. . . T> EIGEN_ALWAYS_INLINE void)",
+    "insertText": "binary_kernel_launcher(T... var)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->template binary_kernel_launcher<OutScalar, KernelType>( var...)"
+  },
+  {
+    "label": "unary_kernel_launcher()",
+    "kind": "Method",
+    "detail": "Function (} template<OutScalar,KernelType,. . . T> EIGEN_ALWAYS_INLINE void)",
+    "insertText": "unary_kernel_launcher(T... var)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->template unary_kernel_launcher<OutScalar, KernelType>( var...)"
+  },
+  {
+    "label": "nullary_kernel_launcher()",
+    "kind": "Method",
+    "detail": "Function (} template<OutScalar,KernelType,. . . T> EIGEN_ALWAYS_INLINE void)",
+    "insertText": "nullary_kernel_launcher(T... var)"
+  },
+  {
+    "label": "queue_stream()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "queue_stream()->template nullary_kernel_launcher<OutScalar, KernelType>( var...)"
   }
 ]

@@ -1,38 +1,140 @@
 [
   {
-    "label": "Dst()",
+    "label": "UINT64()",
     "kind": "Method",
-    "detail": "Function (CD3DX12_TEXTURE_COPY_LOCATION)",
-    "insertText": "Dst(pDestinationResource, i + FirstSubresource)"
+    "detail": "Function (/ MipLevel,ArraySlice,PlaneSlice ) ; const UINT64 Width = D3DX12AlignAtLeast<)",
+    "insertText": "UINT64(resourceDesc.Width >> MipLevel, WidthAlignment)"
   },
   {
-    "label": "Src()",
+    "label": "D3DX12AlignAtLeast()",
     "kind": "Method",
-    "detail": "Function (CD3DX12_TEXTURE_COPY_LOCATION)",
-    "insertText": "Src(pIntermediate, pLayouts[i])"
+    "detail": "Function (const UINT Height =)",
+    "insertText": "D3DX12AlignAtLeast(resourceDesc.Height >> MipLevel, HeightAlignment)"
   },
   {
-    "label": "Dst()",
+    "label": "UINT16()",
     "kind": "Method",
-    "detail": "Function (CD3DX12_TEXTURE_COPY_LOCATION)",
-    "insertText": "Dst(pDestinationResource, i + FirstSubresource)"
+    "detail": "Function (const UINT16 Depth = D3DX12AlignAtLeast<)",
+    "insertText": "UINT16(resourceDesc.Depth() >> MipLevel, DepthAlignment)"
   },
   {
-    "label": "Src()",
+    "label": "GetPlaneSubsampledSizeAndFormatForCopyableLayout()",
     "kind": "Method",
-    "detail": "Function (CD3DX12_TEXTURE_COPY_LOCATION)",
-    "insertText": "Src(pIntermediate, pLayouts[i])"
+    "detail": "Function (DXGI_FORMAT PlaneFormat ; UINT32 MinPlanePitchWidth,PlaneWidth,PlaneHeight ;)",
+    "insertText": "GetPlaneSubsampledSizeAndFormatForCopyableLayout(PlaneSlice, Format, (UINT)Width, Height, PlaneFormat, MinPlanePitchWidth, PlaneWidth, PlaneHeight)"
   },
   {
-    "label": "UpdateSubresources()",
+    "label": "CalculateMinimumRowMajorRowPitch()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, Layouts, NumRows, RowSizesInBytes, pSrcData)"
+    "detail": "Function (D3D12_SUBRESOURCE_FOOTPRINT LocalPlacement ; auto& Placement = pLayouts ? pLayouts [ uSubRes ] . Footprint : LocalPlacement ; Placement . Format = PlaneFormat ; Placement . Width = PlaneWidth ; Placement . Height = PlaneHeight ; Placement . Depth = Depth ; UINT MinPlaneRowPitch = 0 ;)",
+    "insertText": "CalculateMinimumRowMajorRowPitch(PlaneFormat, MinPlanePitchWidth, MinPlaneRowPitch)"
   },
   {
-    "label": "UpdateSubresources()",
+    "label": "Planar()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "UpdateSubresources(pCmdList, pDestinationResource, pIntermediate, FirstSubresource, NumSubresources, RequiredSize, Layouts, NumRows, RowSizesInBytes, pResourceData, pSrcData)"
+    "detail": "Function (Placement . RowPitch =)",
+    "insertText": "Planar(Format) ? D3DX12Align< UINT >( MinPlaneRowPitch, D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT ) : D3DX12Align< UINT >( MinPlaneRowPitch, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT)"
+  },
+  {
+    "label": "CalculateMinimumRowMajorRowPitch()",
+    "kind": "Method",
+    "detail": "Function (UINT PlaneRowSize = 0 ;)",
+    "insertText": "CalculateMinimumRowMajorRowPitch(PlaneFormat, PlaneWidth, PlaneRowSize)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (pRowSizeInBytes [ uSubRes ] = PlaneRowSize ; } UINT NumRows = 0 ;)",
+    "insertText": "if(D3D12_PROPERTY_LAYOUT_FORMAT_TABLE::Planar(Format))"
+  },
+  {
+    "label": "D3DX12_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (NumRows = PlaneHeight ; } else {)",
+    "insertText": "D3DX12_ASSERT(Height % HeightAlignment == 0)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (NumRows = Height / HeightAlignment ; })",
+    "insertText": "if(pNumRows)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (pNumRows [ uSubRes ] = NumRows ; })",
+    "insertText": "if(pLayouts)"
+  },
+  {
+    "label": "Offset()",
+    "kind": "Method",
+    "detail": "Function (pLayouts [ uSubRes ] .)",
+    "insertText": "Offset(bOverflow ? uint64_max : TotalBytes + BaseOffset)"
+  },
+  {
+    "label": "SubresourceSize()",
+    "kind": "Method",
+    "detail": "Function (} const UINT16 NumSlices = Depth ; const UINT64)",
+    "insertText": "SubresourceSize(NumRows * NumSlices - 1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (TotalBytes = TotalBytes + SubresourceSize ;)",
+    "insertText": "if(TotalBytes < SubresourceSize)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (TotalBytes = uint64_max ; } bResourceOverflow = bResourceOverflow | | bOverflow ; })",
+    "insertText": "if(bResourceOverflow)"
+  },
+  {
+    "label": "memset()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "memset(pLayouts + uSubRes, -1, sizeof( *pLayouts ) * (NumSubresources - uSubRes))"
+  },
+  {
+    "label": "memset()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "memset(pNumRows + uSubRes, -1, sizeof(*pNumRows) * (NumSubresources - uSubRes))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(pRowSizeInBytes)"
+  },
+  {
+    "label": "memset()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "memset(pRowSizeInBytes + uSubRes, -1, sizeof(*pRowSizeInBytes) * (NumSubresources - uSubRes))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(pTotalBytes)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (* pTotalBytes = TotalBytes ; })",
+    "insertText": "if(TotalBytes == uint64_max)"
+  },
+  {
+    "label": "D3DX12GetCopyableFootprints()",
+    "kind": "Method",
+    "detail": "Function (D3D12_RESOURCE_DESC1 desc1 ; desc1 . Dimension = desc0 . Dimension ; desc1 . Alignment = desc0 . Alignment ; desc1 . Width = desc0 . Width ; desc1 . Height = desc0 . Height ; desc1 . DepthOrArraySize = desc0 . DepthOrArraySize ; desc1 . MipLevels = desc0 . MipLevels ; desc1 . Format = desc0 . Format ; desc1 . SampleDesc . Count = desc0 . SampleDesc . Count ; desc1 . SampleDesc . Quality = desc0 . SampleDesc . Quality ; desc1 . Layout = desc0 . Layout ; desc1 . Flags = desc0 . Flags ; desc1 . SamplerFeedbackMipRegion . Width = 0 ; desc1 . SamplerFeedbackMipRegion . Height = 0 ; desc1 . SamplerFeedbackMipRegion . Depth = 0 ; return desc1 ; } bool)",
+    "insertText": "D3DX12GetCopyableFootprints(_In_ const D3D12_RESOURCE_DESC& pResourceDesc, _In_range_(0, D3D12_REQ_SUBRESOURCES) UINT FirstSubresource, _In_range_(0, D3D12_REQ_SUBRESOURCES - FirstSubresource) UINT NumSubresources, UINT64 BaseOffset, _Out_writes_opt_(NumSubresources) D3D12_PLACED_SUBRESOURCE_FOOTPRINT* pLayouts, _Out_writes_opt_(NumSubresources) UINT* pNumRows, _Out_writes_opt_(NumSubresources) UINT64* pRowSizeInBytes, _Out_opt_ UINT64* pTotalBytes)"
+  },
+  {
+    "label": "D3DX12ResourceDesc0ToDesc1()",
+    "kind": "Method",
+    "detail": "Function (D3D12_RESOURCE_DESC1 desc =)",
+    "insertText": "D3DX12ResourceDesc0ToDesc1(pResourceDesc)"
   }
 ]

@@ -12,18 +12,6 @@
     "insertText": "ComputeNeumannVelocityOp"
   },
   {
-    "label": "ComputeNeumannVelocityOp",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "ComputeNeumannVelocityOp"
-  },
-  {
-    "label": "SolveBoundaryOp",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "SolveBoundaryOp"
-  },
-  {
     "label": "SolveBoundaryOp",
     "kind": "Type",
     "detail": "struct declaration",
@@ -32,20 +20,278 @@
   {
     "label": "createPotentialFlowMask()",
     "kind": "Method",
-    "detail": "Function (MaskT::Ptr)",
+    "detail": "Function (# ifndef OPENVDB_TOOLS_POTENTIAL_FLOW_HAS_BEEN_INCLUDED # define OPENVDB_TOOLS_POTENTIAL_FLOW_HAS_BEEN_INCLUDED # include<openvdb / openvdb . h> # include \" GridOperators . h \" # include \" GridTransformer . h \" # include \" Mask . h \" # include \" Morphology . h \" # include \" PoissonSolver . h \" namespace openvdb { OPENVDB_USE_VERSION_NAMESPACE namespace OPENVDB_VERSION_NAME { namespace tools { template<VecGridT> struct VectorToScalarGrid { using Type = VecGridT::template ValueConverter<VecGridT::ValueType::value_type>::Type ; using Ptr = Type::Ptr ; using ConstPtr = Type::ConstPtr ; } ; template<GridT,MaskT = GridT::template ValueConverter<ValueMask>::Type> MaskT::Ptr)",
     "insertText": "createPotentialFlowMask(const GridT& grid, int dilation = 5)"
   },
   {
     "label": "createPotentialFlowNeumannVelocities()",
     "kind": "Method",
-    "detail": "Function (ValueConverter<Vec3T>::Type::Ptr)",
-    "insertText": "createPotentialFlowNeumannVelocities(const GridT& collider, const MaskT& domain,\n    const typename GridT::template ValueConverter<Vec3T>::Type::ConstPtr boundaryVelocity,\n    const Vec3T& backgroundVelocity)"
+    "detail": "Function (template<Vec3T,GridT,MaskT> GridT::template ValueConverter<Vec3T>::Type::Ptr)",
+    "insertText": "createPotentialFlowNeumannVelocities(const GridT& collider, const MaskT& domain, const typename GridT::template ValueConverter<Vec3T>::Type::ConstPtr boundaryVelocity, const Vec3T& backgroundVelocity)"
   },
   {
     "label": "computeScalarPotential()",
     "kind": "Method",
-    "detail": "Function (VectorToScalarGrid<Vec3GridT>::Ptr)",
-    "insertText": "computeScalarPotential(const MaskT& domain, const Vec3GridT& neumann, math::pcg::State& state,\n    InterrupterT* interrupter = nullptr)"
+    "detail": "Function (template<Vec3GridT,MaskT,InterrupterT = util::NullInterrupter> VectorToScalarGrid<Vec3GridT>::Ptr)",
+    "insertText": "computeScalarPotential(const MaskT& domain, const Vec3GridT& neumann, math::pcg::State& state, InterrupterT* interrupter = nullptr)"
+  },
+  {
+    "label": "computePotentialFlow()",
+    "kind": "Method",
+    "detail": "Function (template<Vec3GridT> Vec3GridT::Ptr)",
+    "insertText": "computePotentialFlow(const typename VectorToScalarGrid<Vec3GridT>::Type& potential, const Vec3GridT& neumann, const typename Vec3GridT::ValueType backgroundVelocity = zeroVal<typename Vec3GridT::TreeType::ValueType>())"
+  },
+  {
+    "label": "extractOuterVoxelMask()",
+    "kind": "Method",
+    "detail": "Function (namespace potential_flow_internal { template<GridT> GridT::TreeType::template ValueConverter<ValueMask>::Type::Ptr)",
+    "insertText": "extractOuterVoxelMask(GridT& inGrid)"
+  },
+  {
+    "label": "interiorMask()",
+    "kind": "Method",
+    "detail": "Function (using MaskTreeT = GridT::TreeType::template ValueConverter<ValueMask>::Type ; MaskTreeT::Ptr)",
+    "insertText": "interiorMask(new MaskTreeT(inGrid.tree(), false, TopologyCopy()))"
+  },
+  {
+    "label": "boundaryMask()",
+    "kind": "Method",
+    "detail": "Function (MaskTreeT::Ptr)",
+    "insertText": "boundaryMask(new MaskTreeT(inGrid.tree(), false, TopologyCopy()))"
+  },
+  {
+    "label": "erodeActiveValues()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "erodeActiveValues(*interiorMask, 1, tools::NN_FACE, tools::IGNORE_TILES)"
+  },
+  {
+    "label": "pruneInactive()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "pruneInactive(*interiorMask)"
+  },
+  {
+    "label": "topologyDifference()",
+    "kind": "Method",
+    "detail": "Function (boundaryMask ->)",
+    "insertText": "topologyDifference(*interiorMask)"
+  },
+  {
+    "label": "ComputeNeumannVelocityOp()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "ComputeNeumannVelocityOp(const GradientT& gradient, const ValueT& backgroundVelocity) : mGradient(gradient) , mBackgroundVelocity(backgroundVelocity)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "operator()(typename Vec3GridT::TreeType::LeafNodeType& leaf, size_t)"
+  },
+  {
+    "label": "getConstAccessor()",
+    "kind": "Method",
+    "detail": "Function (auto gradientAccessor = mGradient .)",
+    "insertText": "getConstAccessor()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (std::unique_ptr<VelocityAccessor> velocityAccessor ; std::unique_ptr<VelocitySamplerT> velocitySampler ;)",
+    "insertText": "if(mVelocity)"
+  },
+  {
+    "label": "reset()",
+    "kind": "Method",
+    "detail": "Function (velocityAccessor .)",
+    "insertText": "reset(new VelocityAccessor(mVelocity->getConstAccessor()))"
+  },
+  {
+    "label": "reset()",
+    "kind": "Method",
+    "detail": "Function (velocitySampler .)",
+    "insertText": "reset(new VelocitySamplerT(*velocityAccessor, mVelocity->transform()))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "for(auto it = leaf.beginValueOn(); it; ++it)"
+  },
+  {
+    "label": "getCoord()",
+    "kind": "Method",
+    "detail": "Function (Coord ijk = it .)",
+    "insertText": "getCoord()"
+  },
+  {
+    "label": "getValue()",
+    "kind": "Method",
+    "detail": "Function (auto gradient = gradientAccessor .)",
+    "insertText": "getValue(ijk)"
+  },
+  {
+    "label": "transform()",
+    "kind": "Method",
+    "detail": "Function (const Vec3d xyz = mGradient .)",
+    "insertText": "transform().indexToWorld(ijk)"
+  },
+  {
+    "label": "wsSample()",
+    "kind": "Method",
+    "detail": "Function (const ValueT sampledVelocity = velocitySampler ? velocitySampler ->)",
+    "insertText": "wsSample(xyz) : zeroVal<ValueT>()"
+  },
+  {
+    "label": "dot()",
+    "kind": "Method",
+    "detail": "Function (auto velocity = sampledVelocity + mBackgroundVelocity ; auto value = gradient .)",
+    "insertText": "dot(velocity)"
+  },
+  {
+    "label": "setValue()",
+    "kind": "Method",
+    "detail": "Function (it .)",
+    "insertText": "setValue(value)"
+  },
+  {
+    "label": "setValueOff()",
+    "kind": "Method",
+    "detail": "Function (} else { it .)",
+    "insertText": "setValueOff()"
+  },
+  {
+    "label": "SolveBoundaryOp()",
+    "kind": "Method",
+    "detail": "Function (} } } private : const GradientT& mGradient ; const Vec3GridT* mVelocity = nullptr ; const ValueT& mBackgroundVelocity ; } ; template<Vec3GridT,MaskT> struct SolveBoundaryOp {)",
+    "insertText": "SolveBoundaryOp(const Vec3GridT& velGrid, const MaskT& domainGrid) : mVoxelSize(domainGrid.voxelSize()[0]) , mVelGrid(velGrid) , mDomainGrid(domainGrid)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "operator()(const Coord& ijk, const Coord& neighbor, double& source, double& diagonal)"
+  },
+  {
+    "label": "getAccessor()",
+    "kind": "Method",
+    "detail": "Function (Vec3GridT::ConstAccessor velGridAccessor = mVelGrid .)",
+    "insertText": "getAccessor()"
+  },
+  {
+    "label": "diff()",
+    "kind": "Method",
+    "detail": "Function (const Coord)",
+    "insertText": "diff(ijk - neighbor)"
+  },
+  {
+    "label": "createPotentialFlowMask()",
+    "kind": "Method",
+    "detail": "Function (source + = mVoxelSize* diff [ 0 ]* sampleVel [ 0 ] ; source + = mVoxelSize* diff [ 1 ]* sampleVel [ 1 ] ; source + = mVoxelSize* diff [ 2 ]* sampleVel [ 2 ] ; } else { diagonal - = 1 ; } } const double mVoxelSize ; const Vec3GridT& mVelGrid ; const MaskT& mDomainGrid ; } ; } template<GridT,MaskT> MaskT::Ptr)",
+    "insertText": "createPotentialFlowMask(const GridT& grid, int dilation)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (using MaskTreeT = MaskT::TreeType ;)",
+    "insertText": "if(!grid.hasUniformVoxels())"
+  },
+  {
+    "label": "OPENVDB_THROW()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "OPENVDB_THROW(ValueError, \"Transform must have uniform voxels for Potential Flow mask.\")"
+  },
+  {
+    "label": "interiorMask()",
+    "kind": "Method",
+    "detail": "Function (} auto interior =)",
+    "insertText": "interiorMask(grid)"
+  },
+  {
+    "label": "maskTree()",
+    "kind": "Method",
+    "detail": "Function (MaskTreeT::Ptr)",
+    "insertText": "maskTree(new MaskTreeT(interior->tree(), false, TopologyCopy()))"
+  },
+  {
+    "label": "create()",
+    "kind": "Method",
+    "detail": "Function (MaskT::Ptr mask =)",
+    "insertText": "create(maskTree)"
+  },
+  {
+    "label": "setTransform()",
+    "kind": "Method",
+    "detail": "Function (mask ->)",
+    "insertText": "setTransform(grid.transform().copy())"
+  },
+  {
+    "label": "dilateActiveValues()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "dilateActiveValues(*maskTree, dilation, NN_FACE_EDGE)"
+  },
+  {
+    "label": "tree()",
+    "kind": "Method",
+    "detail": "Function (mask ->)",
+    "insertText": "tree().topologyDifference(interior->tree())"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (using Vec3GridT = GridT::template ValueConverter<Vec3T>::Type ; using TreeT = Vec3GridT::TreeType ; using ValueT = TreeT::ValueType ; using GradientT = ScalarToVectorConverter<GridT>::Type ; using potential_flow_internal::ComputeNeumannVelocityOp ;)",
+    "insertText": "if(collider.getGridClass() != GRID_LEVEL_SET || !std::is_floating_point<typename GridT::TreeType::ValueType>::value)"
+  },
+  {
+    "label": "OPENVDB_THROW()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "OPENVDB_THROW(TypeError, \"Potential Flow expecting the collider to be a level set.\")"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(backgroundVelocity == zeroVal<Vec3T>() && (!boundaryVelocity || boundaryVelocity->empty()))"
+  },
+  {
+    "label": "create()",
+    "kind": "Method",
+    "detail": "Function (auto neumann =)",
+    "insertText": "create()"
+  },
+  {
+    "label": "setTransform()",
+    "kind": "Method",
+    "detail": "Function (neumann ->)",
+    "insertText": "setTransform(collider.transform().copy())"
+  },
+  {
+    "label": "topologyIntersection()",
+    "kind": "Method",
+    "detail": "Function (boundary ->)",
+    "insertText": "topologyIntersection(collider.tree())"
+  },
+  {
+    "label": "neumannTree()",
+    "kind": "Method",
+    "detail": "Function (TreeT::Ptr)",
+    "insertText": "neumannTree(new TreeT(*boundary, zeroVal<ValueT>(), TopologyCopy()))"
+  },
+  {
+    "label": "voxelizeActiveTiles()",
+    "kind": "Method",
+    "detail": "Function (neumannTree ->)",
+    "insertText": "voxelizeActiveTiles()"
+  },
+  {
+    "label": "gradient()",
+    "kind": "Method",
+    "detail": "Function (const GradientT::Ptr gradient =)",
+    "insertText": "gradient(collider)"
   },
   {
     "label": "leafManager()",
@@ -56,25 +302,133 @@
   {
     "label": "neumannOp()",
     "kind": "Method",
-    "detail": "Function (GradientT>)",
+    "detail": "Function (ComputeNeumannVelocityOp<Vec3GridT,GradientT>)",
     "insertText": "neumannOp(*gradient, *boundaryVelocity, backgroundVelocity)"
+  },
+  {
+    "label": "foreach()",
+    "kind": "Method",
+    "detail": "Function (leafManager .)",
+    "insertText": "foreach(neumannOp, false)"
   },
   {
     "label": "neumannOp()",
     "kind": "Method",
-    "detail": "Function (GradientT>)",
+    "detail": "Function (} else { ComputeNeumannVelocityOp<Vec3GridT,GradientT>)",
     "insertText": "neumannOp(*gradient, backgroundVelocity)"
+  },
+  {
+    "label": "pruneInactive()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "pruneInactive(*neumannTree)"
+  },
+  {
+    "label": "neumann()",
+    "kind": "Method",
+    "detail": "Function (Vec3GridT::Ptr)",
+    "insertText": "neumann(Vec3GridT::create(neumannTree))"
+  },
+  {
+    "label": "solveTree()",
+    "kind": "Method",
+    "detail": "Function (using ScalarT = Vec3GridT::ValueType::value_type ; using ScalarTreeT = Vec3GridT::TreeType::template ValueConverter<ScalarT>::Type ; using ScalarGridT = Vec3GridT::template ValueConverter<ScalarT>::Type ; using potential_flow_internal::SolveBoundaryOp ; ScalarTreeT)",
+    "insertText": "solveTree(domain.tree(), zeroVal<ScalarT>(), TopologyCopy())"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (util::NullInterrupter nullInterrupt ;)",
+    "insertText": "if(!interrupter)"
   },
   {
     "label": "solve()",
     "kind": "Method",
-    "detail": "Function (MaskT>)",
+    "detail": "Function (SolveBoundaryOp<Vec3GridT,MaskT>)",
     "insertText": "solve(neumann, domain)"
+  },
+  {
+    "label": "solveWithBoundaryConditions()",
+    "kind": "Method",
+    "detail": "Function (ScalarTreeT::Ptr potentialTree =)",
+    "insertText": "solveWithBoundaryConditions(solveTree, solve, state, *interrupter, true)"
+  },
+  {
+    "label": "create()",
+    "kind": "Method",
+    "detail": "Function (auto potential =)",
+    "insertText": "create(potentialTree)"
+  },
+  {
+    "label": "setTransform()",
+    "kind": "Method",
+    "detail": "Function (potential ->)",
+    "insertText": "setTransform(domain.transform().copy())"
+  },
+  {
+    "label": "gradient()",
+    "kind": "Method",
+    "detail": "Function (using Vec3T = const Vec3GridT::ValueType ; using potential_flow_internal::extractOuterVoxelMask ; auto gradient =)",
+    "insertText": "gradient(potential)"
+  },
+  {
+    "label": "neumann()",
+    "kind": "Method",
+    "detail": "Function (auto applyNeumann = [& gradient,&)",
+    "insertText": "neumann(const MaskGrid::TreeType::LeafNodeType& leaf, size_t)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (Vec3GridT::ValueType value ;)",
+    "insertText": "if(neumannAccessor.probeValue(ijk, value))"
+  },
+  {
+    "label": "setValue()",
+    "kind": "Method",
+    "detail": "Function (gradientAccessor .)",
+    "insertText": "setValue(ijk, value)"
+  },
+  {
+    "label": "extractOuterVoxelMask()",
+    "kind": "Method",
+    "detail": "Function (} } } ; const MaskGrid::TreeType::Ptr boundary =)",
+    "insertText": "extractOuterVoxelMask(*gradient)"
   },
   {
     "label": "leafManager()",
     "kind": "Method",
-    "detail": "Function (MaskGrid::TreeType>)",
+    "detail": "Function (tree::LeafManager<const MaskGrid::TreeType>)",
     "insertText": "leafManager(*boundary)"
+  },
+  {
+    "label": "foreach()",
+    "kind": "Method",
+    "detail": "Function (leafManager .)",
+    "insertText": "foreach(applyNeumann)"
+  },
+  {
+    "label": "backgroundVelocity()",
+    "kind": "Method",
+    "detail": "Function (auto applyBackgroundVelocity = [&)",
+    "insertText": "backgroundVelocity(typename Vec3GridT::TreeType::LeafNodeType& leaf, size_t)"
+  },
+  {
+    "label": "setValue()",
+    "kind": "Method",
+    "detail": "Function (it .)",
+    "insertText": "setValue(it.getValue() - backgroundVelocity)"
+  },
+  {
+    "label": "leafManager2()",
+    "kind": "Method",
+    "detail": "Function (} } ; tree::LeafManager<Vec3GridT::TreeType>)",
+    "insertText": "leafManager2(gradient->tree())"
+  },
+  {
+    "label": "foreach()",
+    "kind": "Method",
+    "detail": "Function (leafManager2 .)",
+    "insertText": "foreach(applyBackgroundVelocity)"
   }
 ]

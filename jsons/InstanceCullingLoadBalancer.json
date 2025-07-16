@@ -12,12 +12,6 @@
     "insertText": "AllocatorTypeRDGInitialDataFlags"
   },
   {
-    "label": "AllocatorTypeRDGInitialDataFlags",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "AllocatorTypeRDGInitialDataFlags"
-  },
-  {
     "label": "FInstanceCullingLoadBalancerBase",
     "kind": "Type",
     "detail": "class declaration",
@@ -48,15 +42,189 @@
     "insertText": "TInstanceCullingLoadBalancer"
   },
   {
-    "label": "SetShaderDefines()",
+    "label": "static_assert()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "SetShaderDefines(FShaderCompilerEnvironment& OutEnvironment)"
+    "detail": "Function (# pragma once # include \" HAL / Platform . h \" # include \" RenderGraphDefinitions . h \" # include \" RendererInterface . h \" # include \" ShaderParameterMacros . h \" struct FShaderCompilerEnvironment ; namespace InstanceCullingImplementationDetails { template<AllocatorType> struct AllocatorTypeRDGInitialDataFlags { ERDGInitialDataFlags Flags = ERDGInitialDataFlags::None ; } ; template<> struct AllocatorTypeRDGInitialDataFlags<SceneRenderingAllocator> { ERDGInitialDataFlags Flags = ERDGInitialDataFlags::NoCopy ; } ; } ; class FInstanceCullingLoadBalancerBase { public : uint32 ThreadGroupSize = 6 4 U ; uint32 PrefixBits = 6 U ;)",
+    "insertText": "static_assert((1U << PrefixBits) == ThreadGroupSize, \"ThreadGroupSize and PrefixBits must be kept in sync\")"
+  },
+  {
+    "label": "PrefixBitMask()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "PrefixBitMask(1U << PrefixBits)"
+  },
+  {
+    "label": "NumInstancesItemMask()",
+    "kind": "Method",
+    "detail": "Function (uint32 NumInstancesItemBits = PrefixBits + 1 U ; uint32)",
+    "insertText": "NumInstancesItemMask(1U << NumInstancesItemBits)"
+  },
+  {
+    "label": "PackBatch()",
+    "kind": "Method",
+    "detail": "Function (struct FPackedBatch { uint32 FirstItem_NumItems ; } ; FPackedBatch)",
+    "insertText": "PackBatch(uint32 FirstItem, uint32 NumItems)"
+  },
+  {
+    "label": "PackItem()",
+    "kind": "Method",
+    "detail": "Function (} struct FPackedItem { uint32 InstanceDataOffset_NumInstances ; uint32 Payload_BatchPrefixOffset ; } ; FPackedItem)",
+    "insertText": "PackItem(uint32 InstanceDataOffset, uint32 NumInstances, uint32 Payload, uint32 BatchPrefixSum)"
+  },
+  {
+    "label": "BEGIN_SHADER_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "BEGIN_SHADER_PARAMETER_STRUCT(FShaderParameters, ) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer< FPackedBatch >, BatchBuffer) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer< FPackedItem >, ItemBuffer) SHADER_PARAMETER(uint32, NumBatches) SHADER_PARAMETER(uint32, NumItems) SHADER_PARAMETER(uint32, NumGroupsPerBatch) END_SHADER_PARAMETER_STRUCT() static void SetShaderDefines(FShaderCompilerEnvironment& OutEnvironment)"
   },
   {
     "label": "GetShaderParameters()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (struct FGPUData { int32 NumBatches = 0 ; int32 NumItems = 0 ; int32 NumGroupsPerBatch = 1 ; FRDGBufferRef BatchBuffer = nullptr ; FRDGBufferRef ItemBuffer = nullptr ; void)",
     "insertText": "GetShaderParameters(FRDGBuilder& GraphBuilder, FShaderParameters& ShaderParameters)"
+  },
+  {
+    "label": "Upload()",
+    "kind": "Method",
+    "detail": "Function (} ; FGPUData)",
+    "insertText": "Upload(FRDGBuilder& GraphBuilder, TConstArrayView<FPackedBatch> Batches, TConstArrayView<FPackedItem> Items, ERDGInitialDataFlags RDGInitialDataFlags, int32 NumGroupsPerBatch)"
+  },
+  {
+    "label": "GetWrappedCsGroupCount()",
+    "kind": "Method",
+    "detail": "Function (FIntVector)",
+    "insertText": "GetWrappedCsGroupCount(TConstArrayView<FPackedBatch> Batches, int32 NumGroupsPerBatch)"
+  },
+  {
+    "label": "ReserveStorage()",
+    "kind": "Method",
+    "detail": "Function (} ; template<InAllocatorType = FDefaultAllocator> class TInstanceCullingLoadBalancer : public FInstanceCullingLoadBalancerBase { public : using AllocatorType = InAllocatorType ; ERDGInitialDataFlags DefaultRDGInitialDataFlags = InstanceCullingImplementationDetails::AllocatorTypeRDGInitialDataFlags<AllocatorType>::Flags ; void)",
+    "insertText": "ReserveStorage(int32 NumBatches, int32 NumItems)"
+  },
+  {
+    "label": "Empty()",
+    "kind": "Method",
+    "detail": "Function (Batches .)",
+    "insertText": "Empty(NumBatches)"
+  },
+  {
+    "label": "Empty()",
+    "kind": "Method",
+    "detail": "Function (Items .)",
+    "insertText": "Empty(NumItems)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "Add(uint32 InstanceDataOffset, uint32 NumInstanceDataEntries, uint32 Payload)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (uint32 InstancesAdded = 0 ;)",
+    "insertText": "while(InstancesAdded < NumInstanceDataEntries)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (uint32 MaxInstancesThisBatch = ThreadGroupSize - CurrentBatchPrefixSum ;)",
+    "insertText": "if(MaxInstancesThisBatch > 0)"
+  },
+  {
+    "label": "Min()",
+    "kind": "Method",
+    "detail": "Function (const uint32 NumInstancesThisItem =)",
+    "insertText": "Min(MaxInstancesThisBatch, NumInstanceDataEntries - InstancesAdded)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Items .)",
+    "insertText": "Add(PackItem(InstanceDataOffset + InstancesAdded, NumInstancesThisItem, Payload, CurrentBatchPrefixSum))"
+  },
+  {
+    "label": "CurrentBatchPackedPrefixSum()",
+    "kind": "Method",
+    "detail": "Function (CurrentBatchPackedPrefixSum | =)",
+    "insertText": "CurrentBatchPackedPrefixSum(PrefixBits * CurrentBatchNumItems)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} CurrentBatchNumItems + = 1 U ; InstancesAdded + = NumInstancesThisItem ; CurrentBatchPrefixSum + = NumInstancesThisItem ; })",
+    "insertText": "if(MaxInstancesThisBatch <= 0U || CurrentBatchPrefixSum >= ThreadGroupSize)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Batches .)",
+    "insertText": "Add(PackBatch(CurrentBatchFirstItem, CurrentBatchNumItems))"
+  },
+  {
+    "label": "uint32()",
+    "kind": "Method",
+    "detail": "Function (CurrentBatchFirstItem =)",
+    "insertText": "uint32(Items.Num())"
+  },
+  {
+    "label": "IsEmpty()",
+    "kind": "Method",
+    "detail": "Function (CurrentBatchPrefixSum = 0 u ; CurrentBatchNumItems = 0 U ; CurrentBatchPackedPrefixSum = 0 U ; } } TotalInstances + = InstancesAdded ; } bool)",
+    "insertText": "IsEmpty()"
+  },
+  {
+    "label": "Upload()",
+    "kind": "Method",
+    "detail": "Function (} FGPUData)",
+    "insertText": "Upload(FRDGBuilder& GraphBuilder, ERDGInitialDataFlags RDGInitialDataFlags = DefaultRDGInitialDataFlags, int32 NumGroupsPerBatch = 1)"
+  },
+  {
+    "label": "FinalizeBatches()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "FinalizeBatches()"
+  },
+  {
+    "label": "UploadFinalized()",
+    "kind": "Method",
+    "detail": "Function (} FGPUData)",
+    "insertText": "UploadFinalized(FRDGBuilder& GraphBuilder, ERDGInitialDataFlags RDGInitialDataFlags = DefaultRDGInitialDataFlags, int32 NumGroupsPerBatch = 1)"
+  },
+  {
+    "label": "GetWrappedCsGroupCount()",
+    "kind": "Method",
+    "detail": "Function (CurrentBatchNumItems = 0 ; } } FIntVector)",
+    "insertText": "GetWrappedCsGroupCount(int32 NumGroupsPerBatch = 1)"
+  },
+  {
+    "label": "GetBatches()",
+    "kind": "Method",
+    "detail": "Function (} const TArray<FPackedBatch,AllocatorType>&)",
+    "insertText": "GetBatches()"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (Batches .)",
+    "insertText": "Append(Other.GetBatches().GetData(), Other.GetBatches().Num())"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (Items .)",
+    "insertText": "Append(Other.GetItems().GetData(), Other.GetItems().Num())"
+  },
+  {
+    "label": "GetTotalNumInstances()",
+    "kind": "Method",
+    "detail": "Function (TotalInstances + = Other .)",
+    "insertText": "GetTotalNumInstances()"
+  },
+  {
+    "label": "HasSingleInstanceItemsOnly()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "HasSingleInstanceItemsOnly()"
   }
 ]

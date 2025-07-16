@@ -48,12 +48,6 @@
     "insertText": "FVirtualShadowMapArrayCacheManager"
   },
   {
-    "label": "FSortedLightSetSceneInfo",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "FSortedLightSetSceneInfo"
-  },
-  {
     "label": "FVirtualShadowMapClipmap",
     "kind": "Type",
     "detail": "class declaration",
@@ -168,16 +162,46 @@
     "insertText": "FVirtualShadowMapArray"
   },
   {
+    "label": "IsSinglePageVirtualShadowMap()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" SceneManagement . h \" # include \" SceneView . h \" # include \" VirtualShadowMapDefinitions . h \" # include \" ScreenPass . h \" struct FMinimalSceneTextures ; struct FSortedLightSetSceneInfo ; struct FNaniteVisibilityQuery ; class FViewInfo ; class FProjectedShadowInfo ; class FVisibleLightInfo ; class FVirtualShadowMapCacheEntry ; class FVirtualShadowMapArrayCacheManager ; struct FSortedLightSetSceneInfo ; class FVirtualShadowMapClipmap ; struct FScreenPassTexture ; struct FSingleLayerWaterPrePassResult ; class FNaniteVisibilityResults ; class FSceneRenderer ; class FSceneUniformBuffer ; struct FShaderCompilerEnvironment ; struct FFrontLayerTranslucencyData ; class FSceneInstanceCullingQuery ; namespace Froxel { class FRenderer ; } namespace Nanite { struct FPackedView ; class FPackedViewArray ; struct FRasterResults ; } bool)",
+    "insertText": "IsSinglePageVirtualShadowMap(int32 VirtualShadowMapId)"
+  },
+  {
     "label": "DoesVSMWantFroxels()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (} bool)",
     "insertText": "DoesVSMWantFroxels(EShaderPlatform ShaderPlatform)"
   },
   {
-    "label": "CalcTranslatedWorldToShadowUVMatrix()",
+    "label": "static_assert()",
     "kind": "Method",
-    "detail": "Function (FMatrix)",
-    "insertText": "CalcTranslatedWorldToShadowUVMatrix(const FMatrix& TranslatedWorldToShadowView, const FMatrix& ViewToClip)"
+    "detail": "Function (class FVirtualShadowMap { public : uint32 PageSize = VSM_PAGE_SIZE ; uint32 PageSizeMask = VSM_PAGE_SIZE_MASK ; uint32 Log2PageSize = VSM_LOG2_PAGE_SIZE ; uint32 Level0DimPagesXY = VSM_LEVEL0_DIM_PAGES_XY ; uint32 Log2Level0DimPagesXY = VSM_LOG2_LEVEL0_DIM_PAGES_XY ; uint32 MaxMipLevels = VSM_MAX_MIP_LEVELS ; uint32 VirtualMaxResolutionXY = VSM_VIRTUAL_MAX_RESOLUTION_XY ; uint32 RasterWindowPages = VSM_RASTER_WINDOW_PAGES ; uint32 PageTableSize = VSM_PAGE_TABLE_SIZE ; uint32 PhysicalPageAddressBits = 1 6 U ; uint32 MaxPhysicalTextureDimPages = 1 U<<PhysicalPageAddressBits ; uint32 MaxPhysicalTextureDimTexels = MaxPhysicalTextureDimPages* PageSize ; uint32 NumHZBLevels = Log2PageSize ;)",
+    "insertText": "static_assert(MaxMipLevels <= 8, \">8 mips requires more PageFlags bits. See VSM_PAGE_FLAGS_BITS_PER_HMIP in PageAccessCommon.ush\")"
+  },
+  {
+    "label": "FVirtualShadowMap()",
+    "kind": "Method",
+    "detail": "Function (private :)",
+    "insertText": "FVirtualShadowMap()"
+  },
+  {
+    "label": "FIntPoint()",
+    "kind": "Method",
+    "detail": "Function (} } ; struct FVirtualShadowMapProjectionShaderData { FMatrix44f ShadowViewToClipMatrix ; FMatrix44f TranslatedWorldToShadowUVMatrix ; FMatrix44f TranslatedWorldToShadowUVNormalMatrix ; FVector3f LightDirection ; uint32 LightType = ELightComponentType::LightType_Directional ; FVector3f PreViewTranslationHigh ; float LightRadius ; FVector3f PreViewTranslationLow ; float ResolutionLodBias = 0 . 0 f ; FVector3f NegativeClipmapWorldOriginLWCOffset ; float LightSourceRadius ; FIntPoint ClipmapCornerRelativeOffset =)",
+    "insertText": "FIntPoint(0, 0)"
+  },
+  {
+    "label": "static_assert()",
+    "kind": "Method",
+    "detail": "Function (int32 ClipmapLevel = MAX_int32 ; int32 ClipmapLevelCountRemaining = - 1 ; uint32 Flags = 0 U ; float ClipmapLevelWPODistanceDisableThresholdSquared = 0 . 0 f ; float TexelDitherScale ; uint32 MinMipLevel = 0 u ; } ;)",
+    "insertText": "static_assert(sizeof(FVirtualShadowMapProjectionShaderData) == (16*18), \"FVirtualShadowMapProjectionShaderData does not match size in shader. See VirtualShadowMapProjectionStructs.ush.\")"
+  },
+  {
+    "label": "BEGIN_SHADER_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (struct FVirtualShadowMapHZBMetadata { FViewMatrices ViewMatrices ; FIntRect ViewRect ; uint32 TargetLayerIndex = INDEX_NONE ; } ;)",
+    "insertText": "BEGIN_SHADER_PARAMETER_STRUCT(FVirtualShadowMapPerViewParameters, ) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint>, LightGridData) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint>, NumCulledLightsGrid) SHADER_PARAMETER(uint32, MaxLightGridEntryIndex) END_SHADER_PARAMETER_STRUCT() BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FVirtualShadowMapUniformParameters, ) SHADER_PARAMETER(uint32, NumFullShadowMaps) SHADER_PARAMETER(uint32, NumSinglePageShadowMaps) SHADER_PARAMETER(uint32, MaxPhysicalPages) SHADER_PARAMETER(uint32, NumShadowMapSlots) SHADER_PARAMETER(uint32, StaticCachedArrayIndex) SHADER_PARAMETER(uint32, StaticHZBArrayIndex) SHADER_PARAMETER(uint32, PhysicalPageRowMask) SHADER_PARAMETER(uint32, PhysicalPageRowShift) SHADER_PARAMETER(uint32, PackedShadowMaskMaxLightCount) SHADER_PARAMETER(FVector4f, RecPhysicalPoolSize) SHADER_PARAMETER(FIntPoint, PhysicalPoolSize) SHADER_PARAMETER(FIntPoint, PhysicalPoolSizePages) SHADER_PARAMETER(uint32, bExcludeNonNaniteFromCoarsePages) SHADER_PARAMETER(float, CoarsePagePixelThresholdDynamic) SHADER_PARAMETER(float, CoarsePagePixelThresholdStatic) SHADER_PARAMETER(float, CoarsePagePixelThresholdDynamicNanite) SHADER_PARAMETER(uint32, SceneFrameNumber) SHADER_PARAMETER(uint32, bClipmapGreedyLevelSelection) SHADER_PARAMETER(float, GlobalResolutionLodBias) SHADER_PARAMETER(float, ScreenRayLength) SHADER_PARAMETER(float, NormalBias) SHADER_PARAMETER(uint32, SMRTAdaptiveRayCount) SHADER_PARAMETER(int32, SMRTRayCountLocal) SHADER_PARAMETER(int32, SMRTSamplesPerRayLocal) SHADER_PARAMETER(float, SMRTExtrapolateMaxSlopeLocal) SHADER_PARAMETER(float, SMRTTexelDitherScaleLocal) SHADER_PARAMETER(float, SMRTMaxSlopeBiasLocal) SHADER_PARAMETER(float, SMRTCotMaxRayAngleFromLight) SHADER_PARAMETER(int32, SMRTRayCountDirectional) SHADER_PARAMETER(int32, SMRTSamplesPerRayDirectional) SHADER_PARAMETER(float, SMRTExtrapolateMaxSlopeDirectional) SHADER_PARAMETER(float, SMRTTexelDitherScaleDirectional) SHADER_PARAMETER(float, SMRTRayLengthScale) SHADER_PARAMETER(uint32, SMRTHairRayCount) SHADER_PARAMETER_RDG_BUFFER_SRV(ByteAddressBuffer, ProjectionData) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint>, PageTable) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint>, PageFlags) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint4>, AllocatedPageRectBounds) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint4>, UncachedPageRectBounds) SHADER_PARAMETER_RDG_TEXTURE(Texture2DArray<uint>, PhysicalPagePool) SHADER_PARAMETER_RDG_BUFFER_SRV(StructuredBuffer<uint>, CachePrimitiveAsDynamic) SHADER_PARAMETER_STRUCT_INCLUDE(FVirtualShadowMapPerViewParameters, PerViewData) END_GLOBAL_SHADER_PARAMETER_STRUCT() BEGIN_SHADER_PARAMETER_STRUCT(FVirtualShadowMapSamplingParameters, ) SHADER_PARAMETER_RDG_UNIFORM_BUFFER(FVirtualShadowMapUniformParameters, VirtualShadowMap) END_SHADER_PARAMETER_STRUCT() FMatrix CalcTranslatedWorldToShadowUVMatrix(const FMatrix& TranslatedWorldToShadowView, const FMatrix& ViewToClip)"
   },
   {
     "label": "CalcTranslatedWorldToShadowUVNormalMatrix()",
@@ -186,9 +210,21 @@
     "insertText": "CalcTranslatedWorldToShadowUVNormalMatrix(const FMatrix& TranslatedWorldToShadowView, const FMatrix& ViewToClip)"
   },
   {
-    "label": "CheckLight()",
+    "label": "FVirtualShadowMapVisualizeLightSearch()",
+    "kind": "Method",
+    "detail": "Function (struct FVirtualShadowMapVisualizeLightSearch { public :)",
+    "insertText": "FVirtualShadowMapVisualizeLightSearch()"
+  },
+  {
+    "label": "Reset()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "Reset()"
+  },
+  {
+    "label": "CheckLight()",
+    "kind": "Method",
+    "detail": "Function (FoundKey . Packed = 0 ; FoundProxy = nullptr ; FoundVirtualShadowMapId = INDEX_NONE ; } void)",
     "insertText": "CheckLight(const FLightSceneProxy* CheckProxy, int CheckVirtualShadowMapId)"
   },
   {
@@ -198,22 +234,82 @@
     "insertText": "ChooseLight()"
   },
   {
+    "label": "IsValid()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsValid()"
+  },
+  {
     "label": "FVirtualShadowMapArray()",
     "kind": "Method",
-    "detail": "Function (public:)",
+    "detail": "Function (private : union SortKey { struct { uint32 bSelected : 1 ; uint32 bPartialNameMatch : 1 ; uint32 bExactNameMatch : 1 ; } Fields ; uint32 Packed ; } ; SortKey FoundKey ; const FLightSceneProxy* FoundProxy = nullptr ; int FoundVirtualShadowMapId = INDEX_NONE ; } ; enum class EVSMVisualizationPostPass { PreEditorPrimitives,PostEditorPrimitives } ; class FVirtualShadowMapArray { public :)",
     "insertText": "FVirtualShadowMapArray(FScene& InScene)"
+  },
+  {
+    "label": "FVirtualShadowMapArray()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "FVirtualShadowMapArray()"
   },
   {
     "label": "Initialize()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "Initialize(\n\t\tFRDGBuilder& GraphBuilder,\n\t\tFVirtualShadowMapArrayCacheManager* InCacheManager,\n\t\tbool bInEnabled,\n\t\tconst FEngineShowFlags& EngineShowFlags)"
+    "insertText": "Initialize(FRDGBuilder& GraphBuilder, FVirtualShadowMapArrayCacheManager* InCacheManager, bool bInEnabled, const FEngineShowFlags& EngineShowFlags)"
   },
   {
-    "label": "Allocate()",
+    "label": "IsEnabled()",
     "kind": "Method",
-    "detail": "Function (int32)",
-    "insertText": "Allocate(bool bSinglePageShadowMap, int32 Count)"
+    "detail": "Function (bool)",
+    "insertText": "IsEnabled()"
+  },
+  {
+    "label": "UpdateNextData()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UpdateNextData(int32 PrevVirtualShadowMapId, int32 CurrentVirtualShadowMapId, FInt32Point PageOffset = FInt32Point(0, 0))"
+  },
+  {
+    "label": "IsSinglePage()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsSinglePage(int VirtualShadowMapId)"
+  },
+  {
+    "label": "GetNumShadowMapSlots()",
+    "kind": "Method",
+    "detail": "Function (} int32)",
+    "insertText": "GetNumShadowMapSlots()"
+  },
+  {
+    "label": "GetNumSinglePageShadowMaps()",
+    "kind": "Method",
+    "detail": "Function (} int32)",
+    "insertText": "GetNumSinglePageShadowMaps()"
+  },
+  {
+    "label": "GetPhysicalPoolSize()",
+    "kind": "Method",
+    "detail": "Function (} FIntPoint)",
+    "insertText": "GetPhysicalPoolSize()"
+  },
+  {
+    "label": "GetHZBPhysicalPoolSize()",
+    "kind": "Method",
+    "detail": "Function (FIntPoint)",
+    "insertText": "GetHZBPhysicalPoolSize()"
+  },
+  {
+    "label": "GetMaxPhysicalPages()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetMaxPhysicalPages()"
+  },
+  {
+    "label": "GetPackedShadowMaskFormat()",
+    "kind": "Method",
+    "detail": "Function (EPixelFormat)",
+    "insertText": "GetPackedShadowMaskFormat()"
   },
   {
     "label": "SetShaderDefines()",
@@ -237,7 +333,19 @@
     "label": "BuildPageAllocations()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "BuildPageAllocations(\n\t\tFRDGBuilder& GraphBuilder,\n\t\tconst FMinimalSceneTextures& SceneTextures,\n\t\tconst TConstArrayView<FViewInfo> &Views,\n\t\tconst FSortedLightSetSceneInfo& SortedLights, \n\t\tconst TConstArrayView<FVisibleLightInfo>& VisibleLightInfos,\n\t\tconst FSingleLayerWaterPrePassResult* SingleLayerWaterPrePassResult,\n\t\tconst FFrontLayerTranslucencyData& FrontLayerTranslucencyData,\n\t\tconst Froxel::FRenderer& FroxelRenderer,\n\t\tbool bAnyLocalLightsWithVSMs)"
+    "insertText": "BuildPageAllocations(FRDGBuilder& GraphBuilder, const FMinimalSceneTextures& SceneTextures, const TConstArrayView<FViewInfo> &Views, const FSortedLightSetSceneInfo& SortedLights, const TConstArrayView<FVisibleLightInfo>& VisibleLightInfos, const FSingleLayerWaterPrePassResult* SingleLayerWaterPrePassResult, const FFrontLayerTranslucencyData& FrontLayerTranslucencyData, const Froxel::FRenderer& FroxelRenderer, bool bAnyLocalLightsWithVSMs)"
+  },
+  {
+    "label": "IsAllocated()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsAllocated()"
+  },
+  {
+    "label": "CreateVirtualShadowMapNaniteViews()",
+    "kind": "Method",
+    "detail": "Function (Nanite::FPackedViewArray*)",
+    "insertText": "CreateVirtualShadowMapNaniteViews(FRDGBuilder& GraphBuilder, TConstArrayView<FViewInfo> Views, TConstArrayView<FProjectedShadowInfo*> Shadows, float ShadowsLODScaleFactor, FSceneInstanceCullingQuery* InstanceCullingQuery)"
   },
   {
     "label": "RenderVirtualShadowMapsNanite()",
@@ -258,16 +366,46 @@
     "insertText": "RenderDebugInfo(FRDGBuilder& GraphBuilder, TArrayView<FViewInfo> Views)"
   },
   {
+    "label": "ShouldGenerateStats()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "ShouldGenerateStats()"
+  },
+  {
+    "label": "IsCsvLogEnabled()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsCsvLogEnabled()"
+  },
+  {
     "label": "LogStats()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "LogStats(FRDGBuilder& GraphBuilder, const FViewInfo& View)"
   },
   {
-    "label": "UpdateHZB()",
+    "label": "GetSamplingParameters()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "UpdateHZB(FRDGBuilder& GraphBuilder)"
+    "detail": "Function (FVirtualShadowMapSamplingParameters)",
+    "insertText": "GetSamplingParameters(FRDGBuilder& GraphBuilder, int32 ViewIndex)"
+  },
+  {
+    "label": "GetUniformBuffer()",
+    "kind": "Method",
+    "detail": "Function (TRDGUniformBufferRef<FVirtualShadowMapUniformParameters>)",
+    "insertText": "GetUniformBuffer(int32 ViewIndex)"
+  },
+  {
+    "label": "Min()",
+    "kind": "Method",
+    "detail": "Function (} return CachedUniformBuffers [)",
+    "insertText": "Min(ViewIndex, CachedUniformBuffers.Num() - 1)"
+  },
+  {
+    "label": "HasAnyShadowData()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "HasAnyShadowData()"
   },
   {
     "label": "AddRenderViews()",
@@ -282,16 +420,16 @@
     "insertText": "AddVisualizePass(FRDGBuilder& GraphBuilder, const FViewInfo& View, int32 ViewIndex, EVSMVisualizationPostPass Pass, FScreenPassTexture& SceneColor, FScreenPassRenderTarget& Output)"
   },
   {
-    "label": "InterpolateResolutionBias()",
+    "label": "UseHzbOcclusion()",
     "kind": "Method",
-    "detail": "Function (float)",
-    "insertText": "InterpolateResolutionBias(float BiasNonMoving, float BiasMoving, float LightMobilityFactor)"
+    "detail": "Function (bool)",
+    "insertText": "UseHzbOcclusion()"
   },
   {
     "label": "UpdateVisualizeLight()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "UpdateVisualizeLight(\n\t\tconst TConstArrayView<FViewInfo> &Views,\n\t\tconst TConstArrayView<FVisibleLightInfo>& VisibleLightInfos)"
+    "detail": "Function (FVirtualShadowMapArrayCacheManager* CacheManager = nullptr ; FVirtualShadowMapUniformParameters UniformParameters ; TArray<FVirtualShadowMapPerViewParameters> PerViewParameters ; FRDGTextureRef PhysicalPagePoolRDG = nullptr ; TRefCountPtr<IPooledRenderTarget> HZBPhysicalArray = nullptr ; FRDGTextureRef HZBPhysicalArrayRDG = nullptr ; FRDGBufferRef PhysicalPageMetaDataRDG = nullptr ; FRDGBufferRef PageTableRDG = nullptr ; FRDGBufferRef PageRequestFlagsRDG = nullptr ; FRDGBufferRef PageFlagsRDG = nullptr ; FRDGBufferRef PhysicalPageListsRDG = nullptr ; FRDGBufferRef CachedPageInfosRDG = nullptr ; FRDGBufferRef UncachedPageRectBoundsRDG = nullptr ; FRDGBufferRef AllocatedPageRectBoundsRDG = nullptr ; FRDGBufferRef ProjectionDataRDG = nullptr ; FRDGBufferRef DirtyPageFlagsRDG = nullptr ; bool bHZBBuiltThisFrame = false ; uint32 MaxPageAreaDiagnosticSlots = 3 2 ; FRDGBufferRef StatsBufferRDG = nullptr ; FRDGBufferUAVRef StatsBufferUAV = nullptr ; FRDGBufferRef StatsNaniteBufferRDG = nullptr ; TArray<FRDGTextureRef> DebugVisualizationOutput ; TArray<FVirtualShadowMapVisualizeLightSearch> VisualizeLight ; bool bEnableVisualization = false ; bool bEnableNaniteVisualization = false ; private : void)",
+    "insertText": "UpdateVisualizeLight(const TConstArrayView<FViewInfo> &Views, const TConstArrayView<FVisibleLightInfo>& VisibleLightInfos)"
   },
   {
     "label": "AppendPhysicalPageList()",
@@ -304,6 +442,12 @@
     "kind": "Method",
     "detail": "Function (uint32)",
     "insertText": "AddRenderViews(const TSharedPtr<FVirtualShadowMapClipmap>& Clipmap, const FViewInfo* CullingView, float LODScaleFactor, bool bSetHzbParams, bool bUpdateHZBMetaData, TArray<Nanite::FPackedView, SceneRenderingAllocator>& OutVirtualShadowViews)"
+  },
+  {
+    "label": "GetUncachedUniformBuffer()",
+    "kind": "Method",
+    "detail": "Function (TRDGUniformBufferRef<FVirtualShadowMapUniformParameters>)",
+    "insertText": "GetUncachedUniformBuffer(FRDGBuilder& GraphBuilder)"
   },
   {
     "label": "UpdateCachedUniformBuffers()",

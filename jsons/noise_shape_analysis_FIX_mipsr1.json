@@ -1,0 +1,506 @@
+[
+  {
+    "label": "silk_noise_shape_analysis_FIX()",
+    "kind": "Method",
+    "detail": "Function (# define OVERRIDE_silk_noise_shape_analysis_FIX void)",
+    "insertText": "silk_noise_shape_analysis_FIX(silk_encoder_state_FIX *psEnc, silk_encoder_control_FIX *psEncCtrl, const opus_int16 *pitch_res, const opus_int16 *x, int arch)"
+  },
+  {
+    "label": "VARDECL()",
+    "kind": "Method",
+    "detail": "Function (silk_shape_state_FIX* psShapeSt =& psEnc -> sShape ; opus_int k,i,nSamples,Qnrg,b_Q14,warping_Q16,scale = 0 ; opus_int32 SNR_adj_dB_Q7,HarmBoost_Q16,HarmShapeGain_Q16,Tilt_Q16,tmp32 ; opus_int32 nrg,pre_nrg_Q30,log_energy_Q7,log_energy_prev_Q7,energy_variation_Q7 ; opus_int32 delta_Q16,BWExp1_Q16,BWExp2_Q16,gain_mult_Q16,gain_add_Q16,strength_Q16,b_Q8 ; opus_int32 auto_corr [ MAX_SHAPE_LPC_ORDER + 1 ] ; opus_int32 refl_coef_Q16 [ MAX_SHAPE_LPC_ORDER ] ; opus_int32 AR1_Q24 [ MAX_SHAPE_LPC_ORDER ] ; opus_int32 AR2_Q24 [ MAX_SHAPE_LPC_ORDER ] ;)",
+    "insertText": "VARDECL(opus_int16, x_windowed)"
+  },
+  {
+    "label": "input_quality_Q14()",
+    "kind": "Method",
+    "detail": "Function (const opus_int16* x_ptr,* pitch_res_ptr ; SAVE_STACK ; x_ptr = x - psEnc -> sCmn . la_shape ; SNR_adj_dB_Q7 = psEnc -> sCmn . SNR_dB_Q7 ; psEncCtrl ->)",
+    "insertText": "input_quality_Q14(opus_int )silk_RSHIFT( (opus_int32)psEnc->sCmn.input_quality_bands_Q15[ 0 ] + psEnc->sCmn.input_quality_bands_Q15[ 1 ], 2)"
+  },
+  {
+    "label": "silk_RSHIFT()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> coding_quality_Q14 =)",
+    "insertText": "silk_RSHIFT(silk_sigm_Q15( silk_RSHIFT_ROUND( SNR_adj_dB_Q7 - SILK_FIX_CONST( 20.0, 7 ), 4 ) ), 1)"
+  },
+  {
+    "label": "SILK_FIX_CONST()",
+    "kind": "Method",
+    "detail": "Function (sCmn.speech_activity_Q8)",
+    "insertText": "SILK_FIX_CONST(1.0, 8)"
+  },
+  {
+    "label": "silk_SMULWB()",
+    "kind": "Method",
+    "detail": "Function (b_Q8 =)",
+    "insertText": "silk_SMULWB(silk_LSHIFT( b_Q8, 8 ), b_Q8)"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (SNR_adj_dB_Q7 =)",
+    "insertText": "silk_SMLAWB(SNR_adj_dB_Q7, silk_SMULBB( SILK_FIX_CONST( -BG_SNR_DECR_dB, 7 ) >> ( 4 + 1 ), b_Q8 ), silk_SMULWB( SILK_FIX_CONST( 1.0, 14 ) + psEncCtrl->input_quality_Q14, psEncCtrl->coding_quality_Q14 ))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(psEnc->sCmn.indices.signalType == TYPE_VOICED)"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (SNR_adj_dB_Q7 =)",
+    "insertText": "silk_SMLAWB(SNR_adj_dB_Q7, SILK_FIX_CONST( HARM_SNR_INCR_dB, 8 ), psEnc->LTPCorr_Q15)"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (} else { SNR_adj_dB_Q7 =)",
+    "insertText": "silk_SMLAWB(SNR_adj_dB_Q7, silk_SMLAWB( SILK_FIX_CONST( 6.0, 9 ), -SILK_FIX_CONST( 0.4, 18 ), psEnc->sCmn.SNR_dB_Q7 ), SILK_FIX_CONST( 1.0, 14 ) - psEncCtrl->input_quality_Q14)"
+  },
+  {
+    "label": "silk_LSHIFT()",
+    "kind": "Method",
+    "detail": "Function (psEnc -> sCmn . indices . quantOffsetType = 0 ; psEncCtrl -> sparseness_Q8 = 0 ; } else { nSamples =)",
+    "insertText": "silk_LSHIFT(psEnc->sCmn.fs_kHz, 1)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (energy_variation_Q7 = 0 ; log_energy_prev_Q7 = 0 ; pitch_res_ptr = pitch_res ;)",
+    "insertText": "for(k = 0; k < silk_SMULBB( SUB_FRAME_LENGTH_MS, psEnc->sCmn.nb_subfr ) / 2; k++)"
+  },
+  {
+    "label": "silk_sum_sqr_shift()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_sum_sqr_shift(&nrg, &scale, pitch_res_ptr, nSamples)"
+  },
+  {
+    "label": "silk_RSHIFT()",
+    "kind": "Method",
+    "detail": "Function (nrg + =)",
+    "insertText": "silk_RSHIFT(nSamples, scale)"
+  },
+  {
+    "label": "silk_lin2log()",
+    "kind": "Method",
+    "detail": "Function (log_energy_Q7 =)",
+    "insertText": "silk_lin2log(nrg)"
+  },
+  {
+    "label": "silk_abs()",
+    "kind": "Method",
+    "detail": "Function (energy_variation_Q7 + =)",
+    "insertText": "silk_abs(log_energy_Q7 - log_energy_prev_Q7)"
+  },
+  {
+    "label": "silk_RSHIFT()",
+    "kind": "Method",
+    "detail": "Function (} log_energy_prev_Q7 = log_energy_Q7 ; pitch_res_ptr + = nSamples ; } psEncCtrl -> sparseness_Q8 =)",
+    "insertText": "silk_RSHIFT(silk_sigm_Q15( silk_SMULWB( energy_variation_Q7 - SILK_FIX_CONST( 5.0, 7 ), SILK_FIX_CONST( 0.1, 16 ) ) ), 7)"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (psEnc -> sCmn . indices . quantOffsetType = 0 ; } else { psEnc -> sCmn . indices . quantOffsetType = 1 ; } SNR_adj_dB_Q7 =)",
+    "insertText": "silk_SMLAWB(SNR_adj_dB_Q7, SILK_FIX_CONST( SPARSE_SNR_INCR_dB, 15 ), psEncCtrl->sparseness_Q8 - SILK_FIX_CONST( 0.5, 8 ))"
+  },
+  {
+    "label": "silk_SMULWB()",
+    "kind": "Method",
+    "detail": "Function (} strength_Q16 =)",
+    "insertText": "silk_SMULWB(psEncCtrl->predGain_Q16, SILK_FIX_CONST( FIND_PITCH_WHITE_NOISE_FRACTION, 16 ))"
+  },
+  {
+    "label": "silk_DIV32_varQ()",
+    "kind": "Method",
+    "detail": "Function (BWExp1_Q16 = BWExp2_Q16 =)",
+    "insertText": "silk_DIV32_varQ(SILK_FIX_CONST( BANDWIDTH_EXPANSION, 16 ), silk_SMLAWW( SILK_FIX_CONST( 1.0, 16 ), strength_Q16, strength_Q16 ), 16)"
+  },
+  {
+    "label": "silk_SMULWB()",
+    "kind": "Method",
+    "detail": "Function (delta_Q16 =)",
+    "insertText": "silk_SMULWB(SILK_FIX_CONST( 1.0, 16 ) - silk_SMULBB( 3, psEncCtrl->coding_quality_Q14 ), SILK_FIX_CONST( LOW_RATE_BANDWIDTH_EXPANSION_DELTA, 16 ))"
+  },
+  {
+    "label": "silk_SUB32()",
+    "kind": "Method",
+    "detail": "Function (BWExp1_Q16 =)",
+    "insertText": "silk_SUB32(BWExp1_Q16, delta_Q16)"
+  },
+  {
+    "label": "silk_ADD32()",
+    "kind": "Method",
+    "detail": "Function (BWExp2_Q16 =)",
+    "insertText": "silk_ADD32(BWExp2_Q16, delta_Q16)"
+  },
+  {
+    "label": "silk_DIV32_16()",
+    "kind": "Method",
+    "detail": "Function (BWExp1_Q16 =)",
+    "insertText": "silk_DIV32_16(silk_LSHIFT( BWExp1_Q16, 14 ), silk_RSHIFT( BWExp2_Q16, 2 ))"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (warping_Q16 =)",
+    "insertText": "silk_SMLAWB(psEnc->sCmn.warping_Q16, (opus_int32)psEncCtrl->coding_quality_Q14, SILK_FIX_CONST( 0.01, 18 ))"
+  },
+  {
+    "label": "ALLOC()",
+    "kind": "Method",
+    "detail": "Function (} else { warping_Q16 = 0 ; })",
+    "insertText": "ALLOC(x_windowed, psEnc->sCmn.shapeWinLength, opus_int16)"
+  },
+  {
+    "label": "silk_RSHIFT()",
+    "kind": "Method",
+    "detail": "Function (opus_int shift,slope_part,flat_part ; flat_part = psEnc -> sCmn . fs_kHz* 3 ; slope_part =)",
+    "insertText": "silk_RSHIFT(psEnc->sCmn.shapeWinLength - flat_part, 1)"
+  },
+  {
+    "label": "silk_apply_sine_window()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_apply_sine_window(x_windowed, x_ptr, 1, slope_part)"
+  },
+  {
+    "label": "silk_memcpy()",
+    "kind": "Method",
+    "detail": "Function (shift = slope_part ;)",
+    "insertText": "silk_memcpy(x_windowed + shift, x_ptr + shift, flat_part * sizeof(opus_int16))"
+  },
+  {
+    "label": "silk_apply_sine_window()",
+    "kind": "Method",
+    "detail": "Function (shift + = flat_part ;)",
+    "insertText": "silk_apply_sine_window(x_windowed + shift, x_ptr + shift, 2, slope_part)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (x_ptr + = psEnc -> sCmn . subfr_length ;)",
+    "insertText": "if(psEnc->sCmn.warping_Q16 > 0)"
+  },
+  {
+    "label": "silk_warped_autocorrelation_FIX()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_warped_autocorrelation_FIX(auto_corr, &scale, x_windowed, warping_Q16, psEnc->sCmn.shapeWinLength, psEnc->sCmn.shapingLPCOrder, arch)"
+  },
+  {
+    "label": "silk_autocorr()",
+    "kind": "Method",
+    "detail": "Function (} else {)",
+    "insertText": "silk_autocorr(auto_corr, &scale, x_windowed, psEnc->sCmn.shapeWinLength, psEnc->sCmn.shapingLPCOrder + 1, arch)"
+  },
+  {
+    "label": "silk_ADD32()",
+    "kind": "Method",
+    "detail": "Function (} auto_corr [ 0 ] =)",
+    "insertText": "silk_ADD32(auto_corr[0], silk_max_32( silk_SMULWB( silk_RSHIFT( auto_corr[ 0 ], 4 ), SILK_FIX_CONST( SHAPE_WHITE_NOISE_FRACTION, 20 ) ), 1 ))"
+  },
+  {
+    "label": "silk_schur64()",
+    "kind": "Method",
+    "detail": "Function (nrg =)",
+    "insertText": "silk_schur64(refl_coef_Q16, auto_corr, psEnc->sCmn.shapingLPCOrder)"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_assert(nrg >= 0)"
+  },
+  {
+    "label": "silk_k2a_Q16()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_k2a_Q16(AR2_Q24, refl_coef_Q16, psEnc->sCmn.shapingLPCOrder)"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (Qnrg = - scale ;)",
+    "insertText": "silk_assert(Qnrg >= -12)"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_assert(Qnrg <= 30)"
+  },
+  {
+    "label": "silk_SQRT_APPROX()",
+    "kind": "Method",
+    "detail": "Function (Qnrg - = 1 ; nrg>> = 1 ; } tmp32 =)",
+    "insertText": "silk_SQRT_APPROX(nrg)"
+  },
+  {
+    "label": "k()",
+    "kind": "Method",
+    "detail": "Function (Qnrg>> = 1 ; psEncCtrl -> Gains_Q16 [)",
+    "insertText": "k(silk_LSHIFT32( silk_LIMIT( (tmp32), silk_RSHIFT32( silk_int32_MIN, (16 - Qnrg) ), \\ silk_RSHIFT32( silk_int32_MAX, (16 - Qnrg) ) ), (16 - Qnrg) ))"
+  },
+  {
+    "label": "warped_gain()",
+    "kind": "Method",
+    "detail": "Function (gain_mult_Q16 =)",
+    "insertText": "warped_gain(AR2_Q24, warping_Q16, psEnc->sCmn.shapingLPCOrder)"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_assert(psEncCtrl->Gains_Q16[ k ] >= 0)"
+  },
+  {
+    "label": "silk_SMULWW()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> Gains_Q16 [ k ] = silk_int32_MAX ; } else { psEncCtrl -> Gains_Q16 [ k ] =)",
+    "insertText": "silk_SMULWW(psEncCtrl->Gains_Q16[ k ], gain_mult_Q16)"
+  },
+  {
+    "label": "silk_bwexpander_32()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "silk_bwexpander_32(AR2_Q24, psEnc->sCmn.shapingLPCOrder, BWExp2_Q16)"
+  },
+  {
+    "label": "silk_memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_memcpy(AR1_Q24, AR2_Q24, psEnc->sCmn.shapingLPCOrder * sizeof( opus_int32 ))"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_assert(BWExp1_Q16 <= SILK_FIX_CONST( 1.0, 16 ))"
+  },
+  {
+    "label": "silk_bwexpander_32()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_bwexpander_32(AR1_Q24, psEnc->sCmn.shapingLPCOrder, BWExp1_Q16)"
+  },
+  {
+    "label": "silk_LPC_inverse_pred_gain_Q24()",
+    "kind": "Method",
+    "detail": "Function (pre_nrg_Q30 =)",
+    "insertText": "silk_LPC_inverse_pred_gain_Q24(AR2_Q24, psEnc->sCmn.shapingLPCOrder, arch)"
+  },
+  {
+    "label": "silk_LPC_inverse_pred_gain_Q24()",
+    "kind": "Method",
+    "detail": "Function (nrg =)",
+    "insertText": "silk_LPC_inverse_pred_gain_Q24(AR1_Q24, psEnc->sCmn.shapingLPCOrder, arch)"
+  },
+  {
+    "label": "silk_LSHIFT32()",
+    "kind": "Method",
+    "detail": "Function (pre_nrg_Q30 =)",
+    "insertText": "silk_LSHIFT32(silk_SMULWB( pre_nrg_Q30, SILK_FIX_CONST( 0.7, 15 ) ), 1)"
+  },
+  {
+    "label": "k()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> GainsPre_Q14 [)",
+    "insertText": "k(opus_int ) SILK_FIX_CONST( 0.3, 14 ) + silk_DIV32_varQ( pre_nrg_Q30, nrg, 14)"
+  },
+  {
+    "label": "limit_warped_coefs()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "limit_warped_coefs(AR2_Q24, AR1_Q24, warping_Q16, SILK_FIX_CONST( 3.999, 24 ), psEnc->sCmn.shapingLPCOrder)"
+  },
+  {
+    "label": "i()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> AR1_Q13 [ k* MAX_SHAPE_LPC_ORDER +)",
+    "insertText": "i(opus_int16)silk_SAT16( silk_RSHIFT_ROUND( AR1_Q24[ i ], 11 ))"
+  },
+  {
+    "label": "i()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> AR2_Q13 [ k* MAX_SHAPE_LPC_ORDER +)",
+    "insertText": "i(opus_int16)silk_SAT16( silk_RSHIFT_ROUND( AR2_Q24[ i ], 11 ))"
+  },
+  {
+    "label": "silk_log2lin()",
+    "kind": "Method",
+    "detail": "Function (} } gain_mult_Q16 =)",
+    "insertText": "silk_log2lin(-silk_SMLAWB( -SILK_FIX_CONST( 16.0, 7 ), SNR_adj_dB_Q7, SILK_FIX_CONST( 0.16, 16 ) ))"
+  },
+  {
+    "label": "silk_log2lin()",
+    "kind": "Method",
+    "detail": "Function (gain_add_Q16 =)",
+    "insertText": "silk_log2lin(silk_SMLAWB( SILK_FIX_CONST( 16.0, 7 ), SILK_FIX_CONST( MIN_QGAIN_DB, 7 ), SILK_FIX_CONST( 0.16, 16 ) ))"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "silk_assert(gain_mult_Q16 > 0)"
+  },
+  {
+    "label": "silk_ADD_POS_SAT32()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> Gains_Q16 [ k ] =)",
+    "insertText": "silk_ADD_POS_SAT32(psEncCtrl->Gains_Q16[ k ], gain_add_Q16)"
+  },
+  {
+    "label": "SILK_FIX_CONST()",
+    "kind": "Method",
+    "detail": "Function (} gain_mult_Q16 =)",
+    "insertText": "SILK_FIX_CONST(1.0, 16 ) + silk_RSHIFT_ROUND( silk_MLA( SILK_FIX_CONST( INPUT_TILT, 26 ), psEncCtrl->coding_quality_Q14, SILK_FIX_CONST( HIGH_RATE_INPUT_TILT, 12 ) ), 10)"
+  },
+  {
+    "label": "silk_SMULWB()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> GainsPre_Q14 [ k ] =)",
+    "insertText": "silk_SMULWB(gain_mult_Q16, psEncCtrl->GainsPre_Q14[ k ])"
+  },
+  {
+    "label": "silk_MUL()",
+    "kind": "Method",
+    "detail": "Function (} strength_Q16 =)",
+    "insertText": "silk_MUL(SILK_FIX_CONST( LOW_FREQ_SHAPING, 4 ), silk_SMLAWB( SILK_FIX_CONST( 1.0, 12 ), SILK_FIX_CONST( LOW_QUALITY_LOW_FREQ_SHAPING_DECR, 13 ), psEnc->sCmn.input_quality_bands_Q15[ 0 ] - SILK_FIX_CONST( 1.0, 15 ) ))"
+  },
+  {
+    "label": "silk_RSHIFT()",
+    "kind": "Method",
+    "detail": "Function (strength_Q16 =)",
+    "insertText": "silk_RSHIFT(silk_MUL( strength_Q16, psEnc->sCmn.speech_activity_Q8 ), 8)"
+  },
+  {
+    "label": "silk_DIV32_16()",
+    "kind": "Method",
+    "detail": "Function (opus_int fs_kHz_inv =)",
+    "insertText": "silk_DIV32_16(SILK_FIX_CONST( 0.2, 14 ), psEnc->sCmn.fs_kHz)"
+  },
+  {
+    "label": "silk_DIV32_16()",
+    "kind": "Method",
+    "detail": "Function (b_Q14 = fs_kHz_inv +)",
+    "insertText": "silk_DIV32_16(SILK_FIX_CONST( 3.0, 14 ), psEncCtrl->pitchL[ k ])"
+  },
+  {
+    "label": "silk_LSHIFT()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> LF_shp_Q14 [ k ] =)",
+    "insertText": "silk_LSHIFT(SILK_FIX_CONST( 1.0, 14 ) - b_Q14 - silk_SMULWB( strength_Q16, b_Q14 ), 16)"
+  },
+  {
+    "label": "k()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> LF_shp_Q14 [)",
+    "insertText": "k(opus_uint16)( b_Q14 - SILK_FIX_CONST( 1.0, 14 ))"
+  },
+  {
+    "label": "silk_assert()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "silk_assert(SILK_FIX_CONST( HARM_HP_NOISE_COEF, 24 ) < SILK_FIX_CONST( 0.5, 24 ))"
+  },
+  {
+    "label": "SILK_FIX_CONST()",
+    "kind": "Method",
+    "detail": "Function (Tilt_Q16 = -)",
+    "insertText": "SILK_FIX_CONST(HP_NOISE_COEF, 16 ) - silk_SMULWB( SILK_FIX_CONST( 1.0, 16 ) - SILK_FIX_CONST( HP_NOISE_COEF, 16 ), silk_SMULWB( SILK_FIX_CONST( HARM_HP_NOISE_COEF, 24 ), psEnc->sCmn.speech_activity_Q8 ))"
+  },
+  {
+    "label": "silk_DIV32_16()",
+    "kind": "Method",
+    "detail": "Function (} else { b_Q14 =)",
+    "insertText": "silk_DIV32_16(21299, psEnc->sCmn.fs_kHz)"
+  },
+  {
+    "label": "silk_LSHIFT()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> LF_shp_Q14 [ 0 ] =)",
+    "insertText": "silk_LSHIFT(SILK_FIX_CONST( 1.0, 14 ) - b_Q14 - silk_SMULWB( strength_Q16, silk_SMULWB( SILK_FIX_CONST( 0.6, 16 ), b_Q14 ) ), 16)"
+  },
+  {
+    "label": "LF_shp_Q14()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl ->)",
+    "insertText": "LF_shp_Q14(opus_uint16)( b_Q14 - SILK_FIX_CONST( 1.0, 14 ))"
+  },
+  {
+    "label": "SILK_FIX_CONST()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> LF_shp_Q14 [ k ] = psEncCtrl -> LF_shp_Q14 [ 0 ] ; } Tilt_Q16 = -)",
+    "insertText": "SILK_FIX_CONST(HP_NOISE_COEF, 16)"
+  },
+  {
+    "label": "silk_SMULWB()",
+    "kind": "Method",
+    "detail": "Function (} HarmBoost_Q16 =)",
+    "insertText": "silk_SMULWB(silk_SMULWB( SILK_FIX_CONST( 1.0, 17 ) - silk_LSHIFT( psEncCtrl->coding_quality_Q14, 3 ), psEnc->LTPCorr_Q15 ), SILK_FIX_CONST( LOW_RATE_HARMONIC_BOOST, 16 ))"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (HarmBoost_Q16 =)",
+    "insertText": "silk_SMLAWB(HarmBoost_Q16, SILK_FIX_CONST( 1.0, 16 ) - silk_LSHIFT( psEncCtrl->input_quality_Q14, 2 ), SILK_FIX_CONST( LOW_INPUT_QUALITY_HARMONIC_BOOST, 16 ))"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (HarmShapeGain_Q16 =)",
+    "insertText": "silk_SMLAWB(SILK_FIX_CONST( HARMONIC_SHAPING, 16 ), SILK_FIX_CONST( 1.0, 16 ) - silk_SMULWB( SILK_FIX_CONST( 1.0, 18 ) - silk_LSHIFT( psEncCtrl->coding_quality_Q14, 4 ), psEncCtrl->input_quality_Q14 ), SILK_FIX_CONST( HIGH_RATE_OR_LOW_QUALITY_HARMONIC_SHAPING, 16 ))"
+  },
+  {
+    "label": "silk_SMULWB()",
+    "kind": "Method",
+    "detail": "Function (HarmShapeGain_Q16 =)",
+    "insertText": "silk_SMULWB(silk_LSHIFT( HarmShapeGain_Q16, 1 ), silk_SQRT_APPROX( silk_LSHIFT( psEnc->LTPCorr_Q15, 15 ) ))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (} else { HarmShapeGain_Q16 = 0 ; })",
+    "insertText": "for(k = 0; k < MAX_NB_SUBFR; k++)"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (psShapeSt -> HarmBoost_smth_Q16 =)",
+    "insertText": "silk_SMLAWB(psShapeSt->HarmBoost_smth_Q16, HarmBoost_Q16 - psShapeSt->HarmBoost_smth_Q16, SILK_FIX_CONST( SUBFR_SMTH_COEF, 16 ))"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (psShapeSt -> HarmShapeGain_smth_Q16 =)",
+    "insertText": "silk_SMLAWB(psShapeSt->HarmShapeGain_smth_Q16, HarmShapeGain_Q16 - psShapeSt->HarmShapeGain_smth_Q16, SILK_FIX_CONST( SUBFR_SMTH_COEF, 16 ))"
+  },
+  {
+    "label": "silk_SMLAWB()",
+    "kind": "Method",
+    "detail": "Function (psShapeSt -> Tilt_smth_Q16 =)",
+    "insertText": "silk_SMLAWB(psShapeSt->Tilt_smth_Q16, Tilt_Q16 - psShapeSt->Tilt_smth_Q16, SILK_FIX_CONST( SUBFR_SMTH_COEF, 16 ))"
+  },
+  {
+    "label": "k()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> HarmBoost_Q14 [)",
+    "insertText": "k(opus_int )silk_RSHIFT_ROUND( psShapeSt->HarmBoost_smth_Q16, 2)"
+  },
+  {
+    "label": "k()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> HarmShapeGain_Q14 [)",
+    "insertText": "k(opus_int )silk_RSHIFT_ROUND( psShapeSt->HarmShapeGain_smth_Q16, 2)"
+  },
+  {
+    "label": "k()",
+    "kind": "Method",
+    "detail": "Function (psEncCtrl -> Tilt_Q14 [)",
+    "insertText": "k(opus_int )silk_RSHIFT_ROUND( psShapeSt->Tilt_smth_Q16, 2)"
+  }
+]

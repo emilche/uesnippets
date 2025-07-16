@@ -48,21 +48,219 @@
     "insertText": "FFreePageBlock"
   },
   {
-    "label": "FPoolTable",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "FPoolTable"
-  },
-  {
     "label": "FOutputDevice",
     "kind": "Type",
     "detail": "class declaration",
     "insertText": "FOutputDevice"
   },
   {
+    "label": "MEM_TIME()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" Containers / Array . h \" # include \" CoreTypes . h \" # include \" HAL / CriticalSection . h \" # include \" HAL / LowLevelMemStats . h \" # include \" HAL / LowLevelMemTracker . h \" # include \" HAL / MallocJemalloc . h \" # include \" HAL / MemoryBase . h \" # include \" HAL / PlatformAtomics . h \" # include \" Math / UnrealMathUtility . h \" # include \" Stats / Stats . h \" # include \" Stats / Stats2 . h \" struct FGenericMemoryStats ; # define)",
+    "insertText": "MEM_TIME(st) #define USE_INTERNAL_LOCKS #if USE_CACHE_FREED_OS_ALLOCS #endif #ifndef USE_OS_SMALL_BLOCK_ALLOC #define USE_OS_SMALL_BLOCK_ALLOC PLATFORM_IOS #endif #ifndef USE_OS_SMALL_BLOCK_GRAB_MEMORY_FROM_OS #define USE_OS_SMALL_BLOCK_GRAB_MEMORY_FROM_OS (USE_OS_SMALL_BLOCK_ALLOC && PLATFORM_IOS && 0) #endif #ifdef USE_INTERNAL_LOCKS #endif #if defined USE_LOCKFREE_DELETE # define USE_INTERNAL_LOCKS # define USE_COARSE_GRAIN_LOCKS #endif #if defined CACHE_FREED_OS_ALLOCS #define MAX_CACHED_OS_FREES (64) #if PLATFORM_64BITS #define MAX_CACHED_OS_FREES_BYTE_LIMIT (64*1024*1024) #else #define MAX_CACHED_OS_FREES_BYTE_LIMIT (16*1024*1024)"
+  },
+  {
+    "label": "BINNED_INCREMENT_STATCOUNTER()",
+    "kind": "Method",
+    "detail": "Function (# else typedef int32 BINNED_STAT_TYPE ; # endif # if STATS # ifdef USE_COARSE_GRAIN_LOCKS # define BINNED_STAT BINNED_STAT_TYPE # define)",
+    "insertText": "BINNED_INCREMENT_STATCOUNTER(counter) (++(counter)) # define BINNED_DECREMENT_STATCOUNTER(counter) (--(counter)) # define BINNED_ADD_STATCOUNTER(counter, value) ((counter) += (value)) # define BINNED_PEAK_STATCOUNTER(PeakCounter, CompareVal) ((PeakCounter) = FMath::Max((PeakCounter), (CompareVal))) # else # define BINNED_STAT volatile BINNED_STAT_TYPE # define BINNED_INCREMENT_STATCOUNTER(counter) (FPlatformAtomics::InterlockedIncrement(&(counter))) # define BINNED_DECREMENT_STATCOUNTER(counter) (FPlatformAtomics::InterlockedDecrement(&(counter))) # define BINNED_ADD_STATCOUNTER(counter, value) (FPlatformAtomics::InterlockedAdd(&counter, (value))) # define BINNED_PEAK_STATCOUNTER(PeakCounter, CompareVal)"
+  },
+  {
+    "label": "NewCompare()",
+    "kind": "Method",
+    "detail": "Function (\\ BINNED_STAT_TYPE NewCompare ; \\ BINNED_STAT_TYPE NewPeak ; \\ do \\ { \\)",
+    "insertText": "NewCompare(PeakCounter)"
+  },
+  {
+    "label": "Max()",
+    "kind": "Method",
+    "detail": "Function (\\ NewPeak =)",
+    "insertText": "Max((PeakCounter), (CompareVal))"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (\\ } \\)",
+    "insertText": "while(FPlatformAtomics::InterlockedCompareExchange(&(PeakCounter), NewPeak, NewCompare) != NewCompare)"
+  },
+  {
+    "label": "BINNED_INCREMENT_STATCOUNTER()",
+    "kind": "Method",
+    "detail": "Function (\\ } # endif # else # define BINNED_STAT BINNED_STAT_TYPE # define)",
+    "insertText": "BINNED_INCREMENT_STATCOUNTER(counter) # define BINNED_DECREMENT_STATCOUNTER(counter) # define BINNED_ADD_STATCOUNTER(counter, value) # define BINNED_PEAK_STATCOUNTER(PeakCounter, CompareVal) #endif DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Os Current\"), STAT_Binned_OsCurrent,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Os Peak\"), STAT_Binned_OsPeak,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Waste Current\"), STAT_Binned_WasteCurrent,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Waste Peak\"), STAT_Binned_WastePeak,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Used Current\"), STAT_Binned_UsedCurrent,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Used Peak\"), STAT_Binned_UsedPeak,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_DWORD_COUNTER_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT(\"Binned Current Allocs\"), STAT_Binned_CurrentAllocs,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_DWORD_COUNTER_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_DWORD_COUNTER_STAT_EXTERN(TEXT(\"Binned Total Allocs\"), STAT_Binned_TotalAllocs,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_MEMORY_STAT_EXTERN(TEXT(\"Binned Slack Current\"), STAT_Binned_SlackCurrent,STATGROUP_MemoryAllocator, CORE_API)"
+  },
+  {
+    "label": "DECLARE_LLM_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (# if USE_OS_SMALL_BLOCK_GRAB_MEMORY_FROM_OS&& ENABLE_LOW_LEVEL_MEM_TRACKER)",
+    "insertText": "DECLARE_LLM_MEMORY_STAT_EXTERN(TEXT(\"Nano Malloc Pages Current\"), STAT_Binned_NanoMallocPages_Current,STATGROUP_LLMPlatform, CORE_API)"
+  },
+  {
+    "label": "DECLARE_LLM_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_LLM_MEMORY_STAT_EXTERN(TEXT(\"Nano Malloc Pages Peak\"), STAT_Binned_NanoMallocPages_Peak,STATGROUP_LLMPlatform, CORE_API)"
+  },
+  {
+    "label": "DECLARE_LLM_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_LLM_MEMORY_STAT_EXTERN(TEXT(\"Nano Malloc Pages Waste Current\"), STAT_Binned_NanoMallocPages_WasteCurrent,STATGROUP_LLMPlatform, CORE_API)"
+  },
+  {
+    "label": "DECLARE_LLM_MEMORY_STAT_EXTERN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_LLM_MEMORY_STAT_EXTERN(TEXT(\"Nano Malloc Pages Waste Peak\"),STAT_Binned_NanoMallocPages_WastePeak,STATGROUP_LLMPlatform, CORE_API)"
+  },
+  {
+    "label": "FFreePageBlock()",
+    "kind": "Method",
+    "detail": "Function (# endif class FMallocBinned : public FMalloc { struct Private ; private : enum { POOL_COUNT = 4 1 } ; enum { EXTENDED_PAGE_POOL_ALLOCATION_COUNT = 2 } ; enum { MAX_POOLED_ALLOCATION_SIZE = 3 2 7 6 8 + 1 } ; struct FFreeMem ; struct FPoolInfo ; struct FPoolTable ; struct PoolHashBucket ; # ifdef CACHE_FREED_OS_ALLOCS struct FFreePageBlock { void* Ptr ; SIZE_T ByteSize ;)",
+    "insertText": "FFreePageBlock()"
+  },
+  {
+    "label": "FPoolTable()",
+    "kind": "Method",
+    "detail": "Function (Ptr = nullptr ; ByteSize = 0 ; } } ; # endif struct FPoolTable { FPoolInfo* FirstPool ; FPoolInfo* ExhaustedPool ; uint32 BlockSize ; # ifdef USE_FINE_GRAIN_LOCKS FCriticalSection CriticalSection ; # endif # if STATS uint32 NumActivePools ; uint32 MaxActivePools ; uint32 ActiveRequests ; uint32 MaxActiveRequests ; uint32 MinRequest ; uint32 MaxRequest ; uint64 TotalRequests ; uint64 TotalWaste ; # endif)",
+    "insertText": "FPoolTable() : FirstPool(nullptr) , ExhaustedPool(nullptr) , BlockSize(0) #if STATS , NumActivePools(0) , MaxActivePools(0) , ActiveRequests(0) , MaxActiveRequests(0) , MinRequest(0) , MaxRequest(0) , TotalRequests(0) , TotalWaste(0)"
+  },
+  {
+    "label": "sizeof()",
+    "kind": "Method",
+    "detail": "Function (} } ; uint64 TableAddressLimit ; # ifdef USE_LOCKFREE_DELETE uint8 PendingFreeListMemory [)",
+    "insertText": "sizeof(TLockFreePointerList<void>)"
+  },
+  {
     "label": "FMallocBinned()",
     "kind": "Method",
-    "detail": "Function (slower)",
+    "detail": "Function (TLockFreePointerList<void>* PendingFreeList ; TArray<void*> FlushedFrees ; bool bFlushingFrees ; bool bDoneFreeListInit ; # endif FCriticalSection AccessGuard ; uint64 MaxHashBuckets ; uint64 MaxHashBucketBits ; uint64 MaxHashBucketWaste ; uint64 MaxBookKeepingOverhead ; uint64 PoolBitShift ; uint64 IndirectPoolBitShift ; uint64 IndirectPoolBlockSize ; uint64 HashKeyShift ; uint64 PoolMask ; uint64 BinnedSizeLimit ; uint64 BinnedOSTableIndex ; FPoolTable PoolTable [ POOL_COUNT ] ; FPoolTable OsTable ; FPoolTable PagePoolTable [ EXTENDED_PAGE_POOL_ALLOCATION_COUNT ] ; FPoolTable* MemSizeToPoolTable [ MAX_POOLED_ALLOCATION_SIZE + EXTENDED_PAGE_POOL_ALLOCATION_COUNT ] ; PoolHashBucket* HashBuckets ; PoolHashBucket* HashBucketFreeList ; uint32 PageSize ; # ifdef CACHE_FREED_OS_ALLOCS FFreePageBlock FreedPageBlocks [ MAX_CACHED_OS_FREES ] ; uint32 FreedPageBlocksNum ; uint32 CachedTotal ; # endif # if STATS BINNED_STAT OsCurrent ; BINNED_STAT OsPeak ; BINNED_STAT WasteCurrent ; BINNED_STAT WastePeak ; BINNED_STAT UsedCurrent ; BINNED_STAT UsedPeak ; BINNED_STAT CurrentAllocs ; BINNED_STAT TotalAllocs ; BINNED_STAT SlackCurrent ; double MemTime ; # if USE_OS_SMALL_BLOCK_GRAB_MEMORY_FROM_OS BINNED_STAT NanoMallocPagesCurrent ; BINNED_STAT NanoMallocPagesPeak ; BINNED_STAT NanoMallocPagesWaste ; BINNED_STAT NanoMallocWastePagesPeak ; # endif # endif # if USE_OS_SMALL_BLOCK_ALLOC bool bNanoMallocAvailable ; # endif public :)",
     "insertText": "FMallocBinned(uint32 InPageSize, uint64 AddressLimit)"
+  },
+  {
+    "label": "InitializeStatsMetadata()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "InitializeStatsMetadata()"
+  },
+  {
+    "label": "FMallocBinned()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "FMallocBinned()"
+  },
+  {
+    "label": "IsInternallyThreadSafe()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsInternallyThreadSafe()"
+  },
+  {
+    "label": "Malloc()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "Malloc(SIZE_T Size, uint32 Alignment)"
+  },
+  {
+    "label": "Realloc()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "Realloc(void* Ptr, SIZE_T NewSize, uint32 Alignment)"
+  },
+  {
+    "label": "Free()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Free(void* Ptr)"
+  },
+  {
+    "label": "GetAllocationSize()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "GetAllocationSize(void *Original, SIZE_T &SizeOut)"
+  },
+  {
+    "label": "QuantizeSize()",
+    "kind": "Method",
+    "detail": "Function (SIZE_T)",
+    "insertText": "QuantizeSize(SIZE_T Count, uint32 Alignment)"
+  },
+  {
+    "label": "ValidateHeap()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "ValidateHeap()"
+  },
+  {
+    "label": "UpdateStats()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UpdateStats()"
+  },
+  {
+    "label": "GetAllocatorStats()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "GetAllocatorStats(FGenericMemoryStats& out_Stats)"
+  },
+  {
+    "label": "DumpAllocatorStats()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DumpAllocatorStats(class FOutputDevice& Ar)"
+  },
+  {
+    "label": "GetDescriptiveName()",
+    "kind": "Method",
+    "detail": "Function (const TCHAR*)",
+    "insertText": "GetDescriptiveName()"
   }
 ]

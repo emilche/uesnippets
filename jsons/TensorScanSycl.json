@@ -46,5 +46,479 @@
     "kind": "Type",
     "detail": "struct declaration",
     "insertText": "ScanLauncher"
+  },
+  {
+    "label": "EIGEN_SYCL_MAX_GLOBAL_RANGE()",
+    "kind": "Method",
+    "detail": "Function (# ifndef UNSUPPORTED_EIGEN_CXX11_SRC_TENSOR_TENSOR_SYCL_SYCL_HPP # define UNSUPPORTED_EIGEN_CXX11_SRC_TENSOR_TENSOR_SYCL_SYCL_HPP namespace Eigen { namespace TensorSycl { namespace internal { # ifndef EIGEN_SYCL_MAX_GLOBAL_RANGE # define)",
+    "insertText": "EIGEN_SYCL_MAX_GLOBAL_RANGE(EIGEN_SYCL_LOCAL_THREAD_DIM0 * EIGEN_SYCL_LOCAL_THREAD_DIM1 * 4)"
+  },
+  {
+    "label": "ScanParameters()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_CONSTEXPR index_t ScanPerThread = 8 ; const index_t total_size ; const index_t non_scan_size ; const index_t scan_size ; const index_t non_scan_stride ; const index_t scan_stride ; const index_t panel_threads ; const index_t group_threads ; const index_t block_threads ; const index_t elements_per_group ; const index_t elements_per_block ; const index_t loop_range ;)",
+    "insertText": "ScanParameters(index_t total_size_, index_t non_scan_size_, index_t scan_size_, index_t non_scan_stride_, index_t scan_stride_, index_t panel_threads_, index_t group_threads_, index_t block_threads_, index_t elements_per_group_, index_t elements_per_block_, index_t loop_range_) : total_size(total_size_), non_scan_size(non_scan_size_), scan_size(scan_size_), non_scan_stride(non_scan_stride_), scan_stride(scan_stride_), panel_threads(panel_threads_), group_threads(group_threads_), block_threads(block_threads_), elements_per_group(elements_per_group_), elements_per_block(elements_per_block_), loop_range(loop_range_)"
+  },
+  {
+    "label": "ScanKernelFunctor()",
+    "kind": "Method",
+    "detail": "Function (} } ; enum class scan_step { first,second } ; template<Evaluator,CoeffReturnType,OutAccessor,Op,Index,scan_step stp> struct ScanKernelFunctor { typedef cl::sycl::accessor<CoeffReturnType,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> LocalAccessor ; EIGEN_CONSTEXPR int PacketSize = ScanParameters<Index>::ScanPerThread / 2 ; LocalAccessor scratch ; Evaluator dev_eval ; OutAccessor out_accessor ; OutAccessor temp_accessor ; const ScanParameters<Index> scanParameters ; Op accumulator ; const bool inclusive ; EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE)",
+    "insertText": "ScanKernelFunctor(LocalAccessor scratch_, const Evaluator dev_eval_, OutAccessor out_accessor_, OutAccessor temp_accessor_, const ScanParameters<Index> scanParameters_, Op accumulator_, const bool inclusive_) : scratch(scratch_), dev_eval(dev_eval_), out_accessor(out_accessor_), temp_accessor(temp_accessor_), scanParameters(scanParameters_), accumulator(accumulator_), inclusive(inclusive_)"
+  },
+  {
+    "label": "read()",
+    "kind": "Method",
+    "detail": "Function (} template<scan_step sst = stp,Input>::Eigen::internal::enable_if<sst = = scan_step::first,CoeffReturnType>::type EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE)",
+    "insertText": "read(const Input &inpt, Index global_id)"
+  },
+  {
+    "label": "inclusive_op()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "inclusive_op()"
+  },
+  {
+    "label": "first_step_inclusive_Operation()",
+    "kind": "Method",
+    "detail": "Function (} template<scan_step sst = stp,InclusiveOp>::Eigen::internal::enable_if<sst ! = scan_step::first>::type EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE)",
+    "insertText": "first_step_inclusive_Operation(InclusiveOp)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void)",
+    "insertText": "operator()(cl::sycl::nd_item<1> itemID)"
+  },
+  {
+    "label": "get_pointer()",
+    "kind": "Method",
+    "detail": "Function (auto out_ptr = out_accessor .)",
+    "insertText": "get_pointer()"
+  },
+  {
+    "label": "get_pointer()",
+    "kind": "Method",
+    "detail": "Function (auto scratch_ptr = scratch .)",
+    "insertText": "get_pointer().get()"
+  },
+  {
+    "label": "data_offset()",
+    "kind": "Method",
+    "detail": "Function (Index)",
+    "insertText": "data_offset(itemID.get_global_id(0) + (itemID.get_global_range(0) * loop_offset))"
+  },
+  {
+    "label": "scratch_offset()",
+    "kind": "Method",
+    "detail": "Function (Index tmp = data_offset % scanParameters . panel_threads ; const Index panel_id = data_offset / scanParameters . panel_threads ; const Index group_id = tmp / scanParameters . group_threads ; tmp = tmp % scanParameters . group_threads ; const Index block_id = tmp / scanParameters . block_threads ; const Index local_id = tmp % scanParameters . block_threads ; const Index scratch_stride = scanParameters . elements_per_block / PacketSize ; const Index)",
+    "insertText": "scratch_offset(itemID.get_local_id(0) / scanParameters.block_threads)"
+  },
+  {
+    "label": "thread_offset()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType private_scan [ ScanParameters<Index>::ScanPerThread ] ; CoeffReturnType inclusive_scan ; const Index panel_offset = panel_id* scanParameters . scan_size* scanParameters . non_scan_size ; const Index group_offset = group_id* scanParameters . non_scan_stride ; const Index block_offset = block_id* scanParameters . elements_per_block* scanParameters . scan_stride ; const Index)",
+    "insertText": "thread_offset(ScanParameters<Index>::ScanPerThread * local_id * scanParameters.scan_stride)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (const Index global_offset = panel_offset + group_offset + block_offset + thread_offset ; Index next_elements = 0 ; EIGEN_UNROLL_LOOP)",
+    "insertText": "for(int i = 0; i < ScanParameters<Index>::ScanPerThread; i++)"
+  },
+  {
+    "label": "i()",
+    "kind": "Method",
+    "detail": "Function (Index global_id = global_offset + next_elements ; private_scan [)",
+    "insertText": "i((((block_id * scanParameters.elements_per_block) + (ScanParameters<Index>::ScanPerThread * local_id) + i) < scanParameters.scan_size) && (global_id < scanParameters.total_size)) ? read(dev_eval, global_id) : accumulator.initialize()"
+  },
+  {
+    "label": "first_step_inclusive_Operation()",
+    "kind": "Method",
+    "detail": "Function (next_elements + = scanParameters . scan_stride ; })",
+    "insertText": "first_step_inclusive_Operation([&]() EIGEN_DEVICE_FUNC { if (inclusive) { inclusive_scan = private_scan[ScanParameters<Index>::ScanPerThread - 1]; } })"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_UNROLL_LOOP)",
+    "insertText": "for(int packetIndex = 0; packetIndex < ScanParameters<Index>::ScanPerThread; packetIndex += PacketSize)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (Index private_offset = 1 ; EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index d = PacketSize >> 1; d > 0; d >>= 1)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index l = 0; l < d; l++)"
+  },
+  {
+    "label": "private_offset()",
+    "kind": "Method",
+    "detail": "Function (Index ai =)",
+    "insertText": "private_offset(2 * l + 1)"
+  },
+  {
+    "label": "private_offset()",
+    "kind": "Method",
+    "detail": "Function (Index bi =)",
+    "insertText": "private_offset(2 * l + 2)"
+  },
+  {
+    "label": "initialize()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType accum = accumulator .)",
+    "insertText": "initialize()"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (accumulator .)",
+    "insertText": "reduce(private_scan[ai], &accum)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (accumulator .)",
+    "insertText": "reduce(private_scan[bi], &accum)"
+  },
+  {
+    "label": "finalize()",
+    "kind": "Method",
+    "detail": "Function (private_scan [ bi ] = accumulator .)",
+    "insertText": "finalize(accum)"
+  },
+  {
+    "label": "local_id()",
+    "kind": "Method",
+    "detail": "Function (} private_offset* = 2 ; } scratch_ptr [ 2*)",
+    "insertText": "local_id(packetIndex / PacketSize)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index d = 1; d < PacketSize; d *= 2)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (} } } Index offset = 1 ;)",
+    "insertText": "for(Index d = scratch_stride >> 1; d > 0; d >>= 1)"
+  },
+  {
+    "label": "barrier()",
+    "kind": "Method",
+    "detail": "Function (itemID .)",
+    "insertText": "barrier(cl::sycl::access::fence_space::local_space)"
+  },
+  {
+    "label": "offset()",
+    "kind": "Method",
+    "detail": "Function (Index ai =)",
+    "insertText": "offset(2 * local_id + 1)"
+  },
+  {
+    "label": "offset()",
+    "kind": "Method",
+    "detail": "Function (Index bi =)",
+    "insertText": "offset(2 * local_id + 2)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (accumulator .)",
+    "insertText": "reduce(scratch_ptr[ai], &accum)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (accumulator .)",
+    "insertText": "reduce(scratch_ptr[bi], &accum)"
+  },
+  {
+    "label": "panel_id()",
+    "kind": "Method",
+    "detail": "Function (const Index temp_id =)",
+    "insertText": "panel_id(scanParameters.elements_per_group / scanParameters.elements_per_block) * scanParameters.non_scan_size + group_id * (scanParameters.elements_per_group / scanParameters.elements_per_block)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "for(Index d = 1; d < scratch_stride; d *= 2)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index i = 0; i < PacketSize; i++)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType accum = private_scan [ packetIndex + i ] ; accumulator .)",
+    "insertText": "reduce(scratch_ptr[2 * local_id + (packetIndex / PacketSize) + scratch_offset], &accum)"
+  },
+  {
+    "label": "first_step_inclusive_Operation()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "first_step_inclusive_Operation([&]() EIGEN_DEVICE_FUNC { if (inclusive) { accumulator.reduce(private_scan[ScanParameters<Index>::ScanPerThread - 1], &inclusive_scan); private_scan[0] = accumulator.finalize(inclusive_scan); } })"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (next_elements = 0 ; EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index i = 0; i < ScanParameters<Index>::ScanPerThread; i++)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (Index global_id = global_offset + next_elements ;)",
+    "insertText": "if((((block_id * scanParameters.elements_per_block) + (ScanParameters<Index>::ScanPerThread * local_id) + i) < scanParameters.scan_size) && (global_id < scanParameters.total_size))"
+  },
+  {
+    "label": "private_id()",
+    "kind": "Method",
+    "detail": "Function (Index)",
+    "insertText": "private_id(i * !inclusive) + (((i + 1) % ScanParameters<Index>::ScanPerThread) * (inclusive))"
+  },
+  {
+    "label": "ScanAdjustmentKernelFunctor()",
+    "kind": "Method",
+    "detail": "Function (out_ptr [ global_id ] = private_scan [ private_id ] ; } next_elements + = scanParameters . scan_stride ; } } } } ; template<CoeffReturnType,InAccessor,OutAccessor,Op,Index> struct ScanAdjustmentKernelFunctor { typedef cl::sycl::accessor<CoeffReturnType,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> LocalAccessor ; EIGEN_CONSTEXPR int PacketSize = ScanParameters<Index>::ScanPerThread / 2 ; InAccessor in_accessor ; OutAccessor out_accessor ; const ScanParameters<Index> scanParameters ; Op accumulator ; EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE)",
+    "insertText": "ScanAdjustmentKernelFunctor(LocalAccessor, InAccessor in_accessor_, OutAccessor out_accessor_, const ScanParameters<Index> scanParameters_, Op accumulator_) : in_accessor(in_accessor_), out_accessor(out_accessor_), scanParameters(scanParameters_), accumulator(accumulator_)"
+  },
+  {
+    "label": "in_id()",
+    "kind": "Method",
+    "detail": "Function (Index tmp = data_offset % scanParameters . panel_threads ; const Index panel_id = data_offset / scanParameters . panel_threads ; const Index group_id = tmp / scanParameters . group_threads ; tmp = tmp % scanParameters . group_threads ; const Index block_id = tmp / scanParameters . block_threads ; const Index local_id = tmp % scanParameters . block_threads ; const Index panel_offset = panel_id* scanParameters . scan_size* scanParameters . non_scan_size ; const Index group_offset = group_id* scanParameters . non_scan_stride ; const Index block_offset = block_id* scanParameters . elements_per_block* scanParameters . scan_stride ; const Index thread_offset = ScanParameters<Index>::ScanPerThread* local_id* scanParameters . scan_stride ; const Index global_offset = panel_offset + group_offset + block_offset + thread_offset ; const Index block_size = scanParameters . elements_per_group / scanParameters . elements_per_block ; const Index)",
+    "insertText": "in_id(panel_id * block_size * scanParameters.non_scan_size) + (group_id * block_size)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType accum = adjust_val ; accumulator .)",
+    "insertText": "reduce(out_ptr[global_id], &accum)"
+  },
+  {
+    "label": "ScanInfo()",
+    "kind": "Method",
+    "detail": "Function (} next_elements + = scanParameters . scan_stride ; } } } } ; template<Index> struct ScanInfo { const Index& total_size ; const Index& scan_size ; const Index& panel_size ; const Index& non_scan_size ; const Index& scan_stride ; const Index& non_scan_stride ; Index max_elements_per_block ; Index block_size ; Index panel_threads ; Index group_threads ; Index block_threads ; Index elements_per_group ; Index elements_per_block ; Index loop_range ; Index global_range ; Index local_range ; const Eigen::SyclDevice& dev ; EIGEN_STRONG_INLINE)",
+    "insertText": "ScanInfo(const Index &total_size_, const Index &scan_size_, const Index &panel_size_, const Index &non_scan_size_, const Index &scan_stride_, const Index &non_scan_stride_, const Eigen::SyclDevice &dev_) : total_size(total_size_), scan_size(scan_size_), panel_size(panel_size_), non_scan_size(non_scan_size_), scan_stride(scan_stride_), non_scan_stride(non_scan_stride_), dev(dev_)"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (local_range =)",
+    "insertText": "min(Index(dev.getNearestPowerOfTwoWorkGroupSize()), Index(EIGEN_SYCL_LOCAL_THREAD_DIM0 * EIGEN_SYCL_LOCAL_THREAD_DIM1))"
+  },
+  {
+    "label": "getPowerOfTwo()",
+    "kind": "Method",
+    "detail": "Function (max_elements_per_block = local_range* ScanParameters<Index>::ScanPerThread ; elements_per_group = dev .)",
+    "insertText": "getPowerOfTwo(Index(roundUp(Index(scan_size), ScanParameters<Index>::ScanPerThread)), true)"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (const Index elements_per_panel = elements_per_group* non_scan_size ; elements_per_block =)",
+    "insertText": "min(Index(elements_per_group), Index(max_elements_per_block))"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (panel_threads = elements_per_panel / ScanParameters<Index>::ScanPerThread ; group_threads = elements_per_group / ScanParameters<Index>::ScanPerThread ; block_threads = elements_per_block / ScanParameters<Index>::ScanPerThread ; block_size = elements_per_group / elements_per_block ; # ifdef EIGEN_SYCL_MAX_GLOBAL_RANGE const Index max_threads =)",
+    "insertText": "min(Index(panel_threads * panel_size), Index(EIGEN_SYCL_MAX_GLOBAL_RANGE))"
+  },
+  {
+    "label": "roundUp()",
+    "kind": "Method",
+    "detail": "Function (# else const Index max_threads = panel_threads* panel_size ; # endif global_range =)",
+    "insertText": "roundUp(max_threads, local_range)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (loop_range =)",
+    "insertText": "Index(std::ceil(double(elements_per_panel * panel_size) / (global_range * ScanParameters<Index>::ScanPerThread)))"
+  },
+  {
+    "label": "get_scan_parameter()",
+    "kind": "Method",
+    "detail": "Function (} ScanParameters<Index>)",
+    "insertText": "get_scan_parameter()"
+  },
+  {
+    "label": "get_thread_range()",
+    "kind": "Method",
+    "detail": "Function (} cl::sycl::nd_range<1>)",
+    "insertText": "get_thread_range()"
+  },
+  {
+    "label": "adjust_scan_block_offset()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<EvaluatorPointerType,CoeffReturnType,Reducer,Index> struct SYCLAdjustBlockOffset { EIGEN_STRONG_INLINE void)",
+    "insertText": "adjust_scan_block_offset(EvaluatorPointerType in_ptr, EvaluatorPointerType out_ptr, Reducer &accumulator, const Index total_size, const Index scan_size, const Index panel_size, const Index non_scan_size, const Index scan_stride, const Index non_scan_stride, const Eigen::SyclDevice &dev)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (auto scan_info = ScanInfo<)",
+    "insertText": "Index(total_size, scan_size, panel_size, non_scan_size, scan_stride, non_scan_stride, dev)"
+  },
+  {
+    "label": "AdjustFuctor()",
+    "kind": "Method",
+    "detail": "Function (typedef ScanAdjustmentKernelFunctor<CoeffReturnType,EvaluatorPointerType,EvaluatorPointerType,Reducer,Index> AdjustFuctor ; dev . template unary_kernel_launcher<CoeffReturnType,)",
+    "insertText": "AdjustFuctor(in_ptr, out_ptr, scan_info.get_thread_range(), scan_info.max_elements_per_block, scan_info.get_scan_parameter(), accumulator)"
+  },
+  {
+    "label": "scan_block()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<CoeffReturnType,scan_step stp> struct ScanLauncher_impl { template<Input,EvaluatorPointerType,Reducer,Index> EIGEN_STRONG_INLINE void)",
+    "insertText": "scan_block(Input in_ptr, EvaluatorPointerType out_ptr, Reducer &accumulator, const Index total_size, const Index scan_size, const Index panel_size, const Index non_scan_size, const Index scan_stride, const Index non_scan_stride, const bool inclusive, const Eigen::SyclDevice &dev)"
+  },
+  {
+    "label": "max_elements_per_block()",
+    "kind": "Method",
+    "detail": "Function (const Index temp_pointer_size = scan_info . block_size* non_scan_size* panel_size ; const Index scratch_size = scan_info .)",
+    "insertText": "max_elements_per_block(ScanParameters<Index>::ScanPerThread / 2)"
+  },
+  {
+    "label": "CoeffReturnType()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType* temp_pointer = static_cast<)",
+    "insertText": "CoeffReturnType(dev.allocate_temp(temp_pointer_size * sizeof(CoeffReturnType)))"
+  },
+  {
+    "label": "get()",
+    "kind": "Method",
+    "detail": "Function (EvaluatorPointerType tmp_global_accessor = dev .)",
+    "insertText": "get(temp_pointer)"
+  },
+  {
+    "label": "ScanFunctor()",
+    "kind": "Method",
+    "detail": "Function (typedef ScanKernelFunctor<Input,CoeffReturnType,EvaluatorPointerType,Reducer,Index,stp> ScanFunctor ; dev . template binary_kernel_launcher<CoeffReturnType,)",
+    "insertText": "ScanFunctor(in_ptr, out_ptr, tmp_global_accessor, scan_info.get_thread_range(), scratch_size, scan_info.get_scan_parameter(), accumulator, inclusive)"
+  },
+  {
+    "label": "scan_block()",
+    "kind": "Method",
+    "detail": "Function (ScanLauncher_impl<CoeffReturnType,scan_step::second)",
+    "insertText": "scan_block(tmp_global_accessor, tmp_global_accessor, accumulator, temp_pointer_size, scan_info.block_size, panel_size, non_scan_size, Index(1), scan_info.block_size, false, dev)"
+  },
+  {
+    "label": "adjust_scan_block_offset()",
+    "kind": "Method",
+    "detail": "Function (SYCLAdjustBlockOffset<EvaluatorPointerType,CoeffReturnType,Reducer,Index)",
+    "insertText": "adjust_scan_block_offset(tmp_global_accessor, out_ptr, accumulator, total_size, scan_size, panel_size, non_scan_size, scan_stride, non_scan_stride, dev)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (} dev .)",
+    "insertText": "deallocate_temp(temp_pointer)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} } ; } } namespace internal { template<Self,Reducer,bool vectorize> struct ScanLauncher<Self,Reducer,Eigen::SyclDevice,vectorize> { typedef Self::Index Index ; typedef Self::CoeffReturnType CoeffReturnType ; typedef Self::Storage Storage ; typedef Self::EvaluatorPointerType EvaluatorPointerType ; void)",
+    "insertText": "operator()(Self &self, EvaluatorPointerType data)"
+  },
+  {
+    "label": "array_prod()",
+    "kind": "Method",
+    "detail": "Function (const Index total_size =)",
+    "insertText": "array_prod(self.dimensions())"
+  },
+  {
+    "label": "size()",
+    "kind": "Method",
+    "detail": "Function (const Index scan_size = self .)",
+    "insertText": "size()"
+  },
+  {
+    "label": "stride()",
+    "kind": "Method",
+    "detail": "Function (const Index scan_stride = self .)",
+    "insertText": "stride()"
+  },
+  {
+    "label": "accumulator()",
+    "kind": "Method",
+    "detail": "Function (auto accumulator = self .)",
+    "insertText": "accumulator()"
+  },
+  {
+    "label": "exclusive()",
+    "kind": "Method",
+    "detail": "Function (auto inclusive = ! self .)",
+    "insertText": "exclusive()"
+  },
+  {
+    "label": "consume_dim()",
+    "kind": "Method",
+    "detail": "Function (auto consume_dim = self .)",
+    "insertText": "consume_dim()"
+  },
+  {
+    "label": "device()",
+    "kind": "Method",
+    "detail": "Function (auto dev = self .)",
+    "insertText": "device()"
+  },
+  {
+    "label": "inner()",
+    "kind": "Method",
+    "detail": "Function (auto dims = self .)",
+    "insertText": "inner().dimensions()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (Index non_scan_size = 1 ; Index panel_size = 1 ;)",
+    "insertText": "if(static_cast<int>(Self::Layout) == static_cast<int>(ColMajor))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (non_scan_size* = dims [ i ] ; })",
+    "insertText": "for(int i = consume_dim + 1; i < Self::NumDims; i++)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (panel_size* = dims [ i ] ; } } else {)",
+    "insertText": "for(int i = Self::NumDims - 1; i > consume_dim; i--)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (non_scan_size* = dims [ i ] ; })",
+    "insertText": "for(int i = consume_dim - 1; i >= 0; i--)"
+  },
+  {
+    "label": "non_scan_stride()",
+    "kind": "Method",
+    "detail": "Function (panel_size* = dims [ i ] ; } } const Index)",
+    "insertText": "non_scan_stride(scan_stride > 1)"
+  },
+  {
+    "label": "inner()",
+    "kind": "Method",
+    "detail": "Function (auto eval_impl = self .)",
+    "insertText": "inner()"
+  },
+  {
+    "label": "scan_block()",
+    "kind": "Method",
+    "detail": "Function (TensorSycl::internal::ScanLauncher_impl<CoeffReturnType,TensorSycl::internal::scan_step::first)",
+    "insertText": "scan_block(eval_impl, data, accumulator, total_size, scan_size, panel_size, non_scan_size, scan_stride, non_scan_stride, inclusive, dev)"
   }
 ]

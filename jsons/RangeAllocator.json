@@ -1,23 +1,5 @@
 [
   {
-    "label": "FAllocatorModifier",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "FAllocatorModifier"
-  },
-  {
-    "label": "FChunkModifier",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "FChunkModifier"
-  },
-  {
-    "label": "FAllocInfoModifier",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "FAllocInfoModifier"
-  },
-  {
     "label": "TRangeAllocator",
     "kind": "Type",
     "detail": "class declaration",
@@ -48,64 +30,238 @@
     "insertText": "FAllocInfo"
   },
   {
-    "label": "InitCustomInfo()",
+    "label": "FRange()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "InitCustomInfo(const FChunkModifier& Chunk, SIZE_T Ptr)"
+    "detail": "Function (# pragma once # include \" Containers / Array . h \" # include \" HAL / CriticalSection . h \" # include \" Misc / ScopeLock . h \" # define RANGE_ALLOCATOR_RECORD_STATS ! UE_BUILD_SHIPPING template<FAllocatorModifier> class TRangeAllocator : public FAllocatorModifier { protected : using FRangeAllocator = TRangeAllocator<FAllocatorModifier> ; using FPointerType = FAllocatorModifier::FPointerType ; using FConstPointerType = FAllocatorModifier::FConstPointerType ; using FChunkModifier = FAllocatorModifier::FChunkModifier ; using FAllocInfoModifier = FAllocatorModifier::FAllocInfoModifier ; using FAllocatorModifier::Check ; using FAllocatorModifier::MakePointer ; class FChunk : public FChunkModifier { using FChunkModifier::AdjustAllocation ; struct FRange { uint16 OffsetMultiplier ; uint16 SizeMultiplier ;)",
+    "insertText": "FRange(uint16 InOffsetMultiplier, uint16 InSizeMultiplier) : OffsetMultiplier(InOffsetMultiplier) , SizeMultiplier(InSizeMultiplier)"
   },
   {
-    "label": "MakePointer()",
+    "label": "FChunk()",
     "kind": "Method",
-    "detail": "Function (FPointerType)",
-    "insertText": "MakePointer(SIZE_T Ptr)"
+    "detail": "Function (} } ; TArray<FRange> FreeRanges ; public : union { int32 InfoIndex ; int32 NextFreeChunkSlot ; } ; using FChunkModifier::IsValid ; using FChunkModifier::Contains ;)",
+    "insertText": "FChunk(const FRangeAllocator& Allocator) : FChunkModifier(Allocator) , InfoIndex(INDEX_NONE)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (FreeRanges .)",
+    "insertText": "Add(FRange(0, Allocator.ChunkSize / MinAlignment))"
+  },
+  {
+    "label": "Alloc()",
+    "kind": "Method",
+    "detail": "Function (} SIZE_T)",
+    "insertText": "Alloc(uint32 InSize, uint32 InAlignment, uint16& InOutMaxFreeRangeSize, uint16& OutOffset, uint16& OutSize)"
   },
   {
     "label": "Check()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "Check(bool bOk)"
+    "detail": "Function (bool bMaxRangeSizeDirty = false ; uint16 NewMaxFreeRangeSize = 0 ;)",
+    "insertText": "Check(InSize / MinAlignment <= UINT16_MAX)"
   },
   {
-    "label": "AdjustAllocation()",
+    "label": "uint16()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "AdjustAllocation(OffsetInChunk)"
+    "detail": "Function (const uint16 Size =)",
+    "insertText": "uint16(InSize / MinAlignment)"
   },
   {
-    "label": "AdjustAllocation()",
+    "label": "uint16()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "AdjustAllocation(OffsetInChunk)"
+    "detail": "Function (const uint16 Alignment =)",
+    "insertText": "uint16(InAlignment / MinAlignment)"
   },
   {
-    "label": "Lock()",
+    "label": "Check()",
     "kind": "Method",
-    "detail": "Function (FScopeLock)",
-    "insertText": "Lock(&CS)"
-  },
-  {
-    "label": "MakePointer()",
-    "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "MakePointer(Ptr)"
+    "detail": "Function (SIZE_T OffsetInChunk = 0 ;)",
+    "insertText": "Check(FreeRanges.Num() > 0)"
   },
   {
     "label": "for()",
     "kind": "Method",
-    "detail": "Function (fits)",
-    "insertText": "for(int32 Index = 0; Index < MayFitInfoIndices.Num()"
+    "detail": "Function (int32 Index = 0 ;)",
+    "insertText": "for(; Index < FreeRanges.Num(); ++Index)"
   },
   {
-    "label": "MakePointer()",
+    "label": "Align()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "MakePointer(Ptr)"
+    "detail": "Function (FRange& Range = FreeRanges [ Index ] ; const uint16 Start = Range . OffsetMultiplier ; const uint16 AlignedStart =)",
+    "insertText": "Align(Start, Alignment)"
   },
   {
-    "label": "MakePointer()",
+    "label": "Check()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "MakePointer(Ptr)"
+    "detail": "Function (const uint16 Padding = AlignedStart - Start ;)",
+    "insertText": "Check((uint32)Padding + (uint32)Size <= (uint32)UINT16_MAX)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const uint16 RequiredSize = Padding + Size ;)",
+    "insertText": "if(Range.SizeMultiplier >= RequiredSize)"
+  },
+  {
+    "label": "OffsetInChunk()",
+    "kind": "Method",
+    "detail": "Function (const uint16 RemainingSize = Range . SizeMultiplier - RequiredSize ; bMaxRangeSizeDirty = Range . SizeMultiplier = = InOutMaxFreeRangeSize ;)",
+    "insertText": "OffsetInChunk(SIZE_T)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (OutOffset = Range . OffsetMultiplier ; OutSize = RequiredSize ;)",
+    "insertText": "if(!RemainingSize)"
+  },
+  {
+    "label": "RemoveAt()",
+    "kind": "Method",
+    "detail": "Function (FreeRanges .)",
+    "insertText": "RemoveAt(Index, EAllowShrinking::No)"
+  },
+  {
+    "label": "Max()",
+    "kind": "Method",
+    "detail": "Function (} else { Range . OffsetMultiplier + = RequiredSize ; Range . SizeMultiplier = RemainingSize ; NewMaxFreeRangeSize =)",
+    "insertText": "Max(NewMaxFreeRangeSize, Range.SizeMultiplier)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(!bMaxRangeSizeDirty)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "if(bMaxRangeSizeDirty)"
+  },
+  {
+    "label": "AdjustAllocation()",
+    "kind": "Method",
+    "detail": "Function (} InOutMaxFreeRangeSize = NewMaxFreeRangeSize ; return)",
+    "insertText": "AdjustAllocation(OffsetInChunk)"
+  },
+  {
+    "label": "Free()",
+    "kind": "Method",
+    "detail": "Function (} return 0 ; } void)",
+    "insertText": "Free(uint16 Offset, uint16 Size, uint16& InOutMaxFreeRangeSize)"
+  },
+  {
+    "label": "UpperBoundBy()",
+    "kind": "Method",
+    "detail": "Function (const int32 UpperBoundIndex =)",
+    "insertText": "UpperBoundBy(FreeRanges, Offset, [](const FRange& Range) { return Range.OffsetMultiplier; })"
+  },
+  {
+    "label": "Check()",
+    "kind": "Method",
+    "detail": "Function (const int32 LowerBoundIndex = UpperBoundIndex - 1 ;)",
+    "insertText": "Check(LowerBoundIndex >= -1 && LowerBoundIndex < FreeRanges.Num())"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (bool bInsertRange = true ;)",
+    "insertText": "if(LowerBoundIndex >= 0 && Offset == FreeRanges[LowerBoundIndex].OffsetMultiplier + FreeRanges[LowerBoundIndex].SizeMultiplier)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (FreeRanges [ LowerBoundIndex ] . SizeMultiplier + = Size ; Offset = FreeRanges [ LowerBoundIndex ] . OffsetMultiplier ; Size = FreeRanges [ LowerBoundIndex ] . SizeMultiplier ; bInsertRange = false ; })",
+    "insertText": "if(UpperBoundIndex < FreeRanges.Num() && Offset + Size == FreeRanges[UpperBoundIndex].OffsetMultiplier)"
+  },
+  {
+    "label": "Check()",
+    "kind": "Method",
+    "detail": "Function (FreeRanges [ UpperBoundIndex ] . OffsetMultiplier = Offset ;)",
+    "insertText": "Check((uint32)Size + FreeRanges[UpperBoundIndex].SizeMultiplier <= UINT16_MAX)"
+  },
+  {
+    "label": "RemoveAt()",
+    "kind": "Method",
+    "detail": "Function (FreeRanges [ UpperBoundIndex ] . SizeMultiplier + = Size ; Size = FreeRanges [ UpperBoundIndex ] . SizeMultiplier ; bInsertRange = false ; } else { FreeRanges [ LowerBoundIndex ] . SizeMultiplier + = FreeRanges [ UpperBoundIndex ] . SizeMultiplier ; Size = FreeRanges [ LowerBoundIndex ] . SizeMultiplier ; FreeRanges .)",
+    "insertText": "RemoveAt(UpperBoundIndex, EAllowShrinking::No)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "if(bInsertRange)"
+  },
+  {
+    "label": "Insert()",
+    "kind": "Method",
+    "detail": "Function (FreeRanges .)",
+    "insertText": "Insert(FRange(Offset, Size), UpperBoundIndex)"
+  },
+  {
+    "label": "Max()",
+    "kind": "Method",
+    "detail": "Function (} InOutMaxFreeRangeSize =)",
+    "insertText": "Max(InOutMaxFreeRangeSize, Size)"
+  },
+  {
+    "label": "FFreeChunkInfo()",
+    "kind": "Method",
+    "detail": "Function (} } ; struct FFreeChunkInfo { uint16 MaxFreeRangeSize ; uint16 ChunkIndex ;)",
+    "insertText": "FFreeChunkInfo(uint16 InMaxFreeRangeSize, uint16 InChunkIndex) : MaxFreeRangeSize(InMaxFreeRangeSize) , ChunkIndex(InChunkIndex)"
+  },
+  {
+    "label": "RemoveFreeChunkInfo()",
+    "kind": "Method",
+    "detail": "Function (} } ; void)",
+    "insertText": "RemoveFreeChunkInfo(int32 InfoIndex)"
+  },
+  {
+    "label": "Last()",
+    "kind": "Method",
+    "detail": "Function (Chunks [ FreeChunkInfos .)",
+    "insertText": "Last()"
+  },
+  {
+    "label": "RemoveAtSwap()",
+    "kind": "Method",
+    "detail": "Function (} FreeChunkInfos .)",
+    "insertText": "RemoveAtSwap(InfoIndex, EAllowShrinking::No)"
+  },
+  {
+    "label": "FreeChunk()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "FreeChunk(uint32 ChunkIndex)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# if RANGE_ALLOCATOR_RECORD_STATS SizeTotal - = ChunkSize ; # endif const int32 InfoIndex = Chunks [ ChunkIndex ] . InfoIndex ;)",
+    "insertText": "if(InfoIndex != INDEX_NONE)"
+  },
+  {
+    "label": "RemoveFreeChunkInfo()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "RemoveFreeChunkInfo(InfoIndex)"
+  },
+  {
+    "label": "FChunk()",
+    "kind": "Method",
+    "detail": "Function (} Chunks [ ChunkIndex ] . ~)",
+    "insertText": "FChunk()"
+  },
+  {
+    "label": "TRangeAllocator()",
+    "kind": "Method",
+    "detail": "Function (Chunks [ ChunkIndex ] . NextFreeChunkSlot = FreeChunkSlotHead ; FreeChunkSlotHead = ChunkIndex ; } # if RANGE_ALLOCATOR_RECORD_STATS SIZE_T SizeTotal = 0 ; SIZE_T SizeUsed = 0 ; # endif const uint16 MinAllocSize ; int32 FreeChunkSlotHead ; TArray<FFreeChunkInfo> FreeChunkInfos ; TArray<FChunk> Chunks ; FCriticalSection CS ; public : using FAllocatorModifier::ChunkSize ; using FAllocatorModifier::MinAlignment ; struct FAllocInfo : public FAllocInfoModifier { uint16 RangeOffset ; uint16 RangeSize ; uint32 ChunkIndex ; } ; template<. . . ArgTypes>)",
+    "insertText": "TRangeAllocator(uint32 InMinAllocSize, ArgTypes&&... Args) : FAllocatorModifier(Forward<ArgTypes>(Args)...) , MinAllocSize(uint16(InMinAllocSize / MinAlignment)) , FreeChunkSlotHead(INDEX_NONE)"
+  },
+  {
+    "label": "Alloc()",
+    "kind": "Method",
+    "detail": "Function (} FPointerType)",
+    "insertText": "Alloc(uint32 Size, uint32 Alignment, FAllocInfo& OutAllocInfo)"
   },
   {
     "label": "Lock()",
@@ -114,9 +270,153 @@
     "insertText": "Lock(&CS)"
   },
   {
-    "label": "Lock()",
+    "label": "Align()",
     "kind": "Method",
-    "detail": "Function (FScopeLock)",
-    "insertText": "Lock(&CS)"
+    "detail": "Function (Alignment =)",
+    "insertText": "Align(FMath::Max(Alignment, MinAlignment), MinAlignment)"
+  },
+  {
+    "label": "Align()",
+    "kind": "Method",
+    "detail": "Function (Size =)",
+    "insertText": "Align(Size, Alignment)"
+  },
+  {
+    "label": "NumFreeChunks()",
+    "kind": "Method",
+    "detail": "Function (const uint16)",
+    "insertText": "NumFreeChunks(uint16)FreeChunkInfos.Num()"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (TArray<uint16,TInlineAllocator<2 4>> MayFitInfoIndices ;)",
+    "insertText": "for(uint16 Index = 0; Index < NumFreeChunks; ++Index)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (FFreeChunkInfo& Info = FreeChunkInfos [ Index ] ;)",
+    "insertText": "if(Size + Alignment - 1 <= (uint32)Info.MaxFreeRangeSize * MinAlignment)"
+  },
+  {
+    "label": "Alloc()",
+    "kind": "Method",
+    "detail": "Function (FChunk& Chunk = Chunks [ Info . ChunkIndex ] ; SIZE_T Ptr = Chunk .)",
+    "insertText": "Alloc(Size, Alignment, Info.MaxFreeRangeSize, OutAllocInfo.RangeOffset, OutAllocInfo.RangeSize)"
+  },
+  {
+    "label": "InitCustomInfo()",
+    "kind": "Method",
+    "detail": "Function (# if RANGE_ALLOCATOR_RECORD_STATS SizeUsed + = OutAllocInfo . RangeSize* MinAlignment ; # endif OutAllocInfo . ChunkIndex = Info . ChunkIndex ; OutAllocInfo .)",
+    "insertText": "InitCustomInfo(Chunk, Ptr)"
+  },
+  {
+    "label": "RemoveFreeChunkInfo()",
+    "kind": "Method",
+    "detail": "Function (Chunk . InfoIndex = INDEX_NONE ;)",
+    "insertText": "RemoveFreeChunkInfo(Index)"
+  },
+  {
+    "label": "MakePointer()",
+    "kind": "Method",
+    "detail": "Function (} return)",
+    "insertText": "MakePointer(Ptr)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} else)",
+    "insertText": "if(Size <= (uint32)Info.MaxFreeRangeSize * MinAlignment)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (MayFitInfoIndices .)",
+    "insertText": "Add(Index)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "for(int32 Index = 0; Index < MayFitInfoIndices.Num(); ++Index)"
+  },
+  {
+    "label": "Check()",
+    "kind": "Method",
+    "detail": "Function (} } uint16 MaxFreeRangeSize = ChunkSize / MinAlignment ;)",
+    "insertText": "Check(Chunks.Num() < UINT16_MAX)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (int32 ChunkIndex ;)",
+    "insertText": "if(FreeChunkSlotHead != INDEX_NONE)"
+  },
+  {
+    "label": "AddUninitialized()",
+    "kind": "Method",
+    "detail": "Function (ChunkIndex = FreeChunkSlotHead ; FreeChunkSlotHead = Chunks [ FreeChunkSlotHead ] . NextFreeChunkSlot ; } else { ChunkIndex = Chunks .)",
+    "insertText": "AddUninitialized()"
+  },
+  {
+    "label": "new()",
+    "kind": "Method",
+    "detail": "Function (} FChunk& Chunk = Chunks [ ChunkIndex ])",
+    "insertText": "new((void*)&Chunk) FChunk(*this)"
+  },
+  {
+    "label": "Alloc()",
+    "kind": "Method",
+    "detail": "Function (SIZE_T Ptr = Chunk .)",
+    "insertText": "Alloc(Size, Alignment, MaxFreeRangeSize, OutAllocInfo.RangeOffset, OutAllocInfo.RangeSize)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Chunk . InfoIndex = FreeChunkInfos .)",
+    "insertText": "Add(FFreeChunkInfo(MaxFreeRangeSize, (uint16)ChunkIndex))"
+  },
+  {
+    "label": "Free()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "Free(const FAllocInfo& AllocInfo)"
+  },
+  {
+    "label": "Free()",
+    "kind": "Method",
+    "detail": "Function (const int32 InfoIndex = Chunks [ AllocInfo . ChunkIndex ] . InfoIndex ; uint16 NewMaxFreeRangeSize = InfoIndex = = INDEX_NONE ? 0 : FreeChunkInfos [ InfoIndex ] . MaxFreeRangeSize ; Chunks [ AllocInfo . ChunkIndex ] .)",
+    "insertText": "Free(AllocInfo.RangeOffset, AllocInfo.RangeSize, NewMaxFreeRangeSize)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# if RANGE_ALLOCATOR_RECORD_STATS SizeUsed - = AllocInfo . RangeSize* MinAlignment ; # endif)",
+    "insertText": "if(NewMaxFreeRangeSize == ChunkSize / MinAlignment)"
+  },
+  {
+    "label": "FreeChunk()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "FreeChunk(AllocInfo.ChunkIndex)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} else)",
+    "insertText": "if(InfoIndex == INDEX_NONE)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Chunks [ AllocInfo . ChunkIndex ] . InfoIndex = FreeChunkInfos .)",
+    "insertText": "Add(FFreeChunkInfo(NewMaxFreeRangeSize, (uint16)AllocInfo.ChunkIndex))"
+  },
+  {
+    "label": "Contains()",
+    "kind": "Method",
+    "detail": "Function (} } else { FreeChunkInfos [ InfoIndex ] . MaxFreeRangeSize = NewMaxFreeRangeSize ; } } bool)",
+    "insertText": "Contains(FConstPointerType Addr)"
   }
 ]

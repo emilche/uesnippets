@@ -1,44 +1,68 @@
 [
   {
-    "label": "xcorr_kernel_sse4_1()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "xcorr_kernel_sse4_1(\n                    const opus_int16 *x,\n                    const opus_int16 *y,\n                    opus_val32       sum[4],\n                    int              len)"
+    "detail": "Function (# ifndef PITCH_SSE_H # define PITCH_SSE_H # if)",
+    "insertText": "defined(HAVE_CONFIG_H) #include \"config.h\" #endif #if defined(OPUS_X86_MAY_HAVE_SSE4_1) && defined(FIXED_POINT) void xcorr_kernel_sse4_1( const opus_int16 *x, const opus_int16 *y, opus_val32 sum[4], int len)"
   },
   {
-    "label": "xcorr_kernel_sse()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "xcorr_kernel_sse(\n                    const opus_val16 *x,\n                    const opus_val16 *y,\n                    opus_val32       sum[4],\n                    int              len)"
+    "detail": "Function (# endif # if)",
+    "insertText": "defined(OPUS_X86_MAY_HAVE_SSE) && !defined(FIXED_POINT) void xcorr_kernel_sse( const opus_val16 *x, const opus_val16 *y, opus_val32 sum[4], int len)"
   },
   {
-    "label": "celt_inner_prod_sse4_1()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (opus_val32)",
-    "insertText": "celt_inner_prod_sse4_1(\n    const opus_int16 *x,\n    const opus_int16 *y,\n    int               N)"
+    "detail": "Function (# endif # if)",
+    "insertText": "defined(OPUS_X86_PRESUME_SSE4_1) && defined(FIXED_POINT) #define OVERRIDE_XCORR_KERNEL #define xcorr_kernel(x, y, sum, len, arch) \\ ((void)arch, xcorr_kernel_sse4_1(x, y, sum, len)) #elif defined(OPUS_X86_PRESUME_SSE) && !defined(FIXED_POINT) #define OVERRIDE_XCORR_KERNEL #define xcorr_kernel(x, y, sum, len, arch) \\ ((void)arch, xcorr_kernel_sse(x, y, sum, len)) #elif defined(OPUS_HAVE_RTCD) && ((defined(OPUS_X86_MAY_HAVE_SSE4_1) && defined(FIXED_POINT)) || (defined(OPUS_X86_MAY_HAVE_SSE) && !defined(FIXED_POINT))) extern void (*const XCORR_KERNEL_IMPL[OPUS_ARCHMASK + 1])( const opus_val16 *x, const opus_val16 *y, opus_val32 sum[4], int len)"
   },
   {
-    "label": "celt_inner_prod_sse2()",
+    "label": "xcorr_kernel()",
     "kind": "Method",
-    "detail": "Function (opus_val32)",
-    "insertText": "celt_inner_prod_sse2(\n    const opus_int16 *x,\n    const opus_int16 *y,\n    int               N)"
+    "detail": "Function (# define OVERRIDE_XCORR_KERNEL # define)",
+    "insertText": "xcorr_kernel(x, y, sum, len, arch) \\ ((*XCORR_KERNEL_IMPL[(arch) & OPUS_ARCHMASK])(x, y, sum, len)) #endif #if defined(OPUS_X86_MAY_HAVE_SSE4_1) && defined(FIXED_POINT) opus_val32 celt_inner_prod_sse4_1( const opus_int16 *x, const opus_int16 *y, int N)"
   },
   {
-    "label": "celt_inner_prod_sse()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (opus_val32)",
-    "insertText": "celt_inner_prod_sse(\n    const opus_val16 *x,\n    const opus_val16 *y,\n    int               N)"
+    "detail": "Function (# endif # if)",
+    "insertText": "defined(OPUS_X86_MAY_HAVE_SSE2) && defined(FIXED_POINT) opus_val32 celt_inner_prod_sse2( const opus_int16 *x, const opus_int16 *y, int N)"
   },
   {
-    "label": "dual_inner_prod_sse()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "dual_inner_prod_sse(const opus_val16 *x,\n    const opus_val16 *y01,\n    const opus_val16 *y02,\n    int               N,\n    opus_val32       *xy1,\n    opus_val32       *xy2)"
+    "detail": "Function (# endif # if)",
+    "insertText": "defined(OPUS_X86_MAY_HAVE_SSE) && !defined(FIXED_POINT) opus_val32 celt_inner_prod_sse( const opus_val16 *x, const opus_val16 *y, int N)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# endif # if)",
+    "insertText": "defined(OPUS_X86_PRESUME_SSE4_1) && defined(FIXED_POINT) #define OVERRIDE_CELT_INNER_PROD #define celt_inner_prod(x, y, N, arch) \\ ((void)arch, celt_inner_prod_sse4_1(x, y, N)) #elif defined(OPUS_X86_PRESUME_SSE2) && defined(FIXED_POINT) && !defined(OPUS_X86_MAY_HAVE_SSE4_1) #define OVERRIDE_CELT_INNER_PROD #define celt_inner_prod(x, y, N, arch) \\ ((void)arch, celt_inner_prod_sse2(x, y, N)) #elif defined(OPUS_X86_PRESUME_SSE) && !defined(FIXED_POINT) #define OVERRIDE_CELT_INNER_PROD #define celt_inner_prod(x, y, N, arch) \\ ((void)arch, celt_inner_prod_sse(x, y, N)) #elif defined(OPUS_HAVE_RTCD) && (((defined(OPUS_X86_MAY_HAVE_SSE4_1) || defined(OPUS_X86_MAY_HAVE_SSE2)) && defined(FIXED_POINT)) || \\ (defined(OPUS_X86_MAY_HAVE_SSE) && !defined(FIXED_POINT))) extern opus_val32 (*const CELT_INNER_PROD_IMPL[OPUS_ARCHMASK + 1])( const opus_val16 *x, const opus_val16 *y, int N)"
+  },
+  {
+    "label": "celt_inner_prod()",
+    "kind": "Method",
+    "detail": "Function (# define OVERRIDE_CELT_INNER_PROD # define)",
+    "insertText": "celt_inner_prod(x, y, N, arch) \\ ((*CELT_INNER_PROD_IMPL[(arch) & OPUS_ARCHMASK])(x, y, N)) #endif #if defined(OPUS_X86_MAY_HAVE_SSE) && !defined(FIXED_POINT) #define OVERRIDE_DUAL_INNER_PROD #define OVERRIDE_COMB_FILTER_CONST #undef dual_inner_prod #undef comb_filter_const void dual_inner_prod_sse(const opus_val16 *x, const opus_val16 *y01, const opus_val16 *y02, int N, opus_val32 *xy1, opus_val32 *xy2)"
   },
   {
     "label": "comb_filter_const_sse()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "comb_filter_const_sse(opus_val32 *y,\n    opus_val32 *x,\n    int         T,\n    int         N,\n    opus_val16  g10,\n    opus_val16  g11,\n    opus_val16  g12)"
+    "insertText": "comb_filter_const_sse(opus_val32 *y, opus_val32 *x, int T, int N, opus_val16 g10, opus_val16 g11, opus_val16 g12)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(OPUS_X86_PRESUME_SSE) # define dual_inner_prod(x, y01, y02, N, xy1, xy2, arch) \\ ((void)(arch),dual_inner_prod_sse(x, y01, y02, N, xy1, xy2)) # define comb_filter_const(y, x, T, N, g10, g11, g12, arch) \\ ((void)(arch),comb_filter_const_sse(y, x, T, N, g10, g11, g12)) #else extern void (*const DUAL_INNER_PROD_IMPL[OPUS_ARCHMASK + 1])( const opus_val16 *x, const opus_val16 *y01, const opus_val16 *y02, int N, opus_val32 *xy1, opus_val32 *xy2)"
+  },
+  {
+    "label": "dual_inner_prod()",
+    "kind": "Method",
+    "detail": "Function (# define)",
+    "insertText": "dual_inner_prod(x, y01, y02, N, xy1, xy2, arch) \\ ((*DUAL_INNER_PROD_IMPL[(arch) & OPUS_ARCHMASK])(x, y01, y02, N, xy1, xy2)) extern void (*const COMB_FILTER_CONST_IMPL[OPUS_ARCHMASK + 1])( opus_val32 *y, opus_val32 *x, int T, int N, opus_val16 g10, opus_val16 g11, opus_val16 g12)"
   }
 ]

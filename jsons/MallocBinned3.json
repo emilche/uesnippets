@@ -42,16 +42,28 @@
     "insertText": "Private"
   },
   {
-    "label": "FPoolTable",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "FPoolTable"
-  },
-  {
     "label": "FOutputDevice",
     "kind": "Type",
     "detail": "class declaration",
     "insertText": "FOutputDevice"
+  },
+  {
+    "label": "UE_MB3_USE_CACHED_PAGE_ALLOCATOR_FOR_LARGE_ALLOCS()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" CoreTypes . h \" # if PLATFORM_64BITS&& PLATFORM_HAS_FPlatformVirtualMemoryBlock # include \" HAL / Allocators / CachedOSPageAllocator . h \" # include \" HAL / Allocators / PooledVirtualMemoryAllocator . h \" # include \" HAL / CriticalSection . h \" # include \" HAL / LowLevelMemTracker . h \" # include \" HAL / MallocBinnedCommon . h \" # include \" HAL / PlatformMemory . h \" # include \" HAL / UnrealMemory . h \" # include \" Math / NumericLimits . h \" # include \" Misc / AssertionMacros . h \" # include \" Templates / AlignmentTemplates . h \" # include \" Templates / Atomic . h \" struct FGenericMemoryStats ; # define)",
+    "insertText": "UE_MB3_USE_CACHED_PAGE_ALLOCATOR_FOR_LARGE_ALLOCS(0) #if PLATFORM_IOS # define USE_512MB_MAX_MEMORY_PER_BLOCK_SIZE 1 #elif !defined(USE_512MB_MAX_MEMORY_PER_BLOCK_SIZE) # define USE_512MB_MAX_MEMORY_PER_BLOCK_SIZE 0 #endif #define UE_MB3_BASE_PAGE_SIZE 4096 #ifndef UE_MB3_MAX_SMALL_POOL_SIZE # if UE_MB3_USE_CACHED_PAGE_ALLOCATOR_FOR_LARGE_ALLOCS # define UE_MB3_MAX_SMALL_POOL_SIZE (UE_MBC_MAX_LISTED_SMALL_POOL_SIZE) # else # define UE_MB3_MAX_SMALL_POOL_SIZE (128 * 1024) # endif #endif #define UE_MB3_SMALL_POOL_COUNT (UE_MBC_NUM_LISTED_SMALL_POOLS + (UE_MB3_MAX_SMALL_POOL_SIZE - UE_MBC_MAX_LISTED_SMALL_POOL_SIZE) / UE_MB3_BASE_PAGE_SIZE) #if USE_512MB_MAX_MEMORY_PER_BLOCK_SIZE # define UE_MB3_MAX_MEMORY_PER_POOL_SIZE_SHIFT (29) #else # define UE_MB3_MAX_MEMORY_PER_POOL_SIZE_SHIFT (30) #endif #define UE_MB3_MAX_MEMORY_PER_POOL_SIZE (1ull << UE_MB3_MAX_MEMORY_PER_POOL_SIZE_SHIFT) #if !defined(BINNED3_USE_SEPARATE_VM_PER_POOL) # if PLATFORM_WINDOWS # define BINNED3_USE_SEPARATE_VM_PER_POOL (1) # else # define BINNED3_USE_SEPARATE_VM_PER_POOL (0) # endif #endif #define UE_MB3_ALLOCATOR_STATS UE_MBC_ALLOCATOR_STATS #if UE_MB3_ALLOCATOR_STATS # define UE_M3_ALLOCATOR_PER_BIN_STATS !(UE_BUILD_SHIPPING || UE_BUILD_TEST)"
+  },
+  {
+    "label": "FPoolInfo()",
+    "kind": "Method",
+    "detail": "Function (public : struct FPoolInfo { enum class ECanary : uint32 { LargeUnassigned = 0 x39431234,LargeAssigned = 0 x17ea5678,} ;)",
+    "insertText": "FPoolInfo()"
+  },
+  {
+    "label": "CheckCanary()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "CheckCanary(ECanary ShouldBe)"
   },
   {
     "label": "SetCanary()",
@@ -60,10 +72,28 @@
     "insertText": "SetCanary(ECanary ShouldBe, bool bPreexisting, bool bGuarnteedToBeNew)"
   },
   {
+    "label": "GetOSRequestedBytes()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetOSRequestedBytes()"
+  },
+  {
     "label": "GetOsCommittedBytes()",
     "kind": "Method",
-    "detail": "Function (return)",
+    "detail": "Function (uint32)",
     "insertText": "GetOsCommittedBytes()"
+  },
+  {
+    "label": "GetOsAllocatedBytes()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetOsAllocatedBytes()"
+  },
+  {
+    "label": "GetOsVMPages()",
+    "kind": "Method",
+    "detail": "Function (} uint32)",
+    "insertText": "GetOsVMPages()"
   },
   {
     "label": "SetOSAllocationSize()",
@@ -78,22 +108,334 @@
     "insertText": "SetOSAllocationSizes(uint32 InRequestedBytes, UPTRINT InCommittedBytes, uint32 InVMSizeDivVirtualSizeAlignment)"
   },
   {
+    "label": "HeadEndAlloc()",
+    "kind": "Method",
+    "detail": "Function (private : ECanary Canary ; uint32 AllocSize ; uint32 VMSizeDivVirtualSizeAlignment ; uint32 CommitSize ; } ; private : struct FPoolInfoSmall ; struct FPoolTable ; struct Private ; struct FPoolTable { uint32 BinSize ; uint32 NumMemoryPagesPerBlock ; FBitTree BlocksAllocatedBits ; FBitTree BlocksExhaustedBits ; uint32 NumEverUsedBlocks ; FPoolInfoSmall** PoolInfos ; uint64 UnusedAreaOffsetLow ; FCriticalSection Mutex ; # if UE_M3_ALLOCATOR_PER_BIN_STATS std::atomic<int64> TotalRequestedAllocSize ; std::atomic<int64> TotalAllocCount ; std::atomic<int64> TotalFreeCount ; void)",
+    "insertText": "HeadEndAlloc(SIZE_T Size)"
+  },
+  {
+    "label": "fetch_add()",
+    "kind": "Method",
+    "detail": "Function (TotalRequestedAllocSize .)",
+    "insertText": "fetch_add(Size, std::memory_order_relaxed)"
+  },
+  {
+    "label": "fetch_add()",
+    "kind": "Method",
+    "detail": "Function (TotalAllocCount .)",
+    "insertText": "fetch_add(1, std::memory_order_relaxed)"
+  },
+  {
+    "label": "HeadEndFree()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "HeadEndFree()"
+  },
+  {
+    "label": "PoolIndexFromPtr()",
+    "kind": "Method",
+    "detail": "Function (} # endif } ; FPoolTable SmallPoolTables [ UE_MB3_SMALL_POOL_COUNT ] ; uint32 SmallPoolInfosPerPlatformPage ; # if ! BINNED3_USE_SEPARATE_VM_PER_POOL uint64)",
+    "insertText": "PoolIndexFromPtr(const void* Ptr)"
+  },
+  {
+    "label": "PoolBasePtr()",
+    "kind": "Method",
+    "detail": "Function (} uint8*)",
+    "insertText": "PoolBasePtr(uint32 InPoolIndex)"
+  },
+  {
+    "label": "RecordPoolSearch()",
+    "kind": "Method",
+    "detail": "Function (# else void)",
+    "insertText": "RecordPoolSearch(uint32 Tests)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} uint64 PoolIndex = UE_MB3_SMALL_POOL_COUNT ;)",
+    "insertText": "if(((uint8*)Ptr >= PoolBaseVMPtr[0]) & ((uint8*)Ptr < HighestPoolBaseVMPtr + UE_MB3_MAX_MEMORY_PER_POOL_SIZE))"
+  },
+  {
+    "label": "uint64()",
+    "kind": "Method",
+    "detail": "Function (PoolIndex =)",
+    "insertText": "uint64((uint8*)Ptr - PoolBaseVMPtr[0])"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (PoolIndex = UE_MB3_SMALL_POOL_COUNT - 1 ; } uint32 Tests = 1 ;)",
+    "insertText": "if((uint8*)Ptr < PoolBaseVMPtr[PoolIndex])"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "while((uint8*)Ptr < PoolBaseVMPtr[PoolIndex])"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (PoolIndex = UE_MB3_SMALL_POOL_COUNT ; } } else)",
+    "insertText": "if((uint8*)Ptr >= PoolBaseVMPtr[PoolIndex] + UE_MB3_MAX_MEMORY_PER_POOL_SIZE)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "while((uint8*)Ptr >= PoolBaseVMPtr[PoolIndex] + UE_MB3_MAX_MEMORY_PER_POOL_SIZE)"
+  },
+  {
+    "label": "RecordPoolSearch()",
+    "kind": "Method",
+    "detail": "Function (PoolIndex = UE_MB3_SMALL_POOL_COUNT ; } })",
+    "insertText": "RecordPoolSearch(Tests)"
+  },
+  {
+    "label": "PoolIndexFromPtr()",
+    "kind": "Method",
+    "detail": "Function (const uint64 Result =)",
+    "insertText": "PoolIndexFromPtr(Ptr)"
+  },
+  {
+    "label": "IsOSAllocation()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "IsOSAllocation(const void* Ptr)"
+  },
+  {
+    "label": "BlockPointerFromContainedPtr()",
+    "kind": "Method",
+    "detail": "Function (} void*)",
+    "insertText": "BlockPointerFromContainedPtr(const void* Ptr, uint8 NumMemoryPagesPerBlock, uint32& OutBlockIndex)"
+  },
+  {
+    "label": "PoolIndexFromPtrChecked()",
+    "kind": "Method",
+    "detail": "Function (const uint32 PoolIndex =)",
+    "insertText": "PoolIndexFromPtrChecked(Ptr)"
+  },
+  {
+    "label": "PoolBasePtr()",
+    "kind": "Method",
+    "detail": "Function (uint8* PoolStart =)",
+    "insertText": "PoolBasePtr(PoolIndex)"
+  },
+  {
+    "label": "BlockIndex()",
+    "kind": "Method",
+    "detail": "Function (const uint64)",
+    "insertText": "BlockIndex(UPTRINT(Ptr) - UPTRINT(PoolStart)) / (UPTRINT(NumMemoryPagesPerBlock) * UPTRINT(OsAllocationGranularity))"
+  },
+  {
+    "label": "UPTRINT()",
+    "kind": "Method",
+    "detail": "Function (OutBlockIndex = BlockIndex ; uint8* Result = PoolStart + BlockIndex*)",
+    "insertText": "UPTRINT(NumMemoryPagesPerBlock) * UPTRINT(OsAllocationGranularity)"
+  },
+  {
+    "label": "PoolBasePtr()",
+    "kind": "Method",
+    "detail": "Function (uint8* PoolStart =)",
+    "insertText": "PoolBasePtr(InPoolIndex)"
+  },
+  {
+    "label": "uint64()",
+    "kind": "Method",
+    "detail": "Function (uint8* Ptr = PoolStart + BlockIndex*)",
+    "insertText": "uint64(BlockSize)"
+  },
+  {
+    "label": "GetFrontPool()",
+    "kind": "Method",
+    "detail": "Function (FPoolInfoSmall*)",
+    "insertText": "GetFrontPool(FPoolTable& Table, uint32 InPoolIndex, uint32& OutBlockIndex)"
+  },
+  {
     "label": "FMallocBinned3()",
     "kind": "Method",
-    "detail": "Function (CORE_API)",
+    "detail": "Function (public :)",
     "insertText": "FMallocBinned3()"
   },
   {
-    "label": "GetAllocationSizeExternal()",
+    "label": "IsInternallyThreadSafe()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "GetAllocationSizeExternal(Ptr, SizeOut)"
+    "detail": "Function (bool)",
+    "insertText": "IsInternallyThreadSafe()"
   },
   {
-    "label": "QuantizeSizeCommon()",
+    "label": "if()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "QuantizeSizeCommon(Count, Alignment, *this)"
+    "detail": "Function (void* Result = nullptr ;)",
+    "insertText": "if((Size <= UE_MB3_MAX_SMALL_POOL_SIZE) & (Alignment <= UE_MBC_MIN_SMALL_POOL_ALIGNMENT))"
+  },
+  {
+    "label": "Get()",
+    "kind": "Method",
+    "detail": "Function (FPerThreadFreeBlockLists* Lists = GMallocBinnedPerThreadCaches ?)",
+    "insertText": "Get()"
+  },
+  {
+    "label": "BoundSizeToPoolIndex()",
+    "kind": "Method",
+    "detail": "Function (const uint32 PoolIndex =)",
+    "insertText": "BoundSizeToPoolIndex(Size, MemSizeToPoolIndex)"
+  },
+  {
+    "label": "PoolIndexToBinSize()",
+    "kind": "Method",
+    "detail": "Function (const uint32 BinSize =)",
+    "insertText": "PoolIndexToBinSize(PoolIndex)"
+  },
+  {
+    "label": "Malloc()",
+    "kind": "Method",
+    "detail": "Function (Result = Lists ->)",
+    "insertText": "Malloc(PoolIndex)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# if UE_MB3_ALLOCATOR_STATS)",
+    "insertText": "if(Result)"
+  },
+  {
+    "label": "HeadEndAlloc()",
+    "kind": "Method",
+    "detail": "Function (SmallPoolTables [ PoolIndex ] .)",
+    "insertText": "HeadEndAlloc(Size)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (Lists -> AllocatedMemory + = BinSize ; } # endif } })",
+    "insertText": "if(Result == nullptr)"
+  },
+  {
+    "label": "MallocExternal()",
+    "kind": "Method",
+    "detail": "Function (Result =)",
+    "insertText": "MallocExternal(Size, Alignment)"
+  },
+  {
+    "label": "Realloc()",
+    "kind": "Method",
+    "detail": "Function (} return Result ; } void*)",
+    "insertText": "Realloc(void* Ptr, SIZE_T NewSize, uint32 Alignment)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (uint32 BinSize = 0 ; bool bCanFree = true ;)",
+    "insertText": "if(Ptr)"
+  },
+  {
+    "label": "HeadEndAlloc()",
+    "kind": "Method",
+    "detail": "Function (# if UE_MB3_ALLOCATOR_STATS SmallPoolTables [ PoolIndex ] .)",
+    "insertText": "HeadEndAlloc(NewSize)"
+  },
+  {
+    "label": "CanFree()",
+    "kind": "Method",
+    "detail": "Function (# endif return Ptr ; } bCanFree = Lists ->)",
+    "insertText": "CanFree(PoolIndex, BinSize)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(bCanFree)"
+  },
+  {
+    "label": "BoundSizeToPoolIndex()",
+    "kind": "Method",
+    "detail": "Function (const uint32 NewPoolIndex =)",
+    "insertText": "BoundSizeToPoolIndex(NewSize, MemSizeToPoolIndex)"
+  },
+  {
+    "label": "PoolIndexToBinSize()",
+    "kind": "Method",
+    "detail": "Function (const uint32 NewBinSize =)",
+    "insertText": "PoolIndexToBinSize(NewPoolIndex)"
+  },
+  {
+    "label": "Malloc()",
+    "kind": "Method",
+    "detail": "Function (void* Result = NewSize ? Lists ->)",
+    "insertText": "Malloc(NewPoolIndex)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (Lists -> AllocatedMemory + = NewBinSize ; } # endif)",
+    "insertText": "if(Result || !NewSize)"
+  },
+  {
+    "label": "Memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Memcpy(Result, Ptr, FPlatformMath::Min<SIZE_T>(NewSize, BinSize))"
+  },
+  {
+    "label": "Free()",
+    "kind": "Method",
+    "detail": "Function (const bool bDidPush = Lists ->)",
+    "insertText": "Free(Ptr, PoolIndex, BinSize)"
+  },
+  {
+    "label": "ReallocExternal()",
+    "kind": "Method",
+    "detail": "Function (Lists -> AllocatedMemory - = BinSize ; # endif } return Result ; } } } } void* Result =)",
+    "insertText": "ReallocExternal(Ptr, NewSize, Alignment)"
+  },
+  {
+    "label": "FreeExternal()",
+    "kind": "Method",
+    "detail": "Function (Lists -> AllocatedMemory - = BinSize ; # endif return ; } } })",
+    "insertText": "FreeExternal(Ptr)"
+  },
+  {
+    "label": "GetSmallAllocationSize()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "GetSmallAllocationSize(void* Ptr, SIZE_T& SizeOut)"
+  },
+  {
+    "label": "QuantizeSize()",
+    "kind": "Method",
+    "detail": "Function (} SIZE_T)",
+    "insertText": "QuantizeSize(SIZE_T Count, uint32 Alignment)"
+  },
+  {
+    "label": "ValidateHeap()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "ValidateHeap()"
+  },
+  {
+    "label": "Trim()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Trim(bool bTrimThreadCaches)"
+  },
+  {
+    "label": "GetDescriptiveName()",
+    "kind": "Method",
+    "detail": "Function (const TCHAR*)",
+    "insertText": "GetDescriptiveName()"
+  },
+  {
+    "label": "MallocExternal()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "MallocExternal(SIZE_T Size, uint32 Alignment)"
+  },
+  {
+    "label": "ReallocExternal()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "ReallocExternal(void* Ptr, SIZE_T NewSize, uint32 Alignment)"
   },
   {
     "label": "FreeExternal()",
@@ -102,9 +444,27 @@
     "insertText": "FreeExternal(void *Ptr)"
   },
   {
-    "label": "FreeBundles()",
+    "label": "GetAllocatorStats()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "GetAllocatorStats(FGenericMemoryStats& out_Stats)"
+  },
+  {
+    "label": "DumpAllocatorStats()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DumpAllocatorStats(class FOutputDevice& Ar)"
+  },
+  {
+    "label": "MemSizeToPoolIndex()",
+    "kind": "Method",
+    "detail": "Function (uint16 SmallBinSizesReversedShifted [ UE_MB3_SMALL_POOL_COUNT + 1 ] ; FMallocBinned3* MallocBinned3 ; # if ! BINNED3_USE_SEPARATE_VM_PER_POOL uint8* Binned3BaseVMPtr ; FPlatformMemory::FPlatformVirtualMemoryBlock Binned3BaseVMBlock ; # else uint64 PoolSearchDiv ; uint8* HighestPoolBaseVMPtr ; uint8* PoolBaseVMPtr [ UE_MB3_SMALL_POOL_COUNT ] ; FPlatformMemory::FPlatformVirtualMemoryBlock PoolBaseVMBlock [ UE_MB3_SMALL_POOL_COUNT ] ; # endif uint8)",
+    "insertText": "MemSizeToPoolIndex(UE_MB3_MAX_SMALL_POOL_SIZE >> UE_MBC_MIN_SMALL_POOL_ALIGNMENT_SHIFT)"
+  },
+  {
+    "label": "FreeBundles()",
+    "kind": "Method",
+    "detail": "Function (} void)",
     "insertText": "FreeBundles(FBundleNode* Bundles, uint32 PoolIndex)"
   },
   {
@@ -124,6 +484,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "FlushCurrentThreadCacheInternal(bool bNewEpochOnly = false)"
+  },
+  {
+    "label": "AllocateMetaDataMemory()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "AllocateMetaDataMemory(SIZE_T Size)"
   },
   {
     "label": "FreeMetaDataMemory()",

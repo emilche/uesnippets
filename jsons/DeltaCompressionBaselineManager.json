@@ -60,12 +60,6 @@
     "insertText": "FDeltaCompressionBaselineManager"
   },
   {
-    "label": "class",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "class"
-  },
-  {
     "label": "FInternalBaseline",
     "kind": "Type",
     "detail": "class declaration",
@@ -92,8 +86,14 @@
   {
     "label": "IsDeltaCompressionEnabled()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (# pragma once # include \" Containers / Array . h \" # include \" Net / Core / NetBitArray . h \" # include \" Iris / ReplicationSystem / DeltaCompression / DeltaCompressionBaseline . h \" # include \" Iris / ReplicationSystem / DeltaCompression / DeltaCompressionBaselineStorage . h \" class UReplicationSystem ; namespace UE::Net { enum class ENetObjectDeltaCompressionStatus : unsigned ; } namespace UE::Net::Private { struct FChangeMaskCache ; class FDeltaCompressionBaselineInvalidationTracker ; typedef uint32 FInternalNetRefIndex ; class FNetRefHandleManager ; class FReplicationConnections ; } namespace UE::Net::Private { bool)",
     "insertText": "IsDeltaCompressionEnabled()"
+  },
+  {
+    "label": "FDeltaCompressionBaselineManager()",
+    "kind": "Method",
+    "detail": "Function (struct FDeltaCompressionBaselineManagerInitParams { const FDeltaCompressionBaselineInvalidationTracker* BaselineInvalidationTracker = nullptr ; FReplicationConnections* Connections = nullptr ; const FNetRefHandleManager* NetRefHandleManager = nullptr ; FReplicationStateStorage* ReplicationStateStorage = nullptr ; UReplicationSystem* ReplicationSystem = nullptr ; FInternalNetRefIndex MaxNetObjectCount = 0 ; FInternalNetRefIndex MaxInternalNetRefIndex = 0 ; uint32 MaxDeltaCompressedObjectCount = 0 ; } ; struct FDeltaCompressionBaselineManagerPreSendUpdateParams { const FChangeMaskCache* ChangeMaskCache = nullptr ; } ; struct FDeltaCompressionBaselineManagerPostSendUpdateParams { } ; class FDeltaCompressionBaselineManager { public : enum : uint32 { MaxBaselineCount = 2 } ; enum : uint32 { InvalidBaselineIndex = MaxBaselineCount } ; enum : uint32 { BaselineIndexBitCount = 2 } ;)",
+    "insertText": "FDeltaCompressionBaselineManager()"
   },
   {
     "label": "Init()",
@@ -144,6 +144,18 @@
     "insertText": "SetDeltaCompressionStatus(FInternalNetRefIndex Index, ENetObjectDeltaCompressionStatus Status)"
   },
   {
+    "label": "GetDeltaCompressionStatus()",
+    "kind": "Method",
+    "detail": "Function (ENetObjectDeltaCompressionStatus)",
+    "insertText": "GetDeltaCompressionStatus(FInternalNetRefIndex Index)"
+  },
+  {
+    "label": "GetMaxDeltaCompressedObjectCount()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetMaxDeltaCompressedObjectCount()"
+  },
+  {
     "label": "CreateBaseline()",
     "kind": "Method",
     "detail": "Function (FDeltaCompressionBaseline)",
@@ -162,9 +174,27 @@
     "insertText": "LostBaseline(uint32 ConnId, uint32 ObjectIndex, uint32 BaselineIndex)"
   },
   {
+    "label": "GetBaseline()",
+    "kind": "Method",
+    "detail": "Function (FDeltaCompressionBaseline)",
+    "insertText": "GetBaseline(uint32 ConnId, uint32 ObjectIndex, uint32 BaselineIndex)"
+  },
+  {
+    "label": "IsValid()",
+    "kind": "Method",
+    "detail": "Function (private : using ObjectInfoIndexType = uint16 ; enum : unsigned { InvalidObjectInfoIndex = 0,InvalidBaselineStateInfoIndex = 0,InvalidInternalIndex = 0,ObjectInfoGrowCount = 1 2 8,} ; enum class EChangeMaskBehavior : unsigned { Discard,Merge,} ; class FInternalBaseline { public : bool)",
+    "insertText": "IsValid()"
+  },
+  {
+    "label": "FPerObjectInfo()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "FPerObjectInfo()"
+  },
+  {
     "label": "UpdateScope()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (public : ChangeMaskStorageType* ChangeMasksForConnections ; uint32 ObjectIndex ; uint32 PrevBaselineCreationFrame ; uint16 ChangeMaskStride ; FObjectBaselineInfo BaselinesForConnections [ 1 ] ; } ; struct FBaselineSharingContext { FNetBitArray ObjectInfoIndicesWithNewBaseline ; TArray<DeltaCompressionBaselineStateInfoIndexType> ObjectInfoIndexToBaselineInfoIndex ; uint32 CreatedBaselineCount = 0 ; } ; private : void)",
     "insertText": "UpdateScope()"
   },
   {
@@ -186,10 +216,22 @@
     "insertText": "RemoveObjectFromScope(uint32 ObjectIndex)"
   },
   {
+    "label": "AllocPerObjectInfoForObject()",
+    "kind": "Method",
+    "detail": "Function (FPerObjectInfo*)",
+    "insertText": "AllocPerObjectInfoForObject(uint32 ObjectIndex)"
+  },
+  {
     "label": "FreePerObjectInfoForObject()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "FreePerObjectInfoForObject(uint32 ObjectIndex)"
+  },
+  {
+    "label": "ConstructPerObjectInfo()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ConstructPerObjectInfo(FPerObjectInfo*)"
   },
   {
     "label": "DestructPerObjectInfo()",
@@ -208,6 +250,18 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "FreePerObjectInfo(ObjectInfoIndexType Index)"
+  },
+  {
+    "label": "GetPerObjectInfo()",
+    "kind": "Method",
+    "detail": "Function (FPerObjectInfo*)",
+    "insertText": "GetPerObjectInfo(ObjectInfoIndexType Index)"
+  },
+  {
+    "label": "GetPerObjectInfoForObject()",
+    "kind": "Method",
+    "detail": "Function (FPerObjectInfo*)",
+    "insertText": "GetPerObjectInfoForObject(uint32 ObjectIndex)"
   },
   {
     "label": "FreeAllPerObjectInfos()",
@@ -252,21 +306,75 @@
     "insertText": "DestructBaselineSharingContext(FBaselineSharingContext&)"
   },
   {
+    "label": "DoesObjectSupportDeltaCompression()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "DoesObjectSupportDeltaCompression(uint32 ObjectIndex)"
+  },
+  {
+    "label": "GetChangeMaskPointerForBaseline()",
+    "kind": "Method",
+    "detail": "Function (ChangeMaskStorageType*)",
+    "insertText": "GetChangeMaskPointerForBaseline(const FPerObjectInfo*, uint32 ConnId, uint32 BaselineIndex)"
+  },
+  {
+    "label": "GetChangeMaskPointerForConnection()",
+    "kind": "Method",
+    "detail": "Function (ChangeMaskStorageType*)",
+    "insertText": "GetChangeMaskPointerForConnection(const FPerObjectInfo*, uint32 ConnId)"
+  },
+  {
+    "label": "IsAllowedToCreateBaselineForObject()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsAllowedToCreateBaselineForObject(uint32 ConnId, uint32 ObjectIndex, const FPerObjectInfo*, ObjectInfoIndexType InfoIndex)"
+  },
+  {
     "label": "InvalidateBaselinesDueToModifiedConditionals()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "InvalidateBaselinesDueToModifiedConditionals()"
   },
   {
-    "label": "GetPerObjectInfo()",
+    "label": "alignof()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "GetPerObjectInfo(InfoIndex)"
+    "detail": "Function (private : FDeltaCompressionBaselineStorage BaselineStorage ; FNetBitArray DeltaCompressionEnabledObjects ; FNetBitArray UsedPerObjectInfos ; TArray<ObjectInfoIndexType> ObjectIndexToObjectInfoIndex ; TArray<uint8,TAlignedHeapAllocator<)",
+    "insertText": "alignof(FPerObjectInfo)"
   },
   {
-    "label": "GetPerObjectInfo()",
+    "label": "checkSlow()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "GetPerObjectInfo(InfoIndex)"
+    "detail": "Function (const SIZE_T ObjectInfoStorageIndex = Index* BytesPerObjectInfo ;)",
+    "insertText": "checkSlow(ObjectInfoStorageIndex < (uint32)ObjectInfoStorage.Num())"
+  },
+  {
+    "label": "GetData()",
+    "kind": "Method",
+    "detail": "Function (uint8* StoragePointer = ObjectInfoStorage .)",
+    "insertText": "GetData()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const ObjectInfoIndexType InfoIndex = ObjectIndexToObjectInfoIndex [ ObjectIndex ] ;)",
+    "insertText": "if(InfoIndex != InvalidObjectInfoIndex)"
+  },
+  {
+    "label": "GetChangeMaskPointerForBaseline()",
+    "kind": "Method",
+    "detail": "Function (} return nullptr ; } ChangeMaskStorageType*)",
+    "insertText": "GetChangeMaskPointerForBaseline(const FPerObjectInfo* ObjectInfo, uint32 ConnId, uint32 BaselineIndex)"
+  },
+  {
+    "label": "BaselineChangeMaskOffset()",
+    "kind": "Method",
+    "detail": "Function (const uint32 ChangeMaskStride = ObjectInfo -> ChangeMaskStride ; const SIZE_T)",
+    "insertText": "BaselineChangeMaskOffset(MaxConnectionCount + 2U*ConnId + BaselineIndex)"
+  },
+  {
+    "label": "GetChangeMaskPointerForConnection()",
+    "kind": "Method",
+    "detail": "Function (ChangeMaskStorageType* ChangeMaskPointer = ObjectInfo -> ChangeMasksForConnections + BaselineChangeMaskOffset ; return ChangeMaskPointer ; } ChangeMaskStorageType*)",
+    "insertText": "GetChangeMaskPointerForConnection(const FPerObjectInfo* ObjectInfo, uint32 ConnId)"
   }
 ]

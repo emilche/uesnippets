@@ -96,9 +96,15 @@
     "insertText": "FObjectScopeHysteresisState"
   },
   {
+    "label": "GetNetObjectFilteringInfos()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" CoreTypes . h \" # include \" Net / Core / NetBitArray . h \" # include \" Iris / ReplicationSystem / Filtering / SharedConnectionFilterStatus . h \" # include \" Iris / ReplicationSystem / Filtering / NetObjectFilter . h \" # include \" Iris / ReplicationSystem / Filtering / ObjectScopeHysteresisUpdater . h \" # include \" Iris / ReplicationSystem / Filtering / ReplicationFilteringConfig . h \" # include \" Iris / ReplicationSystem / NetObjectGroupHandle . h \" # include \" Net / Core / Connection / ConnectionHandle . h \" # include \" Containers / Array . h \" # include \" UObject / StrongObjectPtr . h \" class UReplicationFilteringConfig ; class UReplicationSystem ; namespace UE::Net { typedef uint32 FNetObjectFilterHandle ; namespace Private { class FNetRefHandleManager ; class FNetObjectGroups ; class FReplicationConnections ; typedef uint32 FInternalNetRefIndex ; } } namespace UE::Net::Private { class FNetObjectFilteringInfoAccessor { private : TArrayView<FNetObjectFilteringInfo>)",
+    "insertText": "GetNetObjectFilteringInfos(UReplicationSystem* ReplicationSystem)"
+  },
+  {
     "label": "FReplicationFiltering()",
     "kind": "Method",
-    "detail": "Function (public:)",
+    "detail": "Function (private : UNetObjectFilter ; } ; struct FReplicationFilteringInitParams { TObjectPtr<UReplicationSystem> ReplicationSystem = nullptr ; const FNetRefHandleManager* NetRefHandleManager = nullptr ; FNetObjectGroups* Groups = nullptr ; FReplicationConnections* Connections = nullptr ; FInternalNetRefIndex MaxInternalNetRefIndex = 0 ; uint32 MaxGroupCount = 0 ; } ; class FReplicationFiltering { public :)",
     "insertText": "FReplicationFiltering()"
   },
   {
@@ -126,34 +132,76 @@
     "insertText": "Filter()"
   },
   {
-    "label": "MakeNetBitArrayView()",
+    "label": "GetRelevantObjectsInScope()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "MakeNetBitArrayView(ConnectionInfos[ConnectionId].ObjectsInScope)"
+    "detail": "Function (const FNetBitArrayView)",
+    "insertText": "GetRelevantObjectsInScope(uint32 ConnectionId)"
   },
   {
-    "label": "MakeNetBitArrayView()",
+    "label": "GetGroupFilteredOutObjects()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "MakeNetBitArrayView(ConnectionInfos[ConnectionId].GroupExcludedObjects)"
+    "detail": "Function (} const FNetBitArrayView)",
+    "insertText": "GetGroupFilteredOutObjects(uint32 ConnectionId)"
   },
   {
     "label": "SetOwningConnection()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "SetOwningConnection(FInternalNetRefIndex ObjectIndex, uint32 ConnectionId)"
+  },
+  {
+    "label": "GetOwningConnection()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetOwningConnection(FInternalNetRefIndex ObjectIndex)"
   },
   {
     "label": "SetFilter()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (} bool)",
     "insertText": "SetFilter(FInternalNetRefIndex ObjectIndex, FNetObjectFilterHandle Filter, FName FilterConfigProfile)"
+  },
+  {
+    "label": "IsUsingSpatialFilter()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsUsingSpatialFilter(FInternalNetRefIndex ObjectIndex)"
   },
   {
     "label": "SetConnectionFilter()",
     "kind": "Method",
     "detail": "Function (bool)",
     "insertText": "SetConnectionFilter(FInternalNetRefIndex ObjectIndex, const FNetBitArrayView& ConnectionIndices, ENetFilterStatus ReplicationStatus)"
+  },
+  {
+    "label": "GetFilterHandle()",
+    "kind": "Method",
+    "detail": "Function (FNetObjectFilterHandle)",
+    "insertText": "GetFilterHandle(const FName FilterName)"
+  },
+  {
+    "label": "GetFilter()",
+    "kind": "Method",
+    "detail": "Function (UNetObjectFilter*)",
+    "insertText": "GetFilter(const FName FilterName)"
+  },
+  {
+    "label": "GetFilterName()",
+    "kind": "Method",
+    "detail": "Function (FName)",
+    "insertText": "GetFilterName(FNetObjectFilterHandle Filter)"
+  },
+  {
+    "label": "BuildAlwaysRelevantList()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "BuildAlwaysRelevantList(FNetBitArrayView OutAlwaysRelevantList, const FNetBitArrayView ScopeList)"
+  },
+  {
+    "label": "BuildObjectsInFilterList()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "BuildObjectsInFilterList(FNetBitArrayView OutObjectsInFilter, FName FilterName)"
   },
   {
     "label": "AddConnection()",
@@ -186,9 +234,21 @@
     "insertText": "RemoveGroupFilter(FNetObjectGroupHandle GroupHandle)"
   },
   {
+    "label": "IsExclusionFilterGroup()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsExclusionFilterGroup(FNetObjectGroupHandle GroupHandle)"
+  },
+  {
+    "label": "IsInclusionFilterGroup()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "IsInclusionFilterGroup(FNetObjectGroupHandle GroupHandle)"
+  },
+  {
     "label": "SetGroupFilterStatus()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "SetGroupFilterStatus(FNetObjectGroupHandle GroupHandle, ENetFilterStatus ReplicationStatus)"
   },
   {
@@ -202,6 +262,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "SetGroupFilterStatus(FNetObjectGroupHandle GroupHandle, uint32 ConnectionId, ENetFilterStatus ReplicationStatus)"
+  },
+  {
+    "label": "GetGroupFilterStatus()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "GetGroupFilterStatus(FNetObjectGroupHandle GroupHandle, uint32 ConnectionId, ENetFilterStatus& OutReplicationStatus)"
   },
   {
     "label": "NotifyObjectAddedToGroup()",
@@ -240,21 +306,33 @@
     "insertText": "RemoveSubObjectFilter(FNetObjectGroupHandle GroupHandle)"
   },
   {
+    "label": "IsSubObjectFilterGroup()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsSubObjectFilterGroup(FNetObjectGroupHandle GroupHandle)"
+  },
+  {
     "label": "SetSubObjectFilterStatus()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "SetSubObjectFilterStatus(FNetObjectGroupHandle GroupHandle, FConnectionHandle ConnectionHandle, ENetFilterStatus ReplicationStatus)"
   },
   {
-    "label": "Deinit()",
+    "label": "GetSubObjectFilterStatus()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "Deinit()"
+    "detail": "Function (bool)",
+    "insertText": "GetSubObjectFilterStatus(FNetObjectGroupHandle GroupHandle, uint32 ParentConnectionId, ENetFilterStatus& OutReplicationStatus)"
+  },
+  {
+    "label": "PrintFilterObjectInfo()",
+    "kind": "Method",
+    "detail": "Function (FString)",
+    "insertText": "PrintFilterObjectInfo(FInternalNetRefIndex ObjectIndex, uint32 ConnectionId)"
   },
   {
     "label": "StaticChecks()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (FNetBitArray ConnectionFilteredObjects ; FNetBitArray GroupExcludedObjects ; FNetBitArray ObjectsInScopeBeforeDynamicFiltering ; FNetBitArray GroupIncludedObjects ; FNetBitArray ObjectsInScope ; FNetBitArray DynamicFilteredOutObjects ; FNetBitArray InProgressDynamicFilteredOutObjects ; FNetBitArray DynamicFilteredOutObjectsHysteresisAdjusted ; FObjectScopeHysteresisUpdater HysteresisUpdater ; } ; struct FPerObjectInfo { uint32 ConnectionIds [ 1 ] ; } ; uint32 UsedPerObjectInfoStorageGrowSize = 3 2 ; typedef uint32 PerObjectInfoIndexType ; struct FPerGroupInfo { PerObjectInfoIndexType ConnectionStateIndex ; } ; class FPerSubObjectFilterGroupInfo { public : FSharedConnectionFilterStatusCollection ConnectionFilterStatus ; PerObjectInfoIndexType ConnectionStateIndex = 0 ; } ; struct FFilterInfo { TStrongObjectPtr<UNetObjectFilter> Filter ; FName Name ; uint32 ObjectCount = 0 ; } ; private : class FUpdateDirtyObjectsBatchHelper ; FNetObjectFilteringInfoAccessor ; FPerSubObjectFilterGroupInfo ; void)",
     "insertText": "StaticChecks()"
   },
   {
@@ -372,6 +450,12 @@
     "insertText": "FilterNonRelevantObjects()"
   },
   {
+    "label": "HasDynamicFilters()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "HasDynamicFilters()"
+  },
+  {
     "label": "ClearGroupExclusionFilterEffectsForObject()",
     "kind": "Method",
     "detail": "Function (bool)",
@@ -382,6 +466,18 @@
     "kind": "Method",
     "detail": "Function (bool)",
     "insertText": "ClearGroupInclusionFilterEffectsForObject(uint32 ObjectIndex, uint32 ConnectionId)"
+  },
+  {
+    "label": "HasOwnerFilter()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "HasOwnerFilter(uint32 ObjectIndex)"
+  },
+  {
+    "label": "HasConnectionFilter()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "HasConnectionFilter(uint32 ObjectIndex)"
   },
   {
     "label": "AllocPerObjectInfo()",
@@ -396,10 +492,22 @@
     "insertText": "FreePerObjectInfo(PerObjectInfoIndexType Index)"
   },
   {
+    "label": "AllocPerObjectInfoForObject()",
+    "kind": "Method",
+    "detail": "Function (FPerObjectInfo*)",
+    "insertText": "AllocPerObjectInfoForObject(uint32 ObjectIndex)"
+  },
+  {
     "label": "FreePerObjectInfoForObject()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "FreePerObjectInfoForObject(uint32 ObjectIndex)"
+  },
+  {
+    "label": "GetPerObjectInfo()",
+    "kind": "Method",
+    "detail": "Function (FPerObjectInfo*)",
+    "insertText": "GetPerObjectInfo(PerObjectInfoIndexType Index)"
   },
   {
     "label": "SetPerObjectInfoFilterStatus()",
@@ -408,16 +516,58 @@
     "insertText": "SetPerObjectInfoFilterStatus(FPerObjectInfo& ObjectInfo, ENetFilterStatus ReplicationStatus)"
   },
   {
+    "label": "CreatePerSubObjectGroupFilterInfo()",
+    "kind": "Method",
+    "detail": "Function (FPerSubObjectFilterGroupInfo&)",
+    "insertText": "CreatePerSubObjectGroupFilterInfo(FNetObjectGroupHandle::FGroupIndexType GroupIndex)"
+  },
+  {
     "label": "DestroyPerSubObjectGroupFilterInfo()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "DestroyPerSubObjectGroupFilterInfo(FNetObjectGroupHandle::FGroupIndexType GroupIndex)"
   },
   {
+    "label": "GetPerSubObjectFilterGroupInfo()",
+    "kind": "Method",
+    "detail": "Function (FPerSubObjectFilterGroupInfo*)",
+    "insertText": "GetPerSubObjectFilterGroupInfo(FNetObjectGroupHandle::FGroupIndexType GroupIndex)"
+  },
+  {
+    "label": "GetConnectionFilterStatus()",
+    "kind": "Method",
+    "detail": "Function (ENetFilterStatus)",
+    "insertText": "GetConnectionFilterStatus(const FPerObjectInfo& ObjectInfo, uint32 ConnectionId)"
+  },
+  {
+    "label": "IsAnyConnectionFilterStatusAllowed()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsAnyConnectionFilterStatusAllowed(const FPerObjectInfo& ObjectInfo)"
+  },
+  {
+    "label": "IsAnyConnectionFilterStatusDisallowed()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsAnyConnectionFilterStatusDisallowed(const FPerObjectInfo& ObjectInfo)"
+  },
+  {
     "label": "SetConnectionFilterStatus()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "SetConnectionFilterStatus(FPerObjectInfo& ObjectInfo, uint32 ConnectionId, ENetFilterStatus ReplicationStatus)"
+  },
+  {
+    "label": "IsExcludedByAnyGroup()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsExcludedByAnyGroup(uint32 ObjectInternalIndex, uint32 ConnectionId)"
+  },
+  {
+    "label": "IsIncludedByAnyGroup()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsIncludedByAnyGroup(uint32 ObjectInternalIndex, uint32 ConnectionId)"
   },
   {
     "label": "InternalSetExclusionGroupFilterStatus()",
@@ -436,6 +586,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "InternalSetInclusionGroupFilterStatus(FNetObjectGroupHandle GroupHandle, uint32 ConnectionId, ENetFilterStatus ReplicationStatus)"
+  },
+  {
+    "label": "GetOwningConnectionIfDirty()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetOwningConnectionIfDirty(uint32 ObjectIndex)"
   },
   {
     "label": "RemoveFromDynamicFilter()",
@@ -462,9 +618,27 @@
     "insertText": "GetNetObjectFilteringInfos()"
   },
   {
+    "label": "GetObjectScopeHysteresisFrameCount()",
+    "kind": "Method",
+    "detail": "Function (uint8)",
+    "insertText": "GetObjectScopeHysteresisFrameCount(FName Profile)"
+  },
+  {
+    "label": "HasSubObjectInScopeWithFilteredOutRootObject()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "HasSubObjectInScopeWithFilteredOutRootObject(FNetBitArrayView Objects)"
+  },
+  {
+    "label": "HasSubObjectInScopeWithFilteredOutRootObject()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "HasSubObjectInScopeWithFilteredOutRootObject(uint32 connectionId)"
+  },
+  {
     "label": "ClearFromHysteresis()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (private : enum EHysteresisProcessingMode : uint32 { Disabled,Enabled,} ; struct FObjectScopeHysteresisState { public : void)",
     "insertText": "ClearFromHysteresis(FInternalNetRefIndex NetRefIndex)"
   }
 ]

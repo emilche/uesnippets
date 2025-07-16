@@ -1,11 +1,5 @@
 [
   {
-    "label": "value",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "value"
-  },
-  {
     "label": "FOpenGLErrorScope",
     "kind": "Type",
     "detail": "struct declaration",
@@ -18,10 +12,10 @@
     "insertText": "FRHICommandGLCommandString"
   },
   {
-    "label": "IsOGLDebugOutputEnabled()",
+    "label": "ENABLE_VERIFY_GL()",
     "kind": "Method",
-    "detail": "Function (bool)",
-    "insertText": "IsOGLDebugOutputEnabled()"
+    "detail": "Function (# pragma once # include \" RHICommandList . h \" # include \" OpenGLThirdParty . h \" # include \" OpenGLShaderResources . h \" # define)",
+    "insertText": "ENABLE_VERIFY_GL(0 & DO_CHECK) #define ENABLE_VERIFY_GL_TRACE 0 #define ENABLE_DEBUG_OUTPUT (!UE_BUILD_SHIPPING) #if !ENABLE_DEBUG_OUTPUT inline bool IsOGLDebugOutputEnabled()"
   },
   {
     "label": "GetOGLDebugOutputLevel()",
@@ -30,10 +24,10 @@
     "insertText": "GetOGLDebugOutputLevel()"
   },
   {
-    "label": "GetOpenGLCubeFace()",
+    "label": "ENABLE_VERIFY_GL_THREAD()",
     "kind": "Method",
-    "detail": "Function (GLenum)",
-    "insertText": "GetOpenGLCubeFace(ECubeFace Face)"
+    "detail": "Function (# endif # define)",
+    "insertText": "ENABLE_VERIFY_GL_THREAD(!(UE_BUILD_TEST || UE_BUILD_SHIPPING)) #define ENABLE_UNIFORM_BUFFER_LAYOUT_VERIFICATION ( 0 & UE_BUILD_DEBUG & (!PLATFORM_ANDROID)) #define ENABLE_UNIFORM_BUFFER_LAYOUT_DUMP 0 #define ENABLE_OPENGL_DEBUG_GROUPS 1 #define OPENGL_PERFORMANCE_DATA_INVALID (ENABLE_VERIFY_GL | ENABLE_UNIFORM_BUFFER_LAYOUT_VERIFICATION | DEBUG_GL_SHADERS) GLenum GetOpenGLCubeFace(ECubeFace Face)"
   },
   {
     "label": "PlatformOpenGLContextValid()",
@@ -42,10 +36,22 @@
     "insertText": "PlatformOpenGLContextValid()"
   },
   {
-    "label": "PlatformGlGetError()",
+    "label": "CHECK_EXPECTED_GL_THREAD()",
     "kind": "Method",
-    "detail": "Function (int32)",
-    "insertText": "PlatformGlGetError()"
+    "detail": "Function (# if ENABLE_VERIFY_GL_THREAD # define)",
+    "insertText": "CHECK_EXPECTED_GL_THREAD() \\ if (!PlatformOpenGLContextValid())"
+  },
+  {
+    "label": "UE_LOG()",
+    "kind": "Method",
+    "detail": "Function (\\)",
+    "insertText": "UE_LOG(LogRHI, Fatal, TEXT(\"Potential use of GL context from incorrect thread. [ValidContext = %d] && [IsInGameThread() = %d, IsInRenderingThread() = %d, IsInRHIThread() = %d, IsRunningRHIInSeparateThread() = %d]\"), PlatformOpenGLContextValid(), IsInGameThread(), IsInRenderingThread(), IsInRHIThread(), IsRunningRHIInSeparateThread())"
+  },
+  {
+    "label": "CHECK_EXPECTED_GL_THREAD()",
+    "kind": "Method",
+    "detail": "Function (\\ } # else # define)",
+    "insertText": "CHECK_EXPECTED_GL_THREAD() #endif #if ENABLE_VERIFY_GL extern int32 PlatformGlGetError()"
   },
   {
     "label": "VerifyOpenGLResult()",
@@ -54,21 +60,93 @@
     "insertText": "VerifyOpenGLResult(GLenum ErrorCode, const TCHAR* Msg1, const TCHAR* Msg2, const TCHAR* Filename, uint32 Line)"
   },
   {
-    "label": "CheckForErrors()",
+    "label": "VERIFY_GL()",
     "kind": "Method",
-    "detail": "Function (endif)",
-    "insertText": "CheckForErrors(0)"
+    "detail": "Function (# define)",
+    "insertText": "VERIFY_GL(msg)"
+  },
+  {
+    "label": "PlatformGlGetError()",
+    "kind": "Method",
+    "detail": "Function (GLenum ErrorCode =)",
+    "insertText": "PlatformGlGetError()"
+  },
+  {
+    "label": "FOpenGLErrorScope()",
+    "kind": "Method",
+    "detail": "Function (} } struct FOpenGLErrorScope { const char* FunctionName ; const TCHAR* Filename ; const uint32 Line ;)",
+    "insertText": "FOpenGLErrorScope(const char* InFunctionName, const TCHAR* InFilename, const uint32 InLine) : FunctionName(InFunctionName) , Filename(InFilename) , Line(InLine)"
+  },
+  {
+    "label": "UE_LOG()",
+    "kind": "Method",
+    "detail": "Function (# if ENABLE_VERIFY_GL_TRACE)",
+    "insertText": "UE_LOG(LogRHI, Log, TEXT(\"log before %s(%d): %s\"), InFilename, InLine, ANSI_TO_TCHAR(InFunctionName))"
   },
   {
     "label": "CheckForErrors()",
     "kind": "Method",
-    "detail": "Function (endif)",
+    "detail": "Function (# endif)",
+    "insertText": "CheckForErrors(0)"
+  },
+  {
+    "label": "FOpenGLErrorScope()",
+    "kind": "Method",
+    "detail": "Function (} ~)",
+    "insertText": "FOpenGLErrorScope()"
+  },
+  {
+    "label": "UE_LOG()",
+    "kind": "Method",
+    "detail": "Function (# if ENABLE_VERIFY_GL_TRACE)",
+    "insertText": "UE_LOG(LogRHI, Log, TEXT(\"log after %s(%d): %s\"), Filename, Line, ANSI_TO_TCHAR(FunctionName))"
+  },
+  {
+    "label": "CheckForErrors()",
+    "kind": "Method",
+    "detail": "Function (# endif)",
     "insertText": "CheckForErrors(1)"
+  },
+  {
+    "label": "CheckForErrors()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "CheckForErrors(int32 BeforeOrAfter)"
   },
   {
     "label": "TEXT()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "TEXT(\"FRHICommandGLCommand\")"
+    "detail": "Function (const TCHAR* PrefixStrings [ ] = {)",
+    "insertText": "TEXT(\"Before \"), TEXT(\"During \")"
+  },
+  {
+    "label": "MACRO_TOKENIZER()",
+    "kind": "Method",
+    "detail": "Function (} } } ; # define)",
+    "insertText": "MACRO_TOKENIZER(IdentifierName, Msg, FileName, LineNumber) FOpenGLErrorScope IdentifierName_ ## LineNumber (Msg, FileName, LineNumber) #define MACRO_TOKENIZER2(IdentifierName, Msg, FileName, LineNumber) MACRO_TOKENIZER(IdentiferName, Msg, FileName, LineNumber) #define VERIFY_GL_SCOPE_WITH_MSG_STR(MsgStr) CHECK_EXPECTED_GL_THREAD()"
+  },
+  {
+    "label": "MACRO_TOKENIZER2()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "MACRO_TOKENIZER2(ErrorScope_, MsgStr, TEXT(__FILE__), __LINE__) #define VERIFY_GL_SCOPE() VERIFY_GL_SCOPE_WITH_MSG_STR(__FUNCTION__) #define VERIFY_GL_FUNC(Func, ...)"
+  },
+  {
+    "label": "Func()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Func(__VA_ARGS__)"
+  },
+  {
+    "label": "glBlitFramebuffer()",
+    "kind": "Method",
+    "detail": "Function (} # define)",
+    "insertText": "glBlitFramebuffer(...) VERIFY_GL_FUNC(glBlitFramebuffer, __VA_ARGS__) #define glTexImage2D(...) VERIFY_GL_FUNC(glTexImage2D, __VA_ARGS__) #define glTexSubImage2D(...) VERIFY_GL_FUNC(glTexSubImage2D, __VA_ARGS__) #define glCompressedTexImage2D(...) VERIFY_GL_FUNC(glCompressedTexImage2D, __VA_ARGS__) #else #define VERIFY_GL(...) CHECK_EXPECTED_GL_THREAD() #define VERIFY_GL_SCOPE(...) CHECK_EXPECTED_GL_THREAD()"
+  },
+  {
+    "label": "TStr()",
+    "kind": "Method",
+    "detail": "Function (const TCHAR*)",
+    "insertText": "TStr()"
   }
 ]

@@ -36,10 +36,16 @@
     "insertText": "UpdatePoints"
   },
   {
+    "label": "fillWithSpheres()",
+    "kind": "Method",
+    "detail": "Function (# ifndef OPENVDB_TOOLS_VOLUME_TO_SPHERES_HAS_BEEN_INCLUDED # define OPENVDB_TOOLS_VOLUME_TO_SPHERES_HAS_BEEN_INCLUDED # include<openvdb / tree / LeafManager . h> # include<openvdb / math / Math . h> # include \" Morphology . h \" # include \" PointScatter . h \" # include \" LevelSetRebuild . h \" # include \" LevelSetUtil . h \" # include \" VolumeToMesh . h \" # include<tbb / blocked_range . h> # include<tbb / parallel_for . h> # include<tbb / parallel_reduce . h> # include<algorithm> # include<cmath> # include<limits> # include<memory> # include<random> # include<utility> # include<vector> namespace openvdb { OPENVDB_USE_VERSION_NAMESPACE namespace OPENVDB_VERSION_NAME { namespace tools { template<GridT,InterrupterT = util::NullInterrupter> void)",
+    "insertText": "fillWithSpheres(const GridT& grid, std::vector<openvdb::Vec4s>& spheres, const Vec2i& sphereCount = Vec2i(1, 50), bool overlapping = false, float minRadius = 1.0, float maxRadius = std::numeric_limits<float>::max(), float isovalue = 0.0, int instanceCount = 10000, InterrupterT* interrupter = nullptr)"
+  },
+  {
     "label": "create()",
     "kind": "Method",
-    "detail": "Function (Ptr)",
-    "insertText": "create(const GridT& grid, float isovalue = 0.0,\n        InterrupterT* interrupter = nullptr)"
+    "detail": "Function (template<GridT> class ClosestSurfacePoint { public : using Ptr = std::unique_ptr<ClosestSurfacePoint> ; using TreeT = GridT::TreeType ; using BoolTreeT = TreeT::template ValueConverter<bool>::Type ; using Index32TreeT = TreeT::template ValueConverter<Index32>::Type ; using Int16TreeT = TreeT::template ValueConverter<Int16>::Type ; template<InterrupterT = util::NullInterrupter> Ptr)",
+    "insertText": "create(const GridT& grid, float isovalue = 0.0, InterrupterT* interrupter = nullptr)"
   },
   {
     "label": "search()",
@@ -54,9 +60,15 @@
     "insertText": "searchAndReplace(std::vector<Vec3R>& points, std::vector<float>& distances)"
   },
   {
+    "label": "indexTree()",
+    "kind": "Method",
+    "detail": "Function (const Index32TreeT&)",
+    "insertText": "indexTree()"
+  },
+  {
     "label": "initialize()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (template<InterrupterT = util::NullInterrupter> bool)",
     "insertText": "initialize(const GridT&, float isovalue, InterrupterT*)"
   },
   {
@@ -66,10 +78,28 @@
     "insertText": "search(std::vector<Vec3R>&, std::vector<float>&, bool transformPoints)"
   },
   {
+    "label": "PointAccessor()",
+    "kind": "Method",
+    "detail": "Function (} ; namespace v2s_internal { struct PointAccessor {)",
+    "insertText": "PointAccessor(std::vector<Vec3R>& points) : mPoints(points)"
+  },
+  {
+    "label": "add()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "add(const Vec3R &pos)"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (mPoints .)",
+    "insertText": "push_back(pos)"
+  },
+  {
     "label": "LeafOp()",
     "kind": "Method",
-    "detail": "Function (public:)",
-    "insertText": "LeafOp(std::vector<Vec4R>& leafBoundingSpheres,\n        const std::vector<const Index32LeafT*>& leafNodes,\n        const math::Transform& transform,\n        const PointList& surfacePointList)"
+    "detail": "Function (} private : std::vector<Vec3R>& mPoints ; } ; template<Index32LeafT> class LeafOp { public :)",
+    "insertText": "LeafOp(std::vector<Vec4R>& leafBoundingSpheres, const std::vector<const Index32LeafT*>& leafNodes, const math::Transform& transform, const PointList& surfacePointList)"
   },
   {
     "label": "run()",
@@ -78,34 +108,508 @@
     "insertText": "run(bool threaded = true)"
   },
   {
-    "label": "run()",
+    "label": "operator()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "run(bool threaded = true)"
+    "insertText": "operator()(const tbb::blocked_range<size_t>&)"
+  },
+  {
+    "label": "LeafOp()",
+    "kind": "Method",
+    "detail": "Function (private : std::vector<Vec4R>& mLeafBoundingSpheres ; const std::vector<const Index32LeafT*>& mLeafNodes ; const math::Transform& mTransform ; const PointList& mSurfacePointList ; } ; template<Index32LeafT> LeafOp<Index32LeafT)",
+    "insertText": "LeafOp(std::vector<Vec4R>& leafBoundingSpheres, const std::vector<const Index32LeafT*>& leafNodes, const math::Transform& transform, const PointList& surfacePointList) : mLeafBoundingSpheres(leafBoundingSpheres) , mLeafNodes(leafNodes) , mTransform(transform) , mSurfacePointList(surfacePointList)"
   },
   {
     "label": "run()",
     "kind": "Method",
+    "detail": "Function (} template<Index32LeafT> void LeafOp<Index32LeafT)",
+    "insertText": "run(bool threaded)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "run(bool threaded = true)"
+    "insertText": "parallel_for(tbb::blocked_range<size_t>(0, mLeafNodes.size()), *this)"
+  },
+  {
+    "label": "else()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "else(*this)(tbb::blocked_range<size_t>(0, mLeafNodes.size()))"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} } template<Index32LeafT> void LeafOp<Index32LeafT)",
+    "insertText": "operator()(const tbb::blocked_range<size_t>& range)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (Index32LeafT::ValueOnCIter iter ; Vec3s avg ;)",
+    "insertText": "for(size_t n = range.begin(); n != range.end(); ++n)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (avg [ 0 ] = 0 . 0 ; avg [ 1 ] = 0 . 0 ; avg [ 2 ] = 0 . 0 ; int count = 0 ;)",
+    "insertText": "for(iter = mLeafNodes[n]->cbeginValueOn(); iter; ++iter)"
+  },
+  {
+    "label": "getValue()",
+    "kind": "Method",
+    "detail": "Function (avg + = mSurfacePointList [ iter .)",
+    "insertText": "getValue()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (+ + count ; })",
+    "insertText": "if(count > 1) avg *= float(1.0 / double(count))"
+  },
+  {
+    "label": "tmpDist()",
+    "kind": "Method",
+    "detail": "Function (float)",
+    "insertText": "tmpDist(mSurfacePointList[iter.getValue()] - avg).lengthSqr()"
+  },
+  {
+    "label": "NodeOp()",
+    "kind": "Method",
+    "detail": "Function (} Vec4R& sphere = mLeafBoundingSpheres [ n ] ; sphere [ 0 ] = avg [ 0 ] ; sphere [ 1 ] = avg [ 1 ] ; sphere [ 2 ] = avg [ 2 ] ; sphere [ 3 ] = maxDist* 2 . 0 ; } } class NodeOp { public : using IndexRange = std::pair<size_t,size_t> ;)",
+    "insertText": "NodeOp(std::vector<Vec4R>& nodeBoundingSpheres, const std::vector<IndexRange>& leafRanges, const std::vector<Vec4R>& leafBoundingSpheres)"
+  },
+  {
+    "label": "NodeOp()",
+    "kind": "Method",
+    "detail": "Function (private : std::vector<Vec4R>& mNodeBoundingSpheres ; const std::vector<IndexRange>& mLeafRanges ; const std::vector<Vec4R>& mLeafBoundingSpheres ; } ;)",
+    "insertText": "NodeOp(std::vector<Vec4R>& nodeBoundingSpheres, const std::vector<IndexRange>& leafRanges, const std::vector<Vec4R>& leafBoundingSpheres) : mNodeBoundingSpheres(nodeBoundingSpheres) , mLeafRanges(leafRanges) , mLeafBoundingSpheres(leafBoundingSpheres)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "parallel_for(tbb::blocked_range<size_t>(0, mLeafRanges.size()), *this)"
+  },
+  {
+    "label": "else()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "else(*this)(tbb::blocked_range<size_t>(0, mLeafRanges.size()))"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (avg [ 0 ] = 0 . 0 ; avg [ 1 ] = 0 . 0 ; avg [ 2 ] = 0 . 0 ; int count =)",
+    "insertText": "int(mLeafRanges[n].second) - int(mLeafRanges[n].first)"
+  },
+  {
+    "label": "tmpDist()",
+    "kind": "Method",
+    "detail": "Function (pos [ 0 ] = mLeafBoundingSpheres [ i ] [ 0 ] ; pos [ 1 ] = mLeafBoundingSpheres [ i ] [ 1 ] ; pos [ 2 ] = mLeafBoundingSpheres [ i ] [ 2 ] ; const auto radiusSqr = mLeafBoundingSpheres [ i ] [ 3 ] ; double)",
+    "insertText": "tmpDist(pos - avg).lengthSqr()"
+  },
+  {
+    "label": "ClosestPointDist()",
+    "kind": "Method",
+    "detail": "Function (} Vec4R& sphere = mNodeBoundingSpheres [ n ] ; sphere [ 0 ] = avg [ 0 ] ; sphere [ 1 ] = avg [ 1 ] ; sphere [ 2 ] = avg [ 2 ] ; sphere [ 3 ] = maxDist* 2 . 0 ; } } template<Index32LeafT> class ClosestPointDist { public : using IndexRange = std::pair<size_t,size_t> ;)",
+    "insertText": "ClosestPointDist(std::vector<Vec3R>& instancePoints, std::vector<float>& instanceDistances, const PointList& surfacePointList, const std::vector<const Index32LeafT*>& leafNodes, const std::vector<IndexRange>& leafRanges, const std::vector<Vec4R>& leafBoundingSpheres, const std::vector<Vec4R>& nodeBoundingSpheres, size_t maxNodeLeafs, bool transformPoints = false)"
+  },
+  {
+    "label": "evalLeaf()",
+    "kind": "Method",
+    "detail": "Function (private : void)",
+    "insertText": "evalLeaf(size_t index, const Index32LeafT& leaf)"
+  },
+  {
+    "label": "evalNode()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "evalNode(size_t pointIndex, size_t nodeIndex)"
+  },
+  {
+    "label": "ClosestPointDist()",
+    "kind": "Method",
+    "detail": "Function (std::vector<Vec3R>& mInstancePoints ; std::vector<float>& mInstanceDistances ; const PointList& mSurfacePointList ; const std::vector<const Index32LeafT*>& mLeafNodes ; const std::vector<IndexRange>& mLeafRanges ; const std::vector<Vec4R>& mLeafBoundingSpheres ; const std::vector<Vec4R>& mNodeBoundingSpheres ; std::vector<float> mLeafDistances,mNodeDistances ; const bool mTransformPoints ; size_t mClosestPointIndex ; } ; template<Index32LeafT> ClosestPointDist<Index32LeafT)",
+    "insertText": "ClosestPointDist(std::vector<Vec3R>& instancePoints, std::vector<float>& instanceDistances, const PointList& surfacePointList, const std::vector<const Index32LeafT*>& leafNodes, const std::vector<IndexRange>& leafRanges, const std::vector<Vec4R>& leafBoundingSpheres, const std::vector<Vec4R>& nodeBoundingSpheres, size_t maxNodeLeafs, bool transformPoints) : mInstancePoints(instancePoints) , mInstanceDistances(instanceDistances) , mSurfacePointList(surfacePointList) , mLeafNodes(leafNodes) , mLeafRanges(leafRanges) , mLeafBoundingSpheres(leafBoundingSpheres) , mNodeBoundingSpheres(nodeBoundingSpheres) , mLeafDistances(maxNodeLeafs, 0.0) , mNodeDistances(leafRanges.size(), 0.0) , mTransformPoints(transformPoints) , mClosestPointIndex(0)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "parallel_for(tbb::blocked_range<size_t>(0, mInstancePoints.size()), *this)"
+  },
+  {
+    "label": "else()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "else(*this)(tbb::blocked_range<size_t>(0, mInstancePoints.size()))"
+  },
+  {
+    "label": "size_t()",
+    "kind": "Method",
+    "detail": "Function (Index32LeafT::ValueOnCIter iter ; const Vec3s center = mInstancePoints [ index ] ; size_t& closestPointIndex = const_cast<)",
+    "insertText": "size_t(mClosestPointIndex)"
+  },
+  {
+    "label": "tmpDist()",
+    "kind": "Method",
+    "detail": "Function (float)",
+    "insertText": "tmpDist(point - center).lengthSqr()"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (const Vec3R& pos = mInstancePoints [ pointIndex ] ; float minDist = mInstanceDistances [ pointIndex ] ; size_t minDistIdx = 0 ; Vec3R center ; bool updatedDist = false ;)",
+    "insertText": "for(size_t i = mLeafRanges[nodeIndex].first, n = 0; i < mLeafRanges[nodeIndex].second; ++i, ++n)"
+  },
+  {
+    "label": "float()",
+    "kind": "Method",
+    "detail": "Function (float& distToLeaf = const_cast<)",
+    "insertText": "float(mLeafDistances[n])"
+  },
+  {
+    "label": "float()",
+    "kind": "Method",
+    "detail": "Function (center [ 0 ] = mLeafBoundingSpheres [ i ] [ 0 ] ; center [ 1 ] = mLeafBoundingSpheres [ i ] [ 1 ] ; center [ 2 ] = mLeafBoundingSpheres [ i ] [ 2 ] ; const auto radiusSqr = mLeafBoundingSpheres [ i ] [ 3 ] ; distToLeaf =)",
+    "insertText": "float(std::max(0.0, (pos - center).lengthSqr() - radiusSqr))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (minDist = distToLeaf ; minDistIdx = i ; updatedDist = true ; } })",
+    "insertText": "if(!updatedDist)"
+  },
+  {
+    "label": "evalLeaf()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "evalLeaf(pointIndex, *mLeafNodes[minDistIdx])"
+  },
+  {
+    "label": "evalLeaf()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "evalLeaf(pointIndex, *mLeafNodes[i])"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (const Vec3R& pos = mInstancePoints [ n ] ; float minDist = mInstanceDistances [ n ] ; size_t minDistIdx = 0 ;)",
+    "insertText": "for(size_t i = 0, I = mNodeDistances.size(); i < I; ++i)"
+  },
+  {
+    "label": "float()",
+    "kind": "Method",
+    "detail": "Function (float& distToNode = const_cast<)",
+    "insertText": "float(mNodeDistances[i])"
+  },
+  {
+    "label": "evalNode()",
+    "kind": "Method",
+    "detail": "Function (minDist = distToNode ; minDistIdx = i ; } })",
+    "insertText": "evalNode(n, minDistIdx)"
+  },
+  {
+    "label": "evalNode()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "evalNode(n, i)"
+  },
+  {
+    "label": "sqrt()",
+    "kind": "Method",
+    "detail": "Function (} } mInstanceDistances [ n ] =)",
+    "insertText": "sqrt(mInstanceDistances[n])"
   },
   {
     "label": "UpdatePoints()",
     "kind": "Method",
-    "detail": "Function (public:)",
-    "insertText": "UpdatePoints(\n        const Vec4s& sphere,\n        const std::vector<Vec3R>& points,\n        std::vector<float>& distances,\n        std::vector<unsigned char>& mask,\n        bool overlapping)"
+    "detail": "Function (} } class UpdatePoints { public :)",
+    "insertText": "UpdatePoints(const Vec4s& sphere, const std::vector<Vec3R>& points, std::vector<float>& distances, std::vector<unsigned char>& mask, bool overlapping)"
   },
   {
-    "label": "run()",
+    "label": "radius()",
+    "kind": "Method",
+    "detail": "Function (float)",
+    "insertText": "radius()"
+  },
+  {
+    "label": "UpdatePoints()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "run(bool threaded = true)"
+    "insertText": "UpdatePoints(UpdatePoints&, tbb::split)"
+  },
+  {
+    "label": "join()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "join(const UpdatePoints& rhs)"
+  },
+  {
+    "label": "UpdatePoints()",
+    "kind": "Method",
+    "detail": "Function (mRadius = rhs . mRadius ; mIndex = rhs . mIndex ; } } private : const Vec4s& mSphere ; const std::vector<Vec3R>& mPoints ; std::vector<float>& mDistances ; std::vector<unsigned char>& mMask ; bool mOverlapping ; float mRadius ; int mIndex ; } ;)",
+    "insertText": "UpdatePoints(const Vec4s& sphere, const std::vector<Vec3R>& points, std::vector<float>& distances, std::vector<unsigned char>& mask, bool overlapping) : mSphere(sphere) , mPoints(points) , mDistances(distances) , mMask(mask) , mOverlapping(overlapping) , mRadius(0.0) , mIndex(0)"
+  },
+  {
+    "label": "UpdatePoints()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "UpdatePoints(UpdatePoints& rhs, tbb::split) : mSphere(rhs.mSphere) , mPoints(rhs.mPoints) , mDistances(rhs.mDistances) , mMask(rhs.mMask) , mOverlapping(rhs.mOverlapping) , mRadius(rhs.mRadius) , mIndex(rhs.mIndex)"
+  },
+  {
+    "label": "parallel_reduce()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "parallel_reduce(tbb::blocked_range<size_t>(0, mPoints.size()), *this)"
+  },
+  {
+    "label": "else()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "else(*this)(tbb::blocked_range<size_t>(0, mPoints.size()))"
+  },
+  {
+    "label": "x()",
+    "kind": "Method",
+    "detail": "Function (pos .)",
+    "insertText": "x() = float(mPoints[n].x())"
+  },
+  {
+    "label": "y()",
+    "kind": "Method",
+    "detail": "Function (pos .)",
+    "insertText": "y() = float(mPoints[n].y())"
+  },
+  {
+    "label": "z()",
+    "kind": "Method",
+    "detail": "Function (pos .)",
+    "insertText": "z() = float(mPoints[n].z())"
+  },
+  {
+    "label": "length()",
+    "kind": "Method",
+    "detail": "Function (float dist = pos .)",
+    "insertText": "length()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (mMask [ n ] = 1 ; continue ; })",
+    "insertText": "if(!mOverlapping)"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (mDistances [ n ] =)",
+    "insertText": "min(mDistances[n], (dist - mSphere[3]))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(mDistances[n] > mRadius)"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (mRadius = mDistances [ n ] ; mIndex =)",
+    "insertText": "int(n)"
+  },
+  {
+    "label": "fillWithSpheres()",
+    "kind": "Method",
+    "detail": "Function (} } } } template<GridT,InterrupterT> void)",
+    "insertText": "fillWithSpheres(const GridT& grid, std::vector<openvdb::Vec4s>& spheres, const Vec2i& sphereCount, bool overlapping, float minRadius, float maxRadius, float isovalue, int instanceCount, InterrupterT* interrupter)"
+  },
+  {
+    "label": "clear()",
+    "kind": "Method",
+    "detail": "Function (spheres .)",
+    "insertText": "clear()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const int minSphereCount = sphereCount [ 0 ],maxSphereCount = sphereCount [ 1 ] ;)",
+    "insertText": "if((minSphereCount > maxSphereCount) || (maxSphereCount < 1))"
+  },
+  {
+    "label": "OPENVDB_LOG_WARN()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "OPENVDB_LOG_WARN(\"fillWithSpheres: minimum sphere count (\" << minSphereCount << \") exceeds maximum count (\" << maxSphereCount << \")\")"
+  },
+  {
+    "label": "copy()",
+    "kind": "Method",
+    "detail": "Function (auto gridPtr = grid .)",
+    "insertText": "copy()"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (isovalue =)",
+    "insertText": "min(isovalue, static_cast<float>(gridPtr->background() - math::Tolerance<float>::value()))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} else)",
+    "insertText": "if(gridPtr->getGridClass() == GRID_FOG_VOLUME)"
+  },
+  {
+    "label": "Clamp()",
+    "kind": "Method",
+    "detail": "Function (isovalue =)",
+    "insertText": "Clamp(isovalue, math::Tolerance<float>::value(), 1.f)"
+  },
+  {
+    "label": "activeVoxelCount()",
+    "kind": "Method",
+    "detail": "Function (} auto numVoxels = gridPtr ->)",
+    "insertText": "activeVoxelCount()"
+  },
+  {
+    "label": "Cbrt()",
+    "kind": "Method",
+    "detail": "Function (const auto scale = 1 . 0 /)",
+    "insertText": "Cbrt(2.0 * 10000.0 / double(numVoxels))"
+  },
+  {
+    "label": "transform()",
+    "kind": "Method",
+    "detail": "Function (auto scaledXform = gridPtr ->)",
+    "insertText": "transform().copy()"
+  },
+  {
+    "label": "preScale()",
+    "kind": "Method",
+    "detail": "Function (scaledXform ->)",
+    "insertText": "preScale(scale)"
+  },
+  {
+    "label": "levelSetRebuild()",
+    "kind": "Method",
+    "detail": "Function (auto newGridPtr =)",
+    "insertText": "levelSetRebuild(*gridPtr, isovalue, LEVEL_SET_HALF_WIDTH, LEVEL_SET_HALF_WIDTH, scaledXform.get(), interrupter)"
+  },
+  {
+    "label": "OPENVDB_LOG_DEBUG_RUNTIME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "OPENVDB_LOG_DEBUG_RUNTIME(\"fillWithSpheres: resampled input grid from \" << numVoxels << \" voxel\" << (numVoxels == 1 ? \"\" : \"s\") << \" to \" << newNumVoxels << \" voxel\" << (newNumVoxels == 1 ? \"\" : \"s\"))"
+  },
+  {
+    "label": "addNarrowBandPoints()",
+    "kind": "Method",
+    "detail": "Function (gridPtr = newGridPtr ; numVoxels = newNumVoxels ; } } const bool)",
+    "insertText": "addNarrowBandPoints(numVoxels < 10000)"
+  },
+  {
+    "label": "max()",
+    "kind": "Method",
+    "detail": "Function (int instances =)",
+    "insertText": "max(instanceCount, maxSphereCount)"
   },
   {
     "label": "mtRand()",
     "kind": "Method",
-    "detail": "Function (RandGen)",
-    "insertText": "mtRand(/*seed=*/0)"
+    "detail": "Function (using TreeT = GridT::TreeType ; using BoolTreeT = TreeT::template ValueConverter<bool>::Type ; using Int16TreeT = TreeT::template ValueConverter<Int16>::Type ; using RandGen = std::mersenne_twister_engine<uint32_t,3 2,3 5 1,1 7 5,1 9,0 xccab8ee7,1 1,0 xffffffff,7,0 x31b6ab00,1 5,0 xffe50000,1 7,1 8 1 2 4 3 3 2 5 3> ; RandGen)",
+    "insertText": "mtRand(0)"
+  },
+  {
+    "label": "tree()",
+    "kind": "Method",
+    "detail": "Function (const TreeT& tree = gridPtr ->)",
+    "insertText": "tree()"
+  },
+  {
+    "label": "transform()",
+    "kind": "Method",
+    "detail": "Function (math::Transform transform = gridPtr ->)",
+    "insertText": "transform()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (std::vector<Vec3R> instancePoints ; { Grid<BoolTreeT>::Ptr interiorMaskPtr ;)",
+    "insertText": "if(gridPtr->getGridClass() == GRID_LEVEL_SET)"
+  },
+  {
+    "label": "sdfInteriorMask()",
+    "kind": "Method",
+    "detail": "Function (interiorMaskPtr =)",
+    "insertText": "sdfInteriorMask(*gridPtr, isovalue)"
+  },
+  {
+    "label": "Ptr()",
+    "kind": "Method",
+    "detail": "Function (} else { interiorMaskPtr = Grid<BoolTreeT)",
+    "insertText": "Ptr(Grid<BoolTreeT>::create(false))"
+  },
+  {
+    "label": "setTransform()",
+    "kind": "Method",
+    "detail": "Function (interiorMaskPtr ->)",
+    "insertText": "setTransform(transform.copy())"
+  },
+  {
+    "label": "tree()",
+    "kind": "Method",
+    "detail": "Function (interiorMaskPtr ->)",
+    "insertText": "tree().topologyUnion(tree)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(interrupter && interrupter->wasInterrupted())"
+  },
+  {
+    "label": "erodeActiveValues()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "erodeActiveValues(interiorMaskPtr->tree(), 1, tools::NN_FACE, tools::IGNORE_TILES)"
+  },
+  {
+    "label": "pruneInactive()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "pruneInactive(interiorMaskPtr->tree())"
+  },
+  {
+    "label": "BoolTreeT()",
+    "kind": "Method",
+    "detail": "Function (auto copyOfTree = StaticPtrCast<)",
+    "insertText": "BoolTreeT(maskTree.copy())"
+  },
+  {
+    "label": "erodeActiveValues()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "erodeActiveValues(maskTree, 1, tools::NN_FACE, tools::IGNORE_TILES)"
+  },
+  {
+    "label": "pruneInactive()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "pruneInactive(maskTree)"
+  },
+  {
+    "label": "setTree()",
+    "kind": "Method",
+    "detail": "Function (interiorMaskPtr ->)",
+    "insertText": "setTree(copyOfTree)"
+  },
+  {
+    "label": "reserve()",
+    "kind": "Method",
+    "detail": "Function (} } instancePoints .)",
+    "insertText": "reserve(instances)"
   },
   {
     "label": "ptnAcc()",
@@ -114,22 +618,214 @@
     "insertText": "ptnAcc(instancePoints)"
   },
   {
+    "label": "Index64()",
+    "kind": "Method",
+    "detail": "Function (const auto scatterCount =)",
+    "insertText": "Index64(addNarrowBandPoints ? (instances / 2) : instances)"
+  },
+  {
     "label": "scatter()",
     "kind": "Method",
-    "detail": "Function (InterrupterT>)",
-    "insertText": "scatter(\n            ptnAcc, scatterCount, mtRand, 1.0, interrupter)"
+    "detail": "Function (UniformPointScatter<v2s_internal::PointAccessor,RandGen,InterrupterT>)",
+    "insertText": "scatter(ptnAcc, scatterCount, mtRand, 1.0, interrupter)"
+  },
+  {
+    "label": "scatter()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "scatter(*interiorMaskPtr)"
+  },
+  {
+    "label": "create()",
+    "kind": "Method",
+    "detail": "Function (auto csp = ClosestSurfacePoint<GridT)",
+    "insertText": "create(*gridPtr, isovalue, interrupter)"
+  },
+  {
+    "label": "signTree()",
+    "kind": "Method",
+    "detail": "Function (const Int16TreeT& signTree = csp ->)",
+    "insertText": "signTree()"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (const int flags =)",
+    "insertText": "int(it.getValue())"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (instancePoints .)",
+    "insertText": "push_back(transform.indexToWorld(it.getCoord()))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(instancePoints.size() == size_t(instances))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (std::vector<float> instanceRadius ;)",
+    "insertText": "if(!csp->search(instancePoints, instanceRadius))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (float largestRadius = 0 . 0 ; int largestRadiusIdx = 0 ;)",
+    "insertText": "for(size_t n = 0, N = instancePoints.size(); n < N; ++n)"
+  },
+  {
+    "label": "instanceMask()",
+    "kind": "Method",
+    "detail": "Function (} } std::vector<unsigned char>)",
+    "insertText": "instanceMask(instancePoints.size(), 0)"
+  },
+  {
+    "label": "float()",
+    "kind": "Method",
+    "detail": "Function (minRadius =)",
+    "insertText": "float(minRadius * transform.voxelSize()[0])"
+  },
+  {
+    "label": "float()",
+    "kind": "Method",
+    "detail": "Function (maxRadius =)",
+    "insertText": "float(maxRadius * transform.voxelSize()[0])"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (largestRadius =)",
+    "insertText": "min(maxRadius, largestRadius)"
+  },
+  {
+    "label": "sphere()",
+    "kind": "Method",
+    "detail": "Function (const Vec4s)",
+    "insertText": "sphere(float(instancePoints[largestRadiusIdx].x()), float(instancePoints[largestRadiusIdx].y()), float(instancePoints[largestRadiusIdx].z()), largestRadius)"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (spheres .)",
+    "insertText": "push_back(sphere)"
   },
   {
     "label": "op()",
     "kind": "Method",
-    "detail": "Function (v2s_internal::UpdatePoints)",
-    "insertText": "op(\n            sphere, instancePoints, instanceRadius, instanceMask, overlapping)"
+    "detail": "Function (instanceMask [ largestRadiusIdx ] = 1 ; v2s_internal::UpdatePoints)",
+    "insertText": "op(sphere, instancePoints, instanceRadius, instanceMask, overlapping)"
+  },
+  {
+    "label": "run()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "run()"
+  },
+  {
+    "label": "index()",
+    "kind": "Method",
+    "detail": "Function (largestRadiusIdx = op .)",
+    "insertText": "index()"
+  },
+  {
+    "label": "create()",
+    "kind": "Method",
+    "detail": "Function (} } template<GridT> template<InterrupterT> ClosestSurfacePoint<GridT>::Ptr ClosestSurfacePoint<GridT)",
+    "insertText": "create(const GridT& grid, float isovalue, InterrupterT* interrupter)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (auto csp = Ptr { new ClosestSurfacePoint } ;)",
+    "insertText": "if(!csp->initialize(grid, isovalue, interrupter)) csp.reset()"
   },
   {
     "label": "mask()",
     "kind": "Method",
-    "detail": "Function (BoolTreeT)",
+    "detail": "Function ({ BoolTreeT)",
     "insertText": "mask(false)"
+  },
+  {
+    "label": "identifySurfaceIntersectingVoxels()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "identifySurfaceIntersectingVoxels(mask, tree, ValueT(isovalue))"
+  },
+  {
+    "label": "reset()",
+    "kind": "Method",
+    "detail": "Function (mSignTreePt .)",
+    "insertText": "reset(new Int16TreeT(0))"
+  },
+  {
+    "label": "reset()",
+    "kind": "Method",
+    "detail": "Function (mIdxTreePt .)",
+    "insertText": "reset(new Index32TreeT(std::numeric_limits<Index32>::max()))"
+  },
+  {
+    "label": "computeAuxiliaryData()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "computeAuxiliaryData(*mSignTreePt, *mIdxTreePt, mask, tree, ValueT(isovalue))"
+  },
+  {
+    "label": "getNodes()",
+    "kind": "Method",
+    "detail": "Function (using Int16LeafNodeType = Int16TreeT::LeafNodeType ; using Index32LeafNodeType = Index32TreeT::LeafNodeType ; std::vector<Int16LeafNodeType*> signFlagsLeafNodes ; mSignTreePt ->)",
+    "insertText": "getNodes(signFlagsLeafNodes)"
+  },
+  {
+    "label": "auxiliaryLeafNodeRange()",
+    "kind": "Method",
+    "detail": "Function (const tbb::blocked_range<size_t>)",
+    "insertText": "auxiliaryLeafNodeRange(0, signFlagsLeafNodes.size())"
+  },
+  {
+    "label": "leafNodeOffsets()",
+    "kind": "Method",
+    "detail": "Function (std::unique_ptr<Index32 [ ]>)",
+    "insertText": "leafNodeOffsets(new Index32[signFlagsLeafNodes.size()])"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "parallel_for(auxiliaryLeafNodeRange, volume_to_mesh_internal::LeafNodePointCount<Int16LeafNodeType::LOG2DIM> (signFlagsLeafNodes, leafNodeOffsets))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function ({ Index32 pointCount = 0 ;)",
+    "insertText": "for(size_t n = 0, N = signFlagsLeafNodes.size(); n < N; ++n)"
+  },
+  {
+    "label": "size_t()",
+    "kind": "Method",
+    "detail": "Function (const Index32 tmp = leafNodeOffsets [ n ] ; leafNodeOffsets [ n ] = pointCount ; pointCount + = tmp ; } mPointListSize =)",
+    "insertText": "size_t(pointCount)"
+  },
+  {
+    "label": "reset()",
+    "kind": "Method",
+    "detail": "Function (mSurfacePointList .)",
+    "insertText": "reset(new Vec3s[mPointListSize])"
+  },
+  {
+    "label": "getNodes()",
+    "kind": "Method",
+    "detail": "Function (} std::vector<Index32LeafNodeType*> pointIndexLeafNodes ; mIdxTreePt ->)",
+    "insertText": "getNodes(pointIndexLeafNodes)"
+  },
+  {
+    "label": "parallel_for()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "parallel_for(auxiliaryLeafNodeRange, volume_to_mesh_internal::ComputePoints<TreeT>( mSurfacePointList.get(), tree, pointIndexLeafNodes, signFlagsLeafNodes, leafNodeOffsets, transform, ValueT(isovalue)))"
   },
   {
     "label": "idxLeafs()",
@@ -138,10 +834,118 @@
     "insertText": "idxLeafs(*mIdxTreePt)"
   },
   {
+    "label": "static_assert()",
+    "kind": "Method",
+    "detail": "Function (using Index32RootNodeT = Index32TreeT::RootNodeType ; using Index32NodeChainT = Index32RootNodeT::NodeChainType ;)",
+    "insertText": "static_assert(Index32NodeChainT::Size > 1, \"expected tree depth greater than one\")"
+  },
+  {
+    "label": "cbeginNode()",
+    "kind": "Method",
+    "detail": "Function (using Index32InternalNodeT = Index32NodeChainT::template Get<1> ; Index32TreeT::NodeCIter nIt = mIdxTreePt ->)",
+    "insertText": "cbeginNode()"
+  },
+  {
+    "label": "setMinDepth()",
+    "kind": "Method",
+    "detail": "Function (nIt .)",
+    "insertText": "setMinDepth(Index32TreeT::NodeCIter::LEAF_DEPTH - 1)"
+  },
+  {
+    "label": "setMaxDepth()",
+    "kind": "Method",
+    "detail": "Function (nIt .)",
+    "insertText": "setMaxDepth(Index32TreeT::NodeCIter::LEAF_DEPTH - 1)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (std::vector<const Index32InternalNodeT*> internalNodes ; const Index32InternalNodeT* node = nullptr ;)",
+    "insertText": "for(; nIt; ++nIt)"
+  },
+  {
+    "label": "getNode()",
+    "kind": "Method",
+    "detail": "Function (nIt .)",
+    "insertText": "getNode(node)"
+  },
+  {
+    "label": "IndexRange()",
+    "kind": "Method",
+    "detail": "Function (} std::vector<)",
+    "insertText": "IndexRange().swap(mLeafRanges)"
+  },
+  {
+    "label": "resize()",
+    "kind": "Method",
+    "detail": "Function (mLeafRanges .)",
+    "insertText": "resize(internalNodes.size())"
+  },
+  {
+    "label": "Index32LeafT()",
+    "kind": "Method",
+    "detail": "Function (std::vector<const)",
+    "insertText": "Index32LeafT().swap(mLeafNodes)"
+  },
+  {
+    "label": "reserve()",
+    "kind": "Method",
+    "detail": "Function (mLeafNodes .)",
+    "insertText": "reserve(idxLeafs.leafCount())"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (Index32InternalNodeT::ChildOnCIter leafIt ; mMaxNodeLeafs = 0 ;)",
+    "insertText": "for(size_t n = 0, N = internalNodes.size(); n < N; ++n)"
+  },
+  {
+    "label": "size()",
+    "kind": "Method",
+    "detail": "Function (mLeafRanges [ n ] . first = mLeafNodes .)",
+    "insertText": "size()"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (size_t leafCount = 0 ;)",
+    "insertText": "for(leafIt = internalNodes[n]->cbeginChildOn(); leafIt; ++leafIt)"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (mLeafNodes .)",
+    "insertText": "push_back(&(*leafIt))"
+  },
+  {
+    "label": "max()",
+    "kind": "Method",
+    "detail": "Function (+ + leafCount ; } mMaxNodeLeafs =)",
+    "insertText": "max(leafCount, mMaxNodeLeafs)"
+  },
+  {
+    "label": "Vec4R()",
+    "kind": "Method",
+    "detail": "Function (} std::vector<)",
+    "insertText": "Vec4R().swap(mLeafBoundingSpheres)"
+  },
+  {
+    "label": "resize()",
+    "kind": "Method",
+    "detail": "Function (mLeafBoundingSpheres .)",
+    "insertText": "resize(mLeafNodes.size())"
+  },
+  {
     "label": "leafBS()",
     "kind": "Method",
     "detail": "Function (v2s_internal::LeafOp<Index32LeafT>)",
-    "insertText": "leafBS(\n        mLeafBoundingSpheres, mLeafNodes, transform, mSurfacePointList)"
+    "insertText": "leafBS(mLeafBoundingSpheres, mLeafNodes, transform, mSurfacePointList)"
+  },
+  {
+    "label": "Vec4R()",
+    "kind": "Method",
+    "detail": "Function (std::vector<)",
+    "insertText": "Vec4R().swap(mNodeBoundingSpheres)"
   },
   {
     "label": "nodeBS()",
@@ -150,15 +954,15 @@
     "insertText": "nodeBS(mNodeBoundingSpheres, mLeafRanges, mLeafBoundingSpheres)"
   },
   {
+    "label": "resize()",
+    "kind": "Method",
+    "detail": "Function (distances .)",
+    "insertText": "resize(points.size(), std::numeric_limits<float>::infinity())"
+  },
+  {
     "label": "cpd()",
     "kind": "Method",
     "detail": "Function (v2s_internal::ClosestPointDist<Index32LeafT>)",
-    "insertText": "cpd(points, distances, mSurfacePointList,\n        mLeafNodes, mLeafRanges, mLeafBoundingSpheres, mNodeBoundingSpheres,\n        mMaxNodeLeafs, transformPoints)"
-  },
-  {
-    "label": "search()",
-    "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "search(points, distances, true)"
+    "insertText": "cpd(points, distances, mSurfacePointList, mLeafNodes, mLeafRanges, mLeafBoundingSpheres, mNodeBoundingSpheres, mMaxNodeLeafs, transformPoints)"
   }
 ]

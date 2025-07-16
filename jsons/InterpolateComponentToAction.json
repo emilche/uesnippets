@@ -6,6 +6,102 @@
     "insertText": "FInterpolateComponentToAction"
   },
   {
+    "label": "FInterpolateComponentToAction()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # include \" UObject / WeakObjectPtr . h \" # include \" Components / SceneComponent . h \" # include \" Engine / LatentActionManager . h \" # include \" LatentActions . h \" class FInterpolateComponentToAction : public FPendingLatentAction { public : float TotalTime ; float TimeElapsed ; bool bInterpolating ; FName ExecutionFunction ; int32 OutputLink ; FWeakObjectPtr CallbackTarget ; TWeakObjectPtr<USceneComponent> TargetComponent ; bool bInterpRotation ; FRotator InitialRotation ; FRotator TargetRotation ; bool bInterpLocation ; FVector InitialLocation ; FVector TargetLocation ; bool bEaseIn ; bool bEaseOut ; bool bForceShortestRotationPath ;)",
+    "insertText": "FInterpolateComponentToAction(float Duration, const FLatentActionInfo& LatentInfo, USceneComponent* Component, bool bInEaseOut, bool bInEaseIn, bool bInForceShortestRotationPath) : TotalTime(Duration) , TimeElapsed(0.f) , bInterpolating(true) , ExecutionFunction(LatentInfo.ExecutionFunction) , OutputLink(LatentInfo.Linkage) , CallbackTarget(LatentInfo.CallbackTarget) , TargetComponent(Component) , bInterpRotation(true) , InitialRotation(FRotator::ZeroRotator) , TargetRotation(FRotator::ZeroRotator) , bInterpLocation(true) , InitialLocation(FVector::ZeroVector) , TargetLocation(FVector::ZeroVector) , bEaseIn(bInEaseIn) , bEaseOut(bInEaseOut) , bForceShortestRotationPath(bInForceShortestRotationPath)"
+  },
+  {
+    "label": "UpdateOperation()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "UpdateOperation(FLatentResponse& Response)"
+  },
+  {
+    "label": "ElapsedTime()",
+    "kind": "Method",
+    "detail": "Function (TimeElapsed + = Response .)",
+    "insertText": "ElapsedTime()"
+  },
+  {
+    "label": "bComplete()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "bComplete(TimeElapsed >= TotalTime)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const float BlendExp = 2 . f ; float DurationPct = TimeElapsed / TotalTime ; float BlendPct ;)",
+    "insertText": "if(bEaseIn)"
+  },
+  {
+    "label": "InterpEaseInOut()",
+    "kind": "Method",
+    "detail": "Function (BlendPct =)",
+    "insertText": "InterpEaseInOut(0.f, 1.f, DurationPct, BlendExp)"
+  },
+  {
+    "label": "Lerp()",
+    "kind": "Method",
+    "detail": "Function (} else { BlendPct =)",
+    "insertText": "Lerp(0.f, 1.f, FMath::Pow(DurationPct, BlendExp))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} } else {)",
+    "insertText": "if(bEaseOut)"
+  },
+  {
+    "label": "Lerp()",
+    "kind": "Method",
+    "detail": "Function (BlendPct =)",
+    "insertText": "Lerp(0.f, 1.f, FMath::Pow(DurationPct, 1.f / BlendExp))"
+  },
+  {
+    "label": "Lerp()",
+    "kind": "Method",
+    "detail": "Function (} else { BlendPct =)",
+    "insertText": "Lerp(0.f, 1.f, DurationPct)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "if(bInterpLocation)"
+  },
+  {
+    "label": "Lerp()",
+    "kind": "Method",
+    "detail": "Function (FVector NewLocation = bComplete ? TargetLocation :)",
+    "insertText": "Lerp(InitialLocation, TargetLocation, BlendPct)"
+  },
+  {
+    "label": "SetRelativeLocation()",
+    "kind": "Method",
+    "detail": "Function (TargetComponent ->)",
+    "insertText": "SetRelativeLocation(NewLocation, false)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(bInterpRotation && TargetComponent.IsValid())"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (FRotator NewRotation ;)",
+    "insertText": "if(bComplete)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (NewRotation = TargetRotation ; } else)",
+    "insertText": "if(bForceShortestRotationPath)"
+  },
+  {
     "label": "AQuat()",
     "kind": "Method",
     "detail": "Function (FQuat)",
@@ -16,5 +112,53 @@
     "kind": "Method",
     "detail": "Function (FQuat)",
     "insertText": "BQuat(TargetRotation)"
+  },
+  {
+    "label": "Slerp()",
+    "kind": "Method",
+    "detail": "Function (FQuat Result =)",
+    "insertText": "Slerp(AQuat, BQuat, BlendPct)"
+  },
+  {
+    "label": "Normalize()",
+    "kind": "Method",
+    "detail": "Function (Result .)",
+    "insertText": "Normalize()"
+  },
+  {
+    "label": "Rotator()",
+    "kind": "Method",
+    "detail": "Function (NewRotation = Result .)",
+    "insertText": "Rotator()"
+  },
+  {
+    "label": "Lerp()",
+    "kind": "Method",
+    "detail": "Function (} else { NewRotation =)",
+    "insertText": "Lerp(InitialRotation, TargetRotation, BlendPct)"
+  },
+  {
+    "label": "SetRelativeRotation()",
+    "kind": "Method",
+    "detail": "Function (} TargetComponent ->)",
+    "insertText": "SetRelativeRotation(NewRotation, false)"
+  },
+  {
+    "label": "FinishAndTriggerIf()",
+    "kind": "Method",
+    "detail": "Function (} } Response .)",
+    "insertText": "FinishAndTriggerIf(bComplete || !bInterpolating, ExecutionFunction, OutputLink, CallbackTarget)"
+  },
+  {
+    "label": "GetDescription()",
+    "kind": "Method",
+    "detail": "Function (} # if WITH_EDITOR FString)",
+    "insertText": "GetDescription()"
+  },
+  {
+    "label": "FNumberFormattingOptions()",
+    "kind": "Method",
+    "detail": "Function (const FNumberFormattingOptions DelayTimeFormatOptions =)",
+    "insertText": "FNumberFormattingOptions() .SetMinimumFractionalDigits(3) .SetMaximumFractionalDigits(3)"
   }
 ]

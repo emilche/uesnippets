@@ -1,26 +1,104 @@
 [
   {
-    "label": "__builtin_bswap16()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_bswap16(x)"
+    "detail": "Function (# ifndef VPX_VPX_UTIL_ENDIAN_INL_H_ # define VPX_VPX_UTIL_ENDIAN_INL_H_ # include<stdlib . h> # include \" . / vpx_config . h \" # include \" vpx / vpx_integer . h \" # if)",
+    "insertText": "defined(__GNUC__) #define LOCAL_GCC_VERSION ((__GNUC__ << 8) | __GNUC_MINOR__) #define LOCAL_GCC_PREREQ(maj, min) (LOCAL_GCC_VERSION >= (((maj) << 8) | (min))) #else #define LOCAL_GCC_VERSION 0 #define LOCAL_GCC_PREREQ(maj, min) 0 #endif #ifndef __has_builtin #define __has_builtin(x) 0 #endif #if !defined(WORDS_BIGENDIAN) && \\ (defined(__BIG_ENDIAN__) || defined(_M_PPC) || \\ (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__))) #define WORDS_BIGENDIAN #endif #if defined(WORDS_BIGENDIAN) #define HToLE32 BSwap32 #define HToLE16 BSwap16 #define HToBE64(x) (x) #define HToBE32(x) (x) #else #define HToLE32(x) (x) #define HToLE16(x) (x) #define HToBE64(X) BSwap64(X) #define HToBE32(X) BSwap32(X) #endif #if LOCAL_GCC_PREREQ(4, 8) || __has_builtin(__builtin_bswap16) #define HAVE_BUILTIN_BSWAP16 #endif #if LOCAL_GCC_PREREQ(4, 3) || __has_builtin(__builtin_bswap32) #define HAVE_BUILTIN_BSWAP32 #endif #if LOCAL_GCC_PREREQ(4, 3) || __has_builtin(__builtin_bswap64) #define HAVE_BUILTIN_BSWAP64 #endif #if HAVE_MIPS32 && defined(__mips__) && !defined(__mips64) && \\ defined(__mips_isa_rev) && (__mips_isa_rev >= 2) && (__mips_isa_rev < 6) #define VPX_USE_MIPS32_R2 #endif static INLINE uint16_t BSwap16(uint16_t x)"
   },
   {
-    "label": "_byteswap_ushort()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "_byteswap_ushort(x)"
+    "detail": "Function (# if)",
+    "insertText": "defined(HAVE_BUILTIN_BSWAP16) return __builtin_bswap16(x)"
   },
   {
-    "label": "__builtin_bswap32()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_bswap32(x)"
+    "detail": "Function (# elif)",
+    "insertText": "defined(_MSC_VER) return _byteswap_ushort(x)"
   },
   {
-    "label": "__builtin_bswap64()",
+    "label": "return()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_bswap64(x)"
+    "detail": "Function (# else)",
+    "insertText": "return(x >> 8) | ((x & 0xff) << 8)"
+  },
+  {
+    "label": "BSwap32()",
+    "kind": "Method",
+    "detail": "Function (# endif } uint32_t)",
+    "insertText": "BSwap32(uint32_t x)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(VPX_USE_MIPS32_R2)"
+  },
+  {
+    "label": "volatile()",
+    "kind": "Method",
+    "detail": "Function (__asm__)",
+    "insertText": "volatile(\"wsbh %[ret], %[x] \\n\\t\" \"rotr %[ret], %[ret], 16 \\n\\t\" : [ret] \"=r\"(ret) : [x] \"r\"(x))"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__i386__) || defined(__x86_64__)"
+  },
+  {
+    "label": "volatile()",
+    "kind": "Method",
+    "detail": "Function (__asm__)",
+    "insertText": "volatile(\"bswap %0\" : \"=r\"(swapped_bytes) : \"0\"(x))"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (# else)",
+    "insertText": "return(x >> 24) | ((x >> 8) & 0xff00) | ((x << 8) & 0xff0000) | (x << 24)"
+  },
+  {
+    "label": "BSwap64()",
+    "kind": "Method",
+    "detail": "Function (# endif } uint64_t)",
+    "insertText": "BSwap64(uint64_t x)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(HAVE_BUILTIN_BSWAP64) return __builtin_bswap64(x)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__x86_64__)"
+  },
+  {
+    "label": "volatile()",
+    "kind": "Method",
+    "detail": "Function (__asm__)",
+    "insertText": "volatile(\"bswapq %0\" : \"=r\"(swapped_bytes) : \"0\"(x))"
+  },
+  {
+    "label": "x()",
+    "kind": "Method",
+    "detail": "Function (# else)",
+    "insertText": "x((x & 0xffffffff00000000ull) >> 32) | ((x & 0x00000000ffffffffull) << 32)"
+  },
+  {
+    "label": "x()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "x((x & 0xffff0000ffff0000ull) >> 16) | ((x & 0x0000ffff0000ffffull) << 16)"
+  },
+  {
+    "label": "x()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "x((x & 0xff00ff00ff00ff00ull) >> 8) | ((x & 0x00ff00ff00ff00ffull) << 8)"
   }
 ]

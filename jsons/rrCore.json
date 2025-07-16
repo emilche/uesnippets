@@ -1,56 +1,104 @@
 [
   {
-    "label": "RAD_INFINITE_LOOP()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (RADUNREACHABLE)",
-    "insertText": "RAD_INFINITE_LOOP( RR_BREAK()"
+    "detail": "Function (# if !)",
+    "insertText": "defined(__RADRR_CORE2H__) #define __RADRR_CORE2H__ #ifdef USING_EGT #include \"egttypes.h\" #else #include \"radtypes.h\" #endif #include <stddef.h> #ifdef __RADFINAL__ #define RADTODO(str)"
   },
   {
-    "label": "_byteswap_ushort()",
+    "label": "RADTODO()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_byteswap_ushort(unsigned short _Short)"
+    "detail": "Function (char __str [ 0 ] = str ; } # else # define)",
+    "insertText": "RADTODO(str) #endif #if defined __RADMAC__ || defined __RADIPHONE__ #define __RADBSD__ #endif #if defined __RADBSD__ || defined __RADLINUX__ || defined __RADQNX__ #define __RADPOSIX__ #endif #ifdef __RAD64__ #define RAD_PTRBITS 64 #define RAD_PTRBYTES 8 #define RAD_TWOPTRBYTES 16 #else #define RAD_PTRBITS 32 #define RAD_PTRBYTES 4 #define RAD_TWOPTRBYTES 8 #endif #if defined(__RADMAC__) #ifndef __RADINDLL__ #define RAD_TLS(type,var) __thread type var #endif #define RR_BREAK() __builtin_trap() #ifdef __RADARM__ #define RR_CACHE_LINE_SIZE 32 #else #define RR_CACHE_LINE_SIZE 64 #endif #define RAD_GUARANTEED_SSE3 #define RAD_USES_SSE3 #define RAD_USES_SSSE3 #endif #if defined(__RADIPHONE__) #define RR_BREAK() __builtin_trap() #define RR_CACHE_LINE_SIZE 32 #define RAD_GUARANTEED_SSE3 #define RAD_USES_SSE3 #endif #if defined(__RADANDROID__) #define RR_BREAK() __builtin_trap() #ifdef __RADARM__ #define RR_CACHE_LINE_SIZE 32 #elif defined(__RADX86__) #ifndef RR_CACHE_LINE_SIZE #define RR_CACHE_LINE_SIZE 64 #endif #endif #endif #if defined(__RADLINUX__) #ifndef __RADINDLL__ #define RAD_TLS(type,var) __thread type var #endif #define RR_BREAK() __builtin_trap() #ifdef __RADARM__ #define RR_CACHE_LINE_SIZE 32 #else #define RR_CACHE_LINE_SIZE 64 #endif #endif #if defined(__RADQNX__) #define RR_BREAK() __builtin_trap() #ifdef __RADARM__ #define RR_CACHE_LINE_SIZE 32 #else #define RR_CACHE_LINE_SIZE 64 #endif #endif #if defined(__RADWINRT__) #ifdef __RAD64__ #define __RAD64REGS__ #endif #ifdef __RADARM__ #define RR_CACHE_LINE_SIZE 32 #else #define RR_CACHE_LINE_SIZE 64 #endif #define RR_BREAK __debugbreak #endif #if defined(__RADNT__) #define RADASMLINK __cdecl #ifndef __RADINDLL__ #define RAD_TLS(type,var) __declspec(thread) type var #endif #ifdef __RAD64__ #define __RAD64REGS__ #endif #ifdef __RADARM__ #define RR_CACHE_LINE_SIZE 32 #else #define RR_CACHE_LINE_SIZE 64 #endif #if defined(_MSC_VER) && _MSC_VER >= 1300 #define RR_BREAK __debugbreak #else #define RR_BREAK() RAD_STATEMENT_WRAPPER( __asm {int 3} ) #endif #endif #if defined(__RADEMSCRIPTEN__) #define RR_BREAK() __builtin_trap() #define RR_CACHE_LINE_SIZE 64 #endif #if !defined(RR_BREAK) #error \"No rr_break defined!\" #endif #ifdef __RAD64REGS__ #define RAD_UINTr RAD_U64 #define RAD_SINTr RAD_S64 #else #define RAD_UINTr RAD_U32 #define RAD_SINTr RAD_S32 #endif #ifdef __RADNTBUILDLINUX__ #undef RADLINK #undef RADEXPLINK #undef RADDLLEXPORTDLL #undef RADDLLIMPORTDLL #define RADLINK #define RADEXPLINK #define RADDLLEXPORTDLL #define RADDLLIMPORTDLL #endif #ifdef _MSC_VER #define RRSTRIPPABLE __declspec(selectany) #define RRSTRIPPABLEPUB __declspec(selectany) #else #define RRSTRIPPABLE static #define RRSTRIPPABLEPUB #endif #ifdef _MSC_VER #if (_MSC_VER >= 1300) #define RAD_ALIGN(type,var,num) type __declspec(align(num)) var #define RADNOINLINE __declspec(noinline) #else #define RADNOINLINE #endif #ifndef RAD_USES_SSE3 #define RAD_USES_SSE3 #endif #ifndef RAD_USES_SSSE3 #define RAD_USES_SSSE3 #endif #define RADFORCEINLINE __forceinline #define RADUNREACHABLE __assume(0) #define RADASSUME(exp) __assume(exp) #ifndef __RADINDLL__ #define RAD_TLS(type,var) __declspec(thread) type var #endif #define RAD_EXPECT(expr,cond) (expr) #elif defined(__clang__) #define RAD_ALIGN(type,var,num) type __attribute__ ((aligned (num))) var #ifdef _DEBUG #define RADFORCEINLINE inline #else #define RADFORCEINLINE inline __attribute((always_inline)) #endif #ifndef RAD_USES_SSE3 #define RAD_USES_SSE3 __attribute__((target(\"sse3\"))) #endif #if !defined(RAD_USES_SSSE3) && !defined(__RADIPHONE__) #define RAD_USES_SSSE3 __attribute__((target(\"ssse3\"))) #endif #define RADNOINLINE __attribute__((noinline)) #define RADUNREACHABLE __builtin_unreachable() #if __has_builtin(__builtin_assume) #define RADASSUME(exp) __builtin_assume(exp) #else #define RADASSUME(exp) RAD_STATEMENT_WRAPPER( if ( ! (exp) ) __builtin_unreachable(); ) #endif #define RAD_EXPECT(expr,cond) __builtin_expect(expr,cond) #elif (defined(__GCC__) || defined(__GNUC__)) || defined(ANDROID) #define RAD_ALIGN(type,var,num) type __attribute__ ((aligned (num))) var #ifdef _DEBUG #define RADFORCEINLINE inline #else #define RADFORCEINLINE inline __attribute((always_inline)) #endif #define RADNOINLINE __attribute__((noinline)) #define __RAD_GCC_VERSION__ (__GNUC__ * 10000 \\ + __GNUC_MINOR__ * 100 \\ + __GNUC_PATCHLEVEL__) #if __RAD_GCC_VERSION__ >= 40500 #define RADUNREACHABLE __builtin_unreachable() #define RADASSUME(exp) RAD_STATEMENT_WRAPPER( if ( ! (exp) ) __builtin_unreachable(); ) #else #define RADUNREACHABLE RAD_INFINITE_LOOP( RR_BREAK(); ) #define RADASSUME(exp) #endif #if __RAD_GCC_VERSION__ >= 40600 #ifndef RAD_USES_SSE3 #define RAD_USES_SSE3 __attribute__((target(\"sse3\"))) #endif #ifndef RAD_USES_SSSE3 #define RAD_USES_SSSE3 __attribute__((target(\"ssse3\"))) #endif #else #ifdef RAD_USES_SSSE3 #undef RAD_USES_SSSE3 #endif #endif #define RAD_EXPECT(expr,cond) __builtin_expect(expr,cond) #elif defined(__SNC__) #ifndef RAD_ALIGN #define RAD_ALIGN(type,var,num) type __attribute__ ((aligned (num))) var #define RADFORCEINLINE inline __attribute((always_inline)) #define RADNOINLINE __attribute__((noinline)) #define RADASSUME(exp) RAD_STATEMENT_WRAPPER( if ( ! (exp) ) RADUNREACHABLE; ) #define RAD_EXPECT(expr,cond) __builtin_expect(expr,cond) #endif #define RADUNREACHABLE #else #define RAD_EXPECT(exp,cond) !! no RAD_EXPECT defined !! #define RADASSUME(exp) !! no RADASSUME defined !! #define RADUNREACHABLE !! no RADUNREACHABLE defined !! #define RADFORCEINLINE !! no RADFORCEINLINE defined !! #define RADNOINLINE !! no RADNOINLINE defined !! #endif #define RAD_LIKELY(expr) RAD_EXPECT(expr,1) #define RAD_UNLIKELY(expr) RAD_EXPECT(expr,0) #if defined(__RADX86__) && !defined(__RADX64__) && defined(_MSC_VER)"
   },
   {
-    "label": "_byteswap_ulong()",
+    "label": "__pragma()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_byteswap_ulong(unsigned long  _Long)"
+    "detail": "Function (# define RAD_STATEMENT_END_FALSE \\)",
+    "insertText": "__pragma(warning(push)) \\ __pragma(warning(disable:4127)) \\ } while(0) \\ __pragma(warning(pop)) #define RAD_STATEMENT_END_TRUE \\ __pragma(warning(push)) \\ __pragma(warning(disable:4127)) \\ } while(1) \\ __pragma(warning(pop))"
   },
   {
-    "label": "_byteswap_uint64()",
+    "label": "while()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_byteswap_uint64(unsigned __int64 val)"
-  },
-  {
-    "label": "_byteswap_ushort()",
-    "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_byteswap_ushort(unsigned short _Short)"
+    "detail": "Function (# define RAD_STATEMENT_END_FALSE \\ })",
+    "insertText": "while((void)0,0 ) #define RAD_STATEMENT_END_TRUE \\ } while ( (void)1,1 ) #endif #define RAD_STATEMENT_WRAPPER( code ) \\ RAD_STATEMENT_START \\ code \\ RAD_STATEMENT_END_FALSE #define RAD_INFINITE_LOOP( code ) \\ RAD_STATEMENT_START \\ code \\ RAD_STATEMENT_END_TRUE #if defined(_MSC_VER) && _MSC_VER >= 1600 #define RR_UNUSED_VARIABLE(x) (void) (x) #else #define RR_UNUSED_VARIABLE(x) (void)(sizeof(x)) #endif #define RR_STRINGIZE( L ) #L #define RR_DO_MACRO( M, X ) M(X) #define RR_STRINGIZE_DELAY( X ) RR_DO_MACRO( RR_STRINGIZE, X ) #define RR_LINESTRING RR_STRINGIZE_DELAY( __LINE__ ) #define RR_CAT(X,Y) X ## Y #define RR_STRING_JOIN3(arg1, arg2, arg3) RR_STRING_JOIN_DELAY3(arg1, arg2, arg3) #define RR_STRING_JOIN_DELAY3(arg1, arg2, arg3) RR_STRING_JOIN_IMMEDIATE3(arg1, arg2, arg3) #define RR_STRING_JOIN_IMMEDIATE3(arg1, arg2, arg3) arg1 ## arg2 ## arg3 #ifndef RR_MIN #define RR_MIN(a,b) ( (a) < (b) ? (a) : (b) ) #endif #ifndef RR_MAX #define RR_MAX(a,b) ( (a) > (b) ? (a) : (b) ) #endif #ifndef RR_ABS #define RR_ABS(a) ( ((a) < 0) ? -(a) : (a) ) #endif #ifndef RR_CLAMP #define RR_CLAMP(val,lo,hi) RR_MAX( RR_MIN(val,hi), lo ) #endif #define RR_ARRAY_SIZE(array) ( sizeof(array)/sizeof(array[0]) ) #define RR_MEMBER_OFFSET(type,member) offsetof(type, member) #define RR_MEMBER_SIZE(type,member) ( sizeof( ((type *) 0)->member) ) #define RR_MEMBER_OFFSET_PTR(type,member,ptr) ( (SINTa) &(((type *)(ptr))->member) - (SINTa)(ptr) ) #define RR_MEMBER_SIZE_PTR(type,member,ptr) ( sizeof( ((type *) (ptr))->member) ) #define RR_MEMBER_TO_OWNER(type,member,ptr) (type *)( ((char *)(ptr)) - RR_MEMBER_OFFSET_PTR(type,member,ptr) ) #ifdef __RADX86__ #define RR_PREFETCH_SEQUENTIAL(ptr,offset) #define RR_PREFETCH_WRITE_INVALIDATE(ptr,offset) #elif defined(__RADANDROID__) #define RR_PREFETCH_SEQUENTIAL(ptr,offset) #define RR_PREFETCH_WRITE_INVALIDATE(ptr,offset) #elif defined(__RADWINRT__) #define RR_PREFETCH_SEQUENTIAL(ptr,offset) __prefetch((char *)(ptr) + (int)(offset)) #define RR_PREFETCH_WRITE_INVALIDATE(ptr,offset) #elif defined(__RADARM__) #define RR_PREFETCH_SEQUENTIAL(ptr,offset) #define RR_PREFETCH_WRITE_INVALIDATE(ptr,offset) #else #ifndef RR_PREFETCH_SEQUENTIAL #define RR_PREFETCH_SEQUENTIAL(ptr,offset) !! NO PREFETCH DEFINED !! #endif #ifndef RR_PREFETCH_WRITE_INVALIDATE #define RR_PREFETCH_WRITE_INVALIDATE(ptr,offset) !! NO PREFETCH DEFINED !! #endif #endif #if (defined(_DEBUG) && !defined(NDEBUG)) || defined(ASSERT_IN_RELEASE) #define RR_DO_ASSERTS #endif #ifdef RAD_NO_BREAK #define RR_ASSERT_BREAK() (void)0 #else #define RR_ASSERT_BREAK() RR_BREAK() #endif #ifndef RR_ASSERT_ALWAYS #define RR_ASSERT_ALWAYS(exp) RAD_STATEMENT_WRAPPER( if ( ! (exp) ) { RR_ASSERT_BREAK(); } ) #endif #ifndef RR_ASSERT_FAILURE_ALWAYS #define RR_ASSERT_FAILURE_ALWAYS(str) RAD_STATEMENT_WRAPPER( RR_ASSERT_BREAK(); ) #endif #ifndef RR_ASSERT_LITE_ALWAYS #define RR_ASSERT_LITE_ALWAYS(exp) RAD_STATEMENT_WRAPPER( if ( ! (exp) ) { RR_ASSERT_BREAK(); } ) #endif #ifdef RR_DO_ASSERTS #define RR_ASSERT(exp) RR_ASSERT_ALWAYS(exp) #define RR_ASSERT_LITE(exp) RR_ASSERT_LITE_ALWAYS(exp) #define RR_ASSERT_NO_ASSUME(exp) RR_ASSERT_ALWAYS(exp) #define RR_DURING_ASSERT(exp) exp #define RR_ASSERT_FAILURE(str) RR_ASSERT_FAILURE_ALWAYS(str) #define RR_CANT_GET_HERE() RAD_STATEMENT_WRAPPER( RR_ASSERT_FAILURE(\"can't get here\"); RADUNREACHABLE; ) #else #define RR_ASSERT(exp) (void)0 #define RR_ASSERT_LITE(exp) (void)0 #define RR_ASSERT_NO_ASSUME(exp) (void)0 #define RR_DURING_ASSERT(exp) (void)0 #define RR_ASSERT_FAILURE(str) (void)0 #define RR_CANT_GET_HERE() RADUNREACHABLE #endif #ifndef __RADFINAL__ #define RR_ASSERT_RELEASE(exp) RR_ASSERT_ALWAYS(exp) #define RR_ASSERT_LITE_RELEASE(exp) RR_ASSERT_LITE_ALWAYS(exp) #else #define RR_ASSERT_RELEASE(exp) (void)0 #define RR_ASSERT_LITE_RELEASE(exp) (void)0 #endif #define RR_ASSERT_ALIGNED(ptr) RR_ASSERT( (((UINTa)(ptr)) & (sizeof(*(ptr))-1)) == 0 ) #define RR_ASSERT_ALWAYS_NO_SHIP RR_ASSERT_RELEASE #define rrAssert RR_ASSERT #define rrassert RR_ASSERT #ifdef _MSC_VER #if _MSC_VER >= 1300 #pragma warning( disable : 4127) #endif #endif #ifdef RR_GET_RESTRICT #define RR_GET_PTR_POST RADRESTRICT #endif #ifndef RR_GET_PTR_POST #define RR_GET_PTR_POST #endif #define RR_GET16_NATIVE(ptr) *((const U16 * RR_GET_PTR_POST)(ptr)) #define RR_PUT16_NATIVE(ptr,val) *((U16 * RR_GET_PTR_POST)(ptr)) = (U16)(val) #define RR_U16_PTR_OFFSET(ptr,offset) ((U16 * RR_GET_PTR_POST)((char *)(ptr) + (offset))) #define RR_GET16_NATIVE_OFFSET(ptr,offset) *( RR_U16_PTR_OFFSET((ptr),offset) ) #define RR_PUT16_NATIVE_OFFSET(ptr,val,offset) *( RR_U16_PTR_OFFSET((ptr),offset)) = (val) #define RR_GET32_NATIVE(ptr) *((const U32 * RR_GET_PTR_POST)(ptr)) #define RR_PUT32_NATIVE(ptr,val) *((U32 * RR_GET_PTR_POST)(ptr)) = (val) #define RR_U32_PTR_OFFSET(ptr,offset) ((U32 * RR_GET_PTR_POST)((char *)(ptr) + (offset))) #define RR_GET32_NATIVE_OFFSET(ptr,offset) *( RR_U32_PTR_OFFSET((ptr),offset) ) #define RR_PUT32_NATIVE_OFFSET(ptr,val,offset) *( RR_U32_PTR_OFFSET((ptr),offset)) = (val) #define RR_GET64_NATIVE(ptr) *((const U64 * RR_GET_PTR_POST)(ptr)) #define RR_PUT64_NATIVE(ptr,val) *((U64 * RR_GET_PTR_POST)(ptr)) = (val) #define RR_U64_PTR_OFFSET(ptr,offset) ((U64 * RR_GET_PTR_POST)((char *)(ptr) + (offset))) #define RR_GET64_NATIVE_OFFSET(ptr,offset) *( RR_U64_PTR_OFFSET((ptr),offset) ) #define RR_PUT64_NATIVE_OFFSET(ptr,val,offset) *( RR_U64_PTR_OFFSET((ptr),offset)) = (val) #ifdef __RADLITTLEENDIAN__ #define RR_GET16_LE RR_GET16_NATIVE #define RR_PUT16_LE RR_PUT16_NATIVE #define RR_GET16_LE_OFFSET RR_GET16_NATIVE_OFFSET #define RR_PUT16_LE_OFFSET RR_PUT16_NATIVE_OFFSET #define RR_GET32_LE RR_GET32_NATIVE #define RR_PUT32_LE RR_PUT32_NATIVE #define RR_GET32_LE_OFFSET RR_GET32_NATIVE_OFFSET #define RR_PUT32_LE_OFFSET RR_PUT32_NATIVE_OFFSET #define RR_GET64_LE RR_GET64_NATIVE #define RR_PUT64_LE RR_PUT64_NATIVE #define RR_GET64_LE_OFFSET RR_GET64_NATIVE_OFFSET #define RR_PUT64_LE_OFFSET RR_PUT64_NATIVE_OFFSET #else #define RR_GET16_BE RR_GET16_NATIVE #define RR_PUT16_BE RR_PUT16_NATIVE #define RR_GET16_BE_OFFSET RR_GET16_NATIVE_OFFSET #define RR_PUT16_BE_OFFSET RR_PUT16_NATIVE_OFFSET #define RR_GET32_BE RR_GET32_NATIVE #define RR_PUT32_BE RR_PUT32_NATIVE #define RR_GET32_BE_OFFSET RR_GET32_NATIVE_OFFSET #define RR_PUT32_BE_OFFSET RR_PUT32_NATIVE_OFFSET #define RR_GET64_BE RR_GET64_NATIVE #define RR_PUT64_BE RR_PUT64_NATIVE #define RR_GET64_BE_OFFSET RR_GET64_NATIVE_OFFSET #define RR_PUT64_BE_OFFSET RR_PUT64_NATIVE_OFFSET #endif #if defined(__RADX86__) #if (_MSC_VER >= 1300) RADDEFFUNC unsigned short __cdecl _byteswap_ushort (unsigned short _Short)"
   },
   {
     "label": "_byteswap_ulong()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_byteswap_ulong(unsigned long  _Long)"
+    "detail": "Function (RADDEFFUNC unsigned long __cdecl)",
+    "insertText": "_byteswap_ulong(unsigned long _Long)"
+  },
+  {
+    "label": "intrinsic()",
+    "kind": "Method",
+    "detail": "Function (# pragma)",
+    "insertText": "intrinsic(_byteswap_ushort, _byteswap_ulong) #define RR_BSWAP16 _byteswap_ushort #define RR_BSWAP32 _byteswap_ulong RADDEFFUNC unsigned __int64 __cdecl _byteswap_uint64 (unsigned __int64 val)"
+  },
+  {
+    "label": "intrinsic()",
+    "kind": "Method",
+    "detail": "Function (# pragma)",
+    "insertText": "intrinsic(_byteswap_uint64) #define RR_BSWAP64 _byteswap_uint64 #elif defined(_MSC_VER) RADDEFFUNC RADFORCEINLINE unsigned long RR_BSWAP16 (unsigned long _Long)"
+  },
+  {
+    "label": "RR_BSWAP32()",
+    "kind": "Method",
+    "detail": "Function (__asm { mov eax,[ _Long ] rol ax,8 mov [ _Long ],eax ; } return _Long ; } RADDEFFUNC RADFORCEINLINE unsigned long)",
+    "insertText": "RR_BSWAP32(unsigned long _Long)"
+  },
+  {
+    "label": "RR_BSWAP64()",
+    "kind": "Method",
+    "detail": "Function (__asm { mov eax,[ _Long ] bswap eax mov [ _Long ],eax } return _Long ; } RADDEFFUNC RADFORCEINLINE unsigned __int64)",
+    "insertText": "RR_BSWAP64(unsigned __int64 _Long)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (__asm { mov eax,DWORD PTR _Long mov edx,DWORD PTR _Long + 4 bswap eax bswap edx mov DWORD PTR _Long,edx mov DWORD PTR _Long + 4,eax } return _Long ; } # elif)",
+    "insertText": "defined(__GNUC__) || defined(__clang__) #define RR_BSWAP16(u16) ( (U16) ( ((u16) >> 8) | ((u16) << 8) ) ) #define RR_BSWAP32 __builtin_bswap32 #define RR_BSWAP64 __builtin_bswap64 #endif #define RR_GET16_BE(ptr) RR_BSWAP16(*((U16 *)(ptr))) #define RR_PUT16_BE(ptr,val) *((U16 *)(ptr)) = (U16) RR_BSWAP16(val) #define RR_GET16_BE_OFFSET(ptr,offset) RR_BSWAP16(*RR_U16_PTR_OFFSET(ptr,offset)) #define RR_PUT16_BE_OFFSET(ptr,val,offset) *RR_U16_PTR_OFFSET(ptr,offset) = RR_BSWAP16(val) #define RR_GET32_BE(ptr) RR_BSWAP32(*((U32 *)(ptr))) #define RR_PUT32_BE(ptr,val) *((U32 *)(ptr)) = RR_BSWAP32(val) #define RR_GET32_BE_OFFSET(ptr,offset) RR_BSWAP32(*RR_U32_PTR_OFFSET(ptr,offset)) #define RR_PUT32_BE_OFFSET(ptr,val,offset) *RR_U32_PTR_OFFSET(ptr,offset) = RR_BSWAP32(val) #define RR_GET64_BE(ptr) RR_BSWAP64(*((U64 *)(ptr))) #define RR_PUT64_BE(ptr,val) *((U64 *)(ptr)) = RR_BSWAP64(val) #define RR_GET64_BE_OFFSET(ptr,offset) RR_BSWAP64(*RR_U64_PTR_OFFSET(ptr,offset)) #define RR_PUT64_BE_OFFSET(ptr,val,offset) *RR_U64_PTR_OFFSET(ptr,offset) = RR_BSWAP64(val) #elif defined(__RADIPHONE__) || defined(__RADANDROID__) #define RR_BSWAP16(u16) ( (U16) ( ((u16) >> 8) | ((u16) << 8) ) ) #define RR_BSWAP32(u32) ( (U32) ( ((u32) >> 24) | (((u32)<<8) & 0x00FF0000) | (((u32)>>8) & 0x0000FF00) | ((u32) << 24) ) ) #define RR_BSWAP64(u64) ( (U64) ( RR_BSWAP32((u64)>>32) | ((U64)RR_BSWAP32((U32)(u64))<<32) ) ) #define RR_GET16_BE(ptr) RR_BSWAP16(*((U16 *)(ptr))) #define RR_PUT16_BE(ptr,val) *((U16 *)(ptr)) = RR_BSWAP16(val) #define RR_GET32_BE(ptr) RR_BSWAP32(*((U32 *)(ptr))) #define RR_PUT32_BE(ptr,val) *((U32 *)(ptr)) = RR_BSWAP32(val) #define RR_GET64_BE(ptr) RR_BSWAP64(*((U64 *)(ptr))) #define RR_PUT64_BE(ptr,val) *((U64 *)(ptr)) = RR_BSWAP64(val) #elif defined(__RADWINRTAPI__) && defined(__RADARM__) #include <intrin.h> RADDEFFUNC unsigned short __cdecl _byteswap_ushort (unsigned short _Short)"
   },
   {
     "label": "_byteswap_uint64()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
+    "detail": "Function (RADDEFFUNC unsigned __int64 __cdecl)",
     "insertText": "_byteswap_uint64(unsigned __int64 val)"
   },
   {
-    "label": "_lrotl()",
+    "label": "intrinsic()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_lrotl(unsigned long, int)"
+    "detail": "Function (# pragma)",
+    "insertText": "intrinsic(_byteswap_ushort, _byteswap_ulong) #pragma intrinsic(_byteswap_uint64) #define RR_GET16_BE(ptr) _byteswap_ushort(*((U16 *)(ptr))) #define RR_PUT16_BE(ptr,val) *((U16 *)(ptr)) = _byteswap_ushort(val) #define RR_GET32_BE(ptr) _byteswap_ulong(*((U32 *)(ptr))) #define RR_PUT32_BE(ptr,val) *((U32 *)(ptr)) = _byteswap_ulong(val) #define RR_GET64_BE(ptr) _byteswap_uint64(*((U64 *)(ptr))) #define RR_PUT64_BE(ptr,val) *((U64 *)(ptr)) = _byteswap_uint64(val) #elif defined(__clang__) && defined(__RADARM64__) #define RR_BSWAP16 __builtin_bswap16 #define RR_BSWAP32 __builtin_bswap32 #define RR_BSWAP64 __builtin_bswap64 #define RR_GET16_BE(ptr) RR_BSWAP16(*((U16 *)(ptr))) #define RR_PUT16_BE(ptr,val) *((U16 *)(ptr)) = RR_BSWAP16(val) #define RR_GET32_BE(ptr) RR_BSWAP32(*((U32 *)(ptr))) #define RR_PUT32_BE(ptr,val) *((U32 *)(ptr)) = RR_BSWAP32(val) #define RR_GET64_BE(ptr) RR_BSWAP64(*((U64 *)(ptr))) #define RR_PUT64_BE(ptr,val) *((U64 *)(ptr)) = RR_BSWAP64(val) #else #endif #if defined(__RADX86__) || defined(__RADPPC__) #define RR_GET64_BE_UNALIGNED(ptr) RR_GET64_BE(ptr) #define RR_GET64_BE_UNALIGNED_OFFSET(ptr,offset) RR_GET64_BE_OFFSET(ptr,offset) #define RR_GET32_BE_UNALIGNED(ptr) RR_GET32_BE(ptr) #define RR_GET32_BE_UNALIGNED_OFFSET(ptr,offset) RR_GET32_BE_OFFSET(ptr,offset) #define RR_GET16_BE_UNALIGNED(ptr) RR_GET16_BE(ptr) #define RR_GET16_BE_UNALIGNED_OFFSET(ptr,offset) RR_GET16_BE_OFFSET(ptr,offset) #define RR_GET64_LE_UNALIGNED(ptr) RR_GET64_LE(ptr) #define RR_GET64_LE_UNALIGNED_OFFSET(ptr,offset) RR_GET64_LE_OFFSET(ptr,offset) #define RR_GET32_LE_UNALIGNED(ptr) RR_GET32_LE(ptr) #define RR_GET32_LE_UNALIGNED_OFFSET(ptr,offset) RR_GET32_LE_OFFSET(ptr,offset) #define RR_GET16_LE_UNALIGNED(ptr) RR_GET16_LE(ptr) #define RR_GET16_LE_UNALIGNED_OFFSET(ptr,offset) RR_GET16_LE_OFFSET(ptr,offset) #else #define RR_GET32_BE_UNALIGNED(ptr) ( \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[0] << 24 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[1] << 16 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[2] << 8 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[3] << 0 ) ) #define RR_GET32_BE_UNALIGNED_OFFSET(ptr,offset) ( \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[0] << 24 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[1] << 16 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[2] << 8 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[3] << 0 ) ) #define RR_GET16_BE_UNALIGNED(ptr) ( \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr)))[0] << 8 ) | \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr)))[1] << 0 ) ) #define RR_GET16_BE_UNALIGNED_OFFSET(ptr,offset) ( \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[0] << 8 ) | \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[1] << 0 ) ) #define RR_GET32_LE_UNALIGNED(ptr) ( \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[3] << 24 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[2] << 16 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[1] << 8 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr)))[0] << 0 ) ) #define RR_GET32_LE_UNALIGNED_OFFSET(ptr,offset) ( \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[3] << 24 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[2] << 16 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[1] << 8 ) | \\ ( (U32)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[0] << 0 ) ) #define RR_GET16_LE_UNALIGNED(ptr) ( \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr)))[1] << 8 ) | \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr)))[0] << 0 ) ) #define RR_GET16_LE_UNALIGNED_OFFSET(ptr,offset) ( \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[1] << 8 ) | \\ ( (U16)(((const U8 * RR_GET_PTR_POST)(ptr))+(offset))[0] << 0 ) ) #endif #ifndef RR_ROTL32 #ifdef _MSC_VER RADDEFFUNC unsigned long __cdecl _lrotl(unsigned long, int)"
   },
   {
-    "label": "_rotl64()",
+    "label": "intrinsic()",
     "kind": "Method",
-    "detail": "Function (__cdecl)",
-    "insertText": "_rotl64(unsigned __int64 _Val, int _Shift)"
+    "detail": "Function (# pragma)",
+    "insertText": "intrinsic(_lrotl) #define RR_ROTL32(x,k) _lrotl((unsigned long)(x),(int)(k)) #else #define RR_ROTL32(u32v,num) ( ( (u32v) << (num) ) | ( (u32v) >> (32 - (num))) ) #endif #endif #ifndef RR_ROTL64 #if ( defined(_MSC_VER) && _MSC_VER >= 1300) RADDEFFUNC unsigned __int64 __cdecl _rotl64(unsigned __int64 _Val, int _Shift)"
+  },
+  {
+    "label": "intrinsic()",
+    "kind": "Method",
+    "detail": "Function (# pragma)",
+    "insertText": "intrinsic(_rotl64) #define RR_ROTL64(x,k) _rotl64((unsigned __int64)(x),(int)(k)) #else #define RR_ROTL64(u64v,num) ( ( (u64v) << (num) ) | ( (u64v) >> (64 - (num))) ) #endif #endif RR_COMPILER_ASSERT( sizeof(RAD_UINTa) == sizeof( RR_STRING_JOIN(RAD_U,RAD_PTRBITS) ))"
+  },
+  {
+    "label": "RR_COMPILER_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "RR_COMPILER_ASSERT(sizeof(RAD_UINTa) == RAD_PTRBYTES)"
+  },
+  {
+    "label": "RR_COMPILER_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "RR_COMPILER_ASSERT(RAD_TWOPTRBYTES == 2* RAD_PTRBYTES)"
+  },
+  {
+    "label": "RR_COMPILER_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "RR_COMPILER_ASSERT(sizeof(rrbool) == 4)"
   }
 ]

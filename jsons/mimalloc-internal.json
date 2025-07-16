@@ -1,15 +1,9 @@
 [
   {
-    "label": "static",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "static"
-  },
-  {
-    "label": "_mi_fputs()",
+    "label": "if()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "_mi_fputs(mi_output_fun* out, void* arg, const char* prefix, const char* message)"
+    "detail": "Function (# pragma once # ifndef MIMALLOC_INTERNAL_H # define MIMALLOC_INTERNAL_H # include \" mimalloc - types . h \" #)",
+    "insertText": "if(MI_DEBUG>0) #define mi_trace_message(...) _mi_trace_message(__VA_ARGS__) #else #define mi_trace_message(...) #endif #define MI_CACHE_LINE 64 #if defined(_MSC_VER) #pragma warning(disable:4127) #define mi_decl_noinline __declspec(noinline) #define mi_decl_thread __declspec(thread) #define mi_decl_cache_align __declspec(align(MI_CACHE_LINE)) #elif (defined(__GNUC__) && (__GNUC__>=3)) #define mi_decl_noinline __attribute__((noinline)) #define mi_decl_thread __thread #define mi_decl_cache_align __attribute__((aligned(MI_CACHE_LINE))) #else #define mi_decl_noinline #define mi_decl_thread __thread #define mi_decl_cache_align #endif void _mi_fputs(mi_output_fun* out, void* arg, const char* prefix, const char* message)"
   },
   {
     "label": "_mi_fprintf()",
@@ -86,7 +80,7 @@
   {
     "label": "_mi_is_main_thread()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (mi_decl_cache_align mi_stats_t _mi_stats_main ; mi_decl_cache_align const mi_page_t _mi_page_empty ; bool)",
     "insertText": "_mi_is_main_thread(void)"
   },
   {
@@ -106,6 +100,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "_mi_os_init(void)"
+  },
+  {
+    "label": "_mi_os_alloc()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_os_alloc(size_t size, mi_stats_t* stats)"
   },
   {
     "label": "_mi_os_free()",
@@ -156,10 +156,28 @@
     "insertText": "_mi_os_good_alloc_size(size_t size)"
   },
   {
+    "label": "_mi_arena_alloc_aligned()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_arena_alloc_aligned(size_t size, size_t alignment, bool* commit, bool* large, bool* is_pinned, bool* is_zero, size_t* memid, mi_os_tld_t* tld)"
+  },
+  {
+    "label": "_mi_arena_alloc()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_arena_alloc(size_t size, bool* commit, bool* large, bool* is_pinned, bool* is_zero, size_t* memid, mi_os_tld_t* tld)"
+  },
+  {
     "label": "_mi_arena_free()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "_mi_arena_free(void* p, size_t size, size_t memid, bool is_committed, mi_os_tld_t* tld)"
+  },
+  {
+    "label": "_mi_segment_cache_pop()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_segment_cache_pop(size_t size, mi_commit_mask_t* commit_mask, bool* large, bool* is_pinned, bool* is_zero, size_t* memid, mi_os_tld_t* tld)"
   },
   {
     "label": "_mi_segment_cache_push()",
@@ -180,6 +198,12 @@
     "insertText": "_mi_segment_map_freed_at(const mi_segment_t* segment)"
   },
   {
+    "label": "_mi_segment_page_alloc()",
+    "kind": "Method",
+    "detail": "Function (mi_page_t*)",
+    "insertText": "_mi_segment_page_alloc(mi_heap_t* heap, size_t block_wsize, mi_segments_tld_t* tld, mi_os_tld_t* os_tld)"
+  },
+  {
     "label": "_mi_segment_page_free()",
     "kind": "Method",
     "detail": "Function (void)",
@@ -195,7 +219,7 @@
     "label": "_mi_segment_try_reclaim_abandoned()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "_mi_segment_try_reclaim_abandoned( mi_heap_t* heap, bool try_all, mi_segments_tld_t* tld)"
+    "insertText": "_mi_segment_try_reclaim_abandoned(mi_heap_t* heap, bool try_all, mi_segments_tld_t* tld)"
   },
   {
     "label": "_mi_segment_thread_collect()",
@@ -210,6 +234,12 @@
     "insertText": "_mi_segment_huge_page_free(mi_segment_t* segment, mi_page_t* page, mi_block_t* block)"
   },
   {
+    "label": "_mi_segment_page_start()",
+    "kind": "Method",
+    "detail": "Function (uint8_t*)",
+    "insertText": "_mi_segment_page_start(const mi_segment_t* segment, const mi_page_t* page, size_t* page_size)"
+  },
+  {
     "label": "_mi_abandoned_reclaim_all()",
     "kind": "Method",
     "detail": "Function (void)",
@@ -220,6 +250,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "_mi_abandoned_await_readers(void)"
+  },
+  {
+    "label": "_mi_malloc_generic()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_malloc_generic(mi_heap_t* heap, size_t size)"
   },
   {
     "label": "_mi_page_retire()",
@@ -342,6 +378,30 @@
     "insertText": "_mi_clock_start(void)"
   },
   {
+    "label": "_mi_page_malloc()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_page_malloc(mi_heap_t* heap, mi_page_t* page, size_t size)"
+  },
+  {
+    "label": "_mi_heap_malloc_zero()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_heap_malloc_zero(mi_heap_t* heap, size_t size, bool zero)"
+  },
+  {
+    "label": "_mi_heap_realloc_zero()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "_mi_heap_realloc_zero(mi_heap_t* heap, void* p, size_t newsize, bool zero)"
+  },
+  {
+    "label": "_mi_page_ptr_unalign()",
+    "kind": "Method",
+    "detail": "Function (mi_block_t*)",
+    "insertText": "_mi_page_ptr_unalign(const mi_segment_t* segment, const mi_page_t* page, const void* p)"
+  },
+  {
     "label": "_mi_free_delayed_block()",
     "kind": "Method",
     "detail": "Function (bool)",
@@ -356,103 +416,853 @@
   {
     "label": "_mi_page_is_valid()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (# if MI_DEBUG> 1 bool)",
     "insertText": "_mi_page_is_valid(mi_page_t* page)"
   },
   {
-    "label": "__builtin_umul_overflow()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_umul_overflow(count, size, total)"
+    "detail": "Function (# endif # if)",
+    "insertText": "defined(__GNUC__) || defined(__clang__) #define mi_unlikely(x) __builtin_expect((x),0) #define mi_likely(x) __builtin_expect((x),1) #else #define mi_unlikely(x) (x) #define mi_likely(x) (x) #endif #ifndef __has_builtin #define __has_builtin(x) 0 #endif #include <errno.h> #ifndef EAGAIN #define EAGAIN (11) #endif #ifndef ENOMEM #define ENOMEM (12) #endif #ifndef EFAULT #define EFAULT (14) #endif #ifndef EINVAL #define EINVAL (22) #endif #ifndef EOVERFLOW #define EOVERFLOW (75) #endif #define UNUSED(x) (void)(x) #if (MI_DEBUG>0) #define UNUSED_RELEASE(x) #else #define UNUSED_RELEASE(x) UNUSED(x) #endif #define MI_INIT4(x) x(),x(),x(),x() #define MI_INIT8(x) MI_INIT4(x),MI_INIT4(x) #define MI_INIT16(x) MI_INIT8(x),MI_INIT8(x) #define MI_INIT32(x) MI_INIT16(x),MI_INIT16(x) #define MI_INIT64(x) MI_INIT32(x),MI_INIT32(x) #define MI_INIT128(x) MI_INIT64(x),MI_INIT64(x) #define MI_INIT256(x) MI_INIT128(x),MI_INIT128(x) static inline bool _mi_is_power_of_two(uintptr_t x)"
   },
   {
-    "label": "__builtin_umull_overflow()",
+    "label": "_mi_align_up()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_umull_overflow(count, size, total)"
-  },
-  {
-    "label": "__builtin_umulll_overflow()",
-    "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_umulll_overflow(count, size, total)"
-  },
-  {
-    "label": "_mi_heap_main_get()",
-    "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "_mi_heap_main_get()"
+    "detail": "Function (} uintptr_t)",
+    "insertText": "_mi_align_up(uintptr_t sz, size_t alignment)"
   },
   {
     "label": "mi_assert_internal()",
     "kind": "Method",
-    "detail": "Function (data)",
-    "insertText": "mi_assert_internal(slice->slice_offset == 0)"
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(alignment != 0)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (uintptr_t mask = alignment - 1 ;)",
+    "insertText": "if((alignment & mask) == 0)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (} else {)",
+    "insertText": "return(((sz + mask)/alignment)*alignment)"
+  },
+  {
+    "label": "_mi_align_down()",
+    "kind": "Method",
+    "detail": "Function (} } uintptr_t)",
+    "insertText": "_mi_align_down(uintptr_t sz, size_t alignment)"
+  },
+  {
+    "label": "_mi_divide_up()",
+    "kind": "Method",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "_mi_divide_up(uintptr_t size, size_t divider)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(divider != 0)"
+  },
+  {
+    "label": "mi_mem_is_zero()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_mem_is_zero(void* p, size_t size)"
+  },
+  {
+    "label": "_mi_wsize_from_size()",
+    "kind": "Method",
+    "detail": "Function (} return true ; } size_t)",
+    "insertText": "_mi_wsize_from_size(size_t size)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(size <= SIZE_MAX - sizeof(uintptr_t))"
+  },
+  {
+    "label": "mi_malloc_satisfies_alignment()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_malloc_satisfies_alignment(size_t alignment, size_t size)"
+  },
+  {
+    "label": "__has_builtin()",
+    "kind": "Method",
+    "detail": "Function (} # if)",
+    "insertText": "__has_builtin(__builtin_umul_overflow) || (defined(__GNUC__) && __GNUC__ >= 5) #include <limits.h> #if defined(_CLOCK_T) #undef _CLOCK_T #endif static inline bool mi_mul_overflow(size_t count, size_t size, size_t* total)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (#)",
+    "insertText": "if(SIZE_MAX == UINT_MAX) return __builtin_umul_overflow(count, size, total)"
+  },
+  {
+    "label": "elif()",
+    "kind": "Method",
+    "detail": "Function (#)",
+    "insertText": "elif(SIZE_MAX == ULONG_MAX) return __builtin_umull_overflow(count, size, total)"
+  },
+  {
+    "label": "__builtin_umulll_overflow()",
+    "kind": "Method",
+    "detail": "Function (# else return)",
+    "insertText": "__builtin_umulll_overflow(count, size, total)"
+  },
+  {
+    "label": "mi_mul_overflow()",
+    "kind": "Method",
+    "detail": "Function (# endif } # else bool)",
+    "insertText": "mi_mul_overflow(size_t count, size_t size, size_t* total)"
+  },
+  {
+    "label": "MI_MUL_NO_OVERFLOW()",
+    "kind": "Method",
+    "detail": "Function (# define)",
+    "insertText": "MI_MUL_NO_OVERFLOW((size_t)1 << (4*sizeof(size_t)))"
+  },
+  {
+    "label": "mi_count_size_overflow()",
+    "kind": "Method",
+    "detail": "Function (} # endif bool)",
+    "insertText": "mi_count_size_overflow(size_t count, size_t size, size_t* total)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (* total = size ; return false ; } else)",
+    "insertText": "if(mi_unlikely(mi_mul_overflow(count, size, total)))"
+  },
+  {
+    "label": "_mi_error_message()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_mi_error_message(EOVERFLOW, \"allocation request is too large (%zu * %zu bytes)\\n\", count, size)"
+  },
+  {
+    "label": "_mi_heap_main_get()",
+    "kind": "Method",
+    "detail": "Function (* total = SIZE_MAX ; return true ; } else return false ; } const mi_heap_t _mi_heap_empty ; bool _mi_process_is_initialized ; mi_heap_t*)",
+    "insertText": "_mi_heap_main_get(void)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(MI_MALLOC_OVERRIDE) #if defined(__MACH__) #define MI_TLS_SLOT 89 #elif defined(__OpenBSD__) #define MI_TLS_PTHREAD_SLOT_OFS (6*sizeof(int) + 4*sizeof(void*) + 24) #elif defined(__DragonFly__) #warning \"mimalloc is not working correctly on DragonFly yet.\" #endif #endif #if defined(MI_TLS_SLOT) static inline void* mi_tls_slot(size_t slot)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(MI_TLS_PTHREAD_SLOT_OFS) #include <pthread.h> static inline mi_heap_t** mi_tls_pthread_heap_slot(void)"
+  },
+  {
+    "label": "pthread_self()",
+    "kind": "Method",
+    "detail": "Function (pthread_t self =)",
+    "insertText": "pthread_self()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(__DragonFly__) if (self==NULL)"
+  },
+  {
+    "label": "_mi_heap_main_get()",
+    "kind": "Method",
+    "detail": "Function (mi_heap_t* pheap_main =)",
+    "insertText": "_mi_heap_main_get()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(MI_TLS_PTHREAD)"
+  },
+  {
+    "label": "mi_get_default_heap()",
+    "kind": "Method",
+    "detail": "Function (# else mi_decl_thread mi_heap_t* _mi_heap_default ; # endif mi_heap_t*)",
+    "insertText": "mi_get_default_heap(void)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(MI_TLS_SLOT) mi_heap_t* heap = (mi_heap_t*)mi_tls_slot(MI_TLS_SLOT)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(MI_TLS_PTHREAD_SLOT_OFS) mi_heap_t* heap = *mi_tls_pthread_heap_slot()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(MI_TLS_PTHREAD) mi_heap_t* heap = (mi_unlikely(_mi_heap_default_key == (pthread_key_t)(-1)) ? _mi_heap_main_get() : (mi_heap_t*)pthread_getspecific(_mi_heap_default_key))"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# else # if)",
+    "insertText": "defined(MI_TLS_RECURSE_GUARD) if (mi_unlikely(!_mi_process_is_initialized)) return _mi_heap_main_get()"
+  },
+  {
+    "label": "mi_heap_is_default()",
+    "kind": "Method",
+    "detail": "Function (# endif return _mi_heap_default ; # endif } bool)",
+    "insertText": "mi_heap_is_default(const mi_heap_t* heap)"
+  },
+  {
+    "label": "mi_heap_is_backing()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_heap_is_backing(const mi_heap_t* heap)"
+  },
+  {
+    "label": "mi_heap_is_initialized()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_heap_is_initialized(mi_heap_t* heap)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(heap != NULL)"
+  },
+  {
+    "label": "_mi_ptr_cookie()",
+    "kind": "Method",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "_mi_ptr_cookie(const void* p)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (mi_heap_t _mi_heap_main ;)",
+    "insertText": "mi_assert_internal(_mi_heap_main.cookie != 0)"
+  },
+  {
+    "label": "_mi_heap_get_free_small_page()",
+    "kind": "Method",
+    "detail": "Function (} mi_page_t*)",
+    "insertText": "_mi_heap_get_free_small_page(mi_heap_t* heap, size_t size)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(size <= (MI_SMALL_SIZE_MAX + MI_PADDING_SIZE))"
+  },
+  {
+    "label": "_mi_wsize_from_size()",
+    "kind": "Method",
+    "detail": "Function (const size_t idx =)",
+    "insertText": "_mi_wsize_from_size(size)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(idx < MI_PAGES_DIRECT)"
+  },
+  {
+    "label": "_mi_ptr_segment()",
+    "kind": "Method",
+    "detail": "Function (} mi_segment_t*)",
+    "insertText": "_mi_ptr_segment(const void* p)"
   },
   {
     "label": "mi_slice_to_page()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "mi_slice_to_page(slice)"
+    "detail": "Function (} mi_page_t*)",
+    "insertText": "mi_slice_to_page(mi_slice_t* s)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(s->slice_offset== 0 && s->slice_count > 0)"
+  },
+  {
+    "label": "mi_page_to_slice()",
+    "kind": "Method",
+    "detail": "Function (} mi_slice_t*)",
+    "insertText": "mi_page_to_slice(mi_page_t* p)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(p->slice_offset== 0 && p->slice_count > 0)"
+  },
+  {
+    "label": "_mi_page_segment()",
+    "kind": "Method",
+    "detail": "Function (} mi_segment_t*)",
+    "insertText": "_mi_page_segment(const mi_page_t* page)"
+  },
+  {
+    "label": "_mi_ptr_segment()",
+    "kind": "Method",
+    "detail": "Function (mi_segment_t* segment =)",
+    "insertText": "_mi_ptr_segment(page)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(segment == NULL || ((mi_slice_t*)page >= segment->slices && (mi_slice_t*)page < segment->slices + segment->slice_entries))"
+  },
+  {
+    "label": "start()",
+    "kind": "Method",
+    "detail": "Function (mi_slice_t*)",
+    "insertText": "start(mi_slice_t*)((uint8_t*)slice - slice->slice_offset)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(start >= _mi_ptr_segment(slice)->slices)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(start->slice_offset == 0)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(start + start->slice_count > slice)"
+  },
+  {
+    "label": "diff()",
+    "kind": "Method",
+    "detail": "Function (ptrdiff_t)",
+    "insertText": "diff(uint8_t*)p - (uint8_t*)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(diff >= 0 && diff < (ptrdiff_t)MI_SEGMENT_SIZE)"
+  },
+  {
+    "label": "idx()",
+    "kind": "Method",
+    "detail": "Function (uintptr_t)",
+    "insertText": "idx(uintptr_t)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(idx < segment->slice_entries)"
+  },
+  {
+    "label": "slice0()",
+    "kind": "Method",
+    "detail": "Function (slices[idx])",
+    "insertText": "slice0(mi_slice_t*)"
+  },
+  {
+    "label": "mi_slice_first()",
+    "kind": "Method",
+    "detail": "Function (mi_slice_t* slice =)",
+    "insertText": "mi_slice_first(slice0)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(slice->slice_offset == 0)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(slice >= segment->slices && slice < segment->slices + segment->slice_entries)"
+  },
+  {
+    "label": "_mi_page_start()",
+    "kind": "Method",
+    "detail": "Function (} uint8_t*)",
+    "insertText": "_mi_page_start(const mi_segment_t* segment, const mi_page_t* page, size_t* page_size)"
+  },
+  {
+    "label": "_mi_ptr_page()",
+    "kind": "Method",
+    "detail": "Function (} mi_page_t*)",
+    "insertText": "_mi_ptr_page(void* p)"
+  },
+  {
+    "label": "mi_page_block_size()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "mi_page_block_size(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (const size_t bsize = page -> xblock_size ;)",
+    "insertText": "mi_assert_internal(bsize > 0)"
+  },
+  {
+    "label": "mi_segment_size()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "mi_segment_size(mi_segment_t* segment)"
+  },
+  {
+    "label": "mi_page_thread_free_flag()",
+    "kind": "Method",
+    "detail": "Function (} mi_delayed_t)",
+    "insertText": "mi_page_thread_free_flag(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_page_heap()",
+    "kind": "Method",
+    "detail": "Function (} mi_heap_t*)",
+    "insertText": "mi_page_heap(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_page_set_heap()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "mi_page_set_heap(mi_page_t* page, mi_heap_t* heap)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(mi_page_thread_free_flag(page) != MI_DELAYED_FREEING)"
+  },
+  {
+    "label": "mi_atomic_store_release()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_atomic_store_release(&page->xheap,(uintptr_t)heap)"
+  },
+  {
+    "label": "mi_tf_block()",
+    "kind": "Method",
+    "detail": "Function (} mi_block_t*)",
+    "insertText": "mi_tf_block(mi_thread_free_t tf)"
+  },
+  {
+    "label": "mi_tf_delayed()",
+    "kind": "Method",
+    "detail": "Function (} mi_delayed_t)",
+    "insertText": "mi_tf_delayed(mi_thread_free_t tf)"
+  },
+  {
+    "label": "mi_tf_make()",
+    "kind": "Method",
+    "detail": "Function (} mi_thread_free_t)",
+    "insertText": "mi_tf_make(mi_block_t* block, mi_delayed_t delayed)"
+  },
+  {
+    "label": "mi_tf_set_delayed()",
+    "kind": "Method",
+    "detail": "Function (} mi_thread_free_t)",
+    "insertText": "mi_tf_set_delayed(mi_thread_free_t tf, mi_delayed_t delayed)"
+  },
+  {
+    "label": "mi_tf_set_block()",
+    "kind": "Method",
+    "detail": "Function (} mi_thread_free_t)",
+    "insertText": "mi_tf_set_block(mi_thread_free_t tf, mi_block_t* block)"
+  },
+  {
+    "label": "mi_page_all_free()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_page_all_free(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(page != NULL)"
+  },
+  {
+    "label": "mi_page_has_any_available()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_page_has_any_available(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(page != NULL && page->reserved > 0)"
+  },
+  {
+    "label": "mi_page_immediate_available()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_page_immediate_available(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_page_mostly_used()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_page_mostly_used(const mi_page_t* page)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (uint16_t frac = page -> reserved / 8 U ;)",
+    "insertText": "return(page->reserved - page->used <= frac)"
+  },
+  {
+    "label": "mi_page_queue()",
+    "kind": "Method",
+    "detail": "Function (} mi_page_queue_t*)",
+    "insertText": "mi_page_queue(const mi_heap_t* heap, size_t size)"
+  },
+  {
+    "label": "mi_page_is_in_full()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_page_is_in_full(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_page_has_aligned()",
+    "kind": "Method",
+    "detail": "Function (page -> flags . x . in_full = in_full ; } bool)",
+    "insertText": "mi_page_has_aligned(const mi_page_t* page)"
+  },
+  {
+    "label": "mi_is_in_same_segment()",
+    "kind": "Method",
+    "detail": "Function (page -> flags . x . has_aligned = has_aligned ; } bool)",
+    "insertText": "mi_is_in_same_segment(const void* p, const void* q)"
+  },
+  {
+    "label": "mi_is_in_same_page()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_is_in_same_page(const void* p, const void* q)"
+  },
+  {
+    "label": "_mi_ptr_segment()",
+    "kind": "Method",
+    "detail": "Function (mi_segment_t* segment =)",
+    "insertText": "_mi_ptr_segment(p)"
+  },
+  {
+    "label": "_mi_segment_page_of()",
+    "kind": "Method",
+    "detail": "Function (mi_page_t* page =)",
+    "insertText": "_mi_segment_page_of(segment, p)"
   },
   {
     "label": "_mi_segment_page_start()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "_mi_segment_page_start(segment, page, page_size)"
+    "detail": "Function (size_t psize ; uint8_t* start =)",
+    "insertText": "_mi_segment_page_start(segment, page, &psize)"
   },
   {
-    "label": "UNUSED()",
+    "label": "mi_rotl()",
     "kind": "Method",
-    "detail": "Function (else)",
-    "insertText": "UNUSED(keys)"
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_rotl(uintptr_t x, uintptr_t shift)"
   },
   {
-    "label": "UNUSED()",
+    "label": "return()",
     "kind": "Method",
-    "detail": "Function (else)",
-    "insertText": "UNUSED(keys)"
+    "detail": "Function (shift % = MI_INTPTR_BITS ;)",
+    "insertText": "return(shift==0 ? x : ((x << shift) | (x >> (MI_INTPTR_BITS - shift))))"
   },
   {
-    "label": "UNUSED()",
+    "label": "mi_rotr()",
     "kind": "Method",
-    "detail": "Function (else)",
-    "insertText": "UNUSED(page)"
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_rotr(uintptr_t x, uintptr_t shift)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (shift % = MI_INTPTR_BITS ;)",
+    "insertText": "return(shift==0 ? x : ((x >> shift) | (x << (MI_INTPTR_BITS - shift))))"
+  },
+  {
+    "label": "mi_ptr_decode()",
+    "kind": "Method",
+    "detail": "Function (} void*)",
+    "insertText": "mi_ptr_decode(const void* null, const mi_encoded_t x, const uintptr_t* keys)"
+  },
+  {
+    "label": "p()",
+    "kind": "Method",
+    "detail": "Function (void*)",
+    "insertText": "p(void*)(mi_rotr(x - keys[0], keys[0]) ^ keys[1])"
+  },
+  {
+    "label": "mi_ptr_encode()",
+    "kind": "Method",
+    "detail": "Function (} mi_encoded_t)",
+    "insertText": "mi_ptr_encode(const void* null, const void* p, const uintptr_t* keys)"
+  },
+  {
+    "label": "x()",
+    "kind": "Method",
+    "detail": "Function (uintptr_t)",
+    "insertText": "x(uintptr_t)(mi_unlikely(p==NULL) ? null : p)"
   },
   {
     "label": "mi_block_nextx()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "mi_block_nextx(page,block,NULL)"
+    "detail": "Function (} mi_block_t*)",
+    "insertText": "mi_block_nextx(const void* null, const mi_block_t* block, const uintptr_t* keys)"
   },
   {
-    "label": "mi_block_set_nextx()",
+    "label": "return()",
     "kind": "Method",
-    "detail": "Function (MI_ENCODE_FREELIST)",
-    "insertText": "mi_block_set_nextx(page,block,next, page->keys)"
+    "detail": "Function (# ifdef MI_ENCODE_FREELIST)",
+    "insertText": "return(mi_block_t*)mi_ptr_decode(null, block->next, keys)"
   },
   {
     "label": "UNUSED()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
+    "insertText": "UNUSED(keys)"
+  },
+  {
+    "label": "UNUSED()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UNUSED(null)"
+  },
+  {
+    "label": "mi_block_set_nextx()",
+    "kind": "Method",
+    "detail": "Function (# endif } void)",
+    "insertText": "mi_block_set_nextx(const void* null, mi_block_t* block, const mi_block_t* next, const uintptr_t* keys)"
+  },
+  {
+    "label": "mi_ptr_encode()",
+    "kind": "Method",
+    "detail": "Function (# ifdef MI_ENCODE_FREELIST block -> next =)",
+    "insertText": "mi_ptr_encode(null, next, keys)"
+  },
+  {
+    "label": "next()",
+    "kind": "Method",
+    "detail": "Function (block ->)",
+    "insertText": "next(mi_encoded_t)"
+  },
+  {
+    "label": "mi_block_next()",
+    "kind": "Method",
+    "detail": "Function (# endif } mi_block_t*)",
+    "insertText": "mi_block_next(const mi_page_t* page, const mi_block_t* block)"
+  },
+  {
+    "label": "mi_block_nextx()",
+    "kind": "Method",
+    "detail": "Function (# ifdef MI_ENCODE_FREELIST mi_block_t* next =)",
+    "insertText": "mi_block_nextx(page,block,page->keys)"
+  },
+  {
+    "label": "_mi_error_message()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_mi_error_message(EFAULT, \"corrupted free list entry of size %zub at %p: value 0x%zx\\n\", mi_page_block_size(page), block, (uintptr_t)next)"
+  },
+  {
+    "label": "UNUSED()",
+    "kind": "Method",
+    "detail": "Function (next = NULL ; } return next ; # else)",
     "insertText": "UNUSED(page)"
   },
   {
-    "label": "mi_commit_mask_full()",
+    "label": "mi_block_set_next()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "mi_commit_mask_full()"
+    "detail": "Function (# endif } void)",
+    "insertText": "mi_block_set_next(const mi_page_t* page, mi_block_t* block, const mi_block_t* next)"
   },
   {
-    "label": "mi_commit_mask_empty()",
+    "label": "mi_block_set_nextx()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "mi_commit_mask_empty()"
+    "detail": "Function (# ifdef MI_ENCODE_FREELIST)",
+    "insertText": "mi_block_set_nextx(page,block,next, page->keys)"
+  },
+  {
+    "label": "mi_block_set_nextx()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_block_set_nextx(page,block,next,NULL)"
+  },
+  {
+    "label": "MI_COMMIT_MASK_BITS()",
+    "kind": "Method",
+    "detail": "Function (# endif } # define)",
+    "insertText": "MI_COMMIT_MASK_BITS(sizeof(mi_commit_mask_t)*8) static inline mi_commit_mask_t mi_commit_mask_empty(void)"
+  },
+  {
+    "label": "mi_commit_mask_create()",
+    "kind": "Method",
+    "detail": "Function (} mi_commit_mask_t)",
+    "insertText": "mi_commit_mask_create(uintptr_t bitidx, uintptr_t bitcount)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(bitidx < MI_COMMIT_MASK_BITS)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal((bitidx + bitcount) <= MI_COMMIT_MASK_BITS)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(bitidx==0)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} else)",
+    "insertText": "if(bitcount == 0)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (} else {)",
+    "insertText": "return(((uintptr_t)1 << bitcount) - 1)"
+  },
+  {
+    "label": "mi_commit_mask_is_empty()",
+    "kind": "Method",
+    "detail": "Function (} } bool)",
+    "insertText": "mi_commit_mask_is_empty(mi_commit_mask_t mask)"
+  },
+  {
+    "label": "mi_commit_mask_is_full()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_commit_mask_is_full(mi_commit_mask_t mask)"
+  },
+  {
+    "label": "mi_commit_mask_all_set()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_commit_mask_all_set(mi_commit_mask_t commit, mi_commit_mask_t mask)"
+  },
+  {
+    "label": "mi_commit_mask_any_set()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "mi_commit_mask_any_set(mi_commit_mask_t commit, mi_commit_mask_t mask)"
+  },
+  {
+    "label": "mi_commit_mask_intersect()",
+    "kind": "Method",
+    "detail": "Function (} mi_decl_nodiscard mi_commit_mask_t)",
+    "insertText": "mi_commit_mask_intersect(mi_commit_mask_t commit, mi_commit_mask_t mask)"
+  },
+  {
+    "label": "mi_commit_mask_clear()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "mi_commit_mask_clear(mi_commit_mask_t* commit, mi_commit_mask_t mask)"
+  },
+  {
+    "label": "commit()",
+    "kind": "Method",
+    "detail": "Function (*)",
+    "insertText": "commit(*commit) & (~mask)"
+  },
+  {
+    "label": "mi_commit_mask_set()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "mi_commit_mask_set(mi_commit_mask_t* commit, mi_commit_mask_t mask)"
+  },
+  {
+    "label": "commit()",
+    "kind": "Method",
+    "detail": "Function (*)",
+    "insertText": "commit(*commit)"
+  },
+  {
+    "label": "mi_commit_mask_committed_size()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "mi_commit_mask_committed_size(mi_commit_mask_t mask, size_t total)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "return(total/MI_COMMIT_MASK_BITS)"
+  },
+  {
+    "label": "mi_commit_mask_foreach()",
+    "kind": "Method",
+    "detail": "Function (} } # define)",
+    "insertText": "mi_commit_mask_foreach(mask,idx,count)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (\\)",
+    "insertText": "while(mask != 0)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (\\ \\ count = 0 ; \\)",
+    "insertText": "while((mask&1)==1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (\\ mask>> = 1 ; \\ count + + ; \\ } \\ \\)",
+    "insertText": "if(count > 0)"
+  },
+  {
+    "label": "mi_commit_mask_foreach_end()",
+    "kind": "Method",
+    "detail": "Function (# define)",
+    "insertText": "mi_commit_mask_foreach_end()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (x = 1 7 ; } #)",
+    "insertText": "if(MI_INTPTR_SIZE==8)"
+  },
+  {
+    "label": "elif()",
+    "kind": "Method",
+    "detail": "Function (x* = 0 xbf58476d1ce4e5b9UL ; x ^ = x>> 2 7 ; x* = 0 x94d049bb133111ebUL ; x ^ = x>> 3 1 ; #)",
+    "insertText": "elif(MI_INTPTR_SIZE==4)"
   },
   {
     "label": "_mi_os_numa_node_get()",
     "kind": "Method",
-    "detail": "Function (int)",
+    "detail": "Function (x* = 0 x7feb352dUL ; x ^ = x>> 1 5 ; x* = 0 x846ca68bUL ; x ^ = x>> 1 6 ; # endif return x ; } int)",
     "insertText": "_mi_os_numa_node_get(mi_os_tld_t* tld)"
   },
   {
@@ -462,51 +1272,327 @@
     "insertText": "_mi_os_numa_node_count_get(void)"
   },
   {
-    "label": "_mi_os_numa_node_get()",
+    "label": "_mi_os_numa_node()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "_mi_os_numa_node_get(tld)"
+    "detail": "Function (size_t _mi_numa_node_count ; int)",
+    "insertText": "_mi_os_numa_node(mi_os_tld_t* tld)"
   },
   {
-    "label": "_mi_os_numa_node_count_get()",
+    "label": "_mi_os_numa_node_count()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "_mi_os_numa_node_count_get()"
+    "detail": "Function (} size_t)",
+    "insertText": "_mi_os_numa_node_count(void)"
   },
   {
-    "label": "__builtin_clzl()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_clzl(x)"
+    "detail": "Function (} # if)",
+    "insertText": "defined(_WIN32) #define WIN32_LEAN_AND_MEAN #include <windows.h> static inline uintptr_t _mi_thread_id(void)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(__GNUC__) && \\ (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__aarch64__)) static inline void* mi_tls_slot(size_t slot)"
+  },
+  {
+    "label": "ofs()",
+    "kind": "Method",
+    "detail": "Function (void* res ; const size_t)",
+    "insertText": "ofs(slot*sizeof(void*))"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(__i386__) __asm__(\"movl %%gs:%1, %0\" : \"=r\" (res) : \"m\" (*((void**)ofs)) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__MACH__) && defined(__x86_64__) __asm__(\"movq %%gs:%1, %0\" : \"=r\" (res) : \"m\" (*((void**)ofs)) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__x86_64__) && (MI_INTPTR_SIZE==4) __asm__(\"movl %%fs:%1, %0\" : \"=r\" (res) : \"m\" (*((void**)ofs)) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__x86_64__) __asm__(\"movq %%fs:%1, %0\" : \"=r\" (res) : \"m\" (*((void**)ofs)) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__arm__)"
+  },
+  {
+    "label": "UNUSED()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UNUSED(ofs)"
+  },
+  {
+    "label": "volatile()",
+    "kind": "Method",
+    "detail": "Function (__asm__)",
+    "insertText": "volatile(\"mrc p15, 0, %0, c13, c0, 3\\nbic %0, %0, #3\" : \"=r\" (tcb))"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (res = tcb [ slot ] ; # elif)",
+    "insertText": "defined(__aarch64__)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(__APPLE__) __asm__ volatile (\"mrs %0, tpidrro_el0\" : \"=r\" (tcb))"
+  },
+  {
+    "label": "volatile()",
+    "kind": "Method",
+    "detail": "Function (# else __asm__)",
+    "insertText": "volatile(\"mrs %0, tpidr_el0\" : \"=r\" (tcb))"
+  },
+  {
+    "label": "mi_tls_slot_set()",
+    "kind": "Method",
+    "detail": "Function (# endif res = tcb [ slot ] ; # endif return res ; } void)",
+    "insertText": "mi_tls_slot_set(size_t slot, void* value)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(__i386__) __asm__(\"movl %1,%%gs:%0\" : \"=m\" (*((void**)ofs)) : \"rn\" (value) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__MACH__) && defined(__x86_64__) __asm__(\"movq %1,%%gs:%0\" : \"=m\" (*((void**)ofs)) : \"rn\" (value) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__x86_64__) && (MI_INTPTR_SIZE==4) __asm__(\"movl %1,%%fs:%1\" : \"=m\" (*((void**)ofs)) : \"rn\" (value) :)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(__x86_64__) __asm__(\"movq %1,%%fs:%1\" : \"=m\" (*((void**)ofs)) : \"rn\" (value) :)"
+  },
+  {
+    "label": "_mi_thread_id()",
+    "kind": "Method",
+    "detail": "Function (# endif tcb [ slot ] = value ; # endif } uintptr_t)",
+    "insertText": "_mi_thread_id(void)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # endif # if)",
+    "insertText": "defined(__GNUC__) #include <limits.h> #define MI_HAVE_FAST_BITSCAN static inline size_t mi_clz(uintptr_t x)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (#)",
+    "insertText": "if(INTPTR_MAX == LONG_MAX) return __builtin_clzl(x)"
   },
   {
     "label": "__builtin_clzll()",
     "kind": "Method",
-    "detail": "Function (return)",
+    "detail": "Function (# else return)",
     "insertText": "__builtin_clzll(x)"
   },
   {
-    "label": "__builtin_ctzl()",
+    "label": "mi_ctz()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "__builtin_ctzl(x)"
+    "detail": "Function (# endif } size_t)",
+    "insertText": "mi_ctz(uintptr_t x)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (#)",
+    "insertText": "if(INTPTR_MAX == LONG_MAX) return __builtin_ctzl(x)"
   },
   {
     "label": "__builtin_ctzll()",
     "kind": "Method",
-    "detail": "Function (return)",
+    "detail": "Function (# else return)",
     "insertText": "__builtin_ctzll(x)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# endif } # elif)",
+    "insertText": "defined(_MSC_VER) #include <limits.h> #define MI_HAVE_FAST_BITSCAN static inline size_t mi_clz(uintptr_t x)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (unsigned long idx ; #)",
+    "insertText": "if(INTPTR_MAX == LONG_MAX) _BitScanReverse(&idx, x)"
   },
   {
     "label": "_BitScanReverse64()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
     "insertText": "_BitScanReverse64(&idx, x)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (# endif)",
+    "insertText": "return((MI_INTPTR_BITS - 1) - idx)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (unsigned long idx ; #)",
+    "insertText": "if(INTPTR_MAX == LONG_MAX) _BitScanForward(&idx, x)"
   },
   {
     "label": "_BitScanForward64()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
     "insertText": "_BitScanForward64(&idx, x)"
+  },
+  {
+    "label": "mi_ctz32()",
+    "kind": "Method",
+    "detail": "Function (# endif return idx ; } # else size_t)",
+    "insertText": "mi_ctz32(uint32_t x)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const unsigned char debruijn [ 3 2 ] = { 0,1,2 8,2,2 9,1 4,2 4,3,3 0,2 2,2 0,1 5,2 5,1 7,4,8,3 1,2 7,1 3,2 3,2 1,1 9,1 6,7,2 6,1 2,1 8,6,1 1,5,1 0,9 } ;)",
+    "insertText": "if(x==0)"
+  },
+  {
+    "label": "mi_clz32()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "mi_clz32(uint32_t x)"
+  },
+  {
+    "label": "debruijn()",
+    "kind": "Method",
+    "detail": "Function (x | = x>> 1 ; x | = x>> 2 ; x | = x>> 4 ; x | = x>> 8 ; x | = x>> 1 6 ; return)",
+    "insertText": "debruijn(uint32_t)(x * 0x07C4ACDDUL)"
+  },
+  {
+    "label": "mi_clz()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "mi_clz(uintptr_t x)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (#)",
+    "insertText": "if(MI_INTPTR_BITS <= 32) return mi_clz32((uint32_t)x)"
+  },
+  {
+    "label": "mi_clz32()",
+    "kind": "Method",
+    "detail": "Function (# else size_t count =)",
+    "insertText": "mi_clz32((uint32_t)(x >> 32))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (#)",
+    "insertText": "if(MI_INTPTR_BITS <= 32) return mi_ctz32((uint32_t)x)"
+  },
+  {
+    "label": "mi_ctz32()",
+    "kind": "Method",
+    "detail": "Function (# else size_t count =)",
+    "insertText": "mi_ctz32((uint32_t)x)"
+  },
+  {
+    "label": "mi_bsr()",
+    "kind": "Method",
+    "detail": "Function (# endif } # endif size_t)",
+    "insertText": "mi_bsr(uintptr_t x)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # if)",
+    "insertText": "defined(_WIN32) && (defined(_M_IX86) || defined(_M_X64))"
+  },
+  {
+    "label": "_mi_memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_mi_memcpy(void* dst, const void* src, size_t n)"
+  },
+  {
+    "label": "__movsb()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "__movsb((unsigned char*)dst, (const unsigned char*)src, n)"
+  },
+  {
+    "label": "memcpy()",
+    "kind": "Method",
+    "detail": "Function (} else {)",
+    "insertText": "memcpy(dst, src, n)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} # endif #)",
+    "insertText": "if(defined(__GNUC__) && __GNUC__ >= 4) || defined(__clang__) #include <string.h> static inline void _mi_memcpy_aligned(void* dst, const void* src, size_t n)"
+  },
+  {
+    "label": "mi_assert_internal()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_assert_internal(((uintptr_t)dst % MI_INTPTR_SIZE == 0) && ((uintptr_t)src % MI_INTPTR_SIZE == 0))"
+  },
+  {
+    "label": "__builtin_assume_aligned()",
+    "kind": "Method",
+    "detail": "Function (void* adst =)",
+    "insertText": "__builtin_assume_aligned(dst, MI_INTPTR_SIZE)"
+  },
+  {
+    "label": "__builtin_assume_aligned()",
+    "kind": "Method",
+    "detail": "Function (const void* asrc =)",
+    "insertText": "__builtin_assume_aligned(src, MI_INTPTR_SIZE)"
+  },
+  {
+    "label": "memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "memcpy(adst, asrc, n)"
+  },
+  {
+    "label": "_mi_memcpy_aligned()",
+    "kind": "Method",
+    "detail": "Function (} # else void)",
+    "insertText": "_mi_memcpy_aligned(void* dst, const void* src, size_t n)"
+  },
+  {
+    "label": "_mi_memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_mi_memcpy(dst, src, n)"
   }
 ]

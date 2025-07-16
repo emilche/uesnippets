@@ -12,6 +12,12 @@
     "insertText": "class"
   },
   {
+    "label": "RetransmissionQueue()",
+    "kind": "Method",
+    "detail": "Function (# ifndef NET_DCSCTP_TX_RETRANSMISSION_QUEUE_H_ # define NET_DCSCTP_TX_RETRANSMISSION_QUEUE_H_ # include<cstdint> # include<functional> # include<map> # include<set> # include<string> # include<utility> # include<vector> # include \" absl / strings / string_view . h \" # include \" absl / types / optional . h \" # include \" api / array_view . h \" # include \" net / dcsctp / common / sequence_numbers . h \" # include \" net / dcsctp / packet / chunk / forward_tsn_chunk . h \" # include \" net / dcsctp / packet / chunk / iforward_tsn_chunk . h \" # include \" net / dcsctp / packet / chunk / sack_chunk . h \" # include \" net / dcsctp / packet / data . h \" # include \" net / dcsctp / public / dcsctp_handover_state . h \" # include \" net / dcsctp / public / dcsctp_options . h \" # include \" net / dcsctp / public / dcsctp_socket . h \" # include \" net / dcsctp / timer / timer . h \" # include \" net / dcsctp / tx / outstanding_data . h \" # include \" net / dcsctp / tx / retransmission_timeout . h \" # include \" net / dcsctp / tx / send_queue . h \" namespace dcsctp { class RetransmissionQueue { public : size_t kMinimumFragmentedPayload = 1 0 ; using State = OutstandingData::State ;)",
+    "insertText": "RetransmissionQueue(absl::string_view log_prefix, DcSctpSocketCallbacks* callbacks, TSN my_initial_tsn, size_t a_rwnd, SendQueue& send_queue, std::function<void(DurationMs rtt)> on_new_rtt, std::function<void()> on_clear_retransmission_counter, Timer& t3_rtx, const DcSctpOptions& options, bool supports_partial_reliability = true, bool use_message_interleaving = false)"
+  },
+  {
     "label": "HandleSack()",
     "kind": "Method",
     "detail": "Function (bool)",
@@ -24,16 +30,58 @@
     "insertText": "HandleT3RtxTimerExpiry()"
   },
   {
+    "label": "has_data_to_be_fast_retransmitted()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "has_data_to_be_fast_retransmitted()"
+  },
+  {
     "label": "GetChunksForFastRetransmit()",
     "kind": "Method",
-    "detail": "Function (Data>>)",
-    "insertText": "GetChunksForFastRetransmit(\n      size_t bytes_in_packet)"
+    "detail": "Function (} std::vector<std::pair<TSN,Data>>)",
+    "insertText": "GetChunksForFastRetransmit(size_t bytes_in_packet)"
   },
   {
     "label": "GetChunksToSend()",
     "kind": "Method",
-    "detail": "Function (Data>>)",
-    "insertText": "GetChunksToSend(\n      TimeMs now,\n      size_t bytes_remaining_in_packet)"
+    "detail": "Function (std::vector<std::pair<TSN,Data>>)",
+    "insertText": "GetChunksToSend(TimeMs now, size_t bytes_remaining_in_packet)"
+  },
+  {
+    "label": "GetChunkStatesForTesting()",
+    "kind": "Method",
+    "detail": "Function (std::vector<std::pair<TSN,OutstandingData::State>>)",
+    "insertText": "GetChunkStatesForTesting()"
+  },
+  {
+    "label": "next_tsn()",
+    "kind": "Method",
+    "detail": "Function (} TSN)",
+    "insertText": "next_tsn()"
+  },
+  {
+    "label": "cwnd()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "cwnd()"
+  },
+  {
+    "label": "rwnd()",
+    "kind": "Method",
+    "detail": "Function (cwnd_ = cwnd ; } size_t)",
+    "insertText": "rwnd()"
+  },
+  {
+    "label": "outstanding_items()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "outstanding_items()"
+  },
+  {
+    "label": "can_send_data()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "can_send_data()"
   },
   {
     "label": "ShouldSendForwardTsn()",
@@ -42,15 +90,33 @@
     "insertText": "ShouldSendForwardTsn(TimeMs now)"
   },
   {
+    "label": "CreateIForwardTsn()",
+    "kind": "Method",
+    "detail": "Function (} IForwardTsnChunk)",
+    "insertText": "CreateIForwardTsn()"
+  },
+  {
     "label": "PrepareResetStream()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "PrepareResetStream(StreamID stream_id)"
+  },
+  {
+    "label": "HasStreamsReadyToBeReset()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "HasStreamsReadyToBeReset()"
+  },
+  {
+    "label": "GetStreamsReadyToBeReset()",
+    "kind": "Method",
+    "detail": "Function (std::vector<StreamID>)",
+    "insertText": "GetStreamsReadyToBeReset()"
   },
   {
     "label": "CommitResetStreams()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "CommitResetStreams()"
   },
   {
@@ -58,6 +124,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "RollbackResetStreams()"
+  },
+  {
+    "label": "GetHandoverReadiness()",
+    "kind": "Method",
+    "detail": "Function (HandoverReadinessStatus)",
+    "insertText": "GetHandoverReadiness()"
   },
   {
     "label": "AddHandoverState()",
@@ -70,6 +142,30 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "RestoreFromState(const DcSctpSocketHandoverState& state)"
+  },
+  {
+    "label": "IsConsistent()",
+    "kind": "Method",
+    "detail": "Function (private : enum class CongestionAlgorithmPhase { kSlowStart,kCongestionAvoidance,} ; bool)",
+    "insertText": "IsConsistent()"
+  },
+  {
+    "label": "GetSerializedChunkSize()",
+    "kind": "Method",
+    "detail": "Function (size_t)",
+    "insertText": "GetSerializedChunkSize(const Data& data)"
+  },
+  {
+    "label": "is_in_fast_recovery()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "is_in_fast_recovery()"
+  },
+  {
+    "label": "IsSackValid()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "IsSackValid(const SackChunk& sack)"
   },
   {
     "label": "UpdateRTT()",
@@ -87,13 +183,13 @@
     "label": "StopT3RtxTimerOnIncreasedCumulativeTsnAck()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "StopT3RtxTimerOnIncreasedCumulativeTsnAck(\n      UnwrappedTSN cumulative_tsn_ack)"
+    "insertText": "StopT3RtxTimerOnIncreasedCumulativeTsnAck(UnwrappedTSN cumulative_tsn_ack)"
   },
   {
     "label": "HandleIncreasedCumulativeTsnAck()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "HandleIncreasedCumulativeTsnAck(size_t outstanding_bytes,\n                                       size_t total_bytes_acked)"
+    "insertText": "HandleIncreasedCumulativeTsnAck(size_t outstanding_bytes, size_t total_bytes_acked)"
   },
   {
     "label": "HandlePacketLoss()",
@@ -112,5 +208,29 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "StartT3RtxTimerIfOutstandingData()"
+  },
+  {
+    "label": "phase()",
+    "kind": "Method",
+    "detail": "Function (CongestionAlgorithmPhase)",
+    "insertText": "phase()"
+  },
+  {
+    "label": "max_bytes_to_send()",
+    "kind": "Method",
+    "detail": "Function (} size_t)",
+    "insertText": "max_bytes_to_send()"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (DcSctpSocketCallbacks& callbacks_ ; const DcSctpOptions options_ ; const size_t min_bytes_required_to_send_ ; const bool partial_reliability_ ; const std::string log_prefix_ ; const size_t data_chunk_header_size_ ; const std::function<)",
+    "insertText": "void(DurationMs rtt)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (const std::function<)",
+    "insertText": "void()"
   }
 ]

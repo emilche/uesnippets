@@ -6,28 +6,250 @@
     "insertText": "mi_memory_order_e"
   },
   {
-    "label": "mi_atomic_yield()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "mi_atomic_yield(void)"
+    "detail": "Function (# pragma once # ifndef MIMALLOC_ATOMIC_H # define MIMALLOC_ATOMIC_H # if)",
+    "insertText": "defined(__cplusplus) #include <atomic> #define _Atomic(tp) std::atomic<tp> #define mi_atomic(name) std::atomic_##name #define mi_memory_order(name) std::memory_order_##name #elif defined(_MSC_VER) #define _Atomic(tp) tp #define ATOMIC_VAR_INIT(x) x #define mi_atomic(name) mi_atomic_##name #define mi_memory_order(name) mi_memory_order_##name #else #include <stdatomic.h> #define mi_atomic(name) atomic_##name #define mi_memory_order(name) memory_order_##name #endif #define mi_atomic_cas_weak(p,expected,desired,mem_success,mem_fail) \\ mi_atomic(compare_exchange_weak_explicit)(p,expected,desired,mem_success,mem_fail) #define mi_atomic_cas_strong(p,expected,desired,mem_success,mem_fail) \\ mi_atomic(compare_exchange_strong_explicit)(p,expected,desired,mem_success,mem_fail) #define mi_atomic_load_acquire(p) mi_atomic(load_explicit)(p,mi_memory_order(acquire)) #define mi_atomic_load_relaxed(p) mi_atomic(load_explicit)(p,mi_memory_order(relaxed)) #define mi_atomic_store_release(p,x) mi_atomic(store_explicit)(p,x,mi_memory_order(release)) #define mi_atomic_store_relaxed(p,x) mi_atomic(store_explicit)(p,x,mi_memory_order(relaxed)) #define mi_atomic_exchange_release(p,x) mi_atomic(exchange_explicit)(p,x,mi_memory_order(release)) #define mi_atomic_exchange_acq_rel(p,x) mi_atomic(exchange_explicit)(p,x,mi_memory_order(acq_rel)) #define mi_atomic_cas_weak_release(p,exp,des) mi_atomic_cas_weak(p,exp,des,mi_memory_order(release),mi_memory_order(relaxed)) #define mi_atomic_cas_weak_acq_rel(p,exp,des) mi_atomic_cas_weak(p,exp,des,mi_memory_order(acq_rel),mi_memory_order(acquire)) #define mi_atomic_cas_strong_release(p,exp,des) mi_atomic_cas_strong(p,exp,des,mi_memory_order(release),mi_memory_order(relaxed)) #define mi_atomic_cas_strong_acq_rel(p,exp,des) mi_atomic_cas_strong(p,exp,des,mi_memory_order(acq_rel),mi_memory_order(acquire)) #define mi_atomic_add_relaxed(p,x) mi_atomic(fetch_add_explicit)(p,x,mi_memory_order(relaxed)) #define mi_atomic_sub_relaxed(p,x) mi_atomic(fetch_sub_explicit)(p,x,mi_memory_order(relaxed)) #define mi_atomic_add_acq_rel(p,x) mi_atomic(fetch_add_explicit)(p,x,mi_memory_order(acq_rel)) #define mi_atomic_sub_acq_rel(p,x) mi_atomic(fetch_sub_explicit)(p,x,mi_memory_order(acq_rel)) #define mi_atomic_and_acq_rel(p,x) mi_atomic(fetch_and_explicit)(p,x,mi_memory_order(acq_rel)) #define mi_atomic_or_acq_rel(p,x) mi_atomic(fetch_or_explicit)(p,x,mi_memory_order(acq_rel)) #define mi_atomic_increment_relaxed(p) mi_atomic_add_relaxed(p,(uintptr_t)1) #define mi_atomic_decrement_relaxed(p) mi_atomic_sub_relaxed(p,(uintptr_t)1) #define mi_atomic_increment_acq_rel(p) mi_atomic_add_acq_rel(p,(uintptr_t)1) #define mi_atomic_decrement_acq_rel(p) mi_atomic_sub_acq_rel(p,(uintptr_t)1) static inline void mi_atomic_yield(void)"
+  },
+  {
+    "label": "mi_atomic_addi()",
+    "kind": "Method",
+    "detail": "Function (intptr_t)",
+    "insertText": "mi_atomic_addi(_Atomic(intptr_t)*p, intptr_t add)"
+  },
+  {
+    "label": "mi_atomic_subi()",
+    "kind": "Method",
+    "detail": "Function (intptr_t)",
+    "insertText": "mi_atomic_subi(_Atomic(intptr_t)*p, intptr_t sub)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(__cplusplus) || !defined(_MSC_VER) #define mi_atomic_load_ptr_acquire(tp,p) mi_atomic_load_acquire(p) #define mi_atomic_load_ptr_relaxed(tp,p) mi_atomic_load_relaxed(p) #if defined(__cplusplus) #define mi_atomic_store_ptr_release(tp,p,x) mi_atomic_store_release(p,(tp*)x) #define mi_atomic_store_ptr_relaxed(tp,p,x) mi_atomic_store_relaxed(p,(tp*)x) #define mi_atomic_cas_ptr_weak_release(tp,p,exp,des) mi_atomic_cas_weak_release(p,exp,(tp*)des) #define mi_atomic_cas_ptr_weak_acq_rel(tp,p,exp,des) mi_atomic_cas_weak_acq_rel(p,exp,(tp*)des) #define mi_atomic_cas_ptr_strong_release(tp,p,exp,des) mi_atomic_cas_strong_release(p,exp,(tp*)des) #define mi_atomic_exchange_ptr_release(tp,p,x) mi_atomic_exchange_release(p,(tp*)x) #define mi_atomic_exchange_ptr_acq_rel(tp,p,x) mi_atomic_exchange_acq_rel(p,(tp*)x) #else #define mi_atomic_store_ptr_release(tp,p,x) mi_atomic_store_release(p,x) #define mi_atomic_store_ptr_relaxed(tp,p,x) mi_atomic_store_relaxed(p,x) #define mi_atomic_cas_ptr_weak_release(tp,p,exp,des) mi_atomic_cas_weak_release(p,exp,des) #define mi_atomic_cas_ptr_weak_acq_rel(tp,p,exp,des) mi_atomic_cas_weak_acq_rel(p,exp,des) #define mi_atomic_cas_ptr_strong_release(tp,p,exp,des) mi_atomic_cas_strong_release(p,exp,des) #define mi_atomic_exchange_ptr_release(tp,p,x) mi_atomic_exchange_release(p,x) #define mi_atomic_exchange_ptr_acq_rel(tp,p,x) mi_atomic_exchange_acq_rel(p,x) #endif static inline int64_t mi_atomic_addi64_relaxed(volatile int64_t* p, int64_t add)"
+  },
+  {
+    "label": "mi_atomic_maxi64_relaxed()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "mi_atomic_maxi64_relaxed(volatile int64_t* p, int64_t x)"
+  },
+  {
+    "label": "mi_atomic_load_relaxed()",
+    "kind": "Method",
+    "detail": "Function (int64_t current =)",
+    "insertText": "mi_atomic_load_relaxed((_Atomic(int64_t)*)p)"
+  },
+  {
+    "label": "mi_atomic_loadi64_acquire()",
+    "kind": "Method",
+    "detail": "Function (} ; } # define)",
+    "insertText": "mi_atomic_loadi64_acquire(p) mi_atomic(load_explicit)(p,mi_memory_order(acquire)) #define mi_atomic_loadi64_relaxed(p) mi_atomic(load_explicit)(p,mi_memory_order(relaxed)) #define mi_atomic_storei64_release(p,x) mi_atomic(store_explicit)(p,x,mi_memory_order(release)) #define mi_atomic_storei64_relaxed(p,x) mi_atomic(store_explicit)(p,x,mi_memory_order(relaxed)) #elif defined(_MSC_VER)"
+  },
+  {
+    "label": "MI_64()",
+    "kind": "Method",
+    "detail": "Function (# define)",
+    "insertText": "MI_64(f)"
+  },
+  {
+    "label": "mi_atomic_fetch_add_explicit()",
+    "kind": "Method",
+    "detail": "Function (mi_memory_order_relaxed,mi_memory_order_consume,mi_memory_order_acquire,mi_memory_order_release,mi_memory_order_acq_rel,mi_memory_order_seq_cst } mi_memory_order ; uintptr_t)",
+    "insertText": "mi_atomic_fetch_add_explicit(_Atomic(uintptr_t)*p, uintptr_t add, mi_memory_order mo)"
+  },
+  {
+    "label": "mi_atomic_fetch_sub_explicit()",
+    "kind": "Method",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_atomic_fetch_sub_explicit(_Atomic(uintptr_t)*p, uintptr_t sub, mi_memory_order mo)"
+  },
+  {
+    "label": "mi_atomic_fetch_and_explicit()",
+    "kind": "Method",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_atomic_fetch_and_explicit(_Atomic(uintptr_t)*p, uintptr_t x, mi_memory_order mo)"
+  },
+  {
+    "label": "mi_atomic_fetch_or_explicit()",
+    "kind": "Method",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_atomic_fetch_or_explicit(_Atomic(uintptr_t)*p, uintptr_t x, mi_memory_order mo)"
   },
   {
     "label": "mi_atomic_compare_exchange_strong_explicit()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "mi_atomic_compare_exchange_strong_explicit(p, expected, desired, mo1, mo2)"
+    "detail": "Function (} bool)",
+    "insertText": "mi_atomic_compare_exchange_strong_explicit(_Atomic(uintptr_t)*p, uintptr_t* expected, uintptr_t desired, mi_memory_order mo1, mi_memory_order mo2)"
+  },
+  {
+    "label": "read()",
+    "kind": "Method",
+    "detail": "Function (uintptr_t)",
+    "insertText": "read(uintptr_t)MI_64(_InterlockedCompareExchange)((volatile msc_intptr_t*)p, (msc_intptr_t)desired, (msc_intptr_t)(*expected))"
   },
   {
     "label": "mi_atomic_exchange_explicit()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_atomic_exchange_explicit(_Atomic(uintptr_t)*p, uintptr_t exchange, mi_memory_order mo)"
+  },
+  {
+    "label": "mi_atomic_thread_fence()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "mi_atomic_thread_fence(mi_memory_order mo)"
+  },
+  {
+    "label": "_Atomic()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_Atomic(uintptr_t)"
+  },
+  {
+    "label": "mi_atomic_exchange_explicit()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "mi_atomic_exchange_explicit(&x, 1, mo)"
+  },
+  {
+    "label": "mi_atomic_load_explicit()",
+    "kind": "Method",
+    "detail": "Function (} uintptr_t)",
+    "insertText": "mi_atomic_load_explicit(_Atomic(uintptr_t) const* p, mi_memory_order mo)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(_M_IX86) || defined(_M_X64)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# else uintptr_t x =* p ;)",
+    "insertText": "if(mo > mi_memory_order_relaxed)"
+  },
+  {
+    "label": "mi_atomic_store_explicit()",
+    "kind": "Method",
+    "detail": "Function (} ; } return x ; # endif } void)",
+    "insertText": "mi_atomic_store_explicit(_Atomic(uintptr_t)*p, uintptr_t x, mi_memory_order mo)"
+  },
+  {
+    "label": "mi_atomic_exchange_explicit()",
+    "kind": "Method",
+    "detail": "Function (# else)",
     "insertText": "mi_atomic_exchange_explicit(p, x, mo)"
+  },
+  {
+    "label": "mi_atomic_loadi64_explicit()",
+    "kind": "Method",
+    "detail": "Function (# endif } int64_t)",
+    "insertText": "mi_atomic_loadi64_explicit(_Atomic(int64_t)*p, mi_memory_order mo)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(_M_X64)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (# else int64_t old =* p ; int64_t x = old ;)",
+    "insertText": "while((old = InterlockedCompareExchange64(p, x, old)) != x)"
+  },
+  {
+    "label": "mi_atomic_storei64_explicit()",
+    "kind": "Method",
+    "detail": "Function (x = old ; } return x ; # endif } void)",
+    "insertText": "mi_atomic_storei64_explicit(_Atomic(int64_t)*p, int64_t x, mi_memory_order mo)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# if)",
+    "insertText": "defined(x_M_IX86) || defined(_M_X64)"
   },
   {
     "label": "InterlockedExchange64()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
     "insertText": "InterlockedExchange64(p, x)"
+  },
+  {
+    "label": "mi_atomic_addi64_relaxed()",
+    "kind": "Method",
+    "detail": "Function (# endif } int64_t)",
+    "insertText": "mi_atomic_addi64_relaxed(volatile _Atomic(int64_t)*p, int64_t add)"
+  },
+  {
+    "label": "return()",
+    "kind": "Method",
+    "detail": "Function (# ifdef _WIN64)",
+    "insertText": "return(int64_t)mi_atomic_addi((int64_t*)p, add)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (# else int64_t current ; int64_t sum ; do { current =* p ; sum = current + add ; })",
+    "insertText": "while(_InterlockedCompareExchange64(p, sum, current) != current)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (int64_t current ; do { current =* p ; })",
+    "insertText": "while(current < x && _InterlockedCompareExchange64(p, x, current) != current)"
+  },
+  {
+    "label": "mi_atomic_load_ptr_acquire()",
+    "kind": "Method",
+    "detail": "Function (} # define)",
+    "insertText": "mi_atomic_load_ptr_acquire(tp,p) (tp*)mi_atomic_load_acquire((_Atomic(uintptr_t)*)(p)) #define mi_atomic_load_ptr_relaxed(tp,p) (tp*)mi_atomic_load_relaxed((_Atomic(uintptr_t)*)(p)) #define mi_atomic_store_ptr_release(tp,p,x) mi_atomic_store_release((_Atomic(uintptr_t)*)(p),(uintptr_t)(x)) #define mi_atomic_store_ptr_relaxed(tp,p,x) mi_atomic_store_relaxed((_Atomic(uintptr_t)*)(p),(uintptr_t)(x)) #define mi_atomic_cas_ptr_weak_release(tp,p,exp,des) mi_atomic_cas_weak_release((_Atomic(uintptr_t)*)(p),(uintptr_t*)exp,(uintptr_t)des) #define mi_atomic_cas_ptr_weak_acq_rel(tp,p,exp,des) mi_atomic_cas_weak_acq_rel((_Atomic(uintptr_t)*)(p),(uintptr_t*)exp,(uintptr_t)des) #define mi_atomic_cas_ptr_strong_release(tp,p,exp,des) mi_atomic_cas_strong_release((_Atomic(uintptr_t)*)(p),(uintptr_t*)exp,(uintptr_t)des) #define mi_atomic_exchange_ptr_release(tp,p,x) (tp*)mi_atomic_exchange_release((_Atomic(uintptr_t)*)(p),(uintptr_t)x) #define mi_atomic_exchange_ptr_acq_rel(tp,p,x) (tp*)mi_atomic_exchange_acq_rel((_Atomic(uintptr_t)*)(p),(uintptr_t)x) #define mi_atomic_loadi64_acquire(p) mi_atomic(loadi64_explicit)(p,mi_memory_order(acquire)) #define mi_atomic_loadi64_relaxed(p) mi_atomic(loadi64_explicit)(p,mi_memory_order(relaxed)) #define mi_atomic_storei64_release(p,x) mi_atomic(storei64_explicit)(p,x,mi_memory_order(release)) #define mi_atomic_storei64_relaxed(p,x) mi_atomic(storei64_explicit)(p,x,mi_memory_order(relaxed)) #endif static inline intptr_t mi_atomic_addi(_Atomic(intptr_t)*p, intptr_t add)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # if)",
+    "insertText": "defined(__cplusplus) #include <thread> static inline void mi_atomic_yield(void)"
+  },
+  {
+    "label": "yield()",
+    "kind": "Method",
+    "detail": "Function (std::)",
+    "insertText": "yield()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(_WIN32) #define WIN32_LEAN_AND_MEAN #include <windows.h> static inline void mi_atomic_yield(void)"
+  },
+  {
+    "label": "YieldProcessor()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "YieldProcessor()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(__SSE2__) #include <emmintrin.h> static inline void mi_atomic_yield(void)"
+  },
+  {
+    "label": "_mm_pause()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_mm_pause()"
+  },
+  {
+    "label": "elif()",
+    "kind": "Method",
+    "detail": "Function (} #)",
+    "insertText": "elif(defined(__GNUC__) || defined(__clang__)) && \\ (defined(__x86_64__) || defined(__i386__) || defined(__arm__) || defined(__armel__) || defined(__ARMEL__) || \\ defined(__aarch64__) || defined(__powerpc__) || defined(__ppc__) || defined(__PPC__)) #if defined(__x86_64__) || defined(__i386__) static inline void mi_atomic_yield(void)"
   },
   {
     "label": "volatile()",
@@ -36,10 +258,22 @@
     "insertText": "volatile(\"pause\" ::: \"memory\")"
   },
   {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(__aarch64__) static inline void mi_atomic_yield(void)"
+  },
+  {
     "label": "volatile()",
     "kind": "Method",
     "detail": "Function (asm)",
     "insertText": "volatile(\"wfe\")"
+  },
+  {
+    "label": "elif()",
+    "kind": "Method",
+    "detail": "Function (} #)",
+    "insertText": "elif(defined(__arm__) && __ARM_ARCH__ >= 7) static inline void mi_atomic_yield(void)"
   },
   {
     "label": "volatile()",
@@ -48,15 +282,63 @@
     "insertText": "volatile(\"yield\" ::: \"memory\")"
   },
   {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(__powerpc__) || defined(__ppc__) || defined(__PPC__) static inline void mi_atomic_yield(void)"
+  },
+  {
     "label": "__volatile__()",
     "kind": "Method",
     "detail": "Function (__asm__)",
     "insertText": "__volatile__(\"or 27,27,27\" ::: \"memory\")"
   },
   {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(__armel__) || defined(__ARMEL__) static inline void mi_atomic_yield(void)"
+  },
+  {
     "label": "volatile()",
     "kind": "Method",
     "detail": "Function (asm)",
     "insertText": "volatile(\"nop\" ::: \"memory\")"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # endif # elif)",
+    "insertText": "defined(__sun) #include <synch.h> static inline void mi_atomic_yield(void)"
+  },
+  {
+    "label": "smt_pause()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "smt_pause()"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # elif)",
+    "insertText": "defined(__wasi__) #include <sched.h> static inline void mi_atomic_yield(void)"
+  },
+  {
+    "label": "sched_yield()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "sched_yield()"
+  },
+  {
+    "label": "mi_atomic_yield()",
+    "kind": "Method",
+    "detail": "Function (} # else # include<unistd . h> void)",
+    "insertText": "mi_atomic_yield(void)"
+  },
+  {
+    "label": "sleep()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "sleep(0)"
   }
 ]

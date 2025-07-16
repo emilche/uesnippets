@@ -18,16 +18,34 @@
     "insertText": "TransportWideFeedbackConfig"
   },
   {
-    "label": "IncomingPacket()",
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (# ifndef MODULES_REMOTE_BITRATE_ESTIMATOR_REMOTE_ESTIMATOR_PROXY_H_ # define MODULES_REMOTE_BITRATE_ESTIMATOR_REMOTE_ESTIMATOR_PROXY_H_ # include<deque> # include<functional> # include<memory> # include<vector> # include \" absl / types / optional . h \" # include \" api / field_trials_view . h \" # include \" api / rtp_headers . h \" # include \" api / transport / network_control . h \" # include \" api / units / data_size . h \" # include \" api / units / time_delta . h \" # include \" api / units / timestamp . h \" # include \" modules / remote_bitrate_estimator / packet_arrival_map . h \" # include \" modules / rtp_rtcp / source / rtcp_packet . h \" # include \" modules / rtp_rtcp / source / rtcp_packet / transport_feedback . h \" # include \" rtc_base / experiments / field_trial_parser . h \" # include \" rtc_base / numerics / sequence_number_util . h \" # include \" rtc_base / synchronization / mutex . h \" namespace webrtc { class RemoteEstimatorProxy { public : using TransportFeedbackSender = std::function<)",
+    "insertText": "void(std::vector<std::unique_ptr<rtcp::RtcpPacket>> packets)"
+  },
+  {
+    "label": "RemoteEstimatorProxy()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "RemoteEstimatorProxy(TransportFeedbackSender feedback_sender, const FieldTrialsView* key_value_config, NetworkStateEstimator* network_state_estimator)"
+  },
+  {
+    "label": "RemoteEstimatorProxy()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "RemoteEstimatorProxy()"
+  },
+  {
+    "label": "IncomingPacket()",
+    "kind": "Method",
+    "detail": "Function (struct Packet { Timestamp arrival_time ; DataSize size ; uint32_t ssrc ; absl::optional<uint32_t> absolute_send_time_24bits ; absl::optional<uint16_t> transport_sequence_number ; absl::optional<FeedbackRequest> feedback_request ; } ; void)",
     "insertText": "IncomingPacket(Packet packet)"
   },
   {
     "label": "IncomingPacket()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "IncomingPacket(int64_t arrival_time_ms,\n                      size_t payload_size,\n                      const RTPHeader& header)"
+    "insertText": "IncomingPacket(int64_t arrival_time_ms, size_t payload_size, const RTPHeader& header)"
   },
   {
     "label": "Process()",
@@ -54,69 +72,75 @@
     "insertText": "SetTransportOverhead(DataSize overhead_per_packet)"
   },
   {
+    "label": "Millis()",
+    "kind": "Method",
+    "detail": "Function (private : struct TransportWideFeedbackConfig { FieldTrialParameter<TimeDelta> back_window { \" wind \",)",
+    "insertText": "Millis(500)"
+  },
+  {
+    "label": "Millis()",
+    "kind": "Method",
+    "detail": "Function (FieldTrialParameter<TimeDelta> min_interval { \" min \",)",
+    "insertText": "Millis(50)"
+  },
+  {
+    "label": "Millis()",
+    "kind": "Method",
+    "detail": "Function (FieldTrialParameter<TimeDelta> max_interval { \" max \",)",
+    "insertText": "Millis(250)"
+  },
+  {
+    "label": "Millis()",
+    "kind": "Method",
+    "detail": "Function (FieldTrialParameter<TimeDelta> default_interval { \" def \",)",
+    "insertText": "Millis(100)"
+  },
+  {
+    "label": "TransportWideFeedbackConfig()",
+    "kind": "Method",
+    "detail": "Function (FieldTrialParameter<double> bandwidth_fraction { \" frac \",0 . 0 5 } ;)",
+    "insertText": "TransportWideFeedbackConfig(const FieldTrialsView* key_value_config)"
+  },
+  {
+    "label": "ParseFieldTrial()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ParseFieldTrial({&back_window, &min_interval, &max_interval, &default_interval, &bandwidth_fraction}, key_value_config->Lookup( \"WebRTC-Bwe-TransportWideFeedbackIntervals\"))"
+  },
+  {
+    "label": "MaybeCullOldPackets()",
+    "kind": "Method",
+    "detail": "Function (} } ; void)",
+    "insertText": "MaybeCullOldPackets(int64_t sequence_number, Timestamp arrival_time) RTC_EXCLUSIVE_LOCKS_REQUIRED(&lock_)"
+  },
+  {
+    "label": "SendPeriodicFeedbacks()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SendPeriodicFeedbacks() RTC_EXCLUSIVE_LOCKS_REQUIRED(&lock_)"
+  },
+  {
+    "label": "SendFeedbackOnRequest()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SendFeedbackOnRequest(int64_t sequence_number, const FeedbackRequest& feedback_request) RTC_EXCLUSIVE_LOCKS_REQUIRED(&lock_)"
+  },
+  {
+    "label": "MaybeBuildFeedbackPacket()",
+    "kind": "Method",
+    "detail": "Function (std::unique_ptr<rtcp::TransportFeedback>)",
+    "insertText": "MaybeBuildFeedbackPacket(bool include_timestamps, int64_t begin_sequence_number_inclusive, int64_t end_sequence_number_exclusive, bool is_periodic_update) RTC_EXCLUSIVE_LOCKS_REQUIRED(&lock_)"
+  },
+  {
     "label": "RTC_PT_GUARDED_BY()",
     "kind": "Method",
-    "detail": "Function (network_state_estimator_)",
+    "detail": "Function (const TransportFeedbackSender feedback_sender_ ; const TransportWideFeedbackConfig send_config_ ; Timestamp last_process_time_ ; Mutex lock_ ; NetworkStateEstimator* const network_state_estimator_)",
     "insertText": "RTC_PT_GUARDED_BY(&lock_)"
   },
   {
     "label": "RTC_GUARDED_BY()",
     "kind": "Method",
-    "detail": "Function (media_ssrc_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (feedback_packet_count_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (unwrapper_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (packet_overhead_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (periodic_window_start_seq_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (packet_arrival_times_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (send_interval_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (send_periodic_feedback_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (previous_abs_send_time_)",
-    "insertText": "RTC_GUARDED_BY(&lock_)"
-  },
-  {
-    "label": "RTC_GUARDED_BY()",
-    "kind": "Method",
-    "detail": "Function (abs_send_timestamp_)",
+    "detail": "Function (uint32_t media_ssrc_)",
     "insertText": "RTC_GUARDED_BY(&lock_)"
   }
 ]

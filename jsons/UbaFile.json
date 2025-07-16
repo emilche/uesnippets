@@ -18,9 +18,15 @@
     "insertText": "CreatedDir"
   },
   {
+    "label": "INVALID_FILE_ATTRIBUTES()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" UbaLogger . h \" # include \" UbaMemory . h \" # include \" UbaPlatform . h \" namespace uba { # if ! PLATFORM_WINDOWS u32 ERROR_FILE_NOT_FOUND = ENOENT ; u32 ERROR_PATH_NOT_FOUND = ENOENT ; u32 ERROR_ALREADY_EXISTS = EEXIST ; u32 ERROR_ACCESS_DENIED = EACCES ; u32 MOVEFILE_REPLACE_EXISTING = 0 x00000001 ; u32 FILE_FLAG_NO_BUFFERING = 0 ; u32 FILE_FLAG_OVERLAPPED = 0 ; u32)",
+    "insertText": "INVALID_FILE_ATTRIBUTES(u32)"
+  },
+  {
     "label": "GetFileInformationByHandle()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (u32 CREATE_ALWAYS = 2 ; u32 GENERIC_WRITE = 0 x40000000L ; u32 DELETE = 0 x00010000L ; u32 GENERIC_READ = 0 x80000000L ; u32 FILE_SHARE_WRITE = 0 x00000002 ; u32 FILE_SHARE_READ = 0 x00000001 ; u32 FILE_FLAG_BACKUP_SEMANTICS = 0 x02000000 ; u32 OPEN_EXISTING = 3 ; u32 PAGE_READONLY = 0 x02 ; # endif u64 FileHandleFlagMask = 0 x0000 ' 0 0 0 0 ' ffff ' ffff ; # if PLATFORM_WINDOWS u64 OverlappedIoFlag = 0 x0000 ' 0 0 0 1 ' 0 0 0 0 ' 0 0 0 0 ; # endif struct FileInformation { u32 attributes ; u32 volumeSerialNumber ; u64 lastWriteTime ; u64 size ; u64 index ; } ; bool)",
     "insertText": "GetFileInformationByHandle(FileInformation& out, Logger& logger, const tchar* fileName, FileHandle hFile)"
   },
   {
@@ -212,7 +218,7 @@
   {
     "label": "CreateDirectory()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (class DirectoryCache { public : bool)",
     "insertText": "CreateDirectory(Logger& logger, const tchar* dir)"
   },
   {
@@ -220,5 +226,89 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "Clear()"
+  },
+  {
+    "label": "ReadLines()",
+    "kind": "Method",
+    "detail": "Function (private : ReaderWriterLock m_createdDirsLock ; struct CreatedDir { ReaderWriterLock lock ; bool handled = false ; } ; UnorderedMap<TString,CreatedDir> m_createdDirs ; } ; template<LineFunc> bool)",
+    "insertText": "ReadLines(Logger& logger, const tchar* file, const LineFunc& lineFunc)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (FileHandle handle ;)",
+    "insertText": "if(!OpenFileSequentialRead(logger, file, handle)) return logger.Error(TC(\"Failed to open file %s\"), file)"
+  },
+  {
+    "label": "MakeGuard()",
+    "kind": "Method",
+    "detail": "Function (auto fg =)",
+    "insertText": "MakeGuard([&]() { CloseFile(file, handle); })"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (u64 fileSize = 0 ;)",
+    "insertText": "if(!GetFileSizeEx(fileSize, handle)) return logger.Error(TC(\"Failed to get size of file %s\"), file)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (char buffer [ 5 1 2 ] ; u64 left = fileSize ; std::string line ;)",
+    "insertText": "while(left)"
+  },
+  {
+    "label": "Min()",
+    "kind": "Method",
+    "detail": "Function (u64 toRead =)",
+    "insertText": "Min(left, u64(sizeof(buffer)))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (left - = toRead ;)",
+    "insertText": "if(!ReadFile(logger, file, handle, buffer, toRead))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (u64 start = 0 ;)",
+    "insertText": "for(u64 i=0;i!=toRead;++i)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (u64 end = i ;)",
+    "insertText": "if(i > 0 && buffer[i-1] == '\\r')"
+  },
+  {
+    "label": "append()",
+    "kind": "Method",
+    "detail": "Function (line .)",
+    "insertText": "append(buffer + start, end - start)"
+  },
+  {
+    "label": "clear()",
+    "kind": "Method",
+    "detail": "Function (line .)",
+    "insertText": "clear()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (start = i + 1 ; })",
+    "insertText": "if(toRead && buffer[toRead - 1] == '\\r')"
+  },
+  {
+    "label": "append()",
+    "kind": "Method",
+    "detail": "Function (line .)",
+    "insertText": "append(buffer + start, toRead - start)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(!line.empty()) if (!lineFunc(TString(line.begin(), line.end())))"
   }
 ]

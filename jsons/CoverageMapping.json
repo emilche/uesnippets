@@ -114,18 +114,6 @@
     "insertText": "CoverageData"
   },
   {
-    "label": "CoverageMapping",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "CoverageMapping"
-  },
-  {
-    "label": "CoverageMapping",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "CoverageMapping"
-  },
-  {
     "label": "DenseMapInfo",
     "kind": "Type",
     "detail": "struct declaration",
@@ -146,32 +134,62 @@
   {
     "label": "Counter()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "Counter()"
+    "detail": "Function (# ifndef LLVM_PROFILEDATA_COVERAGEMAPPING_H_ # define LLVM_PROFILEDATA_COVERAGEMAPPING_H_ # include \" llvm / ADT / ArrayRef . h \" # include \" llvm / ADT / DenseMap . h \" # include \" llvm / ADT / Hashing . h \" # include \" llvm / ADT / Triple . h \" # include \" llvm / ADT / iterator . h \" # include \" llvm / Support / Debug . h \" # include \" llvm / Support / ErrorOr . h \" # include \" llvm / Support / raw_ostream . h \" # include<system_error> # include<tuple> namespace llvm { class IndexedInstrProfReader ; namespace coverage { class CoverageMappingReader ; class CoverageMapping ; struct CounterExpressions ; enum CoverageMappingVersion { CoverageMappingVersion1 } ; struct Counter { enum CounterKind { Zero,CounterValueReference,Expression } ; const unsigned EncodingTagBits = 2 ; const unsigned EncodingTagMask = 0 x3 ; const unsigned EncodingCounterTagAndExpansionRegionTagBits = EncodingTagBits + 1 ; private : CounterKind Kind ; unsigned ID ;)",
+    "insertText": "Counter(CounterKind Kind, unsigned ID) : Kind(Kind), ID(ID)"
   },
   {
     "label": "Counter()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "Counter(CounterValueReference, CounterId)"
+    "detail": "Function (} public :)",
+    "insertText": "Counter() : Kind(Zero), ID(0)"
   },
   {
-    "label": "Counter()",
+    "label": "getKind()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "Counter(Expression, ExpressionId)"
+    "detail": "Function (} CounterKind)",
+    "insertText": "getKind()"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "operator(const Counter &LHS, const Counter &RHS)"
+  },
+  {
+    "label": "getZero()",
+    "kind": "Method",
+    "detail": "Function (} Counter)",
+    "insertText": "getZero()"
+  },
+  {
+    "label": "getCounter()",
+    "kind": "Method",
+    "detail": "Function (} Counter)",
+    "insertText": "getCounter(unsigned CounterId)"
+  },
+  {
+    "label": "getExpression()",
+    "kind": "Method",
+    "detail": "Function (} Counter)",
+    "insertText": "getExpression(unsigned ExpressionId)"
+  },
+  {
+    "label": "CounterExpression()",
+    "kind": "Method",
+    "detail": "Function (} } ; struct CounterExpression { enum ExprKind { Subtract,Add } ; ExprKind Kind ; Counter LHS,RHS ;)",
+    "insertText": "CounterExpression(ExprKind Kind, Counter LHS, Counter RHS) : Kind(Kind), LHS(LHS), RHS(RHS)"
   },
   {
     "label": "get()",
     "kind": "Method",
-    "detail": "Function (Counter)",
+    "detail": "Function (} } ; class CounterExpressionBuilder { std::vector<CounterExpression> Expressions ; llvm::DenseMap<CounterExpression,unsigned> ExpressionIndices ; Counter)",
     "insertText": "get(const CounterExpression &E)"
   },
   {
     "label": "extractTerms()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "extractTerms(Counter C, int Sign,\n                    SmallVectorImpl<std::pair<unsigned, int>> &Terms)"
+    "insertText": "extractTerms(Counter C, int Sign, SmallVectorImpl<std::pair<unsigned, int>> &Terms)"
   },
   {
     "label": "simplify()",
@@ -180,10 +198,10 @@
     "insertText": "simplify(Counter ExpressionTree)"
   },
   {
-    "label": "add()",
+    "label": "getExpressions()",
     "kind": "Method",
-    "detail": "Function (Counter)",
-    "insertText": "add(Counter LHS, Counter RHS)"
+    "detail": "Function (public : ArrayRef<CounterExpression>)",
+    "insertText": "getExpressions()"
   },
   {
     "label": "subtract()",
@@ -194,26 +212,254 @@
   {
     "label": "CounterMappingRegion()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "CounterMappingRegion(Count, FileID, 0, LineStart, ColumnStart,\n                                LineEnd, ColumnEnd, CodeRegion)"
+    "detail": "Function (} ; struct CounterMappingRegion { enum RegionKind { CodeRegion,ExpansionRegion,SkippedRegion } ; Counter Count ; unsigned FileID,ExpandedFileID ; unsigned LineStart,ColumnStart,LineEnd,ColumnEnd ; RegionKind Kind ;)",
+    "insertText": "CounterMappingRegion(Counter Count, unsigned FileID, unsigned ExpandedFileID, unsigned LineStart, unsigned ColumnStart, unsigned LineEnd, unsigned ColumnEnd, RegionKind Kind) : Count(Count), FileID(FileID), ExpandedFileID(ExpandedFileID), LineStart(LineStart), ColumnStart(ColumnStart), LineEnd(LineEnd), ColumnEnd(ColumnEnd), Kind(Kind)"
+  },
+  {
+    "label": "makeRegion()",
+    "kind": "Method",
+    "detail": "Function (} CounterMappingRegion)",
+    "insertText": "makeRegion(Counter Count, unsigned FileID, unsigned LineStart, unsigned ColumnStart, unsigned LineEnd, unsigned ColumnEnd)"
+  },
+  {
+    "label": "makeExpansion()",
+    "kind": "Method",
+    "detail": "Function (} CounterMappingRegion)",
+    "insertText": "makeExpansion(unsigned FileID, unsigned ExpandedFileID, unsigned LineStart, unsigned ColumnStart, unsigned LineEnd, unsigned ColumnEnd)"
+  },
+  {
+    "label": "makeSkipped()",
+    "kind": "Method",
+    "detail": "Function (} CounterMappingRegion)",
+    "insertText": "makeSkipped(unsigned FileID, unsigned LineStart, unsigned ColumnStart, unsigned LineEnd, unsigned ColumnEnd)"
+  },
+  {
+    "label": "startLoc()",
+    "kind": "Method",
+    "detail": "Function (} std::pair<unsigned,unsigned>)",
+    "insertText": "startLoc()"
+  },
+  {
+    "label": "endLoc()",
+    "kind": "Method",
+    "detail": "Function (} std::pair<unsigned,unsigned>)",
+    "insertText": "endLoc()"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "operator(const CounterMappingRegion &Other)"
+  },
+  {
+    "label": "contains()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "contains(const CounterMappingRegion &Other)"
+  },
+  {
+    "label": "CounterMappingContext()",
+    "kind": "Method",
+    "detail": "Function (} } ; class CounterMappingContext { ArrayRef<CounterExpression> Expressions ; ArrayRef<uint64_t> CounterValues ; public :)",
+    "insertText": "CounterMappingContext(ArrayRef<CounterExpression> Expressions, ArrayRef<uint64_t> CounterValues = ArrayRef<uint64_t>()) : Expressions(Expressions), CounterValues(CounterValues)"
+  },
+  {
+    "label": "setCounts()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "setCounts(ArrayRef<uint64_t> Counts)"
+  },
+  {
+    "label": "dump()",
+    "kind": "Method",
+    "detail": "Function (CounterValues = Counts ; } void)",
+    "insertText": "dump(const Counter &C, llvm::raw_ostream &OS)"
+  },
+  {
+    "label": "dump()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "dump(const Counter &C)"
+  },
+  {
+    "label": "dump()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "dump(C, dbgs())"
+  },
+  {
+    "label": "evaluate()",
+    "kind": "Method",
+    "detail": "Function (} ErrorOr<int64_t>)",
+    "insertText": "evaluate(const Counter &C)"
+  },
+  {
+    "label": "FunctionRecord()",
+    "kind": "Method",
+    "detail": "Function (} ; struct FunctionRecord { std::string Name ; std::vector<std::string> Filenames ; std::vector<CountedRegion> CountedRegions ; uint64_t ExecutionCount ;)",
+    "insertText": "FunctionRecord(StringRef Name, ArrayRef<StringRef> Filenames) : Name(Name), Filenames(Filenames.begin(), Filenames.end())"
+  },
+  {
+    "label": "pushRegion()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "pushRegion(CounterMappingRegion Region, uint64_t Count)"
+  },
+  {
+    "label": "emplace_back()",
+    "kind": "Method",
+    "detail": "Function (CountedRegions .)",
+    "insertText": "emplace_back(Region, Count)"
   },
   {
     "label": "skipOtherFiles()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} } ; class FunctionRecordIterator : public iterator_facade_base<FunctionRecordIterator,std::forward_iterator_tag,FunctionRecord> { ArrayRef<FunctionRecord> Records ; ArrayRef<FunctionRecord>::iterator Current ; StringRef Filename ; void)",
     "insertText": "skipOtherFiles()"
+  },
+  {
+    "label": "FunctionRecordIterator()",
+    "kind": "Method",
+    "detail": "Function (public :)",
+    "insertText": "FunctionRecordIterator(ArrayRef<FunctionRecord> Records_, StringRef Filename = \"\") : Records(Records_), Current(Records.begin()), Filename(Filename)"
+  },
+  {
+    "label": "FunctionRecordIterator()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "FunctionRecordIterator() : Current(Records.begin())"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "operator(const FunctionRecordIterator &RHS)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(Current != Records.end() && \"incremented past end\")"
+  },
+  {
+    "label": "CoverageSegment()",
+    "kind": "Method",
+    "detail": "Function (} } ; struct CoverageSegment { unsigned Line ; unsigned Col ; uint64_t Count ; bool HasCount ; bool IsRegionEntry ;)",
+    "insertText": "CoverageSegment(unsigned Line, unsigned Col, bool IsRegionEntry) : Line(Line), Col(Col), Count(0), HasCount(false), IsRegionEntry(IsRegionEntry)"
+  },
+  {
+    "label": "CoverageSegment()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "CoverageSegment(unsigned Line, unsigned Col, uint64_t Count, bool IsRegionEntry) : Line(Line), Col(Col), Count(Count), HasCount(true), IsRegionEntry(IsRegionEntry)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "operator(const CoverageSegment &L, const CoverageSegment &R)"
+  },
+  {
+    "label": "setCount()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "setCount(uint64_t NewCount)"
+  },
+  {
+    "label": "addCount()",
+    "kind": "Method",
+    "detail": "Function (Count = NewCount ; HasCount = true ; } void)",
+    "insertText": "addCount(uint64_t NewCount)"
+  },
+  {
+    "label": "setCount()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "setCount(Count + NewCount)"
+  },
+  {
+    "label": "CoverageData()",
+    "kind": "Method",
+    "detail": "Function (} } ; class CoverageData { std::string Filename ; std::vector<CoverageSegment> Segments ; std::vector<ExpansionRecord> Expansions ; class CoverageMapping ; public :)",
+    "insertText": "CoverageData()"
+  },
+  {
+    "label": "CoverageData()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "CoverageData(StringRef Filename) : Filename(Filename)"
+  },
+  {
+    "label": "CoverageData()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "CoverageData(CoverageData &&RHS) : Filename(std::move(RHS.Filename)), Segments(std::move(RHS.Segments)), Expansions(std::move(RHS.Expansions))"
+  },
+  {
+    "label": "getFilename()",
+    "kind": "Method",
+    "detail": "Function (} StringRef)",
+    "insertText": "getFilename()"
+  },
+  {
+    "label": "end()",
+    "kind": "Method",
+    "detail": "Function (} std::vector<CoverageSegment>::iterator)",
+    "insertText": "end()"
+  },
+  {
+    "label": "empty()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "empty()"
+  },
+  {
+    "label": "getExpansions()",
+    "kind": "Method",
+    "detail": "Function (} std::vector<ExpansionRecord>)",
+    "insertText": "getExpansions()"
+  },
+  {
+    "label": "load()",
+    "kind": "Method",
+    "detail": "Function (} public : ErrorOr<std::unique_ptr<CoverageMapping>>)",
+    "insertText": "load(CoverageMappingReader &CoverageReader, IndexedInstrProfReader &ProfileReader)"
   },
   {
     "label": "load()",
     "kind": "Method",
     "detail": "Function (ErrorOr<std::unique_ptr<CoverageMapping>>)",
-    "insertText": "load(CoverageMappingReader &CoverageReader,\n       IndexedInstrProfReader &ProfileReader)"
+    "insertText": "load(StringRef ObjectFilename, StringRef ProfileFilename, StringRef Arch = StringRef())"
+  },
+  {
+    "label": "getMismatchedCount()",
+    "kind": "Method",
+    "detail": "Function (unsigned)",
+    "insertText": "getMismatchedCount()"
   },
   {
     "label": "getCoverageForFile()",
     "kind": "Method",
     "detail": "Function (CoverageData)",
     "insertText": "getCoverageForFile(StringRef Filename)"
+  },
+  {
+    "label": "getCoveredFunctions()",
+    "kind": "Method",
+    "detail": "Function (iterator_range<FunctionRecordIterator>)",
+    "insertText": "getCoveredFunctions()"
+  },
+  {
+    "label": "getCoveredFunctions()",
+    "kind": "Method",
+    "detail": "Function (} iterator_range<FunctionRecordIterator>)",
+    "insertText": "getCoveredFunctions(StringRef Filename)"
+  },
+  {
+    "label": "getInstantiations()",
+    "kind": "Method",
+    "detail": "Function (} std::vector<const FunctionRecord*>)",
+    "insertText": "getInstantiations(StringRef Filename)"
   },
   {
     "label": "getCoverageForFunction()",
@@ -226,5 +472,47 @@
     "kind": "Method",
     "detail": "Function (CoverageData)",
     "insertText": "getCoverageForExpansion(const ExpansionRecord &Expansion)"
+  },
+  {
+    "label": "getEmptyKey()",
+    "kind": "Method",
+    "detail": "Function (} ; } template<> struct DenseMapInfo<coverage::CounterExpression> { coverage::CounterExpression)",
+    "insertText": "getEmptyKey()"
+  },
+  {
+    "label": "CounterExpression()",
+    "kind": "Method",
+    "detail": "Function (using namespace coverage ; return)",
+    "insertText": "CounterExpression(CounterExpression::ExprKind::Subtract, Counter::getCounter(~0U), Counter::getCounter(~0U))"
+  },
+  {
+    "label": "getTombstoneKey()",
+    "kind": "Method",
+    "detail": "Function (} coverage::CounterExpression)",
+    "insertText": "getTombstoneKey()"
+  },
+  {
+    "label": "CounterExpression()",
+    "kind": "Method",
+    "detail": "Function (using namespace coverage ; return)",
+    "insertText": "CounterExpression(CounterExpression::ExprKind::Add, Counter::getCounter(~0U), Counter::getCounter(~0U))"
+  },
+  {
+    "label": "getHashValue()",
+    "kind": "Method",
+    "detail": "Function (} unsigned)",
+    "insertText": "getHashValue(const coverage::CounterExpression &V)"
+  },
+  {
+    "label": "isEqual()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "isEqual(const coverage::CounterExpression &LHS, const coverage::CounterExpression &RHS)"
+  },
+  {
+    "label": "make_error_code()",
+    "kind": "Method",
+    "detail": "Function (enum class coveragemap_error { success = 0,eof,no_data_found,unsupported_version,truncated,malformed } ; std::error_code)",
+    "insertText": "make_error_code(coveragemap_error E)"
   }
 ]

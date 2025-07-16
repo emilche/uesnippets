@@ -6,16 +6,16 @@
     "insertText": "FOccupancyGrid3"
   },
   {
-    "label": "representing",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "representing"
-  },
-  {
     "label": "class",
     "kind": "Enum",
     "detail": "enum declaration",
     "insertText": "class"
+  },
+  {
+    "label": "FOccupancyGrid3()",
+    "kind": "Method",
+    "detail": "Function (\ufeff # pragma once # include \" DenseGrid3 . h \" # include \" FastWinding . h \" # include \" MeshAABBTree3 . h \" # include \" MeshWindingNumberGrid . h \" # include \" Algo / Count . h \" namespace UE::Geometry { struct FOccupancyGrid3 { enum class EDomain : int32 { Exterior,Boundary,Interior } ; template<MeshType>)",
+    "insertText": "FOccupancyGrid3(const MeshType& InMesh, const int32 InVoxelResolution)"
   },
   {
     "label": "Spatial()",
@@ -30,21 +30,93 @@
     "insertText": "FastWinding(&Spatial)"
   },
   {
+    "label": "GetBoundingBox()",
+    "kind": "Method",
+    "detail": "Function (const FAxisAlignedBox3d Bounds = Spatial .)",
+    "insertText": "GetBoundingBox()"
+  },
+  {
+    "label": "float()",
+    "kind": "Method",
+    "detail": "Function (CellSize =)",
+    "insertText": "float(Bounds.MaxDim() / InVoxelResolution)"
+  },
+  {
     "label": "WindingGrid()",
     "kind": "Method",
-    "detail": "Function (TMeshWindingNumberGrid)",
+    "detail": "Function (CellMidPoint = { CellSize / 2 . 0 f,CellSize / 2 . 0 f,CellSize / 2 . 0 f } ; TMeshWindingNumberGrid)",
     "insertText": "WindingGrid(&InMesh, &FastWinding, CellSize)"
   },
   {
-    "label": "CornerIndex()",
+    "label": "Compute()",
     "kind": "Method",
-    "detail": "Function (FVector3i)",
-    "insertText": "CornerIndex(OccupancyIndex + CornerOffset)"
+    "detail": "Function (WindingGrid .)",
+    "insertText": "Compute()"
+  },
+  {
+    "label": "Dimensions()",
+    "kind": "Method",
+    "detail": "Function (const FVector3i WindingDims = WindingGrid .)",
+    "insertText": "Dimensions()"
+  },
+  {
+    "label": "FVector3i()",
+    "kind": "Method",
+    "detail": "Function (Occupancy = { WindingDims . X - 1,WindingDims . Y - 1,WindingDims . Z - 1,EDomain::Exterior } ; GridOrigin = WindingGrid . GridOrigin + CellMidPoint ; FVector3i CornerOffsets [ ] = {)",
+    "insertText": "FVector3i(0, 0, 0), FVector3i(0, 0, 1), FVector3i(0, 1, 0), FVector3i(0, 1, 1), FVector3i(1, 0, 0), FVector3i(1, 0, 1), FVector3i(1, 1, 0), FVector3i(1, 1, 1)"
+  },
+  {
+    "label": "ParallelFor()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ParallelFor(Occupancy.Size(), [&](const int32 OccupancyId) { const FVector3i OccupancyIndex(Occupancy.ToIndex(OccupancyId)); const int32 Count = Algo::CountIf(CornerOffsets, [&WindingGrid, OccupancyIndex](FVector3i CornerOffset) { const FVector3i CornerIndex(OccupancyIndex + CornerOffset); return WindingGrid.GetValue(CornerIndex) >= WindingGrid.WindingIsoValue; }); if (Count == 8) { Occupancy[OccupancyIndex] = EDomain::Interior; } else if (Count > 0) { Occupancy[OccupancyIndex] = EDomain::Boundary; } })"
+  },
+  {
+    "label": "GetVertex()",
+    "kind": "Method",
+    "detail": "Function (const FVector3d& Pos = InMesh .)",
+    "insertText": "GetVertex(VertexIdx)"
+  },
+  {
+    "label": "GetCellIndexFromPoint()",
+    "kind": "Method",
+    "detail": "Function (const FVector3i OccupancyIndex =)",
+    "insertText": "GetCellIndexFromPoint(FVector(Pos))"
+  },
+  {
+    "label": "GetCellIndexFromPoint()",
+    "kind": "Method",
+    "detail": "Function (Occupancy [ OccupancyIndex ] = EDomain::Boundary ; } } } } FVector3i)",
+    "insertText": "GetCellIndexFromPoint(const FVector &InPoint)"
   },
   {
     "label": "PP()",
     "kind": "Method",
     "detail": "Function (FVector3f)",
     "insertText": "PP(InPoint)"
+  },
+  {
+    "label": "FloorToInt()",
+    "kind": "Method",
+    "detail": "Function (PP - = GridOrigin ; return {)",
+    "insertText": "FloorToInt(PP.X / CellSize), FMath::FloorToInt(PP.Y / CellSize), FMath::FloorToInt(PP.Z / CellSize)"
+  },
+  {
+    "label": "GetCellCenterFromIndex()",
+    "kind": "Method",
+    "detail": "Function (} FVector3f)",
+    "insertText": "GetCellCenterFromIndex(const FVector3i &Index)"
+  },
+  {
+    "label": "GetCellBoxFromIndex()",
+    "kind": "Method",
+    "detail": "Function (} FBox3f)",
+    "insertText": "GetCellBoxFromIndex(const FVector3i &Index)"
+  },
+  {
+    "label": "GetCellCenterFromIndex()",
+    "kind": "Method",
+    "detail": "Function (const FVector3f P =)",
+    "insertText": "GetCellCenterFromIndex(Index)"
   }
 ]

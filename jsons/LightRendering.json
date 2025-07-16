@@ -42,10 +42,10 @@
     "insertText": "class"
   },
   {
-    "label": "GetShadowQuality()",
+    "label": "BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT()",
     "kind": "Method",
-    "detail": "Function (uint32)",
-    "insertText": "GetShadowQuality()"
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # include \" RHI . h \" # include \" RHIResourceUtils . h \" # include \" RenderResource . h \" # include \" UniformBuffer . h \" # include \" ShaderParameters . h \" # include \" ShaderParameterUtils . h \" # include \" Shader . h \" # include \" GlobalShader . h \" # include \" SceneRendering . h \" # include \" Containers / DynamicRHIResourceArray . h \" # include \" LightSceneInfo . h \")",
+    "insertText": "BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FDeferredLightUniformStruct,) SHADER_PARAMETER(FVector4f,ShadowMapChannelMask) SHADER_PARAMETER(FVector2f,DistanceFadeMAD) SHADER_PARAMETER(float, ContactShadowLength) SHADER_PARAMETER(float, ContactShadowCastingIntensity) SHADER_PARAMETER(float, ContactShadowNonCastingIntensity) SHADER_PARAMETER(float, VolumetricScatteringIntensity) SHADER_PARAMETER(uint32,ShadowedBits) SHADER_PARAMETER(uint32,LightingChannelMask) SHADER_PARAMETER_STRUCT_INCLUDE(FLightShaderParameters, LightParameters) END_GLOBAL_SHADER_PARAMETER_STRUCT() extern uint32 GetShadowQuality()"
   },
   {
     "label": "GetLightFadeFactor()",
@@ -60,15 +60,51 @@
     "insertText": "GetDeferredLightParameters(const FSceneView& View, const FLightSceneInfo& LightSceneInfo, bool bUseLightFunctionAtlas=false, uint32 LightFlags=0)"
   },
   {
+    "label": "SetDeferredLightParameters()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetDeferredLightParameters(FRHIBatchedShaderParameters& BatchedParameters, const TShaderUniformBufferParameter<FDeferredLightUniformStruct>& DeferredLightUniformBufferParameter, const FLightSceneInfo* LightSceneInfo, const FSceneView& View, bool bUseLightFunctionAtlas)"
+  },
+  {
+    "label": "SetUniformBufferParameterImmediate()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetUniformBufferParameterImmediate(BatchedParameters, DeferredLightUniformBufferParameter, GetDeferredLightParameters(View, *LightSceneInfo, bUseLightFunctionAtlas))"
+  },
+  {
     "label": "GetSimpleDeferredLightParameters()",
     "kind": "Method",
-    "detail": "Function (FDeferredLightUniformStruct)",
-    "insertText": "GetSimpleDeferredLightParameters(\n\tconst FSceneView& View,\n\tconst FSimpleLightEntry& SimpleLight,\n\tconst FSimpleLightPerViewEntry &SimpleLightPerViewData)"
+    "detail": "Function (} FDeferredLightUniformStruct)",
+    "insertText": "GetSimpleDeferredLightParameters(const FSceneView& View, const FSimpleLightEntry& SimpleLight, const FSimpleLightPerViewEntry &SimpleLightPerViewData)"
+  },
+  {
+    "label": "SetSimpleDeferredLightParameters()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetSimpleDeferredLightParameters(FRHIBatchedShaderParameters& BatchedParameters, const TShaderUniformBufferParameter<FDeferredLightUniformStruct>& DeferredLightUniformBufferParameter, const FSimpleLightEntry& SimpleLight, const FSimpleLightPerViewEntry &SimpleLightPerViewData, const FSceneView& View)"
+  },
+  {
+    "label": "GetSimpleDeferredLightParameters()",
+    "kind": "Method",
+    "detail": "Function (FDeferredLightUniformStruct DeferredLightUniformsValue =)",
+    "insertText": "GetSimpleDeferredLightParameters(View, SimpleLight, SimpleLightPerViewData)"
+  },
+  {
+    "label": "SetUniformBufferParameterImmediate()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetUniformBufferParameterImmediate(BatchedParameters, DeferredLightUniformBufferParameter, DeferredLightUniformsValue)"
+  },
+  {
+    "label": "DECLARE_TYPE_LAYOUT()",
+    "kind": "Method",
+    "detail": "Function (} class FLightFunctionSharedParameters {)",
+    "insertText": "DECLARE_TYPE_LAYOUT(FLightFunctionSharedParameters, NonVirtual)"
   },
   {
     "label": "Bind()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (public : void)",
     "insertText": "Bind(const FShaderParameterMap& ParameterMap)"
   },
   {
@@ -78,9 +114,33 @@
     "insertText": "GetLightFunctionSharedParameters(const FLightSceneInfo* LightSceneInfo, float ShadowFadeFraction)"
   },
   {
-    "label": "DrawSphere()",
+    "label": "Set()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "Set(FRHIBatchedShaderParameters& BatchedParameters, const FLightSceneInfo* LightSceneInfo, float ShadowFadeFraction)"
+  },
+  {
+    "label": "SetShaderValue()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetShaderValue(BatchedParameters, LightFunctionParameters, GetLightFunctionSharedParameters(LightSceneInfo, ShadowFadeFraction))"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} FArchive&)",
+    "insertText": "operator(FArchive& Ar,FLightFunctionSharedParameters& P)"
+  },
+  {
+    "label": "LAYOUT_FIELD()",
+    "kind": "Method",
+    "detail": "Function (Ar<<P . LightFunctionParameters ; return Ar ; } private :)",
+    "insertText": "LAYOUT_FIELD(FShaderParameter, LightFunctionParameters)"
+  },
+  {
+    "label": "DrawSphere()",
+    "kind": "Method",
+    "detail": "Function (namespace StencilingGeometry { void)",
     "insertText": "DrawSphere(FRHICommandList& RHICmdList)"
   },
   {
@@ -104,26 +164,194 @@
   {
     "label": "static_assert()",
     "kind": "Method",
-    "detail": "Function (public:)",
+    "detail": "Function (template<int32 NumSphereSides,int32 NumSphereRings,VectorType> class TStencilSphereVertexBuffer : public FVertexBuffer { public :)",
     "insertText": "static_assert(std::is_same_v<typename VectorType::FReal, float>, \"Must be a float vector type\")"
+  },
+  {
+    "label": "GetNumRings()",
+    "kind": "Method",
+    "detail": "Function (int32)",
+    "insertText": "GetNumRings()"
+  },
+  {
+    "label": "NumVerts()",
+    "kind": "Method",
+    "detail": "Function (const int32 NumSides = NumSphereSides ; const int32 NumRings = NumSphereRings ; const int32)",
+    "insertText": "NumVerts(NumSides + 1) * (NumRings + 1)"
+  },
+  {
+    "label": "UE_PI()",
+    "kind": "Method",
+    "detail": "Function (const float RadiansPerRingSegment =)",
+    "insertText": "UE_PI(float)"
+  },
+  {
+    "label": "Empty()",
+    "kind": "Method",
+    "detail": "Function (float Radius = 1 ; TArray<VectorType,TInlineAllocator<NumRings + 1>> ArcVerts ; ArcVerts .)",
+    "insertText": "Empty(NumRings + 1)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (const float Angle = i* RadiansPerRingSegment ; ArcVerts .)",
+    "insertText": "Add(FVector3f(0.0f, FMath::Sin(Angle), FMath::Cos(Angle)))"
+  },
+  {
+    "label": "Empty()",
+    "kind": "Method",
+    "detail": "Function (} TArray<VectorType> Verts ; Verts .)",
+    "insertText": "Empty(NumVerts)"
+  },
+  {
+    "label": "FVector3f()",
+    "kind": "Method",
+    "detail": "Function (const FVector3f Center =)",
+    "insertText": "FVector3f(0,0,0)"
+  },
+  {
+    "label": "ArcRotator()",
+    "kind": "Method",
+    "detail": "Function (FRotator3f)",
+    "insertText": "ArcRotator(0, 360.f * ((float)s / NumSides), 0)"
   },
   {
     "label": "ArcRot()",
     "kind": "Method",
     "detail": "Function (FRotationMatrix44f)",
-    "insertText": "ArcRot( ArcRotator )"
+    "insertText": "ArcRot(ArcRotator)"
+  },
+  {
+    "label": "VIx()",
+    "kind": "Method",
+    "detail": "Function (const int32)",
+    "insertText": "VIx(NumRings + 1)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Verts .)",
+    "insertText": "Add(Center + Radius * ArcRot.TransformPosition(ArcVerts[v]))"
+  },
+  {
+    "label": "Num()",
+    "kind": "Method",
+    "detail": "Function (} } NumSphereVerts = Verts .)",
+    "insertText": "Num()"
+  },
+  {
+    "label": "CreateVertexBufferFromArray()",
+    "kind": "Method",
+    "detail": "Function (VertexBufferRHI = UE::)",
+    "insertText": "CreateVertexBufferFromArray(RHICmdList, TEXT(\"TStencilSphereVertexBuffer\"), EBufferUsageFlags::Static, MakeConstArrayView(Verts))"
+  },
+  {
+    "label": "GetVertexCount()",
+    "kind": "Method",
+    "detail": "Function (} int32)",
+    "insertText": "GetVertexCount()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (float Radius = Sphere . W ;)",
+    "insertText": "if(bConservativelyBoundSphere)"
+  },
+  {
+    "label": "Cos()",
+    "kind": "Method",
+    "detail": "Function (Radius / =)",
+    "insertText": "Cos(RadiansPerRingSegment)"
   },
   {
     "label": "Translate()",
     "kind": "Method",
-    "detail": "Function (FVector3f)",
+    "detail": "Function (} const FVector3f)",
     "insertText": "Translate(Sphere.Center + PreViewTranslation)"
   },
   {
-    "label": "Bind()",
+    "label": "FVector4f()",
+    "kind": "Method",
+    "detail": "Function (OutPosAndScale =)",
+    "insertText": "FVector4f(Translate, Radius)"
+  },
+  {
+    "label": "InitRHI()",
+    "kind": "Method",
+    "detail": "Function (} private : int32 NumSphereVerts ; } ; template<int32 NumSphereSides,int32 NumSphereRings> class TStencilSphereIndexBuffer : public FIndexBuffer { public : void)",
+    "insertText": "InitRHI(FRHICommandListBase& RHICmdList)"
+  },
+  {
+    "label": "Reserve()",
+    "kind": "Method",
+    "detail": "Function (const int32 NumSides = NumSphereSides ; const int32 NumRings = NumSphereRings ; TArray<uint16> Indices ; Indices .)",
+    "insertText": "Reserve(NumSides * NumRings * 6)"
+  },
+  {
+    "label": "a0start()",
+    "kind": "Method",
+    "detail": "Function (const int32)",
+    "insertText": "a0start(s + 0) * (NumRings + 1)"
+  },
+  {
+    "label": "a1start()",
+    "kind": "Method",
+    "detail": "Function (const int32)",
+    "insertText": "a1start(s + 1) * (NumRings + 1)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Indices .)",
+    "insertText": "Add(a0start + r + 0)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Indices .)",
+    "insertText": "Add(a1start + r + 0)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Indices .)",
+    "insertText": "Add(a0start + r + 1)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (Indices .)",
+    "insertText": "Add(a1start + r + 1)"
+  },
+  {
+    "label": "CreateIndexBufferFromArray()",
+    "kind": "Method",
+    "detail": "Function (IndexBufferRHI = UE::)",
+    "insertText": "CreateIndexBufferFromArray(RHICmdList, TEXT(\"TStencilSphereIndexBuffer\"), EBufferUsageFlags::Static, MakeConstArrayView(Indices))"
+  },
+  {
+    "label": "GetIndexCount()",
+    "kind": "Method",
+    "detail": "Function (} int32)",
+    "insertText": "GetIndexCount()"
+  },
+  {
+    "label": "BEGIN_SHADER_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (public :)",
+    "insertText": "BEGIN_SHADER_PARAMETER_STRUCT(FParameters, ) SHADER_PARAMETER(FVector4f, StencilingGeometryPosAndScale) SHADER_PARAMETER(FVector4f, StencilingConeParameters) SHADER_PARAMETER(FMatrix44f, StencilingConeTransform) END_SHADER_PARAMETER_STRUCT() void Bind(const FShaderParameterMap& ParameterMap)"
+  },
+  {
+    "label": "Set()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "Bind(const FShaderParameterMap& ParameterMap)"
+    "insertText": "Set(FRHIBatchedShaderParameters& BatchedParameters, const FVector4f& InStencilingGeometryPosAndScale)"
+  },
+  {
+    "label": "Set()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Set(FRHIBatchedShaderParameters& BatchedParameters, const FSceneView& View, const FLightSceneInfo* LightSceneInfo)"
   },
   {
     "label": "GetParameters()",
@@ -138,10 +366,46 @@
     "insertText": "GetParameters(const FSceneView& View, const FLightSceneInfo* LightSceneInfo)"
   },
   {
-    "label": "ShouldCompilePermutation()",
+    "label": "operator()",
     "kind": "Method",
-    "detail": "Function (bool)",
-    "insertText": "ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)"
+    "detail": "Function (FArchive&)",
+    "insertText": "operator(FArchive& Ar,FStencilingGeometryShaderParameters& P)"
+  },
+  {
+    "label": "LAYOUT_FIELD()",
+    "kind": "Method",
+    "detail": "Function (Ar<<P . StencilGeometryPosAndScale ; Ar<<P . StencilConeParameters ; Ar<<P . StencilConeTransform ; return Ar ; } private :)",
+    "insertText": "LAYOUT_FIELD(FShaderParameter, StencilGeometryPosAndScale) LAYOUT_FIELD(FShaderParameter, StencilConeParameters) LAYOUT_FIELD(FShaderParameter, StencilConeTransform)"
+  },
+  {
+    "label": "BEGIN_SHADER_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "BEGIN_SHADER_PARAMETER_STRUCT(FDrawFullScreenRectangleParameters, ) SHADER_PARAMETER(FVector4f, PosScaleBias) SHADER_PARAMETER(FVector4f, UVScaleBias) SHADER_PARAMETER(FVector4f, InvTargetSizeAndTextureSize) END_SHADER_PARAMETER_STRUCT()"
+  },
+  {
+    "label": "DECLARE_SHADER_TYPE()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DECLARE_SHADER_TYPE(FDeferredLightVS,Global)"
+  },
+  {
+    "label": "SHADER_USE_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SHADER_USE_PARAMETER_STRUCT(FDeferredLightVS, FGlobalShader)"
+  },
+  {
+    "label": "SHADER_PERMUTATION_BOOL()",
+    "kind": "Method",
+    "detail": "Function (class FRadialLight :)",
+    "insertText": "SHADER_PERMUTATION_BOOL(\"SHADER_RADIAL_LIGHT\")"
+  },
+  {
+    "label": "BEGIN_SHADER_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (using FPermutationDomain = TShaderPermutationDomain<FRadialLight> ;)",
+    "insertText": "BEGIN_SHADER_PARAMETER_STRUCT(FParameters, ) SHADER_PARAMETER_STRUCT_REF(FViewUniformShaderParameters, View) SHADER_PARAMETER_STRUCT_INCLUDE(FDrawFullScreenRectangleParameters, FullScreenRect) SHADER_PARAMETER_STRUCT_INCLUDE(FStencilingGeometryShaderParameters::FParameters, Geometry) END_SHADER_PARAMETER_STRUCT() public: static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)"
   },
   {
     "label": "ModifyCompilationEnvironment()",
@@ -153,13 +417,13 @@
     "label": "GetFullScreenRectParameters()",
     "kind": "Method",
     "detail": "Function (FDrawFullScreenRectangleParameters)",
-    "insertText": "GetFullScreenRectParameters(\n\t\tfloat X, float Y,\n\t\tfloat SizeX, float SizeY,\n\t\tfloat U, float V,\n\t\tfloat SizeU, float SizeV,\n\t\tFIntPoint InTargetSize,\n\t\tFIntPoint InTextureSize)"
+    "insertText": "GetFullScreenRectParameters(float X, float Y, float SizeX, float SizeY, float U, float V, float SizeU, float SizeV, FIntPoint InTargetSize, FIntPoint InTextureSize)"
   },
   {
     "label": "GetParameters()",
     "kind": "Method",
     "detail": "Function (FParameters)",
-    "insertText": "GetParameters(const FViewInfo& View,\n\t\tfloat X, float Y,\n\t\tfloat SizeX, float SizeY,\n\t\tfloat U, float V,\n\t\tfloat SizeU, float SizeV,\n\t\tFIntPoint TargetSize,\n\t\tFIntPoint TextureSize,\n\t\tbool bBindViewUniform = true)"
+    "insertText": "GetParameters(const FViewInfo& View, float X, float Y, float SizeX, float SizeY, float U, float V, float SizeU, float SizeV, FIntPoint TargetSize, FIntPoint TextureSize, bool bBindViewUniform = true)"
   },
   {
     "label": "GetParameters()",
@@ -182,7 +446,7 @@
   {
     "label": "GetLightOcclusionType()",
     "kind": "Method",
-    "detail": "Function (FLightOcclusionType)",
+    "detail": "Function (} ; enum class FLightOcclusionType : uint8 { Shadowmap,Raytraced,MegaLights,MegaLightsVSM,} ; FLightOcclusionType)",
     "insertText": "GetLightOcclusionType(const FLightSceneProxy& Proxy, const FSceneViewFamily& ViewFamily)"
   },
   {

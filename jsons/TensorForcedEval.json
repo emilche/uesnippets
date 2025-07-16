@@ -1,11 +1,5 @@
 [
   {
-    "label": "TensorForcedEval",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "TensorForcedEval"
-  },
-  {
     "label": "traits",
     "kind": "Type",
     "detail": "struct declaration",
@@ -36,21 +30,153 @@
     "insertText": "non_integral_type_placement_new"
   },
   {
-    "label": "non_integral_type_placement_new",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "non_integral_type_placement_new"
-  },
-  {
     "label": "TensorEvaluator",
     "kind": "Type",
     "detail": "struct declaration",
     "insertText": "TensorEvaluator"
   },
   {
+    "label": "TensorForcedEvalOp()",
+    "kind": "Method",
+    "detail": "Function (# ifndef EIGEN_CXX11_TENSOR_TENSOR_FORCED_EVAL_H # define EIGEN_CXX11_TENSOR_TENSOR_FORCED_EVAL_H namespace Eigen { namespace internal { template<XprType> struct traits<TensorForcedEvalOp<XprType>> { typedef XprType::Scalar Scalar ; typedef traits<XprType> XprTraits ; typedef traits<XprType>::StorageKind StorageKind ; typedef traits<XprType>::Index Index ; typedef XprType::Nested Nested ; typedef remove_reference<Nested>::type _Nested ; const int NumDimensions = XprTraits::NumDimensions ; const int Layout = XprTraits::Layout ; typedef XprTraits::PointerType PointerType ; enum { Flags = 0 } ; } ; template<XprType> struct eval<TensorForcedEvalOp<XprType>,Eigen::Dense> { typedef const TensorForcedEvalOp<XprType>& type ; } ; template<XprType> struct nested<TensorForcedEvalOp<XprType>,1,eval<TensorForcedEvalOp<XprType>>::type> { typedef TensorForcedEvalOp<XprType> type ; } ; } template<XprType> class TensorForcedEvalOp : public TensorBase<TensorForcedEvalOp<XprType>,ReadOnlyAccessors> { public : typedef Eigen::internal::traits<TensorForcedEvalOp>::Scalar Scalar ; typedef Eigen::NumTraits<Scalar>::Real RealScalar ; typedef internal::remove_const<XprType::CoeffReturnType>::type CoeffReturnType ; typedef Eigen::internal::nested<TensorForcedEvalOp>::type Nested ; typedef Eigen::internal::traits<TensorForcedEvalOp>::StorageKind StorageKind ; typedef Eigen::internal::traits<TensorForcedEvalOp>::Index Index ; EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE)",
+    "insertText": "TensorForcedEvalOp(const XprType& expr) : m_xpr(expr)"
+  },
+  {
+    "label": "expression()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC const internal::remove_all<XprType::Nested>::type&)",
+    "insertText": "expression()"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} } } ; template<CoeffReturnType> struct non_integral_type_placement_new<Eigen::SyclDevice,CoeffReturnType> { template<StorageType> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void)",
+    "insertText": "operator()(Index, StorageType)"
+  },
+  {
+    "label": "PacketAccess()",
+    "kind": "Method",
+    "detail": "Function (} } ; } template<ArgType_,Device> struct TensorEvaluator<const TensorForcedEvalOp<ArgType_>,Device> { typedef const internal::remove_all<ArgType_>::type ArgType ; typedef TensorForcedEvalOp<ArgType> XprType ; typedef ArgType::Scalar Scalar ; typedef TensorEvaluator<ArgType,Device>::Dimensions Dimensions ; typedef XprType::Index Index ; typedef XprType::CoeffReturnType CoeffReturnType ; typedef PacketType<CoeffReturnType,Device>::type PacketReturnType ; const int PacketSize = PacketType<CoeffReturnType,Device>::size ; typedef Eigen::internal::traits<XprType>::PointerType TensorPointerType ; typedef StorageMemory<CoeffReturnType,Device> Storage ; typedef Storage::Type EvaluatorPointerType ; enum { IsAligned = true,)",
+    "insertText": "PacketAccess(PacketType<CoeffReturnType, Device>::size > 1)"
+  },
+  {
+    "label": "TensorEvaluator()",
+    "kind": "Method",
+    "detail": "Function (const int NumDims = internal::traits<ArgType>::NumDimensions ; typedef internal::TensorBlockDescriptor<NumDims,Index> TensorBlockDesc ; typedef internal::TensorBlockScratchAllocator<Device> TensorBlockScratch ; typedef internal::TensorMaterializedBlock<CoeffReturnType,NumDims,Layout,Index> TensorBlock ;)",
+    "insertText": "TensorEvaluator(const XprType& op, const Device& device) : m_impl(op.expression(), device), m_op(op.expression()), m_device(device), m_buffer(NULL)"
+  },
+  {
+    "label": "dimensions()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC const Dimensions&)",
+    "insertText": "dimensions()"
+  },
+  {
+    "label": "evalSubExprsIfNeeded()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_STRONG_INLINE bool)",
+    "insertText": "evalSubExprsIfNeeded(EvaluatorPointerType)"
+  },
+  {
+    "label": "array_prod()",
+    "kind": "Method",
+    "detail": "Function (const Index numValues =)",
+    "insertText": "array_prod(m_impl.dimensions())"
+  },
+  {
+    "label": "get()",
+    "kind": "Method",
+    "detail": "Function (m_buffer = m_device .)",
+    "insertText": "get((CoeffReturnType*)m_device.allocate_temp(numValues * sizeof(CoeffReturnType)))"
+  },
+  {
+    "label": "CoeffReturnType()",
+    "kind": "Method",
+    "detail": "Function (internal::non_integral_type_placement_new<Device,)",
+    "insertText": "CoeffReturnType()(numValues, m_buffer)"
+  },
+  {
+    "label": "evalToTmp()",
+    "kind": "Method",
+    "detail": "Function (typedef TensorEvalToOp<const internal::remove_const<ArgType>::type> EvalTo ; EvalTo)",
+    "insertText": "evalToTmp(m_device.get(m_buffer), m_op)"
+  },
+  {
     "label": "run()",
     "kind": "Method",
-    "detail": "Function (ArgType>::value>::)",
+    "detail": "Function (internal::TensorExecutor<const EvalTo,internal::remove_const<Device>::type,internal::IsVectorizable<Device,const ArgType>::value,internal::IsTileable<Device,const ArgType>::value)",
     "insertText": "run(evalToTmp, m_device)"
+  },
+  {
+    "label": "get()",
+    "kind": "Method",
+    "detail": "Function (m_buffer = m_device .)",
+    "insertText": "get((CoeffReturnType*)m_device.allocate_temp( numValues * sizeof(CoeffReturnType)))"
+  },
+  {
+    "label": "bind()",
+    "kind": "Method",
+    "detail": "Function (auto on_done =)",
+    "insertText": "bind([](EvalSubExprsCallback done_) { done_(true); }, std::move(done))"
+  },
+  {
+    "label": "decltype()",
+    "kind": "Method",
+    "detail": "Function (internal::TensorAsyncExecutor<const EvalTo,internal::remove_const<Device>::type,)",
+    "insertText": "decltype(on_done), internal::IsVectorizable<Device, const ArgType>::value, internal::IsTileable<Device, const ArgType>::value>:: runAsync(evalToTmp, m_device, std::move(on_done))"
+  },
+  {
+    "label": "cleanup()",
+    "kind": "Method",
+    "detail": "Function (} # endif EIGEN_STRONG_INLINE void)",
+    "insertText": "cleanup()"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (m_device .)",
+    "insertText": "deallocate_temp(m_buffer)"
+  },
+  {
+    "label": "coeff()",
+    "kind": "Method",
+    "detail": "Function (m_buffer = NULL ; } EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE CoeffReturnType)",
+    "insertText": "coeff(Index index)"
+  },
+  {
+    "label": "getResourceRequirements()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE internal::TensorBlockResourceRequirements)",
+    "insertText": "getResourceRequirements()"
+  },
+  {
+    "label": "block()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE TensorBlock)",
+    "insertText": "block(TensorBlockDesc& desc, TensorBlockScratch& scratch, bool = false)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(m_buffer != NULL)"
+  },
+  {
+    "label": "costPerCoeff()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE TensorOpCost)",
+    "insertText": "costPerCoeff(bool vectorized)"
+  },
+  {
+    "label": "data()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE EvaluatorPointerType)",
+    "insertText": "data()"
+  },
+  {
+    "label": "bind()",
+    "kind": "Method",
+    "detail": "Function (m_buffer .)",
+    "insertText": "bind(cgh)"
   }
 ]

@@ -84,22 +84,10 @@
     "insertText": "LICMSafetyInfo"
   },
   {
-    "label": "holds",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "holds"
-  },
-  {
     "label": "RecurrenceDescriptor",
     "kind": "Type",
     "detail": "class declaration",
     "insertText": "RecurrenceDescriptor"
-  },
-  {
-    "label": "represents",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "represents"
   },
   {
     "label": "RecurrenceKind",
@@ -108,22 +96,10 @@
     "insertText": "RecurrenceKind"
   },
   {
-    "label": "represents",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "represents"
-  },
-  {
     "label": "MinMaxRecurrenceKind",
     "kind": "Enum",
     "detail": "enum declaration",
     "insertText": "MinMaxRecurrenceKind"
-  },
-  {
-    "label": "holds",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "holds"
   },
   {
     "label": "InstDesc",
@@ -132,28 +108,46 @@
     "insertText": "InstDesc"
   },
   {
-    "label": "describing",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "describing"
-  },
-  {
-    "label": "describing",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "describing"
-  },
-  {
-    "label": "isRecurrenceInstr()",
+    "label": "LICMSafetyInfo()",
     "kind": "Method",
-    "detail": "Function (InstDesc)",
-    "insertText": "isRecurrenceInstr(Instruction *I, RecurrenceKind Kind,\n                                    InstDesc &Prev, bool HasFunNoNaNAttr)"
+    "detail": "Function (# ifndef LLVM_TRANSFORMS_UTILS_LOOPUTILS_H # define LLVM_TRANSFORMS_UTILS_LOOPUTILS_H # include \" llvm / ADT / SmallVector . h \" # include \" llvm / IR / Dominators . h \" # include \" llvm / IR / IRBuilder . h \" namespace llvm { class AliasAnalysis ; class AliasSet ; class AliasSetTracker ; class AssumptionCache ; class BasicBlock ; class DataLayout ; class DominatorTree ; class Loop ; class LoopInfo ; class Pass ; class PredIteratorCache ; class ScalarEvolution ; class TargetLibraryInfo ; struct LICMSafetyInfo { bool MayThrow ; bool HeaderMayThrow ;)",
+    "insertText": "LICMSafetyInfo() : MayThrow(false), HeaderMayThrow(false)"
+  },
+  {
+    "label": "RecurrenceDescriptor()",
+    "kind": "Method",
+    "detail": "Function (} } ; class RecurrenceDescriptor { public : enum RecurrenceKind { RK_NoRecurrence,RK_IntegerAdd,RK_IntegerMult,RK_IntegerOr,RK_IntegerAnd,RK_IntegerXor,RK_IntegerMinMax,RK_FloatAdd,RK_FloatMult,RK_FloatMinMax } ; enum MinMaxRecurrenceKind { MRK_Invalid,MRK_UIntMin,MRK_UIntMax,MRK_SIntMin,MRK_SIntMax,MRK_FloatMin,MRK_FloatMax } ;)",
+    "insertText": "RecurrenceDescriptor() : StartValue(nullptr), LoopExitInstr(nullptr), Kind(RK_NoRecurrence), MinMaxKind(MRK_Invalid)"
+  },
+  {
+    "label": "RecurrenceDescriptor()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "RecurrenceDescriptor(Value *Start, Instruction *Exit, RecurrenceKind K, MinMaxRecurrenceKind MK) : StartValue(Start), LoopExitInstr(Exit), Kind(K), MinMaxKind(MK)"
+  },
+  {
+    "label": "InstDesc()",
+    "kind": "Method",
+    "detail": "Function (} class InstDesc { public :)",
+    "insertText": "InstDesc(bool IsRecur, Instruction *I) : IsRecurrence(IsRecur), PatternLastInst(I), MinMaxKind(MRK_Invalid)"
+  },
+  {
+    "label": "InstDesc()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "InstDesc(Instruction *I, MinMaxRecurrenceKind K) : IsRecurrence(true), PatternLastInst(I), MinMaxKind(K)"
+  },
+  {
+    "label": "isRecurrence()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "isRecurrence()"
   },
   {
     "label": "hasMultipleUsesOf()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "hasMultipleUsesOf(Instruction *I,\n                                SmallPtrSetImpl<Instruction *> &Insts)"
+    "insertText": "hasMultipleUsesOf(Instruction *I, SmallPtrSetImpl<Instruction *> &Insts)"
   },
   {
     "label": "areAllUsesIn()",
@@ -168,58 +162,76 @@
     "insertText": "isMinMaxSelectCmpPattern(Instruction *I, InstDesc &Prev)"
   },
   {
+    "label": "getRecurrenceIdentity()",
+    "kind": "Method",
+    "detail": "Function (Constant*)",
+    "insertText": "getRecurrenceIdentity(RecurrenceKind K, Type *Tp)"
+  },
+  {
     "label": "getRecurrenceBinOp()",
     "kind": "Method",
     "detail": "Function (unsigned)",
     "insertText": "getRecurrenceBinOp(RecurrenceKind Kind)"
   },
   {
+    "label": "createMinMaxOp()",
+    "kind": "Method",
+    "detail": "Function (Value*)",
+    "insertText": "createMinMaxOp(IRBuilder<> &Builder, MinMaxRecurrenceKind RK, Value *Left, Value *Right)"
+  },
+  {
     "label": "AddReductionVar()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "AddReductionVar(PHINode *Phi, RecurrenceKind Kind, Loop *TheLoop,\n                              bool HasFunNoNaNAttr,\n                              RecurrenceDescriptor &RedDes)"
+    "insertText": "AddReductionVar(PHINode *Phi, RecurrenceKind Kind, Loop *TheLoop, bool HasFunNoNaNAttr, RecurrenceDescriptor &RedDes)"
   },
   {
     "label": "isReductionPHI()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "isReductionPHI(PHINode *Phi, Loop *TheLoop,\n                             RecurrenceDescriptor &RedDes)"
+    "insertText": "isReductionPHI(PHINode *Phi, Loop *TheLoop, RecurrenceDescriptor &RedDes)"
+  },
+  {
+    "label": "getRecurrenceKind()",
+    "kind": "Method",
+    "detail": "Function (RecurrenceKind)",
+    "insertText": "getRecurrenceKind()"
   },
   {
     "label": "simplifyLoop()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "simplifyLoop(Loop *L, DominatorTree *DT, LoopInfo *LI, Pass *PP,\n                  AliasAnalysis *AA = nullptr, ScalarEvolution *SE = nullptr,\n                  AssumptionCache *AC = nullptr)"
+    "insertText": "simplifyLoop(Loop *L, DominatorTree *DT, LoopInfo *LI, Pass *PP, AliasAnalysis *AA = nullptr, ScalarEvolution *SE = nullptr, AssumptionCache *AC = nullptr)"
   },
   {
     "label": "formLCSSA()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "formLCSSA(Loop &L, DominatorTree &DT, LoopInfo *LI,\n               ScalarEvolution *SE = nullptr)"
+    "insertText": "formLCSSA(Loop &L, DominatorTree &DT, LoopInfo *LI, ScalarEvolution *SE = nullptr)"
   },
   {
     "label": "formLCSSARecursively()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "formLCSSARecursively(Loop &L, DominatorTree &DT, LoopInfo *LI,\n                          ScalarEvolution *SE = nullptr)"
+    "insertText": "formLCSSARecursively(Loop &L, DominatorTree &DT, LoopInfo *LI, ScalarEvolution *SE = nullptr)"
   },
   {
     "label": "sinkRegion()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "sinkRegion(DomTreeNode *, AliasAnalysis *, LoopInfo *, DominatorTree *,\n                TargetLibraryInfo *, Loop *, AliasSetTracker *,\n                LICMSafetyInfo *)"
+    "insertText": "sinkRegion(DomTreeNode *, AliasAnalysis *, LoopInfo *, DominatorTree *, TargetLibraryInfo *, Loop *, AliasSetTracker *, LICMSafetyInfo *)"
   },
   {
     "label": "hoistRegion()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "hoistRegion(DomTreeNode *, AliasAnalysis *, LoopInfo *, DominatorTree *,\n                 TargetLibraryInfo *, Loop *, AliasSetTracker *,\n                 LICMSafetyInfo *)"
+    "insertText": "hoistRegion(DomTreeNode *, AliasAnalysis *, LoopInfo *, DominatorTree *, TargetLibraryInfo *, Loop *, AliasSetTracker *, LICMSafetyInfo *)"
   },
   {
     "label": "promoteLoopAccessesToScalars()",
     "kind": "Method",
     "detail": "Function (bool)",
-    "insertText": "promoteLoopAccessesToScalars(AliasSet &, SmallVectorImpl<BasicBlock*> &,\n                                  SmallVectorImpl<Instruction*> &,\n                                  PredIteratorCache &, LoopInfo *,\n                                  DominatorTree *, Loop *, AliasSetTracker *,\n                                  LICMSafetyInfo *)"
+    "insertText": "promoteLoopAccessesToScalars(AliasSet &, SmallVectorImpl<BasicBlock*> &, SmallVectorImpl<Instruction*> &, PredIteratorCache &, LoopInfo *, DominatorTree *, Loop *, AliasSetTracker *, LICMSafetyInfo *)"
   },
   {
     "label": "computeLICMSafetyInfo()",

@@ -24,10 +24,34 @@
     "insertText": "SWorldHierarchyImpl"
   },
   {
-    "label": "DECLARE_DELEGATE_OneParam()",
+    "label": "FPendingWorldTreeOperation()",
     "kind": "Method",
-    "detail": "Function (WorldHierarchy)",
-    "insertText": "DECLARE_DELEGATE_OneParam(FOnWorldHierarchyItemPicked, WorldHierarchy::FWorldTreeItemRef)"
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # include \" Layout / Visibility . h \" # include \" Input / Reply . h \" # include \" Widgets / SWidget . h \" # include \" Widgets / Input / SComboButton . h \" # include \" Widgets / DeclarativeSyntaxSupport . h \" # include \" Widgets / SCompoundWidget . h \" # include \" EditorUndoClient . h \" # include \" LevelModel . h \" # include \" LevelCollectionModel . h \" # include \" Misc / TextFilter . h \" # include \" SLevelsTreeWidget . h \" # include \" UObject / ObjectSaveContext . h \" # include \" IWorldTreeItem . h \" typedef TTextFilter<const WorldHierarchy::IWorldTreeItem&> HierarchyFilter ; typedef TTextFilter<const FLevelModel*> LevelTextFilter ; namespace WorldHierarchy { struct FPendingWorldTreeOperation { enum EType { Added,Removed,Moved,} ;)",
+    "insertText": "FPendingWorldTreeOperation(EType InOp, FWorldTreeItemRef InItem) : Operation(InOp), Item(InItem)"
+  },
+  {
+    "label": "ENUM_CLASS_FLAGS()",
+    "kind": "Method",
+    "detail": "Function (} EType Operation ; FWorldTreeItemRef Item ; } ; enum class ENewItemAction : uint8 { None = 0,Select = 1<<0,ScrollIntoView = 1<<1,Rename = 1<<2,} ;)",
+    "insertText": "ENUM_CLASS_FLAGS(ENewItemAction) } DECLARE_DELEGATE_OneParam(FOnWorldHierarchyItemPicked, WorldHierarchy::FWorldTreeItemRef)"
+  },
+  {
+    "label": "SLATE_BEGIN_ARGS()",
+    "kind": "Method",
+    "detail": "Function (class SWorldHierarchyImpl : public SCompoundWidget,public FEditorUndoClient { public :)",
+    "insertText": "SLATE_BEGIN_ARGS(SWorldHierarchyImpl) : _ShowFoldersOnly(false)"
+  },
+  {
+    "label": "SLATE_ARGUMENT()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "SLATE_ARGUMENT(TSharedPtr<FLevelCollectionModel>, InWorldModel) SLATE_ARGUMENT(bool, ShowFoldersOnly) SLATE_ARGUMENT(TSet<FName>, InExcludedFolders) SLATE_ARGUMENT(FOnWorldHierarchyItemPicked, OnItemPickedDelegate) SLATE_END_ARGS() SWorldHierarchyImpl()"
+  },
+  {
+    "label": "SWorldHierarchyImpl()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "SWorldHierarchyImpl()"
   },
   {
     "label": "Construct()",
@@ -40,6 +64,12 @@
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "RefreshView()"
+  },
+  {
+    "label": "Tick()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Tick(const FGeometry& AllotedGeometry, const double InCurrentTime, const float InDeltaTime)"
   },
   {
     "label": "CreateFolder()",
@@ -78,6 +108,18 @@
     "insertText": "AddDroppedLevelsToFolder(const TArray<FAssetData>& WorldAssetList, FName FolderPath)"
   },
   {
+    "label": "GetSelectedTreeItems()",
+    "kind": "Method",
+    "detail": "Function (TArray<WorldHierarchy::FWorldTreeItemPtr>)",
+    "insertText": "GetSelectedTreeItems()"
+  },
+  {
+    "label": "IsColumnVisible()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "IsColumnVisible(FName ColumnId)"
+  },
+  {
     "label": "SetColumnVisible()",
     "kind": "Method",
     "detail": "Function (void)",
@@ -96,9 +138,27 @@
     "insertText": "SetWillBeVisibleInConfigTransient(FName ColumnId, bool bIsVisible)"
   },
   {
+    "label": "PostUndo()",
+    "kind": "Method",
+    "detail": "Function (public : void)",
+    "insertText": "PostUndo(bool bSuccess)"
+  },
+  {
+    "label": "PostRedo()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "PostRedo(bool bSuccess)"
+  },
+  {
+    "label": "PostUndo()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "PostUndo(bSuccess)"
+  },
+  {
     "label": "CreateHeaderRow()",
     "kind": "Method",
-    "detail": "Function (TSharedRef<SHeaderRow>)",
+    "detail": "Function (} private : const int32 MaxPendingOperations = 5 0 0 ; TSharedRef<SHeaderRow>)",
     "insertText": "CreateHeaderRow()"
   },
   {
@@ -132,6 +192,12 @@
     "insertText": "GetChildrenForTree(WorldHierarchy::FWorldTreeItemPtr Item, TArray<WorldHierarchy::FWorldTreeItemPtr>& OutChildren)"
   },
   {
+    "label": "ConstructLevelContextMenu()",
+    "kind": "Method",
+    "detail": "Function (TSharedPtr<SWidget>)",
+    "insertText": "ConstructLevelContextMenu()"
+  },
+  {
     "label": "FillFoldersSubmenu()",
     "kind": "Method",
     "detail": "Function (void)",
@@ -159,7 +225,7 @@
     "label": "OnTreeItemScrolledIntoView()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "OnTreeItemScrolledIntoView( WorldHierarchy::FWorldTreeItemPtr Item, const TSharedPtr<ITableRow>& Widget )"
+    "insertText": "OnTreeItemScrolledIntoView(WorldHierarchy::FWorldTreeItemPtr Item, const TSharedPtr<ITableRow>& Widget)"
   },
   {
     "label": "OnExpansionChanged()",
@@ -186,15 +252,51 @@
     "insertText": "OnTreeViewMouseButtonDoubleClick(WorldHierarchy::FWorldTreeItemPtr Item)"
   },
   {
+    "label": "SupportsKeyboardFocus()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "SupportsKeyboardFocus()"
+  },
+  {
+    "label": "ConstructItemFor()",
+    "kind": "Method",
+    "detail": "Function (template<TreeItemType,DataType> void)",
+    "insertText": "ConstructItemFor(const DataType& Data)"
+  },
+  {
     "label": "Temporary()",
     "kind": "Method",
-    "detail": "Function (TreeItemType)",
+    "detail": "Function (const TreeItemType)",
     "insertText": "Temporary(Data)"
+  },
+  {
+    "label": "PassesFilter()",
+    "kind": "Method",
+    "detail": "Function (bool bPassesFilter =)",
+    "insertText": "PassesFilter(Temporary)"
+  },
+  {
+    "label": "MakeShareable()",
+    "kind": "Method",
+    "detail": "Function (WorldHierarchy::FWorldTreeItemRef NewItem =)",
+    "insertText": "MakeShareable(new TreeItemType(Data))"
+  },
+  {
+    "label": "Emplace()",
+    "kind": "Method",
+    "detail": "Function (NewItem -> WorldModel = WorldModel ; PendingOperations .)",
+    "insertText": "Emplace(WorldHierarchy::FPendingWorldTreeOperation::Added, NewItem)"
+  },
+  {
+    "label": "Add()",
+    "kind": "Method",
+    "detail": "Function (PendingTreeItemMap .)",
+    "insertText": "Add(NewItem->GetID(), NewItem)"
   },
   {
     "label": "Populate()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} } void)",
     "insertText": "Populate()"
   },
   {
@@ -244,6 +346,12 @@
     "kind": "Method",
     "detail": "Function (WorldHierarchy::FWorldTreeItemPtr)",
     "insertText": "EnsureParentForItem(WorldHierarchy::FWorldTreeItemRef Item)"
+  },
+  {
+    "label": "GetParentsExpansionState()",
+    "kind": "Method",
+    "detail": "Function (TMap<WorldHierarchy::FWorldTreeItemID,bool>)",
+    "insertText": "GetParentsExpansionState()"
   },
   {
     "label": "SetParentsExpansionState()",
@@ -324,10 +432,52 @@
     "insertText": "PassesFilter(const WorldHierarchy::IWorldTreeItem& Item)"
   },
   {
+    "label": "GetEmptyLabelVisibility()",
+    "kind": "Method",
+    "detail": "Function (EVisibility)",
+    "insertText": "GetEmptyLabelVisibility()"
+  },
+  {
+    "label": "IsTreeItemExpanded()",
+    "kind": "Method",
+    "detail": "Function (private : bool)",
+    "insertText": "IsTreeItemExpanded(WorldHierarchy::FWorldTreeItemPtr Item)"
+  },
+  {
+    "label": "TransformLevelToString()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "TransformLevelToString(const FLevelModel* Level, TArray<FString>& OutSearchStrings)"
+  },
+  {
+    "label": "TransformItemToString()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "TransformItemToString(const WorldHierarchy::IWorldTreeItem& Item, TArray<FString>& OutSearchStrings)"
+  },
+  {
+    "label": "GetSearchBoxText()",
+    "kind": "Method",
+    "detail": "Function (FText)",
+    "insertText": "GetSearchBoxText()"
+  },
+  {
+    "label": "GetFilterStatusText()",
+    "kind": "Method",
+    "detail": "Function (FText)",
+    "insertText": "GetFilterStatusText()"
+  },
+  {
     "label": "SetFilterText()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "SetFilterText(const FText& InFilterText)"
+  },
+  {
+    "label": "GetFilterStatusTextColor()",
+    "kind": "Method",
+    "detail": "Function (FSlateColor)",
+    "insertText": "GetFilterStatusTextColor()"
   },
   {
     "label": "GetViewButtonContent()",
@@ -336,10 +486,34 @@
     "insertText": "GetViewButtonContent()"
   },
   {
+    "label": "ToggleDisplayPaths_Executed()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ToggleDisplayPaths_Executed()"
+  },
+  {
+    "label": "SetDisplayPathsState()",
+    "kind": "Method",
+    "detail": "Function (WorldModel ->)",
+    "insertText": "SetDisplayPathsState(!WorldModel->GetDisplayPathsState())"
+  },
+  {
+    "label": "GetDisplayPathsState()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "GetDisplayPathsState()"
+  },
+  {
     "label": "ToggleDisplayActorsCount_Executed()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "ToggleDisplayActorsCount_Executed()"
+  },
+  {
+    "label": "GetDisplayActorsCountState()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "GetDisplayActorsCountState()"
   },
   {
     "label": "OnWorldSaved()",

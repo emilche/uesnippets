@@ -12,16 +12,142 @@
     "insertText": "class"
   },
   {
-    "label": "class",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "class"
+    "label": "FPassiveFilterParams()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # include \" DSP / AudioFFT . h \" # include \" DSP / FFTAlgorithm . h \" # include \" Async / ParallelFor . h \" # include \" Audio . h \" namespace Audio { struct FPassiveFilterParams { enum class EClass { Butterworth,Chebyshev } ; enum class EType { Lowpass,Highpass } ; EClass Class ; EType Type ; int32 Order ; float NormalizedCutoffFrequency ; float UnitGain ; bool bRemoveDC ; bool bScaleByOffset ;)",
+    "insertText": "FPassiveFilterParams() : Class(EClass::Butterworth) , Type(EType::Lowpass) , Order(4) , NormalizedCutoffFrequency(0.8f) , UnitGain(1.0f) , bRemoveDC(false) , bScaleByOffset(true)"
+  },
+  {
+    "label": "EvaluateChebyshevPolynomial()",
+    "kind": "Method",
+    "detail": "Function (} } ; float)",
+    "insertText": "EvaluateChebyshevPolynomial(float FrequencyRatio, int32 Order)"
+  },
+  {
+    "label": "Result()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Result(2.0f * FrequencyRatio * Temp0)"
+  },
+  {
+    "label": "GetGainForFrequency()",
+    "kind": "Method",
+    "detail": "Function (Temp1 = Temp0 ; Temp0 = Result ; } return Result ; } break ; } } float)",
+    "insertText": "GetGainForFrequency(float NormalizedFreq, const FPassiveFilterParams& InParams)"
+  },
+  {
+    "label": "FrequencyRatio()",
+    "kind": "Method",
+    "detail": "Function (const float)",
+    "insertText": "FrequencyRatio(InParams.Type == FPassiveFilterParams::EType::Lowpass) ? (NormalizedFreq / InParams.NormalizedCutoffFrequency) : (InParams.NormalizedCutoffFrequency / NormalizedFreq)"
+  },
+  {
+    "label": "Sqrt()",
+    "kind": "Method",
+    "detail": "Function (break ; } default : case FPassiveFilterParams::EClass::Butterworth : { const float Denominator =)",
+    "insertText": "Sqrt((1 + FMath::Pow(FrequencyRatio, InParams.Order * 2.0f)))"
+  },
+  {
+    "label": "NewFFTAlgorithm()",
+    "kind": "Method",
+    "detail": "Function (FFTSettings . bArrays128BitAligned = true ; TUniquePtr<IFFTAlgorithm> FFT =)",
+    "insertText": "NewFFTAlgorithm(FFTSettings)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const float Value = Signal [ Index ] ;)",
+    "insertText": "if(MaxVal < Value)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (MaxVal = Value ; } else)",
+    "insertText": "if(Value < MinVal)"
+  },
+  {
+    "label": "f()",
+    "kind": "Method",
+    "detail": "Function (MinVal = Value ; } } float Scale = 1 . 0)",
+    "insertText": "f((MaxVal - MinVal) * 2.0f)"
   },
   {
     "label": "for()",
     "kind": "Method",
-    "detail": "Function (range:)",
-    "insertText": "for(int32 Index = 0; Index < Signal.Num()"
+    "detail": "Function (float Offset = MinVal - 1 . 0 f ;)",
+    "insertText": "for(int32 Index = 0; Index < Signal.Num(); ++Index)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Signal [)",
+    "insertText": "Index(Signal[Index] - Offset)"
+  },
+  {
+    "label": "AddZeroed()",
+    "kind": "Method",
+    "detail": "Function (} } FAlignedFloatBuffer TimeData ; TimeData .)",
+    "insertText": "AddZeroed(FFT->NumInputFloats())"
+  },
+  {
+    "label": "Memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Memcpy(TimeData.GetData(), Signal.GetData(), Signal.Num() * sizeof(float))"
+  },
+  {
+    "label": "AddUninitialized()",
+    "kind": "Method",
+    "detail": "Function (FAlignedFloatBuffer ComplexSpectrum ; ComplexSpectrum .)",
+    "insertText": "AddUninitialized(FFT->NumOutputFloats())"
+  },
+  {
+    "label": "ForwardRealToComplex()",
+    "kind": "Method",
+    "detail": "Function (FFT ->)",
+    "insertText": "ForwardRealToComplex(TimeData.GetData(), ComplexSpectrum.GetData())"
+  },
+  {
+    "label": "NumOutputFloats()",
+    "kind": "Method",
+    "detail": "Function (const float NumBins = FFT ->)",
+    "insertText": "NumOutputFloats()"
+  },
+  {
+    "label": "ParallelFor()",
+    "kind": "Method",
+    "detail": "Function (ComplexSpectrum [ 0 ] = 0 . f ; ComplexSpectrum [ 1 ] = 0 . f ; })",
+    "insertText": "ParallelFor(NumBins, [&](int32 Index) { float NormalizedFreq = ((float)Index) / (NumBins - 1); float Gain = GetGainForFrequency(NormalizedFreq, InParams); ComplexSpectrum[2 * Index] *= Gain; ComplexSpectrum[2 * Index + 1] *= Gain; })"
+  },
+  {
+    "label": "InverseComplexToReal()",
+    "kind": "Method",
+    "detail": "Function (FFT ->)",
+    "insertText": "InverseComplexToReal(ComplexSpectrum.GetData(), TimeData.GetData())"
+  },
+  {
+    "label": "Memcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Memcpy(Signal.GetData(), TimeData.GetData(), Signal.Num() * sizeof(float))"
+  },
+  {
+    "label": "Scale()",
+    "kind": "Method",
+    "detail": "Function (float)",
+    "insertText": "Scale((MaxVal - MinVal) * 2.0f)"
+  },
+  {
+    "label": "f()",
+    "kind": "Method",
+    "detail": "Function (float Offset = - 1 . 0)",
+    "insertText": "f(MinVal - 1.0f)"
+  },
+  {
+    "label": "Filter()",
+    "kind": "Method",
+    "detail": "Function (} } } void)",
+    "insertText": "Filter(TArray<float>& Signal, const FPassiveFilterParams& InParams)"
   },
   {
     "label": "SignalView()",
@@ -30,9 +156,33 @@
     "insertText": "SignalView(Signal)"
   },
   {
-    "label": "SignalView()",
+    "label": "Filter()",
     "kind": "Method",
-    "detail": "Function (TArrayView<float>)",
-    "insertText": "SignalView(Signal)"
+    "detail": "Function (void)",
+    "insertText": "Filter(SignalView, InParams)"
+  },
+  {
+    "label": "Num()",
+    "kind": "Method",
+    "detail": "Function (} else { const int32 OriginalLength = Signal .)",
+    "insertText": "Num()"
+  },
+  {
+    "label": "RoundUpToPowerOfTwo()",
+    "kind": "Method",
+    "detail": "Function (const int32 NumZerosRequired =)",
+    "insertText": "RoundUpToPowerOfTwo(OriginalLength)"
+  },
+  {
+    "label": "AddZeroed()",
+    "kind": "Method",
+    "detail": "Function (Signal .)",
+    "insertText": "AddZeroed(NumZerosRequired)"
+  },
+  {
+    "label": "SetNum()",
+    "kind": "Method",
+    "detail": "Function (Signal .)",
+    "insertText": "SetNum(OriginalLength)"
   }
 ]

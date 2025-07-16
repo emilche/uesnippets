@@ -6,15 +6,123 @@
     "insertText": "AWS"
   },
   {
-    "label": "WriteIsNotAws()",
+    "label": "QueryInformation()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "WriteIsNotAws(logger, rootDir)"
+    "detail": "Function (# pragma once # include \" UbaFileAccessor . h \" # include \" UbaNetworkBackend . h \" # include \" UbaStringBuffer . h \" # define UBA_USE_AWS ! PLATFORM_MAC # if UBA_USE_AWS namespace uba { class AWS { public : char g_imdsHost [ ] = \" 1 6 9 . 2 5 4 . 1 6 9 . 2 5 4 \" ; char g_imdsInstanceId [ ] = \" latest / meta - data / instance - id \" ; char g_imdsInstanceLifeCycle [ ] = \" latest / meta - data / instance - life - cycle \" ; char g_imdsAutoScalingLifeCycleState [ ] = \" latest / meta - data / autoscaling / target - lifecycle - state \" ; char g_imdsInstanceAvailabilityZone [ ] = \" latest / meta - data / placement / availability - zone \" ; char g_imdsSpotInstanceAction [ ] = \" latest / meta - data / spot / instance - action \" ; char g_imdsToken [ ] = \" latest / api / token \" ; bool)",
+    "insertText": "QueryInformation(Logger& logger, StringBufferBase& outExtraInfo, const tchar* rootDir)"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (HttpConnection http ; u32 statusCode = 0 ; StringBuffer<1 2 8> token ; token .)",
+    "insertText": "Append(TC(\"X-aws-ec2-metadata-token: \"))"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (token .)",
+    "insertText": "Append(\"\\r\\n\")"
+  },
+  {
+    "label": "wcstombs_s()",
+    "kind": "Method",
+    "detail": "Function (# if PLATFORM_WINDOWS char tokenString [ 5 1 2 ] ; size_t tokenStringLen ;)",
+    "insertText": "wcstombs_s(&tokenStringLen, tokenString, sizeof_array(tokenString), token.data, _TRUNCATE)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (m_tokenString = tokenString ; # else m_tokenString = token . data ; # endif StringBuffer<1 2 8> instanceId ;)",
+    "insertText": "if(!http.Query(logger, \"GET\", instanceId, statusCode, g_imdsHost, g_imdsInstanceId, m_tokenString.c_str()))"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (outExtraInfo .)",
+    "insertText": "Append(TC(\", AWS: \")).Append(instanceId)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<3 2> instanceLifeCycle ;)",
+    "insertText": "if(http.Query(logger, \"GET\", instanceLifeCycle, statusCode, g_imdsHost, g_imdsInstanceLifeCycle, m_tokenString.c_str()))"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (outExtraInfo .)",
+    "insertText": "Append(' ').Append(instanceLifeCycle)"
+  },
+  {
+    "label": "Contains()",
+    "kind": "Method",
+    "detail": "Function (m_isSpot = instanceLifeCycle .)",
+    "insertText": "Contains(TC(\"spot\"))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} StringBuffer<3 2> autoscaling ;)",
+    "insertText": "if(http.Query(logger, \"GET\", autoscaling, statusCode, g_imdsHost, g_imdsAutoScalingLifeCycleState, m_tokenString.c_str()) && statusCode == 200)"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (outExtraInfo .)",
+    "insertText": "Append(m_isSpot ? '/' : ' ').Append(TC(\"autoscale\"))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (m_isAutoscaling = true ; })",
+    "insertText": "if(!QueryAvailabilityZone(logger, nullptr))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (HttpConnection http ; StringBuffer<1 2 8> availabilityZone ; u32 statusCode = 0 ;)",
+    "insertText": "if(!http.Query(logger, \"GET\", availabilityZone, statusCode, g_imdsHost, g_imdsInstanceAvailabilityZone, m_tokenString.c_str()))"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<5 1 2> file ; file .)",
+    "insertText": "Append(rootDir).EnsureEndsWithSlash().Append(\".isNotAWS\")"
   },
   {
     "label": "f()",
     "kind": "Method",
     "detail": "Function (FileAccessor)",
     "insertText": "f(logger, file.data)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (HttpConnection http ; outTerminationTimeMs = 0 ;)",
+    "insertText": "if(m_isSpot)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<1 0 2 4> content ; u32 statusCode = 0 ;)",
+    "insertText": "if(http.Query(logger, \"GET\", content, statusCode, g_imdsHost, g_imdsSpotInstanceAction, m_tokenString.c_str()) && statusCode == 200)"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (outReason .)",
+    "insertText": "Append(TC(\"AWS spot instance interruption\"))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<1 0 2 4> content ; u32 statusCode = 0 ;)",
+    "insertText": "if(http.Query(logger, \"GET\", content, statusCode, g_imdsHost, g_imdsAutoScalingLifeCycleState, m_tokenString.c_str()) && statusCode == 200)"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (outReason .)",
+    "insertText": "Append(TC(\"AWS autoscale rebalancing\"))"
   }
 ]

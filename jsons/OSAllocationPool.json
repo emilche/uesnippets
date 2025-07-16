@@ -12,21 +12,81 @@
     "insertText": "is"
   },
   {
-    "label": "is",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "is"
+    "label": "UE4_TMEMORY_POOL_DO_SANITY_CHECKS()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # if PLATFORM_HAS_FPlatformVirtualMemoryBlock # define)",
+    "insertText": "UE4_TMEMORY_POOL_DO_SANITY_CHECKS(UE_BUILD_DEBUG || (UE_BUILD_DEVELOPMENT && !UE_EDITOR))"
   },
   {
-    "label": "is",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "is"
+    "label": "TMemoryPool()",
+    "kind": "Method",
+    "detail": "Function (protected : SIZE_T BlockSize ; SIZE_T AlignedPoolStart ; SIZE_T AlignedPoolEnd ; SIZE_T NumBlocks ; uint8* Bitmask ; SIZE_T BitmaskSizeInBytes ; SIZE_T NumFreeBlocks ; SIZE_T UsefulMemorySize ; FPlatformMemory::FPlatformVirtualMemoryBlock VMBlock ; # if UE4_TMEMORY_POOL_DO_SANITY_CHECKS FThreadSafeCounter NoConcurrentAccess ; # endif public :)",
+    "insertText": "TMemoryPool(SIZE_T InBlockSize, SIZE_T InAlignedPoolStart, SIZE_T InNumBlocks, uint8* InBitmask, FPlatformMemory::FPlatformVirtualMemoryBlock& InVMBlock) : BlockSize(InBlockSize) , AlignedPoolStart(InAlignedPoolStart) , AlignedPoolEnd(InAlignedPoolStart + InBlockSize * (SIZE_T)InNumBlocks) , NumBlocks(InNumBlocks) , Bitmask(InBitmask) , BitmaskSizeInBytes(BitmaskMemorySize(NumBlocks)) , NumFreeBlocks(InNumBlocks) , UsefulMemorySize(0) , VMBlock(InVMBlock)"
   },
   {
-    "label": "is",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "is"
+    "label": "checkf()",
+    "kind": "Method",
+    "detail": "Function (# if UE4_TMEMORY_POOL_DO_SANITY_CHECKS)",
+    "insertText": "checkf((AlignedPoolStart % RequiredAlignment) == 0, TEXT(\"Non-aligned pool address passed to a TMemoryPool\"))"
+  },
+  {
+    "label": "Memset()",
+    "kind": "Method",
+    "detail": "Function (# endif)",
+    "insertText": "Memset(Bitmask, 0xFF, BitmaskSizeInBytes)"
+  },
+  {
+    "label": "DecommitByPtr()",
+    "kind": "Method",
+    "detail": "Function (VMBlock .)",
+    "insertText": "DecommitByPtr(reinterpret_cast<void *>(AlignedPoolStart), Align(NumBlocks * BlockSize, FPlatformMemory::FPlatformVirtualMemoryBlock::GetCommitAlignment()))"
+  },
+  {
+    "label": "Allocate()",
+    "kind": "Method",
+    "detail": "Function (} void*)",
+    "insertText": "Allocate(SIZE_T Size)"
+  },
+  {
+    "label": "checkf()",
+    "kind": "Method",
+    "detail": "Function (# if UE4_TMEMORY_POOL_DO_SANITY_CHECKS)",
+    "insertText": "checkf(Size <= BlockSize, TEXT(\"Attempting to allocate %llu bytes from a memory pool of %llu byte blocks\"), (uint64)Size, (uint64)BlockSize)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# endif void* Address = nullptr ;)",
+    "insertText": "if(LIKELY(NumFreeBlocks > 0))"
+  },
+  {
+    "label": "FindFirstFreeAndMarkUsed()",
+    "kind": "Method",
+    "detail": "Function (Address =)",
+    "insertText": "FindFirstFreeAndMarkUsed()"
+  },
+  {
+    "label": "checkf()",
+    "kind": "Method",
+    "detail": "Function (- - NumFreeBlocks ; UsefulMemorySize + = Size ; # if UE4_TMEMORY_POOL_DO_SANITY_CHECKS)",
+    "insertText": "checkf(Address != nullptr, TEXT(\"NumFreeBlocks and bitmask of the free blocks are not in sync - bug in TMemoryPool\"))"
+  },
+  {
+    "label": "CommitByPtr()",
+    "kind": "Method",
+    "detail": "Function (# endif VMBlock .)",
+    "insertText": "CommitByPtr(Address, Align(Size, FPlatformMemory::FPlatformVirtualMemoryBlock::GetCommitAlignment()))"
+  },
+  {
+    "label": "checkf()",
+    "kind": "Method",
+    "detail": "Function (} # if UE4_TMEMORY_POOL_DO_SANITY_CHECKS)",
+    "insertText": "checkf(NoConcurrentAccess.Decrement() == 0, TEXT(\"TMemoryPool is being accessed on multiple threads. The class is not thread safe, add locking!.\"))"
+  },
+  {
+    "label": "Free()",
+    "kind": "Method",
+    "detail": "Function (# endif return Address ; } void)",
+    "insertText": "Free(void *Ptr, SIZE_T Size)"
   }
 ]

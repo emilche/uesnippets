@@ -30,18 +30,6 @@
     "insertText": "FTextureSourceData"
   },
   {
-    "label": "is",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "is"
-  },
-  {
-    "label": "will",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "will"
-  },
-  {
     "label": "FTextureCacheDerivedDataWorker",
     "kind": "Type",
     "detail": "class declaration",
@@ -62,7 +50,7 @@
   {
     "label": "GetTextureDerivedDataKeySuffix()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # if WITH_EDITOR # include \" Async / AsyncWork . h \" # include \" DerivedDataCacheKeyProxy . h \" # include \" Engine / Texture2D . h \" # include \" IImageWrapperModule . h \" # include \" ImageCore . h \" # include \" Misc / EnumClassFlags . h \" # include \" TextureCompressorModule . h \" # include \" TextureEncodingSettings . h \" # endif enum { NUM_INLINE_DERIVED_MIPS = 7,} ; # if WITH_EDITOR namespace UE::DerivedData { class FBuildOutput ; } void)",
     "insertText": "GetTextureDerivedDataKeySuffix(const UTexture& Texture, const FTextureBuildSettings* BuildSettingsPerLayer, FString& OutKeySuffix)"
   },
   {
@@ -72,9 +60,21 @@
     "insertText": "PutDerivedDataInCache(FTexturePlatformData* DerivedData, const FString& DerivedDataKeySuffix, const FStringView& TextureName, bool bForceAllMipsToBeInlined, bool bReplaceExistingDDC)"
   },
   {
+    "label": "ENUM_CLASS_FLAGS()",
+    "kind": "Method",
+    "detail": "Function (enum class ETextureCacheFlags : uint32 { None = 0 x00,Async = 0 x01,ForceRebuild = 0 x02,InlineMips = 0 x08,AllowAsyncBuild = 0 x10,ForDDCBuild = 0 x20,RemoveSourceMipDataAfterCache = 0 x40,AllowAsyncLoading = 0 x80,ForVirtualTextureStreamingBuild = 0 x100,} ;)",
+    "insertText": "ENUM_CLASS_FLAGS(ETextureCacheFlags)"
+  },
+  {
+    "label": "FTextureSourceData()",
+    "kind": "Method",
+    "detail": "Function (struct FTextureSourceLayerData { ERawImageFormat::Type ImageFormat = ERawImageFormat::Invalid ; EGammaSpace SourceGammaSpace = EGammaSpace::Invalid ; } ; struct FTextureSourceBlockData { TArray<TArray<FImage>> MipsPerLayer ; int32 BlockX = 0 ; int32 BlockY = 0 ; int32 SizeInBlocksX = 1 ; int32 SizeInBlocksY = 1 ; int32 SizeX = 0 ; int32 SizeY = 0 ; int32 NumMips = 0 ; int32 NumSlices = 0 ; int32 MipBias = 0 ; } ; struct FTextureSourceData {)",
+    "insertText": "FTextureSourceData() : SizeInBlocksX(0) , SizeInBlocksY(0) , BlockSizeX(0) , BlockSizeY(0) , bValid(false)"
+  },
+  {
     "label": "InitAsPlaceholder()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "InitAsPlaceholder()"
   },
   {
@@ -84,10 +84,34 @@
     "insertText": "Init(UTexture& InTexture, TextureMipGenSettings InMipGenSettings, bool bInCubeMap, bool bInTextureArray, bool bInVolumeTexture, ETexturePowerOfTwoSetting::Type InPow2Setting, int32 InResizeDuringBuildX, int32 InResizeDuringBuildY, bool bAllowAsyncLoading)"
   },
   {
-    "label": "GetSourceMips()",
+    "label": "IsValid()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "IsValid()"
+  },
+  {
+    "label": "ReleaseMemory()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "GetSourceMips(FTextureSource& Source, IImageWrapperModule* InImageWrapper = nullptr)"
+    "insertText": "ReleaseMemory()"
+  },
+  {
+    "label": "TRACE_CPUPROFILER_EVENT_SCOPE()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "TRACE_CPUPROFILER_EVENT_SCOPE(Texture.ReleaseMemory)"
+  },
+  {
+    "label": "Empty()",
+    "kind": "Method",
+    "detail": "Function (Blocks .)",
+    "insertText": "Empty()"
+  },
+  {
+    "label": "FTextureCacheDerivedDataWorker()",
+    "kind": "Method",
+    "detail": "Function (bValid = false ; } TArray<TPair<FLinearColor,FLinearColor>> LayerChannelMinMax ; FString TextureFullName ; TArray<FTextureSourceLayerData> Layers ; TArray<FTextureSourceBlockData> Blocks ; int32 SizeInBlocksX ; int32 SizeInBlocksY ; int32 BlockSizeX ; int32 BlockSizeY ; bool bValid ; } ; class FTextureCacheDerivedDataWorker : public FNonAbandonableTask { ITextureCompressorModule* Compressor ; IImageWrapperModule* ImageWrapper ; FTexturePlatformData* DerivedData ; UTexture& Texture ; FString TexturePathName ; TArray<FTextureBuildSettings> BuildSettingsPerLayerFetchFirst ; TArray<FTextureBuildSettings> BuildSettingsPerLayerFetchOrBuild ; FTexturePlatformData::FTextureEncodeResultMetadata FetchFirstMetadata ; FTexturePlatformData::FTextureEncodeResultMetadata FetchOrBuildMetadata ; FString KeySuffix ; FTextureSourceData TextureData ; FTextureSourceData CompositeTextureData ; ETextureCacheFlags CacheFlags ; int64 BytesCached = 0 ; int64 RequiredMemoryEstimate = - 1 ; bool bSucceeded = false ; bool bTriedAndFailed = false ; bool bLoadedFromDDC = false ; public :)",
+    "insertText": "FTextureCacheDerivedDataWorker(ITextureCompressorModule* InCompressor, FTexturePlatformData* InDerivedData, UTexture* InTexture, const FTextureBuildSettings* InSettingsPerLayerFetchFirst, const FTextureBuildSettings* InSettingsPerLayerFetchOrBuild, const FTexturePlatformData::FTextureEncodeResultMetadata* InFetchFirstMetadata, const FTexturePlatformData::FTextureEncodeResultMetadata* InFetchOrBuildMetadata, ETextureCacheFlags InCacheFlags)"
   },
   {
     "label": "DoWork()",
@@ -102,9 +126,99 @@
     "insertText": "Finalize()"
   },
   {
+    "label": "GetBytesCached()",
+    "kind": "Method",
+    "detail": "Function (int64)",
+    "insertText": "GetBytesCached()"
+  },
+  {
+    "label": "FTextureAsyncCacheDerivedDataTask()",
+    "kind": "Method",
+    "detail": "Function (} } ; struct FTextureAsyncCacheDerivedDataTask { ~)",
+    "insertText": "FTextureAsyncCacheDerivedDataTask()"
+  },
+  {
+    "label": "Finalize()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Finalize(bool& bOutFoundInCache, uint64& OutProcessedByteCount)"
+  },
+  {
+    "label": "GetPriority()",
+    "kind": "Method",
+    "detail": "Function (EQueuedWorkPriority)",
+    "insertText": "GetPriority()"
+  },
+  {
+    "label": "SetPriority()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "SetPriority(EQueuedWorkPriority QueuedWorkPriority)"
+  },
+  {
+    "label": "Cancel()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "Cancel()"
+  },
+  {
+    "label": "Wait()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "Wait()"
+  },
+  {
+    "label": "WaitWithTimeout()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "WaitWithTimeout(float TimeLimitSeconds)"
+  },
+  {
+    "label": "Poll()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "Poll()"
+  },
+  {
+    "label": "FTextureAsyncCacheDerivedDataWorkerTask()",
+    "kind": "Method",
+    "detail": "Function (} ; class FTextureAsyncCacheDerivedDataWorkerTask final : public FTextureAsyncCacheDerivedDataTask,public FAsyncTask<FTextureCacheDerivedDataWorker> { public :)",
+    "insertText": "FTextureAsyncCacheDerivedDataWorkerTask(FQueuedThreadPool* InQueuedPool, ITextureCompressorModule* InCompressor, FTexturePlatformData* InDerivedData, UTexture* InTexture, const FTextureBuildSettings* InSettingsPerLayerFetchFirst, const FTextureBuildSettings* InSettingsPerLayerFetchOrBuild, const FTexturePlatformData::FTextureEncodeResultMetadata* InFetchFirstMetadata, const FTexturePlatformData::FTextureEncodeResultMetadata* InFetchOrBuildMetadata, ETextureCacheFlags InCacheFlags ) : FAsyncTask<FTextureCacheDerivedDataWorker>( InCompressor, InDerivedData, InTexture, InSettingsPerLayerFetchFirst, InSettingsPerLayerFetchOrBuild, InFetchFirstMetadata, InFetchOrBuildMetadata, InCacheFlags ) , QueuedPool(InQueuedPool)"
+  },
+  {
+    "label": "GetTask()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "GetTask().Finalize()"
+  },
+  {
+    "label": "GetTask()",
+    "kind": "Method",
+    "detail": "Function (bOutFoundInCache =)",
+    "insertText": "GetTask().WasLoadedFromDDC()"
+  },
+  {
+    "label": "GetTask()",
+    "kind": "Method",
+    "detail": "Function (OutProcessedByteCount =)",
+    "insertText": "GetTask().GetBytesCached()"
+  },
+  {
+    "label": "EnsureCompletion()",
+    "kind": "Method",
+    "detail": "Function (FAsyncTask<FTextureCacheDerivedDataWorker)",
+    "insertText": "EnsureCompletion()"
+  },
+  {
+    "label": "CreateTextureBuildTask()",
+    "kind": "Method",
+    "detail": "Function (} private : FQueuedThreadPool* QueuedPool ; } ; FTextureAsyncCacheDerivedDataTask*)",
+    "insertText": "CreateTextureBuildTask(UTexture& Texture, FTexturePlatformData& DerivedData, const FTextureBuildSettings* SettingsFetchFirst, const FTextureBuildSettings& SettingsFetchOrBuild, const FTexturePlatformData::FTextureEncodeResultMetadata* FetchMetadata, const FTexturePlatformData::FTextureEncodeResultMetadata* FetchOrBuildMetadata, EQueuedWorkPriority Priority, ETextureCacheFlags Flags)"
+  },
+  {
     "label": "CreateTextureDerivedDataKey()",
     "kind": "Method",
     "detail": "Function (FTexturePlatformData::FStructuredDerivedDataKey)",
-    "insertText": "CreateTextureDerivedDataKey(\n\tUTexture& Texture,\n\tETextureCacheFlags CacheFlags,\n\tconst FTextureBuildSettings& Settings)"
+    "insertText": "CreateTextureDerivedDataKey(UTexture& Texture, ETextureCacheFlags CacheFlags, const FTextureBuildSettings& Settings)"
   }
 ]

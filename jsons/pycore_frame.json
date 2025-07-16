@@ -24,33 +24,111 @@
     "insertText": "_frameowner"
   },
   {
-    "label": "_PyInterpreterFrame",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "_PyInterpreterFrame"
+    "label": "_PyFrame_New_NoTrack()",
+    "kind": "Method",
+    "detail": "Function (# ifndef Py_INTERNAL_FRAME_H # define Py_INTERNAL_FRAME_H # ifdef __cplusplus \" C \" { # endif # include<stdbool . h> # include<stddef . h> struct _frame { PyObject_HEAD PyFrameObject* f_back ; struct _PyInterpreterFrame* f_frame ; PyObject* f_trace ; int f_lineno ; char f_trace_lines ; char f_trace_opcodes ; char f_fast_as_locals ; PyObject* _f_frame_data [ 1 ] ; } ; PyFrameObject*)",
+    "insertText": "_PyFrame_New_NoTrack(PyCodeObject *code)"
   },
   {
-    "label": "_PyInterpreterFrame",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "_PyInterpreterFrame"
+    "label": "_PyInterpreterFrame_LASTI()",
+    "kind": "Method",
+    "detail": "Function (typedef enum _framestate { FRAME_CREATED = - 2,FRAME_SUSPENDED = - 1,FRAME_EXECUTING = 0,FRAME_COMPLETED = 1,FRAME_CLEARED = 4 } PyFrameState ; enum _frameowner { FRAME_OWNED_BY_THREAD = 0,FRAME_OWNED_BY_GENERATOR = 1,FRAME_OWNED_BY_FRAME_OBJECT = 2 } ; typedef struct _PyInterpreterFrame { PyFunctionObject* f_func ; PyObject* f_globals ; PyObject* f_builtins ; PyObject* f_locals ; PyCodeObject* f_code ; PyFrameObject* frame_obj ; struct _PyInterpreterFrame* previous ; _Py_CODEUNIT* prev_instr ; int stacktop ; bool is_entry ; char owner ; PyObject* localsplus [ 1 ] ; } _PyInterpreterFrame ; # define)",
+    "insertText": "_PyInterpreterFrame_LASTI(IF) \\ ((int)((IF)->prev_instr - _PyCode_CODE((IF)->f_code))) static inline PyObject **_PyFrame_Stackbase(_PyInterpreterFrame *f)"
   },
   {
-    "label": "_PyFrame_Copy()",
+    "label": "assert()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "_PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *dest)"
+    "insertText": "assert(f->stacktop > f->f_code->co_nlocalsplus)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(f->localsplus[f->stacktop-1] != NULL)"
+  },
+  {
+    "label": "_PyFrame_StackPush()",
+    "kind": "Method",
+    "detail": "Function (f -> stacktop - - ; return f -> localsplus [ f -> stacktop ] ; } void)",
+    "insertText": "_PyFrame_StackPush(_PyInterpreterFrame *f, PyObject *value)"
+  },
+  {
+    "label": "FRAME_SPECIALS_SIZE()",
+    "kind": "Method",
+    "detail": "Function (f -> localsplus [ f -> stacktop ] = value ; f -> stacktop + + ; } # define)",
+    "insertText": "FRAME_SPECIALS_SIZE((sizeof(_PyInterpreterFrame)-1)/sizeof(PyObject *)) void _PyFrame_Copy(_PyInterpreterFrame *src, _PyInterpreterFrame *dest)"
+  },
+  {
+    "label": "_PyFrame_InitializeSpecials()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "_PyFrame_InitializeSpecials(_PyInterpreterFrame *frame, PyFunctionObject *func, PyObject *locals, int nlocalsplus)"
+  },
+  {
+    "label": "f_code()",
+    "kind": "Method",
+    "detail": "Function (frame -> f_func = func ; frame ->)",
+    "insertText": "f_code(PyCodeObject *)Py_NewRef(func->func_code)"
+  },
+  {
+    "label": "Py_XNewRef()",
+    "kind": "Method",
+    "detail": "Function (frame -> f_builtins = func -> func_builtins ; frame -> f_globals = func -> func_globals ; frame -> f_locals =)",
+    "insertText": "Py_XNewRef(locals)"
+  },
+  {
+    "label": "_PyCode_CODE()",
+    "kind": "Method",
+    "detail": "Function (frame -> stacktop = nlocalsplus ; frame -> frame_obj = NULL ; frame -> prev_instr =)",
+    "insertText": "_PyCode_CODE(frame->f_code)"
+  },
+  {
+    "label": "_PyFrame_GetLocalsArray()",
+    "kind": "Method",
+    "detail": "Function (frame -> is_entry = false ; frame -> owner = FRAME_OWNED_BY_THREAD ; } PyObject**)",
+    "insertText": "_PyFrame_GetLocalsArray(_PyInterpreterFrame *frame)"
+  },
+  {
+    "label": "stacktop()",
+    "kind": "Method",
+    "detail": "Function (frame ->)",
+    "insertText": "stacktop(int)(stack_pointer - frame->localsplus)"
+  },
+  {
+    "label": "_PyFrame_IsIncomplete()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "_PyFrame_IsIncomplete(_PyInterpreterFrame *frame)"
   },
   {
     "label": "_PyFrame_MakeAndSetFrameObject()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "_PyFrame_MakeAndSetFrameObject(frame)"
+    "detail": "Function (} PyFrameObject*)",
+    "insertText": "_PyFrame_MakeAndSetFrameObject(_PyInterpreterFrame *frame)"
+  },
+  {
+    "label": "_PyFrame_GetFrameObject()",
+    "kind": "Method",
+    "detail": "Function (PyFrameObject*)",
+    "insertText": "_PyFrame_GetFrameObject(_PyInterpreterFrame *frame)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(!_PyFrame_IsIncomplete(frame))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (PyFrameObject* res = frame -> frame_obj ;)",
+    "insertText": "if(res != NULL)"
   },
   {
     "label": "_PyFrame_Clear()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "_PyFrame_Clear(_PyInterpreterFrame * frame)"
   },
   {
@@ -74,19 +152,73 @@
   {
     "label": "_PyThreadState_BumpFramePointerSlow()",
     "kind": "Method",
-    "detail": "Function (return)",
+    "detail": "Function (_PyInterpreterFrame*)",
+    "insertText": "_PyThreadState_BumpFramePointerSlow(PyThreadState *tstate, size_t size)"
+  },
+  {
+    "label": "_PyThreadState_HasStackSpace()",
+    "kind": "Method",
+    "detail": "Function (bool)",
+    "insertText": "_PyThreadState_HasStackSpace(PyThreadState *tstate, size_t size)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert((tstate->datastack_top == NULL && tstate->datastack_limit == NULL) || (tstate->datastack_top != NULL && tstate->datastack_limit != NULL))"
+  },
+  {
+    "label": "_PyThreadState_BumpFramePointer()",
+    "kind": "Method",
+    "detail": "Function (} _PyInterpreterFrame*)",
+    "insertText": "_PyThreadState_BumpFramePointer(PyThreadState *tstate, size_t size)"
+  },
+  {
+    "label": "res()",
+    "kind": "Method",
+    "detail": "Function (datastack_top)",
+    "insertText": "res(_PyInterpreterFrame *)"
+  },
+  {
+    "label": "_PyThreadState_BumpFramePointerSlow()",
+    "kind": "Method",
+    "detail": "Function (tstate -> datastack_top + = size ; return res ; } return)",
     "insertText": "_PyThreadState_BumpFramePointerSlow(tstate, size)"
   },
   {
     "label": "_PyThreadState_PopFrame()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "_PyThreadState_PopFrame(PyThreadState *tstate, _PyInterpreterFrame *frame)"
+  },
+  {
+    "label": "_PyFrame_Push()",
+    "kind": "Method",
+    "detail": "Function (_PyInterpreterFrame*)",
+    "insertText": "_PyFrame_Push(PyThreadState *tstate, PyFunctionObject *func)"
   },
   {
     "label": "_PyInterpreterFrame_GetLine()",
     "kind": "Method",
     "detail": "Function (int)",
     "insertText": "_PyInterpreterFrame_GetLine(_PyInterpreterFrame *frame)"
+  },
+  {
+    "label": "_PyFrame_GetGenerator()",
+    "kind": "Method",
+    "detail": "Function (PyGenObject*)",
+    "insertText": "_PyFrame_GetGenerator(_PyInterpreterFrame *frame)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(frame->owner == FRAME_OWNED_BY_GENERATOR)"
+  },
+  {
+    "label": "offsetof()",
+    "kind": "Method",
+    "detail": "Function (size_t offset_in_gen =)",
+    "insertText": "offsetof(PyGenObject, gi_iframe)"
   }
 ]

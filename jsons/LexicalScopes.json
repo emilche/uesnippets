@@ -18,22 +18,10 @@
     "insertText": "MachineFunction"
   },
   {
-    "label": "is",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "is"
-  },
-  {
     "label": "LexicalScope",
     "kind": "Type",
     "detail": "class declaration",
     "insertText": "LexicalScope"
-  },
-  {
-    "label": "provides",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "provides"
   },
   {
     "label": "LexicalScopes",
@@ -42,9 +30,111 @@
     "insertText": "LexicalScopes"
   },
   {
-    "label": "initialize()",
+    "label": "LexicalScope()",
+    "kind": "Method",
+    "detail": "Function (# ifndef LLVM_CODEGEN_LEXICALSCOPES_H # define LLVM_CODEGEN_LEXICALSCOPES_H # include \" llvm / ADT / ArrayRef . h \" # include \" llvm / ADT / DenseMap . h \" # include \" llvm / ADT / STLExtras . h \" # include \" llvm / ADT / SmallPtrSet . h \" # include \" llvm / ADT / SmallVector . h \" # include \" llvm / IR / DebugLoc . h \" # include \" llvm / IR / DebugInfoMetadata . h \" # include \" llvm / IR / ValueHandle . h \" # include<unordered_map> # include<utility> namespace llvm { class MachineInstr ; class MachineBasicBlock ; class MachineFunction ; typedef std::pair<const MachineInstr*,const MachineInstr*> InsnRange ; class LexicalScope { public :)",
+    "insertText": "LexicalScope(LexicalScope *P, const DILocalScope *D, const DILocation *I, bool A) : Parent(P), Desc(D), InlinedAtLocation(I), AbstractScope(A), LastInsn(nullptr), FirstInsn(nullptr), DFSIn(0), DFSOut(0)"
+  },
+  {
+    "label": "assert()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "assert((!D || D->isResolved()) && \"Expected resolved node\")"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert((!I || I->isResolved()) && \"Expected resolved node\")"
+  },
+  {
+    "label": "getParent()",
+    "kind": "Method",
+    "detail": "Function (} LexicalScope*)",
+    "insertText": "getParent()"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (Children .)",
+    "insertText": "push_back(S)"
+  },
+  {
+    "label": "openInsnRange()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "openInsnRange(const MachineInstr *MI)"
+  },
+  {
+    "label": "extendInsnRange()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "extendInsnRange(const MachineInstr *MI)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(FirstInsn && \"MI Range is not open!\")"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (LastInsn = MI ;)",
+    "insertText": "if(Parent) Parent->extendInsnRange(MI)"
+  },
+  {
+    "label": "closeInsnRange()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "closeInsnRange(LexicalScope *NewScope = nullptr)"
+  },
+  {
+    "label": "assert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "assert(LastInsn && \"Last insn missing!\")"
+  },
+  {
+    "label": "push_back()",
+    "kind": "Method",
+    "detail": "Function (Ranges .)",
+    "insertText": "push_back(InsnRange(FirstInsn, LastInsn))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (FirstInsn = nullptr ; LastInsn = nullptr ;)",
+    "insertText": "if(Parent && (!NewScope || !Parent->dominates(NewScope))) Parent->closeInsnRange(NewScope)"
+  },
+  {
+    "label": "dominates()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "dominates(const LexicalScope *S)"
+  },
+  {
+    "label": "getDFSIn()",
+    "kind": "Method",
+    "detail": "Function (DFSOut = O ; } unsigned)",
+    "insertText": "getDFSIn()"
+  },
+  {
+    "label": "dump()",
+    "kind": "Method",
+    "detail": "Function (DFSIn = I ; } void)",
+    "insertText": "dump(unsigned Indent = 0)"
+  },
+  {
+    "label": "LexicalScopes()",
+    "kind": "Method",
+    "detail": "Function (private : LexicalScope* Parent ; const DILocalScope* Desc ; const DILocation* InlinedAtLocation ; bool AbstractScope ; SmallVector<LexicalScope*,4> Children ; SmallVector<InsnRange,4> Ranges ; const MachineInstr* LastInsn ; const MachineInstr* FirstInsn ; unsigned DFSIn,DFSOut ; } ; class LexicalScopes { public :)",
+    "insertText": "LexicalScopes() : MF(nullptr), CurrentFnLexicalScope(nullptr)"
+  },
+  {
+    "label": "initialize()",
+    "kind": "Method",
+    "detail": "Function (} void)",
     "insertText": "initialize(const MachineFunction &)"
   },
   {
@@ -54,10 +144,10 @@
     "insertText": "reset()"
   },
   {
-    "label": "getMachineBasicBlocks()",
+    "label": "empty()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "getMachineBasicBlocks(const DILocation *DL,\n                             SmallPtrSetImpl<const MachineBasicBlock *> &MBBs)"
+    "detail": "Function (bool)",
+    "insertText": "empty()"
   },
   {
     "label": "dominates()",
@@ -66,16 +156,82 @@
     "insertText": "dominates(const DILocation *DL, MachineBasicBlock *MBB)"
   },
   {
+    "label": "findLexicalScope()",
+    "kind": "Method",
+    "detail": "Function (LexicalScope*)",
+    "insertText": "findLexicalScope(const DILocation *DL)"
+  },
+  {
+    "label": "getAbstractScopesList()",
+    "kind": "Method",
+    "detail": "Function (ArrayRef<LexicalScope*>)",
+    "insertText": "getAbstractScopesList()"
+  },
+  {
+    "label": "find()",
+    "kind": "Method",
+    "detail": "Function (auto I = AbstractScopeMap .)",
+    "insertText": "find(N)"
+  },
+  {
+    "label": "findInlinedScope()",
+    "kind": "Method",
+    "detail": "Function (} LexicalScope*)",
+    "insertText": "findInlinedScope(const DILocalScope *N, const DILocation *IA)"
+  },
+  {
+    "label": "find()",
+    "kind": "Method",
+    "detail": "Function (auto I = InlinedLexicalScopeMap .)",
+    "insertText": "find(std::make_pair(N, IA))"
+  },
+  {
+    "label": "findLexicalScope()",
+    "kind": "Method",
+    "detail": "Function (} LexicalScope*)",
+    "insertText": "findLexicalScope(const DILocalScope *N)"
+  },
+  {
     "label": "dump()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (} void)",
     "insertText": "dump()"
+  },
+  {
+    "label": "getOrCreateAbstractScope()",
+    "kind": "Method",
+    "detail": "Function (LexicalScope*)",
+    "insertText": "getOrCreateAbstractScope(const DILocalScope *Scope)"
+  },
+  {
+    "label": "getOrCreateLexicalScope()",
+    "kind": "Method",
+    "detail": "Function (private : LexicalScope*)",
+    "insertText": "getOrCreateLexicalScope(const DILocalScope *Scope, const DILocation *IA = nullptr)"
+  },
+  {
+    "label": "getOrCreateLexicalScope()",
+    "kind": "Method",
+    "detail": "Function (LexicalScope*)",
+    "insertText": "getOrCreateLexicalScope(const DILocation *DL)"
+  },
+  {
+    "label": "getOrCreateRegularScope()",
+    "kind": "Method",
+    "detail": "Function (} LexicalScope*)",
+    "insertText": "getOrCreateRegularScope(const DILocalScope *Scope)"
+  },
+  {
+    "label": "getOrCreateInlinedScope()",
+    "kind": "Method",
+    "detail": "Function (LexicalScope*)",
+    "insertText": "getOrCreateInlinedScope(const DILocalScope *Scope, const DILocation *InlinedAt)"
   },
   {
     "label": "extractLexicalScopes()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "extractLexicalScopes(SmallVectorImpl<InsnRange> &MIRanges,\n                            DenseMap<const MachineInstr *, LexicalScope *> &M)"
+    "insertText": "extractLexicalScopes(SmallVectorImpl<InsnRange> &MIRanges, DenseMap<const MachineInstr *, LexicalScope *> &M)"
   },
   {
     "label": "constructScopeNest()",
@@ -87,6 +243,6 @@
     "label": "assignInstructionRanges()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "assignInstructionRanges(SmallVectorImpl<InsnRange> &MIRanges,\n                          DenseMap<const MachineInstr *, LexicalScope *> &M)"
+    "insertText": "assignInstructionRanges(SmallVectorImpl<InsnRange> &MIRanges, DenseMap<const MachineInstr *, LexicalScope *> &M)"
   }
 ]

@@ -1,0 +1,56 @@
+[
+  {
+    "label": "__TBB_Yield()",
+    "kind": "Method",
+    "detail": "Function (# ifndef __TBB_machine_H # error Do not # include this internal file directly ; use public TBB headers instead . # endif # include<sched . h> # define)",
+    "insertText": "__TBB_Yield() sched_yield() #include <unistd.h> #define __TBB_Sleep(v) usleep((v)*1000) #include <sys/syscall.h> #if defined(SYS_futex) #define __TBB_USE_FUTEX 1 #if defined(__has_include) #define __TBB_has_include __has_include #else #define __TBB_has_include(x) 0 #endif #if defined(__linux__) || __TBB_has_include(<linux/futex.h>) #include <linux/futex.h> #elif defined(__OpenBSD__) || __TBB_has_include(<sys/futex.h>) #include <sys/futex.h> #endif #include <limits.h> #include <errno.h> #if defined(FUTEX_WAIT_PRIVATE) #define __TBB_FUTEX_WAIT FUTEX_WAIT_PRIVATE #elif defined(FUTEX_WAIT) #define __TBB_FUTEX_WAIT FUTEX_WAIT #else #define __TBB_FUTEX_WAIT 0 #endif #if defined(FUTEX_WAKE_PRIVATE) #define __TBB_FUTEX_WAKE FUTEX_WAKE_PRIVATE #elif defined(FUTEX_WAKE)"
+  },
+  {
+    "label": "futex_wait()",
+    "kind": "Method",
+    "detail": "Function (namespace internal { int)",
+    "insertText": "futex_wait(void *futex, int comparand)"
+  },
+  {
+    "label": "syscall()",
+    "kind": "Method",
+    "detail": "Function (int r =)",
+    "insertText": "syscall(SYS_futex,futex,__TBB_FUTEX_WAIT,comparand,NULL,NULL,0)"
+  },
+  {
+    "label": "__TBB_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (# if TBB_USE_ASSERT int e = errno ;)",
+    "insertText": "__TBB_ASSERT(r==0||r==EWOULDBLOCK||(r==-1&&(e==EAGAIN||e==EINTR)), \"futex_wait failed.\")"
+  },
+  {
+    "label": "futex_wakeup_one()",
+    "kind": "Method",
+    "detail": "Function (# endif return r ; } int)",
+    "insertText": "futex_wakeup_one(void *futex)"
+  },
+  {
+    "label": "syscall()",
+    "kind": "Method",
+    "detail": "Function (int r)",
+    "insertText": "syscall(SYS_futex,futex,__TBB_FUTEX_WAKE,1,NULL,NULL,0)"
+  },
+  {
+    "label": "__TBB_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "__TBB_ASSERT(r==0||r==1, \"futex_wakeup_one: more than one thread woken up?\")"
+  },
+  {
+    "label": "syscall()",
+    "kind": "Method",
+    "detail": "Function (int r)",
+    "insertText": "syscall(SYS_futex,futex,__TBB_FUTEX_WAKE,INT_MAX,NULL,NULL,0)"
+  },
+  {
+    "label": "__TBB_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "__TBB_ASSERT(r>=0, \"futex_wakeup_all: error in waking up threads\")"
+  }
+]

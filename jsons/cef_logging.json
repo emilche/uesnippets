@@ -12,52 +12,16 @@
     "insertText": "t2"
   },
   {
-    "label": "type",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "type"
-  },
-  {
-    "label": "t1",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "t1"
-  },
-  {
-    "label": "t2",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "t2"
-  },
-  {
-    "label": "more",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "more"
-  },
-  {
     "label": "LogMessage",
     "kind": "Type",
     "detail": "class declaration",
     "insertText": "LogMessage"
   },
   {
-    "label": "uses",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "uses"
-  },
-  {
     "label": "SaveLastError",
     "kind": "Type",
     "detail": "class declaration",
     "insertText": "SaveLastError"
-  },
-  {
-    "label": "is",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "is"
   },
   {
     "label": "LogMessageVoidify",
@@ -78,45 +42,201 @@
     "insertText": "ErrnoLogMessage"
   },
   {
-    "label": "cef_get_min_log_level()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "cef_get_min_log_level()"
+    "detail": "Function (# ifndef CEF_INCLUDE_BASE_CEF_LOGGING_H_ # define CEF_INCLUDE_BASE_CEF_LOGGING_H_ # pragma once # if)",
+    "insertText": "defined(USING_CHROMIUM_INCLUDES) #include \"base/logging.h\" #include \"base/notreached.h\" #elif defined(DCHECK) #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON) #define DCHECK_IS_ON() false #else #define DCHECK_IS_ON()"
   },
   {
-    "label": "cef_get_vlog_level()",
+    "label": "GetMinLogLevel()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "cef_get_vlog_level(file, N)"
+    "detail": "Function (namespace logging { int)",
+    "insertText": "GetMinLogLevel()"
+  },
+  {
+    "label": "GetVlogLevel()",
+    "kind": "Method",
+    "detail": "Function (} template<size_t N> int)",
+    "insertText": "GetVlogLevel(const char (&file)[N])"
+  },
+  {
+    "label": "COMPACT_GOOGLE_LOG_EX_INFO()",
+    "kind": "Method",
+    "detail": "Function (} typedef int LogSeverity ; const LogSeverity LOG_VERBOSE = - 1 ; const LogSeverity LOG_INFO = 0 ; const LogSeverity LOG_WARNING = 1 ; const LogSeverity LOG_ERROR = 2 ; const LogSeverity LOG_FATAL = 3 ; const LogSeverity LOG_NUM_SEVERITIES = 4 ; # ifdef NDEBUG const LogSeverity LOG_DFATAL = LOG_ERROR ; # else const LogSeverity LOG_DFATAL = LOG_FATAL ; # endif # define)",
+    "insertText": "COMPACT_GOOGLE_LOG_EX_INFO(ClassName, ...) \\ cef::logging::ClassName(__FILE__, __LINE__, cef::logging::LOG_INFO, \\ ##__VA_ARGS__) #define COMPACT_GOOGLE_LOG_EX_WARNING(ClassName, ...) \\ cef::logging::ClassName(__FILE__, __LINE__, cef::logging::LOG_WARNING, \\ ##__VA_ARGS__) #define COMPACT_GOOGLE_LOG_EX_ERROR(ClassName, ...) \\ cef::logging::ClassName(__FILE__, __LINE__, cef::logging::LOG_ERROR, \\ ##__VA_ARGS__) #define COMPACT_GOOGLE_LOG_EX_FATAL(ClassName, ...) \\ cef::logging::ClassName(__FILE__, __LINE__, cef::logging::LOG_FATAL, \\ ##__VA_ARGS__) #define COMPACT_GOOGLE_LOG_EX_DFATAL(ClassName, ...) \\ cef::logging::ClassName(__FILE__, __LINE__, cef::logging::LOG_DFATAL, \\ ##__VA_ARGS__) #define COMPACT_GOOGLE_LOG_INFO COMPACT_GOOGLE_LOG_EX_INFO(LogMessage) #define COMPACT_GOOGLE_LOG_WARNING COMPACT_GOOGLE_LOG_EX_WARNING(LogMessage) #define COMPACT_GOOGLE_LOG_ERROR COMPACT_GOOGLE_LOG_EX_ERROR(LogMessage) #define COMPACT_GOOGLE_LOG_FATAL COMPACT_GOOGLE_LOG_EX_FATAL(LogMessage) #define COMPACT_GOOGLE_LOG_DFATAL COMPACT_GOOGLE_LOG_EX_DFATAL(LogMessage) #if defined(OS_WIN) #define ERROR 0 #define COMPACT_GOOGLE_LOG_EX_0(ClassName, ...) \\ COMPACT_GOOGLE_LOG_EX_ERROR(ClassName, ##__VA_ARGS__)"
+  },
+  {
+    "label": "LOG_IS_ON()",
+    "kind": "Method",
+    "detail": "Function (# endif # define)",
+    "insertText": "LOG_IS_ON(severity) \\ ((::cef::logging::LOG_##severity) >= ::cef::logging::GetMinLogLevel()) #define VLOG_IS_ON(verboselevel) \\ ((verboselevel) <= ::cef::logging::GetVlogLevel(__FILE__)) #define LAZY_STREAM(stream, condition) \\ !(condition) ? (void)0 : ::cef::logging::LogMessageVoidify() & (stream) #define LOG_STREAM(severity) COMPACT_GOOGLE_LOG_##severity.stream() #define LOG(severity) LAZY_STREAM(LOG_STREAM(severity), LOG_IS_ON(severity)) #define LOG_IF(severity, condition) \\ LAZY_STREAM(LOG_STREAM(severity), LOG_IS_ON(severity) && (condition)) #define SYSLOG(severity) LOG(severity) #define SYSLOG_IF(severity, condition) LOG_IF(severity, condition) #define VLOG_STREAM(verbose_level) \\ cef::logging::LogMessage(__FILE__, __LINE__, -verbose_level).stream() #define VLOG(verbose_level) \\ LAZY_STREAM(VLOG_STREAM(verbose_level), VLOG_IS_ON(verbose_level)) #define VLOG_IF(verbose_level, condition) \\ LAZY_STREAM(VLOG_STREAM(verbose_level), \\ VLOG_IS_ON(verbose_level) && (condition)) #if defined(OS_WIN) #define VPLOG_STREAM(verbose_level) \\ cef::logging::Win32ErrorLogMessage(__FILE__, __LINE__, -verbose_level, \\ ::cef::logging::GetLastSystemErrorCode()) \\ .stream() #elif defined(OS_POSIX) #define VPLOG_STREAM(verbose_level) \\ cef::logging::ErrnoLogMessage(__FILE__, __LINE__, -verbose_level, \\ ::cef::logging::GetLastSystemErrorCode()) \\ .stream() #endif #define VPLOG(verbose_level) \\ LAZY_STREAM(VPLOG_STREAM(verbose_level), VLOG_IS_ON(verbose_level)) #define VPLOG_IF(verbose_level, condition) \\ LAZY_STREAM(VPLOG_STREAM(verbose_level), \\ VLOG_IS_ON(verbose_level) && (condition)) #define LOG_ASSERT(condition) \\ LOG_IF(FATAL, !(condition)) << \"Assert failed: \" #condition \". \" #define SYSLOG_ASSERT(condition) \\ SYSLOG_IF(FATAL, !(condition)) << \"Assert failed: \" #condition \". \" #if defined(OS_WIN) #define PLOG_STREAM(severity) \\ COMPACT_GOOGLE_LOG_EX_##severity(Win32ErrorLogMessage, \\ ::cef::logging::GetLastSystemErrorCode()) \\ .stream() #elif defined(OS_POSIX) #define PLOG_STREAM(severity) \\ COMPACT_GOOGLE_LOG_EX_##severity(ErrnoLogMessage, \\ ::cef::logging::GetLastSystemErrorCode()) \\ .stream() #endif #define PLOG(severity) LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity)) #define PLOG_IF(severity, condition) \\ LAZY_STREAM(PLOG_STREAM(severity), LOG_IS_ON(severity) && (condition)) #define EAT_STREAM_PARAMETERS \\ true ? (void)0 : ::cef::logging::LogMessageVoidify() & LOG_STREAM(FATAL) #define CHECK(condition) \\ LAZY_STREAM(LOG_STREAM(FATAL), !(condition)) \\ << \"Check failed: \" #condition \". \" #define PCHECK(condition) \\ LAZY_STREAM(PLOG_STREAM(FATAL), !(condition)) \\ << \"Check failed: \" #condition \". \" #define CHECK_OP(name, op, val1, val2) \\ if (std::string* _result = cef::logging::Check##name##Impl( \\ (val1), (val2), #val1 \" \" #op \" \" #val2)) \\ cef::logging::LogMessage(__FILE__, __LINE__, _result).stream() template <class t1, class t2> std::string* MakeCheckOpString(const t1& v1, const t2& v2, const char* names)"
+  },
+  {
+    "label": "names()",
+    "kind": "Method",
+    "detail": "Function (std::ostringstream ss ; ss<<)",
+    "insertText": "names(\" << v1 << \" vs. \" << v2 << \")"
+  },
+  {
+    "label": "string()",
+    "kind": "Method",
+    "detail": "Function (std::string* msg = new)",
+    "insertText": "string(ss.str())"
+  },
+  {
+    "label": "long()",
+    "kind": "Method",
+    "detail": "Function (template std::string* MakeCheckOpString<unsigned long,unsigned)",
+    "insertText": "long(const unsigned long&, const unsigned long&, const char* names)"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (template std::string* MakeCheckOpString<unsigned long,unsigned)",
+    "insertText": "int(const unsigned long&, const unsigned int&, const char* names)"
+  },
+  {
+    "label": "long()",
+    "kind": "Method",
+    "detail": "Function (template std::string* MakeCheckOpString<unsigned int,unsigned)",
+    "insertText": "long(const unsigned int&, const unsigned long&, const char* names)"
+  },
+  {
+    "label": "string()",
+    "kind": "Method",
+    "detail": "Function (template std::string* MakeCheckOpString<std::string,)",
+    "insertText": "string(const std::string&, const std::string&, const char* name)"
+  },
+  {
+    "label": "DEFINE_CHECK_OP_IMPL()",
+    "kind": "Method",
+    "detail": "Function (# endif # define)",
+    "insertText": "DEFINE_CHECK_OP_IMPL(name, op) \\ template <class t1, class t2> \\ inline std::string* Check##name##Impl(const t1& v1, const t2& v2, \\ const char* names)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (\\)",
+    "insertText": "if(v1 op v2)"
   },
   {
     "label": "MakeCheckOpString()",
     "kind": "Method",
-    "detail": "Function (return)",
+    "detail": "Function (\\ else \\ return)",
     "insertText": "MakeCheckOpString(v1, v2, names)"
   },
   {
-    "label": "MakeCheckOpString()",
+    "label": "Impl()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "MakeCheckOpString(v1, v2, names)"
+    "detail": "Function (\\ } \\ std::string* Check # # name # #)",
+    "insertText": "Impl(int v1, int v2, const char* names)"
+  },
+  {
+    "label": "DEFINE_CHECK_OP_IMPL()",
+    "kind": "Method",
+    "detail": "Function (\\ })",
+    "insertText": "DEFINE_CHECK_OP_IMPL(EQ, ==) DEFINE_CHECK_OP_IMPL(NE, !=) DEFINE_CHECK_OP_IMPL(LE, <=) DEFINE_CHECK_OP_IMPL(LT, <) DEFINE_CHECK_OP_IMPL(GE, >=) DEFINE_CHECK_OP_IMPL(GT, >) #undef DEFINE_CHECK_OP_IMPL #define CHECK_EQ(val1, val2) CHECK_OP(EQ, ==, val1, val2) #define CHECK_NE(val1, val2) CHECK_OP(NE, !=, val1, val2) #define CHECK_LE(val1, val2) CHECK_OP(LE, <=, val1, val2) #define CHECK_LT(val1, val2) CHECK_OP(LT, <, val1, val2) #define CHECK_GE(val1, val2) CHECK_OP(GE, >=, val1, val2) #define CHECK_GT(val1, val2) CHECK_OP(GT, >, val1, val2) #if defined(NDEBUG) #define ENABLE_DLOG 0 #else #define ENABLE_DLOG 1 #endif #if defined(NDEBUG) && !defined(DCHECK_ALWAYS_ON) #define DCHECK_IS_ON() 0 #else #define DCHECK_IS_ON() 1 #endif #if ENABLE_DLOG #define DLOG_IS_ON(severity) LOG_IS_ON(severity) #define DLOG_IF(severity, condition) LOG_IF(severity, condition) #define DLOG_ASSERT(condition) LOG_ASSERT(condition) #define DPLOG_IF(severity, condition) PLOG_IF(severity, condition) #define DVLOG_IF(verboselevel, condition) VLOG_IF(verboselevel, condition) #define DVPLOG_IF(verboselevel, condition) VPLOG_IF(verboselevel, condition) #else #define DLOG_IS_ON(severity) false #define DLOG_IF(severity, condition) EAT_STREAM_PARAMETERS #define DLOG_ASSERT(condition) EAT_STREAM_PARAMETERS #define DPLOG_IF(severity, condition) EAT_STREAM_PARAMETERS #define DVLOG_IF(verboselevel, condition) EAT_STREAM_PARAMETERS #define DVPLOG_IF(verboselevel, condition)"
+  },
+  {
+    "label": "DLOG()",
+    "kind": "Method",
+    "detail": "Function (DEBUG_MODE = ENABLE_DLOG } ; # undef ENABLE_DLOG # define)",
+    "insertText": "DLOG(severity) LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity)) #define DPLOG(severity) LAZY_STREAM(PLOG_STREAM(severity), DLOG_IS_ON(severity)) #define DVLOG(verboselevel) DVLOG_IF(verboselevel, VLOG_IS_ON(verboselevel)) #define DVPLOG(verboselevel) DVPLOG_IF(verboselevel, VLOG_IS_ON(verboselevel)) #if DCHECK_IS_ON() #define COMPACT_GOOGLE_LOG_EX_DCHECK(ClassName, ...) \\ COMPACT_GOOGLE_LOG_EX_FATAL(ClassName, ##__VA_ARGS__)"
+  },
+  {
+    "label": "COMPACT_GOOGLE_LOG_EX_DCHECK()",
+    "kind": "Method",
+    "detail": "Function (# else # define)",
+    "insertText": "COMPACT_GOOGLE_LOG_EX_DCHECK(ClassName, ...) \\ COMPACT_GOOGLE_LOG_EX_INFO(ClassName, ##__VA_ARGS__)"
+  },
+  {
+    "label": "DCHECK()",
+    "kind": "Method",
+    "detail": "Function (# endif # define)",
+    "insertText": "DCHECK(condition) \\ LAZY_STREAM(LOG_STREAM(DCHECK), DCHECK_IS_ON() && !(condition)) \\ << \"Check failed: \" #condition \". \" #define DPCHECK(condition) \\ LAZY_STREAM(PLOG_STREAM(DCHECK), DCHECK_IS_ON() && !(condition)) \\ << \"Check failed: \" #condition \". \" #define DCHECK_OP(name, op, val1, val2) \\ if (DCHECK_IS_ON()) \\ if (std::string* _result = cef::logging::Check##name##Impl( \\ (val1), (val2), #val1 \" \" #op \" \" #val2)) \\ cef::logging::LogMessage(__FILE__, __LINE__, ::cef::logging::LOG_DCHECK, \\ _result) \\ .stream() #define DCHECK_EQ(val1, val2) DCHECK_OP(EQ, ==, val1, val2) #define DCHECK_NE(val1, val2) DCHECK_OP(NE, !=, val1, val2) #define DCHECK_LE(val1, val2) DCHECK_OP(LE, <=, val1, val2) #define DCHECK_LT(val1, val2) DCHECK_OP(LT, <, val1, val2) #define DCHECK_GE(val1, val2) DCHECK_OP(GE, >=, val1, val2) #define DCHECK_GT(val1, val2) DCHECK_OP(GT, >, val1, val2) #define NOTREACHED() DCHECK(false) #undef assert #define assert(x) DLOG_ASSERT(x)"
+  },
+  {
+    "label": "LogMessage()",
+    "kind": "Method",
+    "detail": "Function (public :)",
+    "insertText": "LogMessage(const char* file, int line, LogSeverity severity)"
+  },
+  {
+    "label": "LogMessage()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "LogMessage(const char* file, int line, std::string* result)"
+  },
+  {
+    "label": "LogMessage()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "LogMessage(const char* file, int line, LogSeverity severity, std::string* result)"
+  },
+  {
+    "label": "LogMessage()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "LogMessage()"
+  },
+  {
+    "label": "stream()",
+    "kind": "Method",
+    "detail": "Function (std::ostream&)",
+    "insertText": "stream()"
   },
   {
     "label": "SaveLastError()",
     "kind": "Method",
-    "detail": "Function (public:)",
+    "detail": "Function (public :)",
     "insertText": "SaveLastError()"
   },
   {
-    "label": "DISALLOW_COPY_AND_ASSIGN()",
+    "label": "get_error()",
     "kind": "Method",
-    "detail": "Function (endif)",
-    "insertText": "DISALLOW_COPY_AND_ASSIGN(LogMessage)"
+    "detail": "Function (unsigned long)",
+    "insertText": "get_error()"
+  },
+  {
+    "label": "LogAtLevel()",
+    "kind": "Method",
+    "detail": "Function (} ; void)",
+    "insertText": "LogAtLevel(int const log_level, std::string const& msg)"
+  },
+  {
+    "label": "LogMessage()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "LogMessage(__FILE__, __LINE__, log_level).stream()"
+  },
+  {
+    "label": "LogMessageVoidify()",
+    "kind": "Method",
+    "detail": "Function (} class LogMessageVoidify { public :)",
+    "insertText": "LogMessageVoidify()"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "operator(std::ostream&)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} } ; # if)",
+    "insertText": "defined(OS_WIN)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# elif)",
+    "insertText": "defined(OS_POSIX)"
   },
   {
     "label": "GetLastSystemErrorCode()",
     "kind": "Method",
-    "detail": "Function (SystemErrorCode)",
+    "detail": "Function (# endif SystemErrorCode)",
     "insertText": "GetLastSystemErrorCode()"
   },
   {
@@ -128,13 +248,67 @@
   {
     "label": "Win32ErrorLogMessage()",
     "kind": "Method",
-    "detail": "Function (public:)",
-    "insertText": "Win32ErrorLogMessage(const char* file,\n                       int line,\n                       LogSeverity severity,\n                       SystemErrorCode err)"
+    "detail": "Function (public :)",
+    "insertText": "Win32ErrorLogMessage(const char* file, int line, LogSeverity severity, SystemErrorCode err)"
+  },
+  {
+    "label": "Win32ErrorLogMessage()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "Win32ErrorLogMessage()"
+  },
+  {
+    "label": "DISALLOW_COPY_AND_ASSIGN()",
+    "kind": "Method",
+    "detail": "Function (} private : SystemErrorCode err_ ; LogMessage log_message_ ;)",
+    "insertText": "DISALLOW_COPY_AND_ASSIGN(Win32ErrorLogMessage)"
   },
   {
     "label": "ErrnoLogMessage()",
     "kind": "Method",
-    "detail": "Function (public:)",
-    "insertText": "ErrnoLogMessage(const char* file,\n                  int line,\n                  LogSeverity severity,\n                  SystemErrorCode err)"
+    "detail": "Function (public :)",
+    "insertText": "ErrnoLogMessage(const char* file, int line, LogSeverity severity, SystemErrorCode err)"
+  },
+  {
+    "label": "ErrnoLogMessage()",
+    "kind": "Method",
+    "detail": "Function (~)",
+    "insertText": "ErrnoLogMessage()"
+  },
+  {
+    "label": "DISALLOW_COPY_AND_ASSIGN()",
+    "kind": "Method",
+    "detail": "Function (} private : SystemErrorCode err_ ; LogMessage log_message_ ;)",
+    "insertText": "DISALLOW_COPY_AND_ASSIGN(ErrnoLogMessage)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} ; # endif } } std::ostream&)",
+    "insertText": "operator(std::ostream& out, const wchar_t* wstr)"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (std::ostream&)",
+    "insertText": "operator(std::ostream& out, const std::wstring& wstr)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (} # ifndef NOTIMPLEMENTED_POLICY # if)",
+    "insertText": "defined(OS_ANDROID) && defined(OFFICIAL_BUILD) #define NOTIMPLEMENTED_POLICY 0 #else #define NOTIMPLEMENTED_POLICY 4 #endif #endif #if defined(COMPILER_GCC) #define NOTIMPLEMENTED_MSG \"Not implemented reached in \" << __PRETTY_FUNCTION__ #else #define NOTIMPLEMENTED_MSG \"NOT IMPLEMENTED\" #endif #if NOTIMPLEMENTED_POLICY == 0 #define NOTIMPLEMENTED() EAT_STREAM_PARAMETERS #elif NOTIMPLEMENTED_POLICY == 1 #define NOTIMPLEMENTED() COMPILE_ASSERT(false, NOT_IMPLEMENTED) #elif NOTIMPLEMENTED_POLICY == 2 #define NOTIMPLEMENTED() COMPILE_ASSERT(false, NOT_IMPLEMENTED) #elif NOTIMPLEMENTED_POLICY == 3 #define NOTIMPLEMENTED() NOTREACHED() #elif NOTIMPLEMENTED_POLICY == 4 #define NOTIMPLEMENTED() LOG(ERROR) << NOTIMPLEMENTED_MSG #elif NOTIMPLEMENTED_POLICY == 5 #define NOTIMPLEMENTED()"
+  },
+  {
+    "label": "LOG_IF()",
+    "kind": "Method",
+    "detail": "Function (\\ bool logged_once = false ; \\)",
+    "insertText": "LOG_IF(ERROR, !logged_once)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (\\ logged_once = true ; \\ })",
+    "insertText": "while(0)"
   }
 ]

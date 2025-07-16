@@ -6,9 +6,45 @@
     "insertText": "FPerParticlePBDCCDCollisionConstraint"
   },
   {
-    "label": "Lock()",
+    "label": "FPerParticlePBDCCDCollisionConstraint()",
     "kind": "Method",
-    "detail": "Function (FScopeLock)",
-    "insertText": "Lock(Mutex)"
+    "detail": "Function (# pragma once # if UE_ENABLE_INCLUDE_ORDER_DEPRECATED_IN_5_4 # include \" Chaos / GeometryParticlesfwd . h \" # endif # include \" Chaos / SoftsSolverCollisionParticles . h \" # include \" Chaos / Transform . h \" # include \" Chaos / PBDActiveView . h \" # include \" Chaos / PBDSoftsSolverParticles . h \" # include \" Chaos / WeightedLatticeImplicitObject . h \" # include \" Chaos / Levelset . h \" # include \" Misc / ScopeLock . h \" namespace Chaos::Softs { class FPerParticlePBDCCDCollisionConstraint final { public :)",
+    "insertText": "FPerParticlePBDCCDCollisionConstraint(const TPBDActiveView<FSolverCollisionParticles>& InCollisionParticlesActiveView, TArray<FSolverRigidTransform3>& InCollisionTransforms, TArray<bool>& InCollided, TArray<FSolverVec3>& InContacts, TArray<FSolverVec3>& InNormals, TArray<uint32>& InDynamicGroupIds, TArray<uint32>& InKinematicGroupIds, const TArray<FSolverReal>& InPerGroupThicknesses, const TArray<FSolverReal>& InPerGroupFriction, bool bWriteCCDContacts) : CollisionParticlesActiveView(InCollisionParticlesActiveView) , CollisionTransforms(InCollisionTransforms) , Collided(InCollided) , Contacts(InContacts) , Normals(InNormals) , DynamicGroupIds(InDynamicGroupIds) , KinematicGroupIds(InKinematicGroupIds) , PerGroupThicknesses(InPerGroupThicknesses) , PerGroupFriction(InPerGroupFriction) , Mutex(bWriteCCDContacts ? new FCriticalSection : nullptr)"
+  },
+  {
+    "label": "FPerParticlePBDCCDCollisionConstraint()",
+    "kind": "Method",
+    "detail": "Function (} ~)",
+    "insertText": "FPerParticlePBDCCDCollisionConstraint()"
+  },
+  {
+    "label": "ApplyRange()",
+    "kind": "Method",
+    "detail": "Function (delete Mutex ; } void)",
+    "insertText": "ApplyRange(FSolverParticles& Particles, const FSolverReal Dt, const int32 Offset, const int32 Range)"
+  },
+  {
+    "label": "true()",
+    "kind": "Method",
+    "detail": "Function (ApplyRangeHelper<)",
+    "insertText": "true(Particles, Dt, Offset, Range)"
+  },
+  {
+    "label": "false()",
+    "kind": "Method",
+    "detail": "Function (} else { ApplyRangeHelper<)",
+    "insertText": "false(Particles, Dt, Offset, Range)"
+  },
+  {
+    "label": "ApplyRangeHelper()",
+    "kind": "Method",
+    "detail": "Function (} } private : template<bool bLockAndWriteContacts> void)",
+    "insertText": "ApplyRangeHelper(FSolverParticles& Particles, const FSolverReal Dt, const int32 Offset, const int32 Range)"
+  },
+  {
+    "label": "PhysicsParallelFor()",
+    "kind": "Method",
+    "detail": "Function (const uint32 DynamicGroupId = DynamicGroupIds [ Offset ] ; const FSolverReal Friction = PerGroupFriction [ DynamicGroupId ] ; const FSolverReal Thickness = PerGroupThicknesses [ DynamicGroupId ] ;)",
+    "insertText": "PhysicsParallelFor(Range - Offset, [this, &Particles, Offset, DynamicGroupId, Thickness, Friction, Dt](int32 i) { const int32 Index = Offset + i; if (Particles.InvM(Index) == (FSolverReal)0.) { return; } CollisionParticlesActiveView.SequentialFor([this, &Particles, &Index, DynamicGroupId, Thickness, Friction, Dt](FSolverCollisionParticles& CollisionParticles, int32 CollisionIndex) { const uint32 KinematicGroupId = KinematicGroupIds[CollisionIndex]; if ((KinematicGroupId != (uint32)INDEX_NONE && DynamicGroupId != KinematicGroupId) || CollisionParticles.GetGeometry(CollisionIndex)->GetType() == Chaos::ImplicitObjectType::WeightedLatticeBone) { return; } const FSolverRigidTransform3 Frame(CollisionParticles.GetX(CollisionIndex), CollisionParticles.GetR(CollisionIndex)); const Pair<FVec3, bool> PointPair = CollisionParticles.GetGeometry(CollisionIndex)->FindClosestIntersection( FVec3(CollisionTransforms[CollisionIndex].InverseTransformPositionNoScale(Particles.GetX(Index))), FVec3(Frame.InverseTransformPositionNoScale(Particles.P(Index))), (FReal)Thickness); if (PointPair.Second) { Collided[CollisionIndex] = true; const FSolverVec3 Normal = FSolverVec3(CollisionParticles.GetGeometry(CollisionIndex)->Normal(PointPair.First)); const FSolverVec3 NormalWorld = Frame.TransformVectorNoScale(Normal); const FSolverVec3 ContactWorld = Frame.TransformPositionNoScale(UE::Math::TVector<FSolverReal>(PointPair.First)); if (bLockAndWriteContacts) { check(Mutex); FScopeLock Lock(Mutex); Contacts.Emplace(ContactWorld); Normals.Emplace(NormalWorld); } const FSolverVec3 Direction = ContactWorld - Particles.P(Index); const FSolverReal Penetration = FMath::Max((FSolverReal)0., FSolverVec3::DotProduct(NormalWorld, Direction)) + (FSolverReal)UE_THRESH_POINT_ON_PLANE; Particles.P(Index) += Penetration * NormalWorld; int32 VelocityBone = CollisionIndex; if (const TWeightedLatticeImplicitObject<FLevelSet>* LevelSet = CollisionParticles.GetGeometry(CollisionIndex)->GetObject< TWeightedLatticeImplicitObject<FLevelSet> >()) { TArray<FWeightedLatticeImplicitObject::FEmbeddingCoordinate> Coordinates; LevelSet->GetEmbeddingCoordinates(PointPair.First, Coordinates, false); int32 ClosestCoordIndex = INDEX_NONE; double ClosestCoordPhi = UE_BIG_NUMBER; for (int32 CoordIndex = 0; CoordIndex < Coordinates.Num(); ++CoordIndex) { FVec3 NormalUnused; const double CoordPhi = FMath::Abs(LevelSet->GetEmbeddedObject()->PhiWithNormal(Coordinates[CoordIndex].UndeformedPosition(LevelSet->GetGrid()), NormalUnused)); if (CoordPhi < ClosestCoordPhi) { ClosestCoordIndex = CoordIndex; ClosestCoordPhi = CoordPhi; } } if (ClosestCoordIndex != INDEX_NONE) { const int32 StrongestBone = Coordinates[ClosestCoordIndex].GreatestInfluenceBone(LevelSet->GetBoneData()); if (StrongestBone != INDEX_NONE) { VelocityBone = LevelSet->GetSolverBoneIndices()[StrongestBone]; } } } const FSolverVec3 VectorToPoint = Particles.P(Index) - CollisionParticles.GetX(VelocityBone); const FSolverVec3 RelativeDisplacement = (Particles.P(Index) - Particles.GetX(Index)) - (CollisionParticles.V(VelocityBone) + FSolverVec3::CrossProduct(CollisionParticles.W(VelocityBone), VectorToPoint)) * Dt; const FSolverVec3 RelativeDisplacementTangent = RelativeDisplacement - FSolverVec3::DotProduct(RelativeDisplacement, NormalWorld) * NormalWorld; const FSolverReal RelativeDisplacementTangentLength = RelativeDisplacementTangent.Size(); if (RelativeDisplacementTangentLength >= UE_SMALL_NUMBER) { const FSolverReal PositionCorrection = FMath::Min<FSolverReal>(Penetration * Friction, RelativeDisplacementTangentLength); const FSolverReal CorrectionRatio = PositionCorrection / RelativeDisplacementTangentLength; Particles.P(Index) -= CorrectionRatio * RelativeDisplacementTangent; } } }); })"
   }
 ]

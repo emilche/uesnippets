@@ -6,51 +6,447 @@
     "insertText": "VPxWorkerImpl"
   },
   {
-    "label": "are",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "are"
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# ifndef VPX_VPX_UTIL_VPX_THREAD_H_ # define VPX_VPX_UTIL_VPX_THREAD_H_ # include \" . / vpx_config . h \" # ifdef __cplusplus \" C \" { # endif # define MAX_DECODE_THREADS 8 # if CONFIG_MULTITHREAD # if)",
+    "insertText": "defined(_WIN32)"
+  },
+  {
+    "label": "WINAPI_FAMILY_PARTITION()",
+    "kind": "Method",
+    "detail": "Function (typedef CRITICAL_SECTION pthread_mutex_t ; # if _WIN32_WINNT> = 0 x0600 # define USE_WINDOWS_CONDITION_VARIABLE typedef CONDITION_VARIABLE pthread_cond_t ; # else typedef struct { HANDLE waiting_sem_ ; HANDLE received_sem_ ; HANDLE signal_event_ ; } pthread_cond_t ; # endif # ifndef WINAPI_FAMILY_PARTITION # define WINAPI_PARTITION_DESKTOP 1 # define)",
+    "insertText": "WINAPI_FAMILY_PARTITION(x) x #endif #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) #define USE_CREATE_THREAD #endif #if !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP) #define THREAD_RETURN_TYPE DWORD #else #define THREAD_RETURN_TYPE unsigned int #endif #if defined(__GNUC__) && \\ (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 2)) #define THREADFN __attribute__((force_align_arg_pointer)) THREAD_RETURN_TYPE __stdcall #else #define THREADFN THREAD_RETURN_TYPE __stdcall #endif #define THREAD_RETURN(val) (THREAD_RETURN_TYPE)((DWORD_PTR)val) #if _WIN32_WINNT >= 0x0501 #define WaitForSingleObject(obj, timeout) \\ WaitForSingleObjectEx(obj, timeout, FALSE ) #endif static INLINE int pthread_create(pthread_t *const thread, const void *attr, #ifdef USE_CREATE_THREAD LPTHREAD_START_ROUTINE start, #else unsigned int(__stdcall *start)(void *), #endif void *arg)"
+  },
+  {
+    "label": "CreateThread()",
+    "kind": "Method",
+    "detail": "Function (# ifdef USE_CREATE_THREAD* thread =)",
+    "insertText": "CreateThread(NULL, 0, start, arg, 0, NULL)"
+  },
+  {
+    "label": "thread()",
+    "kind": "Method",
+    "detail": "Function (# else*)",
+    "insertText": "thread(pthread_t)_beginthreadex(NULL, 0, start, arg, 0, NULL)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# endif)",
+    "insertText": "if(*thread == NULL)"
+  },
+  {
+    "label": "SetThreadPriority()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetThreadPriority(*thread, THREAD_PRIORITY_ABOVE_NORMAL)"
+  },
+  {
+    "label": "pthread_mutex_init()",
+    "kind": "Method",
+    "detail": "Function (} int)",
+    "insertText": "pthread_mutex_init(pthread_mutex_t *const mutex, void *mutexattr)"
   },
   {
     "label": "InitializeCriticalSectionEx()",
     "kind": "Method",
-    "detail": "Function (greater)",
-    "insertText": "InitializeCriticalSectionEx(mutex, 0 /*dwSpinCount*/, 0 /*Flags*/)"
+    "detail": "Function (# if _WIN32_WINNT> = 0 x0600)",
+    "insertText": "InitializeCriticalSectionEx(mutex, 0 , 0)"
   },
   {
     "label": "InitializeCriticalSection()",
     "kind": "Method",
-    "detail": "Function (else)",
+    "detail": "Function (# else)",
     "insertText": "InitializeCriticalSection(mutex)"
+  },
+  {
+    "label": "pthread_mutex_trylock()",
+    "kind": "Method",
+    "detail": "Function (# endif return 0 ; } int)",
+    "insertText": "pthread_mutex_trylock(pthread_mutex_t *const mutex)"
+  },
+  {
+    "label": "pthread_mutex_lock()",
+    "kind": "Method",
+    "detail": "Function (} int)",
+    "insertText": "pthread_mutex_lock(pthread_mutex_t *const mutex)"
+  },
+  {
+    "label": "EnterCriticalSection()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "EnterCriticalSection(mutex)"
+  },
+  {
+    "label": "LeaveCriticalSection()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "LeaveCriticalSection(mutex)"
+  },
+  {
+    "label": "DeleteCriticalSection()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "DeleteCriticalSection(mutex)"
+  },
+  {
+    "label": "USE_WINDOWS_CONDITION_VARIABLE()",
+    "kind": "Method",
+    "detail": "Function (int ok = 1 ; # ifdef)",
+    "insertText": "USE_WINDOWS_CONDITION_VARIABLE(void)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (# else)",
+    "insertText": "ok(CloseHandle(condition->waiting_sem_) != 0)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ok(CloseHandle(condition->received_sem_) != 0)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ok(CloseHandle(condition->signal_event_) != 0)"
+  },
+  {
+    "label": "pthread_cond_init()",
+    "kind": "Method",
+    "detail": "Function (# endif return ! ok ; } int)",
+    "insertText": "pthread_cond_init(pthread_cond_t *const condition, void *cond_attr)"
   },
   {
     "label": "InitializeConditionVariable()",
     "kind": "Method",
-    "detail": "Function (USE_WINDOWS_CONDITION_VARIABLE)",
+    "detail": "Function (# ifdef USE_WINDOWS_CONDITION_VARIABLE)",
     "insertText": "InitializeConditionVariable(condition)"
+  },
+  {
+    "label": "CreateSemaphore()",
+    "kind": "Method",
+    "detail": "Function (# else condition -> waiting_sem_ =)",
+    "insertText": "CreateSemaphore(NULL, 0, MAX_DECODE_THREADS, NULL)"
+  },
+  {
+    "label": "CreateEvent()",
+    "kind": "Method",
+    "detail": "Function (condition -> signal_event_ =)",
+    "insertText": "CreateEvent(NULL, FALSE, FALSE, NULL)"
+  },
+  {
+    "label": "pthread_cond_destroy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "pthread_cond_destroy(condition)"
   },
   {
     "label": "WakeAllConditionVariable()",
     "kind": "Method",
-    "detail": "Function (USE_WINDOWS_CONDITION_VARIABLE)",
+    "detail": "Function (int ok = 1 ; # ifdef USE_WINDOWS_CONDITION_VARIABLE)",
     "insertText": "WakeAllConditionVariable(condition)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (# else)",
+    "insertText": "while(WaitForSingleObject(condition->waiting_sem_, 0) == WAIT_OBJECT_0)"
+  },
+  {
+    "label": "SetEvent()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "SetEvent(condition->signal_event_)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ok(WaitForSingleObject(condition->received_sem_, INFINITE) != WAIT_OBJECT_0)"
+  },
+  {
+    "label": "pthread_cond_signal()",
+    "kind": "Method",
+    "detail": "Function (} # endif return ! ok ; } int)",
+    "insertText": "pthread_cond_signal(pthread_cond_t *const condition)"
   },
   {
     "label": "WakeConditionVariable()",
     "kind": "Method",
-    "detail": "Function (USE_WINDOWS_CONDITION_VARIABLE)",
+    "detail": "Function (int ok = 1 ; # ifdef USE_WINDOWS_CONDITION_VARIABLE)",
     "insertText": "WakeConditionVariable(condition)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# else)",
+    "insertText": "if(WaitForSingleObject(condition->waiting_sem_, 0) == WAIT_OBJECT_0)"
+  },
+  {
+    "label": "pthread_cond_wait()",
+    "kind": "Method",
+    "detail": "Function (} # endif return ! ok ; } int)",
+    "insertText": "pthread_cond_wait(pthread_cond_t *const condition, pthread_mutex_t *const mutex)"
+  },
+  {
+    "label": "SleepConditionVariableCS()",
+    "kind": "Method",
+    "detail": "Function (int ok ; # ifdef USE_WINDOWS_CONDITION_VARIABLE ok =)",
+    "insertText": "SleepConditionVariableCS(condition, mutex, INFINITE)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (# else)",
+    "insertText": "if(!ReleaseSemaphore(condition->waiting_sem_, 1, NULL))"
   },
   {
     "label": "pthread_mutex_unlock()",
     "kind": "Method",
-    "detail": "Function (issued)",
+    "detail": "Function (void)",
     "insertText": "pthread_mutex_unlock(mutex)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "ok(WaitForSingleObject(condition->signal_event_, INFINITE) == WAIT_OBJECT_0)"
+  },
+  {
+    "label": "ReleaseSemaphore()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "ReleaseSemaphore(condition->received_sem_, 1, NULL)"
+  },
+  {
+    "label": "pthread_mutex_lock()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "pthread_mutex_lock(mutex)"
+  },
+  {
+    "label": "defined()",
+    "kind": "Method",
+    "detail": "Function (# endif return ! ok ; } # elif)",
+    "insertText": "defined(__OS2__) #define INCL_DOS #include <os2.h> #include <errno.h> #include <stdlib.h> #include <sys/builtin.h> #if defined(__STRICT_ANSI__) int _beginthread(void (*)(void *), void *, unsigned, void *)"
+  },
+  {
+    "label": "THREAD_RETURN()",
+    "kind": "Method",
+    "detail": "Function (# endif # define pthread_t TID # define pthread_mutex_t HMTX typedef struct { HEV event_sem_ ; HEV ack_sem_ ; volatile unsigned wait_count_ ; } pthread_cond_t ; # define THREADFN void* # define)",
+    "insertText": "THREAD_RETURN(val) (val)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "void(*start_)(void *)"
+  },
+  {
+    "label": "thread_start()",
+    "kind": "Method",
+    "detail": "Function (void* arg_ ; } thread_arg ; void)",
+    "insertText": "thread_start(void *arg)"
+  },
+  {
+    "label": "targ()",
+    "kind": "Method",
+    "detail": "Function (thread_arg)",
+    "insertText": "targ(thread_arg *)"
+  },
+  {
+    "label": "free()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "free(arg)"
+  },
+  {
+    "label": "start_()",
+    "kind": "Method",
+    "detail": "Function (targ .)",
+    "insertText": "start_(targ.arg_)"
+  },
+  {
+    "label": "pthread_create()",
+    "kind": "Method",
+    "detail": "Function (} int)",
+    "insertText": "pthread_create(pthread_t *const thread, const void *attr, void *(*start)(void *), void *arg)"
+  },
+  {
+    "label": "targ()",
+    "kind": "Method",
+    "detail": "Function (int tid ; thread_arg*)",
+    "insertText": "targ(thread_arg *)malloc(sizeof(*targ))"
+  },
+  {
+    "label": "tid()",
+    "kind": "Method",
+    "detail": "Function (targ -> start_ = start ; targ -> arg_ = arg ;)",
+    "insertText": "tid(pthread_t)_beginthread(thread_start, NULL, 1024 * 1024, targ)"
+  },
+  {
+    "label": "free()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "free(targ)"
+  },
+  {
+    "label": "pthread_mutex_unlock()",
+    "kind": "Method",
+    "detail": "Function (} int)",
+    "insertText": "pthread_mutex_unlock(pthread_mutex_t *const mutex)"
+  },
+  {
+    "label": "pthread_mutex_destroy()",
+    "kind": "Method",
+    "detail": "Function (} int)",
+    "insertText": "pthread_mutex_destroy(pthread_mutex_t *const mutex)"
+  },
+  {
+    "label": "pthread_cond_destroy()",
+    "kind": "Method",
+    "detail": "Function (} int)",
+    "insertText": "pthread_cond_destroy(pthread_cond_t *const condition)"
+  },
+  {
+    "label": "DosCloseEventSem()",
+    "kind": "Method",
+    "detail": "Function (int ok = 1 ; ok& =)",
+    "insertText": "DosCloseEventSem(condition->event_sem_)"
+  },
+  {
+    "label": "DosCloseEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosCloseEventSem(condition->ack_sem_)"
+  },
+  {
+    "label": "ok()",
+    "kind": "Method",
+    "detail": "Function (int)",
+    "insertText": "ok(void)"
+  },
+  {
+    "label": "DosCreateEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosCreateEventSem(NULL, &condition->event_sem_, DCE_POSTONE, FALSE)"
+  },
+  {
+    "label": "DosCreateEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosCreateEventSem(NULL, &condition->ack_sem_, DCE_POSTONE, FALSE)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (int ok = 1 ;)",
+    "insertText": "if(!__atomic_cmpxchg32(&condition->wait_count_, 0, 0))"
+  },
+  {
+    "label": "DosPostEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosPostEventSem(condition->event_sem_)"
+  },
+  {
+    "label": "DosWaitEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosWaitEventSem(condition->ack_sem_, SEM_INDEFINITE_WAIT)"
+  },
+  {
+    "label": "pthread_cond_broadcast()",
+    "kind": "Method",
+    "detail": "Function (} return ! ok ; } int)",
+    "insertText": "pthread_cond_broadcast(pthread_cond_t *const condition)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (int ok = 1 ;)",
+    "insertText": "while(!__atomic_cmpxchg32(&condition->wait_count_, 0, 0)) ok &= pthread_cond_signal(condition)"
+  },
+  {
+    "label": "__atomic_increment()",
+    "kind": "Method",
+    "detail": "Function (int ok = 1 ;)",
+    "insertText": "__atomic_increment(&condition->wait_count_)"
+  },
+  {
+    "label": "DosWaitEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosWaitEventSem(condition->event_sem_, SEM_INDEFINITE_WAIT)"
+  },
+  {
+    "label": "__atomic_decrement()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "__atomic_decrement(&condition->wait_count_)"
+  },
+  {
+    "label": "DosPostEventSem()",
+    "kind": "Method",
+    "detail": "Function (ok& =)",
+    "insertText": "DosPostEventSem(condition->ack_sem_)"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (NOT_OK = 0,OK,WORK } VPxWorkerStatus ; typedef)",
+    "insertText": "int(*VPxWorkerHook)(void *, void *)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (typedef struct VPxWorkerImpl VPxWorkerImpl ; typedef struct { VPxWorkerImpl* impl_ ; VPxWorkerStatus status_ ; VPxWorkerHook hook ; void* data1 ; void* data2 ; int had_error ; } VPxWorker ; typedef struct {)",
+    "insertText": "void(*init)(VPxWorker *const worker)"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "int(*reset)(VPxWorker *const worker)"
+  },
+  {
+    "label": "int()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "int(*sync)(VPxWorker *const worker)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "void(*launch)(VPxWorker *const worker)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "void(*execute)(VPxWorker *const worker)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "void(*end)(VPxWorker *const worker)"
   },
   {
     "label": "vpx_set_worker_interface()",
     "kind": "Method",
-    "detail": "Function (int)",
+    "detail": "Function (} VPxWorkerInterface ; int)",
     "insertText": "vpx_set_worker_interface(const VPxWorkerInterface *const winterface)"
+  },
+  {
+    "label": "vpx_get_worker_interface()",
+    "kind": "Method",
+    "detail": "Function (const VPxWorkerInterface*)",
+    "insertText": "vpx_get_worker_interface(void)"
   }
 ]

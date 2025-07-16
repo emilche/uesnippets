@@ -36,21 +36,261 @@
     "insertText": "dirent"
   },
   {
-    "label": "stat",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "stat"
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" UbaFile . h \" # include \" UbaLogger . h \" # include \" UbaProcessStats . h \" # include \" UbaStringBuffer . h \" namespace uba { struct DirectoryEntry { const tchar* name ; u32 nameLen ; u64 lastWritten ; u32 attributes ; u32 volumeSerial ; u64 id ; u64 size ; } ; struct DirectoryInfo { u32 attributes ; u32 volumeSerial ; u64 id ; } ; using IteratorFunc = Function<)",
+    "insertText": "void(const DirectoryEntry&)"
+  },
+  {
+    "label": "void()",
+    "kind": "Method",
+    "detail": "Function (using DirectoryInfoFunc = Function<)",
+    "insertText": "void(const DirectoryInfo&)"
   },
   {
     "label": "NtQueryDirectoryFile()",
     "kind": "Method",
-    "detail": "Function (NTSTATUS)",
+    "detail": "Function (} # if PLATFORM_WINDOWS # include<winternl . h> struct FILE_DIRECTORY_INFORMATION { ULONG NextEntryOffset ; ULONG FileIndex ; LARGE_INTEGER CreationTime ; LARGE_INTEGER LastAccessTime ; LARGE_INTEGER LastWriteTime ; LARGE_INTEGER ChangeTime ; LARGE_INTEGER EndOfFile ; LARGE_INTEGER AllocationSize ; ULONG FileAttributes ; ULONG FileNameLength ; WCHAR FileName [ 1 ] ; } ; \" C \" NTSTATUS)",
     "insertText": "NtQueryDirectoryFile(HANDLE FileHandle, HANDLE Event, PIO_APC_ROUTINE ApcRoutine, PVOID ApcContext, PIO_STATUS_BLOCK IoStatusBlock, PVOID FileInformation, ULONG Length, FILE_INFORMATION_CLASS FileInformationClass, BOOLEAN ReturnSingleEntry, PUNICODE_STRING FileName, BOOLEAN RestartScan)"
+  },
+  {
+    "label": "TraverseDir()",
+    "kind": "Method",
+    "detail": "Function (int FileIdBothDirectoryInformation = 3 7 ; struct FILE_ID_BOTH_DIR_INFORMATION { ULONG NextEntryOffset ; ULONG FileIndex ; LARGE_INTEGER CreationTime ; LARGE_INTEGER LastAccessTime ; LARGE_INTEGER LastWriteTime ; LARGE_INTEGER ChangeTime ; LARGE_INTEGER EndOfFile ; LARGE_INTEGER AllocationSize ; ULONG FileAttributes ; ULONG FileNameLength ; ULONG EaSize ; CCHAR ShortNameLength ; WCHAR ShortName [ 1 2 ] ; LARGE_INTEGER FileId ; WCHAR FileName [ 1 ] ; } ; namespace uba { bool)",
+    "insertText": "TraverseDir(Logger& logger, const tchar* dirPath, const IteratorFunc& iteratorFunc, bool errorOnNotFound = false, const DirectoryInfoFunc& infoFunc = {})"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<> str ; str .)",
+    "insertText": "Append(L\"\\\\??\\\\\").Append(dirPath)"
+  },
+  {
+    "label": "RtlInitUnicodeString()",
+    "kind": "Method",
+    "detail": "Function (UNICODE_STRING uniName ;)",
+    "insertText": "RtlInitUnicodeString(&uniName, str.data)"
   },
   {
     "label": "timer()",
     "kind": "Method",
     "detail": "Function (Timer)",
     "insertText": "timer(0, 1)"
+  },
+  {
+    "label": "MakeGuard()",
+    "kind": "Method",
+    "detail": "Function (auto mg =)",
+    "insertText": "MakeGuard([&]() { KernelStats::GetCurrent().traverseDir += timer; })"
+  },
+  {
+    "label": "memset()",
+    "kind": "Method",
+    "detail": "Function (HANDLE handle ; OBJECT_ATTRIBUTES ObjectAttributes ; IO_STATUS_BLOCK IoStatusBlock ;)",
+    "insertText": "memset(&IoStatusBlock, 0, sizeof(IoStatusBlock))"
+  },
+  {
+    "label": "InitializeObjectAttributes()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "InitializeObjectAttributes(&ObjectAttributes, &uniName, OBJ_CASE_INSENSITIVE, NULL, NULL)"
+  },
+  {
+    "label": "GetTime()",
+    "kind": "Method",
+    "detail": "Function (ULONG ShareAccess = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE ; u64 startTime =)",
+    "insertText": "GetTime()"
+  },
+  {
+    "label": "NtCreateFile()",
+    "kind": "Method",
+    "detail": "Function (NTSTATUS res =)",
+    "insertText": "NtCreateFile(&handle, FILE_READ_ATTRIBUTES | FILE_LIST_DIRECTORY | FILE_ATTRIBUTE_UNPINNED, &ObjectAttributes, &IoStatusBlock, 0, FILE_ATTRIBUTE_NORMAL, ShareAccess, FILE_OPEN, FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_ALERT, NULL, 0)"
+  },
+  {
+    "label": "MakeGuard()",
+    "kind": "Method",
+    "detail": "Function (auto hg =)",
+    "insertText": "MakeGuard([&]() { NtClose(handle); })"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (bool exists = IoStatusBlock . Information = = 1 ;)",
+    "insertText": "if(!exists)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (BY_HANDLE_FILE_INFORMATION dirInfo ;)",
+    "insertText": "if(!GetFileInformationByHandle(handle, &dirInfo))"
+  },
+  {
+    "label": "Warning()",
+    "kind": "Method",
+    "detail": "Function (logger .)",
+    "insertText": "Warning(L\"GetFileInformationByHandle returned error %s\", LastErrorToText().data)"
+  },
+  {
+    "label": "ToLargeInteger()",
+    "kind": "Method",
+    "detail": "Function (DirectoryInfo di ; di . attributes = dirInfo . dwFileAttributes ; di . volumeSerial = volumeSerial ; di . id =)",
+    "insertText": "ToLargeInteger(dirInfo.nFileIndexHigh, dirInfo.nFileIndexLow)"
+  },
+  {
+    "label": "UBA_ASSERT()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UBA_ASSERT(di.id)"
+  },
+  {
+    "label": "infoFunc()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "infoFunc(di)"
+  },
+  {
+    "label": "while()",
+    "kind": "Method",
+    "detail": "Function (} u8 buff [ 6 4* 1 0 2 4 ] ;)",
+    "insertText": "while(true)"
+  },
+  {
+    "label": "NtQueryDirectoryFile()",
+    "kind": "Method",
+    "detail": "Function (res =)",
+    "insertText": "NtQueryDirectoryFile(handle, 0, NULL, NULL, &IoStatusBlock, buff, sizeof(buff) - 2, (FILE_INFORMATION_CLASS)FileIdBothDirectoryInformation, FALSE, NULL, FALSE)"
+  },
+  {
+    "label": "FileInformation()",
+    "kind": "Method",
+    "detail": "Function (auto&)",
+    "insertText": "FileInformation(FILE_ID_BOTH_DIR_INFORMATION*)"
+  },
+  {
+    "label": "sizeof()",
+    "kind": "Method",
+    "detail": "Function (auto fileName = FileInformation . FileName ; u64 fileNameCharCount = FileInformation . FileNameLength /)",
+    "insertText": "sizeof(tchar)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (wchar_t& fileNameEnd = fileName [ fileNameCharCount ] ; wchar_t old = fileNameEnd ; fileNameEnd = 0 ;)",
+    "insertText": "if(fileNameCharCount == 1 && fileName[0] == '.' || (fileNameCharCount == 2 && fileName[0] == '.' && fileName[1] == '.'))"
+  },
+  {
+    "label": "u32()",
+    "kind": "Method",
+    "detail": "Function (fileNameEnd = old ; it + = FileInformation . NextEntryOffset ; continue ; } DirectoryEntry entry ; entry . name = fileName ; entry . nameLen =)",
+    "insertText": "u32(fileNameCharCount)"
+  },
+  {
+    "label": "iteratorFunc()",
+    "kind": "Method",
+    "detail": "Function (entry . lastWritten = FileInformation . LastWriteTime . QuadPart ; entry . attributes = FileInformation . FileAttributes ; entry . volumeSerial = volumeSerial ; entry . id = FileInformation . FileId . QuadPart ; entry . size = FileInformation . EndOfFile . QuadPart ;)",
+    "insertText": "iteratorFunc(entry)"
+  },
+  {
+    "label": "strcpy()",
+    "kind": "Method",
+    "detail": "Function (char dirPath2 [ 1 0 2 4 ] ;)",
+    "insertText": "strcpy(dirPath2, dirPath)"
+  },
+  {
+    "label": "strlen()",
+    "kind": "Method",
+    "detail": "Function (u32 dirPathLen =)",
+    "insertText": "strlen(dirPath2)"
+  },
+  {
+    "label": "opendir()",
+    "kind": "Method",
+    "detail": "Function (DIR* dir =)",
+    "insertText": "opendir(dirPath2)"
+  },
+  {
+    "label": "UBA_ASSERTF()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UBA_ASSERTF(false, \"TraverseDir error handling not implemented %s (%s)\", dirPath, strerror(errno))"
+  },
+  {
+    "label": "dirfd()",
+    "kind": "Method",
+    "detail": "Function (int fd =)",
+    "insertText": "dirfd(dir)"
+  },
+  {
+    "label": "UBA_ASSERTF()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UBA_ASSERTF(false, \"TraverseDir:dirfd error handling not implemented\")"
+  },
+  {
+    "label": "UBA_ASSERTF()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UBA_ASSERTF(false, \"TraverseDir:fstat error handling not implemented\")"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(dirPath2[dirPathLen - 1] != '/')"
+  },
+  {
+    "label": "readdir()",
+    "kind": "Method",
+    "detail": "Function (errno = 0 ; struct dirent* pDirent =)",
+    "insertText": "readdir(dir)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (break ; } char* fileName = pDirent -> d_name ;)",
+    "insertText": "if(fileName[0] == '.' && (fileName[1] == 0 || (fileName[1] == '.' && fileName[2] == 0)))"
+  },
+  {
+    "label": "strcpy()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "strcpy(dirPath2 + dirPathLen, fileName)"
+  },
+  {
+    "label": "stat()",
+    "kind": "Method",
+    "detail": "Function (struct stat attr ; int res =)",
+    "insertText": "stat(dirPath2, &attr)"
+  },
+  {
+    "label": "lstat()",
+    "kind": "Method",
+    "detail": "Function (res =)",
+    "insertText": "lstat(dirPath2, &attr)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(errno == ENODEV || errno == EACCES || errno == EPERM)"
+  },
+  {
+    "label": "UBA_ASSERTF()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UBA_ASSERTF(res == 0, \"TraverseDir:stat error handling not added for file %s (error %s)\", dirPath2, strerror(errno))"
+  },
+  {
+    "label": "strlen()",
+    "kind": "Method",
+    "detail": "Function (} DirectoryEntry entry ; entry . name = fileName ; entry . nameLen =)",
+    "insertText": "strlen(fileName)"
+  },
+  {
+    "label": "FromTimeSpec()",
+    "kind": "Method",
+    "detail": "Function (entry . lastWritten =)",
+    "insertText": "FromTimeSpec(attr.st_mtimespec)"
   }
 ]

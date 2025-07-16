@@ -6,21 +6,195 @@
     "insertText": "LU_kernel_bmod"
   },
   {
-    "label": "LU_kernel_bmod",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "LU_kernel_bmod"
+    "label": "run()",
+    "kind": "Method",
+    "detail": "Function (# ifndef SPARSELU_KERNEL_BMOD_H # define SPARSELU_KERNEL_BMOD_H namespace Eigen { namespace internal { template<int SegSizeAtCompileTime> struct LU_kernel_bmod { template<BlockScalarVector,ScalarVector,IndexVector> EIGEN_DONT_INLINE void)",
+    "insertText": "run(const Index segsize, BlockScalarVector& dense, ScalarVector& tempv, ScalarVector& lusup, Index& luptr, const Index lda, const Index nrow, IndexVector& lsub, const Index lptr, const Index no_zeros)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (typedef ScalarVector::Scalar Scalar ; Index isub = lptr + no_zeros ; Index i ; Index irow ;)",
+    "insertText": "for(i = 0; i < ((SegSizeAtCompileTime==Dynamic)?segsize:SegSizeAtCompileTime); i++)"
+  },
+  {
+    "label": "lsub()",
+    "kind": "Method",
+    "detail": "Function (irow =)",
+    "insertText": "lsub(isub)"
+  },
+  {
+    "label": "tempv()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "tempv(i) = dense(irow)"
+  },
+  {
+    "label": "A()",
+    "kind": "Method",
+    "detail": "Function (+ + isub ; } luptr + = lda* no_zeros + no_zeros ; Map<Matrix<Scalar,SegSizeAtCompileTime,SegSizeAtCompileTime,ColMajor>,0,OuterStride<>>)",
+    "insertText": "A(&(lusup.data()[luptr]), segsize, segsize, OuterStride<>(lda))"
+  },
+  {
+    "label": "u()",
+    "kind": "Method",
+    "detail": "Function (Map<Matrix<Scalar,SegSizeAtCompileTime,1>>)",
+    "insertText": "u(tempv.data(), segsize)"
+  },
+  {
+    "label": "UnitLower()",
+    "kind": "Method",
+    "detail": "Function (u = A . template triangularView<)",
+    "insertText": "UnitLower().solve(u)"
+  },
+  {
+    "label": "first_multiple()",
+    "kind": "Method",
+    "detail": "Function (luptr + = segsize ; const Index PacketSize = internal::packet_traits<Scalar>::size ; Index ldl =)",
+    "insertText": "first_multiple(nrow, PacketSize)"
+  },
+  {
+    "label": "B()",
+    "kind": "Method",
+    "detail": "Function (Map<Matrix<Scalar,Dynamic,SegSizeAtCompileTime,ColMajor>,0,OuterStride<>>)",
+    "insertText": "B(&(lusup.data()[luptr]), nrow, segsize, OuterStride<>(lda))"
+  },
+  {
+    "label": "first_default_aligned()",
+    "kind": "Method",
+    "detail": "Function (Index aligned_offset =)",
+    "insertText": "first_default_aligned(tempv.data()+segsize, PacketSize)"
+  },
+  {
+    "label": "aligned_with_B_offset()",
+    "kind": "Method",
+    "detail": "Function (Index)",
+    "insertText": "aligned_with_B_offset(PacketSize-internal::first_default_aligned(B.data(), PacketSize))"
+  },
+  {
+    "label": "l()",
+    "kind": "Method",
+    "detail": "Function (Map<Matrix<Scalar,Dynamic,1>,0,OuterStride<>>)",
+    "insertText": "l(tempv.data()+segsize+aligned_offset+aligned_with_B_offset, nrow, OuterStride<>(ldl))"
+  },
+  {
+    "label": "setZero()",
+    "kind": "Method",
+    "detail": "Function (l .)",
+    "insertText": "setZero()"
+  },
+  {
+    "label": "Scalar()",
+    "kind": "Method",
+    "detail": "Function (internal::sparselu_gemm<)",
+    "insertText": "Scalar(l.rows(), l.cols(), B.cols(), B.data(), B.outerStride(), u.data(), u.outerStride(), l.data(), l.outerStride())"
+  },
+  {
+    "label": "lsub()",
+    "kind": "Method",
+    "detail": "Function (irow =)",
+    "insertText": "lsub(isub++)"
+  },
+  {
+    "label": "dense()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "dense(irow) = tempv(i)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "for(i = 0; i < nrow; i++)"
+  },
+  {
+    "label": "dense()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "dense(irow) -= l(i)"
   },
   {
     "label": "run()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "run(const Index segsize, BlockScalarVector& dense, ScalarVector& tempv, ScalarVector& lusup, Index& luptr, const Index lda,\n                                    const Index nrow, IndexVector& lsub, const Index lptr, const Index no_zeros)"
+    "detail": "Function (} } template<> struct LU_kernel_bmod<1> { template<BlockScalarVector,ScalarVector,IndexVector> EIGEN_DONT_INLINE void)",
+    "insertText": "run(const Index , BlockScalarVector& dense, ScalarVector& , ScalarVector& lusup, Index& luptr, const Index lda, const Index nrow, IndexVector& lsub, const Index lptr, const Index no_zeros)"
   },
   {
-    "label": "run()",
+    "label": "dense()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "run(const Index /*segsize*/, BlockScalarVector& dense, ScalarVector& /*tempv*/, ScalarVector& lusup, Index& luptr,\n                                    const Index lda, const Index nrow, IndexVector& lsub, const Index lptr, const Index no_zeros)"
+    "detail": "Function (typedef ScalarVector::Scalar Scalar ; typedef IndexVector::Scalar StorageIndex ; Scalar f =)",
+    "insertText": "dense(lsub(lptr + no_zeros))"
+  },
+  {
+    "label": "a()",
+    "kind": "Method",
+    "detail": "Function (luptr + = lda* no_zeros + no_zeros + 1 ; const Scalar*)",
+    "insertText": "a(lusup.data() + luptr)"
+  },
+  {
+    "label": "irow()",
+    "kind": "Method",
+    "detail": "Function (const StorageIndex*)",
+    "insertText": "irow(lsub.data()+lptr + no_zeros + 1)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (Index i = 0 ;)",
+    "insertText": "for(; i+1 < nrow; i+=2)"
+  },
+  {
+    "label": "i0()",
+    "kind": "Method",
+    "detail": "Function (Index)",
+    "insertText": "i0(irow++)"
+  },
+  {
+    "label": "i1()",
+    "kind": "Method",
+    "detail": "Function (Index)",
+    "insertText": "i1(irow++)"
+  },
+  {
+    "label": "a0()",
+    "kind": "Method",
+    "detail": "Function (Scalar)",
+    "insertText": "a0(a++)"
+  },
+  {
+    "label": "a1()",
+    "kind": "Method",
+    "detail": "Function (Scalar)",
+    "insertText": "a1(a++)"
+  },
+  {
+    "label": "coeff()",
+    "kind": "Method",
+    "detail": "Function (Scalar d0 = dense .)",
+    "insertText": "coeff(i0)"
+  },
+  {
+    "label": "coeff()",
+    "kind": "Method",
+    "detail": "Function (Scalar d1 = dense .)",
+    "insertText": "coeff(i1)"
+  },
+  {
+    "label": "coeffRef()",
+    "kind": "Method",
+    "detail": "Function (d0 - = f* a0 ; d1 - = f* a1 ; dense .)",
+    "insertText": "coeffRef(i0)"
+  },
+  {
+    "label": "coeffRef()",
+    "kind": "Method",
+    "detail": "Function (dense .)",
+    "insertText": "coeffRef(i1)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(i<nrow) dense.coeffRef(*(irow++)) -= f * *(a++)"
   }
 ]

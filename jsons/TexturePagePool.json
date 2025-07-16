@@ -24,12 +24,6 @@
     "insertText": "FVTProducerDescription"
   },
   {
-    "label": "works",
-    "kind": "Type",
-    "detail": "class declaration",
-    "insertText": "works"
-  },
-  {
     "label": "FTexturePagePool",
     "kind": "Type",
     "detail": "class declaration",
@@ -44,7 +38,7 @@
   {
     "label": "FTexturePagePool()",
     "kind": "Method",
-    "detail": "Function (public:)",
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # include \" VirtualTextureShared . h \" # include \" Containers / BinaryHeap . h \" # include \" Containers / HashTable . h \" union FVirtualTextureLocalTile ; class FVirtualTexturePhysicalSpace ; union FVirtualTextureProducerHandle ; class FVirtualTextureSpace ; class FVirtualTextureSystem ; struct FVTProducerDescription ; class FTexturePagePool { public :)",
     "insertText": "FTexturePagePool()"
   },
   {
@@ -54,10 +48,22 @@
     "insertText": "Initialize(uint32 InNumPages)"
   },
   {
-    "label": "EvictAllPages()",
+    "label": "GetLock()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "EvictAllPages(FVirtualTextureSystem* System)"
+    "detail": "Function (FCriticalSection&)",
+    "insertText": "GetLock()"
+  },
+  {
+    "label": "GetNumLockedPages()",
+    "kind": "Method",
+    "detail": "Function (} uint32)",
+    "insertText": "GetNumLockedPages()"
+  },
+  {
+    "label": "GetNumMappedPages()",
+    "kind": "Method",
+    "detail": "Function (} uint32)",
+    "insertText": "GetNumMappedPages()"
   },
   {
     "label": "EvictPages()",
@@ -96,6 +102,30 @@
     "insertText": "GetLocalTileFromPhysicalAddress(uint16 pAddress)"
   },
   {
+    "label": "GetLocalLevelForAddress()",
+    "kind": "Method",
+    "detail": "Function (uint8)",
+    "insertText": "GetLocalLevelForAddress(uint16 pAddress)"
+  },
+  {
+    "label": "FindPageAddress()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "FindPageAddress(const FVirtualTextureProducerHandle& ProducerHandle, uint8 GroupIndex, uint32 Local_vAddress, uint8 Local_vLevel)"
+  },
+  {
+    "label": "FindNearestPageAddress()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "FindNearestPageAddress(const FVirtualTextureProducerHandle& ProducerHandle, uint8 GroupIndex, uint32 Local_vAddress, uint8 Local_vLevel, uint8 MaxLevel)"
+  },
+  {
+    "label": "FindNearestPageLevel()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "FindNearestPageLevel(const FVirtualTextureProducerHandle& ProducerHandle, uint8 GroupIndex, uint32 Local_vAddress, uint8 Local_vLevel)"
+  },
+  {
     "label": "Alloc()",
     "kind": "Method",
     "detail": "Function (uint32)",
@@ -126,6 +156,18 @@
     "insertText": "UpdateUsage(uint32 Frame, uint16 pAddress)"
   },
   {
+    "label": "GetNumVisiblePages()",
+    "kind": "Method",
+    "detail": "Function (uint32)",
+    "insertText": "GetNumVisiblePages(uint32 Frame)"
+  },
+  {
+    "label": "CollectProducerCounts()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "CollectProducerCounts(TMap<uint32, uint32>& OutProducerCountMap)"
+  },
+  {
     "label": "MapPage()",
     "kind": "Method",
     "detail": "Function (void)",
@@ -134,7 +176,7 @@
   {
     "label": "GetPageHash()",
     "kind": "Method",
-    "detail": "Function (uint16)",
+    "detail": "Function (private : const uint32 PAGE_MAPPING_CAPACITY = 0 x00ffffff ; struct FPageMapping { uint32 vAddress : 2 4 ; uint32 vLogSize : 4 ; uint32 SpaceID : 4 ; uint32 NextIndex : 2 4 ; uint32 MaxLevel : 4 ; uint32 Pad : 4 ; uint32 PrevIndex : 2 4 ; uint32 PageTableLayerIndex : 8 ; } ; union FPageEntry { uint64 PackedValue ; struct { uint32 PackedProducerHandle ; uint32 Local_vAddress : 2 4 ; uint32 Local_vLevel : 4 ; uint32 GroupIndex : 4 ; } ; } ; uint16)",
     "insertText": "GetPageHash(const FPageEntry& Entry)"
   },
   {
@@ -150,15 +192,51 @@
     "insertText": "UnmapAllPages(FVirtualTextureSystem* System, uint16 pAddress, bool bMapAncestorPages)"
   },
   {
-    "label": "check()",
+    "label": "RemoveMappingFromList()",
     "kind": "Method",
-    "detail": "Function (list)",
-    "insertText": "check(Index <= PAGE_MAPPING_CAPACITY)"
+    "detail": "Function (void)",
+    "insertText": "RemoveMappingFromList(uint32 Index)"
+  },
+  {
+    "label": "AddMappingToList()",
+    "kind": "Method",
+    "detail": "Function (FPageMapping& Mapping = PageMapping [ Index ] ; PageMapping [ Mapping . PrevIndex ] . NextIndex = Mapping . NextIndex ; PageMapping [ Mapping . NextIndex ] . PrevIndex = Mapping . PrevIndex ; Mapping . NextIndex = Mapping . PrevIndex = Index ; } void)",
+    "insertText": "AddMappingToList(uint32 HeadIndex, uint32 Index)"
   },
   {
     "label": "check()",
     "kind": "Method",
-    "detail": "Function (list)",
-    "insertText": "check(Mapping.NextIndex == Index)"
+    "detail": "Function (FPageMapping& Head = PageMapping [ HeadIndex ] ; FPageMapping& Mapping = PageMapping [ Index ] ;)",
+    "insertText": "check(Index > NumPages)"
+  },
+  {
+    "label": "AcquireMapping()",
+    "kind": "Method",
+    "detail": "Function (Mapping . NextIndex = HeadIndex ; Mapping . PrevIndex = Head . PrevIndex ; PageMapping [ Head . PrevIndex ] . NextIndex = Index ; Head . PrevIndex = Index ; } uint32)",
+    "insertText": "AcquireMapping()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (const uint32 FreeHeadIndex = NumPages ; FPageMapping& FreeHead = PageMapping [ FreeHeadIndex ] ; uint32 Index = FreeHead . NextIndex ;)",
+    "insertText": "if(Index != FreeHeadIndex)"
+  },
+  {
+    "label": "RemoveMappingFromList()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "RemoveMappingFromList(Index)"
+  },
+  {
+    "label": "ReleaseMapping()",
+    "kind": "Method",
+    "detail": "Function (FPageMapping& Mapping = PageMapping [ Index ] ; Mapping . NextIndex = Mapping . PrevIndex = Index ; return Index ; } void)",
+    "insertText": "ReleaseMapping(uint32 Index)"
+  },
+  {
+    "label": "AddMappingToList()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "AddMappingToList(FreeHeadIndex, Index)"
   }
 ]

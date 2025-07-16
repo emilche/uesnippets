@@ -1,8 +1,134 @@
 [
   {
-    "label": "FindImportsInMem()",
+    "label": "defined()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "FindImportsInMem(fileName, mem, func)"
+    "detail": "Function (# pragma once # include \" UbaStringBuffer . h \" # include<algorithm> # if !)",
+    "insertText": "defined(UBA_IS_DETOURED_INCLUDE)"
+  },
+  {
+    "label": "IsKnownSystemFile()",
+    "kind": "Method",
+    "detail": "Function (const wchar_t* g_knownSystemFiles [ ] = { L \" advapi32 . dll \",L \" bcrypt . dll \",L \" bcryptprimitives . dll \",L \" combase . dll \",L \" concrt140 . dll \",L \" crypt32 . dll \",L \" cryptbase . dll \",L \" dbghelp . dll \",L \" dnsapi . dll \",L \" dwmapi . dll \",L \" dxgi . dll \",L \" fwpuclnt . dll \",L \" gdi32 . dll \",L \" gdi32full . dll \",L \" glu32 . dll \",L \" imagehlp . dll \",L \" imm32 . dll \",L \" iphlpapi . dll \",L \" kernel32 . dll \",L \" kernelbase . dll \",L \" mscoree . dll \",L \" msvcp_win . dll \",L \" msvcrt . dll \",L \" mswsock . dll \",L \" ncrypt . dll \",L \" netapi32 . dll \",L \" nsi . dll \",L \" ntasn1 . dll \",L \" ntdll . dll \",L \" ole32 . dll \",L \" oleaut32 . dll \",L \" ondemandconnroutehelper . dll \",L \" opengl32 . dll \",L \" powrprof . dll \",L \" psapi . dll \",L \" rasadhlp . dll \",L \" rpcrt4 . dll \",L \" rsaenh . dll \",L \" rstrtmgr . dll \",L \" sechost . dll \",L \" setupapi . dll \",L \" shell32 . dll \",L \" sspicli . dll \",L \" ucrtbase . dll \",L \" umpdc . dll \",L \" umppc17706 . dll \",L \" user32 . dll \",L \" userenv . dll \",L \" uxtheme . dll \",L \" version . dll \",L \" webio . dll \",L \" win32u . dll \",L \" winhttp . dll \",L \" winmm . dll \",L \" winnsi . dll \",L \" ws2_32 . dll \",} ; bool)",
+    "insertText": "IsKnownSystemFile(const tchar* fileName)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<> nameLower ;)",
+    "insertText": "if(auto lastSeparator = TStrrchr(fileName, PathSeparator)) nameLower.Append(lastSeparator + 1)"
+  },
+  {
+    "label": "MakeLower()",
+    "kind": "Method",
+    "detail": "Function (nameLower .)",
+    "insertText": "MakeLower()"
+  },
+  {
+    "label": "GetOffset()",
+    "kind": "Method",
+    "detail": "Function (} DWORD)",
+    "insertText": "GetOffset(DWORD rva, PIMAGE_SECTION_HEADER psh, PIMAGE_NT_HEADERS pnt)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (PIMAGE_SECTION_HEADER seh = psh ;)",
+    "insertText": "for(size_t i=0; i<pnt->FileHeader.NumberOfSections; ++i, ++seh) if (rva >= seh->VirtualAddress && rva < seh->VirtualAddress + seh->Misc.VirtualSize)"
+  },
+  {
+    "label": "hdrs()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "hdrs(PIMAGE_NT_HEADERS)(PCHAR(mem) + PIMAGE_DOS_HEADER(mem)->e_lfanew)"
+  },
+  {
+    "label": "IMAGE_FIRST_SECTION()",
+    "kind": "Method",
+    "detail": "Function (auto pSech =)",
+    "insertText": "IMAGE_FIRST_SECTION(hdrs)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (__try { auto& dataDir = hdrs -> OptionalHeader . DataDirectory [ IMAGE_DIRECTORY_ENTRY_IMPORT ] ;)",
+    "insertText": "if(dataDir.Size == 0)"
+  },
+  {
+    "label": "importDesc()",
+    "kind": "Method",
+    "detail": "Function (auto)",
+    "insertText": "importDesc(PIMAGE_IMPORT_DESCRIPTOR)((DWORD_PTR)mem + GetOffset(dataDir.VirtualAddress, pSech, hdrs))"
+  },
+  {
+    "label": "name()",
+    "kind": "Method",
+    "detail": "Function (const char*)",
+    "insertText": "name(PCHAR)((DWORD_PTR)mem + GetOffset(importDesc->Name, pSech, hdrs))"
+  },
+  {
+    "label": "Append()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<2 5 6> wname ; wname .)",
+    "insertText": "Append(name)"
+  },
+  {
+    "label": "func()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "func(wname.data, IsKnownSystemFile(wname.data), nullptr)"
+  },
+  {
+    "label": "__except()",
+    "kind": "Method",
+    "detail": "Function (+ + importDesc ; } })",
+    "insertText": "__except(GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)"
+  },
+  {
+    "label": "Appendf()",
+    "kind": "Method",
+    "detail": "Function (StringBuffer<> buf ; buf .)",
+    "insertText": "Appendf(L\"Access violation reading %s\", fileName)"
+  },
+  {
+    "label": "UbaAssert()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UbaAssert(buf.data, __FILE__, __LINE__, \"\", GetExceptionCode())"
+  },
+  {
+    "label": "True_CreateFileW()",
+    "kind": "Method",
+    "detail": "Function (HANDLE fileHandle =)",
+    "insertText": "True_CreateFileW(fileName, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0)"
+  },
+  {
+    "label": "MakeGuard()",
+    "kind": "Method",
+    "detail": "Function (auto closeFileHandle =)",
+    "insertText": "MakeGuard([&]() { CloseHandle(fileHandle); })"
+  },
+  {
+    "label": "True_CreateFileMappingW()",
+    "kind": "Method",
+    "detail": "Function (HANDLE fileMapping =)",
+    "insertText": "True_CreateFileMappingW(fileHandle, NULL, PAGE_READONLY, 0, 0, NULL)"
+  },
+  {
+    "label": "MakeGuard()",
+    "kind": "Method",
+    "detail": "Function (auto closeMappingHandle =)",
+    "insertText": "MakeGuard([&]() { CloseHandle(fileMapping); })"
+  },
+  {
+    "label": "True_MapViewOfFile()",
+    "kind": "Method",
+    "detail": "Function (void* mem =)",
+    "insertText": "True_MapViewOfFile(fileMapping, FILE_MAP_READ, 0, 0, 0)"
+  },
+  {
+    "label": "MakeGuard()",
+    "kind": "Method",
+    "detail": "Function (auto unmap =)",
+    "insertText": "MakeGuard([&]() { True_UnmapViewOfFile(mem); })"
   }
 ]

@@ -6,18 +6,6 @@
     "insertText": "OpDefiner"
   },
   {
-    "label": "OpDefiner",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "OpDefiner"
-  },
-  {
-    "label": "OpDefiner",
-    "kind": "Type",
-    "detail": "struct declaration",
-    "insertText": "OpDefiner"
-  },
-  {
     "label": "SecondStepFullReducer",
     "kind": "Type",
     "detail": "struct declaration",
@@ -90,15 +78,531 @@
     "insertText": "GenericReducer"
   },
   {
-    "label": "type()",
+    "label": "get_op()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "type()"
+    "detail": "Function (# ifndef UNSUPPORTED_EIGEN_CXX11_SRC_TENSOR_TENSOR_REDUCTION_SYCL_HPP # define UNSUPPORTED_EIGEN_CXX11_SRC_TENSOR_TENSOR_REDUCTION_SYCL_HPP namespace Eigen { namespace TensorSycl { namespace internal { template<Op,CoeffReturnType,Index,bool Vectorizable> struct OpDefiner { typedef Vectorise<CoeffReturnType,Eigen::SyclDevice,Vectorizable>::PacketReturnType PacketReturnType ; typedef Op type ; EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE type)",
+    "insertText": "get_op(Op &op)"
   },
   {
-    "label": "type()",
+    "label": "finalise_op()",
     "kind": "Method",
-    "detail": "Function (return)",
-    "insertText": "type()"
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE CoeffReturnType)",
+    "insertText": "finalise_op(const CoeffReturnType &accumulator, const Index &scale)"
+  },
+  {
+    "label": "quotient_op()",
+    "kind": "Method",
+    "detail": "Function (::Eigen::internal::scalar_quotient_op<CoeffReturnType> quotient_op ; return)",
+    "insertText": "quotient_op(accumulator, CoeffReturnType(scale))"
+  },
+  {
+    "label": "get_op()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<CoeffReturnType,Index> struct OpDefiner<Eigen::internal::MeanReducer<CoeffReturnType>,CoeffReturnType,Index,true> { typedef Vectorise<CoeffReturnType,Eigen::SyclDevice,true>::PacketReturnType PacketReturnType ; typedef Eigen::internal::SumReducer<CoeffReturnType> type ; EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE type)",
+    "insertText": "get_op(Eigen::internal::MeanReducer<CoeffReturnType> &)"
+  },
+  {
+    "label": "finalise_op()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE PacketReturnType)",
+    "insertText": "finalise_op(const PacketReturnType &accumulator, const Index &scale)"
+  },
+  {
+    "label": "SecondStepFullReducer()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<CoeffReturnType,OpType,InputAccessor,OutputAccessor,Index,Index local_range> struct SecondStepFullReducer { typedef cl::sycl::accessor<CoeffReturnType,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> LocalAccessor ; typedef OpDefiner<OpType,CoeffReturnType,Index,true> OpDef ; typedef OpDef::type Op ; LocalAccessor scratch ; InputAccessor aI ; OutputAccessor outAcc ; Op op ;)",
+    "insertText": "SecondStepFullReducer(LocalAccessor scratch_, InputAccessor aI_, OutputAccessor outAcc_, OpType op_) : scratch(scratch_), aI(aI_), outAcc(outAcc_), op(OpDef::get_op(op_))"
+  },
+  {
+    "label": "operator()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "operator()(cl::sycl::nd_item<1> itemID)"
+  },
+  {
+    "label": "get_local_id()",
+    "kind": "Method",
+    "detail": "Function (const Index localid = itemID .)",
+    "insertText": "get_local_id(0)"
+  },
+  {
+    "label": "get_pointer()",
+    "kind": "Method",
+    "detail": "Function (auto aInPtr = aI .)",
+    "insertText": "get_pointer()"
+  },
+  {
+    "label": "finalize()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType accumulator =* aInPtr ; scratchptr [ localid ] = op .)",
+    "insertText": "finalize(accumulator)"
+  },
+  {
+    "label": "barrier()",
+    "kind": "Method",
+    "detail": "Function (itemID .)",
+    "insertText": "barrier(cl::sycl::access::fence_space::local_space)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "reduce(scratchptr[localid + offset], &accumulator)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "if(localid == 0) *aOutPtr = op.finalize(accumulator)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<Evaluator,OpType,Evaluator::Index local_range> class FullReductionKernelFunctor { public : typedef Evaluator::CoeffReturnType CoeffReturnType ; typedef Evaluator::Index Index ; typedef OpDefiner<OpType,Evaluator::CoeffReturnType,)",
+    "insertText": "Index(Evaluator::ReducerTraits::PacketAccess & Evaluator::InputPacketAccess)"
+  },
+  {
+    "label": "conditional()",
+    "kind": "Method",
+    "detail": "Function (typedef OpDef::type Op ; typedef Evaluator::EvaluatorPointerType EvaluatorPointerType ; typedef Evaluator::PacketReturnType PacketReturnType ; typedef::Eigen::)",
+    "insertText": "conditional(Evaluator::ReducerTraits::PacketAccess & Evaluator::InputPacketAccess)"
+  },
+  {
+    "label": "FullReductionKernelFunctor()",
+    "kind": "Method",
+    "detail": "Function (typedef cl::sycl::accessor<OutType,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> LocalAccessor ; LocalAccessor scratch ; Evaluator evaluator ; EvaluatorPointerType final_output ; Index rng ; Op op ;)",
+    "insertText": "FullReductionKernelFunctor(LocalAccessor scratch_, Evaluator evaluator_, EvaluatorPointerType final_output_, Index rng_, OpType op_) : scratch(scratch_), evaluator(evaluator_), final_output(final_output_), rng(rng_), op(OpDef::get_op(op_))"
+  },
+  {
+    "label": "compute_reduction()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "compute_reduction(itemID)"
+  },
+  {
+    "label": "Vect()",
+    "kind": "Method",
+    "detail": "Function (} template<bool)",
+    "insertText": "Vect(Evaluator::ReducerTraits::PacketAccess & Evaluator::InputPacketAccess)> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE typename ::Eigen::internal::enable_if<Vect>::type compute_reduction( const cl::sycl::nd_item<1> &itemID)"
+  },
+  {
+    "label": "VectorizedRange()",
+    "kind": "Method",
+    "detail": "Function (Index)",
+    "insertText": "VectorizedRange(rng / Evaluator::PacketSize)"
+  },
+  {
+    "label": "get_global_id()",
+    "kind": "Method",
+    "detail": "Function (Index globalid = itemID .)",
+    "insertText": "get_global_id(0)"
+  },
+  {
+    "label": "get_global_range()",
+    "kind": "Method",
+    "detail": "Function (Index step = Evaluator::PacketSize* itemID .)",
+    "insertText": "get_global_range(0)"
+  },
+  {
+    "label": "PacketReturnType()",
+    "kind": "Method",
+    "detail": "Function (Index start = Evaluator::PacketSize* globalid ; PacketReturnType packetAccumulator = op . template initializePacket<)",
+    "insertText": "PacketReturnType()"
+  },
+  {
+    "label": "PacketReturnType()",
+    "kind": "Method",
+    "detail": "Function (op . template reducePacket<)",
+    "insertText": "PacketReturnType(evaluator.impl().template packet<Unaligned>(i), &packetAccumulator)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (} globalid + = VectorizedRange ;)",
+    "insertText": "for(Index i = globalid; i < rng; i += itemID.get_global_range(0))"
+  },
+  {
+    "label": "PacketReturnType()",
+    "kind": "Method",
+    "detail": "Function (op . template reducePacket<)",
+    "insertText": "PacketReturnType(::Eigen::TensorSycl::internal::PacketWrapper<PacketReturnType, Evaluator::PacketSize>::convert_to_packet_type( evaluator.impl().coeff(i), op.initialize()), &packetAccumulator)"
+  },
+  {
+    "label": "finalise_op()",
+    "kind": "Method",
+    "detail": "Function (} scratch [ localid ] = packetAccumulator =)",
+    "insertText": "finalise_op(op.template finalizePacket<PacketReturnType>(packetAccumulator), rng)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index offset = local_range / 2; offset > 0; offset /= 2)"
+  },
+  {
+    "label": "PacketReturnType()",
+    "kind": "Method",
+    "detail": "Function (op . template reducePacket<)",
+    "insertText": "PacketReturnType(scratch[localid + offset], &packetAccumulator)"
+  },
+  {
+    "label": "PacketReturnType()",
+    "kind": "Method",
+    "detail": "Function (scratch [ localid ] = op . template finalizePacket<)",
+    "insertText": "PacketReturnType(packetAccumulator)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} })",
+    "insertText": "if(localid == 0)"
+  },
+  {
+    "label": "get_group()",
+    "kind": "Method",
+    "detail": "Function (output_ptr [ itemID .)",
+    "insertText": "get_group(0)] = op.finalizeBoth(op.initialize(), op.template finalizePacket<PacketReturnType>(packetAccumulator))"
+  },
+  {
+    "label": "Vect()",
+    "kind": "Method",
+    "detail": "Function (} } template<bool)",
+    "insertText": "Vect(Evaluator::ReducerTraits::PacketAccess & Evaluator::InputPacketAccess)> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE typename ::Eigen::internal::enable_if<!Vect>::type compute_reduction( const cl::sycl::nd_item<1> &itemID)"
+  },
+  {
+    "label": "initialize()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType accumulator = op .)",
+    "insertText": "initialize()"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "reduce(evaluator.impl().coeff(i), &accumulator)"
+  },
+  {
+    "label": "finalise_op()",
+    "kind": "Method",
+    "detail": "Function (} scratch [ localid ] = accumulator =)",
+    "insertText": "finalise_op(op.finalize(accumulator), rng)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "reduce(scratch[localid + offset], &accumulator)"
+  },
+  {
+    "label": "get_group()",
+    "kind": "Method",
+    "detail": "Function (output_ptr [ itemID .)",
+    "insertText": "get_group(0)] = op.finalize(accumulator)"
+  },
+  {
+    "label": "GenericNondeterministicReducer()",
+    "kind": "Method",
+    "detail": "Function (} } } ; template<Evaluator,OpType> class GenericNondeterministicReducer { public : typedef Evaluator::CoeffReturnType CoeffReturnType ; typedef Evaluator::EvaluatorPointerType EvaluatorPointerType ; typedef Evaluator::Index Index ; typedef OpDefiner<OpType,CoeffReturnType,Index,false> OpDef ; typedef OpDef::type Op ; template<Scratch>)",
+    "insertText": "GenericNondeterministicReducer(Scratch, Evaluator evaluator_, EvaluatorPointerType output_accessor_, OpType functor_, Index range_, Index num_values_to_reduce_) : evaluator(evaluator_), output_accessor(output_accessor_), functor(OpDef::get_op(functor_)), range(range_), num_values_to_reduce(num_values_to_reduce_)"
+  },
+  {
+    "label": "Index()",
+    "kind": "Method",
+    "detail": "Function (Index globalid = static_cast<)",
+    "insertText": "Index(itemID.get_global_linear_id())"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (Eigen::internal::GenericDimReducer<Evaluator::NumReducedDims - 1,Evaluator,Op)",
+    "insertText": "reduce(evaluator, evaluator.firstInput(globalid), functor, &accum)"
+  },
+  {
+    "label": "finalise_op()",
+    "kind": "Method",
+    "detail": "Function (output_accessor_ptr [ globalid ] =)",
+    "insertText": "finalise_op(functor.finalize(accum), num_values_to_reduce)"
+  },
+  {
+    "label": "PartialReductionKernel()",
+    "kind": "Method",
+    "detail": "Function (} } private : Evaluator evaluator ; EvaluatorPointerType output_accessor ; Op functor ; Index range ; Index num_values_to_reduce ; } ; enum class reduction_dim { inner_most,outer_most } ; template<Evaluator,OpType,PannelParameters,reduction_dim rt> struct PartialReductionKernel { typedef Evaluator::CoeffReturnType CoeffReturnType ; typedef Evaluator::EvaluatorPointerType EvaluatorPointerType ; typedef Evaluator::Index Index ; typedef OpDefiner<OpType,CoeffReturnType,Index,false> OpDef ; typedef OpDef::type Op ; typedef cl::sycl::accessor<CoeffReturnType,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> ScratchAcc ; ScratchAcc scratch ; Evaluator evaluator ; EvaluatorPointerType output_accessor ; Op op ; const Index preserve_elements_num_groups ; const Index reduce_elements_num_groups ; const Index num_coeffs_to_preserve ; const Index num_coeffs_to_reduce ;)",
+    "insertText": "PartialReductionKernel(ScratchAcc scratch_, Evaluator evaluator_, EvaluatorPointerType output_accessor_, OpType op_, const Index preserve_elements_num_groups_, const Index reduce_elements_num_groups_, const Index num_coeffs_to_preserve_, const Index num_coeffs_to_reduce_) : scratch(scratch_), evaluator(evaluator_), output_accessor(output_accessor_), op(OpDef::get_op(op_)), preserve_elements_num_groups(preserve_elements_num_groups_), reduce_elements_num_groups(reduce_elements_num_groups_), num_coeffs_to_preserve(num_coeffs_to_preserve_), num_coeffs_to_reduce(num_coeffs_to_reduce_)"
+  },
+  {
+    "label": "element_wise_reduce()",
+    "kind": "Method",
+    "detail": "Function (} EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void)",
+    "insertText": "element_wise_reduce(Index globalRId, Index globalPId, CoeffReturnType &accumulator)"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (Index localOffset = globalRId ; const Index per_thread_local_stride = PannelParameters::LocalThreadSizeR* reduce_elements_num_groups ; const Index per_thread_global_stride = rt = = reduction_dim::outer_most ? num_coeffs_to_preserve* per_thread_local_stride : per_thread_local_stride ;)",
+    "insertText": "for(Index i = globalRId; i < num_coeffs_to_reduce; i += per_thread_local_stride)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "reduce(evaluator.impl().coeff(global_offset), &accumulator)"
+  },
+  {
+    "label": "get_group()",
+    "kind": "Method",
+    "detail": "Function (Index pLocalThreadId = rt = = reduction_dim::outer_most ? linearLocalThreadId % PannelParameters::LocalThreadSizeP : linearLocalThreadId / PannelParameters::LocalThreadSizeR ; Index rLocalThreadId = rt = = reduction_dim::outer_most ? linearLocalThreadId / PannelParameters::LocalThreadSizeP : linearLocalThreadId % PannelParameters::LocalThreadSizeR ; const Index pGroupId = rt = = reduction_dim::outer_most ? itemID .)",
+    "insertText": "get_group(0) % preserve_elements_num_groups : itemID.get_group(0)"
+  },
+  {
+    "label": "get_group()",
+    "kind": "Method",
+    "detail": "Function (const Index rGroupId = rt = = reduction_dim::outer_most ? itemID .)",
+    "insertText": "get_group(0) / preserve_elements_num_groups : itemID.get_group(0)"
+  },
+  {
+    "label": "get_pointer()",
+    "kind": "Method",
+    "detail": "Function (Index globalPId = pGroupId* PannelParameters::LocalThreadSizeP + pLocalThreadId ; const Index globalRId = rGroupId* PannelParameters::LocalThreadSizeR + rLocalThreadId ; auto scratchPtr = scratch .)",
+    "insertText": "get_pointer().get()"
+  },
+  {
+    "label": "get_pointer()",
+    "kind": "Method",
+    "detail": "Function (auto outPtr = output_accessor .)",
+    "insertText": "get_pointer() + (reduce_elements_num_groups > 1 ? rGroupId * num_coeffs_to_preserve : 0)"
+  },
+  {
+    "label": "element_wise_reduce()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "element_wise_reduce(globalRId, globalPId, accumulator)"
+  },
+  {
+    "label": "finalise_op()",
+    "kind": "Method",
+    "detail": "Function (accumulator =)",
+    "insertText": "finalise_op(op.finalize(accumulator), num_coeffs_to_reduce)"
+  },
+  {
+    "label": "rLocalThreadId()",
+    "kind": "Method",
+    "detail": "Function (scratchPtr [ pLocalThreadId +)",
+    "insertText": "rLocalThreadId(PannelParameters::LocalThreadSizeP + PannelParameters::BC)"
+  },
+  {
+    "label": "scratchPtr()",
+    "kind": "Method",
+    "detail": "Function (pLocalThreadId = linearLocalThreadId % PannelParameters::LocalThreadSizeP ; rLocalThreadId = linearLocalThreadId / PannelParameters::LocalThreadSizeP ; globalPId = pGroupId* PannelParameters::LocalThreadSizeP + pLocalThreadId ; } auto out_scratch_ptr =)",
+    "insertText": "scratchPtr(pLocalThreadId + (rLocalThreadId * (PannelParameters::LocalThreadSizeP + PannelParameters::BC)))"
+  },
+  {
+    "label": "for()",
+    "kind": "Method",
+    "detail": "Function (accumulator =* out_scratch_ptr ; } EIGEN_UNROLL_LOOP)",
+    "insertText": "for(Index offset = PannelParameters::LocalThreadSizeR >> 1; offset > 0; offset >>= 1)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "reduce(out_scratch_ptr[(PannelParameters::LocalThreadSizeP + PannelParameters::BC) * offset], &accumulator)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(rLocalThreadId == 0 && (globalPId < num_coeffs_to_preserve))"
+  },
+  {
+    "label": "SecondStepPartialReduction()",
+    "kind": "Method",
+    "detail": "Function (} } } ; template<OutScalar,Index,InputAccessor,OutputAccessor,OpType> struct SecondStepPartialReduction { typedef OpDefiner<OpType,OutScalar,Index,false> OpDef ; typedef OpDef::type Op ; typedef cl::sycl::accessor<OutScalar,1,cl::sycl::access::mode::read_write,cl::sycl::access::target::local> ScratchAccessor ; InputAccessor input_accessor ; OutputAccessor output_accessor ; Op op ; const Index num_coeffs_to_preserve ; const Index num_coeffs_to_reduce ; EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE)",
+    "insertText": "SecondStepPartialReduction(ScratchAccessor, InputAccessor input_accessor_, OutputAccessor output_accessor_, OpType op_, const Index num_coeffs_to_preserve_, const Index num_coeffs_to_reduce_) : input_accessor(input_accessor_), output_accessor(output_accessor_), op(OpDef::get_op(op_)), num_coeffs_to_preserve(num_coeffs_to_preserve_), num_coeffs_to_reduce(num_coeffs_to_reduce_)"
+  },
+  {
+    "label": "reduce()",
+    "kind": "Method",
+    "detail": "Function (op .)",
+    "insertText": "reduce(*in_ptr, &accumulator)"
+  },
+  {
+    "label": "get_pointer()",
+    "kind": "Method",
+    "detail": "Function (in_ptr + = num_coeffs_to_preserve ; } output_accessor .)",
+    "insertText": "get_pointer()[globalId] = op.finalize(accumulator)"
+  },
+  {
+    "label": "run()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<Index,Index LTP,Index LTR,bool BC_> struct ReductionPannel { EIGEN_CONSTEXPR Index LocalThreadSizeP = LTP ; EIGEN_CONSTEXPR Index LocalThreadSizeR = LTR ; EIGEN_CONSTEXPR bool BC = BC_ ; } ; template<Self,Op,TensorSycl::internal::reduction_dim rt> struct PartialReducerLauncher { typedef Self::EvaluatorPointerType EvaluatorPointerType ; typedef Self::CoeffReturnType CoeffReturnType ; typedef Self::Storage Storage ; typedef Self::Index Index ; typedef ReductionPannel<Self::Index,EIGEN_SYCL_LOCAL_THREAD_DIM0,EIGEN_SYCL_LOCAL_THREAD_DIM1,true> PannelParameters ; typedef PartialReductionKernel<Self,Op,PannelParameters,rt> SyclReducerKerneType ; bool)",
+    "insertText": "run(const Self &self, const Op &reducer, const Eigen::SyclDevice &dev, EvaluatorPointerType output, Index num_coeffs_to_reduce, Index num_coeffs_to_preserve)"
+  },
+  {
+    "label": "roundUp()",
+    "kind": "Method",
+    "detail": "Function (Index roundUpP =)",
+    "insertText": "roundUp(num_coeffs_to_preserve, PannelParameters::LocalThreadSizeP)"
+  },
+  {
+    "label": "getPowerOfTwo()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_CONSTEXPR Index localRange = PannelParameters::LocalThreadSizeP* PannelParameters::LocalThreadSizeR ; const Index reductionPerThread = 6 4 ; Index cu = dev .)",
+    "insertText": "getPowerOfTwo(dev.getNumSyclMultiProcessors(), true)"
+  },
+  {
+    "label": "rGroups()",
+    "kind": "Method",
+    "detail": "Function (const Index pNumGroups = roundUpP / PannelParameters::LocalThreadSizeP ; Index)",
+    "insertText": "rGroups(cu + pNumGroups - 1)"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (const Index rNumGroups = num_coeffs_to_reduce> reductionPerThread* localRange ?)",
+    "insertText": "min(rGroups, localRange)"
+  },
+  {
+    "label": "LocalThreadSizeR()",
+    "kind": "Method",
+    "detail": "Function (const Index globalRange = pNumGroups* rNumGroups* localRange ; EIGEN_CONSTEXPR Index scratchSize =)",
+    "insertText": "LocalThreadSizeR(PannelParameters::LocalThreadSizeP + PannelParameters::BC)"
+  },
+  {
+    "label": "nd_range()",
+    "kind": "Method",
+    "detail": "Function (auto thread_range = cl::)",
+    "insertText": "nd_range(cl::sycl::range<1>(globalRange), cl::sycl::range<1>(localRange))"
+  },
+  {
+    "label": "CoeffReturnType()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType* temp_pointer = static_cast<)",
+    "insertText": "CoeffReturnType(dev.allocate_temp(num_coeffs_to_preserve * rNumGroups * sizeof(CoeffReturnType)))"
+  },
+  {
+    "label": "get()",
+    "kind": "Method",
+    "detail": "Function (EvaluatorPointerType temp_accessor = dev .)",
+    "insertText": "get(temp_pointer)"
+  },
+  {
+    "label": "SyclReducerKerneType()",
+    "kind": "Method",
+    "detail": "Function (dev . template unary_kernel_launcher<CoeffReturnType,)",
+    "insertText": "SyclReducerKerneType(self, temp_accessor, thread_range, scratchSize, reducer, pNumGroups, rNumGroups, num_coeffs_to_preserve, num_coeffs_to_reduce)"
+  },
+  {
+    "label": "SecondStepPartialReductionKernel()",
+    "kind": "Method",
+    "detail": "Function (typedef SecondStepPartialReduction<CoeffReturnType,Index,EvaluatorPointerType,EvaluatorPointerType,Op> SecondStepPartialReductionKernel ; dev . template unary_kernel_launcher<CoeffReturnType,)",
+    "insertText": "SecondStepPartialReductionKernel(temp_accessor, output, cl::sycl::nd_range<1>(cl::sycl::range<1>(pNumGroups * localRange), cl::sycl::range<1>(localRange)), Index(1), reducer, num_coeffs_to_preserve, rNumGroups)"
+  },
+  {
+    "label": "device()",
+    "kind": "Method",
+    "detail": "Function (self .)",
+    "insertText": "device().deallocate_temp(temp_pointer)"
+  },
+  {
+    "label": "SyclReducerKerneType()",
+    "kind": "Method",
+    "detail": "Function (} else { dev . template unary_kernel_launcher<CoeffReturnType,)",
+    "insertText": "SyclReducerKerneType(self, output, thread_range, scratchSize, reducer, pNumGroups, rNumGroups, num_coeffs_to_preserve, num_coeffs_to_reduce)"
+  },
+  {
+    "label": "run()",
+    "kind": "Method",
+    "detail": "Function (} return false ; } } ; } } namespace internal { template<Self,Op,bool Vectorizable> struct FullReducer<Self,Op,Eigen::SyclDevice,Vectorizable> { typedef Self::CoeffReturnType CoeffReturnType ; typedef Self::EvaluatorPointerType EvaluatorPointerType ; EIGEN_CONSTEXPR bool HasOptimizedImplementation = true ; EIGEN_CONSTEXPR int PacketSize = Self::PacketAccess ? Self::PacketSize : 1 ; void)",
+    "insertText": "run(const Self &self, Op &reducer, const Eigen::SyclDevice &dev, EvaluatorPointerType data)"
+  },
+  {
+    "label": "static_assert()",
+    "kind": "Method",
+    "detail": "Function (typedef conditional<Self::PacketAccess,Self::PacketReturnType,CoeffReturnType>::type OutType ;)",
+    "insertText": "static_assert(!((EIGEN_SYCL_LOCAL_THREAD_DIM0 * EIGEN_SYCL_LOCAL_THREAD_DIM1) & (EIGEN_SYCL_LOCAL_THREAD_DIM0 * EIGEN_SYCL_LOCAL_THREAD_DIM1 - 1)), \"The Local thread size must be a power of 2 for the reduction \" \"operation\")"
+  },
+  {
+    "label": "impl()",
+    "kind": "Method",
+    "detail": "Function (EIGEN_CONSTEXPR Index local_range = EIGEN_SYCL_LOCAL_THREAD_DIM0* EIGEN_SYCL_LOCAL_THREAD_DIM1 ; Self::Index inputSize = self .)",
+    "insertText": "impl().dimensions().TotalSize()"
+  },
+  {
+    "label": "getPowerOfTwo()",
+    "kind": "Method",
+    "detail": "Function (const Index reductionPerThread = 2 0 4 8 ; Index reductionGroup = dev .)",
+    "insertText": "getPowerOfTwo((inputSize + (reductionPerThread * local_range - 1)) / (reductionPerThread * local_range), true)"
+  },
+  {
+    "label": "min()",
+    "kind": "Method",
+    "detail": "Function (const Index num_work_group =)",
+    "insertText": "min(reductionGroup, local_range)"
+  },
+  {
+    "label": "nd_range()",
+    "kind": "Method",
+    "detail": "Function (const Index global_range = num_work_group* local_range ; auto thread_range = cl::)",
+    "insertText": "nd_range(cl::sycl::range<1>(global_range), cl::sycl::range<1>(local_range))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (typedef TensorSycl::internal::FullReductionKernelFunctor<Self,Op,local_range> reduction_kernel_t ;)",
+    "insertText": "if(num_work_group > 1)"
+  },
+  {
+    "label": "CoeffReturnType()",
+    "kind": "Method",
+    "detail": "Function (CoeffReturnType* temp_pointer = static_cast<)",
+    "insertText": "CoeffReturnType(dev.allocate_temp(num_work_group * sizeof(CoeffReturnType)))"
+  },
+  {
+    "label": "reduction_kernel_t()",
+    "kind": "Method",
+    "detail": "Function (dev . template unary_kernel_launcher<OutType,)",
+    "insertText": "reduction_kernel_t(self, tmp_global_accessor, thread_range, local_range, inputSize, reducer)"
+  },
+  {
+    "label": "GenericRKernel()",
+    "kind": "Method",
+    "detail": "Function (typedef TensorSycl::internal::SecondStepFullReducer<CoeffReturnType,Op,EvaluatorPointerType,EvaluatorPointerType,Index,local_range> GenericRKernel ; dev . template unary_kernel_launcher<CoeffReturnType,)",
+    "insertText": "GenericRKernel(tmp_global_accessor, data, cl::sycl::nd_range<1>(cl::sycl::range<1>(num_work_group), cl::sycl::range<1>(num_work_group)), num_work_group, reducer)"
+  },
+  {
+    "label": "deallocate_temp()",
+    "kind": "Method",
+    "detail": "Function (dev .)",
+    "insertText": "deallocate_temp(temp_pointer)"
+  },
+  {
+    "label": "reduction_kernel_t()",
+    "kind": "Method",
+    "detail": "Function (} else { dev . template unary_kernel_launcher<OutType,)",
+    "insertText": "reduction_kernel_t(self, data, thread_range, local_range, inputSize, reducer)"
+  },
+  {
+    "label": "run()",
+    "kind": "Method",
+    "detail": "Function (} } } ; template<Self,Op> struct OuterReducer<Self,Op,Eigen::SyclDevice> { EIGEN_CONSTEXPR bool HasOptimizedImplementation = true ; bool)",
+    "insertText": "run(const Self &self, const Op &reducer, const Eigen::SyclDevice &dev, typename Self::EvaluatorPointerType output, typename Self::Index num_coeffs_to_reduce, typename Self::Index num_coeffs_to_preserve)"
+  },
+  {
+    "label": "run()",
+    "kind": "Method",
+    "detail": "Function (} } ; template<Self,Op> struct GenericReducer<Self,Op,Eigen::SyclDevice> { EIGEN_CONSTEXPR bool HasOptimizedImplementation = false ; bool)",
+    "insertText": "run(const Self &self, const Op &reducer, const Eigen::SyclDevice &dev, typename Self::EvaluatorPointerType output, typename Self::Index num_values_to_reduce, typename Self::Index num_coeffs_to_preserve)"
+  },
+  {
+    "label": "parallel_for_setup()",
+    "kind": "Method",
+    "detail": "Function (Self::Index range,GRange,tileSize ; dev .)",
+    "insertText": "parallel_for_setup(num_coeffs_to_preserve, tileSize, range, GRange)"
+  },
+  {
+    "label": "Op()",
+    "kind": "Method",
+    "detail": "Function (dev . template unary_kernel_launcher<Self::CoeffReturnType,TensorSycl::internal::GenericNondeterministicReducer<Self,)",
+    "insertText": "Op(self, output, cl::sycl::nd_range<1>(cl::sycl::range<1>(GRange), cl::sycl::range<1>(tileSize)), Index(1), reducer, range, (num_values_to_reduce != 0) ? num_values_to_reduce : static_cast<Index>(1))"
   }
 ]

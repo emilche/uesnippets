@@ -66,9 +66,45 @@
     "insertText": "FMeshParticleInstanceVertexPrevTransform"
   },
   {
+    "label": "BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" CoreMinimal . h \" # include \" RHI . h \" # include \" UniformBuffer . h \" # include \" VertexFactory . h \" # include \" Components . h \" # include \" SceneManagement . h \" # include \" VertexFactory . h \" # include \" ParticleVertexFactory . h \" class FMaterial ; class FVertexBuffer ; struct FDynamicReadBuffer ; struct FShaderCompilerEnvironment ;)",
+    "insertText": "BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FMeshParticleUniformParameters, ENGINE_API) SHADER_PARAMETER( FVector4f, SubImageSize ) SHADER_PARAMETER( uint32, TexCoordWeightA ) SHADER_PARAMETER( uint32, TexCoordWeightB ) SHADER_PARAMETER( uint32, PrevTransformAvailable ) SHADER_PARAMETER( float, DeltaSeconds ) SHADER_PARAMETER( uint32, bUseLocalSpace ) SHADER_PARAMETER( FVector3f, LWCTile ) SHADER_PARAMETER( float, UseVelocityForMotionBlur ) END_GLOBAL_SHADER_PARAMETER_STRUCT()"
+  },
+  {
+    "label": "DECLARE_VERTEX_FACTORY_TYPE()",
+    "kind": "Method",
+    "detail": "Function (class FMeshParticleInstanceVertices ; class FMeshParticleVertexFactory : public FParticleVertexFactoryBase {)",
+    "insertText": "DECLARE_VERTEX_FACTORY_TYPE(FMeshParticleVertexFactory)"
+  },
+  {
+    "label": "FMeshParticleVertexFactory()",
+    "kind": "Method",
+    "detail": "Function (public :)",
+    "insertText": "FMeshParticleVertexFactory(ERHIFeatureLevel::Type InFeatureLevel) : FParticleVertexFactoryBase(InFeatureLevel)"
+  },
+  {
+    "label": "FDataType()",
+    "kind": "Method",
+    "detail": "Function (} struct FDataType : public FStaticMeshDataType { FVertexStreamComponent ParticleColorComponent ; FVertexStreamComponent TransformComponent [ 3 ] ; FVertexStreamComponent VelocityComponent ; FVertexStreamComponent SubUVs ; FVertexStreamComponent SubUVLerpAndRelTime ; bool bInitialized ;)",
+    "insertText": "FDataType() : bInitialized(false)"
+  },
+  {
+    "label": "FMeshParticleVertexFactory()",
+    "kind": "Method",
+    "detail": "Function (} } ; class FBatchParametersCPU : public FOneFrameResource { public : const struct FMeshParticleInstanceVertex* InstanceBuffer ; const struct FMeshParticleInstanceVertexDynamicParameter* DynamicParameterBuffer ; const struct FMeshParticleInstanceVertexPrevTransform* PrevTransformBuffer ; } ;)",
+    "insertText": "FMeshParticleVertexFactory(EParticleVertexFactoryType InType, ERHIFeatureLevel::Type InFeatureLevel, int32 InDynamicVertexStride, int32 InDynamicParameterVertexStride) : FParticleVertexFactoryBase(InType, InFeatureLevel) , LODIdx(0xff) , DynamicVertexStride(InDynamicVertexStride) , DynamicParameterVertexStride(InDynamicParameterVertexStride) , InstanceVerticesCPU(nullptr)"
+  },
+  {
+    "label": "FMeshParticleVertexFactory()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "FMeshParticleVertexFactory() : FParticleVertexFactoryBase(PVFT_MAX, ERHIFeatureLevel::Num) , LODIdx(0xff) , DynamicVertexStride(-1) , DynamicParameterVertexStride(-1) , InstanceVerticesCPU(nullptr)"
+  },
+  {
     "label": "ShouldCompilePermutation()",
     "kind": "Method",
-    "detail": "Function (bool)",
+    "detail": "Function (} bool)",
     "insertText": "ShouldCompilePermutation(const FVertexFactoryShaderPermutationParameters& Parameters)"
   },
   {
@@ -96,15 +132,15 @@
     "insertText": "SetData(FRHICommandListBase& RHICmdList, const FDataType& InData)"
   },
   {
-    "label": "SetData()",
+    "label": "GetUniformBuffer()",
     "kind": "Method",
-    "detail": "Function (void)",
-    "insertText": "SetData(const FDataType& InData)"
+    "detail": "Function (MeshParticleUniformBuffer = InMeshParticleUniformBuffer ; } FRHIUniformBuffer*)",
+    "insertText": "GetUniformBuffer()"
   },
   {
     "label": "SetInstanceBuffer()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (DynamicVertexStride = InDynamicVertexStride ; DynamicParameterVertexStride = InDynamicParameterVertexStride ; } void)",
     "insertText": "SetInstanceBuffer(const FVertexBuffer* InstanceBuffer, uint32 StreamOffset, uint32 Stride)"
   },
   {
@@ -114,10 +150,22 @@
     "insertText": "SetDynamicParameterBuffer(const FVertexBuffer* InDynamicParameterBuffer, uint32 StreamOffset, uint32 Stride)"
   },
   {
+    "label": "LockPreviousTransformBuffer()",
+    "kind": "Method",
+    "detail": "Function (uint8*)",
+    "insertText": "LockPreviousTransformBuffer(FRHICommandListBase& RHICmdList, uint32 ParticleCount)"
+  },
+  {
     "label": "UnlockPreviousTransformBuffer()",
     "kind": "Method",
     "detail": "Function (void)",
     "insertText": "UnlockPreviousTransformBuffer(FRHICommandListBase& RHICmdList)"
+  },
+  {
+    "label": "GetPreviousTransformBufferSRV()",
+    "kind": "Method",
+    "detail": "Function (FRHIShaderResourceView*)",
+    "insertText": "GetPreviousTransformBufferSRV()"
   },
   {
     "label": "Copy()",
@@ -126,21 +174,33 @@
     "insertText": "Copy(const FMeshParticleVertexFactory& Other)"
   },
   {
-    "label": "GetVertexElements()",
+    "label": "InitRHI()",
     "kind": "Method",
     "detail": "Function (void)",
-    "insertText": "GetVertexElements(ERHIFeatureLevel::Type FeatureLevel, int32 InDynamicVertexStride, int32 InDynamicParameterVertexStride, FDataType& Data, FVertexDeclarationElementList& Elements, FVertexStreamList& InOutStreams)"
+    "insertText": "InitRHI(FRHICommandListBase& RHICmdList)"
   },
   {
-    "label": "FMeshParticleVertexFactory()",
+    "label": "GetInstanceVerticesCPU()",
     "kind": "Method",
-    "detail": "Function (new)",
-    "insertText": "FMeshParticleVertexFactory(InFeatureLevel)"
+    "detail": "Function (FMeshParticleInstanceVertices*&)",
+    "insertText": "GetInstanceVerticesCPU()"
   },
   {
-    "label": "FMeshParticleVertexFactory()",
+    "label": "GetLODIdx()",
     "kind": "Method",
-    "detail": "Function (new)",
-    "insertText": "FMeshParticleVertexFactory(InType, InFeatureLevel, InDynamicVertexStride, InDynamicParameterVertexStride)"
+    "detail": "Function (LODIdx = InLODIdx ; } uint8)",
+    "insertText": "GetLODIdx()"
+  },
+  {
+    "label": "ConstructMeshParticleVertexFactory()",
+    "kind": "Method",
+    "detail": "Function (protected : FDataType Data ; uint8 LODIdx ; int32 DynamicVertexStride ; int32 DynamicParameterVertexStride ; FRHIUniformBuffer* MeshParticleUniformBuffer ; FDynamicReadBuffer PrevTransformBuffer ; FMeshParticleInstanceVertices* InstanceVerticesCPU ; } ; FMeshParticleVertexFactory*)",
+    "insertText": "ConstructMeshParticleVertexFactory(ERHIFeatureLevel::Type InFeatureLevel)"
+  },
+  {
+    "label": "ConstructMeshParticleVertexFactory()",
+    "kind": "Method",
+    "detail": "Function (} FMeshParticleVertexFactory*)",
+    "insertText": "ConstructMeshParticleVertexFactory(EParticleVertexFactoryType InType, ERHIFeatureLevel::Type InFeatureLevel, int32 InDynamicVertexStride, int32 InDynamicParameterVertexStride)"
   }
 ]

@@ -36,12 +36,6 @@
     "insertText": "FTriangleSubMesh"
   },
   {
-    "label": "struct",
-    "kind": "Enum",
-    "detail": "enum declaration",
-    "insertText": "struct"
-  },
-  {
     "label": "FFullToSubMeshIndex",
     "kind": "Type",
     "detail": "struct declaration",
@@ -54,9 +48,81 @@
     "insertText": "FScratchBuffers"
   },
   {
-    "label": "Init()",
+    "label": "SetContourColor()",
+    "kind": "Method",
+    "detail": "Function (# pragma once # include \" Chaos / Core . h \" # include \" Chaos / PBDFlatWeightMap . h \" # include \" Chaos / PBDSoftsEvolutionFwd . h \" # include \" Chaos / TriangleMesh . h \" # include \" Chaos / HierarchicalSpatialHash . h \" # include \" Chaos / CollectionPropertyFacade . h \" # include \" Templates / PimplPtr . h \" namespace Chaos::Softs { class FPBDTriangleMeshCollisions { public : struct FContourMinimizationIntersection { TVec2<int32> EdgeVertices ; TVec3<int32> FaceVertices ; FSolverVec3 LocalGradientVector ; FSolverVec3 GlobalGradientVector ; } ; struct FGIAColor { int32 ContourIndexBits = 0 ; int32 ColorBits = 0 ; int32 LoopContourIndex = 0 ; int32 LoopBits = 1<<LoopContourIndex ; int32 NonLoopMask = ~ LoopBits ; int32 BoundaryContourIndex = 0 ; void)",
+    "insertText": "SetContourColor(int32 ContourIndex, bool bIsColorB)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (ContourIndexBits | = 1<<ContourIndex ;)",
+    "insertText": "if(bIsColorB)"
+  },
+  {
+    "label": "ColorBits()",
+    "kind": "Method",
+    "detail": "Function (ColorBits | = 1<<ContourIndex ; } else {)",
+    "insertText": "ColorBits(1 << ContourIndex)"
+  },
+  {
+    "label": "HasContourColorSet()",
+    "kind": "Method",
+    "detail": "Function (} } bool)",
+    "insertText": "HasContourColorSet(int32 ContourIndex)"
+  },
+  {
+    "label": "IsLoop()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "IsLoop()"
+  },
+  {
+    "label": "SetLoop()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "SetLoop()"
+  },
+  {
+    "label": "SetContourColor()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "SetContourColor(LoopContourIndex, true)"
+  },
+  {
+    "label": "SetBoundary()",
+    "kind": "Method",
+    "detail": "Function (} void)",
+    "insertText": "SetBoundary()"
+  },
+  {
+    "label": "SetContourColor()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetContourColor(BoundaryContourIndex, false)"
+  },
+  {
+    "label": "IsBoundary()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "IsBoundary()"
+  },
+  {
+    "label": "ShouldFlipNormal()",
+    "kind": "Method",
+    "detail": "Function (} bool)",
+    "insertText": "ShouldFlipNormal(const FGIAColor& Color0, const FGIAColor& Color1)"
+  },
+  {
+    "label": "FTriangleSubMesh()",
+    "kind": "Method",
+    "detail": "Function (const int32 SharedContourBits = Color0 . ContourIndexBits& Color1 . ContourIndexBits& NonLoopMask ; const int32 FlippedColorBits = Color0 . ColorBits ^ Color1 . ColorBits ; return FlippedColorBits& SharedContourBits ; } } ; struct FBarycentricPoint { FSolverVec2 Bary ; TVec3<int32> Vertices ; } ; enum struct FContourType : int8 { Open = 0,Loop,BoundaryClosed,BoundaryOpen,Contour0,Contour1,Count } ; class FTriangleSubMesh { public :)",
+    "insertText": "FTriangleSubMesh(const FTriangleMesh& InFullMesh) : FullMesh(InFullMesh)"
+  },
+  {
+    "label": "Init()",
+    "kind": "Method",
+    "detail": "Function (} template<SolverParticlesOrRange> void)",
     "insertText": "Init(const SolverParticlesOrRange& Particles, const TSet<int32>& DisabledFaces, bool bCollideAgainstAllKinematicVertices, const TSet<int32>& EnabledKinematicFaces, const bool bOnlyCollideKinematics = false)"
   },
   {
@@ -66,21 +132,267 @@
     "insertText": "InitAllDynamic()"
   },
   {
+    "label": "GetFullMesh()",
+    "kind": "Method",
+    "detail": "Function (const FTriangleMesh&)",
+    "insertText": "GetFullMesh()"
+  },
+  {
+    "label": "FPBDTriangleMeshCollisions()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "FPBDTriangleMeshCollisions(const int32 InOffset, const int32 InNumParticles, const TMap<FString, const TSet<int32>*>& FaceSets, const FTriangleMesh& InTriangleMesh, const FCollectionPropertyConstFacade& PropertyCollection ) : CollidableSubMesh(InTriangleMesh) , Offset(InOffset) , NumParticles(InNumParticles) , bUseSelfIntersections(GetUseSelfIntersections(PropertyCollection, false)) , bGlobalIntersectionAnalysis(GetUseSelfIntersections(PropertyCollection, false) && GetUseGlobalIntersectionAnalysis(PropertyCollection, true)) , bContourMinimization(GetUseSelfIntersections(PropertyCollection, false) && GetUseContourMinimization(PropertyCollection, true)) , NumContourMinimizationPostSteps(GetUseSelfIntersections(PropertyCollection, false) ? GetNumContourMinimizationPostSteps(PropertyCollection, 0) : 0) , bUseGlobalPostStepContours(GetUseGlobalPostStepContours(PropertyCollection, true)) , bOnlyCollideWithKinematics(GetSelfCollideAgainstKinematicCollidersOnly(PropertyCollection, false)) , bSelfCollideAgainstAllKinematicVertices(GetSelfCollideAgainstAllKinematicVertices(PropertyCollection, false)) , bCollidableSubMeshDirty(true) , UseSelfIntersectionsIndex(PropertyCollection) , UseGlobalIntersectionAnalysisIndex(PropertyCollection) , UseContourMinimizationIndex(PropertyCollection) , NumContourMinimizationPostStepsIndex(PropertyCollection) , UseGlobalPostStepContoursIndex(PropertyCollection) , SelfCollideAgainstKinematicCollidersOnlyIndex(PropertyCollection) , SelfCollideAgainstAllKinematicVerticesIndex(PropertyCollection) , SelfCollisionDisabledFacesIndex(PropertyCollection) , SelfCollisionEnabledKinematicFacesIndex(PropertyCollection)"
+  },
+  {
+    "label": "FPBDTriangleMeshCollisions()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "FPBDTriangleMeshCollisions(const int32 InOffset, const int32 InNumParticles, const FTriangleMesh& InTriangleMesh, bool bInGlobalIntersectionAnalysis, bool bInContourMinimization ) :CollidableSubMesh(InTriangleMesh) , Offset(InOffset) , NumParticles(InNumParticles) , bUseSelfIntersections(bInGlobalIntersectionAnalysis || bInContourMinimization) , bGlobalIntersectionAnalysis(bInGlobalIntersectionAnalysis) , bContourMinimization(bInContourMinimization) , bOnlyCollideWithKinematics(false) , bSelfCollideAgainstAllKinematicVertices(false) , bCollidableSubMeshDirty(true) , UseSelfIntersectionsIndex(ForceInit) , UseGlobalIntersectionAnalysisIndex(ForceInit) , UseContourMinimizationIndex(ForceInit) , NumContourMinimizationPostStepsIndex(ForceInit) , UseGlobalPostStepContoursIndex(ForceInit) , SelfCollideAgainstKinematicCollidersOnlyIndex(ForceInit) , SelfCollideAgainstAllKinematicVerticesIndex(ForceInit) , SelfCollisionDisabledFacesIndex(ForceInit) , SelfCollisionEnabledKinematicFacesIndex(ForceInit)"
+  },
+  {
+    "label": "FPBDTriangleMeshCollisions()",
+    "kind": "Method",
+    "detail": "Function (} ~)",
+    "insertText": "FPBDTriangleMeshCollisions()"
+  },
+  {
+    "label": "SetProperties()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetProperties(const FCollectionPropertyConstFacade& PropertyCollection, const TMap<FString, const TSet<int32>*>& FaceSets)"
+  },
+  {
+    "label": "IsUseSelfIntersectionsMutable()",
+    "kind": "Method",
+    "detail": "Function (const bool bSelfIntersectionsMutable =)",
+    "insertText": "IsUseSelfIntersectionsMutable(PropertyCollection)"
+  },
+  {
+    "label": "GetUseSelfIntersections()",
+    "kind": "Method",
+    "detail": "Function (bUseSelfIntersections =)",
+    "insertText": "GetUseSelfIntersections(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(bUseSelfIntersections)"
+  },
+  {
+    "label": "GetUseGlobalIntersectionAnalysis()",
+    "kind": "Method",
+    "detail": "Function (bGlobalIntersectionAnalysis =)",
+    "insertText": "GetUseGlobalIntersectionAnalysis(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(bSelfIntersectionsMutable || IsUseContourMinimizationMutable(PropertyCollection))"
+  },
+  {
+    "label": "GetUseContourMinimization()",
+    "kind": "Method",
+    "detail": "Function (bContourMinimization =)",
+    "insertText": "GetUseContourMinimization(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(bSelfIntersectionsMutable || IsNumContourMinimizationPostStepsMutable(PropertyCollection))"
+  },
+  {
+    "label": "GetNumContourMinimizationPostSteps()",
+    "kind": "Method",
+    "detail": "Function (NumContourMinimizationPostSteps =)",
+    "insertText": "GetNumContourMinimizationPostSteps(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (})",
+    "insertText": "if(bSelfIntersectionsMutable || IsUseGlobalPostStepContoursMutable(PropertyCollection))"
+  },
+  {
+    "label": "GetUseGlobalPostStepContours()",
+    "kind": "Method",
+    "detail": "Function (bUseGlobalPostStepContours =)",
+    "insertText": "GetUseGlobalPostStepContours(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (} } else { bGlobalIntersectionAnalysis = bContourMinimization = false ; NumContourMinimizationPostSteps = 0 ; })",
+    "insertText": "if(IsSelfCollideAgainstKinematicCollidersOnlyMutable(PropertyCollection))"
+  },
+  {
+    "label": "GetSelfCollideAgainstKinematicCollidersOnly()",
+    "kind": "Method",
+    "detail": "Function (const bool bNewValue =)",
+    "insertText": "GetSelfCollideAgainstKinematicCollidersOnly(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (bOnlyCollideWithKinematics = bNewValue ; bCollidableSubMeshDirty = true ; } })",
+    "insertText": "if(IsSelfCollideAgainstAllKinematicVerticesMutable(PropertyCollection))"
+  },
+  {
+    "label": "GetSelfCollideAgainstAllKinematicVertices()",
+    "kind": "Method",
+    "detail": "Function (const bool bNewValue =)",
+    "insertText": "GetSelfCollideAgainstAllKinematicVertices(PropertyCollection)"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (bSelfCollideAgainstAllKinematicVertices = bNewValue ; bCollidableSubMeshDirty = true ; } })",
+    "insertText": "if(IsSelfCollisionDisabledFacesMutable(PropertyCollection) && IsSelfCollisionDisabledFacesStringDirty(PropertyCollection))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (DisabledFaces =* InDisabledFaces ; bCollidableSubMeshDirty = true ; } else {)",
+    "insertText": "if(!DisabledFaces.IsEmpty())"
+  },
+  {
+    "label": "Reset()",
+    "kind": "Method",
+    "detail": "Function (DisabledFaces .)",
+    "insertText": "Reset()"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (bCollidableSubMeshDirty = true ; } } })",
+    "insertText": "if(IsSelfCollisionEnabledKinematicFacesMutable(PropertyCollection) && IsSelfCollisionEnabledKinematicFacesStringDirty(PropertyCollection))"
+  },
+  {
+    "label": "if()",
+    "kind": "Method",
+    "detail": "Function (EnabledKinematicFaces =* InEnabledFaces ; bCollidableSubMeshDirty = true ; } else {)",
+    "insertText": "if(!EnabledKinematicFaces.IsEmpty())"
+  },
+  {
+    "label": "SetProperties()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetProperties(PropertyCollection, TMap<FString, const TSet<int32>*>())"
+  },
+  {
+    "label": "Init()",
+    "kind": "Method",
+    "detail": "Function (} template<SolverParticlesOrRange> void)",
+    "insertText": "Init(const SolverParticlesOrRange& Particles, const FSolverReal MinProximityQueryRadius = (FSolverReal)0.)"
+  },
+  {
     "label": "Init()",
     "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "Init(Particles, FPBDFlatWeightMap(FSolverVec2(MinProximityQueryRadius * (FSolverReal).5f)))"
+  },
+  {
+    "label": "Init()",
+    "kind": "Method",
+    "detail": "Function (} template<SolverParticlesOrRange> void)",
     "insertText": "Init(const SolverParticlesOrRange& Particles, const FPBDFlatWeightMap& ThicknessMap)"
   },
   {
     "label": "InitFlesh()",
     "kind": "Method",
+    "detail": "Function (template<SolverParticlesOrRange> void)",
+    "insertText": "InitFlesh(const SolverParticlesOrRange& Particles, const FSolverReal MinProximityQueryRadius = (FSolverReal)0., const bool bUseFullMesh = false)"
+  },
+  {
+    "label": "InitFlesh()",
+    "kind": "Method",
     "detail": "Function (void)",
+    "insertText": "InitFlesh(Particles, FPBDFlatWeightMap(FSolverVec2(MinProximityQueryRadius * (FSolverReal).5f)), bUseFullMesh)"
+  },
+  {
+    "label": "InitFlesh()",
+    "kind": "Method",
+    "detail": "Function (} template<SolverParticlesOrRange> void)",
     "insertText": "InitFlesh(const SolverParticlesOrRange& Particles, const FPBDFlatWeightMap& ThicknessMap, const bool bUseFullMesh = false)"
   },
   {
     "label": "PostStepInit()",
     "kind": "Method",
-    "detail": "Function (void)",
+    "detail": "Function (template<SolverParticlesOrRange> void)",
     "insertText": "PostStepInit(const SolverParticlesOrRange& Particles)"
+  },
+  {
+    "label": "SetGlobalIntersectionAnalysis()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "SetGlobalIntersectionAnalysis(bool bInGlobalIntersectionAnalysis)"
+  },
+  {
+    "label": "SetContourMinimization()",
+    "kind": "Method",
+    "detail": "Function (bGlobalIntersectionAnalysis = bInGlobalIntersectionAnalysis ; } void)",
+    "insertText": "SetContourMinimization(bool bInContourMinimization)"
+  },
+  {
+    "label": "GetNumContourMinimizationPostSteps()",
+    "kind": "Method",
+    "detail": "Function (bContourMinimization = bInContourMinimization ; } int32)",
+    "insertText": "GetNumContourMinimizationPostSteps()"
+  },
+  {
+    "label": "GetTriangleGIAColors()",
+    "kind": "Method",
+    "detail": "Function (} const TArray<FGIAColor>&)",
+    "insertText": "GetTriangleGIAColors()"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(UseGlobalIntersectionAnalysis, bool)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(UseContourMinimization, bool)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(NumContourMinimizationPostSteps, int32)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(UseGlobalPostStepContours, bool)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(SelfCollideAgainstKinematicCollidersOnly, bool)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(SelfCollideAgainstAllKinematicVertices, bool)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(SelfCollisionDisabledFaces, bool)"
+  },
+  {
+    "label": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME()",
+    "kind": "Method",
+    "detail": "Function (void)",
+    "insertText": "UE_CHAOS_DECLARE_PROPERTYCOLLECTION_NAME(SelfCollisionEnabledKinematicFaces, bool)"
   }
 ]
