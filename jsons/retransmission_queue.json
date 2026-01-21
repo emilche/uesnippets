@@ -1,0 +1,608 @@
+{
+  "id": "retransmission-queue",
+  "label": "retransmission_queue",
+  "includepath": "retransmission_queue.h",
+  "functions": [
+    {
+      "id": "retransmission-queue",
+      "name": "RetransmissionQueue",
+      "category": "retransmission_queue",
+      "signature": "RetransmissionQueue(Log Prefix, Callbacks, My Initial Tsn, A Rwnd, Send Queue, On New Rtt, On Clear Retransmission Counter, T 3 Rtx, Options, Supports Partial Reliability, Use Message Interleaving)",
+      "params": [
+        {
+          "name": "Log Prefix",
+          "type": "absl::string_view"
+        },
+        {
+          "name": "Callbacks",
+          "type": "DcSctpSocketCallbacks*"
+        },
+        {
+          "name": "My Initial Tsn",
+          "type": "TSN"
+        },
+        {
+          "name": "A Rwnd",
+          "type": "size_t"
+        },
+        {
+          "name": "Send Queue",
+          "type": "SendQueue&"
+        },
+        {
+          "name": "On New Rtt",
+          "type": "std::function<void ( DurationMs rtt )>"
+        },
+        {
+          "name": "On Clear Retransmission Counter",
+          "type": "std::function<void ( )>"
+        },
+        {
+          "name": "T 3 Rtx",
+          "type": "Timer&"
+        },
+        {
+          "name": "Options",
+          "type": "DcSctpOptions&"
+        },
+        {
+          "name": "Supports Partial Reliability",
+          "type": "Bool"
+        },
+        {
+          "name": "Use Message Interleaving",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "namespace dcsctp"
+    },
+    {
+      "id": "handle-sack",
+      "name": "HandleSack",
+      "category": "retransmission_queue",
+      "signature": "HandleSack(Target, Now, Sack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Now",
+          "type": "TimeMs"
+        },
+        {
+          "name": "Sack",
+          "type": "SackChunk&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "handle-t-3-rtx-timer-expiry",
+      "name": "HandleT3RtxTimerExpiry",
+      "category": "retransmission_queue",
+      "signature": "HandleT3RtxTimerExpiry(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-data-to-be-fast-retransmitted",
+      "name": "has_data_to_be_fast_retransmitted",
+      "category": "retransmission_queue",
+      "signature": "has_data_to_be_fast_retransmitted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-chunks-for-fast-retransmit",
+      "name": "GetChunksForFastRetransmit",
+      "category": "retransmission_queue",
+      "signature": "GetChunksForFastRetransmit(Target, Bytes In Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Bytes In Packet",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-chunks-to-send",
+      "name": "GetChunksToSend",
+      "category": "retransmission_queue",
+      "signature": "GetChunksToSend(Target, Now, Bytes Remaining In Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Now",
+          "type": "TimeMs"
+        },
+        {
+          "name": "Bytes Remaining In Packet",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "std::vector<std::pair<TSN,Data>>"
+    },
+    {
+      "id": "get-chunk-states-for-testing",
+      "name": "GetChunkStatesForTesting",
+      "category": "retransmission_queue",
+      "signature": "GetChunkStatesForTesting(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "std::vector<std::pair<TSN,OutstandingData::State>>"
+    },
+    {
+      "id": "next-tsn",
+      "name": "next_tsn",
+      "category": "retransmission_queue",
+      "signature": "next_tsn(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cwnd",
+      "name": "cwnd",
+      "category": "retransmission_queue",
+      "signature": "cwnd(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rwnd",
+      "name": "rwnd",
+      "category": "retransmission_queue",
+      "signature": "rwnd(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "cwnd_ = cwnd"
+    },
+    {
+      "id": "outstanding-items",
+      "name": "outstanding_items",
+      "category": "retransmission_queue",
+      "signature": "outstanding_items(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "can-send-data",
+      "name": "can_send_data",
+      "category": "retransmission_queue",
+      "signature": "can_send_data(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "should-send-forward-tsn",
+      "name": "ShouldSendForwardTsn",
+      "category": "retransmission_queue",
+      "signature": "ShouldSendForwardTsn(Target, Now)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Now",
+          "type": "TimeMs"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-i-forward-tsn",
+      "name": "CreateIForwardTsn",
+      "category": "retransmission_queue",
+      "signature": "CreateIForwardTsn(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prepare-reset-stream",
+      "name": "PrepareResetStream",
+      "category": "retransmission_queue",
+      "signature": "PrepareResetStream(Target, Stream Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Stream Id",
+          "type": "StreamID"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-streams-ready-to-be-reset",
+      "name": "HasStreamsReadyToBeReset",
+      "category": "retransmission_queue",
+      "signature": "HasStreamsReadyToBeReset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-streams-ready-to-be-reset",
+      "name": "GetStreamsReadyToBeReset",
+      "category": "retransmission_queue",
+      "signature": "GetStreamsReadyToBeReset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "std::vector<StreamID>"
+    },
+    {
+      "id": "commit-reset-streams",
+      "name": "CommitResetStreams",
+      "category": "retransmission_queue",
+      "signature": "CommitResetStreams(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rollback-reset-streams",
+      "name": "RollbackResetStreams",
+      "category": "retransmission_queue",
+      "signature": "RollbackResetStreams(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-handover-readiness",
+      "name": "GetHandoverReadiness",
+      "category": "retransmission_queue",
+      "signature": "GetHandoverReadiness(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "HandoverReadinessStatus"
+    },
+    {
+      "id": "add-handover-state",
+      "name": "AddHandoverState",
+      "category": "retransmission_queue",
+      "signature": "AddHandoverState(Target, State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "State",
+          "type": "DcSctpSocketHandoverState&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "restore-from-state",
+      "name": "RestoreFromState",
+      "category": "retransmission_queue",
+      "signature": "RestoreFromState(Target, State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "State",
+          "type": "DcSctpSocketHandoverState&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-consistent",
+      "name": "IsConsistent",
+      "category": "retransmission_queue",
+      "signature": "IsConsistent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "private : enum class CongestionAlgorithmPhase"
+    },
+    {
+      "id": "get-serialized-chunk-size",
+      "name": "GetSerializedChunkSize",
+      "category": "retransmission_queue",
+      "signature": "GetSerializedChunkSize(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Data",
+          "type": "Data&"
+        }
+      ],
+      "returnType": "size_t"
+    },
+    {
+      "id": "is-in-fast-recovery",
+      "name": "is_in_fast_recovery",
+      "category": "retransmission_queue",
+      "signature": "is_in_fast_recovery(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-sack-valid",
+      "name": "IsSackValid",
+      "category": "retransmission_queue",
+      "signature": "IsSackValid(Target, Sack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Sack",
+          "type": "SackChunk&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-rtt",
+      "name": "UpdateRTT",
+      "category": "retransmission_queue",
+      "signature": "UpdateRTT(Target, Now, Cumulative Tsn Ack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Now",
+          "type": "TimeMs"
+        },
+        {
+          "name": "Cumulative Tsn Ack",
+          "type": "UnwrappedTSN"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "maybe-exit-fast-recovery",
+      "name": "MaybeExitFastRecovery",
+      "category": "retransmission_queue",
+      "signature": "MaybeExitFastRecovery(Target, Cumulative Tsn Ack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Cumulative Tsn Ack",
+          "type": "UnwrappedTSN"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "stop-t-3-rtx-timer-on-increased-cumulative-tsn-ack",
+      "name": "StopT3RtxTimerOnIncreasedCumulativeTsnAck",
+      "category": "retransmission_queue",
+      "signature": "StopT3RtxTimerOnIncreasedCumulativeTsnAck(Target, Cumulative Tsn Ack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Cumulative Tsn Ack",
+          "type": "UnwrappedTSN"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "handle-increased-cumulative-tsn-ack",
+      "name": "HandleIncreasedCumulativeTsnAck",
+      "category": "retransmission_queue",
+      "signature": "HandleIncreasedCumulativeTsnAck(Target, Outstanding Bytes, Total Bytes Acked)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Outstanding Bytes",
+          "type": "size_t"
+        },
+        {
+          "name": "Total Bytes Acked",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "handle-packet-loss",
+      "name": "HandlePacketLoss",
+      "category": "retransmission_queue",
+      "signature": "HandlePacketLoss(Target, Highest Tsn Acked)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Highest Tsn Acked",
+          "type": "UnwrappedTSN"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-receiver-window",
+      "name": "UpdateReceiverWindow",
+      "category": "retransmission_queue",
+      "signature": "UpdateReceiverWindow(Target, A Rwnd)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "A Rwnd",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "start-t-3-rtx-timer-if-outstanding-data",
+      "name": "StartT3RtxTimerIfOutstandingData",
+      "category": "retransmission_queue",
+      "signature": "StartT3RtxTimerIfOutstandingData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "phase",
+      "name": "phase",
+      "category": "retransmission_queue",
+      "signature": "phase(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "CongestionAlgorithmPhase"
+    },
+    {
+      "id": "max-bytes-to-send",
+      "name": "max_bytes_to_send",
+      "category": "retransmission_queue",
+      "signature": "max_bytes_to_send(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "void-f02145",
+      "name": "void",
+      "category": "retransmission_queue",
+      "signature": "void(Target, Rtt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        },
+        {
+          "name": "Rtt",
+          "type": "DurationMs"
+        }
+      ],
+      "returnType": "DcSctpSocketCallbacks& callbacks_"
+    },
+    {
+      "id": "void-29ed52",
+      "name": "void",
+      "category": "retransmission_queue",
+      "signature": "void(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "RetransmissionQueue*"
+        }
+      ],
+      "returnType": "std::function<"
+    }
+  ]
+}
