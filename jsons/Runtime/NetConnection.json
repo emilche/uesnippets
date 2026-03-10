@@ -1,0 +1,1656 @@
+{
+  "id": "net-connection",
+  "label": "NetConnection",
+  "includepath": "Engine/NetConnection.h",
+  "includes": [
+    "ObjectKey",
+    "ObjectMacros",
+    "UObjectGlobals",
+    "BitWriter",
+    "CustomVersion",
+    "EngineVersion",
+    "NetworkGuid",
+    "OnlineReplStructs",
+    "UpdateLevelVisibilityLevelInfo",
+    "NetDriver",
+    "DataBunch",
+    "NetPacketNotify",
+    "Player",
+    "Channel",
+    "Histogram",
+    "ArrayView",
+    "CircularBuffer",
+    "NetTraceConfig",
+    "ReplicationDriver",
+    "EngineNetAnalytics",
+    "PacketTraits",
+    "ResizableCircularQueue",
+    "NetAnalyticsTypes",
+    "ConnectionHandle",
+    "NetCloseResult",
+    "TrafficControl",
+    "NetDormantHolder",
+    "LowLevelMemTracker",
+    "Actor",
+    "NetConnection.generated"
+  ],
+  "functions": [
+    {
+      "id": "has-disabled-bandwidth-throttling",
+      "name": "HasDisabledBandwidthThrottling",
+      "category": "NetConnection",
+      "signature": "HasDisabledBandwidthThrottling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "NetConnection",
+      "signature": "LexToString(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Value",
+          "type": "EConnectionState"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "-----------------------------------------------------------------------------\nTypes.\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "u-net-connection-16c01d",
+      "name": "UNetConnection",
+      "category": "NetConnection",
+      "signature": "UNetConnection()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor"
+    },
+    {
+      "id": "get-client-handshake-id",
+      "name": "GetClientHandshakeId",
+      "category": "NetConnection",
+      "signature": "GetClientHandshakeId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the client handshake id for this connection."
+    },
+    {
+      "id": "set-client-handshake-id",
+      "name": "SetClientHandshakeId",
+      "category": "NetConnection",
+      "signature": "SetClientHandshakeId(Target, In Client Handshake Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Client Handshake Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the client handshake id for this connection."
+    },
+    {
+      "id": "get-connection-state",
+      "name": "GetConnectionState",
+      "category": "NetConnection",
+      "signature": "GetConnectionState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "public : EConnectionState",
+      "docs": "An optional unique identifier set by the client when establishing a connection."
+    },
+    {
+      "id": "set-connection-state",
+      "name": "SetConnectionState",
+      "category": "NetConnection",
+      "signature": "SetConnectionState(Target, Connection State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Connection State",
+          "type": "EConnectionState"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-closing-or-closed",
+      "name": "IsClosingOrClosed",
+      "category": "NetConnection",
+      "signature": "IsClosingOrClosed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this connection's state is USOCK_Closing or USOCK_Closed. No new data should be sent in this case."
+    },
+    {
+      "id": "get-parent-connection-id",
+      "name": "GetParentConnectionId",
+      "category": "NetConnection",
+      "signature": "GetParentConnectionId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "If this is a child connection it will return the topmost parent coonnection ID, otherwise it will return its own ID."
+    },
+    {
+      "id": "set-client-world-package-name",
+      "name": "SetClientWorldPackageName",
+      "category": "NetConnection",
+      "signature": "SetClientWorldPackageName(Target, New Client World Package Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "New Client World Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-level-visibility",
+      "name": "UpdateLevelVisibility",
+      "category": "NetConnection",
+      "signature": "UpdateLevelVisibility(Target, Level Visibility)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Level Visibility",
+          "type": "FUpdateLevelVisibilityLevelInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "on the server, the package names of streaming levels that the client has told us it has made visible\nthe server will only replicate references to Actors in visible levels so that it's impossible to send references to\nActors the client has not initialized"
+    },
+    {
+      "id": "set-local-player-function",
+      "name": "SetLocalPlayerFunction",
+      "category": "NetConnection",
+      "signature": "SetLocalPlayerFunction(Target, Get Player Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Get Player Function",
+          "type": "TFunction<ULocalPlayer* ( UNetConnection*,APlayerController* )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This functionality is used during replay checkpoints for example, so we can re-use the existing connection and channels to record\na version of each actor and capture all properties that have changed since the actor has been alive...\nThis will also act as if it needs to re-open all the channels, etc.\nNOTE - This doesn't force all exports to happen again though, it will only export new stuff, so keep that in mind."
+    },
+    {
+      "id": "u-local-player",
+      "name": "ULocalPlayer",
+      "category": "NetConnection",
+      "signature": "ULocalPlayer(Target, Get Local Player Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Get Local Player Function",
+          "type": "APlayerController* )>"
+        }
+      ],
+      "returnType": "TFunction<class"
+    },
+    {
+      "id": "should-replicate-voice-packet-from",
+      "name": "ShouldReplicateVoicePacketFrom",
+      "category": "NetConnection",
+      "signature": "ShouldReplicateVoicePacketFrom(Target, Sender)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Sender",
+          "type": "FUniqueNetId&"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Called to determine if a voice packet should be replicated to this\nconnection or any of its child connections\n@param Sender - the sender of the voice packet\n@return true if it should be sent on this connection, false otherwise"
+    },
+    {
+      "id": "u-net-connection-10cde6",
+      "name": "UNetConnection",
+      "category": "NetConnection",
+      "signature": "UNetConnection(Object Initializer)",
+      "params": [
+        {
+          "name": "Object Initializer",
+          "type": "FObjectInitializer&",
+          "default": "FObjectInitializer::Get()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@hack: set to net connection currently inside CleanUp(), for HasClientLoadedCurrentWorld() to be able to find it during PlayerController\ndestruction, since we clear its Player before destroying it. (and that's not easily reversed)"
+    },
+    {
+      "id": "u-net-connection-095e43",
+      "name": "UNetConnection",
+      "category": "NetConnection",
+      "signature": "UNetConnection(Helper)",
+      "params": [
+        {
+          "name": "Helper",
+          "type": "FVTableHelper&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "NetConnection",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "finish-destroy",
+      "name": "FinishDestroy",
+      "category": "NetConnection",
+      "signature": "FinishDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "NetConnection",
+      "signature": "AddReferencedObjects(In This, Collector)",
+      "params": [
+        {
+          "name": "In This",
+          "type": "UObject*"
+        },
+        {
+          "name": "Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-world",
+      "name": "GetWorld",
+      "category": "NetConnection",
+      "signature": "GetWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "UWorld*",
+      "docs": "Get the world the connection belongs to\n@return  Returns the world of the net driver, or the owning actor on this connection"
+    },
+    {
+      "id": "exec",
+      "name": "Exec",
+      "category": "NetConnection",
+      "signature": "Exec(Target, In World, Cmd, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&",
+          "default": "*GLog"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "describe",
+      "name": "Describe",
+      "category": "NetConnection",
+      "signature": "Describe(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Describe the connection."
+    },
+    {
+      "id": "low-level-send",
+      "name": "LowLevelSend",
+      "category": "NetConnection",
+      "signature": "LowLevelSend(Target, Data, Count Bits, Low Level Send)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Count Bits",
+          "type": "Int"
+        },
+        {
+          "name": "Low Level Send",
+          "type": "FOutPacketTraits& Traits ) PURE_VIRTUAL ( UNetConnection::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends a byte stream to the remote endpoint using the underlying socket\n@param Data\t\t\tThe byte stream to send\n@param CountBits\t\tThe length of the stream to send, in bits (to support bit-level additions to packets, from PacketHandler's)\n@param Traits\t\tSpecial traits for the packet, passed down from the NetConnection through the PacketHandler"
+    },
+    {
+      "id": "validate-send-buffer",
+      "name": "ValidateSendBuffer",
+      "category": "NetConnection",
+      "signature": "ValidateSendBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Validates the FBitWriter to make sure it's not in an error state"
+    },
+    {
+      "id": "init-send-buffer",
+      "name": "InitSendBuffer",
+      "category": "NetConnection",
+      "signature": "InitSendBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the FBitWriter to its default state"
+    },
+    {
+      "id": "assert-valid",
+      "name": "AssertValid",
+      "category": "NetConnection",
+      "signature": "AssertValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Make sure this connection is in a reasonable state."
+    },
+    {
+      "id": "flush-net",
+      "name": "FlushNet",
+      "category": "NetConnection",
+      "signature": "FlushNet(Target, Ignore Simulation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Ignore Simulation",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "flushes any pending data, bundling it into a packet and sending it via LowLevelSend()\nalso handles network simulation settings (simulated lag, packet loss, etc) unless bIgnoreSimulation is true"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "NetConnection",
+      "signature": "Tick(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Poll the connection. If it is timed out, close it."
+    },
+    {
+      "id": "is-net-ready-7f0347",
+      "name": "IsNetReady",
+      "category": "NetConnection",
+      "signature": "IsNetReady(Target, Saturate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Saturate",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Return whether this connection is ready for sending."
+    },
+    {
+      "id": "is-net-ready-405f33",
+      "name": "IsNetReady",
+      "category": "NetConnection",
+      "signature": "IsNetReady(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the connection is ready to send and has not exceeded the bandwidth limit yet."
+    },
+    {
+      "id": "is-packet-sequence-window-full",
+      "name": "IsPacketSequenceWindowFull",
+      "category": "NetConnection",
+      "signature": "IsPacketSequenceWindowFull(Target, Safety Margin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Safety Margin",
+          "type": "UInt",
+          "default": "0U"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether this connection can send packets without exhausting the packet sequence history window, as it could cause packets to be NAKed even when they've been received by the remote peer.\n@param SafetyMargin A small number representing how many packets you would like to keep as a safety margin for heart beats or other important packets."
+    },
+    {
+      "id": "handle-client-player",
+      "name": "HandleClientPlayer",
+      "category": "NetConnection",
+      "signature": "HandleClientPlayer(Target, PC, Net Connection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "PC",
+          "type": "APlayerController*"
+        },
+        {
+          "name": "Net Connection",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handle the player controller client\n@param PC player controller for this player\n@param NetConnection the connection the player is communicating on"
+    },
+    {
+      "id": "close",
+      "name": "Close",
+      "category": "NetConnection",
+      "signature": "Close(Target, Close Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Close Reason",
+          "type": "FNetResult&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Closes the connection (including sending a close notify across the network)\n@param CloseReason\tSpecifies the reason for the Close"
+    },
+    {
+      "id": "graceful-close",
+      "name": "GracefulClose",
+      "category": "NetConnection",
+      "signature": "GracefulClose(Target, Close Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Close Reason",
+          "type": "FNetResult&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts a graceful close. If net.EnableGracefulClose is true, waits longer for reliable RPCs to be acknowledged before fully cleaning up the connection.\nIf net.EnableGracefulClose is false, immediately sends the control channel close bunch. Reliable RPCs may be lost.\n@param CloseReason\tSpecifies the reason for the Close"
+    },
+    {
+      "id": "clean-up",
+      "name": "CleanUp",
+      "category": "NetConnection",
+      "signature": "CleanUp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "closes the control channel, cleans up structures, and prepares for deletion"
+    },
+    {
+      "id": "init-base",
+      "name": "InitBase",
+      "category": "NetConnection",
+      "signature": "InitBase(Target, In Driver, In Socket, In URL, In State, In Max Packet, In Packet Overhead)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Driver",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Socket",
+          "type": "FSocket*"
+        },
+        {
+          "name": "In URL",
+          "type": "FURL&"
+        },
+        {
+          "name": "In State",
+          "type": "EConnectionState"
+        },
+        {
+          "name": "In Max Packet",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "In Packet Overhead",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize common settings for this connection instance\n@param InDriver the net driver associated with this connection\n@param InSocket the socket associated with this connection\n@param InURL the URL to init with\n@param InState the connection state to start with for this connection\n@param InMaxPacket the max packet size that will be used for sending\n@param InPacketOverhead the packet overhead for this connection type"
+    },
+    {
+      "id": "init-remote-connection",
+      "name": "InitRemoteConnection",
+      "category": "NetConnection",
+      "signature": "InitRemoteConnection(Target, In Driver, In Socket, In URL, In Remote Addr, In State, In Max Packet, In Packet Overhead)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Driver",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Socket",
+          "type": "FSocket*"
+        },
+        {
+          "name": "In URL",
+          "type": "FURL&"
+        },
+        {
+          "name": "In Remote Addr",
+          "type": "FInternetAddr&"
+        },
+        {
+          "name": "In State",
+          "type": "EConnectionState"
+        },
+        {
+          "name": "In Max Packet",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "In Packet Overhead",
+          "type": "Int",
+          "default": "0) PURE_VIRTUAL(UNetConnection::InitRemoteConnection,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize this connection instance *from* a remote source\n@param InDriver the net driver associated with this connection\n@param InSocket the socket associated with this connection\n@param InURL the URL to init with\n@param InRemoteAddr the remote address for this connection\n@param InState the connection state to start with for this connection\n@param InMaxPacket the max packet size that will be used for sending\n@param InPacketOverhead the packet overhead for this connection type"
+    },
+    {
+      "id": "init-local-connection",
+      "name": "InitLocalConnection",
+      "category": "NetConnection",
+      "signature": "InitLocalConnection(Target, In Driver, In Socket, In URL, In State, In Max Packet, In Packet Overhead)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Driver",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Socket",
+          "type": "FSocket*"
+        },
+        {
+          "name": "In URL",
+          "type": "FURL&"
+        },
+        {
+          "name": "In State",
+          "type": "EConnectionState"
+        },
+        {
+          "name": "In Max Packet",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "In Packet Overhead",
+          "type": "Int",
+          "default": "0) PURE_VIRTUAL(UNetConnection::InitLocalConnection,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize this connection instance *to* a remote source\n@param InDriver the net driver associated with this connection\n@param InSocket the socket associated with this connection\n@param InURL the URL to init with\n@param InRemoteAddr the remote address for this connection\n@param InState the connection state to start with for this connection\n@param InMaxPacket the max packet size that will be used for sending\n@param InPacketOverhead the packet overhead for this connection type"
+    },
+    {
+      "id": "init-connection",
+      "name": "InitConnection",
+      "category": "NetConnection",
+      "signature": "InitConnection(Target, In Driver, In State, In URL, In Connection Speed, In Max Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Driver",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In State",
+          "type": "EConnectionState"
+        },
+        {
+          "name": "In URL",
+          "type": "FURL&"
+        },
+        {
+          "name": "In Connection Speed",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "In Max Packet",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes an \"addressless\" connection with the passed in settings\n@param InDriver the net driver associated with this connection\n@param InState the connection state to start with for this connection\n@param InURL the URL to init with\n@param InConnectionSpeed Optional connection speed override"
+    },
+    {
+      "id": "init-handler",
+      "name": "InitHandler",
+      "category": "NetConnection",
+      "signature": "InitHandler(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes the PacketHandler"
+    },
+    {
+      "id": "init-sequence",
+      "name": "InitSequence",
+      "category": "NetConnection",
+      "signature": "InitSequence(Target, Incoming Sequence, Outgoing Sequence)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Incoming Sequence",
+          "type": "Int"
+        },
+        {
+          "name": "Outgoing Sequence",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes the sequence numbers for the connection, usually from shared randomized data\n@param IncomingSequence\tThe initial sequence number for incoming packets\n@param OutgoingSequence\tThe initial sequence number for outgoing packets"
+    },
+    {
+      "id": "notify-analytics-provider",
+      "name": "NotifyAnalyticsProvider",
+      "category": "NetConnection",
+      "signature": "NotifyAnalyticsProvider(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notification that the NetDriver analytics provider has been updated\nNOTE: Can also mean disabled, e.g. during hotfix"
+    },
+    {
+      "id": "enable-encryption-ad9a14",
+      "name": "EnableEncryption",
+      "category": "NetConnection",
+      "signature": "EnableEncryption(Target, Encryption Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Encryption Data",
+          "type": "FEncryptionData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the encryption data and enables encryption."
+    },
+    {
+      "id": "enable-encryption-server",
+      "name": "EnableEncryptionServer",
+      "category": "NetConnection",
+      "signature": "EnableEncryptionServer(Target, Encryption Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Encryption Data",
+          "type": "FEncryptionData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the encryption data, enables encryption, and sends the encryption ack to the client."
+    },
+    {
+      "id": "set-encryption-data",
+      "name": "SetEncryptionData",
+      "category": "NetConnection",
+      "signature": "SetEncryptionData(Target, Encryption Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Encryption Data",
+          "type": "FEncryptionData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the data for the underlying encryption packet handler component, but doesn't modify encryption enabled state."
+    },
+    {
+      "id": "send-client-encryption-ack",
+      "name": "SendClientEncryptionAck",
+      "category": "NetConnection",
+      "signature": "SendClientEncryptionAck(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends an NMT_EncryptionAck message"
+    },
+    {
+      "id": "enable-encryption-138862",
+      "name": "EnableEncryption",
+      "category": "NetConnection",
+      "signature": "EnableEncryption(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enables encryption for the underlying encryption packet handler component."
+    },
+    {
+      "id": "is-encryption-enabled",
+      "name": "IsEncryptionEnabled",
+      "category": "NetConnection",
+      "signature": "IsEncryptionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if encryption is enabled for this connection."
+    },
+    {
+      "id": "create-replicator-for-new-actor-channel",
+      "name": "CreateReplicatorForNewActorChannel",
+      "category": "NetConnection",
+      "signature": "CreateReplicatorForNewActorChannel(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "TSharedPtr<FObjectReplicator>",
+      "docs": "Called by UActorChannel. Handles creating a new replicator for an actor"
+    },
+    {
+      "id": "client-has-initialized-level",
+      "name": "ClientHasInitializedLevel",
+      "category": "NetConnection",
+      "signature": "ClientHasInitializedLevel(Target, Test Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Test Level",
+          "type": "ULevel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns whether the client has initialized the given level\n@return true if the client has initialized the given level, false otherwise"
+    },
+    {
+      "id": "client-has-initialized-level-for",
+      "name": "ClientHasInitializedLevelFor",
+      "category": "NetConnection",
+      "signature": "ClientHasInitializedLevelFor(Target, Test Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Test Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns whether the client has initialized the level required for the given object\n@return true if the client has initialized the level the object is in or the object is not in a level, false otherwise"
+    },
+    {
+      "id": "received-raw-packet",
+      "name": "ReceivedRawPacket",
+      "category": "NetConnection",
+      "signature": "ReceivedRawPacket(Target, Data, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows the connection to process the raw data that was received\n@param Data the data to process\n@param Count the size of the data buffer to process"
+    },
+    {
+      "id": "send-raw-bunch",
+      "name": "SendRawBunch",
+      "category": "NetConnection",
+      "signature": "SendRawBunch(Target, Bunch, In Allow Merge, Bunch Collector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "In Allow Merge",
+          "type": "Bool"
+        },
+        {
+          "name": "Bunch Collector",
+          "type": "FNetTraceCollector*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Send a raw bunch"
+    },
+    {
+      "id": "create-channel-by-name",
+      "name": "CreateChannelByName",
+      "category": "NetConnection",
+      "signature": "CreateChannelByName(Target, Ch Name, Create Flags, Channel Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Ch Name",
+          "type": "Name&"
+        },
+        {
+          "name": "Create Flags",
+          "type": "EChannelCreateFlags"
+        },
+        {
+          "name": "Channel Index",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "UChannel*",
+      "docs": "Create a channel."
+    },
+    {
+      "id": "received-packet",
+      "name": "ReceivedPacket",
+      "category": "NetConnection",
+      "signature": "ReceivedPacket(Target, Reader, Is Reinjected Packet, Dispatch Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Reader",
+          "type": "FBitReader&"
+        },
+        {
+          "name": "Is Reinjected Packet",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Dispatch Packet",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handle a packet we just received.\nbIsReinjectedPacket is true if a packet is reprocessed after getting cached\nbDispatchPacket if true the packet will be processed (passed to DispatchPacket)"
+    },
+    {
+      "id": "dispatch-packet",
+      "name": "DispatchPacket",
+      "category": "NetConnection",
+      "signature": "DispatchPacket(Target, Reader, Packet Id, Out Skip Ack, Out Has Bunch Errors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Reader",
+          "type": "FBitReader&"
+        },
+        {
+          "name": "Packet Id",
+          "type": "Int"
+        },
+        {
+          "name": "Out Skip Ack",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Has Bunch Errors",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disassemble and dispatch packet.\nPacketId is an id of the packet to dispatch\nbOutSkipAck Flag that marks packet as dropped"
+    },
+    {
+      "id": "get-voice-channel",
+      "name": "GetVoiceChannel",
+      "category": "NetConnection",
+      "signature": "GetVoiceChannel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "class UVoiceChannel*",
+      "docs": "@return Finds the voice channel for this connection or NULL if none"
+    },
+    {
+      "id": "flush-dormancy",
+      "name": "FlushDormancy",
+      "category": "NetConnection",
+      "signature": "FlushDormancy(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "force-property-compare",
+      "name": "ForcePropertyCompare",
+      "category": "NetConnection",
+      "signature": "ForcePropertyCompare(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forces properties on this actor to do a compare for one frame (rather than share shadow state)"
+    },
+    {
+      "id": "set-client-login-state",
+      "name": "SetClientLoginState",
+      "category": "NetConnection",
+      "signature": "SetClientLoginState(Target, New State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "New State",
+          "type": "EClientLoginState::Type"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Wrapper for setting the current client login state, so we can trap for debugging, and verbosity purposes.\nOnly valid on the server"
+    },
+    {
+      "id": "set-expected-client-login-msg-type",
+      "name": "SetExpectedClientLoginMsgType",
+      "category": "NetConnection",
+      "signature": "SetExpectedClientLoginMsgType(Target, New Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "New Type",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Wrapper for setting the current expected client login msg type.\nOnly valid on the server"
+    },
+    {
+      "id": "is-client-msg-type-valid",
+      "name": "IsClientMsgTypeValid",
+      "category": "NetConnection",
+      "signature": "IsClientMsgTypeValid(Target, Client Msg Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Client Msg Type",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This function validates that ClientMsgType is the next expected msg type.\nOnly valid on the server"
+    },
+    {
+      "id": "track-logs-per-second",
+      "name": "TrackLogsPerSecond",
+      "category": "NetConnection",
+      "signature": "TrackLogsPerSecond(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This function tracks the number of log calls per second for this client,\nand disconnects the client if it detects too many calls are made per second"
+    },
+    {
+      "id": "get-timeout-value",
+      "name": "GetTimeoutValue",
+      "category": "NetConnection",
+      "signature": "GetTimeoutValue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Return current timeout value that should be used"
+    },
+    {
+      "id": "set-player-online-platform-name",
+      "name": "SetPlayerOnlinePlatformName",
+      "category": "NetConnection",
+      "signature": "SetPlayerOnlinePlatformName(Target, In Player Online Platform Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Player Online Platform Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the PlayerOnlinePlatformName member.\nCalled by the engine during the login process with the NMT_Login message parameter."
+    },
+    {
+      "id": "execute-on-all-dormant-replicators",
+      "name": "ExecuteOnAllDormantReplicators",
+      "category": "NetConnection",
+      "signature": "ExecuteOnAllDormantReplicators(Target, Execute Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Execute Function",
+          "type": "UE::Net::FExecuteForEachDormantReplicator"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trigger a callback on all dormant replicators of every dormant actor we stored"
+    },
+    {
+      "id": "consume-queued-actor-delinquency-analytics",
+      "name": "ConsumeQueuedActorDelinquencyAnalytics",
+      "category": "NetConnection",
+      "signature": "ConsumeQueuedActorDelinquencyAnalytics(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Out",
+          "type": "FNetQueuedActorDelinquencyAnalytics&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the current delinquency analytics and resets them.\nThis would be similar to calls to Get and Reset separately, except that the caller\nwill assume ownership of data in this case."
+    },
+    {
+      "id": "get-queued-actor-delinquency-analytics",
+      "name": "GetQueuedActorDelinquencyAnalytics",
+      "category": "NetConnection",
+      "signature": "GetQueuedActorDelinquencyAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "FNetQueuedActorDelinquencyAnalytics&",
+      "docs": "Returns the current delinquency analytics."
+    },
+    {
+      "id": "reset-queued-actor-delinquency-analytics",
+      "name": "ResetQueuedActorDelinquencyAnalytics",
+      "category": "NetConnection",
+      "signature": "ResetQueuedActorDelinquencyAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the current delinquency analytics."
+    },
+    {
+      "id": "consume-saturation-analytics",
+      "name": "ConsumeSaturationAnalytics",
+      "category": "NetConnection",
+      "signature": "ConsumeSaturationAnalytics(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Out",
+          "type": "FNetConnectionSaturationAnalytics&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the current saturation analytics and resets them.\nThis would be similar to calls to Get and Reset separately, except that the caller\nwill assume ownership of data in this case."
+    },
+    {
+      "id": "get-saturation-analytics",
+      "name": "GetSaturationAnalytics",
+      "category": "NetConnection",
+      "signature": "GetSaturationAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "FNetConnectionSaturationAnalytics&",
+      "docs": "Returns the current saturation analytics."
+    },
+    {
+      "id": "reset-saturation-analytics",
+      "name": "ResetSaturationAnalytics",
+      "category": "NetConnection",
+      "signature": "ResetSaturationAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the current saturation analytics."
+    },
+    {
+      "id": "consume-packet-analytics",
+      "name": "ConsumePacketAnalytics",
+      "category": "NetConnection",
+      "signature": "ConsumePacketAnalytics(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Out",
+          "type": "FNetConnectionPacketAnalytics&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the current packet stability analytics and resets them.\nThis would be similar to calls to Get and Reset separately, except that the caller\nwill assume ownership of the data in this case."
+    },
+    {
+      "id": "get-packet-analytics",
+      "name": "GetPacketAnalytics",
+      "category": "NetConnection",
+      "signature": "GetPacketAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "FNetConnectionPacketAnalytics&",
+      "docs": "Returns the current packet stability analytics."
+    },
+    {
+      "id": "reset-packet-analytics",
+      "name": "ResetPacketAnalytics",
+      "category": "NetConnection",
+      "signature": "ResetPacketAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the current packet stability analytics."
+    },
+    {
+      "id": "track-replication-for-analytics",
+      "name": "TrackReplicationForAnalytics",
+      "category": "NetConnection",
+      "signature": "TrackReplicationForAnalytics(Target, Was Saturated)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Was Saturated",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to notify the connection that we attempted to replicate its actors this frame.\nThis is primarily for analytics book keeping.\n@param bWasSaturated\t\tTrue if we failed to replicate all data because we were saturated."
+    },
+    {
+      "id": "send-challenge-control-message",
+      "name": "SendChallengeControlMessage",
+      "category": "NetConnection",
+      "signature": "SendChallengeControlMessage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends the NMT_Challenge message"
+    },
+    {
+      "id": "set-pending-close-due-to-replication-failure",
+      "name": "SetPendingCloseDueToReplicationFailure",
+      "category": "NetConnection",
+      "signature": "SetPendingCloseDueToReplicationFailure(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "notify-actor-destroyed",
+      "name": "NotifyActorDestroyed",
+      "category": "NetConnection",
+      "signature": "NotifyActorDestroyed(Target, Actor, Is Seamless Travel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Is Seamless Travel",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when owning network driver receives NotifyActorDestroyed."
+    },
+    {
+      "id": "notify-actor-channel-cleaned-up",
+      "name": "NotifyActorChannelCleanedUp",
+      "category": "NetConnection",
+      "signature": "NotifyActorChannelCleanedUp(Target, Channel, Close Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Channel",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Close Reason",
+          "type": "EChannelCloseReason"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-pending-close-due-to-socket-send-failure",
+      "name": "SetPendingCloseDueToSocketSendFailure",
+      "category": "NetConnection",
+      "signature": "SetPendingCloseDueToSocketSendFailure(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "destroy-owning-actor",
+      "name": "DestroyOwningActor",
+      "category": "NetConnection",
+      "signature": "DestroyOwningActor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "During cleanup this will destroy the actor owned by this connection (generally a PlayerController)"
+    },
+    {
+      "id": "destroy-ignored-actor",
+      "name": "DestroyIgnoredActor",
+      "category": "NetConnection",
+      "signature": "DestroyIgnoredActor(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called internally to destroy an actor during replay fast-forward when the actor channel index will be recycled"
+    },
+    {
+      "id": "handle-connection-timeout",
+      "name": "HandleConnectionTimeout",
+      "category": "NetConnection",
+      "signature": "HandleConnectionTimeout(Target, Error)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Error",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This is called whenever a connection has passed the relative time to be considered timed out."
+    },
+    {
+      "id": "notify-connection-updated",
+      "name": "NotifyConnectionUpdated",
+      "category": "NetConnection",
+      "signature": "NotifyConnectionUpdated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notification that information about this connection may have been updated"
+    },
+    {
+      "id": "get-last-notified-packet-id",
+      "name": "GetLastNotifiedPacketId",
+      "category": "NetConnection",
+      "signature": "GetLastNotifiedPacketId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Return last notified packet id"
+    },
+    {
+      "id": "send-close-reason",
+      "name": "SendCloseReason",
+      "category": "NetConnection",
+      "signature": "SendCloseReason(Target, Close Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Close Reason",
+          "type": "FNetResult&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends an NMT_CloseReason message, with the specified close reason or close reason chain.\nCalled automatically by UNetConnection::Close, but should be called beforehand if sending a packet that will trigger a remote close.\n@param CloseReason\tThe close reason or close reason chain to send"
+    },
+    {
+      "id": "handle-receive-close-reason",
+      "name": "HandleReceiveCloseReason",
+      "category": "NetConnection",
+      "signature": "HandleReceiveCloseReason(Target, Close Reason List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Close Reason List",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles parsing/validation and logging of NMT_CloseReason messages\n@param CloseReasonList\tDelimited list of close reasons"
+    },
+    {
+      "id": "handle-receive-net-upgrade",
+      "name": "HandleReceiveNetUpgrade",
+      "category": "NetConnection",
+      "signature": "HandleReceiveNetUpgrade(Target, Remote Network Version, Remote Network Features, Net Upgrade Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Remote Network Version",
+          "type": "UInt"
+        },
+        {
+          "name": "Remote Network Features",
+          "type": "EEngineNetworkRuntimeFeatures"
+        },
+        {
+          "name": "Net Upgrade Source",
+          "type": "UE::Net::ENetUpgradeSource",
+          "default": "UE::Net::ENetUpgradeSource::ControlChannel"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handles receiving NMT_Upgrade messages (including at stateless handshake level)\n@param RemoteNetworkVersion\t\tThe net version of the remote side\n@param RemoteNetworkFeatures\t\tThe net runtime features of the remote side\n@param NetUpgradeSource\t\t\tThe source of the net upgrade message\n@return Return true if the connection could be upgraded and we can restart the handshake process. Return false if the upgrade was impossible and the connection must disconnect."
+    }
+  ]
+}

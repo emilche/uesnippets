@@ -1,0 +1,270 @@
+{
+  "id": "memory-trace",
+  "label": "MemoryTrace",
+  "includepath": "ProfilingDebugging/MemoryTrace.h",
+  "includes": [
+    "Platform",
+    "EnumClassFlags",
+    "Config",
+    "Trace"
+  ],
+  "functions": [
+    {
+      "id": "memory-trace-heap-spec",
+      "name": "MemoryTrace_HeapSpec",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_HeapSpec(Parent Id, Name, Flags)",
+      "params": [
+        {
+          "name": "Parent Id",
+          "type": "HeapId"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Flags",
+          "type": "EMemoryTraceHeapFlags",
+          "default": "EMemoryTraceHeapFlags::None"
+        }
+      ],
+      "returnType": "HeapId",
+      "docs": "Register a new heap specification (name). Use the returned value when marking heaps.\n@param ParentId Heap id of parent heap.\n@param Name Descriptive name of the heap.\n@param Flags Properties of this heap. See \\ref EMemoryTraceHeapFlags\n@return Heap id to use when allocating memory"
+    },
+    {
+      "id": "memory-trace-root-heap-spec",
+      "name": "MemoryTrace_RootHeapSpec",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_RootHeapSpec(Name, Flags)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Flags",
+          "type": "EMemoryTraceHeapFlags",
+          "default": "EMemoryTraceHeapFlags::None"
+        }
+      ],
+      "returnType": "HeapId",
+      "docs": "Register a new root heap specification (name). Use the returned value as parent to other heaps.\n@param Name Descriptive name of the root heap.\n@param Flags Properties of the this root heap. See \\ref EMemoryTraceHeapFlags\n@return Heap id to use when allocating memory"
+    },
+    {
+      "id": "memory-trace-mark-alloc-as-heap",
+      "name": "MemoryTrace_MarkAllocAsHeap",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_MarkAllocAsHeap(Address, Heap, Flags, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Heap",
+          "type": "HeapId"
+        },
+        {
+          "name": "Flags",
+          "type": "EMemoryTraceHeapAllocationFlags",
+          "default": "EMemoryTraceHeapAllocationFlags::None"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark a traced allocation as being a heap.\n@param Address Address of the allocation\n@param Heap Heap id, see /ref MemoryTrace_HeapSpec. If no specific heap spec has been created the correct root heap needs to be given.\n@param Flags Additional properties of the heap allocation. Note that \\ref EMemoryTraceHeapAllocationFlags::Heap is implicit.\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-unmark-alloc-as-heap",
+      "name": "MemoryTrace_UnmarkAllocAsHeap",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_UnmarkAllocAsHeap(Address, Heap, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Heap",
+          "type": "HeapId"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unmark an allocation as a heap. When an allocation that has previously been used as a heap is reused as a regular\nallocation.\n@param Address Address of the allocation\n@param Heap Heap id\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-alloc",
+      "name": "MemoryTrace_Alloc",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_Alloc(Address, Size, Alignment, Root Heap, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        },
+        {
+          "name": "Root Heap",
+          "type": "HeapId",
+          "default": "EMemoryTraceRootHeap::SystemMemory"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace an allocation event.\n@param Address Address of allocation\n@param Size Size of allocation\n@param Alignment Alignment of the allocation\n@param RootHeap Which root heap this belongs to (system memory, video memory etc)\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-free",
+      "name": "MemoryTrace_Free",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_Free(Address, Root Heap, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Root Heap",
+          "type": "HeapId",
+          "default": "EMemoryTraceRootHeap::SystemMemory"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace a free event.\n@param Address Address of the allocation being freed\n@param RootHeap Which root heap this belongs to (system memory, video memory etc)\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-realloc-free",
+      "name": "MemoryTrace_ReallocFree",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_ReallocFree(Address, Root Heap, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Root Heap",
+          "type": "HeapId",
+          "default": "EMemoryTraceRootHeap::SystemMemory"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace a free related to a reallocation event.\n@param Address Address of the allocation being freed\n@param RootHeap Which root heap this belongs to (system memory, video memory etc)\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-realloc-alloc",
+      "name": "MemoryTrace_ReallocAlloc",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_ReallocAlloc(Address, New Size, Alignment, Root Heap, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "New Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        },
+        {
+          "name": "Root Heap",
+          "type": "HeapId",
+          "default": "EMemoryTraceRootHeap::SystemMemory"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace an allocation related to a reallocation event.\n@param Address Address of allocation\n@param NewSize Size of allocation\n@param Alignment Alignment of the allocation\n@param RootHeap Which root heap this belongs to (system memory, video memory etc)\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-update-alloc",
+      "name": "MemoryTrace_UpdateAlloc",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_UpdateAlloc(Address, Root Heap, External Callstack Id)",
+      "params": [
+        {
+          "name": "Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Root Heap",
+          "type": "HeapId",
+          "default": "EMemoryTraceRootHeap::SystemMemory"
+        },
+        {
+          "name": "External Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace an update alloc event. It updates context (mem tag and metadata) for an allocation.\n@param Address Address of the allocation being updated\n@param RootHeap Which root heap this belongs to (system memory, video memory etc)\n@param ExternalCallstackId CallstackId to use, if 0 will use current callstack id."
+    },
+    {
+      "id": "memory-trace-swap-op",
+      "name": "MemoryTrace_SwapOp",
+      "category": "MemoryTrace",
+      "signature": "MemoryTrace_SwapOp(Page Address, Swap Operation, Compressed Size, Callstack Id)",
+      "params": [
+        {
+          "name": "Page Address",
+          "type": "UInt64"
+        },
+        {
+          "name": "Swap Operation",
+          "type": "EMemoryTraceSwapOperation"
+        },
+        {
+          "name": "Compressed Size",
+          "type": "UInt",
+          "default": "0"
+        },
+        {
+          "name": "Callstack Id",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace a swap operation. Only available for system memory root heap (EMemoryTraceRootHeap::SystemMemory).\n@param PageAddress Page address for operation, in case of PageIn can be address of the page fault (not aligned to page boundary).\n@param SwapOperation Which swap operation is happening to the address.\n@param CompressedSize Compressed size of the page for page out operation.\n@param CallstackId CallstackId to use, if 0 to ignore (will not use current callstack id)."
+    }
+  ]
+}

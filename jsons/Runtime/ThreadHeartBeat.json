@@ -1,0 +1,538 @@
+{
+  "id": "thread-heart-beat",
+  "label": "ThreadHeartBeat",
+  "includepath": "HAL/ThreadHeartBeat.h",
+  "includes": [
+    "Map",
+    "CoreTypes",
+    "Delegate",
+    "DelegateCombinations",
+    "CriticalSection",
+    "Runnable",
+    "ThreadSafeBool",
+    "ThreadSafeCounter",
+    "AssertionMacros",
+    "NameTypes",
+    "UnixSignalHeartBeat"
+  ],
+  "functions": [
+    {
+      "id": "f-thread-heart-beat-clock",
+      "name": "FThreadHeartBeatClock",
+      "category": "ThreadHeartBeat",
+      "signature": "FThreadHeartBeatClock(In Max Time Step)",
+      "params": [
+        {
+          "name": "In Max Time Step",
+          "type": "Double"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Our own local clock.\nPlatforms that support suspend/resume have problems where a suspended title acts like\na long hitch, causing the hang detector to fire incorrectly when the title is resumed.\nTo solve this, we accumulate our own time on the hang detector thread.\nWhen the title is suspended, this thread is also suspended, and the local clock stops.\nThe delta is clamped so if we are resumed, the clock continues from where it left off."
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "ThreadHeartBeat",
+      "signature": "Tick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeatClock*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "seconds",
+      "name": "Seconds",
+      "category": "ThreadHeartBeat",
+      "signature": "Seconds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeatClock*"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "f-thread-heart-beat",
+      "name": "FThreadHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "FThreadHeartBeat()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Thread to run the worker FRunnable on"
+    },
+    {
+      "id": "init-settings",
+      "name": "InitSettings",
+      "category": "ThreadHeartBeat",
+      "signature": "InitSettings(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Thread to run the worker FRunnable on"
+    },
+    {
+      "id": "on-hang",
+      "name": "OnHang",
+      "category": "ThreadHeartBeat",
+      "signature": "OnHang(Target, Hang Duration, Thread That Hung)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Hang Duration",
+          "type": "Double"
+        },
+        {
+          "name": "Thread That Hung",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "void FORCENOINLINE"
+    },
+    {
+      "id": "on-present-hang",
+      "name": "OnPresentHang",
+      "category": "ThreadHeartBeat",
+      "signature": "OnPresentHang(Target, Hang Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Hang Duration",
+          "type": "Double"
+        }
+      ],
+      "returnType": "void FORCENOINLINE"
+    },
+    {
+      "id": "is-enabled",
+      "name": "IsEnabled",
+      "category": "ThreadHeartBeat",
+      "signature": "IsEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "ThreadHeartBeat",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "FThreadHeartBeat&",
+      "docs": "Gets the heartbeat singleton"
+    },
+    {
+      "id": "get-no-init",
+      "name": "GetNoInit",
+      "category": "ThreadHeartBeat",
+      "signature": "GetNoInit()",
+      "params": [],
+      "returnType": "FThreadHeartBeat*"
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "category": "ThreadHeartBeat",
+      "signature": "Start(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Begin measuring heartbeat"
+    },
+    {
+      "id": "heart-beat",
+      "name": "HeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "HeartBeat(Target, Read Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Read Config",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called from a thread once per frame to update the heartbeat time"
+    },
+    {
+      "id": "present-frame",
+      "name": "PresentFrame",
+      "category": "ThreadHeartBeat",
+      "signature": "PresentFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called from the rendering or RHI thread when the platform RHI presents a frame (supported platforms only)."
+    },
+    {
+      "id": "check-heart-beat",
+      "name": "CheckHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "CheckHeartBeat(Target, Out Hang Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Out Hang Duration",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Called by a supervising thread to check the threads' health"
+    },
+    {
+      "id": "kill-heart-beat",
+      "name": "KillHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "KillHeartBeat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by a thread when it's no longer expecting to be ticked"
+    },
+    {
+      "id": "monitor-function-start",
+      "name": "MonitorFunctionStart",
+      "category": "ThreadHeartBeat",
+      "signature": "MonitorFunctionStart(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called from a thread once on entry to a function to be monitored"
+    },
+    {
+      "id": "monitor-function-end",
+      "name": "MonitorFunctionEnd",
+      "category": "ThreadHeartBeat",
+      "signature": "MonitorFunctionEnd(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by a thread when a function has completed and no longer needs to be monitored"
+    },
+    {
+      "id": "check-function-heart-beat",
+      "name": "CheckFunctionHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "CheckFunctionHeartBeat(Target, Out Hang Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Out Hang Duration",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Called by a supervising thread to check all function calls' being monitored health"
+    },
+    {
+      "id": "monitor-checkpoint-start",
+      "name": "MonitorCheckpointStart",
+      "category": "ThreadHeartBeat",
+      "signature": "MonitorCheckpointStart(Target, End Check Point, Time To Reach Checkpoint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "End Check Point",
+          "type": "Name"
+        },
+        {
+          "name": "Time To Reach Checkpoint",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called from a thread to register a checkpoint to be monitored\n@param EndCheckPoint name of the checkpoint that needs to be reached. TimeToReachCheckPoint the time duration we have to reach the specified checkpoint."
+    },
+    {
+      "id": "monitor-checkpoint-end",
+      "name": "MonitorCheckpointEnd",
+      "category": "ThreadHeartBeat",
+      "signature": "MonitorCheckpointEnd(Target, Check Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Check Point",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called from a thread when a checkpoint has ended"
+    },
+    {
+      "id": "check-checkpoint-heart-beat",
+      "name": "CheckCheckpointHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "CheckCheckpointHeartBeat(Target, Out Hang Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "Out Hang Duration",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Called by a supervising thread to check all checkpoints forward progress"
+    },
+    {
+      "id": "suspend-heart-beat-4d7828",
+      "name": "SuspendHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "SuspendHeartBeat(Target, All Threads)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "All Threads",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Suspend heartbeat measuring for the current thread if the thread has already had a heartbeat\n@param bAllThreads If true, suspends heartbeat for all threads, not only the current one"
+    },
+    {
+      "id": "resume-heart-beat-0114d9",
+      "name": "ResumeHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "ResumeHeartBeat(Target, All Threads)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "All Threads",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resume heartbeat measuring for the current thread\n@param bAllThreads If true, resumes heartbeat for all threads, not only the current one"
+    },
+    {
+      "id": "is-beating",
+      "name": "IsBeating",
+      "category": "ThreadHeartBeat",
+      "signature": "IsBeating(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true/false if this thread is currently performing heartbeat monitoring"
+    },
+    {
+      "id": "set-duration-multiplier",
+      "name": "SetDurationMultiplier",
+      "category": "ThreadHeartBeat",
+      "signature": "SetDurationMultiplier(Target, New Multiplier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        },
+        {
+          "name": "New Multiplier",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a multiplier to the hang duration (>= 1.0).\nCan be used to extend the duration during loading screens etc."
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "ThreadHeartBeat",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "run",
+      "name": "Run",
+      "category": "ThreadHeartBeat",
+      "signature": "Run(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "stop",
+      "name": "Stop",
+      "category": "ThreadHeartBeat",
+      "signature": "Stop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadHeartBeat*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-game-thread-hitch-heart-beat-threaded",
+      "name": "FGameThreadHitchHeartBeatThreaded",
+      "category": "ThreadHeartBeat",
+      "signature": "FGameThreadHitchHeartBeatThreaded()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "frame-start",
+      "name": "FrameStart",
+      "category": "ThreadHeartBeat",
+      "signature": "FrameStart(Target, Skip This Frame)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameThreadHitchHeartBeatThreaded*"
+        },
+        {
+          "name": "Skip This Frame",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called at the start of a frame to register the time we are looking to detect a hitch"
+    },
+    {
+      "id": "get-frame-start-time",
+      "name": "GetFrameStartTime",
+      "category": "ThreadHeartBeat",
+      "signature": "GetFrameStartTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameThreadHitchHeartBeatThreaded*"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "get-current-time",
+      "name": "GetCurrentTime",
+      "category": "ThreadHeartBeat",
+      "signature": "GetCurrentTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameThreadHitchHeartBeatThreaded*"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "suspend-heart-beat-5b91df",
+      "name": "SuspendHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "SuspendHeartBeat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameThreadHitchHeartBeatThreaded*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Suspend heartbeat hitch detection. Must call ResumeHeartBeat later to resume."
+    },
+    {
+      "id": "resume-heart-beat-35ef27",
+      "name": "ResumeHeartBeat",
+      "category": "ThreadHeartBeat",
+      "signature": "ResumeHeartBeat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameThreadHitchHeartBeatThreaded*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resume heartbeat hitch detection. Call only after first calling SuspendHeartBeat."
+    },
+    {
+      "id": "is-started-suspended",
+      "name": "IsStartedSuspended",
+      "category": "ThreadHeartBeat",
+      "signature": "IsStartedSuspended(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameThreadHitchHeartBeatThreaded*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if started suspended."
+    }
+  ]
+}

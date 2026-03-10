@@ -1,0 +1,599 @@
+{
+  "id": "multithreaded-patching",
+  "label": "MultithreadedPatching",
+  "includepath": "DSP/MultithreadedPatching.h",
+  "includes": [
+    "CoreMinimal",
+    "BufferVectorOperations",
+    "Dsp"
+  ],
+  "functions": [
+    {
+      "id": "f-patch-output-0f5c70",
+      "name": "FPatchOutput",
+      "category": "MultithreadedPatching",
+      "signature": "FPatchOutput(In Max Capacity, In Gain)",
+      "params": [
+        {
+          "name": "In Max Capacity",
+          "type": "Int"
+        },
+        {
+          "name": "In Gain",
+          "type": "Float",
+          "default": "1.0f"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "This class can be thought of as an output for a single constructed instance of FPatchInput.\nEach FPatchOutput can only be connected to one FPatchInput. To route multiple outputs, see FPatchSplitter.\nTo route multiple inputs, see FPatchMixer.\nExample usage:\nFPatchOutputStrongPtr NewOutput(new FPatchOutput(4096));\nFPatchInput NewInput(NewOutput);\n// On one thread, push audio to the output:\nNewInput.PushAudio(AudioBufferPtr, AudioBufferNumSamples);\n// and on a seperate thread, retrieve the audio:\nNewOutput->PopAudio(OutAudioBufferPtr, AudioBufferNumSamples);"
+    },
+    {
+      "id": "f-patch-output-d1a359",
+      "name": "FPatchOutput",
+      "category": "MultithreadedPatching",
+      "signature": "FPatchOutput()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "The default constructor will result in an uninitialized, disconnected patch point."
+    },
+    {
+      "id": "pop-audio-69f1df",
+      "name": "PopAudio",
+      "category": "MultithreadedPatching",
+      "signature": "PopAudio(Target, Out Buffer, Num Samples, Use Latest Audio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        },
+        {
+          "name": "Out Buffer",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        },
+        {
+          "name": "Use Latest Audio",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Copies the minimum of NumSamples or however many samples are available into OutBuffer. Returns the number of samples copied, or -1 if this output's corresponding input has been destroyed."
+    },
+    {
+      "id": "mix-in-audio",
+      "name": "MixInAudio",
+      "category": "MultithreadedPatching",
+      "signature": "MixInAudio(Target, Out Buffer, Num Samples, Use Latest Audio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        },
+        {
+          "name": "Out Buffer",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        },
+        {
+          "name": "Use Latest Audio",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Sums the minimum of NumSamples or however many samples are available into OutBuffer. Returns the number of samples summed into OutBuffer."
+    },
+    {
+      "id": "get-num-samples-available",
+      "name": "GetNumSamplesAvailable",
+      "category": "MultithreadedPatching",
+      "signature": "GetNumSamplesAvailable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the current number of samples buffered on this output."
+    },
+    {
+      "id": "wait-until-num-samples-available",
+      "name": "WaitUntilNumSamplesAvailable",
+      "category": "MultithreadedPatching",
+      "signature": "WaitUntilNumSamplesAvailable(Target, Num Samples, Time Out Milliseconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        },
+        {
+          "name": "Time Out Milliseconds",
+          "type": "UInt",
+          "default": "MAX_uint32"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Pauses the current thread until there are the given number of samples available to pop. Will return true if it succeeded, false if it timed out."
+    },
+    {
+      "id": "is-input-stale",
+      "name": "IsInputStale",
+      "category": "MultithreadedPatching",
+      "signature": "IsInputStale(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the input for this patch has been destroyed."
+    },
+    {
+      "id": "push-audio-to-internal-buffer",
+      "name": "PushAudioToInternalBuffer",
+      "category": "MultithreadedPatching",
+      "signature": "PushAudioToInternalBuffer(Target, In Buffer, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        },
+        {
+          "name": "In Buffer",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "private : int32"
+    },
+    {
+      "id": "empty-internal-buffer",
+      "name": "EmptyInternalBuffer",
+      "category": "MultithreadedPatching",
+      "signature": "EmptyInternalBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchOutput*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-patch-input-e7d6a3",
+      "name": "FPatchInput",
+      "category": "MultithreadedPatching",
+      "signature": "FPatchInput(In Output)",
+      "params": [
+        {
+          "name": "In Output",
+          "type": "FPatchOutputStrongPtr&"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Patch outputs are owned by the FPatchMixer, and are pinned by the FPatchInput."
+    },
+    {
+      "id": "f-patch-input-282a8b",
+      "name": "FPatchInput",
+      "category": "MultithreadedPatching",
+      "signature": "FPatchInput(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FPatchInput&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-patch-input-99e94d",
+      "name": "FPatchInput",
+      "category": "MultithreadedPatching",
+      "signature": "FPatchInput()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Default constructed FPatchInput instances will always return -1 for PushAudio and true for IsOutputStillActive."
+    },
+    {
+      "id": "push-audio-d74f6e",
+      "name": "PushAudio",
+      "category": "MultithreadedPatching",
+      "signature": "PushAudio(Target, In Buffer, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchInput*"
+        },
+        {
+          "name": "In Buffer",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Pushes audio from InBuffer to the corresponding FPatchOutput.\nPushes zeros if InBuffer is nullptr.\nReturns how many samples were able to be pushed, or -1 if the output was disconnected."
+    },
+    {
+      "id": "clear-audio",
+      "name": "ClearAudio",
+      "category": "MultithreadedPatching",
+      "signature": "ClearAudio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchInput*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears any audio queued up in the patch."
+    },
+    {
+      "id": "set-gain",
+      "name": "SetGain",
+      "category": "MultithreadedPatching",
+      "signature": "SetGain(Target, In Gain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchInput*"
+        },
+        {
+          "name": "In Gain",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-output-still-active",
+      "name": "IsOutputStillActive",
+      "category": "MultithreadedPatching",
+      "signature": "IsOutputStillActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchInput*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns false if this output was removed, either because someone called FPatchMixer::RemoveTap with this FPatchInput, or the FPatchMixer was destroyed."
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "MultithreadedPatching",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchInput*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns false if this output was not initialized properly."
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "MultithreadedPatching",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchInput*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-new-input-5cd8d0",
+      "name": "AddNewInput",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewInput(Target, Max Latency In Samples, In Gain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        },
+        {
+          "name": "Max Latency In Samples",
+          "type": "Int"
+        },
+        {
+          "name": "In Gain",
+          "type": "Float"
+        }
+      ],
+      "returnType": "public : FPatchInput",
+      "docs": "Strong pointer to our destination buffer."
+    },
+    {
+      "id": "add-new-input-d6dc2e",
+      "name": "AddNewInput",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewInput(Target, In Patch Input)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        },
+        {
+          "name": "In Patch Input",
+          "type": "FPatchInput&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an existing patch input to the patch mixer."
+    },
+    {
+      "id": "remove-patch-4f3d13",
+      "name": "RemovePatch",
+      "category": "MultithreadedPatching",
+      "signature": "RemovePatch(Target, In Patch Input)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        },
+        {
+          "name": "In Patch Input",
+          "type": "FPatchInput&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes a tap from the tap collector. Calling this is thread safe, though FPatchOutput will likely not be deleted until the next call of PopAudio."
+    },
+    {
+      "id": "pop-audio-05caaa",
+      "name": "PopAudio",
+      "category": "MultithreadedPatching",
+      "signature": "PopAudio(Target, Out Buffer, Out Num Samples, Use Latest Audio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        },
+        {
+          "name": "Out Buffer",
+          "type": "Float*"
+        },
+        {
+          "name": "Out Num Samples",
+          "type": "Int"
+        },
+        {
+          "name": "Use Latest Audio",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Mixes all inputs into a single buffer. This should only be called from a single thread. Returns the number of non-silent samples popped to OutBuffer."
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "MultithreadedPatching",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This returns the number of inputs currently connected to this patch mixer. Thread safe, but blocks for PopAudio."
+    },
+    {
+      "id": "max-number-of-samples-that-can-be-popped",
+      "name": "MaxNumberOfSamplesThatCanBePopped",
+      "category": "MultithreadedPatching",
+      "signature": "MaxNumberOfSamplesThatCanBePopped(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This function call gets the maximum number of samples that's safe to pop, based on the thread with the least amount of samples buffered. Thread safe, but blocks for PopAudio."
+    },
+    {
+      "id": "disconnect-all-inputs",
+      "name": "DisconnectAllInputs",
+      "category": "MultithreadedPatching",
+      "signature": "DisconnectAllInputs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disconnect everything currently connected to this mixer."
+    },
+    {
+      "id": "add-new-patch-6cddd2",
+      "name": "AddNewPatch",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewPatch(Target, Max Latency In Samples, In Gain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchSplitter*"
+        },
+        {
+          "name": "Max Latency In Samples",
+          "type": "Int"
+        },
+        {
+          "name": "In Gain",
+          "type": "Float"
+        }
+      ],
+      "returnType": "public : FPatchOutputStrongPtr",
+      "docs": "New taps are added here in AddNewPatch, and then are moved to CurrentPatches in ConnectNewPatches."
+    },
+    {
+      "id": "add-new-patch-98186f",
+      "name": "AddNewPatch",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewPatch(Target, In Patch Output Strong Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchSplitter*"
+        },
+        {
+          "name": "In Patch Output Strong Ptr",
+          "type": "FPatchOutputStrongPtr&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new a patch from an existing patch output."
+    },
+    {
+      "id": "push-audio-6d2a4b",
+      "name": "PushAudio",
+      "category": "MultithreadedPatching",
+      "signature": "PushAudio(Target, In Buffer, In Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchSplitter*"
+        },
+        {
+          "name": "In Buffer",
+          "type": "Float*"
+        },
+        {
+          "name": "In Num Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This call pushes audio to all outputs connected to this splitter. Only should be called from one thread."
+    },
+    {
+      "id": "max-number-of-samples-that-can-be-pushed",
+      "name": "MaxNumberOfSamplesThatCanBePushed",
+      "category": "MultithreadedPatching",
+      "signature": "MaxNumberOfSamplesThatCanBePushed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchSplitter*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This function call gets the maximum number of samples that's safe to push. Thread safe, but blocks for PushAudio."
+    },
+    {
+      "id": "add-new-output-6c8a37",
+      "name": "AddNewOutput",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewOutput(Target, Max Latency In Samples, In Gain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixerSplitter*"
+        },
+        {
+          "name": "Max Latency In Samples",
+          "type": "Int"
+        },
+        {
+          "name": "In Gain",
+          "type": "Float"
+        }
+      ],
+      "returnType": "public : FPatchOutputStrongPtr",
+      "docs": "This class is used to mix multiple inputs from disparate threads to a single mixdown and deliver that mixdown to multiple outputs.\nThis class is MPMC, but only one thread can and should call ProcessAudio()."
+    },
+    {
+      "id": "add-new-output-ab78bc",
+      "name": "AddNewOutput",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewOutput(Target, In Patch Output Strong Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixerSplitter*"
+        },
+        {
+          "name": "In Patch Output Strong Ptr",
+          "type": "FPatchOutputStrongPtr&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new a patch from an existing patch output."
+    },
+    {
+      "id": "add-new-input-7c8970",
+      "name": "AddNewInput",
+      "category": "MultithreadedPatching",
+      "signature": "AddNewInput(Target, In Input)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixerSplitter*"
+        },
+        {
+          "name": "In Input",
+          "type": "FPatchInput&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new a patch input from an existing patch input object."
+    },
+    {
+      "id": "remove-patch-e4df0c",
+      "name": "RemovePatch",
+      "category": "MultithreadedPatching",
+      "signature": "RemovePatch(Target, In Input)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixerSplitter*"
+        },
+        {
+          "name": "In Input",
+          "type": "FPatchInput&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes a tap from the tap collector. Calling this is thread safe, though FPatchOutput will likely not be deleted until the next call of PopAudio."
+    },
+    {
+      "id": "process-audio",
+      "name": "ProcessAudio",
+      "category": "MultithreadedPatching",
+      "signature": "ProcessAudio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPatchMixerSplitter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mixes audio from all inputs and pushes it to all outputs. Should be called regularly."
+    }
+  ]
+}

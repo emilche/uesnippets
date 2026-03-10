@@ -1,0 +1,2217 @@
+{
+  "id": "island-manager",
+  "label": "IslandManager",
+  "includepath": "Chaos/Island/IslandManager.h",
+  "includes": [
+    "Core",
+    "ConstraintHandle",
+    "PoolBackedArray",
+    "Handles",
+    "IslandManagerFwd",
+    "ParticleHandleFwd",
+    "ParticleHandle",
+    "IterationSettings",
+    "Serializable"
+  ],
+  "functions": [
+    {
+      "id": "fpbd-island-particle-d0eb5a",
+      "name": "FPBDIslandParticle",
+      "category": "IslandManager",
+      "signature": "FPBDIslandParticle()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "A particle in the constraint graph."
+    },
+    {
+      "id": "fpbd-island-particle-9c6f31",
+      "name": "FPBDIslandParticle",
+      "category": "IslandManager",
+      "signature": "FPBDIslandParticle(In Particle)",
+      "params": [
+        {
+          "name": "In Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reuse-a9c0cc",
+      "name": "Reuse",
+      "category": "IslandManager",
+      "signature": "Reuse(Target, In Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "In Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trash",
+      "name": "Trash",
+      "category": "IslandManager",
+      "signature": "Trash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-island-id",
+      "name": "GetIslandId",
+      "category": "IslandManager",
+      "signature": "GetIslandId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "fpbd-island-constraint-2f1e11",
+      "name": "FPBDIslandConstraint",
+      "category": "IslandManager",
+      "signature": "FPBDIslandConstraint()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "A constraint in the constraint graph."
+    },
+    {
+      "id": "fpbd-island-constraint-e24674",
+      "name": "FPBDIslandConstraint",
+      "category": "IslandManager",
+      "signature": "FPBDIslandConstraint(In Container Id, In Constraint)",
+      "params": [
+        {
+          "name": "In Container Id",
+          "type": "Int"
+        },
+        {
+          "name": "In Constraint",
+          "type": "FConstraintHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reuse-cb3a64",
+      "name": "Reuse",
+      "category": "IslandManager",
+      "signature": "Reuse(Target, In Container Id, In Constraint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandConstraint*"
+        },
+        {
+          "name": "In Container Id",
+          "type": "Int"
+        },
+        {
+          "name": "In Constraint",
+          "type": "FConstraintHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fpbd-island",
+      "name": "FPBDIsland",
+      "category": "IslandManager",
+      "signature": "FPBDIsland()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "A set of connected constraints and particles.\nA dynamic particle can only be in one island, and each island explicitly holds an array of\nits dynamic particles. Kinematic particles may be in multiple islands and we do not hold\nthe set of these. To find kinematic particles used by an island you would need to visit all\nthe constraints."
+    },
+    {
+      "id": "reuse-d592b8",
+      "name": "Reuse",
+      "category": "IslandManager",
+      "signature": "Reuse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-sync-state",
+      "name": "UpdateSyncState",
+      "category": "IslandManager",
+      "signature": "UpdateSyncState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fpbd-island-merge-set",
+      "name": "FPBDIslandMergeSet",
+      "category": "IslandManager",
+      "signature": "FPBDIslandMergeSet()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "A set of islands to be merged together."
+    },
+    {
+      "id": "fpbd-island-manager-9278c9",
+      "name": "FPBDIslandManager",
+      "category": "IslandManager",
+      "signature": "FPBDIslandManager(In Particles)",
+      "params": [
+        {
+          "name": "In Particles",
+          "type": "FPBDRigidsSOAs&"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Notes on the implementation:\n- Particles are nodes in the graph\n- Constraints are edges in the graph\n- Each island knows about the constraints and dynamic particle in it\n- Islands do not track their kinematic particles (kinematics may be in multiple islands)\n@todo(chaos): the sleep and disable logic feel like they don't belong in here. It requires\nthat we know about materials, and the Disabled Particle concept sits at a higher level\n(in the Evolution, and in principle sleep does too since other system might need to know).\nThe main reason it is here is so that we can cache the thresholds and don't have to check\nthe materials for every particle every tick."
+    },
+    {
+      "id": "fpbd-island-manager-8ceb54",
+      "name": "FPBDIslandManager",
+      "category": "IslandManager",
+      "signature": "FPBDIslandManager()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-num-constraint-containers",
+      "name": "GetNumConstraintContainers",
+      "category": "IslandManager",
+      "signature": "GetNumConstraintContainers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "add-particle",
+      "name": "AddParticle",
+      "category": "IslandManager",
+      "signature": "AddParticle(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-particle",
+      "name": "RemoveParticle",
+      "category": "IslandManager",
+      "signature": "RemoveParticle(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reserve-particles",
+      "name": "ReserveParticles",
+      "category": "IslandManager",
+      "signature": "ReserveParticles(Target, In Num Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Num Particles",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "update-particle-material",
+      "name": "UpdateParticleMaterial",
+      "category": "IslandManager",
+      "signature": "UpdateParticleMaterial(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-particle-level-8d3417",
+      "name": "GetParticleLevel",
+      "category": "IslandManager",
+      "signature": "GetParticleLevel(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "wake-particle-islands",
+      "name": "WakeParticleIslands",
+      "category": "IslandManager",
+      "signature": "WakeParticleIslands(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "sleep-particle",
+      "name": "SleepParticle",
+      "category": "IslandManager",
+      "signature": "SleepParticle(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-constraint",
+      "name": "AddConstraint",
+      "category": "IslandManager",
+      "signature": "AddConstraint(Target, Container Id, Constraint, Constrained Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Container Id",
+          "type": "Int"
+        },
+        {
+          "name": "Constraint",
+          "type": "FConstraintHandle*"
+        },
+        {
+          "name": "Constrained Particles",
+          "type": "TVec2<FGeometryParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-constraint",
+      "name": "RemoveConstraint",
+      "category": "IslandManager",
+      "signature": "RemoveConstraint(Target, Constraint Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Constraint Handle",
+          "type": "FConstraintHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-particle-constraints",
+      "name": "RemoveParticleConstraints",
+      "category": "IslandManager",
+      "signature": "RemoveParticleConstraints(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-particle-container-constraints",
+      "name": "RemoveParticleContainerConstraints",
+      "category": "IslandManager",
+      "signature": "RemoveParticleContainerConstraints(Target, Particle, Container Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Container Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-container-constraints",
+      "name": "RemoveContainerConstraints",
+      "category": "IslandManager",
+      "signature": "RemoveContainerConstraints(Target, Container Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Container Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "wake-constraint-island",
+      "name": "WakeConstraintIsland",
+      "category": "IslandManager",
+      "signature": "WakeConstraintIsland(Target, Constraint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Constraint",
+          "type": "FConstraintHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-particle-island",
+      "name": "GetParticleIsland",
+      "category": "IslandManager",
+      "signature": "GetParticleIsland(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "FPBDIsland*"
+    },
+    {
+      "id": "get-constraint-island",
+      "name": "GetConstraintIsland",
+      "category": "IslandManager",
+      "signature": "GetConstraintIsland(Target, Constraint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Constraint",
+          "type": "FConstraintHandle*"
+        }
+      ],
+      "returnType": "FPBDIsland*"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "IslandManager",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-all-constraints",
+      "name": "RemoveAllConstraints",
+      "category": "IslandManager",
+      "signature": "RemoveAllConstraints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-constraint-container",
+      "name": "AddConstraintContainer",
+      "category": "IslandManager",
+      "signature": "AddConstraintContainer(Target, Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Container",
+          "type": "FPBDConstraintContainer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-constraint-container",
+      "name": "RemoveConstraintContainer",
+      "category": "IslandManager",
+      "signature": "RemoveConstraintContainer(Target, Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Container",
+          "type": "FPBDConstraintContainer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-material-containers",
+      "name": "SetMaterialContainers",
+      "category": "IslandManager",
+      "signature": "SetMaterialContainers(Target, In Physics Materials, In Per Particle Physics Materials, In Sim Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Physics Materials",
+          "type": "TArrayCollectionArray<TSerializablePtr<FChaosPhysicsMaterial>>*"
+        },
+        {
+          "name": "In Per Particle Physics Materials",
+          "type": "TArrayCollectionArray<TUniquePtr<FChaosPhysicsMaterial>>*"
+        },
+        {
+          "name": "In Sim Materials",
+          "type": "THandleArray<FChaosPhysicsMaterial>*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-gravity-forces",
+      "name": "SetGravityForces",
+      "category": "IslandManager",
+      "signature": "SetGravityForces(Target, In Gravity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Gravity",
+          "type": "FPerParticleGravity*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-disable-counter-threshold",
+      "name": "SetDisableCounterThreshold",
+      "category": "IslandManager",
+      "signature": "SetDisableCounterThreshold(Target, In Disable Counter Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Disable Counter Threshold",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-is-deterministic",
+      "name": "SetIsDeterministic",
+      "category": "IslandManager",
+      "signature": "SetIsDeterministic(Target, In Is Deterministic)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Is Deterministic",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-assign-levels",
+      "name": "SetAssignLevels",
+      "category": "IslandManager",
+      "signature": "SetAssignLevels(Target, In Assign Levels)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Assign Levels",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-explicit-sleep",
+      "name": "UpdateExplicitSleep",
+      "category": "IslandManager",
+      "signature": "UpdateExplicitSleep(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-particles",
+      "name": "UpdateParticles",
+      "category": "IslandManager",
+      "signature": "UpdateParticles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-islands",
+      "name": "UpdateIslands",
+      "category": "IslandManager",
+      "signature": "UpdateIslands(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-sleep",
+      "name": "UpdateSleep",
+      "category": "IslandManager",
+      "signature": "UpdateSleep(Target, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-disable",
+      "name": "UpdateDisable",
+      "category": "IslandManager",
+      "signature": "UpdateDisable(Target, Particle Disable Functor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle Disable Functor",
+          "type": "TFunctionRef<void ( FPBDRigidParticleHandle* )>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "end-tick",
+      "name": "EndTick",
+      "category": "IslandManager",
+      "signature": "EndTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-particle-level-0056eb",
+      "name": "GetParticleLevel",
+      "category": "IslandManager",
+      "signature": "GetParticleLevel(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-particle-color",
+      "name": "GetParticleColor",
+      "category": "IslandManager",
+      "signature": "GetParticleColor(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-constraint-level",
+      "name": "GetConstraintLevel",
+      "category": "IslandManager",
+      "signature": "GetConstraintLevel(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-constraint-color",
+      "name": "GetConstraintColor",
+      "category": "IslandManager",
+      "signature": "GetConstraintColor(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-particle-resim-frame",
+      "name": "GetParticleResimFrame",
+      "category": "IslandManager",
+      "signature": "GetParticleResimFrame(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "set-particle-resim-frame",
+      "name": "SetParticleResimFrame",
+      "category": "IslandManager",
+      "signature": "SetParticleResimFrame(Target, Particle, Resim Frame)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Resim Frame",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-particle-resim-frame",
+      "name": "ResetParticleResimFrame",
+      "category": "IslandManager",
+      "signature": "ResetParticleResimFrame(Target, Reset Frame)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Reset Frame",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-island-index",
+      "name": "GetIslandIndex",
+      "category": "IslandManager",
+      "signature": "GetIslandIndex(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-island-array-index",
+      "name": "GetIslandArrayIndex",
+      "category": "IslandManager",
+      "signature": "GetIslandArrayIndex(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-particle-islands-2ecf4c",
+      "name": "FindParticleIslands",
+      "category": "IslandManager",
+      "signature": "FindParticleIslands(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "TArray<FPBDIsland*>"
+    },
+    {
+      "id": "find-particle-islands-ccba0a",
+      "name": "FindParticleIslands",
+      "category": "IslandManager",
+      "signature": "FindParticleIslands(Target, Particle, Out Particle Islands)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Out Particle Islands",
+          "type": "TArray<FPBDIsland*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-particles-in-islands-e40f51",
+      "name": "FindParticlesInIslands",
+      "category": "IslandManager",
+      "signature": "FindParticlesInIslands(Target, Islands)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Islands",
+          "type": "TArray<FPBDIsland*>"
+        }
+      ],
+      "returnType": "TArray<FGeometryParticleHandle*>"
+    },
+    {
+      "id": "find-particles-in-islands-4a2c4f",
+      "name": "FindParticlesInIslands",
+      "category": "IslandManager",
+      "signature": "FindParticlesInIslands(Target, In Islands, Out Island Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "In Islands",
+          "type": "TArray<FPBDIsland*>&"
+        },
+        {
+          "name": "Out Island Particles",
+          "type": "TArray<FGeometryParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-constraints-in-islands",
+      "name": "FindConstraintsInIslands",
+      "category": "IslandManager",
+      "signature": "FindConstraintsInIslands(Target, Islands, Container Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Islands",
+          "type": "TArray<FPBDIsland*>"
+        },
+        {
+          "name": "Container Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FConstraintHandle*>"
+    },
+    {
+      "id": "debug-draw-sleep-state",
+      "name": "DebugDrawSleepState",
+      "category": "IslandManager",
+      "signature": "DebugDrawSleepState(Target, Debug Draw Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Debug Draw Settings",
+          "type": "DebugDraw::FChaosDebugDrawSettings*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-graph-node",
+      "name": "GetGraphNode",
+      "category": "IslandManager",
+      "signature": "GetGraphNode(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "FPBDIslandParticle*"
+    },
+    {
+      "id": "create-graph-node",
+      "name": "CreateGraphNode",
+      "category": "IslandManager",
+      "signature": "CreateGraphNode(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "FPBDIslandParticle*"
+    },
+    {
+      "id": "get-or-create-graph-node",
+      "name": "GetOrCreateGraphNode",
+      "category": "IslandManager",
+      "signature": "GetOrCreateGraphNode(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "FPBDIslandParticle*"
+    },
+    {
+      "id": "destroy-graph-node",
+      "name": "DestroyGraphNode",
+      "category": "IslandManager",
+      "signature": "DestroyGraphNode(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-graph-edge",
+      "name": "GetGraphEdge",
+      "category": "IslandManager",
+      "signature": "GetGraphEdge(Target, Constraint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Constraint",
+          "type": "FConstraintHandle*"
+        }
+      ],
+      "returnType": "FPBDIslandConstraint*"
+    },
+    {
+      "id": "create-graph-edge",
+      "name": "CreateGraphEdge",
+      "category": "IslandManager",
+      "signature": "CreateGraphEdge(Target, Container Id, Constraint, Constrained Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Container Id",
+          "type": "Int"
+        },
+        {
+          "name": "Constraint",
+          "type": "FConstraintHandle*"
+        },
+        {
+          "name": "Constrained Particles",
+          "type": "TVec2<FGeometryParticleHandle*>&"
+        }
+      ],
+      "returnType": "FPBDIslandConstraint*"
+    },
+    {
+      "id": "destroy-graph-edge",
+      "name": "DestroyGraphEdge",
+      "category": "IslandManager",
+      "signature": "DestroyGraphEdge(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "bind-edge-to-nodes",
+      "name": "BindEdgeToNodes",
+      "category": "IslandManager",
+      "signature": "BindEdgeToNodes(Target, Edge, Node 0, Node 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        },
+        {
+          "name": "Node 0",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "Node 1",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unbind-edge-from-nodes",
+      "name": "UnbindEdgeFromNodes",
+      "category": "IslandManager",
+      "signature": "UnbindEdgeFromNodes(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-graph-node-sleep-settings",
+      "name": "UpdateGraphNodeSleepSettings",
+      "category": "IslandManager",
+      "signature": "UpdateGraphNodeSleepSettings(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-graph-node",
+      "name": "UpdateGraphNode",
+      "category": "IslandManager",
+      "signature": "UpdateGraphNode(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-graph-edge",
+      "name": "UpdateGraphEdge",
+      "category": "IslandManager",
+      "signature": "UpdateGraphEdge(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-island",
+      "name": "CreateIsland",
+      "category": "IslandManager",
+      "signature": "CreateIsland(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "FPBDIsland*"
+    },
+    {
+      "id": "destroy-island",
+      "name": "DestroyIsland",
+      "category": "IslandManager",
+      "signature": "DestroyIsland(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "assign-node-island",
+      "name": "AssignNodeIsland",
+      "category": "IslandManager",
+      "signature": "AssignNodeIsland(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "assign-edge-island",
+      "name": "AssignEdgeIsland",
+      "category": "IslandManager",
+      "signature": "AssignEdgeIsland(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-node-to-island",
+      "name": "AddNodeToIsland",
+      "category": "IslandManager",
+      "signature": "AddNodeToIsland(Target, Node, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-node-from-island",
+      "name": "RemoveNodeFromIsland",
+      "category": "IslandManager",
+      "signature": "RemoveNodeFromIsland(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "destroy-island-nodes",
+      "name": "DestroyIslandNodes",
+      "category": "IslandManager",
+      "signature": "DestroyIslandNodes(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-edge-to-island",
+      "name": "AddEdgeToIsland",
+      "category": "IslandManager",
+      "signature": "AddEdgeToIsland(Target, Edge, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-edge-from-island",
+      "name": "RemoveEdgeFromIsland",
+      "category": "IslandManager",
+      "signature": "RemoveEdgeFromIsland(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Edge",
+          "type": "FPBDIslandConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "wake-node-islands",
+      "name": "WakeNodeIslands",
+      "category": "IslandManager",
+      "signature": "WakeNodeIslands(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enqueue-island-check-sleep",
+      "name": "EnqueueIslandCheckSleep",
+      "category": "IslandManager",
+      "signature": "EnqueueIslandCheckSleep(Target, Island, Is Sleep Allowed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Is Sleep Allowed",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "merge-node-islands",
+      "name": "MergeNodeIslands",
+      "category": "IslandManager",
+      "signature": "MergeNodeIslands(Target, Node 0, Node 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node 0",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "Node 1",
+          "type": "FPBDIslandParticle*"
+        }
+      ],
+      "returnType": "FPBDIsland*"
+    },
+    {
+      "id": "merge-islands",
+      "name": "MergeIslands",
+      "category": "IslandManager",
+      "signature": "MergeIslands(Target, Island 0, Island 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island 0",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Island 1",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "FPBDIsland*"
+    },
+    {
+      "id": "create-merge-set",
+      "name": "CreateMergeSet",
+      "category": "IslandManager",
+      "signature": "CreateMergeSet(Target, Island 0, Island 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island 0",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Island 1",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "FPBDIslandMergeSet*"
+    },
+    {
+      "id": "destroy-merge-set",
+      "name": "DestroyMergeSet",
+      "category": "IslandManager",
+      "signature": "DestroyMergeSet(Target, Island Merge Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island Merge Set",
+          "type": "FPBDIslandMergeSet*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-island-to-merge-set",
+      "name": "AddIslandToMergeSet",
+      "category": "IslandManager",
+      "signature": "AddIslandToMergeSet(Target, Island, Island Merge Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Island Merge Set",
+          "type": "FPBDIslandMergeSet*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-island-from-merge-set",
+      "name": "RemoveIslandFromMergeSet",
+      "category": "IslandManager",
+      "signature": "RemoveIslandFromMergeSet(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "combine-merge-sets",
+      "name": "CombineMergeSets",
+      "category": "IslandManager",
+      "signature": "CombineMergeSets(Target, Island Merge Set Parent, Island Merge Set Child)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island Merge Set Parent",
+          "type": "FPBDIslandMergeSet*"
+        },
+        {
+          "name": "Island Merge Set Child",
+          "type": "FPBDIslandMergeSet*"
+        }
+      ],
+      "returnType": "FPBDIslandMergeSet*"
+    },
+    {
+      "id": "get-merge-set-parent-island",
+      "name": "GetMergeSetParentIsland",
+      "category": "IslandManager",
+      "signature": "GetMergeSetParentIsland(Target, Merge Set, Out Num Edges, Out Num Container Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Merge Set",
+          "type": "FPBDIslandMergeSet*"
+        },
+        {
+          "name": "Out Num Edges",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Num Container Edges",
+          "type": "TArrayView<int32>&"
+        }
+      ],
+      "returnType": "FPBDIsland*"
+    },
+    {
+      "id": "process-islands",
+      "name": "ProcessIslands",
+      "category": "IslandManager",
+      "signature": "ProcessIslands(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-wakes",
+      "name": "ProcessWakes",
+      "category": "IslandManager",
+      "signature": "ProcessWakes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-merges",
+      "name": "ProcessMerges",
+      "category": "IslandManager",
+      "signature": "ProcessMerges(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-splits",
+      "name": "ProcessSplits",
+      "category": "IslandManager",
+      "signature": "ProcessSplits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "assign-levels",
+      "name": "AssignLevels",
+      "category": "IslandManager",
+      "signature": "AssignLevels(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-island-merge",
+      "name": "ProcessIslandMerge",
+      "category": "IslandManager",
+      "signature": "ProcessIslandMerge(Target, Parent Island, Child Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Parent Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Child Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-island-splits",
+      "name": "ProcessIslandSplits",
+      "category": "IslandManager",
+      "signature": "ProcessIslandSplits(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "assign-island-levels",
+      "name": "AssignIslandLevels",
+      "category": "IslandManager",
+      "signature": "AssignIslandLevels(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "sort-island-edges",
+      "name": "SortIslandEdges",
+      "category": "IslandManager",
+      "signature": "SortIslandEdges(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "randomize-island-edges",
+      "name": "RandomizeIslandEdges",
+      "category": "IslandManager",
+      "signature": "RandomizeIslandEdges(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-sleep",
+      "name": "ProcessSleep",
+      "category": "IslandManager",
+      "signature": "ProcessSleep(Target, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-particles-sleep",
+      "name": "ProcessParticlesSleep",
+      "category": "IslandManager",
+      "signature": "ProcessParticlesSleep(Target, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-island-sleep",
+      "name": "ProcessIslandSleep",
+      "category": "IslandManager",
+      "signature": "ProcessIslandSleep(Target, Island, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "propagate-island-sleep",
+      "name": "PropagateIslandSleep",
+      "category": "IslandManager",
+      "signature": "PropagateIslandSleep(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "propagate-island-sleep-to-particles",
+      "name": "PropagateIslandSleepToParticles",
+      "category": "IslandManager",
+      "signature": "PropagateIslandSleepToParticles(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "propagate-island-sleep-to-constraints",
+      "name": "PropagateIslandSleepToConstraints",
+      "category": "IslandManager",
+      "signature": "PropagateIslandSleepToConstraints(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-partial-island-sleep",
+      "name": "ProcessPartialIslandSleep",
+      "category": "IslandManager",
+      "signature": "ProcessPartialIslandSleep(Target, Island, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "sleep-non-moving-particles",
+      "name": "SleepNonMovingParticles",
+      "category": "IslandManager",
+      "signature": "SleepNonMovingParticles(Target, Island, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "propagate-particle-sleep-to-constraints",
+      "name": "PropagateParticleSleepToConstraints",
+      "category": "IslandManager",
+      "signature": "PropagateParticleSleepToConstraints(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-partial-island-wake",
+      "name": "ProcessPartialIslandWake",
+      "category": "IslandManager",
+      "signature": "ProcessPartialIslandWake(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "propagate-partial-island-wake",
+      "name": "PropagatePartialIslandWake",
+      "category": "IslandManager",
+      "signature": "PropagatePartialIslandWake(Target, Node Queue, Particles To Wake Up, Num Nodes Constraint Wake, Trigger Nodes Always Propagate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node Queue",
+          "type": "TArray<FPBDIslandParticle*>&"
+        },
+        {
+          "name": "Particles To Wake Up",
+          "type": "TArray<FGeometryParticleHandle*>&"
+        },
+        {
+          "name": "Num Nodes Constraint Wake",
+          "type": "Int"
+        },
+        {
+          "name": "Trigger Nodes Always Propagate",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "process-trigger-particle",
+      "name": "ProcessTriggerParticle",
+      "category": "IslandManager",
+      "signature": "ProcessTriggerParticle(Target, Node, Node Queue, Always Trigger)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "Node Queue",
+          "type": "TArray<FPBDIslandParticle*>&"
+        },
+        {
+          "name": "Always Trigger",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "process-particle-wake",
+      "name": "ProcessParticleWake",
+      "category": "IslandManager",
+      "signature": "ProcessParticleWake(Target, Node, Other Node, Node Queue, Wake Up Queue, Always Propagate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Node",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "Other Node",
+          "type": "FPBDIslandParticle*"
+        },
+        {
+          "name": "Node Queue",
+          "type": "TArray<FPBDIslandParticle*>&"
+        },
+        {
+          "name": "Wake Up Queue",
+          "type": "TArray<FGeometryParticleHandle*>&"
+        },
+        {
+          "name": "Always Propagate",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "sync-constraint-sleep-state-to-particles",
+      "name": "SyncConstraintSleepStateToParticles",
+      "category": "IslandManager",
+      "signature": "SyncConstraintSleepStateToParticles(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "wake-up-particles",
+      "name": "WakeUpParticles",
+      "category": "IslandManager",
+      "signature": "WakeUpParticles(Target, Particles To Wake, Reset Sleep Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particles To Wake",
+          "type": "TArray<FGeometryParticleHandle*>&"
+        },
+        {
+          "name": "Reset Sleep Counter",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-particle-sleep-counter",
+      "name": "ResetParticleSleepCounter",
+      "category": "IslandManager",
+      "signature": "ResetParticleSleepCounter(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-edge-flags",
+      "name": "ResetEdgeFlags",
+      "category": "IslandManager",
+      "signature": "ResetEdgeFlags(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-node-flags",
+      "name": "ResetNodeFlags",
+      "category": "IslandManager",
+      "signature": "ResetNodeFlags(Target, Island)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-disable",
+      "name": "ProcessDisable",
+      "category": "IslandManager",
+      "signature": "ProcessDisable(Target, Particle Disable Functor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Particle Disable Functor",
+          "type": "TFunctionRef<void ( FPBDRigidParticleHandle* )>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-particles-disable",
+      "name": "ProcessParticlesDisable",
+      "category": "IslandManager",
+      "signature": "ProcessParticlesDisable(Target, Out Disable Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Out Disable Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-island-disable",
+      "name": "ProcessIslandDisable",
+      "category": "IslandManager",
+      "signature": "ProcessIslandDisable(Target, Island, Out Disable Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Island",
+          "type": "FPBDIsland*"
+        },
+        {
+          "name": "Out Disable Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "finalize-islands",
+      "name": "FinalizeIslands",
+      "category": "IslandManager",
+      "signature": "FinalizeIslands(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-determinism",
+      "name": "ApplyDeterminism",
+      "category": "IslandManager",
+      "signature": "ApplyDeterminism(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "validate",
+      "name": "Validate",
+      "category": "IslandManager",
+      "signature": "Validate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "update-all-particle-sleep-metrics",
+      "name": "UpdateAllParticleSleepMetrics",
+      "category": "IslandManager",
+      "signature": "UpdateAllParticleSleepMetrics(Target, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-next-visit-epoch",
+      "name": "GetNextVisitEpoch",
+      "category": "IslandManager",
+      "signature": "GetNextVisitEpoch(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "should-assign-levels",
+      "name": "ShouldAssignLevels",
+      "category": "IslandManager",
+      "signature": "ShouldAssignLevels(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDIslandManager*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

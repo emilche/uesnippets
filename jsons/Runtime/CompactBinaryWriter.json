@@ -1,0 +1,636 @@
+{
+  "id": "compact-binary-writer",
+  "label": "CompactBinaryWriter",
+  "includepath": "Serialization/CompactBinaryWriter.h",
+  "includes": [
+    "Array",
+    "ContainersFwd",
+    "StringFwd",
+    "StringView",
+    "CoreTypes",
+    "PlatformCrt",
+    "MemoryFwd",
+    "MemoryView",
+    "CompactBinary",
+    "type_traits"
+  ],
+  "functions": [
+    {
+      "id": "f-cb-writer-819703",
+      "name": "FCbWriter",
+      "category": "CompactBinaryWriter",
+      "signature": "FCbWriter()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "A writer for compact binary object, arrays, and fields.\nThe writer produces a sequence of fields that can be saved to a provided memory buffer or into\na new owned buffer. The typical use case is to write a single object, which can be accessed by\ncalling Save().AsObject() or Save(Buffer).AsObjectView().\nThe writer will assert on most incorrect usage and will always produce valid compact binary if\nprovided with valid input. The writer does not check for invalid UTF-8 string encoding, object\nfields with duplicate names, or invalid compact binary being copied from another source.\nIt is most convenient to use the streaming API for the writer, as demonstrated in the example.\nWhen writing a small amount of compact binary data, TCbWriter can be more efficient as it uses\na fixed-size stack buffer for storage before spilling onto the heap.\n@see TCbWriter\nExample:\nFCbObject WriteObject()\n{\nTCbWriter<256> Writer;\nWriter.BeginObject();\nWriter << \"Resize\" << true;\nWriter << \"MaxWidth\" << 1024;\nWriter << \"MaxHeight\" << 1024;\nWriter.BeginArray();\nWriter << \"FormatA\" << \"FormatB\" << \"FormatC\";\nWriter.EndArray();\nWriter.EndObject();\nreturn Writer.Save().AsObject();\n}"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "CompactBinaryWriter",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Empty the writer without releasing any allocated memory."
+    },
+    {
+      "id": "save-beca23",
+      "name": "Save",
+      "category": "CompactBinaryWriter",
+      "signature": "Save(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "FCbFieldIterator",
+      "docs": "Serialize the field(s) to an owned buffer and return it as an iterator.\nIt is not valid to call this function in the middle of writing an object, array, or field.\nThe writer remains valid for further use when this function returns."
+    },
+    {
+      "id": "save-b5d753",
+      "name": "Save",
+      "category": "CompactBinaryWriter",
+      "signature": "Save(Target, Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Buffer",
+          "type": "FMutableMemoryView"
+        }
+      ],
+      "returnType": "FCbFieldViewIterator",
+      "docs": "Serialize the field(s) to memory.\nIt is not valid to call this function in the middle of writing an object, array, or field.\nThe writer remains valid for further use when this function returns.\n@param Buffer A mutable memory view to write to. Must be exactly GetSaveSize() bytes.\n@return An iterator for the field(s) written to the buffer."
+    },
+    {
+      "id": "save-612c1d",
+      "name": "Save",
+      "category": "CompactBinaryWriter",
+      "signature": "Save(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serialize the field(s) to an archive.\nIt is not valid to call this function in the middle of writing an object, array, or field.\nThe writer remains valid for further use when this function returns.\n@param Ar An archive to write to. Exactly GetSaveSize() bytes will be written."
+    },
+    {
+      "id": "get-save-size",
+      "name": "GetSaveSize",
+      "category": "CompactBinaryWriter",
+      "signature": "GetSaveSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "The size of buffer (in bytes) required to serialize the fields that have been written.\nIt is not valid to call this function in the middle of writing an object, array, or field."
+    },
+    {
+      "id": "set-name",
+      "name": "SetName",
+      "category": "CompactBinaryWriter",
+      "signature": "SetName(Target, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Name",
+          "type": "FUtf8StringView"
+        }
+      ],
+      "returnType": "FCbWriter&",
+      "docs": "Sets the name of the next field to be written.\nIt is not valid to call this function when writing a field inside an array.\nNames must be valid UTF-8 and must be unique within an object."
+    },
+    {
+      "id": "add-field",
+      "name": "AddField",
+      "category": "CompactBinaryWriter",
+      "signature": "AddField(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FCbFieldView&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-object",
+      "name": "BeginObject",
+      "category": "CompactBinaryWriter",
+      "signature": "BeginObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "end-object",
+      "name": "EndObject",
+      "category": "CompactBinaryWriter",
+      "signature": "EndObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "End an object after its fields have been written."
+    },
+    {
+      "id": "add-object",
+      "name": "AddObject",
+      "category": "CompactBinaryWriter",
+      "signature": "AddObject(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FCbObjectView&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-array",
+      "name": "BeginArray",
+      "category": "CompactBinaryWriter",
+      "signature": "BeginArray(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "end-array",
+      "name": "EndArray",
+      "category": "CompactBinaryWriter",
+      "signature": "EndArray(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "End an array after its fields have been written."
+    },
+    {
+      "id": "add-array",
+      "name": "AddArray",
+      "category": "CompactBinaryWriter",
+      "signature": "AddArray(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FCbArrayView&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-null",
+      "name": "AddNull",
+      "category": "CompactBinaryWriter",
+      "signature": "AddNull(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-binary-33a75f",
+      "name": "AddBinary",
+      "category": "CompactBinaryWriter",
+      "signature": "AddBinary(Target, Value, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-binary-f00b6d",
+      "name": "AddBinary",
+      "category": "CompactBinaryWriter",
+      "signature": "AddBinary(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FSharedBuffer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-string",
+      "name": "AddString",
+      "category": "CompactBinaryWriter",
+      "signature": "AddString(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FUtf8StringView"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-integer",
+      "name": "AddInteger",
+      "category": "CompactBinaryWriter",
+      "signature": "AddInteger(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-float",
+      "name": "AddFloat",
+      "category": "CompactBinaryWriter",
+      "signature": "AddFloat(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-bool",
+      "name": "AddBool",
+      "category": "CompactBinaryWriter",
+      "signature": "AddBool(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-object-attachment",
+      "name": "AddObjectAttachment",
+      "category": "CompactBinaryWriter",
+      "signature": "AddObjectAttachment(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-binary-attachment",
+      "name": "AddBinaryAttachment",
+      "category": "CompactBinaryWriter",
+      "signature": "AddBinaryAttachment(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-attachment",
+      "name": "AddAttachment",
+      "category": "CompactBinaryWriter",
+      "signature": "AddAttachment(Target, Attachment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Attachment",
+          "type": "FCbAttachment&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-hash",
+      "name": "AddHash",
+      "category": "CompactBinaryWriter",
+      "signature": "AddHash(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-uuid",
+      "name": "AddUuid",
+      "category": "CompactBinaryWriter",
+      "signature": "AddUuid(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-date-time-ticks",
+      "name": "AddDateTimeTicks",
+      "category": "CompactBinaryWriter",
+      "signature": "AddDateTimeTicks(Target, Ticks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Ticks",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-date-time-43a6da",
+      "name": "AddDateTime",
+      "category": "CompactBinaryWriter",
+      "signature": "AddDateTime(Target, Name, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Name",
+          "type": "FUtf8StringView"
+        },
+        {
+          "name": "Value",
+          "type": "FDateTime"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Write a date/time field."
+    },
+    {
+      "id": "add-date-time-3aa599",
+      "name": "AddDateTime",
+      "category": "CompactBinaryWriter",
+      "signature": "AddDateTime(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FDateTime"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-time-span-ticks",
+      "name": "AddTimeSpanTicks",
+      "category": "CompactBinaryWriter",
+      "signature": "AddTimeSpanTicks(Target, Ticks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Ticks",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-time-span-77c18c",
+      "name": "AddTimeSpan",
+      "category": "CompactBinaryWriter",
+      "signature": "AddTimeSpan(Target, Name, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Name",
+          "type": "FUtf8StringView"
+        },
+        {
+          "name": "Value",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Write a time span field."
+    },
+    {
+      "id": "add-time-span-f30898",
+      "name": "AddTimeSpan",
+      "category": "CompactBinaryWriter",
+      "signature": "AddTimeSpan(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-object-id",
+      "name": "AddObjectId",
+      "category": "CompactBinaryWriter",
+      "signature": "AddObjectId(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "FCbObjectId&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-custom-fb1f11",
+      "name": "AddCustom",
+      "category": "CompactBinaryWriter",
+      "signature": "AddCustom(Target, Type Id, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Type Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Value",
+          "type": "FMemoryView"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-custom-84d8c8",
+      "name": "AddCustom",
+      "category": "CompactBinaryWriter",
+      "signature": "AddCustom(Target, Type Name, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Type Name",
+          "type": "FUtf8StringView"
+        },
+        {
+          "name": "Value",
+          "type": "FMemoryView"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-cb-writer-70f093",
+      "name": "FCbWriter",
+      "category": "CompactBinaryWriter",
+      "signature": "FCbWriter(Initial Size)",
+      "params": [
+        {
+          "name": "Initial Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "protected :",
+      "docs": "Private flags that are public to work with ENUM_CLASS_FLAGS."
+    },
+    {
+      "id": "set-name-or-add-string",
+      "name": "SetNameOrAddString",
+      "category": "CompactBinaryWriter",
+      "signature": "SetNameOrAddString(Target, Name Or Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbWriter*"
+        },
+        {
+          "name": "Name Or Value",
+          "type": "FUtf8StringView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the field name if valid in this state, otherwise write add a string field."
+    }
+  ]
+}

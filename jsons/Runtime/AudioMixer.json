@@ -1,0 +1,566 @@
+{
+  "id": "audio-mixer",
+  "label": "AudioMixer",
+  "includepath": "AudioMixer.h",
+  "includes": [
+    "Future",
+    "AudioMixerLog",
+    "AudioMixerNullDevice",
+    "AudioMixerTypes",
+    "Array",
+    "ArrayView",
+    "Set",
+    "UnrealString",
+    "CoreMinimal",
+    "BufferVectorOperations",
+    "Dsp",
+    "ParamInterpolator",
+    "CriticalSection",
+    "PlatformMath",
+    "Runnable",
+    "ThreadSafeBool",
+    "LogCategory",
+    "LogMacros",
+    "LogVerbosity",
+    "AssertionMacros",
+    "Optional",
+    "ScopeLock",
+    "SingleThreadRunnable",
+    "ModuleInterface",
+    "Stats",
+    "Function",
+    "SharedPointer",
+    "UniquePtr",
+    "Channel",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "should-use-threaded-device-swap",
+      "name": "ShouldUseThreadedDeviceSwap",
+      "category": "AudioMixer",
+      "signature": "ShouldUseThreadedDeviceSwap()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Called by AudioMixer to see if we should do a multithreaded device swap"
+    },
+    {
+      "id": "should-recycle-threads",
+      "name": "ShouldRecycleThreads",
+      "category": "AudioMixer",
+      "signature": "ShouldRecycleThreads()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Called by AudioMixer to see if it should reycle the threads:"
+    },
+    {
+      "id": "should-use-device-info-cache",
+      "name": "ShouldUseDeviceInfoCache",
+      "category": "AudioMixer",
+      "signature": "ShouldUseDeviceInfoCache()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Called by AudioMixer if it should use Cache for DeviceInfo Enumeration"
+    },
+    {
+      "id": "f-audio-render-time-analysis",
+      "name": "FAudioRenderTimeAnalysis",
+      "category": "AudioMixer",
+      "signature": "FAudioRenderTimeAnalysis()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Struct used to store render time analysis data."
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "category": "AudioMixer",
+      "signature": "Start(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioRenderTimeAnalysis*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "category": "AudioMixer",
+      "signature": "End(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioRenderTimeAnalysis*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "AudioMixer",
+      "signature": "Init(Target, In Audio Mixer, In Num Samples, In Num Buffers, In Data Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputBuffer*"
+        },
+        {
+          "name": "In Audio Mixer",
+          "type": "IAudioMixer*"
+        },
+        {
+          "name": "In Num Samples",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Buffers",
+          "type": "Int"
+        },
+        {
+          "name": "In Data Format",
+          "type": "EAudioMixerStreamDataFormat::Type"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the buffer with the given samples and output format."
+    },
+    {
+      "id": "mix-next-buffer",
+      "name": "MixNextBuffer",
+      "category": "AudioMixer",
+      "signature": "MixNextBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputBuffer*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the next mixed buffer from the audio mixer. Returns false if our buffer is already full."
+    },
+    {
+      "id": "pop-buffer-data",
+      "name": "PopBufferData",
+      "category": "AudioMixer",
+      "signature": "PopBufferData(Target, Out Bytes Popped)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputBuffer*"
+        },
+        {
+          "name": "Out Bytes Popped",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "TArrayView<uint8>",
+      "docs": "Gets the buffer data ptrs. Returns a TArrayView for the full buffer size requested, but in the case of an underrun, OutBytesPopped will be less that the size of the returned TArrayView."
+    },
+    {
+      "id": "get-num-samples",
+      "name": "GetNumSamples",
+      "category": "AudioMixer",
+      "signature": "GetNumSamples(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputBuffer*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of frames of the buffer."
+    },
+    {
+      "id": "get-size-for-data-format",
+      "name": "GetSizeForDataFormat",
+      "category": "AudioMixer",
+      "signature": "GetSizeForDataFormat(In Data Format)",
+      "params": [
+        {
+          "name": "In Data Format",
+          "type": "EAudioMixerStreamDataFormat::Type"
+        }
+      ],
+      "returnType": "size_t"
+    },
+    {
+      "id": "i-audio-mixer-platform-interface",
+      "name": "IAudioMixerPlatformInterface",
+      "category": "AudioMixer",
+      "signature": "IAudioMixerPlatformInterface()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Abstract interface for mixer platform."
+    },
+    {
+      "id": "get-index-for-device",
+      "name": "GetIndexForDevice",
+      "category": "AudioMixer",
+      "signature": "GetIndexForDevice(Target, In Device Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        },
+        {
+          "name": "In Device Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Can be used to look up the current index for a given device name.\nOn most platforms, this index may be invalidated if any devices are added or removed.\nReturns INDEX_NONE if no mapping is found"
+    },
+    {
+      "id": "get-channel-type-at-index",
+      "name": "GetChannelTypeAtIndex",
+      "category": "AudioMixer",
+      "signature": "GetChannelTypeAtIndex(Index, Out Type)",
+      "params": [
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Out Type",
+          "type": "EAudioMixerChannel::Type&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "run",
+      "name": "Run",
+      "category": "AudioMixer",
+      "signature": "Run(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "public : uint32"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "AudioMixer",
+      "signature": "Tick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSingleThreadRunnable*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "read-next-buffer",
+      "name": "ReadNextBuffer",
+      "category": "AudioMixer",
+      "signature": "ReadNextBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves the next generated buffer and feeds it to the platform mixer output stream."
+    },
+    {
+      "id": "fade-in",
+      "name": "FadeIn",
+      "category": "AudioMixer",
+      "signature": "FadeIn(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the fade state (use if reusing audio platform interface, e.g. in main audio device."
+    },
+    {
+      "id": "fade-out",
+      "name": "FadeOut",
+      "category": "AudioMixer",
+      "signature": "FadeOut(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Start a fadeout. Prevents pops during shutdown."
+    },
+    {
+      "id": "post-initialize-hardware",
+      "name": "PostInitializeHardware",
+      "category": "AudioMixer",
+      "signature": "PostInitializeHardware(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This is called after InitializeHardware() is called."
+    },
+    {
+      "id": "main-audio-device-run",
+      "name": "MainAudioDeviceRun",
+      "category": "AudioMixer",
+      "signature": "MainAudioDeviceRun(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "protected : uint32"
+    },
+    {
+      "id": "run-internal",
+      "name": "RunInternal",
+      "category": "AudioMixer",
+      "signature": "RunInternal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "begin-generating-audio",
+      "name": "BeginGeneratingAudio",
+      "category": "AudioMixer",
+      "signature": "BeginGeneratingAudio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Start generating audio from our mixer."
+    },
+    {
+      "id": "stop-generating-audio",
+      "name": "StopGeneratingAudio",
+      "category": "AudioMixer",
+      "signature": "StopGeneratingAudio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops the render thread from generating audio."
+    },
+    {
+      "id": "apply-master-attenuation",
+      "name": "ApplyMasterAttenuation",
+      "category": "AudioMixer",
+      "signature": "ApplyMasterAttenuation(Target, In Out Popped Audio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        },
+        {
+          "name": "In Out Popped Audio",
+          "type": "TArrayView<uint8>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-primary-attenuation",
+      "name": "ApplyPrimaryAttenuation",
+      "category": "AudioMixer",
+      "signature": "ApplyPrimaryAttenuation(Target, In Out Popped Audio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        },
+        {
+          "name": "In Out Popped Audio",
+          "type": "TArrayView<uint8>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Performs buffer fades for shutdown/startup of audio mixer."
+    },
+    {
+      "id": "start-running-null-device",
+      "name": "StartRunningNullDevice",
+      "category": "AudioMixer",
+      "signature": "StartRunningNullDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When called, spins up a thread to start consuming output when no audio device is available."
+    },
+    {
+      "id": "stop-running-null-device",
+      "name": "StopRunningNullDevice",
+      "category": "AudioMixer",
+      "signature": "StopRunningNullDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When called, terminates the null device."
+    },
+    {
+      "id": "create-null-device-thread",
+      "name": "CreateNullDeviceThread",
+      "category": "AudioMixer",
+      "signature": "CreateNullDeviceThread(Target, In Callback, In Buffer Duration, Should Pause On Start)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioMixerPlatformInterface*"
+        },
+        {
+          "name": "In Callback",
+          "type": "TFunction<void ( )>"
+        },
+        {
+          "name": "In Buffer Duration",
+          "type": "Float"
+        },
+        {
+          "name": "Should Pause On Start",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by platform specific logic to pre-create or create the null renderer thread"
+    },
+    {
+      "id": "f-audio-mixer-platform-swappable",
+      "name": "FAudioMixerPlatformSwappable",
+      "category": "AudioMixer",
+      "signature": "FAudioMixerPlatformSwappable()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "A Counter to provide the next unique id."
+    },
+    {
+      "id": "request-device-swap",
+      "name": "RequestDeviceSwap",
+      "category": "AudioMixer",
+      "signature": "RequestDeviceSwap(Target, Device ID, In Force, In Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioMixerPlatformSwappable*"
+        },
+        {
+          "name": "Device ID",
+          "type": "String&"
+        },
+        {
+          "name": "In Force",
+          "type": "Bool"
+        },
+        {
+          "name": "In Reason",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "check-audio-device-change",
+      "name": "CheckAudioDeviceChange",
+      "category": "AudioMixer",
+      "signature": "CheckAudioDeviceChange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioMixerPlatformSwappable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if audio device changed if applicable. Return true if audio device changed."
+    },
+    {
+      "id": "move-audio-stream-to-new-audio-device",
+      "name": "MoveAudioStreamToNewAudioDevice",
+      "category": "AudioMixer",
+      "signature": "MoveAudioStreamToNewAudioDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioMixerPlatformSwappable*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "resume-playback-on-new-device",
+      "name": "ResumePlaybackOnNewDevice",
+      "category": "AudioMixer",
+      "signature": "ResumePlaybackOnNewDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioMixerPlatformSwappable*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resumes playback on new audio device after device change."
+    },
+    {
+      "id": "allow-device-swap",
+      "name": "AllowDeviceSwap",
+      "category": "AudioMixer",
+      "signature": "AllowDeviceSwap(Target, In Force Swap)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioMixerPlatformSwappable*"
+        },
+        {
+          "name": "In Force Swap",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Called to determine if the current device swap request should be allowed to proceed."
+    },
+    {
+      "id": "check-threaded-device-swap",
+      "name": "CheckThreadedDeviceSwap",
+      "category": "AudioMixer",
+      "signature": "CheckThreadedDeviceSwap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioMixerPlatformSwappable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Called repeatedly to update an active, async device swap"
+    }
+  ]
+}

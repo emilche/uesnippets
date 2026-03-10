@@ -1,0 +1,623 @@
+{
+  "id": "generic-platform-input-device-mapper",
+  "label": "GenericPlatformInputDeviceMapper",
+  "includepath": "GenericPlatform/GenericPlatformInputDeviceMapper.h",
+  "includes": [
+    "Array",
+    "Map",
+    "CoreTypes",
+    "Delegate",
+    "LogMacros"
+  ],
+  "functions": [
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "public : IPlatformInputDeviceMapper&",
+      "docs": "Base class to private a mapping of Platform Users (FPlatformUserID)\nto their associated available input devices (FInputDeviceID).\nThis will handle the allocation of the globally unique identifier\nof the FInputDeviceID, and allow overrides of how each platform\nmaps input devices to their users. Some platforms may desire to\nhave each new input device assigned to a different user, while others\nmay want multiple input devices associated with a single user.\n@note Keep any function comments up to date with those in PlatformInputDeviceMapperLibrary.h!"
+    },
+    {
+      "id": "i-platform-input-device-mapper",
+      "name": "IPlatformInputDeviceMapper",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "IPlatformInputDeviceMapper()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Virtual destructor"
+    },
+    {
+      "id": "get-all-input-devices-for-user",
+      "name": "GetAllInputDevicesForUser",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetAllInputDevicesForUser(Target, User Id, Out Input Devices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "User Id",
+          "type": "FPlatformUserId"
+        },
+        {
+          "name": "Out Input Devices",
+          "type": "TArray<FInputDeviceId>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Populates the OutInputDevices array with any InputDeviceID's that are mapped to the given platform user\n@param UserId\t\t\t\tThe Platform User to gather the input devices of.\n@param OutInputDevices\t\tArray of input device ID's that will be populated with the mapped devices.\n@return\t\t\t\t\t\tThe number of mapped devices, INDEX_NONE if the user was not found."
+    },
+    {
+      "id": "get-all-input-devices",
+      "name": "GetAllInputDevices",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetAllInputDevices(Target, Out Input Devices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Out Input Devices",
+          "type": "TArray<FInputDeviceId>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get all mapped input devices on this platform regardless of their connection state.\n@param OutInputDevices\tArray of input devices to populate\n@return\t\t\t\t\tThe number of connected input devices"
+    },
+    {
+      "id": "get-all-connected-input-devices",
+      "name": "GetAllConnectedInputDevices",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetAllConnectedInputDevices(Target, Out Input Devices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Out Input Devices",
+          "type": "TArray<FInputDeviceId>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gather all currently connected input devices\n@param OutInputDevices\tArray of input devices to populate\n@return\t\t\t\t\tThe number of connected input devices"
+    },
+    {
+      "id": "get-all-active-users",
+      "name": "GetAllActiveUsers",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetAllActiveUsers(Target, Out Users)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Out Users",
+          "type": "TArray<FPlatformUserId>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get all currently active platform ids, anyone who has a mapped input device\n@param OutUsers\t\tArray that will be populated with the platform users.\n@return\t\t\t\tThe number of active platform users"
+    },
+    {
+      "id": "get-first-platform-user-with-no-input-device",
+      "name": "GetFirstPlatformUserWithNoInputDevice",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetFirstPlatformUserWithNoInputDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Finds the first FPlatformUserId which was already allocated with no input devices.\nReturns PLATFORMUSERID_NONE if every current platform user has a valid input device mapped to it.\nWill not return the Unpaired platform user."
+    },
+    {
+      "id": "is-unpaired-user-id",
+      "name": "IsUnpairedUserId",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "IsUnpairedUserId(Target, Platform Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Platform Id",
+          "type": "FPlatformUserId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the given Platform User Id is the user for unpaired input devices on this platform."
+    },
+    {
+      "id": "is-input-device-mapped-to-unpaired-user",
+      "name": "IsInputDeviceMappedToUnpairedUser",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "IsInputDeviceMappedToUnpairedUser(Target, Input Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Input Device",
+          "type": "FInputDeviceId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the given input device is mapped to the unpaired platform user id."
+    },
+    {
+      "id": "get-platform-user-for-newly-connected-device",
+      "name": "GetPlatformUserForNewlyConnectedDevice",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetPlatformUserForNewlyConnectedDevice(Target, In User Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "In User Id",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Returns the platform user id that a newly connected device should be mapped to.\nIf \"ShouldCreateUniqueUserForEachDevice\" is true, then a new platform user id will be allocated for this device.\nOtherwise, this will return the primary platform user.\n@param InUserId\t\tAn optional user index which can be passed in. If this is not -1, and IsUsingControllerIdAsUserId is true,\nthen the platform user id for that user will be returned."
+    },
+    {
+      "id": "get-user-for-input-device",
+      "name": "GetUserForInputDevice",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetUserForInputDevice(Target, Device Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Device Id",
+          "type": "FInputDeviceId"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Returns the platform user attached to this input device, or PLATFORMUSERID_NONE if invalid"
+    },
+    {
+      "id": "get-primary-input-device-for-user",
+      "name": "GetPrimaryInputDeviceForUser",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetPrimaryInputDeviceForUser(Target, User Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "User Id",
+          "type": "FPlatformUserId"
+        }
+      ],
+      "returnType": "FInputDeviceId",
+      "docs": "Returns the primary input device used by a specific player, or INPUTDEVICEID_NONE if invalid"
+    },
+    {
+      "id": "internal-set-input-device-connection-state",
+      "name": "Internal_SetInputDeviceConnectionState",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "Internal_SetInputDeviceConnectionState(Target, Device Id, New State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Device Id",
+          "type": "FInputDeviceId"
+        },
+        {
+          "name": "New State",
+          "type": "EInputDeviceConnectionState"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the connection state of a given Input Device to something new. This will\nbroadcast the OnInputDeviceConnectionChange delegate.\nThis should be called by the platform's implementation.\n@param DeviceId\t\tThe device id that has had a connection change\n@param NewState\t\tThe new connection state of the given device\n@return\t\t\t\tTrue if the connection state was set successfully"
+    },
+    {
+      "id": "get-input-device-connection-state",
+      "name": "GetInputDeviceConnectionState",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetInputDeviceConnectionState(Target, Device Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Device Id",
+          "type": "FInputDeviceId"
+        }
+      ],
+      "returnType": "EInputDeviceConnectionState",
+      "docs": "Gets the connection state of the given input device.\n@param DeviceId\t\tThe device to get the connection state of\n@return\t\t\t\tThe connection state of the given device. EInputDeviceConnectionState::Unknown if the device is not mapped"
+    },
+    {
+      "id": "internal-map-input-device-to-user",
+      "name": "Internal_MapInputDeviceToUser",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "Internal_MapInputDeviceToUser(Target, Device Id, User Id, Connection State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Device Id",
+          "type": "FInputDeviceId"
+        },
+        {
+          "name": "User Id",
+          "type": "FPlatformUserId"
+        },
+        {
+          "name": "Connection State",
+          "type": "EInputDeviceConnectionState"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Maps the given Input Device to the given userID. This will broadcast the OnInputDeviceConnectionChange delegate.\nThis should be called by the platform's implementation.\n@param DeviceId\t\t\tThe device id to map\n@param UserId\t\t\tThe Platform User that owns the given device\n@param ConnectionState\tThe connection state of the device\n@return\t\t\t\t\tTrue if the input device was successfully mapped"
+    },
+    {
+      "id": "internal-change-input-device-user-mapping",
+      "name": "Internal_ChangeInputDeviceUserMapping",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "Internal_ChangeInputDeviceUserMapping(Target, Device Id, New User Id, Old User Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Device Id",
+          "type": "FInputDeviceId"
+        },
+        {
+          "name": "New User Id",
+          "type": "FPlatformUserId"
+        },
+        {
+          "name": "Old User Id",
+          "type": "FPlatformUserId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Change the user mapping of the given input device from an old user to a new one.\nThis will broadcast the OnInputDevicePairingChange delegate.\nUse this when you know that an input device is already mapped, but it has changed platform users\nThis should be called by the platform's implementation.\n@param DeviceId\t\tThe input device to change the owner on\n@param NewUserId\t\tThe new platform user that this input device should be mapped to\n@param OldUserId\t\tThe old platform user that this input device is currently mapped to\n@return\t\t\t\tTrue if the device was successfully remapped"
+    },
+    {
+      "id": "get-max-platform-user-count",
+      "name": "GetMaxPlatformUserCount",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetMaxPlatformUserCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the max allowed number of platform users this platform can have.\nBy default, this will return the value specified in the input settings ini file"
+    },
+    {
+      "id": "handle-input-device-policy-changed",
+      "name": "HandleInputDevicePolicyChanged",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "HandleInputDevicePolicyChanged(Target, New Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "New Policy",
+          "type": "EInputDeviceMappingPolicy"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remaps the currently connected input devices based on the new given policy. This property can only be changed\nat editor time and should not be used at runtime."
+    },
+    {
+      "id": "get-current-device-mapping-policy",
+      "name": "GetCurrentDeviceMappingPolicy",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetCurrentDeviceMappingPolicy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "EInputDeviceMappingPolicy"
+    },
+    {
+      "id": "bind-core-delegates",
+      "name": "BindCoreDelegates",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "BindCoreDelegates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Binds to any core delegates that the platform may broadcast. By default it is only the OnUserLoginChangedEvent delegate.\nCalled during the constructor of this device mapper."
+    },
+    {
+      "id": "unbind-core-delegates",
+      "name": "UnbindCoreDelegates",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "UnbindCoreDelegates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unbind from any delegates that have been hooked into.\nCalled during the destructor of this device mapper."
+    },
+    {
+      "id": "should-create-unique-user-for-each-device",
+      "name": "ShouldCreateUniqueUserForEachDevice",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "ShouldCreateUniqueUserForEachDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If true, then when we remap the platform's raw int32 ControllerId to its FInputDeviceId\nand owning FPlatformUserId we should create a new platform user id if this controller id is\nnot already mapped."
+    },
+    {
+      "id": "f-generic-platform-input-device-mapper",
+      "name": "FGenericPlatformInputDeviceMapper",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "FGenericPlatformInputDeviceMapper(Inb Using Controller Id As User Id, Inb Should Broadcast Legacy Delegates)",
+      "params": [
+        {
+          "name": "Inb Using Controller Id As User Id",
+          "type": "Bool"
+        },
+        {
+          "name": "Inb Should Broadcast Legacy Delegates",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Callback when input devices are disconnected/reconnected"
+    },
+    {
+      "id": "get-user-for-unpaired-input-devices",
+      "name": "GetUserForUnpairedInputDevices",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetUserForUnpairedInputDevices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Returns the platform user id that is being used for unmapped input devices.\nWill be PLATFORMUSERID_NONE if platform does not support this (this is the default behavior)"
+    },
+    {
+      "id": "get-primary-platform-user",
+      "name": "GetPrimaryPlatformUser",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetPrimaryPlatformUser(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Returns the 'Primary' Platform user for this platform.\nThis typically has an internal ID of '0' and is used as the default platform user to\nmap devices such as the keyboard and mouse that don't get assigned unique ID's from their\nowning platform code."
+    },
+    {
+      "id": "get-default-input-device",
+      "name": "GetDefaultInputDevice",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetDefaultInputDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "FInputDeviceId",
+      "docs": "Returns the default device id used for things like keyboard/mouse input"
+    },
+    {
+      "id": "remap-controller-id-to-platform-user-and-device",
+      "name": "RemapControllerIdToPlatformUserAndDevice",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "RemapControllerIdToPlatformUserAndDevice(Target, Controller Id, In Out User Id, Out Input Device Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Controller Id",
+          "type": "Int"
+        },
+        {
+          "name": "In Out User Id",
+          "type": "FPlatformUserId&"
+        },
+        {
+          "name": "Out Input Device Id",
+          "type": "FInputDeviceId&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remap the legacy \"int32 ControllerId\" to the updated FPlatformUserId and FInputDeviceId. Use this function to\nadd compatibility to platforms that may not have implemented this device mapper yet.\nThis is useful for functions such as FGenericApplicationMessageHandler::OnControllerAnalog that used to\nuse the \"int32 ControllerId\" as a parameter so that you can call the new FGenericApplicationMessageHandler\nthat take in a PlatformUserId and an InputDeviceId.\n@param ControllerId\t\t\tThe old plain \"int32\" that represented gamepad id or user index depending on the context.\n@param InOutUserId\t\t\tIf the old function provides a PlatformId then pass it here, otherwise pass PLATFORMUSERID_NONE.\n@param OutInputDeviceId\t\tThe best guess for an InputDeviceId based on the legacy int32 ControllerId. This may be INPUTDEVICEID_NONE.\n@return\t\t\t\t\t\tTrue if this maps to a real user"
+    },
+    {
+      "id": "get-platform-user-for-user-index",
+      "name": "GetPlatformUserForUserIndex",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetPlatformUserForUserIndex(Target, Local User Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Local User Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Remap the legacy platform LocalUserIndex (often the same as ControllerId) to a FPlatformUserId.\nThis is useful in cases where the input device id is not needed.\n@param LocalUserIndex\tA platform user index where 0 should always be a valid user\n@returns\t\t\t\t\tA platform-allocated user id, or PLATFORMUSERID_NONE"
+    },
+    {
+      "id": "remap-user-and-device-to-controller-id",
+      "name": "RemapUserAndDeviceToControllerId",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "RemapUserAndDeviceToControllerId(Target, User Id, Out Controller Id, Optional Device Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "User Id",
+          "type": "FPlatformUserId"
+        },
+        {
+          "name": "Out Controller Id",
+          "type": "Int&"
+        },
+        {
+          "name": "Optional Device Id",
+          "type": "FInputDeviceId",
+          "default": "INPUTDEVICEID_NONE"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remap a FPlatformUserId to a ControllerId that is needed by legacy code. Use this function to\nadd compatibility to platforms that may not have implemented this device mapper yet.\n@param UserId\t\t\t\tThe platform user that should be converted\n@param OutControllerId\t\tSet to the old plain \"int32\" that represented gamepad id or user index depending on the context.\n@param OptionalDeviceId\t\tSet this to a specific device id if known\n@return\t\t\t\t\t\tTrue if this maps to a real user"
+    },
+    {
+      "id": "get-user-index-for-platform-user",
+      "name": "GetUserIndexForPlatformUser",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "GetUserIndexForPlatformUser(Target, User Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "User Id",
+          "type": "FPlatformUserId"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Remap a FPlatformUserId to the legacy platform LocalUserIndex (often the same as ControllerId).\nThis is useful in cases where the input device id is not needed.\n@param UserId\t\t\tThe platform user that should be converted\n@returns\t\t\t\t\tA valid platform user index, or INDEX_NONE"
+    },
+    {
+      "id": "is-using-controller-id-as-user-id",
+      "name": "IsUsingControllerIdAsUserId",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "IsUsingControllerIdAsUserId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If true, this device mapper is operating in a backward compatible mode where there is a\n1:1 mapping between controller id and user id"
+    },
+    {
+      "id": "should-broadcast-legacy-delegates",
+      "name": "ShouldBroadcastLegacyDelegates",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "ShouldBroadcastLegacyDelegates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If true, than this device mapper will broadcast the older\nCoreDelegates as well as the new delegates. Set this to\ntrue if your platform needs calls from OnControllerConnectionChange or\nOnControllerPairingChange"
+    },
+    {
+      "id": "allocate-new-user-id",
+      "name": "AllocateNewUserId",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "AllocateNewUserId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "FPlatformUserId",
+      "docs": "Allocates a new user id when a user becomes active, will return none if no more can be created"
+    },
+    {
+      "id": "allocate-new-input-device-id",
+      "name": "AllocateNewInputDeviceId",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "AllocateNewInputDeviceId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        }
+      ],
+      "returnType": "FInputDeviceId",
+      "docs": "Returns the next available input device id. This ID should be globally unique!"
+    },
+    {
+      "id": "on-user-login-changed-event",
+      "name": "OnUserLoginChangedEvent",
+      "category": "GenericPlatformInputDeviceMapper",
+      "signature": "OnUserLoginChangedEvent(Target, Logged In, Raw Platform User Id, User Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformInputDeviceMapper*"
+        },
+        {
+          "name": "Logged In",
+          "type": "Bool"
+        },
+        {
+          "name": "Raw Platform User Id",
+          "type": "Int"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Callback for when FCoreDelegates::OnUserLoginChangedEvent is broadcasted.\nIf the user has logged out, then remap any input devices that the user had to the \"Unpaired\" user on this platform (if bUnpairInputDevicesWhenLoggingOut is true)"
+    }
+  ]
+}

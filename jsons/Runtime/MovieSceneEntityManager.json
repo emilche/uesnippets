@@ -1,0 +1,1443 @@
+{
+  "id": "movie-scene-entity-manager",
+  "label": "MovieSceneEntityManager",
+  "includepath": "EntitySystem/MovieSceneEntityManager.h",
+  "includes": [
+    "AllOf",
+    "AnyOf",
+    "TaskGraphInterfaces",
+    "Array",
+    "ArrayView",
+    "BitArray",
+    "Map",
+    "Set",
+    "SparseArray",
+    "UnrealString",
+    "CoreTypes",
+    "MovieSceneComponentTypeHandler",
+    "MovieSceneComponentTypeInfo",
+    "MovieSceneEntityFactoryTypes",
+    "MovieSceneEntityIDs",
+    "MovieSceneEntitySystemTypes",
+    "MovieSceneMaybeAtomic",
+    "MovieScenePlayback",
+    "CriticalSection",
+    "PlatformCrt",
+    "AssertionMacros",
+    "EnumClassFlags",
+    "InlineValue",
+    "MovieSceneSequenceID",
+    "UnrealTemplate",
+    "StrongObjectPtr",
+    "UObjectArray",
+    "initializer_list"
+  ],
+  "functions": [
+    {
+      "id": "f-entity-manager",
+      "name": "FEntityManager",
+      "category": "MovieSceneEntityManager",
+      "signature": "FEntityManager()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Top-level manager class that is responsible for all entity data and interaction/\nAn entity is a stable index into the manager's EntityLocations, which defines the location for that entity's data. This allows the manager to relocate entity data at will without invalidating client held entity IDs.\nAn entity may contain 0 or more components. Components are concrete pieces of data with a unique type identifier. Additionally, tags can be added to entities or whole batches of entities with zero memory overhead.\nEntity Component data is stored in allocations organized by each unique combination of components. Each component type is stored as a contiguous array within each allocation, with each entity's component being a fixed\noffset from the start of each component array. This enables efficient read/write access into specific component arrays and makes issuing parallel tasks that require component data trivial. See FEntityAllocation for\na more detailed explanation of entity component data layout."
+    },
+    {
+      "id": "destroy",
+      "name": "Destroy",
+      "category": "MovieSceneEntityManager",
+      "signature": "Destroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Destroy this entity manager and all the entities and components contained within it, resetting it back to its default state"
+    },
+    {
+      "id": "allocate-entity-0bc37b",
+      "name": "AllocateEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "AllocateEntity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "FMovieSceneEntityID",
+      "docs": "Allocate a new entity with no components\n@return A stable ID that relates to this entity. Will remain valid until the entity is freed"
+    },
+    {
+      "id": "free-entity",
+      "name": "FreeEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "FreeEntity(Target, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Free an entity and relinquish its entity ID\n@param EntityID  A valid entity ID to free\n@return The number of entities released"
+    },
+    {
+      "id": "free-entities-fd5dff",
+      "name": "FreeEntities",
+      "category": "MovieSceneEntityManager",
+      "signature": "FreeEntities(Target, Filter, Out Freed Entities)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Filter",
+          "type": "FEntityComponentFilter&"
+        },
+        {
+          "name": "Out Freed Entities",
+          "type": "TSet<FMovieSceneEntityID>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Free all entities that match the specified filter\n@param Filter            A filter that defines the entities to free. Any entity that passes the filter will be destroyed.\n@param OutFreedEntities (Optional) A set to populate with all the entities that were freed (including any children)\n@return The number of entities released"
+    },
+    {
+      "id": "free-entities-93e5c8",
+      "name": "FreeEntities",
+      "category": "MovieSceneEntityManager",
+      "signature": "FreeEntities(Target, Operation, Out Freed Entities)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Operation",
+          "type": "FFreeEntityOperation&"
+        },
+        {
+          "name": "Out Freed Entities",
+          "type": "TSet<FMovieSceneEntityID>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Free all entities defined by the specified operation\n@param Operation        A pre-populated free entity operation definition\n@param OutFreedEntities (Optional) A set to populate with all the entities that were freed (including any children)\n@return The number of entities released"
+    },
+    {
+      "id": "allocate-contiguous-entities",
+      "name": "AllocateContiguousEntities",
+      "category": "MovieSceneEntityManager",
+      "signature": "AllocateContiguousEntities(Target, Entity Component Mask, In Out Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "In Out Num",
+          "type": "Int*"
+        }
+      ],
+      "returnType": "FEntityDataLocation",
+      "docs": "Attempt to allocate a number of entities of the same type contiguously in memory\n@note May allocate fewer than the desired number due to allocation capacity constraints. As such, subsequent calls may be required.\n@param EntityComponentMask    Defines the components that should exist on the allocated components. Set bits denote allocated components and tags.\n@param InOutNum               A valid pointer to the desired number to allocate. Is overwritten with the number that were actually allocated.\n@return A structure that points to the first entity that was allocated."
+    },
+    {
+      "id": "allocate-entity-3baa33",
+      "name": "AllocateEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "AllocateEntity(Target, Entity Component Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "FEntityInfo",
+      "docs": "Allocate a single entity with the specified components\n@param EntityComponentMask    Defines the components that should exist on the allocated components. Set bits denote allocated components and tags.\n@return A structure that points to the allocated entity."
+    },
+    {
+      "id": "get-entity",
+      "name": "GetEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetEntity(Target, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "FEntityInfo",
+      "docs": "Retrieve an entity's allocation and component offset from its ID\n@return A structure that points to the allocated entity."
+    },
+    {
+      "id": "get-entity-handle",
+      "name": "GetEntityHandle",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetEntityHandle(Target, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "FEntityHandle",
+      "docs": "Retrieve a handle to an entity\n@return A handle that points to the allocated entity."
+    },
+    {
+      "id": "is-handle-valid",
+      "name": "IsHandleValid",
+      "category": "MovieSceneEntityManager",
+      "signature": "IsHandleValid(Target, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FEntityHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether the specified entity handle is still valid\n@return true if the entity ID is allocated, false otherwise"
+    },
+    {
+      "id": "compute-threading-model",
+      "name": "ComputeThreadingModel",
+      "category": "MovieSceneEntityManager",
+      "signature": "ComputeThreadingModel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "EEntityThreadingModel",
+      "docs": "Compute and return this entity manager's threading model. Does not change the current cached threading model."
+    },
+    {
+      "id": "update-threading-model",
+      "name": "UpdateThreadingModel",
+      "category": "MovieSceneEntityManager",
+      "signature": "UpdateThreadingModel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute and store the current threading model."
+    },
+    {
+      "id": "get-threading-model",
+      "name": "GetThreadingModel",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetThreadingModel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "EEntityThreadingModel",
+      "docs": "Get this entitiy manager's current threading model based on the last time UpdateThreadingModel was called."
+    },
+    {
+      "id": "add-component-98a892",
+      "name": "AddComponent",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddComponent(Target, Entity ID, Component Type ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Component Type ID",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the specified component type to an entity. The component value will be default-initialized.\n@param EntityID         The ID of the entity to add the component to\n@param ComponentTypeID  The ID of the component type to add to the entity"
+    },
+    {
+      "id": "add-component-8180b5",
+      "name": "AddComponent",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddComponent(Target, Entity ID, Component Type ID, Recursion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Component Type ID",
+          "type": "FComponentTypeID"
+        },
+        {
+          "name": "Recursion",
+          "type": "EEntityRecursion"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-components-93aba0",
+      "name": "AddComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddComponents(Target, Entity ID, Entity Component Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the specified components to an entity. Existing components will remain unchanged. New component values will be default-initialized.\n@param EntityID             The ID of the entity to add the components to\n@param EntityComponentMask  A mask constituting the components that should be added (set bits indicate components to add)"
+    },
+    {
+      "id": "add-components-444edc",
+      "name": "AddComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddComponents(Target, Entity ID, Entity Component Mask, Recursion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Recursion",
+          "type": "EEntityRecursion"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-component-f8e570",
+      "name": "RemoveComponent",
+      "category": "MovieSceneEntityManager",
+      "signature": "RemoveComponent(Target, Entity ID, Component Type ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Component Type ID",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove the specified component type from an entity if it exists.\n@param EntityID         The ID of the entity to remove the component from\n@param ComponentTypeID  The ID of the component type to remove from the entity"
+    },
+    {
+      "id": "remove-component-065d79",
+      "name": "RemoveComponent",
+      "category": "MovieSceneEntityManager",
+      "signature": "RemoveComponent(Target, Entity ID, Component Type ID, Recursion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Component Type ID",
+          "type": "FComponentTypeID"
+        },
+        {
+          "name": "Recursion",
+          "type": "EEntityRecursion"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-components-648a75",
+      "name": "RemoveComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "RemoveComponents(Target, Entity ID, Components To Remove)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Components To Remove",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove the specified components from an entity, if they exist.\n@param EntityID             The ID of the entity to remove the components from\n@param ComponentsToRemove   A mask constituting the components that should be removed (set bits indicate components to add)"
+    },
+    {
+      "id": "remove-components-e49b67",
+      "name": "RemoveComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "RemoveComponents(Target, Entity ID, Components To Remove, Recursion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Components To Remove",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Recursion",
+          "type": "EEntityRecursion"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "copy-component",
+      "name": "CopyComponent",
+      "category": "MovieSceneEntityManager",
+      "signature": "CopyComponent(Target, Src Entity ID, Dst Entity ID, Component Type ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Src Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Dst Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Component Type ID",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Copy the specified component type from an entity if it exists.\n@param SrcEntityID      The ID of the entity to copy from\n@param DstEntityID      The ID of the entity to copy to\n@param ComponentTypeID  The ID of the component type to copy. Must exist on SrcEntityID"
+    },
+    {
+      "id": "copy-components-93e0a2",
+      "name": "CopyComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "CopyComponents(Target, Src Entity ID, Dst Entity ID, Components To Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Src Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Dst Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Components To Copy",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy any and all the specified component types from one entity onto another. Missing components on the source entity are handled gracefully.\n@param SrcEntityID      The ID of the entity to copy from\n@param DstEntityID      The ID of the entity to copy to\n@param ComponentsToCopy  A mask constituting the components that should be copied (set bits indicate components to copy)"
+    },
+    {
+      "id": "has-component",
+      "name": "HasComponent",
+      "category": "MovieSceneEntityManager",
+      "signature": "HasComponent(Target, Entity ID, Component Type ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Component Type ID",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether the specified component has a component of the specified type\n@param EntityID             The ID of the entity to check\n@param ComponentTypeID      The type of the component that is being tested for"
+    },
+    {
+      "id": "get-entity-type",
+      "name": "GetEntityType",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetEntityType(Target, In Entity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Entity",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "FComponentMask&",
+      "docs": "Retrieve the type mask for this component\n@param InEntity  The ID of the entity\n@return The type mask for this entity, or an empty mask if it has no components"
+    },
+    {
+      "id": "change-entity-type",
+      "name": "ChangeEntityType",
+      "category": "MovieSceneEntityManager",
+      "signature": "ChangeEntityType(Target, In Entity, In New Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Entity",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "In New Mask",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Changes the components that exist on an entity to a new mask\n@param InEntity   The ID of the entity\n@param InNewMask  The new mask of the entity that defines which components it should have"
+    },
+    {
+      "id": "filter-components",
+      "name": "FilterComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "FilterComponents(Target, Entity ID, Entities To Keep)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Entities To Keep",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove all but the specified components from an entity.\n@param EntityID             The ID of the entity to remove the components from\n@param EntitiesToKeep       A mask constituting the components that should be kept on the entity"
+    },
+    {
+      "id": "combine-components",
+      "name": "CombineComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "CombineComponents(Target, Destination Entity ID, Source Entity ID, Optional Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Destination Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Source Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Optional Mask",
+          "type": "FComponentMask*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Combine the components from one entity into another, overwriting any pre-existing component values. Does not free any entities.\n@param DestinationEntityID  The ID of the entity to add new components to\n@param SourceEntityID       The ID of the entity to copy components from\n@param OptionalMask         (Optional) A mask constituting the components that should be copied"
+    },
+    {
+      "id": "duplicate-entity",
+      "name": "DuplicateEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "DuplicateEntity(Target, In Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Other",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "FMovieSceneEntityID",
+      "docs": "Duplicate an entity, by creating an exact copy with a new ID\n@param InOther  The ID of the entity to duplicate\n@return An ID to a new entity that has exactly the same combination and value of components as InOther"
+    },
+    {
+      "id": "overwrite-entity-with-duplicate",
+      "name": "OverwriteEntityWithDuplicate",
+      "category": "MovieSceneEntityManager",
+      "signature": "OverwriteEntityWithDuplicate(Target, In Out Entity, In Entity To Duplicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Out Entity",
+          "type": "FMovieSceneEntityID&"
+        },
+        {
+          "name": "In Entity To Duplicate",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Duplicate an entity over the top of an existing entity ID\n@param InOutEntity          The ID of the entity to overwrite. Doesn't have to be valid.\n@param InEntityToDuplicate  The ID of the entity to duplicate"
+    },
+    {
+      "id": "initialize-child-allocation",
+      "name": "InitializeChildAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "InitializeChildAllocation(Target, Parent Type, Child Type, Parent Allocation, Parent Allocation Offsets, In Child Entity Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Parent Type",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Child Type",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Parent Allocation",
+          "type": "FEntityAllocation*"
+        },
+        {
+          "name": "Parent Allocation Offsets",
+          "type": "TArrayView<int32>"
+        },
+        {
+          "name": "In Child Entity Range",
+          "type": "FEntityRange&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Runs all initializers for the specified parent/child allocation"
+    },
+    {
+      "id": "add-mutual-components-719366",
+      "name": "AddMutualComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddMutualComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Run through all entities in this entity manager, ensuring that all mutual components exist"
+    },
+    {
+      "id": "add-mutual-components-5c8a12",
+      "name": "AddMutualComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddMutualComponents(Target, In Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Filter",
+          "type": "FEntityComponentFilter&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Run through all entities in this entity manager, ensuring that all mutual components exist for any component types that match the specified filter"
+    },
+    {
+      "id": "compact",
+      "name": "Compact",
+      "category": "MovieSceneEntityManager",
+      "signature": "Compact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Goes through all entity data and compacts like-for-like allocations into as few allocations as possible, resulting in the optimal data layout"
+    },
+    {
+      "id": "mutate-all",
+      "name": "MutateAll",
+      "category": "MovieSceneEntityManager",
+      "signature": "MutateAll(Target, Filter, Mutation, Mutual Types)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Filter",
+          "type": "FEntityComponentFilter&"
+        },
+        {
+          "name": "Mutation",
+          "type": "IMovieSceneEntityMutation&"
+        },
+        {
+          "name": "Mutual Types",
+          "type": "EMutuallyInclusiveComponentType",
+          "default": "EMutuallyInclusiveComponentType::Mandatory"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Efficiently mutate all entities that match a filter. Mutations can add or remove components from batches of entity data.\n@param Filter      The filter to match entity allocations against. Only entities that match the filter will be mutated\n@param Mutation    Implementation that defines how to mutate the entities that match the filter\n@return The number of entities that were mutated, or 0 if none were matched"
+    },
+    {
+      "id": "mutate-conditional",
+      "name": "MutateConditional",
+      "category": "MovieSceneEntityManager",
+      "signature": "MutateConditional(Target, Filter, Mutation, Mutual Types)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Filter",
+          "type": "FEntityComponentFilter&"
+        },
+        {
+          "name": "Mutation",
+          "type": "IMovieSceneConditionalEntityMutation&"
+        },
+        {
+          "name": "Mutual Types",
+          "type": "EMutuallyInclusiveComponentType",
+          "default": "EMutuallyInclusiveComponentType::Mandatory"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Efficiently mutate all entities that match a filter. Mutations can add or remove components from batches of entity data.\n@param Filter      The filter to match entity allocations against. Only entities that match the filter will be mutated\n@param Mutation    Implementation that defines how to mutate the entities that match the filter\n@return The number of entities that were mutated, or 0 if none were matched"
+    },
+    {
+      "id": "touch-entity",
+      "name": "TouchEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "TouchEntity(Target, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Touch the specified entity, cause the allocation and component serial numbers to be incremented. Will invalidate any transient caches maintained for serial such numbers.\n@note Allocation and component serial numbers relate to the entire allocation of entities that this entity resides within. As such, it will invalidate downstream caches\nfor any cache that relates to the entire allocation\n@param EntityID    The ID of the entity to touch."
+    },
+    {
+      "id": "add-child",
+      "name": "AddChild",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddChild(Target, Parent ID, Child ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Parent ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Child ID",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set up an entity to be a child of another. Child entities will only be cleaned up if their parents are marked Unlink, and TagOrphanedChildren is called\n@param ParentID   The ID of the parent\n@param ChildID    The ID of the child"
+    },
+    {
+      "id": "get-immediate-children",
+      "name": "GetImmediateChildren",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetImmediateChildren(Target, Parent ID, Out Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Parent ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Out Children",
+          "type": "TArray<FMovieSceneEntityID>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieve the immediate children of the specified entity\n@note: the array will not be emptied by this function - that is the responsibility of the callee, if desired.\n@param ParentID    The ID of the parent\n@param OutChildren (out) Array to populate with child entities."
+    },
+    {
+      "id": "get-children-parent-first",
+      "name": "GetChildren_ParentFirst",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetChildren_ParentFirst(Target, Parent ID, Out Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Parent ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Out Children",
+          "type": "TArray<FMovieSceneEntityID>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieve all children, grandchildren etc of the specified entity using a parent first traversal\n@note: the array will not be emptied by this function - that is the responsibility of the callee, if desired.\n@param ParentID    The ID of the parent\n@param OutChildren (out) Array to populate with child entities."
+    },
+    {
+      "id": "count-memory",
+      "name": "CountMemory",
+      "category": "MovieSceneEntityManager",
+      "signature": "CountMemory(Target, Ar, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Run a serialization routine over the specified entity to approximate the memory it is using\n@note Does not consider per-allocation overhead such as header sizes and other per-allocation meta-data\n@param Ar          The archive to save to. Ar.IsCountingMemory() must be true.\n@param EntityID    Identifier for the entity to replace object references within"
+    },
+    {
+      "id": "find-component-type-handler",
+      "name": "FindComponentTypeHandler",
+      "category": "MovieSceneEntityManager",
+      "signature": "FindComponentTypeHandler(Component Guid)",
+      "params": [
+        {
+          "name": "Component Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "IComponentTypeHandler*",
+      "docs": "Find a component type hander from its registered GUID"
+    },
+    {
+      "id": "iterate",
+      "name": "Iterate",
+      "category": "MovieSceneEntityManager",
+      "signature": "Iterate(Target, In Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Filter",
+          "type": "FEntityComponentFilter*"
+        }
+      ],
+      "returnType": "public : FEntityAllocationIteratorProxy",
+      "docs": "Iterate through all the allocations that match the specified component filter\n@param InFilter (required, non-null) The filter to match allocations against. Filter is copied into the iterator.\n@return An iterator object that walks over all allocations matching the filter."
+    },
+    {
+      "id": "contains",
+      "name": "Contains",
+      "category": "MovieSceneEntityManager",
+      "signature": "Contains(Target, In Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Filter",
+          "type": "FEntityComponentFilter&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Efficiently test whether this entity manager contains any allocations that match the specified filter\n@param InFilter The filter to match allocations against.\n@return True if the entity manager contains any allocations that match the filter, false otherwise"
+    },
+    {
+      "id": "accumulate-mask",
+      "name": "AccumulateMask",
+      "category": "MovieSceneEntityManager",
+      "signature": "AccumulateMask(Target, In Filter, Out Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Filter",
+          "type": "FEntityComponentFilter&"
+        },
+        {
+          "name": "Out Mask",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Accumulate a mask from all entity types that match the specified filter\n@param InFilter The filter to match allocations against. Filter is copied into the iterator.\n@param OutMask  The mask to receive the binary OR accumulation of all entities that pass the filter"
+    },
+    {
+      "id": "get-accumulated-mask",
+      "name": "GetAccumulatedMask",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetAccumulatedMask(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "FComponentMask&",
+      "docs": "Retrieve an up-to-date accumulation of all components present on entities in this manager"
+    },
+    {
+      "id": "enter-iteration",
+      "name": "EnterIteration",
+      "category": "MovieSceneEntityManager",
+      "signature": "EnterIteration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Efficiently test whether this entity manager contains any allocations that match the specified filter\n@param InFilter The filter to match allocations against.\n@return True if the entity manager contains any allocations that match the filter, false otherwise"
+    },
+    {
+      "id": "exit-iteration",
+      "name": "ExitIteration",
+      "category": "MovieSceneEntityManager",
+      "signature": "ExitIteration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddReferencedObjects(Target, Reference Collector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Reference Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Explicitly add referenced objects from an external source. This is not called by default for the global entity manager because each entity owner should do so to avoid cyclic dependencies."
+    },
+    {
+      "id": "replace-entity-id",
+      "name": "ReplaceEntityID",
+      "category": "MovieSceneEntityManager",
+      "signature": "ReplaceEntityID(Target, In Out Entity, Entity To Discard)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Out Entity",
+          "type": "FMovieSceneEntityID&"
+        },
+        {
+          "name": "Entity To Discard",
+          "type": "FMovieSceneEntityID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Replace an entity ID with the components from another, discarding the provided entity ID in the process\n@param InOutEntity     The entity ID to be reassigned. If it is already valid, the existing entity will be freed\n@param EntityToDiscard The entity containing the components to replace InOutEntity with. This Entity ID will be invalid after this function call."
+    },
+    {
+      "id": "on-structure-changed",
+      "name": "OnStructureChanged",
+      "category": "MovieSceneEntityManager",
+      "signature": "OnStructureChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-entity-allocation",
+      "name": "CreateEntityAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "CreateEntityAllocation(Target, Entity Component Mask, Initial Capacity, Max Capacity, Migrate Component Data From)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Initial Capacity",
+          "type": "UInt16"
+        },
+        {
+          "name": "Max Capacity",
+          "type": "UInt16"
+        },
+        {
+          "name": "Migrate Component Data From",
+          "type": "FEntityAllocation*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "FEntityAllocation*"
+    },
+    {
+      "id": "create-entity-allocation-entry",
+      "name": "CreateEntityAllocationEntry",
+      "category": "MovieSceneEntityManager",
+      "signature": "CreateEntityAllocationEntry(Target, Entity Component Mask, Initial Capacity, Max Capacity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Initial Capacity",
+          "type": "UInt16"
+        },
+        {
+          "name": "Max Capacity",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-or-create-allocation-with-slack",
+      "name": "GetOrCreateAllocationWithSlack",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetOrCreateAllocationWithSlack(Target, Entity Component Mask, In Out Desired Slack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "In Out Desired Slack",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "create-allocation-with-slack",
+      "name": "CreateAllocationWithSlack",
+      "category": "MovieSceneEntityManager",
+      "signature": "CreateAllocationWithSlack(Target, Entity Component Mask, In Out Desired Slack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity Component Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "In Out Desired Slack",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "migrate-entity",
+      "name": "MigrateEntity",
+      "category": "MovieSceneEntityManager",
+      "signature": "MigrateEntity(Target, Dest Index, Source Index, Source Entry Index Within Allocation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Dest Index",
+          "type": "Int"
+        },
+        {
+          "name": "Source Index",
+          "type": "Int"
+        },
+        {
+          "name": "Source Entry Index Within Allocation",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "copy-components-9a215d",
+      "name": "CopyComponents",
+      "category": "MovieSceneEntityManager",
+      "signature": "CopyComponents(Target, Dest Allocation Index, Dest Entity Index, Source Allocation Index, Source Entity Index, Optional Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Dest Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Entity Index",
+          "type": "Int"
+        },
+        {
+          "name": "Source Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "Source Entity Index",
+          "type": "Int"
+        },
+        {
+          "name": "Optional Mask",
+          "type": "FComponentMask*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-entity-to-allocation",
+      "name": "AddEntityToAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "AddEntityToAllocation(Target, Allocation Index, ID, Memory Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Memory Type",
+          "type": "EMemoryType",
+          "default": "EMemoryType::DefaultConstructed"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "remove-entity-from-allocation",
+      "name": "RemoveEntityFromAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "RemoveEntityFromAllocation(Target, Allocation Index, Source Entry Index Within Allocation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "Source Entry Index Within Allocation",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "migrate-allocation",
+      "name": "MigrateAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "MigrateAllocation(Target, Allocation Index, New Component Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "New Component Mask",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "FEntityAllocation*"
+    },
+    {
+      "id": "combine-allocations",
+      "name": "CombineAllocations",
+      "category": "MovieSceneEntityManager",
+      "signature": "CombineAllocations(Target, Destination Index, Source Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Destination Index",
+          "type": "Int"
+        },
+        {
+          "name": "Source Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reserve-allocation",
+      "name": "ReserveAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "ReserveAllocation(Target, Allocation Index, Num To Reserve)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num To Reserve",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "grow-allocation",
+      "name": "GrowAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "GrowAllocation(Target, Allocation Index, Min Num To Grow By)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Allocation Index",
+          "type": "Int"
+        },
+        {
+          "name": "Min Num To Grow By",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "FEntityAllocation*"
+    },
+    {
+      "id": "destroy-allocation",
+      "name": "DestroyAllocation",
+      "category": "MovieSceneEntityManager",
+      "signature": "DestroyAllocation(Target, Allocation, Destruct Component Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Allocation",
+          "type": "FEntityAllocation*"
+        },
+        {
+          "name": "Destruct Component Data",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "notify-u-object-deleted",
+      "name": "NotifyUObjectDeleted",
+      "category": "MovieSceneEntityManager",
+      "signature": "NotifyUObjectDeleted(Target, Object, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Object",
+          "type": "UObjectBase*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-u-object-array-shutdown",
+      "name": "OnUObjectArrayShutdown",
+      "category": "MovieSceneEntityManager",
+      "signature": "OnUObjectArrayShutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-referencer-name",
+      "name": "GetReferencerName",
+      "category": "MovieSceneEntityManager",
+      "signature": "GetReferencerName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "check-invariants",
+      "name": "CheckInvariants",
+      "category": "MovieSceneEntityManager",
+      "signature": "CheckInvariants(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

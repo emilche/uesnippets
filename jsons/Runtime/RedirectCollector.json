@@ -1,0 +1,269 @@
+{
+  "id": "redirect-collector",
+  "label": "RedirectCollector",
+  "includepath": "Misc/RedirectCollector.h",
+  "includes": [
+    "UniqueLock",
+    "Map",
+    "Set",
+    "SparseArray",
+    "CoreMinimal",
+    "CriticalSection",
+    "Platform",
+    "ScopeLock",
+    "TVariant",
+    "Function",
+    "TypeHash",
+    "UniquePtr",
+    "NameTypes",
+    "SoftObjectPath",
+    "UnrealNames"
+  ],
+  "functions": [
+    {
+      "id": "on-soft-object-path-loaded",
+      "name": "OnSoftObjectPathLoaded",
+      "category": "RedirectCollector",
+      "signature": "OnSoftObjectPathLoaded(Target, In Path, In Archive)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "In Path",
+          "type": "FSoftObjectPath&"
+        },
+        {
+          "name": "In Archive",
+          "type": "FArchive*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Called from FSoftObjectPath::PostLoadPath, registers the given SoftObjectPath for later querying\n@param InPath The soft object path that was loaded\n@Param InArchive The archive that loaded this path"
+    },
+    {
+      "id": "collect-saved-soft-package-references",
+      "name": "CollectSavedSoftPackageReferences",
+      "category": "RedirectCollector",
+      "signature": "CollectSavedSoftPackageReferences(Target, Referencing Package, Package Names, Editor Only References)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Referencing Package",
+          "type": "Name"
+        },
+        {
+          "name": "Package Names",
+          "type": "TSet<FName>&"
+        },
+        {
+          "name": "Editor Only References",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called at the end of Package Save to record soft package references that might have been created by save transformations\n@param ReferencingPackage The package on which we are recording the references\n@param PackageNames List of of soft package references needed by the referencing package\n@param bEditorOnlyReferences if the PackageNames list are references made by editor only properties"
+    },
+    {
+      "id": "resolve-all-soft-object-paths",
+      "name": "ResolveAllSoftObjectPaths",
+      "category": "RedirectCollector",
+      "signature": "ResolveAllSoftObjectPaths(Target, Filter Package)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Filter Package",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Load all soft object paths to resolve them, add that to the remap table, and empty the array\n@param FilterPackage If set, only load references that were created by FilterPackage. If empty, resolve  all of them"
+    },
+    {
+      "id": "process-soft-object-path-package-list",
+      "name": "ProcessSoftObjectPathPackageList",
+      "category": "RedirectCollector",
+      "signature": "ProcessSoftObjectPathPackageList(Target, Filter Package, Get Editor Only, Out Referenced Packages)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Filter Package",
+          "type": "Name"
+        },
+        {
+          "name": "Get Editor Only",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Referenced Packages",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the list of packages referenced by soft object paths loaded by FilterPackage, and remove them from the internal list\n@param FilterPackage Return references made by loading this package. If passed null will return all references made with no explicit package\n@param bGetEditorOnly If true will return references loaded by editor only objects, if false it will not\n@param OutReferencedPackages Return list of packages referenced by FilterPackage"
+    },
+    {
+      "id": "add-asset-path-redirection",
+      "name": "AddAssetPathRedirection",
+      "category": "RedirectCollector",
+      "signature": "AddAssetPathRedirection(Target, Original Path, Redirected Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Original Path",
+          "type": "FSoftObjectPath&"
+        },
+        {
+          "name": "Redirected Path",
+          "type": "FSoftObjectPath&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new mapping for redirector path to destination path, this is called from the Asset Registry to register all redirects it knows about"
+    },
+    {
+      "id": "remove-asset-path-redirection",
+      "name": "RemoveAssetPathRedirection",
+      "category": "RedirectCollector",
+      "signature": "RemoveAssetPathRedirection(Target, Original Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Original Path",
+          "type": "FSoftObjectPath&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an asset path redirection, call this when deleting redirectors"
+    },
+    {
+      "id": "get-asset-path-redirection",
+      "name": "GetAssetPathRedirection",
+      "category": "RedirectCollector",
+      "signature": "GetAssetPathRedirection(Target, Original Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Original Path",
+          "type": "FSoftObjectPath&"
+        }
+      ],
+      "returnType": "FSoftObjectPath",
+      "docs": "Returns a remapped asset path, if it returns null there is no relevant redirector"
+    },
+    {
+      "id": "remove-and-copy-soft-object-path-exclusions",
+      "name": "RemoveAndCopySoftObjectPathExclusions",
+      "category": "RedirectCollector",
+      "signature": "RemoveAndCopySoftObjectPathExclusions(Target, Package Name, Out Excluded References)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Package Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Excluded References",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Removes and copies the value of the list of package dependencies of the given package that were\nmarked as excluded by FSoftObjectPathSerializationScopes during the load of the package.\nThis is only used on startup packages during the cook commandlet; for all other packages and\nmodes it will find an empty list and return false.\n@param OutExcludedReferences Out set that is reset and then appended with any discovered values\n@return Whether any references were found"
+    },
+    {
+      "id": "on-startup-package-load-complete",
+      "name": "OnStartupPackageLoadComplete",
+      "category": "RedirectCollector",
+      "signature": "OnStartupPackageLoadComplete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called from the cooker to stop the tracking of exclusions."
+    },
+    {
+      "id": "get-object-path-redirection-map-under-lock",
+      "name": "GetObjectPathRedirectionMapUnderLock",
+      "category": "RedirectCollector",
+      "signature": "GetObjectPathRedirectionMapUnderLock(Target, Lock)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Lock",
+          "type": "UE::TDynamicUniqueLock<FCriticalSection>&"
+        }
+      ],
+      "returnType": "TMap<FSoftObjectPath,FSoftObjectPath>&",
+      "docs": "Access to the collected list of redirects when already holding the lock."
+    },
+    {
+      "id": "enumerate-redirects-under-lock",
+      "name": "EnumerateRedirectsUnderLock",
+      "category": "RedirectCollector",
+      "signature": "EnumerateRedirectsUnderLock(Target, F Redirection Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "F Redirection Data",
+          "type": "TFunctionRef<void ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Access to the collected list of redirects through a callback function. The function is called inside the\nRedirectCollector's lock and must not call any other functions on the RedirectCollector; doing so will deadlock."
+    },
+    {
+      "id": "get-all-source-paths-for-target-path",
+      "name": "GetAllSourcePathsForTargetPath",
+      "category": "RedirectCollector",
+      "signature": "GetAllSourcePathsForTargetPath(Target, Target Path, Out Source Paths)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRedirectCollector*"
+        },
+        {
+          "name": "Target Path",
+          "type": "FSoftObjectPath&"
+        },
+        {
+          "name": "Out Source Paths",
+          "type": "TArray<FSoftObjectPath>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the set of paths, if any, that are redirected TO the provided path."
+    }
+  ]
+}

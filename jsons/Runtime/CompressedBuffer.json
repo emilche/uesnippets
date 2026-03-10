@@ -1,0 +1,387 @@
+{
+  "id": "compressed-buffer",
+  "label": "CompressedBuffer",
+  "includepath": "Compression/CompressedBuffer.h",
+  "includes": [
+    "Platform",
+    "NumericLimits",
+    "CompositeBuffer",
+    "MemoryFwd",
+    "SharedBuffer",
+    "EnumClassFlags",
+    "RemoveReference",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "compress-15a061",
+      "name": "Compress",
+      "category": "CompressedBuffer",
+      "signature": "Compress(Raw Data)",
+      "params": [
+        {
+          "name": "Raw Data",
+          "type": "FCompositeBuffer&"
+        }
+      ],
+      "returnType": "public : [ [ nodiscard ] ] FCompressedBuffer",
+      "docs": "A compressed buffer stores compressed data in a self-contained format.\nA buffer is self-contained in the sense that it can be decompressed without external knowledge\nof the compression format or the size of the raw data.\nThe buffer may be partially decompressed using FCompressedBufferReader.\n@see FCompressedBufferReader"
+    },
+    {
+      "id": "compress-1292d8",
+      "name": "Compress",
+      "category": "CompressedBuffer",
+      "signature": "Compress(Raw Data, Compressor, Compression Level, Block Size)",
+      "params": [
+        {
+          "name": "Raw Data",
+          "type": "FCompositeBuffer&"
+        },
+        {
+          "name": "Compressor",
+          "type": "ECompressedBufferCompressor"
+        },
+        {
+          "name": "Compression Level",
+          "type": "ECompressedBufferCompressionLevel"
+        },
+        {
+          "name": "Block Size",
+          "type": "UInt64",
+          "default": "0"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompressedBuffer",
+      "docs": "Compress the buffer using the specified compressor and compression level.\nData that does not compress will be return uncompressed, as if with level None.\n@note Using a level of None will return a buffer that references owned raw data.\n@param RawData            The raw data to be compressed.\n@param Compressor         The compressor to encode with. May use NotSet if level is None.\n@param CompressionLevel   The compression level to encode with.\n@param BlockSize          The power-of-two block size to encode raw data in. 0 is default.\n@return An owned compressed buffer, or null on error."
+    },
+    {
+      "id": "from-compressed",
+      "name": "FromCompressed",
+      "category": "CompressedBuffer",
+      "signature": "FromCompressed(Compressed Data)",
+      "params": [
+        {
+          "name": "Compressed Data",
+          "type": "FCompositeBuffer&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompressedBuffer",
+      "docs": "Construct from a compressed buffer previously created by Compress().\n@return A compressed buffer, or null on error, such as an invalid format or corrupt header."
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "category": "CompressedBuffer",
+      "signature": "Load(Ar)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompressedBuffer",
+      "docs": "Load a compressed buffer from an archive, as saved by Save().\nThe entire compressed buffer will be loaded from the archive before this function returns.\nPrefer to use FCompressedBufferReader to stream from an archive when the compressed buffer\ndoes not need to be fully loaded into memory.\n@return A compressed buffer, or null on error. Ar.IsError() will be true on error."
+    },
+    {
+      "id": "save",
+      "name": "Save",
+      "category": "CompressedBuffer",
+      "signature": "Save(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Save the compressed buffer to an archive."
+    },
+    {
+      "id": "get-compressed-size",
+      "name": "GetCompressedSize",
+      "category": "CompressedBuffer",
+      "signature": "GetCompressedSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint64",
+      "docs": "Returns the size of the compressed data. Zero on error or if this is null."
+    },
+    {
+      "id": "get-raw-size",
+      "name": "GetRawSize",
+      "category": "CompressedBuffer",
+      "signature": "GetRawSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint64",
+      "docs": "Returns the size of the raw data. Zero on error or if this is empty or null."
+    },
+    {
+      "id": "get-raw-hash",
+      "name": "GetRawHash",
+      "category": "CompressedBuffer",
+      "signature": "GetRawHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIoHash",
+      "docs": "Returns the hash of the raw data. Zero on error or if this is null."
+    },
+    {
+      "id": "try-get-compress-parameters",
+      "name": "TryGetCompressParameters",
+      "category": "CompressedBuffer",
+      "signature": "TryGetCompressParameters(Target, Out Compressor, Out Compression Level, Out Block Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        },
+        {
+          "name": "Out Compressor",
+          "type": "ECompressedBufferCompressor&"
+        },
+        {
+          "name": "Out Compression Level",
+          "type": "ECompressedBufferCompressionLevel&"
+        },
+        {
+          "name": "Out Block Size",
+          "type": "UInt64&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Returns the compressor and compression level used by this buffer.\nThe compressor and compression level may differ from those specified when creating the buffer\nbecause an incompressible buffer is stored with no compression. Parameters cannot be accessed\nif this is null or uses a method other than Oodle, in which case this returns false.\n@return True if parameters were written, otherwise false."
+    },
+    {
+      "id": "try-decompress-to-a515eb",
+      "name": "TryDecompressTo",
+      "category": "CompressedBuffer",
+      "signature": "TryDecompressTo(Target, Raw View, Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        },
+        {
+          "name": "Raw View",
+          "type": "FMutableMemoryView"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressedBufferDecompressFlags",
+          "default": "ECompressedBufferDecompressFlags::None"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Decompress into a memory view that is exactly equal to the raw size.\n@return True if the requested range was decompressed, otherwise false."
+    },
+    {
+      "id": "decompress-452eb9",
+      "name": "Decompress",
+      "category": "CompressedBuffer",
+      "signature": "Decompress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FSharedBuffer",
+      "docs": "Decompress into an owned buffer.\n@return An owned buffer containing the raw data, or null on error."
+    },
+    {
+      "id": "decompress-to-composite-86e85a",
+      "name": "DecompressToComposite",
+      "category": "CompressedBuffer",
+      "signature": "DecompressToComposite(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBuffer*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompositeBuffer"
+    },
+    {
+      "id": "f-compressed-buffer-reader-c9e438",
+      "name": "FCompressedBufferReader",
+      "category": "CompressedBuffer",
+      "signature": "FCompressedBufferReader(Archive)",
+      "params": [
+        {
+          "name": "Archive",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct a reader that will read from an archive as needed."
+    },
+    {
+      "id": "f-compressed-buffer-reader-1fa9a2",
+      "name": "FCompressedBufferReader",
+      "category": "CompressedBuffer",
+      "signature": "FCompressedBufferReader(Buffer)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "FCompressedBuffer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct a reader from an in-memory compressed buffer."
+    },
+    {
+      "id": "reset-buffers",
+      "name": "ResetBuffers",
+      "category": "CompressedBuffer",
+      "signature": "ResetBuffers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Release any temporary buffers that have been allocated by the reader."
+    },
+    {
+      "id": "reset-source",
+      "name": "ResetSource",
+      "category": "CompressedBuffer",
+      "signature": "ResetSource(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the reference to the source without releasing temporary buffers."
+    },
+    {
+      "id": "set-source-50266e",
+      "name": "SetSource",
+      "category": "CompressedBuffer",
+      "signature": "SetSource(Target, Archive)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        },
+        {
+          "name": "Archive",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-source-e4cc19",
+      "name": "SetSource",
+      "category": "CompressedBuffer",
+      "signature": "SetSource(Target, Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        },
+        {
+          "name": "Buffer",
+          "type": "FCompressedBuffer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "try-decompress-to-1f3591",
+      "name": "TryDecompressTo",
+      "category": "CompressedBuffer",
+      "signature": "TryDecompressTo(Target, Raw View, Raw Offset, Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        },
+        {
+          "name": "Raw View",
+          "type": "FMutableMemoryView"
+        },
+        {
+          "name": "Raw Offset",
+          "type": "UInt64",
+          "default": "0"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressedBufferDecompressFlags",
+          "default": "ECompressedBufferDecompressFlags::None"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Decompress into a memory view that is less than or equal to the available raw size.\n@param RawView     The view to write to. The size to read is equal to the view size.\n@param RawOffset   The offset into the raw data from which to decompress.\n@return True if the requested range was decompressed, otherwise false."
+    },
+    {
+      "id": "decompress-1218f8",
+      "name": "Decompress",
+      "category": "CompressedBuffer",
+      "signature": "Decompress(Target, Raw Offset, Raw Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        },
+        {
+          "name": "Raw Offset",
+          "type": "UInt64",
+          "default": "0"
+        },
+        {
+          "name": "Raw Size",
+          "type": "UInt64",
+          "default": "MAX_uint64"
+        }
+      ],
+      "returnType": "nodiscard ] ] FSharedBuffer",
+      "docs": "Decompress into an owned buffer.\nRawOffset must be at most the raw buffer size. RawSize may be MAX_uint64 to read the whole\nbuffer from RawOffset, and must otherwise fit within the bounds of the buffer.\n@param RawOffset   The offset into the raw data from which to decompress.\n@param RawSize     The size of the raw data to read from the offset.\n@return An owned buffer containing the raw data, or null on error."
+    },
+    {
+      "id": "decompress-to-composite-e10110",
+      "name": "DecompressToComposite",
+      "category": "CompressedBuffer",
+      "signature": "DecompressToComposite(Target, Raw Offset, Raw Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedBufferReader*"
+        },
+        {
+          "name": "Raw Offset",
+          "type": "UInt64",
+          "default": "0"
+        },
+        {
+          "name": "Raw Size",
+          "type": "UInt64",
+          "default": "MAX_uint64"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompositeBuffer"
+    }
+  ]
+}

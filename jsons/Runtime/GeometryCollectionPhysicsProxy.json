@@ -1,0 +1,2085 @@
+{
+  "id": "geometry-collection-physics-proxy",
+  "label": "GeometryCollectionPhysicsProxy",
+  "includepath": "PhysicsProxy/GeometryCollectionPhysicsProxy.h",
+  "includes": [
+    "GeometryCollection",
+    "GeometryCollectionProxyData",
+    "PhysicsProxy",
+    "ManagedArray",
+    "GeometryCollectionCollisionStructureManager",
+    "CollisionFilterData",
+    "BufferedData",
+    "GeometryParticlesfwd",
+    "ParticleHandle",
+    "ParticleHandleFwd",
+    "PhysicsObject",
+    "Array",
+    "PBDRigidsSolver",
+    "Defines"
+  ],
+  "functions": [
+    {
+      "id": "f-geometry-collection-physics-proxy-aa8ddf",
+      "name": "FGeometryCollectionPhysicsProxy",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "FGeometryCollectionPhysicsProxy(In Owner, Game Thread Collection, Simulation Parameters, In Sim Filter, In Query Filter, In Collector Guid, Buffer Mode)",
+      "params": [
+        {
+          "name": "In Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Game Thread Collection",
+          "type": "FGeometryDynamicCollection&"
+        },
+        {
+          "name": "Simulation Parameters",
+          "type": "FSimulationParameters&"
+        },
+        {
+          "name": "In Sim Filter",
+          "type": "FCollisionFilterData"
+        },
+        {
+          "name": "In Query Filter",
+          "type": "FCollisionFilterData"
+        },
+        {
+          "name": "In Collector Guid",
+          "type": "FGuid",
+          "default": "FGuid::NewGuid()"
+        },
+        {
+          "name": "Buffer Mode",
+          "type": "Chaos::EMultiBufferMode",
+          "default": "Chaos::EMultiBufferMode::TripleGuarded"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "\\p InOwner\n\\p InDynamicCollection game thread owned geometry collection.\n\\p InInitFunc callback invoked from \\c Initialize().\n\\p InCacheSyncFunc callback invoked from \\c PullFromPhysicsState().\n\\p InFinalSyncFunc callback invoked from \\c SyncBeforeDestory()."
+    },
+    {
+      "id": "f-geometry-collection-physics-proxy-001405",
+      "name": "FGeometryCollectionPhysicsProxy",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "FGeometryCollectionPhysicsProxy()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Class to manage sharing data between the game thread and the simulation thread\n(which may not be different than the game thread) for a \\c FGeometryDynamicCollection."
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "Initialize(Target, Evolution)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Evolution",
+          "type": "Chaos::FPBDRigidsEvolutionBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct \\c PTDynamicCollection, copying attributes from the game thread,\nand prepare for simulation."
+    },
+    {
+      "id": "initialize-bodies-pt",
+      "name": "InitializeBodiesPT",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "InitializeBodiesPT(Target, Rigids Solver, Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Particles",
+          "type": "Chaos::FPBDRigidsSolver::FParticlesType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finish initialization on the physics thread.\nCalled by solver command registered by \\c FPBDRigidsSolver::RegisterObject()."
+    },
+    {
+      "id": "initialize-dynamic-collection",
+      "name": "InitializeDynamicCollection",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "InitializeDynamicCollection(Dynamic Collection, Rest Collection, Params)",
+      "params": [
+        {
+          "name": "Dynamic Collection",
+          "type": "FGeometryDynamicCollection&"
+        },
+        {
+          "name": "Rest Collection",
+          "type": "FGeometryCollection&"
+        },
+        {
+          "name": "Params",
+          "type": "FSimulationParameters&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "buffer-game-state",
+      "name": "BufferGameState",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BufferGameState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "buffer-physics-results-internal",
+      "name": "BufferPhysicsResults_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BufferPhysicsResults_Internal(Target, Current Solver, Buffer Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Current Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Buffer Data",
+          "type": "Chaos::FDirtyGeometryCollectionData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Push PT state into the \\c PhysToGameInterchange."
+    },
+    {
+      "id": "buffer-physics-results-external",
+      "name": "BufferPhysicsResults_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BufferPhysicsResults_External(Target, Buffer Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Buffer Data",
+          "type": "Chaos::FDirtyGeometryCollectionData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Push GT state into the \\c PhysToGameInterchange for async physics"
+    },
+    {
+      "id": "push-state-on-game-thread",
+      "name": "PushStateOnGameThread",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "PushStateOnGameThread(Target, In Solver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "In Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Push data from the game thread to the physics thread"
+    },
+    {
+      "id": "push-to-physics-state",
+      "name": "PushToPhysicsState",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "PushToPhysicsState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "apply the state changes on the physics thread"
+    },
+    {
+      "id": "flip-buffer",
+      "name": "FlipBuffer",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "FlipBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Does nothing as \\c BufferPhysicsResults() already did this."
+    },
+    {
+      "id": "pull-from-physics-state",
+      "name": "PullFromPhysicsState",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "PullFromPhysicsState(Target, Buffer Data, Solver Sync Timestamp, Next Pull Data, Alpha, Error, Async Fixed Time Step)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Buffer Data",
+          "type": "Chaos::FDirtyGeometryCollectionData&"
+        },
+        {
+          "name": "Solver Sync Timestamp",
+          "type": "Int"
+        },
+        {
+          "name": "Next Pull Data",
+          "type": "Chaos::FDirtyGeometryCollectionData*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Alpha",
+          "type": "Chaos::FRealSingle*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Error",
+          "type": "Chaos::FDirtyRigidParticleReplicationErrorData*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Async Fixed Time Step",
+          "type": "Chaos::FReal",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Pulls data out of the PhysToGameInterchange and updates \\c GTDynamicCollection.\nCalled from FPhysScene_ChaosInterface::SyncBodies(), NOT the solver."
+    },
+    {
+      "id": "sync-before-destroy",
+      "name": "SyncBeforeDestroy",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SyncBeforeDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-remove-from-solver",
+      "name": "OnRemoveFromSolver",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "OnRemoveFromSolver(Target, RBD Solver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "RBD Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-remove-from-scene",
+      "name": "OnRemoveFromScene",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "OnRemoveFromScene(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-unregistered-from-solver",
+      "name": "OnUnregisteredFromSolver",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "OnUnregisteredFromSolver(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "buffer-field-command-external",
+      "name": "BufferFieldCommand_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BufferFieldCommand_External(Target, Command)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Command",
+          "type": "FFieldSystemCommand&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enqueue a field \\p Command to be processed by \\c ProcessCommands() or \\c FieldForcesUpdateCallback(). Game thread only"
+    },
+    {
+      "id": "buffer-command",
+      "name": "BufferCommand",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BufferCommand(Target, Rigids Solver, Command)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Command",
+          "type": "FFieldSystemCommand&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "buffer-field-command-internal",
+      "name": "BufferFieldCommand_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BufferFieldCommand_Internal(Target, Rigids Solver, Command)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Command",
+          "type": "FFieldSystemCommand&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enqueue a field \\p Command to be processed by \\c ProcessCommands() or \\c FieldForcesUpdateCallback(). Physics thread only"
+    },
+    {
+      "id": "field-forces-update-callback",
+      "name": "FieldForcesUpdateCallback",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "FieldForcesUpdateCallback(Target, Rigid Solver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigid Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "field-parameter-update-callback",
+      "name": "FieldParameterUpdateCallback",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "FieldParameterUpdateCallback(Target, Rigid Solver, Update Views)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigid Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Update Views",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "need-to-initialize-shared-collision-structures",
+      "name": "NeedToInitializeSharedCollisionStructures",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "NeedToInitializeSharedCollisionStructures(Rest Collection)",
+      "params": [
+        {
+          "name": "Rest Collection",
+          "type": "FGeometryCollection&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "initialize-shared-collision-structures",
+      "name": "InitializeSharedCollisionStructures",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "InitializeSharedCollisionStructures(Error Reporter, Rest Collection, Shared Params)",
+      "params": [
+        {
+          "name": "Error Reporter",
+          "type": "Chaos::FErrorReporter&"
+        },
+        {
+          "name": "Rest Collection",
+          "type": "FGeometryCollection&"
+        },
+        {
+          "name": "Shared Params",
+          "type": "FSharedSimulationParameters&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-world-transform-external",
+      "name": "SetWorldTransform_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetWorldTransform_External(Target, World Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "World Transform",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-use-static-mesh-collision-for-traces-external",
+      "name": "SetUseStaticMeshCollisionForTraces_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetUseStaticMeshCollisionForTraces_External(Target, In Use Static Mesh Collision For Traces)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "In Use Static Mesh Collision For Traces",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-particle-by-index-external",
+      "name": "GetParticleByIndex_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetParticleByIndex_External(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FParticle*"
+    },
+    {
+      "id": "get-particle-by-index-internal",
+      "name": "GetParticleByIndex_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetParticleByIndex_Internal(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FParticleHandle*"
+    },
+    {
+      "id": "get-relevant-particle-handles",
+      "name": "GetRelevantParticleHandles",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetRelevantParticleHandles(Target, Handles, Rigid Solver, Resolution Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Handles",
+          "type": "TArray<Chaos::TGeometryParticleHandle<Chaos::FReal,3>*>&"
+        },
+        {
+          "name": "Rigid Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Resolution Type",
+          "type": "EFieldResolutionType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "* Get all the geometry collection particle handles based on the processing resolution"
+    },
+    {
+      "id": "get-filtered-particle-handles",
+      "name": "GetFilteredParticleHandles",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetFilteredParticleHandles(Target, Handles, Rigid Solver, Filter Type, Object Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Handles",
+          "type": "TArray<Chaos::TGeometryParticleHandle<Chaos::FReal,3>*>&"
+        },
+        {
+          "name": "Rigid Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Filter Type",
+          "type": "EFieldFilterType"
+        },
+        {
+          "name": "Object Type",
+          "type": "EFieldObjectType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get all the geometry collection particle handles filtered by object state"
+    },
+    {
+      "id": "get-transform-name-external",
+      "name": "GetTransformName_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetTransformName_External(Target, Item Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "disable-particles-external",
+      "name": "DisableParticles_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "DisableParticles_External(Target, Transform Group Indices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Transform Group Indices",
+          "type": "TArray<int32>&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-force-at-external",
+      "name": "ApplyForceAt_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyForceAt_External(Target, Force, World Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Force",
+          "type": "FVector"
+        },
+        {
+          "name": "World Location",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-impulse-at-external",
+      "name": "ApplyImpulseAt_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyImpulseAt_External(Target, Force, World Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Force",
+          "type": "FVector"
+        },
+        {
+          "name": "World Location",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "break-clusters-external",
+      "name": "BreakClusters_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BreakClusters_External(Target, Item Indices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Indices",
+          "type": "TArray<FGeometryCollectionItemIndex>&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "break-active-clusters-external",
+      "name": "BreakActiveClusters_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BreakActiveClusters_External(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-anchored-by-index-external",
+      "name": "SetAnchoredByIndex_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetAnchoredByIndex_External(Target, Index, Anchored)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Anchored",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-anchored-by-transformed-box-external",
+      "name": "SetAnchoredByTransformedBox_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetAnchoredByTransformedBox_External(Target, Box, Transform, Anchored, Max Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Box",
+          "type": "FBox&"
+        },
+        {
+          "name": "Transform",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Anchored",
+          "type": "Bool"
+        },
+        {
+          "name": "Max Level",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-all-anchors-external",
+      "name": "RemoveAllAnchors_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "RemoveAllAnchors_External(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-external-strain-external",
+      "name": "ApplyExternalStrain_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyExternalStrain_External(Target, Item Index, World Location, Radius, Propagation Depth, Propagation Factor, Strain Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        },
+        {
+          "name": "World Location",
+          "type": "FVector&"
+        },
+        {
+          "name": "Radius",
+          "type": "Float"
+        },
+        {
+          "name": "Propagation Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Propagation Factor",
+          "type": "Float"
+        },
+        {
+          "name": "Strain Value",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-internal-strain-external",
+      "name": "ApplyInternalStrain_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyInternalStrain_External(Target, Item Index, World Location, Radius, Propagation Depth, Propagation Factor, Strain Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        },
+        {
+          "name": "World Location",
+          "type": "FVector&"
+        },
+        {
+          "name": "Radius",
+          "type": "Float"
+        },
+        {
+          "name": "Propagation Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Propagation Factor",
+          "type": "Float"
+        },
+        {
+          "name": "Strain Value",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-breaking-linear-velocity-external",
+      "name": "ApplyBreakingLinearVelocity_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyBreakingLinearVelocity_External(Target, Item Index, Linear Velocity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        },
+        {
+          "name": "Linear Velocity",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-breaking-angular-velocity-external",
+      "name": "ApplyBreakingAngularVelocity_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyBreakingAngularVelocity_External(Target, Item Index, Angular Velocity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        },
+        {
+          "name": "Angular Velocity",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-linear-velocity-external",
+      "name": "ApplyLinearVelocity_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyLinearVelocity_External(Target, Item Index, Linear Velocity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        },
+        {
+          "name": "Linear Velocity",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-angular-velocity-external",
+      "name": "ApplyAngularVelocity_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ApplyAngularVelocity_External(Target, Item Index, Angular Velocity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        },
+        {
+          "name": "Angular Velocity",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-proxy-dirty-external",
+      "name": "SetProxyDirty_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetProxyDirty_External(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-enable-damage-from-collision-external",
+      "name": "SetEnableDamageFromCollision_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetEnableDamageFromCollision_External(Target, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-notify-breakings-external",
+      "name": "SetNotifyBreakings_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetNotifyBreakings_External(Target, Notify)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Notify",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-notify-removals-external",
+      "name": "SetNotifyRemovals_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetNotifyRemovals_External(Target, Notify)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Notify",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-notify-crumblings-external",
+      "name": "SetNotifyCrumblings_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetNotifyCrumblings_External(Target, Notify, Include Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Notify",
+          "type": "Bool"
+        },
+        {
+          "name": "Include Children",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-notify-global-breakings-external",
+      "name": "SetNotifyGlobalBreakings_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetNotifyGlobalBreakings_External(Target, Notify)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Notify",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-notify-global-removals-external",
+      "name": "SetNotifyGlobalRemovals_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetNotifyGlobalRemovals_External(Target, Notify)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Notify",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-notify-global-crumblings-external",
+      "name": "SetNotifyGlobalCrumblings_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetNotifyGlobalCrumblings_External(Target, Notify, Include Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Notify",
+          "type": "Bool"
+        },
+        {
+          "name": "Include Children",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-material-based-damage-threshold-internal-bb77c6",
+      "name": "ComputeMaterialBasedDamageThreshold_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ComputeMaterialBasedDamageThreshold_Internal(Target, Clustered Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle&"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "update-filter-data-external",
+      "name": "UpdateFilterData_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "UpdateFilterData_External(Target, New Sim Filter, New Query Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "New Sim Filter",
+          "type": "FCollisionFilterData&"
+        },
+        {
+          "name": "New Query Filter",
+          "type": "FCollisionFilterData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-per-particle-filter-data-external",
+      "name": "UpdatePerParticleFilterData_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "UpdatePerParticleFilterData_External(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Data",
+          "type": "TArray<FParticleCollisionFilterData>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-damage-thresholds-external",
+      "name": "SetDamageThresholds_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetDamageThresholds_External(Target, Damage Thresholds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Damage Thresholds",
+          "type": "TArray<float>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-damage-propagation-data-external",
+      "name": "SetDamagePropagationData_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetDamagePropagationData_External(Target, Enabled, Break Damage Propagation Factor, Shock Damage Propagation Factor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        },
+        {
+          "name": "Break Damage Propagation Factor",
+          "type": "Float"
+        },
+        {
+          "name": "Shock Damage Propagation Factor",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-damage-model-external",
+      "name": "SetDamageModel_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetDamageModel_External(Target, Damage Model)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Damage Model",
+          "type": "EDamageModelTypeEnum"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-use-material-damage-modifiers-external",
+      "name": "SetUseMaterialDamageModifiers_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetUseMaterialDamageModifiers_External(Target, Use Material Damage Modifiers)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Use Material Damage Modifiers",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-material-override-mass-scale-multiplier-external",
+      "name": "SetMaterialOverrideMassScaleMultiplier_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetMaterialOverrideMassScaleMultiplier_External(Target, In Multiplier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "In Multiplier",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-enable-gravity-external",
+      "name": "SetEnableGravity_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetEnableGravity_External(Target, Enable Gravity External)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Enable Gravity External",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-gravity-group-index-external",
+      "name": "SetGravityGroupIndex_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetGravityGroupIndex_External(Target, Gravity Group Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Gravity Group Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-one-way-interaction-level-external",
+      "name": "SetOneWayInteractionLevel_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetOneWayInteractionLevel_External(Target, One Way Interaction Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "One Way Interaction Level",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-physics-material-external",
+      "name": "SetPhysicsMaterial_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetPhysicsMaterial_External(Target, Material Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Material Handle",
+          "type": "Chaos::FMaterialHandle&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "calculate-and-set-level",
+      "name": "CalculateAndSetLevel",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "CalculateAndSetLevel(Transform Group Idx, Parent, Levels)",
+      "params": [
+        {
+          "name": "Transform Group Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Parent",
+          "type": "TManagedArray<int32>&"
+        },
+        {
+          "name": "Levels",
+          "type": "TManagedArray<int32>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Traverses the parents of TransformGroupIdx counting number of levels,\nand sets levels array value for TransformGroupIdx and its parents if not yet initialized.\nIf level is already set, retrieve stored level.\nUninitialized level array should be correct size and defaulted to zeros."
+    },
+    {
+      "id": "get-initial-root-handle-internal",
+      "name": "GetInitialRootHandle_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetInitialRootHandle_Internal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "FClusterHandle*"
+    },
+    {
+      "id": "get-all-physics-objects",
+      "name": "GetAllPhysicsObjects",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetAllPhysicsObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "TArray<Chaos::FPhysicsObjectHandle>"
+    },
+    {
+      "id": "get-all-physics-object-including-nulls",
+      "name": "GetAllPhysicsObjectIncludingNulls",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetAllPhysicsObjectIncludingNulls(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "TArray<Chaos::FPhysicsObjectHandle>"
+    },
+    {
+      "id": "get-physics-object-by-index",
+      "name": "GetPhysicsObjectByIndex",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetPhysicsObjectByIndex(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Chaos::FPhysicsObjectHandle"
+    },
+    {
+      "id": "rebase-all-game-thread-collection-transforms-on-new-world-transform-external",
+      "name": "RebaseAllGameThreadCollectionTransformsOnNewWorldTransform_External",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "RebaseAllGameThreadCollectionTransformsOnNewWorldTransform_External(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-children-geometry-internal",
+      "name": "CreateChildrenGeometry_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "CreateChildrenGeometry_Internal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-material-based-damage-threshold-internal-71ee1c",
+      "name": "ComputeMaterialBasedDamageThreshold_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ComputeMaterialBasedDamageThreshold_Internal(Target, Transform Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Transform Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "compute-user-defined-damage-threshold-internal",
+      "name": "ComputeUserDefinedDamageThreshold_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ComputeUserDefinedDamageThreshold_Internal(Target, Transform Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Transform Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Compute user defined damage threshold for a specific transform\nthis account for component level damage threshold as well as size specific ones\n@param DynamicCollection dynamic collection to use\n@param TransformIndex index of the transform to compute the threshold for\n#return damage threshold value"
+    },
+    {
+      "id": "adjust-mass-for-scale",
+      "name": "AdjustMassForScale",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "AdjustMassForScale(Target, Mass)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Mass",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "adjust scalar mass to account for per component scale properties ( from material override and world transform scale )"
+    },
+    {
+      "id": "adjust-inertia-for-scale",
+      "name": "AdjustInertiaForScale",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "AdjustInertiaForScale(Target, Inertia)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Inertia",
+          "type": "Chaos::FVec3f&"
+        }
+      ],
+      "returnType": "Chaos::FVec3f",
+      "docs": "adjust inertia to account for per component scale properties ( from material override and world transform scale )"
+    },
+    {
+      "id": "build-non-clusters-internal",
+      "name": "BuildNonClusters_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BuildNonClusters_Internal(Target, Collection Cluster Index, Rigids Solver, Mass, Inertia, Existing Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Collection Cluster Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Mass",
+          "type": "Float"
+        },
+        {
+          "name": "Inertia",
+          "type": "Chaos::FVec3f"
+        },
+        {
+          "name": "Existing Index",
+          "type": "Chaos::FUniqueIdx*"
+        }
+      ],
+      "returnType": "Chaos::TPBDGeometryCollectionParticleHandle<Chaos::FReal,3>*"
+    },
+    {
+      "id": "build-clusters-internal",
+      "name": "BuildClusters_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BuildClusters_Internal(Target, Collection Cluster Index, Child Handles, Child Transform Group Indices, Parameters, Existing Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Collection Cluster Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Child Handles",
+          "type": "TArray<Chaos::FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Child Transform Group Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Parameters",
+          "type": "Chaos::FClusterCreationParameters&"
+        },
+        {
+          "name": "Existing Index",
+          "type": "Chaos::FUniqueIdx*"
+        }
+      ],
+      "returnType": "Chaos::FPBDRigidClusteredParticleHandle*",
+      "docs": "Build a physics thread cluster parent particle.\n\\p CollectionClusterIndex - the source geometry collection transform index.\n\\p ChildHandles - physics particle handles of the cluster children.\n\\p ChildTransformGroupIndices - geometry collection indices of the children.\n\\P Parameters - uh, yeah...  Other parameters."
+    },
+    {
+      "id": "set-sleeping-state",
+      "name": "SetSleepingState",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetSleepingState(Target, Rigids Solver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "dirty-all-particles",
+      "name": "DirtyAllParticles",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "DirtyAllParticles(Target, Rigids Solver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "calculate-hierarchy-level",
+      "name": "CalculateHierarchyLevel",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "CalculateHierarchyLevel(Dynamic Collection, Transform Index)",
+      "params": [
+        {
+          "name": "Dynamic Collection",
+          "type": "FGeometryDynamicCollection&"
+        },
+        {
+          "name": "Transform Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Traverses the parents of \\p TransformIndex in \\p GeometryCollection, counting\nthe number of levels until the next parent is \\c INDEX_NONE."
+    },
+    {
+      "id": "set-clustered-particle-kinematic-target-internal",
+      "name": "SetClusteredParticleKinematicTarget_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetClusteredParticleKinematicTarget_Internal(Target, Handle, World Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Handle",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "World Transform",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prepare-buffer-data",
+      "name": "PrepareBufferData",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "PrepareBufferData(Target, Buffer Data, Thread Collection, Solver Last Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Buffer Data",
+          "type": "Chaos::FDirtyGeometryCollectionData&"
+        },
+        {
+          "name": "Thread Collection",
+          "type": "FGeometryDynamicCollection&"
+        },
+        {
+          "name": "Solver Last Dt",
+          "type": "Chaos::FReal",
+          "default": "0.0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-non-clustered-particles",
+      "name": "CreateNonClusteredParticles",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "CreateNonClusteredParticles(Target, Rigids Solver, Rest Collection, Dynamic Collection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Rigids Solver",
+          "type": "Chaos::FPBDRigidsSolver*"
+        },
+        {
+          "name": "Rest Collection",
+          "type": "FGeometryCollection&"
+        },
+        {
+          "name": "Dynamic Collection",
+          "type": "FGeometryDynamicCollection&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-clustered-particle-handle-by-item-index-internal",
+      "name": "FindClusteredParticleHandleByItemIndex_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "FindClusteredParticleHandleByItemIndex_Internal(Target, Item Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Item Index",
+          "type": "FGeometryCollectionItemIndex"
+        }
+      ],
+      "returnType": "Chaos::FPBDRigidClusteredParticleHandle*"
+    },
+    {
+      "id": "update-damage-threshold-internal",
+      "name": "UpdateDamageThreshold_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "UpdateDamageThreshold_Internal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "scale-cluster-geometry-internal",
+      "name": "ScaleClusterGeometry_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "ScaleClusterGeometry_Internal(Target, World Scale)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "World Scale",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Scale the cluster particles geometry (creates if necessary an additional TImplicitObjectScaled object into the implicits hierarchy)"
+    },
+    {
+      "id": "set-world-transform-internal",
+      "name": "SetWorldTransform_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetWorldTransform_Internal(Target, World Transform, In Skip Child To Parent Update When In Cluster Union)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "World Transform",
+          "type": "FTransform&"
+        },
+        {
+          "name": "In Skip Child To Parent Update When In Cluster Union",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-filter-data-internal",
+      "name": "SetFilterData_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetFilterData_Internal(Target, New Sim Filter, New Query Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "New Sim Filter",
+          "type": "FCollisionFilterData&"
+        },
+        {
+          "name": "New Query Filter",
+          "type": "FCollisionFilterData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-per-particle-filter-data-internal",
+      "name": "SetPerParticleFilterData_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetPerParticleFilterData_Internal(Target, Per Particle Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Per Particle Data",
+          "type": "TArray<FParticleCollisionFilterData>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-damage-propagation-data-internal",
+      "name": "SetDamagePropagationData_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetDamagePropagationData_Internal(Target, Enabled, Break Damage Propagation Factor, Shock Damage Propagation Factor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        },
+        {
+          "name": "Break Damage Propagation Factor",
+          "type": "Float"
+        },
+        {
+          "name": "Shock Damage Propagation Factor",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-enable-gravity-internal",
+      "name": "SetEnableGravity_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetEnableGravity_Internal(Target, Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-damage-thresholds-internal",
+      "name": "SetDamageThresholds_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetDamageThresholds_Internal(Target, Damage Thresholds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Damage Thresholds",
+          "type": "TArray<float>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-damage-model-internal",
+      "name": "SetDamageModel_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetDamageModel_Internal(Target, Damage Model)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Damage Model",
+          "type": "EDamageModelTypeEnum"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-use-material-damage-modifiers-internal",
+      "name": "SetUseMaterialDamageModifiers_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetUseMaterialDamageModifiers_Internal(Target, Use Material Damage Modifiers)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Use Material Damage Modifiers",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-material-override-mass-scale-multiplier-internal",
+      "name": "SetMaterialOverrideMassScaleMultiplier_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetMaterialOverrideMassScaleMultiplier_Internal(Target, In Multiplier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "In Multiplier",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-gravity-group-index-internal",
+      "name": "SetGravityGroupIndex_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetGravityGroupIndex_Internal(Target, Gravity Group Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Gravity Group Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-one-way-interaction-level-internal",
+      "name": "SetOneWayInteractionLevel_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetOneWayInteractionLevel_Internal(Target, In One Way Interaction Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "In One Way Interaction Level",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-physics-material-internal",
+      "name": "SetPhysicsMaterial_Internal",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SetPhysicsMaterial_Internal(Target, Material Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Material Handle",
+          "type": "Chaos::FMaterialHandle&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "Reset(Target, Num Transforms)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDamageCollector*"
+        },
+        {
+          "name": "Num Transforms",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "the watcher collects runtime data about\ndamage on each piece of the geometry collection"
+    },
+    {
+      "id": "sample-damage",
+      "name": "SampleDamage",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "SampleDamage(Target, Transform Index, Damage, Damage Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDamageCollector*"
+        },
+        {
+          "name": "Transform Index",
+          "type": "Int"
+        },
+        {
+          "name": "Damage",
+          "type": "Float"
+        },
+        {
+          "name": "Damage Threshold",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "Clear(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeDataCollector*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "add-collector",
+      "name": "AddCollector",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "AddCollector(Target, Guid, Transform Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeDataCollector*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Transform Num",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-collector",
+      "name": "RemoveCollector",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "RemoveCollector(Target, Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeDataCollector*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "Find(Target, Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeDataCollector*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "FDamageCollector*"
+    },
+    {
+      "id": "get-instance",
+      "name": "GetInstance",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "GetInstance()",
+      "params": [],
+      "returnType": "FRuntimeDataCollector&"
+    },
+    {
+      "id": "create-triangle-mesh",
+      "name": "CreateTriangleMesh",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "CreateTriangleMesh(Target, Face Start, Face Count, Visible, Indices, Rotate Winding)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Face Start",
+          "type": "Int"
+        },
+        {
+          "name": "Face Count",
+          "type": "Int"
+        },
+        {
+          "name": "Visible",
+          "type": "TManagedArray<bool>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TManagedArray<FIntVector>&"
+        },
+        {
+          "name": "Rotate Winding",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "TUniquePtr<Chaos::FTriangleMesh>"
+    },
+    {
+      "id": "build-simulation-data",
+      "name": "BuildSimulationData",
+      "category": "GeometryCollectionPhysicsProxy",
+      "signature": "BuildSimulationData(Target, Error Reporter, Geometry Collection, Shared Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeometryCollectionPhysicsProxy*"
+        },
+        {
+          "name": "Error Reporter",
+          "type": "Chaos::FErrorReporter&"
+        },
+        {
+          "name": "Geometry Collection",
+          "type": "FGeometryCollection&"
+        },
+        {
+          "name": "Shared Params",
+          "type": "FSharedSimulationParameters&"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

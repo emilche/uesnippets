@@ -1,0 +1,1215 @@
+{
+  "id": "primitive-scene-proxy",
+  "label": "PrimitiveSceneProxy",
+  "includepath": "PrimitiveSceneProxy.h",
+  "includes": [
+    "CoreMinimal",
+    "RendererInterface",
+    "SceneViewOwner",
+    "Stats",
+    "MemStack",
+    "PrimitiveViewRelevance",
+    "SceneTypes",
+    "Scene",
+    "UniformBuffer",
+    "PrimitiveUniformShaderParameters",
+    "InstanceUniformShaderParameters",
+    "DrawDebugHelpers",
+    "CapsuleShape",
+    "SceneDefinitions",
+    "MeshDrawCommandStatsDefines",
+    "InstanceDataTypes",
+    "PSOPrecacheFwd",
+    "SceneView"
+  ],
+  "functions": [
+    {
+      "id": "should-optimized-wpo-affect-non-nanite-shader-selection",
+      "name": "ShouldOptimizedWPOAffectNonNaniteShaderSelection",
+      "category": "PrimitiveSceneProxy",
+      "signature": "ShouldOptimizedWPOAffectNonNaniteShaderSelection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-primitive-scene-proxy-756132",
+      "name": "FPrimitiveSceneProxy",
+      "category": "PrimitiveSceneProxy",
+      "signature": "FPrimitiveSceneProxy(In Component, Resource Name)",
+      "params": [
+        {
+          "name": "In Component",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Resource Name",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Encapsulates the data which is mirrored to render a UPrimitiveComponent parallel to the game thread.\nThis is intended to be subclassed to support different primitive types."
+    },
+    {
+      "id": "f-primitive-scene-proxy-397a3d",
+      "name": "FPrimitiveSceneProxy",
+      "category": "PrimitiveSceneProxy",
+      "signature": "FPrimitiveSceneProxy(In Desc, Resource Name)",
+      "params": [
+        {
+          "name": "In Desc",
+          "type": "FPrimitiveSceneProxyDesc&"
+        },
+        {
+          "name": "Resource Name",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-primitive-scene-proxy-ecb375",
+      "name": "FPrimitiveSceneProxy",
+      "category": "PrimitiveSceneProxy",
+      "signature": "FPrimitiveSceneProxy(Const)",
+      "params": [
+        {
+          "name": "Const",
+          "type": "FPrimitiveSceneProxy"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy constructor."
+    },
+    {
+      "id": "f-primitive-scene-proxy-18ebd5",
+      "name": "FPrimitiveSceneProxy",
+      "category": "PrimitiveSceneProxy",
+      "signature": "FPrimitiveSceneProxy()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Virtual destructor."
+    },
+    {
+      "id": "set-selection-game-thread",
+      "name": "SetSelection_GameThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetSelection_GameThread(Target, In Parent Selected, In Individually Selected)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Parent Selected",
+          "type": "Bool"
+        },
+        {
+          "name": "In Individually Selected",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates selection for the primitive proxy. This simply sends a message to the rendering thread to call SetSelection_RenderThread.\nThis is called in the game thread as selection is toggled.\n@param bInParentSelected - true if the parent actor is selected in the editor\n@param bInIndividuallySelected - true if the component is selected in the editor directly"
+    },
+    {
+      "id": "set-level-instance-editing-state-game-thread",
+      "name": "SetLevelInstanceEditingState_GameThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetLevelInstanceEditingState_GameThread(Target, In Editing State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Editing State",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates the LevelInstance editing state for the primitive proxy. This simply sends a message to the rendering thread to call SetLevelInstanceEditingState_RenderThread.\nThis is called in the game thread when the object enters/leaves LevelInstance levels.\n@param bInEditingState - true if the parent actor belongs to an editing LevelInstance sublevel"
+    },
+    {
+      "id": "set-primitive-color-game-thread",
+      "name": "SetPrimitiveColor_GameThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetPrimitiveColor_GameThread(Target, In Primitive Color)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Primitive Color",
+          "type": "FLinearColor&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enqueue and update for the render thread to notify it that the primitive color changed."
+    },
+    {
+      "id": "reset-scene-velocity-game-thread",
+      "name": "ResetSceneVelocity_GameThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "ResetSceneVelocity_GameThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enqueue and update for the render thread to remove the velocity data for this component from the scene."
+    },
+    {
+      "id": "is-shown",
+      "name": "IsShown",
+      "category": "PrimitiveSceneProxy",
+      "signature": "IsShown(Target, View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "View",
+          "type": "FSceneView*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return True if the primitive is visible in the given View."
+    },
+    {
+      "id": "is-shadow-cast",
+      "name": "IsShadowCast",
+      "category": "PrimitiveSceneProxy",
+      "signature": "IsShadowCast(Target, View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "View",
+          "type": "FSceneView*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return True if the primitive is casting a shadow."
+    },
+    {
+      "id": "render-bounds",
+      "name": "RenderBounds",
+      "category": "PrimitiveSceneProxy",
+      "signature": "RenderBounds(Target, PDI, Engine Show Flags, Bounds, Render In Editor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "PDI",
+          "type": "FPrimitiveDrawInterface*"
+        },
+        {
+          "name": "Engine Show Flags",
+          "type": "FEngineShowFlags&"
+        },
+        {
+          "name": "Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "Render In Editor",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper for components that want to render bounds."
+    },
+    {
+      "id": "verify-used-material",
+      "name": "VerifyUsedMaterial",
+      "category": "PrimitiveSceneProxy",
+      "signature": "VerifyUsedMaterial(Target, Material Render Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Material Render Proxy",
+          "type": "FMaterialRenderProxy*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Verifies that a material used for rendering was present in the component's GetUsedMaterials list."
+    },
+    {
+      "id": "create-hit-proxies-c4abcb",
+      "name": "CreateHitProxies",
+      "category": "PrimitiveSceneProxy",
+      "signature": "CreateHitProxies(Target, Component, Out Hit Proxies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Component",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Out Hit Proxies",
+          "type": "TArray<TRefCountPtr<HHitProxy>>&"
+        }
+      ],
+      "returnType": "HHitProxy*",
+      "docs": "All FPrimitiveSceneProxy derived classes can decide to fully override the HHitProxy\ncreation, or add their own and call any of their base classes to add theirs.\nClasses deriving from FPrimitiveSceneProxy which are meant to be used with\nIPrimitiveComponent should override both CreateHitProxies(UPrimitiveComponent*, ...)\nand CreateHitProxies(IPrimitiveComponent*, ...) and make the UPrimitiveComponent\nversion call into the IPrimitiveComponent one. This allows their derived classes that\nare exclusive to UPrimitiveComponent to call into them and to reroute the proxy\ncreation to the IPrimitiveComponent path."
+    },
+    {
+      "id": "create-hit-proxies-53fd22",
+      "name": "CreateHitProxies",
+      "category": "PrimitiveSceneProxy",
+      "signature": "CreateHitProxies(Target, Component Interface, Out Hit Proxies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Component Interface",
+          "type": "IPrimitiveComponent*"
+        },
+        {
+          "name": "Out Hit Proxies",
+          "type": "TArray<TRefCountPtr<HHitProxy>>&"
+        }
+      ],
+      "returnType": "HHitProxy*",
+      "docs": "Creates the hit proxies are used when DrawDynamicElements is called.\nCalled in the game thread.\n@param OutHitProxies - Hit proxes which are created should be added to this array.\n@return The hit proxy to use by default for elements drawn by DrawDynamicElements."
+    },
+    {
+      "id": "get-cached-ray-tracing-instance",
+      "name": "GetCachedRayTracingInstance",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetCachedRayTracingInstance(Target, Out Ray Tracing Instance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Out Ray Tracing Instance",
+          "type": "FRayTracingInstance&"
+        }
+      ],
+      "returnType": "ERayTracingPrimitiveFlags",
+      "docs": "Gathers static ray tracing primitives from this proxy.\nFields of the instances can be partially filled, depending on what is desired to be cached, which is described in the returned flags"
+    },
+    {
+      "id": "get-view-relevance",
+      "name": "GetViewRelevance",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetViewRelevance(Target, View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "View",
+          "type": "FSceneView*"
+        }
+      ],
+      "returnType": "FPrimitiveViewRelevance",
+      "docs": "Determines the relevance of this primitive's elements to the given view.\nCalled in the rendering thread.\n@param View - The view to determine relevance for.\n@return The relevance of the primitive's elements to the view."
+    },
+    {
+      "id": "get-depth-priority-group",
+      "name": "GetDepthPriorityGroup",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetDepthPriorityGroup(Target, View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "View",
+          "type": "FSceneView*"
+        }
+      ],
+      "returnType": "ESceneDepthPriorityGroup",
+      "docs": "Determines the DPG to render the primitive in for the given view.\nMay be called regardless of the result of HasViewDependentDPG.\n@param View - The view to determine the primitive's DPG for.\n@return The DPG the primitive should be rendered in for the given view."
+    },
+    {
+      "id": "set-draw-distance-render-thread",
+      "name": "SetDrawDistance_RenderThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetDrawDistance_RenderThread(Target, Min Draw Distance, Max Draw Distance, Virtual Texture Max Draw Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Min Draw Distance",
+          "type": "Float"
+        },
+        {
+          "name": "Max Draw Distance",
+          "type": "Float"
+        },
+        {
+          "name": "Virtual Texture Max Draw Distance",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-pre-skinned-local-bounds",
+      "name": "GetPreSkinnedLocalBounds",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetPreSkinnedLocalBounds(Target, Out Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Out Bounds",
+          "type": "FBoxSphereBounds&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "should-render-custom-depth",
+      "name": "ShouldRenderCustomDepth",
+      "category": "PrimitiveSceneProxy",
+      "signature": "ShouldRenderCustomDepth(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "use-single-sample-shadow-from-stationary-lights",
+      "name": "UseSingleSampleShadowFromStationaryLights",
+      "category": "PrimitiveSceneProxy",
+      "signature": "UseSingleSampleShadowFromStationaryLights(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-instance-data-gpu-only",
+      "name": "IsInstanceDataGPUOnly",
+      "category": "PrimitiveSceneProxy",
+      "signature": "IsInstanceDataGPUOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether instance data only exists in the GPU Scene (instance data not present in CPU memory)."
+    },
+    {
+      "id": "use-editor-compositing",
+      "name": "UseEditorCompositing",
+      "category": "PrimitiveSceneProxy",
+      "signature": "UseEditorCompositing(Target, View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "View",
+          "type": "FSceneView*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-used-material-for-verification",
+      "name": "SetUsedMaterialForVerification",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetUsedMaterialForVerification(Target, In Used Materials For Verification)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Used Materials For Verification",
+          "type": "TArray<UMaterialInterface*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This function exist only to perform an update of the UsedMaterialsForVerification on the render thread"
+    },
+    {
+      "id": "draw-arc",
+      "name": "DrawArc",
+      "category": "PrimitiveSceneProxy",
+      "signature": "DrawArc(PDI, Start, End, Height, Segments, Color, Depth Priority Group, Thickness, Screen Space)",
+      "params": [
+        {
+          "name": "PDI",
+          "type": "FPrimitiveDrawInterface*"
+        },
+        {
+          "name": "Start",
+          "type": "FVector&"
+        },
+        {
+          "name": "End",
+          "type": "FVector&"
+        },
+        {
+          "name": "Height",
+          "type": "Float"
+        },
+        {
+          "name": "Segments",
+          "type": "UInt"
+        },
+        {
+          "name": "Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "Depth Priority Group",
+          "type": "Byte"
+        },
+        {
+          "name": "Thickness",
+          "type": "Float",
+          "default": "0.0f"
+        },
+        {
+          "name": "Screen Space",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Drawing helper. Draws nice bouncy line."
+    },
+    {
+      "id": "draw-arrow-head",
+      "name": "DrawArrowHead",
+      "category": "PrimitiveSceneProxy",
+      "signature": "DrawArrowHead(PDI, Tip, Origin, Size, Color, Depth Priority Group, Thickness, Screen Space)",
+      "params": [
+        {
+          "name": "PDI",
+          "type": "FPrimitiveDrawInterface*"
+        },
+        {
+          "name": "Tip",
+          "type": "FVector&"
+        },
+        {
+          "name": "Origin",
+          "type": "FVector&"
+        },
+        {
+          "name": "Size",
+          "type": "Float"
+        },
+        {
+          "name": "Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "Depth Priority Group",
+          "type": "Byte"
+        },
+        {
+          "name": "Thickness",
+          "type": "Float",
+          "default": "0.0f"
+        },
+        {
+          "name": "Screen Space",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-world-offset",
+      "name": "ApplyWorldOffset",
+      "category": "PrimitiveSceneProxy",
+      "signature": "ApplyWorldOffset(Target, RHI Cmd List, In Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "In Offset",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shifts primitive position and all relevant data by an arbitrary delta.\nCalled on world origin changes\n@param InOffset - The delta to shift by"
+    },
+    {
+      "id": "apply-late-update-transform",
+      "name": "ApplyLateUpdateTransform",
+      "category": "PrimitiveSceneProxy",
+      "signature": "ApplyLateUpdateTransform(Target, RHI Cmd List, Late Update Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Late Update Transform",
+          "type": "FMatrix&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Applies a \"late in the frame\" adjustment to the proxy's existing transform\n@param LateUpdateTransform - The post-transform to be applied to the LocalToWorld matrix"
+    },
+    {
+      "id": "update-uniform-buffer",
+      "name": "UpdateUniformBuffer",
+      "category": "PrimitiveSceneProxy",
+      "signature": "UpdateUniformBuffer(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandList&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates the primitive proxy's uniform buffer."
+    },
+    {
+      "id": "build-uniform-shader-parameters",
+      "name": "BuildUniformShaderParameters",
+      "category": "PrimitiveSceneProxy",
+      "signature": "BuildUniformShaderParameters(Target, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Builder",
+          "type": "FPrimitiveUniformShaderParametersBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply the unform shader parameter settings for the proxy to the builder."
+    },
+    {
+      "id": "draw-debug-mass",
+      "name": "DrawDebugMass",
+      "category": "PrimitiveSceneProxy",
+      "signature": "DrawDebugMass(Target, PDI, Elem TM)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDebugMassData*"
+        },
+        {
+          "name": "PDI",
+          "type": "FPrimitiveDrawInterface*"
+        },
+        {
+          "name": "Elem TM",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-debug-mass-data",
+      "name": "SetDebugMassData",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetDebugMassData(Target, In Debug Mass Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Debug Mass Data",
+          "type": "TArray<FDebugMassData>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the primitive proxy's mass space to component space. Useful for debugging physics center of mass and inertia tensor"
+    },
+    {
+      "id": "get-primitive-distance",
+      "name": "GetPrimitiveDistance",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetPrimitiveDistance(Target, LOD Index, Section Index, View Origin, Primitive Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "LOD Index",
+          "type": "Int"
+        },
+        {
+          "name": "Section Index",
+          "type": "Int"
+        },
+        {
+          "name": "View Origin",
+          "type": "FVector&"
+        },
+        {
+          "name": "Primitive Distance",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get primitive distance to view origin for a given LOD-section.\n@param LODIndex\t\t\t\t\tLOD index (INDEX_NONE for all)\n@param ElementIndex\t\t\t\tElement index (INDEX_NONE for all)\n@param PrimitiveDistance (OUT)\tLOD-section distance to view\n@return\t\t\t\t\t\t\tWhether distance was computed or not"
+    },
+    {
+      "id": "get-mesh-uv-densities",
+      "name": "GetMeshUVDensities",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetMeshUVDensities(Target, LOD Index, Section Index, World UV Densities)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "LOD Index",
+          "type": "Int"
+        },
+        {
+          "name": "Section Index",
+          "type": "Int"
+        },
+        {
+          "name": "World UV Densities",
+          "type": "FVector4&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get mesh UV density for a LOD-section.\n@param LODIndex\t\t\t\t\tLOD index (INDEX_NONE for all)\n@param ElementIndex\t\t\t\tElement index (INDEX_NONE for all)\n@param WorldUVDensities (OUT)\tUV density in world units for each UV channel\n@return\t\t\t\t\t\t\tWhether the densities were computed or not."
+    },
+    {
+      "id": "get-material-texture-scales",
+      "name": "GetMaterialTextureScales",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetMaterialTextureScales(Target, LOD Index, Section Index, Material Render Proxy, One Over Scales, UV Channel Indices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "LOD Index",
+          "type": "Int"
+        },
+        {
+          "name": "Section Index",
+          "type": "Int"
+        },
+        {
+          "name": "Material Render Proxy",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "One Over Scales",
+          "type": "FVector4f*"
+        },
+        {
+          "name": "UV Channel Indices",
+          "type": "FIntVector4*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get mesh UV density for a LOD-section.\n@param LODIndex\t\t\t\t\tLOD index (INDEX_NONE for all)\n@param ElementIndex\t\t\t\tElement index (INDEX_NONE for all)\n@param MaterialRenderProxy\t\tMaterial bound to that LOD-section\n@param OneOverScales (OUT)\t\tOne over the texture scales (array size = TEXSTREAM_MAX_NUM_TEXTURES_PER_MATERIAL / 4)\n@param UVChannelIndices (OUT)\tThe related index for each (array size = TEXSTREAM_MAX_NUM_TEXTURES_PER_MATERIAL / 4)\n@return\t\t\t\t\t\t\tWhether scales were computed or not."
+    },
+    {
+      "id": "set-drawn-in-game-render-thread",
+      "name": "SetDrawnInGame_RenderThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetDrawnInGame_RenderThread(Target, In Draw In Game)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Draw In Game",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the drawn in game flag, from the render thread.\n@param bInDrawInGame\t\tThe new value."
+    },
+    {
+      "id": "get-instance-scene-data-buffers",
+      "name": "GetInstanceSceneDataBuffers",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetInstanceSceneDataBuffers(Target, Access Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Access Flags",
+          "type": "EInstanceBufferAccessFlags",
+          "default": "EInstanceBufferAccessFlags::SynchronizeUpdateTask"
+        }
+      ],
+      "returnType": "FInstanceSceneDataBuffers*",
+      "docs": "Get the instance data view, which may be null for uninstanced primitives. The pointer must be kept valid for as long as the proxy lives, as a copy is cached in FPrimitiveSceneInfo."
+    },
+    {
+      "id": "get-instance-data-header",
+      "name": "GetInstanceDataHeader",
+      "category": "PrimitiveSceneProxy",
+      "signature": "GetInstanceDataHeader(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "FInstanceDataBufferHeader"
+    },
+    {
+      "id": "boost-precached-pso-requests-on-draw",
+      "name": "BoostPrecachedPSORequestsOnDraw",
+      "category": "PrimitiveSceneProxy",
+      "signature": "BoostPrecachedPSORequestsOnDraw(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-pso-requests-to-boost-on-draw",
+      "name": "SetPSORequestsToBoostOnDraw",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetPSORequestsToBoostOnDraw(Target, PSO Requests To Boost On Draw IN)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "PSO Requests To Boost On Draw IN",
+          "type": "TArray<FMaterialPSOPrecacheRequestID>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "setup-instance-scene-data-buffers",
+      "name": "SetupInstanceSceneDataBuffers",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetupInstanceSceneDataBuffers(Target, In Instance Scene Data Buffers)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Instance Scene Data Buffers",
+          "type": "FInstanceSceneDataBuffers*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "update-visible-in-lumen-scene",
+      "name": "UpdateVisibleInLumenScene",
+      "category": "PrimitiveSceneProxy",
+      "signature": "UpdateVisibleInLumenScene(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates bVisibleInLumen, which indicated whether a primitive should be tracked by Lumen scene. Checks if primitive can be ray traced and if it can by captured by surface cache."
+    },
+    {
+      "id": "on-level-added-to-world-render-thread",
+      "name": "OnLevelAddedToWorld_RenderThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "OnLevelAddedToWorld_RenderThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to notify the proxy that the level has been fully added to\nthe world and the primitive will now be rendered.\nOnly called if bShouldNotifyOnWorldAddRemove is set to true."
+    },
+    {
+      "id": "on-level-removed-from-world-render-thread",
+      "name": "OnLevelRemovedFromWorld_RenderThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "OnLevelRemovedFromWorld_RenderThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to notify the proxy that the level has been fully removed from\nthe world and the primitive will not be rendered.\nOnly called if bShouldNotifyOnWorldAddRemove is set to true."
+    },
+    {
+      "id": "enable-gpu-scene-support-flags",
+      "name": "EnableGPUSceneSupportFlags",
+      "category": "PrimitiveSceneProxy",
+      "signature": "EnableGPUSceneSupportFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call during setup to set flags to indicate GPU-Scene support for the proxy if GPU-Scene is enabled & supported for the current feature level."
+    },
+    {
+      "id": "set-transform",
+      "name": "SetTransform",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SetTransform(Target, RHI Cmd List, In Local To World, In Bounds, In Local Bounds, In Actor Position)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "In Local To World",
+          "type": "FMatrix&"
+        },
+        {
+          "name": "In Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Local Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Actor Position",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Index of the color to use for the object's outline"
+    },
+    {
+      "id": "would-set-transform-be-redundant-any-thread",
+      "name": "WouldSetTransformBeRedundant_AnyThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "WouldSetTransformBeRedundant_AnyThread(Target, In Local To World, In Bounds, In Local Bounds, In Actor Position)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Local To World",
+          "type": "FMatrix&"
+        },
+        {
+          "name": "In Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Local Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Actor Position",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-uniform-buffer",
+      "name": "CreateUniformBuffer",
+      "category": "PrimitiveSceneProxy",
+      "signature": "CreateUniformBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-instances-render-thread-be2c0d",
+      "name": "UpdateInstances_RenderThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "UpdateInstances_RenderThread(Target, RHI Cmd List, In Bounds, In Local Bounds, In Static Mesh Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "In Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Local Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Static Mesh Bounds",
+          "type": "FBoxSphereBounds&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The primitive's cull distance."
+    },
+    {
+      "id": "update-instances-render-thread-3c4b62",
+      "name": "UpdateInstances_RenderThread",
+      "category": "PrimitiveSceneProxy",
+      "signature": "UpdateInstances_RenderThread(Target, RHI Cmd List, In Bounds, In Local Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "In Bounds",
+          "type": "FBoxSphereBounds&"
+        },
+        {
+          "name": "In Local Bounds",
+          "type": "FBoxSphereBounds&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pad-instance-local-bounds",
+      "name": "PadInstanceLocalBounds",
+      "category": "PrimitiveSceneProxy",
+      "signature": "PadInstanceLocalBounds(Target, In Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "In Bounds",
+          "type": "FRenderBounds&"
+        }
+      ],
+      "returnType": "FRenderBounds"
+    },
+    {
+      "id": "supports-caching-mesh-draw-commands-1df54a",
+      "name": "SupportsCachingMeshDrawCommands",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SupportsCachingMeshDrawCommands(Target, Mesh Batch)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Mesh Batch",
+          "type": "FMeshBatch&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if specified mesh command can be cached, or needs to be recreated every frame."
+    },
+    {
+      "id": "supports-caching-mesh-draw-commands-ee57cb",
+      "name": "SupportsCachingMeshDrawCommands",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SupportsCachingMeshDrawCommands(Target, Mesh Batch, Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Mesh Batch",
+          "type": "FMeshBatch&"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if specified mesh command can be cached, or needs to be recreated every frame; this is a slightly slower version\nused for materials with external textures that need invalidating their PSOs."
+    },
+    {
+      "id": "supports-nanite-rendering-099b53",
+      "name": "SupportsNaniteRendering",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SupportsNaniteRendering(Target, Vertex Factory, Primitive Scene Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Vertex Factory",
+          "type": "FVertexFactory* RESTRICT"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy* RESTRICT"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if specified mesh can be rendered via Nanite."
+    },
+    {
+      "id": "supports-nanite-rendering-d61281",
+      "name": "SupportsNaniteRendering",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SupportsNaniteRendering(Target, Vertex Factory, Primitive Scene Proxy, Material Render Proxy, Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Vertex Factory",
+          "type": "FVertexFactory* RESTRICT"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy* RESTRICT"
+        },
+        {
+          "name": "Material Render Proxy",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "supports-nanite-rendering-b8b443",
+      "name": "SupportsNaniteRendering",
+      "category": "PrimitiveSceneProxy",
+      "signature": "SupportsNaniteRendering(Target, Vertex Factory Type, Material, Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Vertex Factory Type",
+          "type": "FVertexFactoryType* RESTRICT"
+        },
+        {
+          "name": "Material",
+          "type": "FMaterial&"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-parallel-gather-dynamic-mesh-elements-enabled",
+      "name": "IsParallelGatherDynamicMeshElementsEnabled",
+      "category": "PrimitiveSceneProxy",
+      "signature": "IsParallelGatherDynamicMeshElementsEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-parallel-gather-dynamic-ray-tracing-instances-enabled",
+      "name": "IsParallelGatherDynamicRayTracingInstancesEnabled",
+      "category": "PrimitiveSceneProxy",
+      "signature": "IsParallelGatherDynamicRayTracingInstancesEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

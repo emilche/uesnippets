@@ -1,0 +1,366 @@
+{
+  "id": "remote-object-transfer",
+  "label": "RemoteObjectTransfer",
+  "includepath": "UObject/RemoteObjectTransfer.h",
+  "includes": [
+    "CoreTypes",
+    "AssertionMacros",
+    "RemoteObjectPathName",
+    "Async",
+    "RemoteExecutor"
+  ],
+  "functions": [
+    {
+      "id": "prefetch-remote-object",
+      "name": "PrefetchRemoteObject",
+      "category": "RemoteObjectTransfer",
+      "signature": "PrefetchRemoteObject(Object Id, Destination Outer)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Destination Outer",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Information for performing a migration (send) an object to a remote server"
+    },
+    {
+      "id": "on-object-data-received",
+      "name": "OnObjectDataReceived",
+      "category": "RemoteObjectTransfer",
+      "signature": "OnObjectDataReceived(Owner Server Id, Physics Id, Object Id, Remote Server Id, Data)",
+      "params": [
+        {
+          "name": "Owner Server Id",
+          "type": "FRemoteServerId"
+        },
+        {
+          "name": "Physics Id",
+          "type": "FRemoteServerId"
+        },
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Remote Server Id",
+          "type": "FRemoteServerId"
+        },
+        {
+          "name": "Data",
+          "type": "FRemoteObjectData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when remote object data has been received from a remote server\n@param ObjectId Remote object id\n@param RemoteServerId Server that sent object data\n@param Data Remote object data. Data ownership is transferred to the remote object queue"
+    },
+    {
+      "id": "on-object-data-denied",
+      "name": "OnObjectDataDenied",
+      "category": "RemoteObjectTransfer",
+      "signature": "OnObjectDataDenied(Object Id, Remote Server Id)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Remote Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a remote object request was denied by a remote server\n@param ObjectId Remote object id\n@param RemoteServerId Server that owns the object data"
+    },
+    {
+      "id": "transfer-object-ownership-to-remote-server",
+      "name": "TransferObjectOwnershipToRemoteServer",
+      "category": "RemoteObjectTransfer",
+      "signature": "TransferObjectOwnershipToRemoteServer(Object, Destination Server Id)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Destination Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Migrates and transfers ownership of an object to a remote server\n@param Object Local object to migrate\n@param DestinationServerId Id of a remote server to receive the object and assume ownership"
+    },
+    {
+      "id": "migrate-object-to-remote-server",
+      "name": "MigrateObjectToRemoteServer",
+      "category": "RemoteObjectTransfer",
+      "signature": "MigrateObjectToRemoteServer(Object Id, Destination Server Id)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Destination Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Migrates an object to a remote server without changing ownership\n@param ObjectId Remote object id\n@param DestinationServerId Id of a remote server to receive the object"
+    },
+    {
+      "id": "migrate-object-to-remote-server-with-explicit-priority",
+      "name": "MigrateObjectToRemoteServerWithExplicitPriority",
+      "category": "RemoteObjectTransfer",
+      "signature": "MigrateObjectToRemoteServerWithExplicitPriority(Request Priority, Id, Destination Server Id)",
+      "params": [
+        {
+          "name": "Request Priority",
+          "type": "FRemoteWorkPriority"
+        },
+        {
+          "name": "Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Destination Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "migrate-object-from-remote-server",
+      "name": "MigrateObjectFromRemoteServer",
+      "category": "RemoteObjectTransfer",
+      "signature": "MigrateObjectFromRemoteServer(Object Id, Current Owner Server Id, Destination Outer)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Current Owner Server Id",
+          "type": "FRemoteServerId"
+        },
+        {
+          "name": "Destination Outer",
+          "type": "UObject*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Migrates an object from a remote server (temp function)\n@param ObjectId Remote object id\n@param CurrentOwnerServerId Id of a remote server that currently owns the object\n@param DestinationOuter Optional outer the migrated object should be reparented to\n@return Migrated object"
+    },
+    {
+      "id": "touch-resident-object",
+      "name": "TouchResidentObject",
+      "category": "RemoteObjectTransfer",
+      "signature": "TouchResidentObject(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reports code that touches a resident object"
+    },
+    {
+      "id": "register-remote-object-id",
+      "name": "RegisterRemoteObjectId",
+      "category": "RemoteObjectTransfer",
+      "signature": "RegisterRemoteObjectId(Id, Resident Server Id)",
+      "params": [
+        {
+          "name": "Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "Resident Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Registers object ID as known to be owned by another server, without migrating it\n@param ObjectId Remote object id\n@param OwnerServerId Id of a remote server that currently owns the object"
+    },
+    {
+      "id": "get-all-borrowed-objects",
+      "name": "GetAllBorrowedObjects",
+      "category": "RemoteObjectTransfer",
+      "signature": "GetAllBorrowedObjects(Out Borrowed Object Ids)",
+      "params": [
+        {
+          "name": "Out Borrowed Object Ids",
+          "type": "TArray<FRemoteObjectId>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the list of all object IDs currently borrowed from another server."
+    },
+    {
+      "id": "register-shared-object",
+      "name": "RegisterSharedObject",
+      "category": "RemoteObjectTransfer",
+      "signature": "RegisterSharedObject(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Registers object for sharing, marking it as owned by the current server\n@param Object to make shareable"
+    },
+    {
+      "id": "init-remote-object-transfer",
+      "name": "InitRemoteObjectTransfer",
+      "category": "RemoteObjectTransfer",
+      "signature": "InitRemoteObjectTransfer()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "void-aa9e61",
+      "name": "void",
+      "category": "RemoteObjectTransfer",
+      "signature": "void()",
+      "params": [],
+      "returnType": "TDelegate<",
+      "docs": "Delegate that transfers object data to another server"
+    },
+    {
+      "id": "void-effbd8",
+      "name": "void",
+      "category": "RemoteObjectTransfer",
+      "signature": "void(U Object)",
+      "params": [
+        {
+          "name": "U Object",
+          "type": "TArray<"
+        }
+      ],
+      "returnType": "TMulticastDelegate<",
+      "docs": "ObjectData"
+    },
+    {
+      "id": "f-remote-object-reference-71652f",
+      "name": "FRemoteObjectReference",
+      "category": "RemoteObjectTransfer",
+      "signature": "FRemoteObjectReference(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "FObjectPtr&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-remote-object-reference-37221d",
+      "name": "FRemoteObjectReference",
+      "category": "RemoteObjectTransfer",
+      "signature": "FRemoteObjectReference(Weak Ptr)",
+      "params": [
+        {
+          "name": "Weak Ptr",
+          "type": "FWeakObjectPtr&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-object-ptr",
+      "name": "ToObjectPtr",
+      "category": "RemoteObjectTransfer",
+      "signature": "ToObjectPtr(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRemoteObjectReference*"
+        }
+      ],
+      "returnType": "FObjectPtr"
+    },
+    {
+      "id": "to-weak-ptr",
+      "name": "ToWeakPtr",
+      "category": "RemoteObjectTransfer",
+      "signature": "ToWeakPtr(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRemoteObjectReference*"
+        }
+      ],
+      "returnType": "FWeakObjectPtr"
+    },
+    {
+      "id": "resolve",
+      "name": "Resolve",
+      "category": "RemoteObjectTransfer",
+      "signature": "Resolve(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRemoteObjectReference*"
+        }
+      ],
+      "returnType": "UObject*"
+    },
+    {
+      "id": "net-serialize",
+      "name": "NetSerialize",
+      "category": "RemoteObjectTransfer",
+      "signature": "NetSerialize(Target, Ar, Map, Out Success)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRemoteObjectReference*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Map",
+          "type": "UPackageMap*"
+        },
+        {
+          "name": "Out Success",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "net-dequantize",
+      "name": "NetDequantize",
+      "category": "RemoteObjectTransfer",
+      "signature": "NetDequantize(Target, In Object Id, In Server Id, In Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRemoteObjectReference*"
+        },
+        {
+          "name": "In Object Id",
+          "type": "FRemoteObjectId"
+        },
+        {
+          "name": "In Server Id",
+          "type": "FRemoteServerId"
+        },
+        {
+          "name": "In Path",
+          "type": "FRemoteObjectPathName&"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

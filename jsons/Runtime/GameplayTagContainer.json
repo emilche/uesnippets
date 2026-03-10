@@ -1,0 +1,1145 @@
+{
+  "id": "gameplay-tag-container",
+  "label": "GameplayTagContainer",
+  "includepath": "GameplayTagContainer.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "ObjectMacros",
+    "Object",
+    "Class",
+    "ComparisonUtility",
+    "GameplayTagContainer.generated"
+  ],
+  "functions": [
+    {
+      "id": "request-gameplay-tag",
+      "name": "RequestGameplayTag",
+      "category": "GameplayTagContainer",
+      "signature": "RequestGameplayTag(Tag Name, Error If Not Found)",
+      "params": [
+        {
+          "name": "Tag Name",
+          "type": "Name&"
+        },
+        {
+          "name": "Error If Not Found",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "FGameplayTag",
+      "docs": "Gets the FGameplayTag that corresponds to the TagName\n@param TagName The Name of the tag to search for\n@param ErrorIfNotfound: ensure() that tag exists.\n@return Will return the corresponding FGameplayTag or an empty one if not found."
+    },
+    {
+      "id": "is-valid-gameplay-tag-string",
+      "name": "IsValidGameplayTagString",
+      "category": "GameplayTagContainer",
+      "signature": "IsValidGameplayTagString(Tag String, Out Error, Out Fixed String)",
+      "params": [
+        {
+          "name": "Tag String",
+          "type": "String&"
+        },
+        {
+          "name": "Out Error",
+          "type": "Text*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Out Fixed String",
+          "type": "String*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this is a valid gameplay tag string (foo.bar.baz). If false, it will fill\n@param TagString String to check for validity\n@param OutError If non-null and string invalid, will fill in with an error message\n@param OutFixedString If non-null and string invalid, will attempt to fix. Will be empty if no fix is possible\n@return True if this can be added to the tag dictionary, false if there's a syntax error"
+    },
+    {
+      "id": "matches-tag",
+      "name": "MatchesTag",
+      "category": "GameplayTagContainer",
+      "signature": "MatchesTag(Target, Tag To Check)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Tag To Check",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine if this tag matches TagToCheck, expanding out parent tags\n\"A.1\".MatchesTag(\"A\") will return True, \"A\".MatchesTag(\"A.1\") will return False\nIf TagToCheck is not Valid it will always return False\n@return True if this tag matches TagToCheck"
+    },
+    {
+      "id": "matches-tag-depth",
+      "name": "MatchesTagDepth",
+      "category": "GameplayTagContainer",
+      "signature": "MatchesTagDepth(Target, Tag To Check)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Tag To Check",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Check to see how closely two FGameplayTags match. Higher values indicate more matching terms in the tags.\n@param TagToCheck\tTag to match against\n@return The depth of the match, higher means they are closer to an exact match"
+    },
+    {
+      "id": "matches-any",
+      "name": "MatchesAny",
+      "category": "GameplayTagContainer",
+      "signature": "MatchesAny(Target, Container To Check)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Container To Check",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if this tag matches ANY of the tags in the specified container, also checks against our parent tags\n\"A.1\".MatchesAny({\"A\",\"B\"}) will return True, \"A\".MatchesAny({\"A.1\",\"B\"}) will return False\nIf ContainerToCheck is empty/invalid it will always return False\n@return True if this tag matches ANY of the tags of in ContainerToCheck"
+    },
+    {
+      "id": "get-single-tag-container",
+      "name": "GetSingleTagContainer",
+      "category": "GameplayTagContainer",
+      "signature": "GetSingleTagContainer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Returns a GameplayTagContainer containing only this tag"
+    },
+    {
+      "id": "request-direct-parent",
+      "name": "RequestDirectParent",
+      "category": "GameplayTagContainer",
+      "signature": "RequestDirectParent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        }
+      ],
+      "returnType": "FGameplayTag",
+      "docs": "Returns direct parent GameplayTag of this GameplayTag, calling on x.y will return x"
+    },
+    {
+      "id": "get-gameplay-tag-parents",
+      "name": "GetGameplayTagParents",
+      "category": "GameplayTagContainer",
+      "signature": "GetGameplayTagParents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Returns a new tag container that includes this tag and all parent tags as explicitly added tags.\nFor example, calling this on x.y.z would return a tag container with x.y.z, x.y, and x"
+    },
+    {
+      "id": "parse-parent-tags",
+      "name": "ParseParentTags",
+      "category": "GameplayTagContainer",
+      "signature": "ParseParentTags(Target, Unique Parent Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Unique Parent Tags",
+          "type": "TArray<FGameplayTag>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Parses the tag name and fills in UniqueParentTags with raw parent tags, without validating with the tag manager.\nFor example, calling this on x.y.z would add x.y and x to UniqueParentTags if they were not already in the array"
+    },
+    {
+      "id": "get-tag-leaf-name",
+      "name": "GetTagLeafName",
+      "category": "GameplayTagContainer",
+      "signature": "GetTagLeafName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Parses the tag name and returns the name of the leaf.\nFor example, calling this on x.y.z would return the z component."
+    },
+    {
+      "id": "net-serialize",
+      "name": "NetSerialize",
+      "category": "GameplayTagContainer",
+      "signature": "NetSerialize(Target, Ar, Map, Out Success)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Map",
+          "type": "UPackageMap*"
+        },
+        {
+          "name": "Out Success",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Overridden for fast serialize"
+    },
+    {
+      "id": "post-serialize",
+      "name": "PostSerialize",
+      "category": "GameplayTagContainer",
+      "signature": "PostSerialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles fixup and errors. This is only called when not serializing a full FGameplayTagContainer"
+    },
+    {
+      "id": "net-serialize-packed",
+      "name": "NetSerialize_Packed",
+      "category": "GameplayTagContainer",
+      "signature": "NetSerialize_Packed(Target, Ar, Map, Out Success)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Map",
+          "type": "UPackageMap*"
+        },
+        {
+          "name": "Out Success",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "serialize-from-mismatched-tag",
+      "name": "SerializeFromMismatchedTag",
+      "category": "GameplayTagContainer",
+      "signature": "SerializeFromMismatchedTag(Target, Tag, Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Tag",
+          "type": "FPropertyTag&"
+        },
+        {
+          "name": "Slot",
+          "type": "FStructuredArchive::FSlot"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Used to upgrade a Name property to a GameplayTag struct property"
+    },
+    {
+      "id": "from-export-string",
+      "name": "FromExportString",
+      "category": "GameplayTagContainer",
+      "signature": "FromExportString(Target, Export String, Port Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Export String",
+          "type": "String&"
+        },
+        {
+          "name": "Port Flags",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets from a ImportText string, used in asset registry"
+    },
+    {
+      "id": "import-text-item",
+      "name": "ImportTextItem",
+      "category": "GameplayTagContainer",
+      "signature": "ImportTextItem(Target, Buffer, Port Flags, Parent, Error Text)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTag*"
+        },
+        {
+          "name": "Buffer",
+          "type": "TCHAR*&"
+        },
+        {
+          "name": "Port Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Parent",
+          "type": "UObject*"
+        },
+        {
+          "name": "Error Text",
+          "type": "FOutputDevice*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handles importing tag strings without (TagName=) in it"
+    },
+    {
+      "id": "f-gameplay-tag",
+      "name": "FGameplayTag",
+      "category": "GameplayTagContainer",
+      "signature": "FGameplayTag(In Tag Name)",
+      "params": [
+        {
+          "name": "In Tag Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Intentionally private so only the tag manager can use"
+    },
+    {
+      "id": "filter",
+      "name": "Filter",
+      "category": "GameplayTagContainer",
+      "signature": "Filter(Target, Other Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Other Container",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Returns a filtered version of this container, returns all tags that match against any of the tags in OtherContainer, expanding parents\n@param OtherContainer\t\tThe Container to filter against\n@return A FGameplayTagContainer containing the filtered tags"
+    },
+    {
+      "id": "filter-exact",
+      "name": "FilterExact",
+      "category": "GameplayTagContainer",
+      "signature": "FilterExact(Target, Other Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Other Container",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Returns a filtered version of this container, returns all tags that match exactly one in OtherContainer\n@param OtherContainer\t\tThe Container to filter against\n@return A FGameplayTagContainer containing the filtered tags"
+    },
+    {
+      "id": "matches-query",
+      "name": "MatchesQuery",
+      "category": "GameplayTagContainer",
+      "signature": "MatchesQuery(Target, Query)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Query",
+          "type": "FGameplayTagQuery&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if this container matches the given query.\n@param Query\t\tQuery we are checking against\n@return True if this container matches the query, false otherwise."
+    },
+    {
+      "id": "append-tags",
+      "name": "AppendTags",
+      "category": "GameplayTagContainer",
+      "signature": "AppendTags(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Other",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds all the tags from one container to this container\nNOTE: From set theory, this effectively is the union of the container this is called on with Other.\n@param Other TagContainer that has the tags you want to add to this container"
+    },
+    {
+      "id": "append-matching-tags",
+      "name": "AppendMatchingTags",
+      "category": "GameplayTagContainer",
+      "signature": "AppendMatchingTags(Target, Other A, Other B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Other A",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Other B",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds all the tags that match between the two specified containers to this container.  WARNING: This matches any\nparent tag in A, not just exact matches!  So while this should be the union of the container this is called on with\nthe intersection of OtherA and OtherB, it's not exactly that.  Since OtherB matches against its parents, any tag\nin OtherA which has a parent match with a parent of OtherB will count.  For example, if OtherA has Color.Green\nand OtherB has Color.Red, that will count as a match due to the Color parent match!\nIf you want an exact match, you need to call A.FilterExact(B) (above) to get the intersection of A with B.\nIf you need the disjunctive union (the union of two sets minus their intersection), use AppendTags to create\nUnion, FilterExact to create Intersection, and then call Union.RemoveTags(Intersection).\n@param OtherA TagContainer that has the matching tags you want to add to this container, these tags have their parents expanded\n@param OtherB TagContainer used to check for matching tags.  If the tag matches on any parent, it counts as a match."
+    },
+    {
+      "id": "add-tag-dc85ce",
+      "name": "AddTag",
+      "category": "GameplayTagContainer",
+      "signature": "AddTag(Target, Tag To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tag To Add",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the specified tag to the container\n@param TagToAdd Tag to add to the container"
+    },
+    {
+      "id": "add-tag-fast",
+      "name": "AddTagFast",
+      "category": "GameplayTagContainer",
+      "signature": "AddTagFast(Target, Tag To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tag To Add",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the specified tag to the container without checking for uniqueness\n@param TagToAdd Tag to add to the container\nUseful when building container from another data struct (TMap for example)"
+    },
+    {
+      "id": "add-leaf-tag",
+      "name": "AddLeafTag",
+      "category": "GameplayTagContainer",
+      "signature": "AddLeafTag(Target, Tag To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tag To Add",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Adds a tag to the container and removes any direct parents, wont add if child already exists\n@param Tag\t\t\tThe tag to try and add to this container\n@return True if tag was added"
+    },
+    {
+      "id": "remove-tag",
+      "name": "RemoveTag",
+      "category": "GameplayTagContainer",
+      "signature": "RemoveTag(Target, Tag To Remove, Defer Parent Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tag To Remove",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Defer Parent Tags",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Tag to remove from the container\n@param TagToRemove\t\tTag to remove from the container\n@param bDeferParentTags\tSkip calling FillParentTags for performance (must be handled by calling code)"
+    },
+    {
+      "id": "remove-tags",
+      "name": "RemoveTags",
+      "category": "GameplayTagContainer",
+      "signature": "RemoveTags(Target, Tags To Remove)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tags To Remove",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes all tags in TagsToRemove from this container\n@param TagsToRemove\tTags to remove from the container"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "GameplayTagContainer",
+      "signature": "Reset(Target, Slack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Slack",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove all tags from the container. Will maintain slack by default"
+    },
+    {
+      "id": "serialize-0721b1",
+      "name": "Serialize",
+      "category": "GameplayTagContainer",
+      "signature": "Serialize(Target, Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Slot",
+          "type": "FStructuredArchive::FSlot"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Serialize the tag container"
+    },
+    {
+      "id": "post-script-construct",
+      "name": "PostScriptConstruct",
+      "category": "GameplayTagContainer",
+      "signature": "PostScriptConstruct(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fill in the ParentTags array and any other transient parameters"
+    },
+    {
+      "id": "to-string",
+      "name": "ToString",
+      "category": "GameplayTagContainer",
+      "signature": "ToString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns string version of container in ImportText format"
+    },
+    {
+      "id": "to-string-simple",
+      "name": "ToStringSimple",
+      "category": "GameplayTagContainer",
+      "signature": "ToStringSimple(Target, Quoted)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Quoted",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns abbreviated human readable Tag list without parens or property names. If bQuoted is true it will quote each tag"
+    },
+    {
+      "id": "to-strings-max-len",
+      "name": "ToStringsMaxLen",
+      "category": "GameplayTagContainer",
+      "signature": "ToStringsMaxLen(Target, Max Len)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Max Len",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FString>",
+      "docs": "Returns abbreviated human readable Tag list without parens or property names, but will limit each string to specified len.  This is to get around output restrictions"
+    },
+    {
+      "id": "to-matching-text",
+      "name": "ToMatchingText",
+      "category": "GameplayTagContainer",
+      "signature": "ToMatchingText(Target, Match Type, Invert Condition)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Match Type",
+          "type": "EGameplayContainerMatchType"
+        },
+        {
+          "name": "Invert Condition",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Returns human readable description of what match is being looked for on the readable tag list."
+    },
+    {
+      "id": "get-gameplay-tag-array",
+      "name": "GetGameplayTagArray",
+      "category": "GameplayTagContainer",
+      "signature": "GetGameplayTagArray(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        }
+      ],
+      "returnType": "TArray<FGameplayTag>&",
+      "docs": "Gets the explicit list of gameplay tags"
+    },
+    {
+      "id": "fill-parent-tags",
+      "name": "FillParentTags",
+      "category": "GameplayTagContainer",
+      "signature": "FillParentTags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fills in ParentTags from GameplayTags"
+    },
+    {
+      "id": "complex-has-tag",
+      "name": "ComplexHasTag",
+      "category": "GameplayTagContainer",
+      "signature": "ComplexHasTag(Target, Tag To Check, Tag Match Type, Tag To Check Match Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tag To Check",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Tag Match Type",
+          "type": "TEnumAsByte<EGameplayTagMatchType::Type>"
+        },
+        {
+          "name": "Tag To Check Match Type",
+          "type": "TEnumAsByte<EGameplayTagMatchType::Type>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-parents-for-tag",
+      "name": "AddParentsForTag",
+      "category": "GameplayTagContainer",
+      "signature": "AddParentsForTag(Target, Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagContainer*"
+        },
+        {
+          "name": "Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-gameplay-tag-native-adder",
+      "name": "FGameplayTagNativeAdder",
+      "category": "GameplayTagContainer",
+      "signature": "FGameplayTagNativeAdder()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Class that can be subclassed by a game/plugin to allow easily adding native gameplay tags at startup"
+    },
+    {
+      "id": "f-gameplay-tag-query-d59588",
+      "name": "FGameplayTagQuery",
+      "category": "GameplayTagContainer",
+      "signature": "FGameplayTagQuery()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "f-gameplay-tag-query-bea6f0",
+      "name": "FGameplayTagQuery",
+      "category": "GameplayTagContainer",
+      "signature": "FGameplayTagQuery(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FGameplayTagQuery&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "matches",
+      "name": "Matches",
+      "category": "GameplayTagContainer",
+      "signature": "Matches(Target, Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        },
+        {
+          "name": "Tags",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the given tags match this query, or false otherwise."
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "GameplayTagContainer",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this query is empty, false otherwise."
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "category": "GameplayTagContainer",
+      "signature": "Clear(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets this query to its default empty state."
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "category": "GameplayTagContainer",
+      "signature": "Build(Target, Root Query Expr, In User Description)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        },
+        {
+          "name": "Root Query Expr",
+          "type": "FGameplayTagQueryExpression&"
+        },
+        {
+          "name": "In User Description",
+          "type": "String",
+          "default": "FString()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates this query with the given root expression."
+    },
+    {
+      "id": "build-query",
+      "name": "BuildQuery",
+      "category": "GameplayTagContainer",
+      "signature": "BuildQuery(Root Query Expr, In Description)",
+      "params": [
+        {
+          "name": "Root Query Expr",
+          "type": "FGameplayTagQueryExpression&"
+        },
+        {
+          "name": "In Description",
+          "type": "String",
+          "default": "FString()"
+        }
+      ],
+      "returnType": "FGameplayTagQuery",
+      "docs": "Static function to assemble and return a query."
+    },
+    {
+      "id": "get-query-expr",
+      "name": "GetQueryExpr",
+      "category": "GameplayTagContainer",
+      "signature": "GetQueryExpr(Target, Out Expr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        },
+        {
+          "name": "Out Expr",
+          "type": "FGameplayTagQueryExpression&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Builds a FGameplayTagQueryExpression from this query."
+    },
+    {
+      "id": "serialize-00c2b3",
+      "name": "Serialize",
+      "category": "GameplayTagContainer",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serialize the tag query"
+    },
+    {
+      "id": "build-from-editable-query",
+      "name": "BuildFromEditableQuery",
+      "category": "GameplayTagContainer",
+      "signature": "BuildFromEditableQuery(Target, Editable Query)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        },
+        {
+          "name": "Editable Query",
+          "type": "UEditableGameplayTagQuery&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates this query based on the given EditableQuery object"
+    },
+    {
+      "id": "create-editable-query",
+      "name": "CreateEditableQuery",
+      "category": "GameplayTagContainer",
+      "signature": "CreateEditableQuery(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQuery*"
+        }
+      ],
+      "returnType": "UEditableGameplayTagQuery*",
+      "docs": "Creates editable query object tree based on this query"
+    },
+    {
+      "id": "make-query-match-any-tags",
+      "name": "MakeQuery_MatchAnyTags",
+      "category": "GameplayTagContainer",
+      "signature": "MakeQuery_MatchAnyTags(In Tags)",
+      "params": [
+        {
+          "name": "In Tags",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "FGameplayTagQuery",
+      "docs": "Shortcuts for easily creating common query types\n@todo: add more as dictated by use cases"
+    },
+    {
+      "id": "make-query-match-all-tags",
+      "name": "MakeQuery_MatchAllTags",
+      "category": "GameplayTagContainer",
+      "signature": "MakeQuery_MatchAllTags(In Tags)",
+      "params": [
+        {
+          "name": "In Tags",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "FGameplayTagQuery"
+    },
+    {
+      "id": "make-query-match-no-tags",
+      "name": "MakeQuery_MatchNoTags",
+      "category": "GameplayTagContainer",
+      "signature": "MakeQuery_MatchNoTags(In Tags)",
+      "params": [
+        {
+          "name": "In Tags",
+          "type": "FGameplayTagContainer&"
+        }
+      ],
+      "returnType": "FGameplayTagQuery"
+    },
+    {
+      "id": "make-query-match-tag",
+      "name": "MakeQuery_MatchTag",
+      "category": "GameplayTagContainer",
+      "signature": "MakeQuery_MatchTag(In Tag)",
+      "params": [
+        {
+          "name": "In Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "FGameplayTagQuery"
+    },
+    {
+      "id": "add-tag-59cdf6",
+      "name": "AddTag",
+      "category": "GameplayTagContainer",
+      "signature": "AddTag(Target, Tag Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQueryExpression*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FGameplayTagQueryExpression&"
+    },
+    {
+      "id": "emit-tokens-6dd680",
+      "name": "EmitTokens",
+      "category": "GameplayTagContainer",
+      "signature": "EmitTokens(Target, Token Stream, Tag Dictionary)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQueryExpression*"
+        },
+        {
+          "name": "Token Stream",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Tag Dictionary",
+          "type": "TArray<FGameplayTag>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes this expression to the given token stream."
+    },
+    {
+      "id": "convert-to-json-object",
+      "name": "ConvertToJsonObject",
+      "category": "GameplayTagContainer",
+      "signature": "ConvertToJsonObject(Target, Out Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagQueryExpression*"
+        },
+        {
+          "name": "Out Object",
+          "type": "TSharedRef<FJsonObject>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Converts the existing TagQueryExpression into a json object. Returns true on success"
+    },
+    {
+      "id": "make-from-json-object",
+      "name": "MakeFromJsonObject",
+      "category": "GameplayTagContainer",
+      "signature": "MakeFromJsonObject(In Object, Out Query Expression)",
+      "params": [
+        {
+          "name": "In Object",
+          "type": "TSharedRef<FJsonObject>&"
+        },
+        {
+          "name": "Out Query Expression",
+          "type": "FGameplayTagQueryExpression&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Uses the input json object and fills out the OutQueryExpression with the data."
+    },
+    {
+      "id": "emit-tokens-dc12d9",
+      "name": "EmitTokens",
+      "category": "GameplayTagContainer",
+      "signature": "EmitTokens(Target, Token Stream, Tag Dictionary, Debug String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditableGameplayTagQuery*"
+        },
+        {
+          "name": "Token Stream",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Tag Dictionary",
+          "type": "TArray<FGameplayTag>&"
+        },
+        {
+          "name": "Debug String",
+          "type": "String*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts this editor query construct into the runtime-usable token stream."
+    },
+    {
+      "id": "get-tag-query-export-text",
+      "name": "GetTagQueryExportText",
+      "category": "GameplayTagContainer",
+      "signature": "GetTagQueryExportText(Target, Tag Query)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditableGameplayTagQuery*"
+        },
+        {
+          "name": "Tag Query",
+          "type": "FGameplayTagQuery&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Generates and returns the export text for this query."
+    },
+    {
+      "id": "emit-tag-tokens",
+      "name": "EmitTagTokens",
+      "category": "GameplayTagContainer",
+      "signature": "EmitTagTokens(Target, Tags To Emit, Token Stream, Tag Dictionary, Debug String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditableGameplayTagQueryExpression*"
+        },
+        {
+          "name": "Tags To Emit",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Token Stream",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Tag Dictionary",
+          "type": "TArray<FGameplayTag>&"
+        },
+        {
+          "name": "Debug String",
+          "type": "String*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "emit-expr-list-tokens",
+      "name": "EmitExprListTokens",
+      "category": "GameplayTagContainer",
+      "signature": "EmitExprListTokens(Target, Expr List, Token Stream, Tag Dictionary, Debug String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditableGameplayTagQueryExpression*"
+        },
+        {
+          "name": "Expr List",
+          "type": "TArray<UEditableGameplayTagQueryExpression*>&"
+        },
+        {
+          "name": "Token Stream",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Tag Dictionary",
+          "type": "TArray<FGameplayTag>&"
+        },
+        {
+          "name": "Debug String",
+          "type": "String*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

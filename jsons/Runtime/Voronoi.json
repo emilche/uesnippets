@@ -1,0 +1,411 @@
+{
+  "id": "voronoi",
+  "label": "Voronoi",
+  "includepath": "Voronoi/Voronoi.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "Map",
+    "CoreMinimal",
+    "Box",
+    "NumericLimits",
+    "UnrealMathSSE",
+    "Vector",
+    "AssertionMacros",
+    "PimplPtr",
+    "Tuple",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "voronoi-neighbors",
+      "name": "VoronoiNeighbors",
+      "category": "Voronoi",
+      "signature": "VoronoiNeighbors(Sites, Neighbors, Exclude Bounds, Squared Dist Skip Pt Threshold)",
+      "params": [
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Neighbors",
+          "type": "TArray<TArray<int>>&"
+        },
+        {
+          "name": "Exclude Bounds",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Squared Dist Skip Pt Threshold",
+          "type": "Double",
+          "default": "UE_KINDA_SMALL_NUMBER"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-voronoi-edges",
+      "name": "GetVoronoiEdges",
+      "category": "Voronoi",
+      "signature": "GetVoronoiEdges(Sites, Bounds, Edges, Cell Member, Squared Dist Skip Pt Threshold)",
+      "params": [
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Edges",
+          "type": "TArray<TTuple<FVector,FVector>>&"
+        },
+        {
+          "name": "Cell Member",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Squared Dist Skip Pt Threshold",
+          "type": "Double",
+          "default": "UE_KINDA_SMALL_NUMBER"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "Voronoi",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiComputeHelper*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-voronoi-diagram-15aece",
+      "name": "FVoronoiDiagram",
+      "category": "Voronoi",
+      "signature": "FVoronoiDiagram(Sites, Extra Bounding Space, Squared Dist Skip Pt Threshold)",
+      "params": [
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Extra Bounding Space",
+          "type": "Double"
+        },
+        {
+          "name": "Squared Dist Skip Pt Threshold",
+          "type": "Double",
+          "default": "UE_KINDA_SMALL_NUMBER"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create a Voronoi diagram with the given sites, in a box bounding containing those sites\n@param Sites\t\t\t\t\t\t\tVoronoi sites for the diagram\n@param ExtraBoundingSpace\t\t\tVoronoi diagram will be computed within the bounding box of the sites + this amount of extra space in each dimension\n@param SquaredDistSkipPtThreshold\tA safety threshold to avoid creating invalid cells: sites that are within this distance of an already-added site will not be added\n(If you know there will be no duplicate sites, can set to zero for faster perf.)"
+    },
+    {
+      "id": "f-voronoi-diagram-2ed87c",
+      "name": "FVoronoiDiagram",
+      "category": "Voronoi",
+      "signature": "FVoronoiDiagram(Sites, Bounds, Extra Bounding Space, Squared Dist Skip Pt Threshold)",
+      "params": [
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Extra Bounding Space",
+          "type": "Double"
+        },
+        {
+          "name": "Squared Dist Skip Pt Threshold",
+          "type": "Double",
+          "default": "UE_KINDA_SMALL_NUMBER"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create a Voronoi diagram with the given sites, in a given bounding box\n@param Sites\t\t\t\t\t\t\tVoronoi sites for the diagram\n@param Bounds\t\t\t\t\t\tBounding box within which to compute the Voronoi diagram\n@param ExtraBoundingSpace\t\t\tVoronoi diagram will be computed within the input Bounds + this amount of extra space in each dimension\n@param SquaredDistSkipPtThreshold\tA safety threshold to avoid creating invalid cells: sites that are within this distance of an already-added site will not be added.\n(If you know there will be no duplicate sites, can set to zero for faster perf.)"
+    },
+    {
+      "id": "f-voronoi-diagram-3247ed",
+      "name": "FVoronoiDiagram",
+      "category": "Voronoi",
+      "signature": "FVoronoiDiagram(Expected Num Sites, Bounds, Extra Bounding Space)",
+      "params": [
+        {
+          "name": "Expected Num Sites",
+          "type": "Int"
+        },
+        {
+          "name": "Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Extra Bounding Space",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Make a container for a Voronoi diagram without any points.  Call AddSites() after to finish creating the diagram.\n@param ExpectedNumSites\t\tHow many sites you expect to add in total\n@param Bounds\t\t\t\tBounding box within which to compute the Voronoi diagram\n@param ExtraBoundingSpace\tAmount to expand the bounding box before computing the Voronoi diagram"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "Voronoi",
+      "signature": "Initialize(Target, Sites, Bounds, Extra Bounding Space, Squared Dist Skip Pt Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Extra Bounding Space",
+          "type": "Double"
+        },
+        {
+          "name": "Squared Dist Skip Pt Threshold",
+          "type": "Double",
+          "default": "UE_KINDA_SMALL_NUMBER"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create a Voronoi diagram with the given sites, in a given bounding box.  Any previous data is discarded.\n@param Sites\t\t\t\t\t\t\tVoronoi sites for the diagram\n@param Bounds\t\t\t\t\t\tBounding box within which to compute the Voronoi diagram\n@param ExtraBoundingSpace\t\t\tVoronoi diagram will be computed within the input Bounds + this amount of extra space in each dimension\n@param SquaredDistSkipPtThreshold\tA safety threshold to avoid creating invalid cells: sites that are within this distance of an already-added site will not be added.\n(If you know there will be no duplicate sites, can set to zero for faster perf.)"
+    },
+    {
+      "id": "f-voronoi-diagram-0b455c",
+      "name": "FVoronoiDiagram",
+      "category": "Voronoi",
+      "signature": "FVoronoiDiagram()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-bounds",
+      "name": "GetBounds",
+      "category": "Voronoi",
+      "signature": "GetBounds(Sites, Extra Bounding Space)",
+      "params": [
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Extra Bounding Space",
+          "type": "Double",
+          "default": "UE_DOUBLE_KINDA_SMALL_NUMBER"
+        }
+      ],
+      "returnType": "FBox"
+    },
+    {
+      "id": "add-sites",
+      "name": "AddSites",
+      "category": "Voronoi",
+      "signature": "AddSites(Target, Sites, Squared Dist Skip Pt Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "Sites",
+          "type": "TArrayView<FVector>&"
+        },
+        {
+          "name": "Squared Dist Skip Pt Threshold",
+          "type": "Double",
+          "default": "0.0f"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-all-cells-serial",
+      "name": "ComputeAllCellsSerial",
+      "category": "Voronoi",
+      "signature": "ComputeAllCellsSerial(Target, All Cells)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "All Cells",
+          "type": "TArray<FVoronoiCellInfo>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-all-cells",
+      "name": "ComputeAllCells",
+      "category": "Voronoi",
+      "signature": "ComputeAllCells(Target, All Cells, Approx Sites Per Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "All Cells",
+          "type": "TArray<FVoronoiCellInfo>&"
+        },
+        {
+          "name": "Approx Sites Per Thread",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-all-neighbors",
+      "name": "ComputeAllNeighbors",
+      "category": "Voronoi",
+      "signature": "ComputeAllNeighbors(Target, All Neighbors, Exclude Bounds, Approx Sites Per Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "All Neighbors",
+          "type": "TArray<TArray<int32>>&"
+        },
+        {
+          "name": "Exclude Bounds",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Approx Sites Per Thread",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-cell-edges-serial",
+      "name": "ComputeCellEdgesSerial",
+      "category": "Voronoi",
+      "signature": "ComputeCellEdgesSerial(Target, Edges, Cell Member)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "Edges",
+          "type": "TArray<TTuple<FVector,FVector>>&"
+        },
+        {
+          "name": "Cell Member",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-cell-edges",
+      "name": "ComputeCellEdges",
+      "category": "Voronoi",
+      "signature": "ComputeCellEdges(Target, Edges, Cell Member, Approx Sites Per Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "Edges",
+          "type": "TArray<TTuple<FVector,FVector>>&"
+        },
+        {
+          "name": "Cell Member",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Approx Sites Per Thread",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-cell",
+      "name": "FindCell",
+      "category": "Voronoi",
+      "signature": "FindCell(Target, Pos, Compute Helper, Out Found Site)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "Pos",
+          "type": "FVector&"
+        },
+        {
+          "name": "Compute Helper",
+          "type": "FVoronoiComputeHelper&"
+        },
+        {
+          "name": "Out Found Site",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find the closest Voronoi cell to a given position\n@param Pos\t\t\t\tPosition to query for closest point\n@param ComputeHelper\t\tA valid helper as returned by GetComputeHelper() for this voronoi diagram\n@param OutFoundSite\t\tThe position of the closest Voronoi site, if any\n@return\t\t\t\t\tThe id of the Voronoi cell containing the given position, or -1 if position is outside diagram"
+    },
+    {
+      "id": "get-compute-helper",
+      "name": "GetComputeHelper",
+      "category": "Voronoi",
+      "signature": "GetComputeHelper(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        }
+      ],
+      "returnType": "FVoronoiComputeHelper"
+    },
+    {
+      "id": "get-parallel-block-ranges",
+      "name": "GetParallelBlockRanges",
+      "category": "Voronoi",
+      "signature": "GetParallelBlockRanges(Target, Approx Sites Per Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVoronoiDiagram*"
+        },
+        {
+          "name": "Approx Sites Per Thread",
+          "type": "Int"
+        }
+      ],
+      "returnType": "private : TArray<int32>"
+    }
+  ]
+}

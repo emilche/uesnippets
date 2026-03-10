@@ -1,0 +1,50 @@
+{
+  "id": "solver-body",
+  "label": "SolverBody",
+  "includepath": "Chaos/Evolution/SolverBody.h",
+  "includes": [
+    "Core",
+    "Quat"
+  ],
+  "functions": [
+    {
+      "id": "solver-quaternion-normalize-approx",
+      "name": "SolverQuaternionNormalizeApprox",
+      "category": "SolverBody",
+      "signature": "SolverQuaternionNormalizeApprox(Target, In Out Q)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSolverBody*"
+        },
+        {
+          "name": "In Out Q",
+          "type": "FRotation3&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief An approximate quaternion normalize for use in the solver\n@note we need to correctly normalize the final quaternion before pushing it back to the\nparticle otherwise some tolerance checks elsewhere will fail (Integrate)\nThis avoids the sqrt which is a massively dominating cost especially with doubles\nwhen we do not have a fast reciproical sqrt (AVX2)\nThis uses the first order Pade approximation instead of a Taylor expansion\nto get more accurate results for small quaternion deltas (i.e., where\nQ.SizeSquared() is already near 1).\nQ.Normalized ~= Q * (2 / (1 + Q.SizeSquared)))\nIn practice we can use this for almost any delta generated in collision detection\nbut we have an accurate fallback just in case. The fallback adds a branch but this\ndoes not seem to cost much."
+    },
+    {
+      "id": "solver-quaternion-apply-angular-delta-approx",
+      "name": "SolverQuaternionApplyAngularDeltaApprox",
+      "category": "SolverBody",
+      "signature": "SolverQuaternionApplyAngularDeltaApprox(Target, In Q 0, In DR)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSolverBody*"
+        },
+        {
+          "name": "In Q 0",
+          "type": "FRotation3&"
+        },
+        {
+          "name": "In DR",
+          "type": "FVec3&"
+        }
+      ],
+      "returnType": "FRotation3"
+    }
+  ]
+}

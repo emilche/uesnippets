@@ -1,0 +1,356 @@
+{
+  "id": "output-device-redirector",
+  "label": "OutputDeviceRedirector",
+  "includepath": "Misc/OutputDeviceRedirector.h",
+  "includes": [
+    "Array",
+    "ContainerAllocationPolicies",
+    "CoreTypes",
+    "LogVerbosity",
+    "EnumClassFlags",
+    "OutputDevice",
+    "PimplPtr",
+    "UniquePtr",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-buffered-line",
+      "name": "FBufferedLine",
+      "category": "OutputDeviceRedirector",
+      "signature": "FBufferedLine(In Data, In Category, In Verbosity, In Time)",
+      "params": [
+        {
+          "name": "In Data",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Category",
+          "type": "Name&"
+        },
+        {
+          "name": "In Verbosity",
+          "type": "ELogVerbosity::Type"
+        },
+        {
+          "name": "In Time",
+          "type": "Double",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "-----------------------------------------------------------------------------\nFOutputDeviceRedirector.\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "f-output-device-redirector",
+      "name": "FOutputDeviceRedirector",
+      "category": "OutputDeviceRedirector",
+      "signature": "FOutputDeviceRedirector()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Class used for output redirection to allow logs to show in multiple output devices."
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "OutputDeviceRedirector",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "FOutputDeviceRedirector*",
+      "docs": "Get the GLog singleton."
+    },
+    {
+      "id": "add-output-device",
+      "name": "AddOutputDevice",
+      "category": "OutputDeviceRedirector",
+      "signature": "AddOutputDevice(Target, Output Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Output Device",
+          "type": "FOutputDevice*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an output device to the chain of redirections.\n@param OutputDevice   Output device to add."
+    },
+    {
+      "id": "remove-output-device",
+      "name": "RemoveOutputDevice",
+      "category": "OutputDeviceRedirector",
+      "signature": "RemoveOutputDevice(Target, Output Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Output Device",
+          "type": "FOutputDevice*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an output device from the chain of redirections.\n@param OutputDevice   Output device to remove."
+    },
+    {
+      "id": "is-redirecting-to",
+      "name": "IsRedirectingTo",
+      "category": "OutputDeviceRedirector",
+      "signature": "IsRedirectingTo(Target, Output Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Output Device",
+          "type": "FOutputDevice*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether an output device is in the list of redirections.\n@param OutputDevice   Output device to check the list against.\n@return true if messages are currently redirected to the the passed in output device, false otherwise."
+    },
+    {
+      "id": "flush-threaded-logs",
+      "name": "FlushThreadedLogs",
+      "category": "OutputDeviceRedirector",
+      "signature": "FlushThreadedLogs(Target, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Options",
+          "type": "EOutputDeviceRedirectorFlushOptions",
+          "default": "EOutputDeviceRedirectorFlushOptions::None"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flushes lines buffered by secondary threads."
+    },
+    {
+      "id": "serialize-backlog",
+      "name": "SerializeBacklog",
+      "category": "OutputDeviceRedirector",
+      "signature": "SerializeBacklog(Target, Output Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Output Device",
+          "type": "FOutputDevice*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the current backlog to the specified output device.\n@param OutputDevice   Output device that will receive the current backlog."
+    },
+    {
+      "id": "enable-backlog",
+      "name": "EnableBacklog",
+      "category": "OutputDeviceRedirector",
+      "signature": "EnableBacklog(Target, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enables or disables the backlog.\n@param bEnable   Starts saving a backlog if true, disables and discards any backlog if false."
+    },
+    {
+      "id": "set-current-thread-as-primary-thread",
+      "name": "SetCurrentThreadAsPrimaryThread",
+      "category": "OutputDeviceRedirector",
+      "signature": "SetCurrentThreadAsPrimaryThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the current thread to be the thread that redirects logs to buffered output devices.\nThe current thread can redirect to buffered output devices without buffering, and becomes\nresponsible for flushing buffered logs from secondary threads. Logs from secondary threads\nwill not be redirected unless the current thread periodically flushes threaded logs."
+    },
+    {
+      "id": "try-start-dedicated-primary-thread",
+      "name": "TryStartDedicatedPrimaryThread",
+      "category": "OutputDeviceRedirector",
+      "signature": "TryStartDedicatedPrimaryThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Starts a dedicated primary thread that redirects logs to buffered output devices.\nA thread will not be started for certain configurations or platforms, or when threading is disabled.\n@return true if a dedicated primary logging thread is running, false otherwise."
+    },
+    {
+      "id": "serialize-record",
+      "name": "SerializeRecord",
+      "category": "OutputDeviceRedirector",
+      "signature": "SerializeRecord(Target, Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Record",
+          "type": "UE::FLogRecord&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the log record via all current output devices.\nThe format string pointed to by the record must remain valid indefinitely."
+    },
+    {
+      "id": "serialize-5bf2da",
+      "name": "Serialize",
+      "category": "OutputDeviceRedirector",
+      "signature": "Serialize(Target, Data, Verbosity, Category, Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Data",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Verbosity",
+          "type": "ELogVerbosity::Type"
+        },
+        {
+          "name": "Category",
+          "type": "Name&"
+        },
+        {
+          "name": "Time",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the passed in data via all current output devices.\n@param Data   Text to log.\n@param Event  Event name used for suppression purposes."
+    },
+    {
+      "id": "serialize-55a11f",
+      "name": "Serialize",
+      "category": "OutputDeviceRedirector",
+      "signature": "Serialize(Target, Data, Verbosity, Category)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Data",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Verbosity",
+          "type": "ELogVerbosity::Type"
+        },
+        {
+          "name": "Category",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the passed in data via all current output devices.\n@param Data   Text to log.\n@param Event  Event name used for suppression purposes."
+    },
+    {
+      "id": "redirect-log",
+      "name": "RedirectLog",
+      "category": "OutputDeviceRedirector",
+      "signature": "RedirectLog(Target, Category, Verbosity, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        },
+        {
+          "name": "Category",
+          "type": "Name&"
+        },
+        {
+          "name": "Verbosity",
+          "type": "ELogVerbosity::Type"
+        },
+        {
+          "name": "Data",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Same as Serialize()."
+    },
+    {
+      "id": "flush",
+      "name": "Flush",
+      "category": "OutputDeviceRedirector",
+      "signature": "Flush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Passes on the flush request to all current output devices."
+    },
+    {
+      "id": "panic",
+      "name": "Panic",
+      "category": "OutputDeviceRedirector",
+      "signature": "Panic(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Attempts to set the calling thread as the panic thread and enable panic mode.\nOnly one thread can be the panic thread. Subsequent calls from other threads are ignored.\nOnly redirects logs to panic-safe output devices from this point forward.\nMakes the calling thread the primary log thread as well.\nFlushes buffered logs to panic-safe output devices.\nFlushes panic-safe output devices."
+    },
+    {
+      "id": "tear-down",
+      "name": "TearDown",
+      "category": "OutputDeviceRedirector",
+      "signature": "TearDown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Closes output device and cleans up.\nThis can't happen in the destructor as we might have to call \"delete\" which cannot be done for static/global objects."
+    },
+    {
+      "id": "is-backlog-enabled",
+      "name": "IsBacklogEnabled",
+      "category": "OutputDeviceRedirector",
+      "signature": "IsBacklogEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOutputDeviceRedirector*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine if the backlog is enabled."
+    }
+  ]
+}

@@ -1,0 +1,379 @@
+{
+  "id": "i-audio-endpoint",
+  "label": "IAudioEndpoint",
+  "includepath": "IAudioEndpoint.h",
+  "includes": [
+    "AudioMixerNullDevice",
+    "Array",
+    "ArrayView",
+    "CoreMinimal",
+    "CoreTypes",
+    "MultithreadedPatching",
+    "IModularFeature",
+    "IModularFeatures",
+    "CriticalSection",
+    "ISoundfieldFormat",
+    "LogMacros",
+    "AssertionMacros",
+    "UniquePtr",
+    "NameTypes",
+    "Object",
+    "ObjectMacros",
+    "UObjectGlobals",
+    "IAudioEndpoint.generated"
+  ],
+  "functions": [
+    {
+      "id": "get-proxy",
+      "name": "GetProxy",
+      "category": "IAudioEndpoint",
+      "signature": "GetProxy(Target, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioEndpointSettingsBase*"
+        },
+        {
+          "name": "Nullptr",
+          "type": ") PURE_VIRTUAL ( UAudioEndpointSettingsBase::GetProxy,return"
+        }
+      ],
+      "returnType": "public : TUniquePtr<IAudioEndpointSettingsProxy>"
+    },
+    {
+      "id": "patch-new-input",
+      "name": "PatchNewInput",
+      "category": "IAudioEndpoint",
+      "signature": "PatchNewInput(Target, Expected Duration Per Render, Out Sample Rate, Out Num Channels)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        },
+        {
+          "name": "Expected Duration Per Render",
+          "type": "Float"
+        },
+        {
+          "name": "Out Sample Rate",
+          "type": "Float&"
+        },
+        {
+          "name": "Out Num Channels",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Audio::FPatchInput",
+      "docs": "Create a new patch point for this endpoint. Please see MultithreadedPatching.h to see how to use the FPatchInput class.\n@param [in] ExpectedDurationPerRender The worst-case amount of time expected between render callbacks. This is used to determined how much to allocate for this input.\n@param [out] OutSampleRate. The sample rate expected to be pushed to the returned FPatchInput.\nIf you need to resample your input, please see Audio::FResampler.\n@param [out] OutNumChannels. The number of channels expected to be pushed to the returned FPatchInput.\nIf you need to downmix or upmix your input, try using the following:\nTArray<float> MixdownGainsMap;\nAudio::FMixerDevice::Get2DChannelMap(false, NumInputChannels, NumOutputChannels, false, MixdownGainsMap);\nAudio::DownmixBuffer(NumInputChannels, NumOutputChannels, InputAudio, OutputAudio, MixdownGainsMap.GetData());\n@returns a new Audio::FPatchInput. The FPatchInput may be disconnected if this endpoint's sample rate or channel count changes, in which case you will need to reconnect by calling this again."
+    },
+    {
+      "id": "set-new-settings",
+      "name": "SetNewSettings",
+      "category": "IAudioEndpoint",
+      "signature": "SetNewSettings(Target, In New Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        },
+        {
+          "name": "In New Settings",
+          "type": "TUniquePtr<IAudioEndpointSettingsProxy>&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Post new settings for this endpoint.\nThere is no type safety on this call, so make sure that you are using the correct implementation\nof IAudioEndpointSettingsProxy for this implementation of IAudioEndpoint."
+    },
+    {
+      "id": "process-audio-if-neccessary",
+      "name": "ProcessAudioIfNeccessary",
+      "category": "IAudioEndpoint",
+      "signature": "ProcessAudioIfNeccessary(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If this audio endpoint hasn't spawned a seperate callback thread but requires a callback, this should be executed somewhere."
+    },
+    {
+      "id": "is-implemented",
+      "name": "IsImplemented",
+      "category": "IAudioEndpoint",
+      "signature": "IsImplemented(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether this endpoint is of an implemented type"
+    },
+    {
+      "id": "get-sample-rate",
+      "name": "GetSampleRate",
+      "category": "IAudioEndpoint",
+      "signature": "GetSampleRate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "protected : float",
+      "docs": "REQUIRED OVERRIDES:"
+    },
+    {
+      "id": "get-num-channels",
+      "name": "GetNumChannels",
+      "category": "IAudioEndpoint",
+      "signature": "GetNumChannels(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This should return the number of channels we should be sending to this endpoint. If the number of channels changes, please call DisconnectAllInputs."
+    },
+    {
+      "id": "pop-audio",
+      "name": "PopAudio",
+      "category": "IAudioEndpoint",
+      "signature": "PopAudio(Target, Out Audio, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        },
+        {
+          "name": "Out Audio",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "METHODS USED BY IMPLEMENTATIONS OF IAudioEndpoint:"
+    },
+    {
+      "id": "poll-settings",
+      "name": "PollSettings",
+      "category": "IAudioEndpoint",
+      "signature": "PollSettings(Target, New Settings Retrieved)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        },
+        {
+          "name": "New Settings Retrieved",
+          "type": "TFunctionRef<void ( IAudioEndpointSettingsProxy* )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Use this as a thread safe way to use the current settings posted to this IAudioEndpoint. Locks with IAudioEndpoint::SetSettings.\n@param[in] NewSettingsRetrieved lambda used to work with the retrieved settings.\nThis lambda is called immediately and synchronously, but is used\nto safely scope usage of the IAudioEndpointSettingsProxy pointer."
+    },
+    {
+      "id": "disconnect-all-inputs",
+      "name": "DisconnectAllInputs",
+      "category": "IAudioEndpoint",
+      "signature": "DisconnectAllInputs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Thread safe function to disconnect everything from this endpoint.\nAnything that owns an Audio::FPatchInput will be notified and will have to call PatchNewInput() again to reconnect."
+    },
+    {
+      "id": "start-running-async-callback",
+      "name": "StartRunningAsyncCallback",
+      "category": "IAudioEndpoint",
+      "signature": "StartRunningAsyncCallback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If EndpointRequiresCallback() returns true, this can be used to spawn an async thread and begin calling OnAudioCallback."
+    },
+    {
+      "id": "stop-running-async-callback",
+      "name": "StopRunningAsyncCallback",
+      "category": "IAudioEndpoint",
+      "signature": "StopRunningAsyncCallback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "run-callback-synchronously",
+      "name": "RunCallbackSynchronously",
+      "category": "IAudioEndpoint",
+      "signature": "RunCallbackSynchronously(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If EndpointRequiresCallback() returns true, this can be used to manually run the callback."
+    },
+    {
+      "id": "get-endpoint-type-name",
+      "name": "GetEndpointTypeName",
+      "category": "IAudioEndpoint",
+      "signature": "GetEndpointTypeName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpointFactory*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Get the name for the endpoint type that this factory produces."
+    },
+    {
+      "id": "get-type-name-for-default-endpoint",
+      "name": "GetTypeNameForDefaultEndpoint",
+      "category": "IAudioEndpoint",
+      "signature": "GetTypeNameForDefaultEndpoint()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "This is a special cased name for endpoint submixes that render directly to the default audio device in Audio::FMixerDevice::OnProcessAudioStream."
+    },
+    {
+      "id": "get-modular-feature-name",
+      "name": "GetModularFeatureName",
+      "category": "IAudioEndpoint",
+      "signature": "GetModularFeatureName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "This is used when calling IModularFeatures::Get().RegisterModularFeature for IAudioEndpointFactory implementations.\nIt's not needed if one uses RegisterEndpointType() to register IAudioEndpointFactory implementations."
+    },
+    {
+      "id": "register-endpoint-type",
+      "name": "RegisterEndpointType",
+      "category": "IAudioEndpoint",
+      "signature": "RegisterEndpointType(In Factory)",
+      "params": [
+        {
+          "name": "In Factory",
+          "type": "IAudioEndpointFactory*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This needs to be called to make a soundfield format usable by the engine.\nIt can be called from a ISoundfieldFactory subclass' constructor"
+    },
+    {
+      "id": "unregister-endpoint-type",
+      "name": "UnregisterEndpointType",
+      "category": "IAudioEndpoint",
+      "signature": "UnregisterEndpointType(In Factory)",
+      "params": [
+        {
+          "name": "In Factory",
+          "type": "IAudioEndpointFactory*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This needs to be called it an implementation of ISoundfieldFactory is about to be destroyed.\nIt can be called from the destructor of an implementation of ISoundfieldFactory."
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "IAudioEndpoint",
+      "signature": "Get(In Name)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "IAudioEndpointFactory*",
+      "docs": "Get a registered endpoint factory by name."
+    },
+    {
+      "id": "get-available-endpoint-types",
+      "name": "GetAvailableEndpointTypes",
+      "category": "IAudioEndpoint",
+      "signature": "GetAvailableEndpointTypes()",
+      "params": [],
+      "returnType": "TArray<FName>"
+    },
+    {
+      "id": "create-new-endpoint-instance",
+      "name": "CreateNewEndpointInstance",
+      "category": "IAudioEndpoint",
+      "signature": "CreateNewEndpointInstance(Target, Init Info, Initial Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpointFactory*"
+        },
+        {
+          "name": "Init Info",
+          "type": "FAudioPluginInitializationParams&"
+        },
+        {
+          "name": "Initial Settings",
+          "type": "IAudioEndpointSettingsProxy&"
+        }
+      ],
+      "returnType": "TUniquePtr<IAudioEndpoint>",
+      "docs": "Called for every new endpoint submix created with this factory's endpoint type."
+    },
+    {
+      "id": "get-custom-settings-class",
+      "name": "GetCustomSettingsClass",
+      "category": "IAudioEndpoint",
+      "signature": "GetCustomSettingsClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpointFactory*"
+        }
+      ],
+      "returnType": "UClass*",
+      "docs": "Should return the StaticClass of this factory's implementation of UAudioEndpointSettingsBase."
+    },
+    {
+      "id": "get-default-settings",
+      "name": "GetDefaultSettings",
+      "category": "IAudioEndpoint",
+      "signature": "GetDefaultSettings(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAudioEndpointFactory*"
+        }
+      ],
+      "returnType": "UAudioEndpointSettingsBase*",
+      "docs": "return the settings an endpoint should use"
+    },
+    {
+      "id": "get-dummy-factory",
+      "name": "GetDummyFactory",
+      "category": "IAudioEndpoint",
+      "signature": "GetDummyFactory()",
+      "params": [],
+      "returnType": "IAudioEndpointFactory*"
+    }
+  ]
+}

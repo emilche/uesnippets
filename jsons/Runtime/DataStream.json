@@ -1,0 +1,209 @@
+{
+  "id": "data-stream",
+  "label": "DataStream",
+  "includepath": "Iris/DataStream/DataStream.h",
+  "includes": [
+    "CoreTypes",
+    "DataStream.generated"
+  ],
+  "functions": [
+    {
+      "id": "u-data-stream",
+      "name": "UDataStream",
+      "category": "DataStream",
+      "signature": "UDataStream()",
+      "params": [],
+      "returnType": "public : ~"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "DataStream",
+      "signature": "Init(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "Params",
+          "type": "FInitParameters&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called before any other calls are made."
+    },
+    {
+      "id": "deinit",
+      "name": "Deinit",
+      "category": "DataStream",
+      "signature": "Deinit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a created stream is destroyed."
+    },
+    {
+      "id": "update",
+      "name": "Update",
+      "category": "DataStream",
+      "signature": "Update(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "Params",
+          "type": "FUpdateParameters&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to drive required updates during the ReplicationSystem update calls."
+    },
+    {
+      "id": "begin-write",
+      "name": "BeginWrite",
+      "category": "DataStream",
+      "signature": "BeginWrite(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "Params",
+          "type": "FBeginWriteParameters&"
+        }
+      ],
+      "returnType": "EWriteResult",
+      "docs": "Called before any calls to potential WriteData, if it returns EWriteData::NoData no other calls will be made.\nThe purpose of the method is to enable a DataStream to setup data that can persist over multiple calls to WriteData if bandwidth allows."
+    },
+    {
+      "id": "write-data",
+      "name": "WriteData",
+      "category": "DataStream",
+      "signature": "WriteData(Target, Context, No Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "Context",
+          "type": "UE::Net::FNetSerializationContext&"
+        },
+        {
+          "name": "No Data",
+          "type": "FDataStreamRecord*& OutRecord ) PURE_VIRTUAL ( WriteData,return EWriteResult::"
+        }
+      ],
+      "returnType": "EWriteResult",
+      "docs": "Serialize data to a bitstream and optionally store record of what was serialized to a custom FDataStreamRecord.\nThe FDataStreamRecord allow streams to implement custom delivery guarantees as they see fit by using the stored\ninformation when ProcessPacketDeliveryStatus is called. For each WriteData call returning something other than NoData\na corresponding call to ProcessPacketDeliveryStatus will be made.\nThe UDataStream owns the FDataStreamRecord, but there will always be a call to ProcessPacketDeliveryStatus passing\nthe original OutRecord so that it can be deleted when all packets have been ACKed/NAKed or when the owning connection is closed.\n@param Context The FNetSerializationContext which has accesssors for the bitstream to write to among other things.\n@param OutRecord Set the data stream specific record to OutRecord so that it can be passed in a future ProcessPacketDeliveryStatus call.\nProcessPacketDeliveryStatus will be called with the record in the same order as WriteData was called.\n@return Whether there was data written or not and if the stream has more data to write if bandwidth settings allow it."
+    },
+    {
+      "id": "end-write",
+      "name": "EndWrite",
+      "category": "DataStream",
+      "signature": "EndWrite(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after the final call to WriteData this frame, allowing the DataStream to cleanup data setup during BeginWrite."
+    },
+    {
+      "id": "read-data",
+      "name": "ReadData",
+      "category": "DataStream",
+      "signature": "ReadData(Target, Read Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "Read Data",
+          "type": "UE::Net::FNetSerializationContext& Context ) PURE_VIRTUAL ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Deserialize data that was written with WriteData.\n@param Context The FNetSerializationContext which has accessors for the bitstream to read from among other things."
+    },
+    {
+      "id": "process-packet-delivery-status",
+      "name": "ProcessPacketDeliveryStatus",
+      "category": "DataStream",
+      "signature": "ProcessPacketDeliveryStatus(Target, Status, Process Packet Delivery Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "Status",
+          "type": "UE::Net::EPacketDeliveryStatus"
+        },
+        {
+          "name": "Process Packet Delivery Status",
+          "type": "FDataStreamRecord* Record ) PURE_VIRTUAL ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For each packet into which we have written data we are guaranteed to get a call to ProcessPacketDeliveryStatus when\nit's known whether the packet was delivered or not.\n@param Status Whether the packet was delivered or not or if the record should simply be discarded due to closing a connection.\n@param Record The record which was set by this stream during a WriteData call."
+    },
+    {
+      "id": "has-acknowledged-all-reliable-data",
+      "name": "HasAcknowledgedAllReliableData",
+      "category": "DataStream",
+      "signature": "HasAcknowledgedAllReliableData(Target, True)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        },
+        {
+          "name": "True",
+          "type": ") PURE_VIRTUAL ( HasAcknowledgedAllReliableData,return"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the stream has no pending reliable data for which it is waiting on an acknowledgement."
+    },
+    {
+      "id": "request-close",
+      "name": "RequestClose",
+      "category": "DataStream",
+      "signature": "RequestClose(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initiate close of DataStream. Note: This only applies to DataStreams that are flagged with bDynamicCreate in the DataStreamDefinition\n@param Name The name of the DataStream. Names of valid DataStream are configured in UDataStreamDefinitions.\n@see UDataStreamDefinitions"
+    },
+    {
+      "id": "get-state",
+      "name": "GetState",
+      "category": "DataStream",
+      "signature": "GetState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataStream*"
+        }
+      ],
+      "returnType": "UDataStream::EDataStreamState",
+      "docs": "Get the current state of the DataStream."
+    }
+  ]
+}

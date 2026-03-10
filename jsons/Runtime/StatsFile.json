@@ -1,0 +1,595 @@
+{
+  "id": "stats-file",
+  "label": "StatsFile",
+  "includepath": "Stats/StatsFile.h",
+  "includes": [
+    "AsyncWork",
+    "Array",
+    "ChunkedArray",
+    "Map",
+    "Set",
+    "SparseArray",
+    "UnrealString",
+    "CoreGlobals",
+    "CoreTypes",
+    "IDelegateInstance",
+    "PlatformCrt",
+    "ThreadSafeBool",
+    "ThreadSafeCounter",
+    "Text",
+    "LogCategory",
+    "LogMacros",
+    "AssertionMacros",
+    "Build",
+    "Compression",
+    "Archive",
+    "Stats",
+    "StatsCommon",
+    "StatsData",
+    "Channel",
+    "NameTypes",
+    "UnrealNames"
+  ],
+  "functions": [
+    {
+      "id": "write-metadata",
+      "name": "WriteMetadata",
+      "category": "StatsFile",
+      "signature": "WriteMetadata(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsWriteStream*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Frame offset in the stats file."
+    },
+    {
+      "id": "write-condensed-messages",
+      "name": "WriteCondensedMessages",
+      "category": "StatsFile",
+      "signature": "WriteCondensedMessages(Target, Ar, Target Frame)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsWriteStream*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Target Frame",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes condensed messages into the stream."
+    },
+    {
+      "id": "i-stats-write-file",
+      "name": "IStatsWriteFile",
+      "category": "StatsFile",
+      "signature": "IStatsWriteFile()",
+      "params": [],
+      "returnType": "protected :",
+      "docs": "Set of names already sent."
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "category": "StatsFile",
+      "signature": "Start(Target, In Filename)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        },
+        {
+          "name": "In Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a file writer and registers for the data delegate."
+    },
+    {
+      "id": "stop",
+      "name": "Stop",
+      "category": "StatsFile",
+      "signature": "Stop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finalizes writing the stats data and unregisters the data delegate."
+    },
+    {
+      "id": "get-file-meta-desc",
+      "name": "GetFileMetaDesc",
+      "category": "StatsFile",
+      "signature": "GetFileMetaDesc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "@return the stats file metadata description like the current size and the duration of the stats session."
+    },
+    {
+      "id": "write-header",
+      "name": "WriteHeader",
+      "category": "StatsFile",
+      "signature": "WriteHeader(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes magic value, dummy header and initial metadata."
+    },
+    {
+      "id": "finalize",
+      "name": "Finalize",
+      "category": "StatsFile",
+      "signature": "Finalize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Finalizes writing to the file."
+    },
+    {
+      "id": "wait-task",
+      "name": "WaitTask",
+      "category": "StatsFile",
+      "signature": "WaitTask(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Waits on the async send task to complete."
+    },
+    {
+      "id": "send-task",
+      "name": "SendTask",
+      "category": "StatsFile",
+      "signature": "SendTask(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStatsWriteFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends the data to the file via async task."
+    },
+    {
+      "id": "set-data-delegate",
+      "name": "SetDataDelegate",
+      "category": "StatsFile",
+      "signature": "SetDataDelegate(Target, Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsWriteFile*"
+        },
+        {
+          "name": "Set",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Sets the data delegate used to receive a stats data."
+    },
+    {
+      "id": "finalize-saving-data",
+      "name": "FinalizeSavingData",
+      "category": "StatsFile",
+      "signature": "FinalizeSavingData(Target, Frame File Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsWriteFile*"
+        },
+        {
+          "name": "Frame File Offset",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finalization code called after the compressed data has been saved."
+    },
+    {
+      "id": "write-frame",
+      "name": "WriteFrame",
+      "category": "StatsFile",
+      "signature": "WriteFrame(Target, Target Frame)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsWriteFile*"
+        },
+        {
+          "name": "Target Frame",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Grabs a frame from the local FStatsThreadState and adds it to the output.\nCalled from the stats thread, but the data is saved using the the FAsyncStatsWrite."
+    },
+    {
+      "id": "write-raw-stat-packet",
+      "name": "WriteRawStatPacket",
+      "category": "StatsFile",
+      "signature": "WriteRawStatPacket(Target, Stat Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRawStatsWriteFile*"
+        },
+        {
+          "name": "Stat Packet",
+          "type": "FStatPacket*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "write-stat-packet",
+      "name": "WriteStatPacket",
+      "category": "StatsFile",
+      "signature": "WriteStatPacket(Target, Ar, Stat Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRawStatsWriteFile*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Stat Packet",
+          "type": "FStatPacket&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Write a stat packed into the specified archive."
+    },
+    {
+      "id": "process-meta-data-and-leave-data-only",
+      "name": "ProcessMetaDataAndLeaveDataOnly",
+      "category": "StatsFile",
+      "signature": "ProcessMetaDataAndLeaveDataOnly(Target, Condensed Messages)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsLoadedState*"
+        },
+        {
+          "name": "Condensed Messages",
+          "type": "TArray<FStatMessage>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Method to update the internal metadata. Metadata messages are removed from the array."
+    },
+    {
+      "id": "add-frame-from-condensed-messages",
+      "name": "AddFrameFromCondensedMessages",
+      "category": "StatsFile",
+      "signature": "AddFrameFromCondensedMessages(Target, Condensed Messages)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsLoadedState*"
+        },
+        {
+          "name": "Condensed Messages",
+          "type": "TArray<FStatMessage>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Method to place the data into the history,\nmaintains the history based on the requested number of frames to keep in the history.\nThe condensed messages are emplaced in the condensed history."
+    },
+    {
+      "id": "get-oldest-valid-frame",
+      "name": "GetOldestValidFrame",
+      "category": "StatsFile",
+      "signature": "GetOldestValidFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsLoadedState*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Return the oldest frame of data we have. *"
+    },
+    {
+      "id": "get-latest-valid-frame",
+      "name": "GetLatestValidFrame",
+      "category": "StatsFile",
+      "signature": "GetLatestValidFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsLoadedState*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Return the newest frame of data we have. *"
+    },
+    {
+      "id": "advance-frame-for-load",
+      "name": "AdvanceFrameForLoad",
+      "category": "StatsFile",
+      "signature": "AdvanceFrameForLoad(Target, Condensed Messages)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsLoadedState*"
+        },
+        {
+          "name": "Condensed Messages",
+          "type": "TArray<FStatMessage>&"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Internal method to scan the messages to find the current game/render thread frame."
+    },
+    {
+      "id": "read-and-process-synchronously",
+      "name": "ReadAndProcessSynchronously",
+      "category": "StatsFile",
+      "signature": "ReadAndProcessSynchronously(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Struct used to read from uestats/uestatsraw files, initializes all metadata and starts a process of reading the file asynchronously."
+    },
+    {
+      "id": "read-and-process-asynchronously",
+      "name": "ReadAndProcessAsynchronously",
+      "category": "StatsFile",
+      "signature": "ReadAndProcessAsynchronously(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reads and processes the file using the async tasks on the pool thread. The read data is sent to the game thread using the task graph. This is a non-blocking operation."
+    },
+    {
+      "id": "set-history-frames",
+      "name": "SetHistoryFrames",
+      "category": "StatsFile",
+      "signature": "SetHistoryFrames(Target, In History Frames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        },
+        {
+          "name": "In History Frames",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the number of frame to be stored for future use."
+    },
+    {
+      "id": "f-stats-read-file-a793ba",
+      "name": "FStatsReadFile",
+      "category": "StatsFile",
+      "signature": "FStatsReadFile(In Filename, In Raw Stats File)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Raw Stats File",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "protected :",
+      "docs": "Initialization constructor."
+    },
+    {
+      "id": "f-stats-read-file-843143",
+      "name": "FStatsReadFile",
+      "category": "StatsFile",
+      "signature": "FStatsReadFile()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Destructor."
+    },
+    {
+      "id": "prepare-loading",
+      "name": "PrepareLoading",
+      "category": "StatsFile",
+      "signature": "PrepareLoading(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "protected : bool",
+      "docs": "Prepares file to be loaded, makes sanity checks, reads and initializes metadata\n@return true, if the process was completed successfully"
+    },
+    {
+      "id": "read-stats",
+      "name": "ReadStats",
+      "category": "StatsFile",
+      "signature": "ReadStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reads stats from the file."
+    },
+    {
+      "id": "read-raw-stats",
+      "name": "ReadRawStats",
+      "category": "StatsFile",
+      "signature": "ReadRawStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reads raw stats."
+    },
+    {
+      "id": "read-regular-stats",
+      "name": "ReadRegularStats",
+      "category": "StatsFile",
+      "signature": "ReadRegularStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reads regular stats."
+    },
+    {
+      "id": "pre-process-stats",
+      "name": "PreProcessStats",
+      "category": "StatsFile",
+      "signature": "PreProcessStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called before started processing."
+    },
+    {
+      "id": "process-stats",
+      "name": "ProcessStats",
+      "category": "StatsFile",
+      "signature": "ProcessStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Processes combined history using the internal functionality and provided overloaded Process*Operation methods."
+    },
+    {
+      "id": "post-process-stats",
+      "name": "PostProcessStats",
+      "category": "StatsFile",
+      "signature": "PostProcessStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after finished processing combined history."
+    },
+    {
+      "id": "update-read-stage-progress",
+      "name": "UpdateReadStageProgress",
+      "category": "StatsFile",
+      "signature": "UpdateReadStageProgress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Updates read stage progress periodically, does debug logging if enabled."
+    },
+    {
+      "id": "update-combined-history-stats",
+      "name": "UpdateCombinedHistoryStats",
+      "category": "StatsFile",
+      "signature": "UpdateCombinedHistoryStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dumps combined history stats. Only for raw stats."
+    },
+    {
+      "id": "update-process-stage-progress",
+      "name": "UpdateProcessStageProgress",
+      "category": "StatsFile",
+      "signature": "UpdateProcessStageProgress(Target, Current Stat Message Index, Frame Index, Packet Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStatsReadFile*"
+        },
+        {
+          "name": "Current Stat Message Index",
+          "type": "Int"
+        },
+        {
+          "name": "Frame Index",
+          "type": "Int"
+        },
+        {
+          "name": "Packet Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates process stage progress periodically, does debug logging if enabled."
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "StatsFile",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "FCommandStatsFile&",
+      "docs": "Current state of the stats. Mostly for metadata."
+    }
+  ]
+}

@@ -9,6 +9,65 @@
   ],
   "functions": [
     {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "LayersSubsystem",
+      "signature": "Initialize(Target, Collection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Collection",
+          "type": "FSubsystemCollectionBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Prepares for use"
+    },
+    {
+      "id": "deinitialize",
+      "name": "Deinitialize",
+      "category": "LayersSubsystem",
+      "signature": "Deinitialize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Internal cleanup"
+    },
+    {
+      "id": "u-layers-subsystem",
+      "name": "ULayersSubsystem",
+      "category": "LayersSubsystem",
+      "signature": "ULayersSubsystem()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor"
+    },
+    {
+      "id": "add-level-layer-information",
+      "name": "AddLevelLayerInformation",
+      "category": "Layers",
+      "signature": "AddLevelLayerInformation(Target, Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Aggregates any information regarding layers associated with the level and it contents\n@param\tLevel\tThe process"
+    },
+    {
       "id": "remove-level-layer-information",
       "name": "RemoveLevelLayerInformation",
       "category": "Layers",
@@ -529,6 +588,56 @@
       "docs": "Updates the visibility for all actors for all views.\n@param LayerThatChanged  If one layer was changed (toggled in view pop-up, etc), then we only need to modify actors that use that layer."
     },
     {
+      "id": "update-per-view-visibility",
+      "name": "UpdatePerViewVisibility",
+      "category": "LayersSubsystem",
+      "signature": "UpdatePerViewVisibility(Target, Viewport Client, Layer That Changed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Viewport Client",
+          "type": "FLevelEditorViewportClient*"
+        },
+        {
+          "name": "Layer That Changed",
+          "type": "Name&",
+          "default": "NAME_Skip"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates the per-view visibility for all actors for the given view\n@param ViewportClient\t\t\t\tThe viewport client to update visibility on\n@param LayerThatChanged [optional]\tIf one layer was changed (toggled in view pop-up, etc), then we only need to modify actors that use that layer"
+    },
+    {
+      "id": "update-actor-view-visibility",
+      "name": "UpdateActorViewVisibility",
+      "category": "LayersSubsystem",
+      "signature": "UpdateActorViewVisibility(Target, Viewport Client, Actor, Reregister If Dirty)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Viewport Client",
+          "type": "FLevelEditorViewportClient*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Reregister If Dirty",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates per-view visibility for the given actor in the given view\n@param ViewportClient\t\t\t\tThe viewport client to update visibility on\n@param Actor\t\t\t\t\t\t\t\tActor to update\n@param bReregisterIfDirty [optional]\t\tIf true, the actor will reregister itself to give the rendering thread updated information"
+    },
+    {
       "id": "update-actor-all-views-visibility",
       "name": "UpdateActorAllViewsVisibility",
       "category": "Layers",
@@ -545,6 +654,24 @@
       ],
       "returnType": "Void",
       "docs": "Updates per-view visibility for the given actor for all views\n@param Actor\t\tActor to update"
+    },
+    {
+      "id": "remove-view-from-actor-view-visibility",
+      "name": "RemoveViewFromActorViewVisibility",
+      "category": "LayersSubsystem",
+      "signature": "RemoveViewFromActorViewVisibility(Target, Viewport Client)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Viewport Client",
+          "type": "FLevelEditorViewportClient*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes the corresponding visibility bit from all actors (slides the later bits down 1)\n@param ViewportClient\tThe viewport client to update visibility on"
     },
     {
       "id": "update-actor-visibility",
@@ -1083,6 +1210,80 @@
       ],
       "returnType": "Void",
       "docs": "Delegate handler for FEditorDelegates::RefreshLayerBrowser. It internally calls UpdateAllActorsVisibility to refresh the actors of each layer."
+    },
+    {
+      "id": "post-undo-redo",
+      "name": "PostUndoRedo",
+      "category": "LayersSubsystem",
+      "signature": "PostUndoRedo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Delegate handler for FEditorDelegates::PostUndoRedo. It internally calls LayersChanged.Broadcast and UpdateAllActorsVisibility to refresh the actors of each layer."
+    },
+    {
+      "id": "add-actor-to-stats",
+      "name": "AddActorToStats",
+      "category": "LayersSubsystem",
+      "signature": "AddActorToStats(Target, Layer, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Layer",
+          "type": "ULayer*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "remove-actor-from-stats",
+      "name": "RemoveActorFromStats",
+      "category": "LayersSubsystem",
+      "signature": "RemoveActorFromStats(Target, Layer, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Layer",
+          "type": "ULayer*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "ensure-layer-exists",
+      "name": "EnsureLayerExists",
+      "category": "LayersSubsystem",
+      "signature": "EnsureLayerExists(Target, Layer Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULayersSubsystem*"
+        },
+        {
+          "name": "Layer Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "ULayer*",
+      "docs": "Checks to see if the named layer exists, and if it doesn't creates it.\n@param\tLayerName\tA valid layer name\n@return\t\t\t\tThe ULayer Object of the named layer"
     }
   ]
 }

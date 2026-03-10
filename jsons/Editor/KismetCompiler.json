@@ -1,0 +1,1901 @@
+{
+  "id": "kismet-compiler",
+  "label": "KismetCompiler",
+  "includepath": "KismetCompiler.h",
+  "includes": [
+    "BPTerminal",
+    "Array",
+    "IndirectArray",
+    "Map",
+    "Set",
+    "UnrealString",
+    "CoreMinimal",
+    "Delegate",
+    "EdGraphNode",
+    "EdGraphPin",
+    "EdGraphSchema",
+    "EdGraphCompilerUtilities",
+    "EdGraphSchema_K2",
+    "Blueprint",
+    "PlatformMath",
+    "K2Node_Event",
+    "CompilerResultsLog",
+    "KismetCompiledFunctionContext",
+    "KismetCompilerMisc",
+    "LogMacros",
+    "Color",
+    "EnumClassFlags",
+    "Casts",
+    "Function",
+    "SharedPointer",
+    "SubclassOf",
+    "TypeHash",
+    "NameTypes",
+    "Object",
+    "ObjectMacros",
+    "UnrealNames"
+  ],
+  "functions": [
+    {
+      "id": "f-kismet-compiler-context-4080c6",
+      "name": "FKismetCompilerContext",
+      "category": "KismetCompiler",
+      "signature": "FKismetCompilerContext(Source Sketch, In Message Log, In Compiler Options)",
+      "params": [
+        {
+          "name": "Source Sketch",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "In Message Log",
+          "type": "FCompilerResultsLog&"
+        },
+        {
+          "name": "In Compiler Options",
+          "type": "FKismetCompilerOptions&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-kismet-compiler-context-9ffa4b",
+      "name": "FKismetCompilerContext",
+      "category": "KismetCompiler",
+      "signature": "FKismetCompilerContext()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "compile-class-layout",
+      "name": "CompileClassLayout",
+      "category": "KismetCompiler",
+      "signature": "CompileClassLayout(Target, Internal Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Internal Flags",
+          "type": "EInternalCompilerFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compile the class layout of the blueprint"
+    },
+    {
+      "id": "compile-functions",
+      "name": "CompileFunctions",
+      "category": "KismetCompiler",
+      "signature": "CompileFunctions(Target, Internal Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Internal Flags",
+          "type": "EInternalCompilerFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compile the functions of the blueprint - must be done after compiling the class layout:"
+    },
+    {
+      "id": "post-cdo-compiled",
+      "name": "PostCDOCompiled",
+      "category": "KismetCompiler",
+      "signature": "PostCDOCompiled(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "UObject::FPostCDOCompiledContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after the CDO has been generated, allows assignment of cached/derived data:"
+    },
+    {
+      "id": "add-post-cdo-compiled-step",
+      "name": "AddPostCDOCompiledStep",
+      "category": "KismetCompiler",
+      "signature": "AddPostCDOCompiledStep(Target, Step Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Step Function",
+          "type": "TFunction<void ( UObject::FPostCDOCompiledContext&,UObject* )>&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds the given \"StepFunction\" to be run after the CDO has been compiled in FKismetCompilerContext::PostCDOCompiled."
+    },
+    {
+      "id": "compile",
+      "name": "Compile",
+      "category": "KismetCompiler",
+      "signature": "Compile(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compile a blueprint into a class and a set of functions"
+    },
+    {
+      "id": "set-new-class",
+      "name": "SetNewClass",
+      "category": "KismetCompiler",
+      "signature": "SetNewClass(Target, Class To Use)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class To Use",
+          "type": "UBlueprintGeneratedClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Function used to assign the new class that will be used by the compiler"
+    },
+    {
+      "id": "spawn-intermediate-function-graph",
+      "name": "SpawnIntermediateFunctionGraph",
+      "category": "KismetCompiler",
+      "signature": "SpawnIntermediateFunctionGraph(Target, In Desired Function Name, In Signature, Use Unique Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "In Desired Function Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Signature",
+          "type": "UFunction*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Use Unique Name",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "UEdGraph*",
+      "docs": "Spawn an intermediate function graph for this compilation using the specified desired name (and optional signature),\nwhich may be modified to make it unique."
+    },
+    {
+      "id": "move-pin-links-to-intermediate",
+      "name": "MovePinLinksToIntermediate",
+      "category": "KismetCompiler",
+      "signature": "MovePinLinksToIntermediate(Target, Source Pin, Intermediate Pin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Pin",
+          "type": "UEdGraphPin&"
+        },
+        {
+          "name": "Intermediate Pin",
+          "type": "UEdGraphPin&"
+        }
+      ],
+      "returnType": "FPinConnectionResponse",
+      "docs": "Moves pin links over from the source-pin to the specified intermediate,\nand validates the result (additionally logs a redirect from the\nintermediate-pin back to the source so we can back trace for debugging, etc.)\n@param  SourcePin\t\tThe pin you want disconnected.\n@param  IntermediatePin\tThe pin you want the SourcePin's links moved to.\n@return The result from calling the schema's MovePinLinks()."
+    },
+    {
+      "id": "copy-pin-links-to-intermediate",
+      "name": "CopyPinLinksToIntermediate",
+      "category": "KismetCompiler",
+      "signature": "CopyPinLinksToIntermediate(Target, Source Pin, Intermediate Pin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Pin",
+          "type": "UEdGraphPin&"
+        },
+        {
+          "name": "Intermediate Pin",
+          "type": "UEdGraphPin&"
+        }
+      ],
+      "returnType": "FPinConnectionResponse",
+      "docs": "Copies pin links over from the source-pin to the specified intermediate,\nand validates the result (additionally logs a redirect from the\nintermediate-pin back to the source so we can back trace for debugging, etc.)\n@param  SourcePin\t\tThe pin whose links you want copied.\n@param  IntermediatePin\tThe pin you want the SourcePin's links copied to.\n@return The result from calling the schema's CopyPinLinks()."
+    },
+    {
+      "id": "spawn-internal-variable",
+      "name": "SpawnInternalVariable",
+      "category": "KismetCompiler",
+      "signature": "SpawnInternalVariable(Target, Source Node, Category, Sub Category, Subcategory Object, Pin Container Type, Value Terminal Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Category",
+          "type": "Name"
+        },
+        {
+          "name": "Sub Category",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "Subcategory Object",
+          "type": "UObject*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Pin Container Type",
+          "type": "EPinContainerType",
+          "default": "EPinContainerType::None"
+        },
+        {
+          "name": "Value Terminal Type",
+          "type": "FEdGraphTerminalType&",
+          "default": "FEdGraphTerminalType()"
+        }
+      ],
+      "returnType": "UK2Node_TemporaryVariable*"
+    },
+    {
+      "id": "use-persistent-uber-graph-frame",
+      "name": "UsePersistentUberGraphFrame",
+      "category": "KismetCompiler",
+      "signature": "UsePersistentUberGraphFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-guid",
+      "name": "GetGuid",
+      "category": "KismetCompiler",
+      "signature": "GetGuid(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "get-compiler-for-bp",
+      "name": "GetCompilerForBP",
+      "category": "KismetCompiler",
+      "signature": "GetCompilerForBP(BP, In Message Log, In Compile Options)",
+      "params": [
+        {
+          "name": "BP",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "In Message Log",
+          "type": "FCompilerResultsLog&"
+        },
+        {
+          "name": "In Compile Options",
+          "type": "FKismetCompilerOptions&"
+        }
+      ],
+      "returnType": "TSharedPtr<FKismetCompilerContext>"
+    },
+    {
+      "id": "register-compiler-for-bp",
+      "name": "RegisterCompilerForBP",
+      "category": "KismetCompiler",
+      "signature": "RegisterCompilerForBP(BP Class, Factory Function)",
+      "params": [
+        {
+          "name": "BP Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Factory Function",
+          "type": "CompilerContextFactoryFunction"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "validate-variable-names",
+      "name": "ValidateVariableNames",
+      "category": "KismetCompiler",
+      "signature": "ValidateVariableNames(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensures that all variables have valid names for compilation/replication"
+    },
+    {
+      "id": "validate-component-class-overrides",
+      "name": "ValidateComponentClassOverrides",
+      "category": "KismetCompiler",
+      "signature": "ValidateComponentClassOverrides(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensures that all component class overrides are legal overrides of the parent class"
+    },
+    {
+      "id": "validate-class-property-defaults",
+      "name": "ValidateClassPropertyDefaults",
+      "category": "KismetCompiler",
+      "signature": "ValidateClassPropertyDefaults(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensures that all class reference Properties are legal overrides of the parent class\nby checking the default value set on any PC_Class variable types. Requires a\nvalid CDO in order to do this validation. Called in Stage V: Validate"
+    },
+    {
+      "id": "reset-and-populate-blueprint-generated-variables",
+      "name": "ResetAndPopulateBlueprintGeneratedVariables",
+      "category": "KismetCompiler",
+      "signature": "ResetAndPopulateBlueprintGeneratedVariables(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the blueprint's GeneratedVariables list and calls PopulateBlueprintGeneratedVariables"
+    },
+    {
+      "id": "create-class-variables-from-blueprint",
+      "name": "CreateClassVariablesFromBlueprint",
+      "category": "KismetCompiler",
+      "signature": "CreateClassVariablesFromBlueprint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a class variable for each entry in the Blueprint NewVars array"
+    },
+    {
+      "id": "get-event-stub-function-name",
+      "name": "GetEventStubFunctionName",
+      "category": "KismetCompiler",
+      "signature": "GetEventStubFunctionName(Target, Src Event Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Src Event Node",
+          "type": "UK2Node_Event*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Picks the name to use for an autogenerated event stub"
+    },
+    {
+      "id": "register-class-delegate-proxies-from-blueprint",
+      "name": "RegisterClassDelegateProxiesFromBlueprint",
+      "category": "KismetCompiler",
+      "signature": "RegisterClassDelegateProxiesFromBlueprint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Searches the function graphs and ubergraph pages for any delegate proxies,\nwhich are then registered with the compiler context.\nIf a \"captured\" variable is needed, then a new property will be added to the current class.\nIn this context, a captured variable is any target actor that the delegate will be called on."
+    },
+    {
+      "id": "create-schema",
+      "name": "CreateSchema",
+      "category": "KismetCompiler",
+      "signature": "CreateSchema(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "protected : UEdGraphSchema_K2*"
+    },
+    {
+      "id": "post-create-schema",
+      "name": "PostCreateSchema",
+      "category": "KismetCompiler",
+      "signature": "PostCreateSchema(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "spawn-new-class",
+      "name": "SpawnNewClass",
+      "category": "KismetCompiler",
+      "signature": "SpawnNewClass(Target, New Class Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "New Class Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "ensure-proper-generated-class",
+      "name": "EnsureProperGeneratedClass",
+      "category": "KismetCompiler",
+      "signature": "EnsureProperGeneratedClass(Target, Target Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Target Class",
+          "type": "UClass*&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Backwards Compatability:  Ensures that the passed in TargetClass is of the proper type (e.g. BlueprintGeneratedClass, AnimBlueprintGeneratedClass), and NULLs the reference if it is not"
+    },
+    {
+      "id": "clean-and-sanitize-class",
+      "name": "CleanAndSanitizeClass",
+      "category": "KismetCompiler",
+      "signature": "CleanAndSanitizeClass(Target, Class To Clean, Old CDO)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class To Clean",
+          "type": "UBlueprintGeneratedClass*"
+        },
+        {
+          "name": "Old CDO",
+          "type": "UObject*&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes the properties and functions from a class, so that new ones can be created in its place\n@param ClassToClean\t\tThe UClass to scrub\n@param OldCDO\t\t\tReference to the old CDO of the class, so we can copy the properties from it to the new class's CDO"
+    },
+    {
+      "id": "add-object",
+      "name": "AddObject",
+      "category": "KismetCompiler",
+      "signature": "AddObject(Target, In Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSubobjectCollection*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "save-sub-objects-from-clean-and-sanitize-class",
+      "name": "SaveSubObjectsFromCleanAndSanitizeClass",
+      "category": "KismetCompiler",
+      "signature": "SaveSubObjectsFromCleanAndSanitizeClass(Target, Sub Objects To Save, Class To Clean)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Sub Objects To Save",
+          "type": "FSubobjectCollection&"
+        },
+        {
+          "name": "Class To Clean",
+          "type": "UBlueprintGeneratedClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Saves any SubObjects on the blueprint that need to survive the clean"
+    },
+    {
+      "id": "check-connection-response",
+      "name": "CheckConnectionResponse",
+      "category": "KismetCompiler",
+      "signature": "CheckConnectionResponse(Target, Response, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Response",
+          "type": "FPinConnectionResponse&"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Checks a connection response, and errors if it didn't succeed (not public,\nusers should be using MovePinLinksToIntermediate/CopyPinLinksToIntermediate\ninstead of wrapping their own with this)."
+    },
+    {
+      "id": "prune-isolated-nodes-2968d8",
+      "name": "PruneIsolatedNodes",
+      "category": "KismetCompiler",
+      "signature": "PruneIsolatedNodes(Target, In Graph, In Include Nodes That Could Be Expanded To Root Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "In Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "In Include Nodes That Could Be Expanded To Root Set",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Prune isolated nodes given the specified graph"
+    },
+    {
+      "id": "validate-link",
+      "name": "ValidateLink",
+      "category": "KismetCompiler",
+      "signature": "ValidateLink(Target, Pin A, Pin B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Pin A",
+          "type": "UEdGraphPin*"
+        },
+        {
+          "name": "Pin B",
+          "type": "UEdGraphPin*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "validate-pin",
+      "name": "ValidatePin",
+      "category": "KismetCompiler",
+      "signature": "ValidatePin(Target, Pin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Pin",
+          "type": "UEdGraphPin*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "validate-node",
+      "name": "ValidateNode",
+      "category": "KismetCompiler",
+      "signature": "ValidateNode(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "can-ignore-node",
+      "name": "CanIgnoreNode",
+      "category": "KismetCompiler",
+      "signature": "CanIgnoreNode(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-force-keep-node",
+      "name": "ShouldForceKeepNode",
+      "category": "KismetCompiler",
+      "signature": "ShouldForceKeepNode(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "prune-isolated-nodes-3854e9",
+      "name": "PruneIsolatedNodes",
+      "category": "KismetCompiler",
+      "signature": "PruneIsolatedNodes(Target, Root Set, Graph Nodes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Root Set",
+          "type": "TArray<UEdGraphNode*>&"
+        },
+        {
+          "name": "Graph Nodes",
+          "type": "TArray<UEdGraphNode*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "expansion-step",
+      "name": "ExpansionStep",
+      "category": "KismetCompiler",
+      "signature": "ExpansionStep(Target, Graph, Allow Ubergraph Expansions)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Allow Ubergraph Expansions",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "advance-macro-placement",
+      "name": "AdvanceMacroPlacement",
+      "category": "KismetCompiler",
+      "signature": "AdvanceMacroPlacement(Target, Width, Height)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Width",
+          "type": "Int"
+        },
+        {
+          "name": "Height",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "auto-assign-node-position",
+      "name": "AutoAssignNodePosition",
+      "category": "KismetCompiler",
+      "signature": "AutoAssignNodePosition(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-comment-block-around-nodes",
+      "name": "CreateCommentBlockAroundNodes",
+      "category": "KismetCompiler",
+      "signature": "CreateCommentBlockAroundNodes(Target, Nodes, Source Object, Target Graph, Comment Text, Comment Color, Out Offset X, Out Offset Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Nodes",
+          "type": "TArray<UEdGraphNode*>&"
+        },
+        {
+          "name": "Source Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Target Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Comment Text",
+          "type": "String"
+        },
+        {
+          "name": "Comment Color",
+          "type": "FLinearColor"
+        },
+        {
+          "name": "Out Offset X",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Offset Y",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-variable",
+      "name": "CreateVariable",
+      "category": "KismetCompiler",
+      "signature": "CreateVariable(Target, Name, Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        },
+        {
+          "name": "Type",
+          "type": "FEdGraphPinType&"
+        }
+      ],
+      "returnType": "FProperty*",
+      "docs": "Creates a class variable"
+    },
+    {
+      "id": "create-multicast-delegate-variable-6c8a69",
+      "name": "CreateMulticastDelegateVariable",
+      "category": "KismetCompiler",
+      "signature": "CreateMulticastDelegateVariable(Target, Name, Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        },
+        {
+          "name": "Type",
+          "type": "FEdGraphPinType&"
+        }
+      ],
+      "returnType": "FMulticastDelegateProperty*",
+      "docs": "Creates a multicast delegate variable & associated signature graph / function, use to generate events\nYou must add an ubergraph page containing an 'UK2Node_GeneratedBoundEvent' that corresponds to this delegate\nto 'GeneratedUbergraphPages' in your 'FKismetCompilerContext'. We do not create this graph / page for you so that\ngraph creation is not coupled to variable creation. We will associate this delegate with your node for you by name."
+    },
+    {
+      "id": "create-multicast-delegate-variable-45878b",
+      "name": "CreateMulticastDelegateVariable",
+      "category": "KismetCompiler",
+      "signature": "CreateMulticastDelegateVariable(Target, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FMulticastDelegateProperty*",
+      "docs": "Creates a multicast delegate variable & associated signature graph / Function, use to generate events\nDefaults to base MulticastDelegate type. See above version with 'Type' arg for more info."
+    },
+    {
+      "id": "is-node-pure",
+      "name": "IsNodePure",
+      "category": "KismetCompiler",
+      "signature": "IsNodePure(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines if a node is pure"
+    },
+    {
+      "id": "create-properties-from-list",
+      "name": "CreatePropertiesFromList",
+      "category": "KismetCompiler",
+      "signature": "CreatePropertiesFromList(Target, Scope, Property List Builder, Terms, Property Flags, Properties Are Local, Properties Are Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Scope",
+          "type": "UStruct*"
+        },
+        {
+          "name": "Property List Builder",
+          "type": "FField::FLinkedListBuilder&"
+        },
+        {
+          "name": "Terms",
+          "type": "TIndirectArray<FBPTerminal>&"
+        },
+        {
+          "name": "Property Flags",
+          "type": "EPropertyFlags"
+        },
+        {
+          "name": "Properties Are Local",
+          "type": "Bool"
+        },
+        {
+          "name": "Properties Are Parameters",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a property with flags including PropertyFlags in the Scope structure for each entry in the Terms array"
+    },
+    {
+      "id": "create-parameters-for-function",
+      "name": "CreateParametersForFunction",
+      "category": "KismetCompiler",
+      "signature": "CreateParametersForFunction(Target, Context, Parameter Signature, Property List Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Parameter Signature",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Property List Builder",
+          "type": "FField::FLinkedListBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create the properties on a function for input/output parameters"
+    },
+    {
+      "id": "create-local-variables-for-function",
+      "name": "CreateLocalVariablesForFunction",
+      "category": "KismetCompiler",
+      "signature": "CreateLocalVariablesForFunction(Target, Context, Property List Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Property List Builder",
+          "type": "FField::FLinkedListBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates the properties on a function that store the local and event graph (if applicable) variables"
+    },
+    {
+      "id": "create-user-defined-local-variables-for-function",
+      "name": "CreateUserDefinedLocalVariablesForFunction",
+      "category": "KismetCompiler",
+      "signature": "CreateUserDefinedLocalVariablesForFunction(Target, Context, Property List Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Property List Builder",
+          "type": "FField::FLinkedListBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates user defined local variables for function"
+    },
+    {
+      "id": "create-user-defined-local-variable-for-function",
+      "name": "CreateUserDefinedLocalVariableForFunction",
+      "category": "KismetCompiler",
+      "signature": "CreateUserDefinedLocalVariableForFunction(Variable, Function, Owning Class, Property List Builder, Schema, Message Log)",
+      "params": [
+        {
+          "name": "Variable",
+          "type": "FBPVariableDescription&"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Owning Class",
+          "type": "UBlueprintGeneratedClass*"
+        },
+        {
+          "name": "Property List Builder",
+          "type": "FField::FLinkedListBuilder&"
+        },
+        {
+          "name": "Schema",
+          "type": "UEdGraphSchema_K2*"
+        },
+        {
+          "name": "Message Log",
+          "type": "FCompilerResultsLog&"
+        }
+      ],
+      "returnType": "FProperty*",
+      "docs": "Helper function for CreateUserDefinedLocalVariablesForFunction and compilation manager's FastGenerateSkeletonClass:"
+    },
+    {
+      "id": "set-property-default-value",
+      "name": "SetPropertyDefaultValue",
+      "category": "KismetCompiler",
+      "signature": "SetPropertyDefaultValue(Target, Property To Set, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Property To Set",
+          "type": "FProperty*"
+        },
+        {
+          "name": "Value",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a default value entry into the DefaultPropertyValueMap for the property specified"
+    },
+    {
+      "id": "copy-term-defaults-to-default-object",
+      "name": "CopyTermDefaultsToDefaultObject",
+      "category": "KismetCompiler",
+      "signature": "CopyTermDefaultsToDefaultObject(Target, Default Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Default Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies default values cached for the terms in the DefaultPropertyValueMap to the final CDO"
+    },
+    {
+      "id": "propagate-values-to-cdo",
+      "name": "PropagateValuesToCDO",
+      "category": "KismetCompiler",
+      "signature": "PropagateValuesToCDO(Target, New CDO, Old CDO)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "New CDO",
+          "type": "UObject*"
+        },
+        {
+          "name": "Old CDO",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Non virtual wrapper to encapsulate functions that occur when the CDO is ready for values:"
+    },
+    {
+      "id": "set-can-ever-tick",
+      "name": "SetCanEverTick",
+      "category": "KismetCompiler",
+      "signature": "SetCanEverTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Function works only if subclass of AActor or UActorComponent.\nIf ReceiveTick event is defined, force CanEverTick."
+    },
+    {
+      "id": "find-local-entry-point",
+      "name": "FindLocalEntryPoint",
+      "category": "KismetCompiler",
+      "signature": "FindLocalEntryPoint(Target, Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        }
+      ],
+      "returnType": "UK2Node_FunctionEntry*",
+      "docs": "Scan FunctionList and return Entry point, for matching one"
+    },
+    {
+      "id": "print-verbose-info-struct",
+      "name": "PrintVerboseInfoStruct",
+      "category": "KismetCompiler",
+      "signature": "PrintVerboseInfoStruct(Target, Struct)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Struct",
+          "type": "UStruct*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "print-verbose-information",
+      "name": "PrintVerboseInformation",
+      "category": "KismetCompiler",
+      "signature": "PrintVerboseInformation(Target, Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "transform-nodes",
+      "name": "TransformNodes",
+      "category": "KismetCompiler",
+      "signature": "TransformNodes(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Performs transformations on specific nodes that require it according to the schema"
+    },
+    {
+      "id": "merge-ubergraph-pages-in",
+      "name": "MergeUbergraphPagesIn",
+      "category": "KismetCompiler",
+      "signature": "MergeUbergraphPagesIn(Target, Ubergraph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Ubergraph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Merges in any all ubergraph pages into the gathering ubergraph"
+    },
+    {
+      "id": "create-function-list",
+      "name": "CreateFunctionList",
+      "category": "KismetCompiler",
+      "signature": "CreateFunctionList(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a list of functions to compile"
+    },
+    {
+      "id": "create-function-context",
+      "name": "CreateFunctionContext",
+      "category": "KismetCompiler",
+      "signature": "CreateFunctionContext(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "FKismetFunctionContext*",
+      "docs": "Creates a new function context and adds it to the function list to be processed."
+    },
+    {
+      "id": "merge-graph-into-ubergraph",
+      "name": "MergeGraphIntoUbergraph",
+      "category": "KismetCompiler",
+      "signature": "MergeGraphIntoUbergraph(Target, Source Graph, Ubergraph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Ubergraph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Merges a single ubergraph page into the main ubergraph"
+    },
+    {
+      "id": "process-one-function-graph",
+      "name": "ProcessOneFunctionGraph",
+      "category": "KismetCompiler",
+      "signature": "ProcessOneFunctionGraph(Target, Source Graph, Internal Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Internal Function",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Merges macros/subgraphs into the graph and validates it, creating a function list entry if it's reasonable."
+    },
+    {
+      "id": "expand-tunnels-and-macros",
+      "name": "ExpandTunnelsAndMacros",
+      "category": "KismetCompiler",
+      "signature": "ExpandTunnelsAndMacros(Target, Source Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Expands any macro instances and collapses any tunnels in the nodes of SourceGraph"
+    },
+    {
+      "id": "map-expansion-path-to-tunnel-instance",
+      "name": "MapExpansionPathToTunnelInstance",
+      "category": "KismetCompiler",
+      "signature": "MapExpansionPathToTunnelInstance(Target, Inner Expansion Node, Outer Tunnel Instance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Inner Expansion Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Outer Tunnel Instance",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Maps the nodes in an intermediate tunnel expansion path back to the owning tunnel instance node."
+    },
+    {
+      "id": "process-intermediate-tunnel-boundary",
+      "name": "ProcessIntermediateTunnelBoundary",
+      "category": "KismetCompiler",
+      "signature": "ProcessIntermediateTunnelBoundary(Target, Tunnel Input, Tunnel Output)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Tunnel Input",
+          "type": "UK2Node_Tunnel*"
+        },
+        {
+          "name": "Tunnel Output",
+          "type": "UK2Node_Tunnel*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Processes an intermediate tunnel expansion boundary.\nWe define a tunnel boundary as the input and output sides of an intermediate tunnel instance node expansion. Each boundary\nconsists of a pair of tunnel nodes (input/output), with one side being the tunnel \"instance\" node that owns the expansion.\nAfter expansion, tunnel nodes are cropped and removed from the function graph, so they do not result in any actual bytecode.\nThis function maps the nodes in the execution path through the expansion and back to the outer tunnel instance node. If\nBlueprint debugging is enabled, this function also spawns one or more intermediate \"boundary\" NOPs around the tunnel I/O\npair. The boundary nodes are intended to serve as debug sites, allowing breakpoints to be hit on both sides of the tunnel.\n@param\tTunnelInput\t\tTunnel input node. This will either be a tunnel instance node (OutputSource) or a tunnel exit node.\n@param\tTunnelOutput\tTunnel output node. This will either be a tunnel entry node or a tunnel instance node (InputSink)."
+    },
+    {
+      "id": "create-and-process-ubergraph",
+      "name": "CreateAndProcessUbergraph",
+      "category": "KismetCompiler",
+      "signature": "CreateAndProcessUbergraph(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Merges pages and creates function stubs, etc..."
+    },
+    {
+      "id": "create-function-stub-for-event",
+      "name": "CreateFunctionStubForEvent",
+      "category": "KismetCompiler",
+      "signature": "CreateFunctionStubForEvent(Target, Event, Owner Of Temporaries)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Event",
+          "type": "UK2Node_Event*"
+        },
+        {
+          "name": "Owner Of Temporaries",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create a stub function graph for the event node, and have it invoke the correct point in the ubergraph"
+    },
+    {
+      "id": "expand-timeline-nodes",
+      "name": "ExpandTimelineNodes",
+      "category": "KismetCompiler",
+      "signature": "ExpandTimelineNodes(Target, Source Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Expand timeline nodes into necessary nodes"
+    },
+    {
+      "id": "precompile-function",
+      "name": "PrecompileFunction",
+      "category": "KismetCompiler",
+      "signature": "PrecompileFunction(Target, Context, Internal Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Internal Flags",
+          "type": "EInternalCompilerFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "First phase of compiling a function graph\n- Performs initial validation that the graph is at least well formed enough to be processed further\n- Creates a copy of the graph to allow further transformations to occur\n- Prunes the 'graph' to only included the connected portion that contains the function entry point\n- Schedules execution of each node based on data/execution dependencies\n- Creates a UFunction object containing parameters and local variables (but no script code yet)"
+    },
+    {
+      "id": "initialize-generated-event-nodes",
+      "name": "InitializeGeneratedEventNodes",
+      "category": "KismetCompiler",
+      "signature": "InitializeGeneratedEventNodes(Target, Internal Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Internal Flags",
+          "type": "EInternalCompilerFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to initialize generated event nodes that came from generated ubergraph pages after delegate signature compilation is done"
+    },
+    {
+      "id": "pre-compile-update-blueprint-on-load",
+      "name": "PreCompileUpdateBlueprintOnLoad",
+      "category": "KismetCompiler",
+      "signature": "PreCompileUpdateBlueprintOnLoad(Target, BP)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "BP",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used for performing custom patching during stage IX of the compilation during load."
+    },
+    {
+      "id": "compile-function",
+      "name": "CompileFunction",
+      "category": "KismetCompiler",
+      "signature": "CompileFunction(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Second phase of compiling a function graph\n- Generates an executable statement list"
+    },
+    {
+      "id": "postcompile-function",
+      "name": "PostcompileFunction",
+      "category": "KismetCompiler",
+      "signature": "PostcompileFunction(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Final phase of compiling a function graph; called after all functions have had CompileFunction called\n- Patches up cross-references, etc..., and performs final validation"
+    },
+    {
+      "id": "finish-compiling-function",
+      "name": "FinishCompilingFunction",
+      "category": "KismetCompiler",
+      "signature": "FinishCompilingFunction(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles final post-compilation setup, flags, creates cached values that would normally be set during deserialization, etc..."
+    },
+    {
+      "id": "set-calculated-meta-data-and-flags",
+      "name": "SetCalculatedMetaDataAndFlags",
+      "category": "KismetCompiler",
+      "signature": "SetCalculatedMetaDataAndFlags(Target, Function, Entry Node, Schema)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Entry Node",
+          "type": "UK2Node_FunctionEntry*"
+        },
+        {
+          "name": "Schema",
+          "type": "UEdGraphSchema_K2*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds metadata for a particular compiled function based on its characteristics"
+    },
+    {
+      "id": "set-default-input-value-meta-data",
+      "name": "SetDefaultInputValueMetaData",
+      "category": "KismetCompiler",
+      "signature": "SetDefaultInputValueMetaData(Function, Input Data)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Input Data",
+          "type": "TArray<TSharedPtr<FUserPinInfo>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reflects each pin's user set, default value into the function's metadata (so it can be queried for later by CallFunction nodes, etc.)"
+    },
+    {
+      "id": "add-interfaces-from-blueprint",
+      "name": "AddInterfacesFromBlueprint",
+      "category": "KismetCompiler",
+      "signature": "AddInterfacesFromBlueprint(Target, Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles adding the implemented interface information to the class"
+    },
+    {
+      "id": "finish-compiling-class",
+      "name": "FinishCompilingClass",
+      "category": "KismetCompiler",
+      "signature": "FinishCompilingClass(Target, Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles final post-compilation setup, flags, creates cached values that would normally be set during deserialization, etc..."
+    },
+    {
+      "id": "build-dynamic-binding-objects",
+      "name": "BuildDynamicBindingObjects",
+      "category": "KismetCompiler",
+      "signature": "BuildDynamicBindingObjects(Target, Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class",
+          "type": "UBlueprintGeneratedClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Build the dynamic bindings objects used to tie events to delegates at runtime"
+    },
+    {
+      "id": "verify-valid-override-event",
+      "name": "VerifyValidOverrideEvent",
+      "category": "KismetCompiler",
+      "signature": "VerifyValidOverrideEvent(Target, Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If a function in the graph cannot be placed as event make sure that it is not."
+    },
+    {
+      "id": "verify-valid-override-function",
+      "name": "VerifyValidOverrideFunction",
+      "category": "KismetCompiler",
+      "signature": "VerifyValidOverrideFunction(Target, Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If a function in the graph cannot be overridden make sure that it is not."
+    },
+    {
+      "id": "validate-self-pins-in-graph",
+      "name": "ValidateSelfPinsInGraph",
+      "category": "KismetCompiler",
+      "signature": "ValidateSelfPinsInGraph(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Checks if self pins are connected."
+    },
+    {
+      "id": "validate-no-wildcard-pins-in-graph",
+      "name": "ValidateNoWildcardPinsInGraph",
+      "category": "KismetCompiler",
+      "signature": "ValidateNoWildcardPinsInGraph(Target, Source Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Checks if pin types are unresolved (e.g. still wildcards)."
+    },
+    {
+      "id": "validate-timeline-names",
+      "name": "ValidateTimelineNames",
+      "category": "KismetCompiler",
+      "signature": "ValidateTimelineNames(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensures that all timelines have valid names for compilation/replication"
+    },
+    {
+      "id": "validate-function-graph-names",
+      "name": "ValidateFunctionGraphNames",
+      "category": "KismetCompiler",
+      "signature": "ValidateFunctionGraphNames(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensures that all function graphs have valid names for compilation/replication"
+    },
+    {
+      "id": "validate-generated-class",
+      "name": "ValidateGeneratedClass",
+      "category": "KismetCompiler",
+      "signature": "ValidateGeneratedClass(Target, Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Class",
+          "type": "UBlueprintGeneratedClass*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Validates the generated class"
+    },
+    {
+      "id": "determine-node-exec-links",
+      "name": "DetermineNodeExecLinks",
+      "category": "KismetCompiler",
+      "signature": "DetermineNodeExecLinks(Target, Source Node, Source Node Links)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Source Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Source Node Links",
+          "type": "TMap<UEdGraphPin*,UEdGraphPin*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discovers exec pin links for the sourcenode"
+    },
+    {
+      "id": "create-locals-and-register-nets",
+      "name": "CreateLocalsAndRegisterNets",
+      "category": "KismetCompiler",
+      "signature": "CreateLocalsAndRegisterNets(Target, Context, Property List Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Property List Builder",
+          "type": "FField::FLinkedListBuilder&"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "create-pin-event-node-for-timeline-function",
+      "name": "CreatePinEventNodeForTimelineFunction",
+      "category": "KismetCompiler",
+      "signature": "CreatePinEventNodeForTimelineFunction(Target, Timeline Node, Source Graph, Function Name, Pin Name, Exec Func Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Timeline Node",
+          "type": "UK2Node_Timeline*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Function Name",
+          "type": "Name"
+        },
+        {
+          "name": "Pin Name",
+          "type": "Name"
+        },
+        {
+          "name": "Exec Func Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles creating a new event node for a given output on a timeline node utilizing the named function"
+    },
+    {
+      "id": "create-call-timeline-function",
+      "name": "CreateCallTimelineFunction",
+      "category": "KismetCompiler",
+      "signature": "CreateCallTimelineFunction(Target, Timeline Node, Source Graph, Function Name, Timeline Var Pin, Timeline Function Pin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Timeline Node",
+          "type": "UK2Node_Timeline*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Function Name",
+          "type": "Name"
+        },
+        {
+          "name": "Timeline Var Pin",
+          "type": "UEdGraphPin*"
+        },
+        {
+          "name": "Timeline Function Pin",
+          "type": "UEdGraphPin*"
+        }
+      ],
+      "returnType": "class UK2Node_CallFunction*",
+      "docs": "Util for creating a node to call a function on a timeline and move connections to it"
+    },
+    {
+      "id": "reset-error-flags",
+      "name": "ResetErrorFlags",
+      "category": "KismetCompiler",
+      "signature": "ResetErrorFlags(Target, Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Function to reset graph node's error flag before compiling\n@param: Reference to graph instance"
+    },
+    {
+      "id": "register-convertible-delegates",
+      "name": "RegisterConvertibleDelegates",
+      "category": "KismetCompiler",
+      "signature": "RegisterConvertibleDelegates(Target, Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Registers any nodes that are bound to a \"convertible\" function signature.\nSpecifically, these are function signatures that differ only by float/double parameters.\n@param: Reference to graph instance"
+    },
+    {
+      "id": "replace-convertible-delegates",
+      "name": "ReplaceConvertibleDelegates",
+      "category": "KismetCompiler",
+      "signature": "ReplaceConvertibleDelegates(Target, Graph)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FKismetCompilerContext*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Modifies the graph to use a proxy delegate function if it uses a convertible delegate signature.\nThis involves several steps:\n1. Creates a new function graph that uses the exact function signature of the delegate.\n2. Adds and links the original delegate function call, which implicity casts the input parameters.\n3. If applicable, adds a node to the original graph that sets the variable of the target actor (ie: the captured variable)\n@param: Reference to graph instance"
+    }
+  ]
+}

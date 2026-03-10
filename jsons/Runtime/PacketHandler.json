@@ -1,0 +1,749 @@
+{
+  "id": "packet-handler",
+  "label": "PacketHandler",
+  "includepath": "PacketHandler.h",
+  "includes": [
+    "Array",
+    "Queue",
+    "UnrealString",
+    "CoreMinimal",
+    "Delegate",
+    "UnrealMemory",
+    "IPAddress",
+    "LogMacros",
+    "UnrealMathSSE",
+    "AssertionMacros",
+    "ModuleInterface",
+    "PacketTraits",
+    "PacketView",
+    "Archive",
+    "BitReader",
+    "BitWriter",
+    "SharedPointer",
+    "NameTypes",
+    "UnrealNames"
+  ],
+  "functions": [
+    {
+      "id": "buffered-packet",
+      "name": "BufferedPacket",
+      "category": "PacketHandler",
+      "signature": "BufferedPacket()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Base destructor"
+    },
+    {
+      "id": "packet-handler",
+      "name": "PacketHandler",
+      "category": "PacketHandler",
+      "signature": "PacketHandler(In D Do S)",
+      "params": [
+        {
+          "name": "In D Do S",
+          "type": "FDDoSDetection*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Parameters for HandlerComponent Incoming/IncomingConnectionless functions"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "PacketHandler",
+      "signature": "Initialize(Target, Mode, In Max Packet Bits, Connectionless Only, In Provider, In D Do S, In Driver Profile)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Mode",
+          "type": "UE::Handler::Mode"
+        },
+        {
+          "name": "In Max Packet Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "Connectionless Only",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "In Provider",
+          "type": "TSharedPtr<IAnalyticsProvider>",
+          "default": "nullptr"
+        },
+        {
+          "name": "In D Do S",
+          "type": "FDDoSDetection*",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Driver Profile",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles initialization of manager\n@param Mode\t\t\t\t\tThe mode the manager should be initialized in\n@param InMaxPacketBits\t\tThe maximum supported packet size\n@param bConnectionlessOnly\tWhether or not this is a connectionless-only manager (ignores .ini components)\n@param InProvider\t\t\tThe analytics provider\n@param InDDoS\t\t\t\tReference to the owning net drivers DDoS detection handler\n@param InDriverProfile\t\tThe PacketHandler configuration profile to use"
+    },
+    {
+      "id": "initialize-delegates",
+      "name": "InitializeDelegates",
+      "category": "PacketHandler",
+      "signature": "InitializeDelegates(Target, In Low Level Send Del, In Add Handler Del)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In Low Level Send Del",
+          "type": "FPacketHandlerLowLevelSendTraits"
+        },
+        {
+          "name": "In Add Handler Del",
+          "type": "FPacketHandlerNotifyAddHandler",
+          "default": "FPacketHandlerNotifyAddHandler()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used for external initialization of delegates\n@param InLowLevelSendDel\t\tThe delegate the PacketHandler should use for triggering packet sends\n@param InAddHandlerDel\t\tCallback for notifying of new HandlerComponent's"
+    },
+    {
+      "id": "init-fault-recovery",
+      "name": "InitFaultRecovery",
+      "category": "PacketHandler",
+      "signature": "InitFaultRecovery(Target, In Fault Recovery)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In Fault Recovery",
+          "type": "UE::Net::FNetConnectionFaultRecoveryBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes a reference to the NetConnection fault recovery interface (does not require Engine dependency)\n@param InFaultRecovery\tA reference to the fault recovery interface"
+    },
+    {
+      "id": "notify-analytics-provider",
+      "name": "NotifyAnalyticsProvider",
+      "category": "PacketHandler",
+      "signature": "NotifyAnalyticsProvider(Target, In Provider, In Aggregator)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In Provider",
+          "type": "TSharedPtr<IAnalyticsProvider>"
+        },
+        {
+          "name": "In Aggregator",
+          "type": "TSharedPtr<FNetAnalyticsAggregator>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notification that the NetDriver analytics provider has been updated (NOT called on first initialization)\nNOTE: Can also mean disabled, e.g. during hotfix\n@param InProvider\t\tThe analytics provider\n@param InAggregator\t\tThe net analytics aggregator"
+    },
+    {
+      "id": "initialize-components",
+      "name": "InitializeComponents",
+      "category": "PacketHandler",
+      "signature": "InitializeComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Triggers initialization of HandlerComponents."
+    },
+    {
+      "id": "begin-handshaking",
+      "name": "BeginHandshaking",
+      "category": "PacketHandler",
+      "signature": "BeginHandshaking(Target, In Handshake Del)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In Handshake Del",
+          "type": "FPacketHandlerHandshakeComplete",
+          "default": "FPacketHandlerHandshakeComplete()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Triggered by the higher level netcode, to begin any required HandlerComponent handshakes"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "PacketHandler",
+      "signature": "Tick(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick functionality should be placed here"
+    },
+    {
+      "id": "add-handler-d6736e",
+      "name": "AddHandler",
+      "category": "PacketHandler",
+      "signature": "AddHandler(Target, New Handler, Defer Initialize)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "New Handler",
+          "type": "TSharedPtr<HandlerComponent>&"
+        },
+        {
+          "name": "Defer Initialize",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a HandlerComponent to the pipeline, prior to initialization (none can be added after initialization)\n@param NewHandler\t\tThe HandlerComponent to add\n@param bDeferInitialize\tWhether or not to defer triggering Initialize (for batch-adds - code calling this, triggers it instead)"
+    },
+    {
+      "id": "add-handler-29e2c4",
+      "name": "AddHandler",
+      "category": "PacketHandler",
+      "signature": "AddHandler(Target, Component Str, Defer Initialize)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Component Str",
+          "type": "String&"
+        },
+        {
+          "name": "Defer Initialize",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "TSharedPtr<HandlerComponent>",
+      "docs": "As above, but initializes from a string specifying the component module, and (optionally) additional options\n@param ComponentStr\t\tThe handler component to load\n@param bDeferInitialize\tWhether or not to defer triggering Initialize (for batch-adds - code calling this, triggers it instead)"
+    },
+    {
+      "id": "incoming-high",
+      "name": "IncomingHigh",
+      "category": "PacketHandler",
+      "signature": "IncomingHigh(Target, Reader)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Reader",
+          "type": "FBitReader&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@todo #JohnB: Work in progress, don't use yet.\nProcesses incoming packets at the UNetConnection level, after uncapping the packet into an FBitReader.\nUse this for simple data additions to packets, and for maximum compatibility with other HandlerComponent's.\n@param Reader\tThe FBitReader for the incoming packet"
+    },
+    {
+      "id": "outgoing-high",
+      "name": "OutgoingHigh",
+      "category": "PacketHandler",
+      "signature": "OutgoingHigh(Target, Writer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Writer",
+          "type": "FBitWriter&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@todo #JohnB: Work in progress, don't use yet.\nProcesses outgoing packets at the UNetConnection level, after game data is written, and just before the packet is capped.\nUse this for simple data additions to packets, and for maximum compatibility with other HandlerComponent's.\n@param Writer\tThe FBitWriter for the outgoing packet"
+    },
+    {
+      "id": "get-encryption-component",
+      "name": "GetEncryptionComponent",
+      "category": "PacketHandler",
+      "signature": "GetEncryptionComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "TSharedPtr<FEncryptionComponent>",
+      "docs": "Returns a pointer to the component set as the encryption handler, if any."
+    },
+    {
+      "id": "get-component-by-name",
+      "name": "GetComponentByName",
+      "category": "PacketHandler",
+      "signature": "GetComponentByName(Target, Component Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Component Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "TSharedPtr<HandlerComponent>",
+      "docs": "Returns a pointer to the first component in the HandlerComponents array with the specified name."
+    },
+    {
+      "id": "count-bytes",
+      "name": "CountBytes",
+      "category": "PacketHandler",
+      "signature": "CountBytes(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "incoming-internal",
+      "name": "Incoming_Internal",
+      "category": "PacketHandler",
+      "signature": "Incoming_Internal(Target, Packet View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Packet View",
+          "type": "FReceivedPacketView&"
+        }
+      ],
+      "returnType": "EIncomingResult",
+      "docs": "Internal handling for Incoming/IncomingConnectionless\n@param PacketView\tView of the packet being processed - PacketView.Data should be used to return the result\n@return\t\t\t\tReturns Success/Failure"
+    },
+    {
+      "id": "outgoing-internal",
+      "name": "Outgoing_Internal",
+      "category": "PacketHandler",
+      "signature": "Outgoing_Internal(Target, Packet, Count Bits, Traits, Connectionless, Address)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Packet",
+          "type": "Byte*"
+        },
+        {
+          "name": "Count Bits",
+          "type": "Int"
+        },
+        {
+          "name": "Traits",
+          "type": "FOutPacketTraits&"
+        },
+        {
+          "name": "Connectionless",
+          "type": "Bool"
+        },
+        {
+          "name": "Address",
+          "type": "TSharedPtr<FInternetAddr>&"
+        }
+      ],
+      "returnType": "ProcessedPacket",
+      "docs": "Internal handling for Outgoing/OutgoingConnectionless\n@param Packet\t\t\tThe packet data to be processed\n@param CountBits\t\t\tThe size of the packet data in bits\n@param Traits\t\t\tTraits for the packet, passed down from the NetConnection, if applicable\n@param bConnectionless\tWhether or not this should be sent as a connectionless packet\n@param Address\t\t\tThe address the packet is being sent to\n@return\t\t\t\t\tReturns the final packet"
+    },
+    {
+      "id": "send-handler-packet",
+      "name": "SendHandlerPacket",
+      "category": "PacketHandler",
+      "signature": "SendHandlerPacket(Target, In Component, Writer, Traits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In Component",
+          "type": "HandlerComponent*"
+        },
+        {
+          "name": "Writer",
+          "type": "FBitWriter&"
+        },
+        {
+          "name": "Traits",
+          "type": "FOutPacketTraits&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Send a packet originating from a HandlerComponent - will process through the HandlerComponents chain,\nstarting after the triggering component.\nNOTE: Requires that InitializeDelegates is called, with a valid LowLevelSend delegate.\n@param Component\t\tThe HandlerComponent sending the packet\n@param Writer\t\tThe packet being sent\n@param Traits\t\tThe traits applied to the packet, if applicable"
+    },
+    {
+      "id": "handler-component-initialized",
+      "name": "HandlerComponentInitialized",
+      "category": "PacketHandler",
+      "signature": "HandlerComponentInitialized(Target, In Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In Component",
+          "type": "HandlerComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Triggered when a child HandlerComponent has been initialized"
+    },
+    {
+      "id": "does-any-profile-have-component",
+      "name": "DoesAnyProfileHaveComponent",
+      "category": "PacketHandler",
+      "signature": "DoesAnyProfileHaveComponent(In Component Name)",
+      "params": [
+        {
+          "name": "In Component Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Searches the PacketHandler profile configurations to find if a component is listed.\n@param InComponentName\tThe PacketHandler Component to search for\n@return if there is a profile that has the component included."
+    },
+    {
+      "id": "does-profile-have-component",
+      "name": "DoesProfileHaveComponent",
+      "category": "PacketHandler",
+      "signature": "DoesProfileHaveComponent(In Net Driver Name, In Component Name)",
+      "params": [
+        {
+          "name": "In Net Driver Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Component Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Searches the PacketHandler profile configuration for the given netdriver to find if a component is listed.\n@param InNetDriverName\tThe name of the netdriver to search configuration for\n@param InComponentName\tThe component to search for\n@return if the component is listed in the profile configuration."
+    },
+    {
+      "id": "get-queued-packet",
+      "name": "GetQueuedPacket",
+      "category": "PacketHandler",
+      "signature": "GetQueuedPacket(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "BufferedPacket*",
+      "docs": "Gets a packet from the buffered packet queue for sending\n@return\t\tThe packet to be sent, or nullptr if none are to be sent"
+    },
+    {
+      "id": "get-queued-raw-packet",
+      "name": "GetQueuedRawPacket",
+      "category": "PacketHandler",
+      "signature": "GetQueuedRawPacket(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "BufferedPacket*",
+      "docs": "Gets a packet from the buffered packet queue for sending (as a raw packet)\n@return\t\tThe packet to be sent, or nullptr if none are to be sent"
+    },
+    {
+      "id": "get-queued-connectionless-packet",
+      "name": "GetQueuedConnectionlessPacket",
+      "category": "PacketHandler",
+      "signature": "GetQueuedConnectionlessPacket(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "BufferedPacket*",
+      "docs": "Gets a packet from the buffered connectionless packet queue for sending\n@return\t\tThe packet to be sent, or nullptr if none are to be sent"
+    },
+    {
+      "id": "get-total-reserved-packet-bits",
+      "name": "GetTotalReservedPacketBits",
+      "category": "PacketHandler",
+      "signature": "GetTotalReservedPacketBits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the combined reserved packet/protocol bits from all handlers, for reserving space in the parent connections packets\n@return\tThe combined reserved packet/protocol bits"
+    },
+    {
+      "id": "set-state-bc071e",
+      "name": "SetState",
+      "category": "PacketHandler",
+      "signature": "SetState(Target, In State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "In State",
+          "type": "UE::Handler::State"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Set state of handler\n@param InState\tThe new state for the handler"
+    },
+    {
+      "id": "update-initial-state",
+      "name": "UpdateInitialState",
+      "category": "PacketHandler",
+      "signature": "UpdateInitialState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when net send/receive functions are triggered, when the handler is still uninitialized - to set a valid initial state"
+    },
+    {
+      "id": "handler-initialized",
+      "name": "HandlerInitialized",
+      "category": "PacketHandler",
+      "signature": "HandlerInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when handler is finished initializing"
+    },
+    {
+      "id": "replace-incoming-packet",
+      "name": "ReplaceIncomingPacket",
+      "category": "PacketHandler",
+      "signature": "ReplaceIncomingPacket(Target, Replacement Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Replacement Packet",
+          "type": "FBitReader&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Replaces IncomingPacket with all unread data from ReplacementPacket\n@param ReplacementPacket\t\tThe packet whose unread data should replace IncomingPacket"
+    },
+    {
+      "id": "realign-packet",
+      "name": "RealignPacket",
+      "category": "PacketHandler",
+      "signature": "RealignPacket(Target, Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "PacketHandler*"
+        },
+        {
+          "name": "Packet",
+          "type": "FBitReader&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Takes a Packet whose position is not at bit 0, and shifts/aligns all packet data to place the current bit at position 0\n@param Packet\tThe packet to realign"
+    },
+    {
+      "id": "get-add-component-by-name-delegate",
+      "name": "GetAddComponentByNameDelegate",
+      "category": "PacketHandler",
+      "signature": "GetAddComponentByNameDelegate()",
+      "params": [],
+      "returnType": "FPacketHandlerAddComponentByNameDelegate&",
+      "docs": "Mode of the handler, Client or Server"
+    },
+    {
+      "id": "get-add-component-delegate",
+      "name": "GetAddComponentDelegate",
+      "category": "PacketHandler",
+      "signature": "GetAddComponentDelegate()",
+      "params": [],
+      "returnType": "FPacketHandlerAddComponentDelegate&"
+    },
+    {
+      "id": "handler-component-e132bd",
+      "name": "HandlerComponent",
+      "category": "PacketHandler",
+      "signature": "HandlerComponent()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "State of the handler"
+    },
+    {
+      "id": "handler-component-80f4e0",
+      "name": "HandlerComponent",
+      "category": "PacketHandler",
+      "signature": "HandlerComponent(In Name)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Constructor that accepts a name"
+    },
+    {
+      "id": "is-active",
+      "name": "IsActive",
+      "category": "PacketHandler",
+      "signature": "IsActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HandlerComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this handler is currently active"
+    },
+    {
+      "id": "is-initialized",
+      "name": "IsInitialized",
+      "category": "PacketHandler",
+      "signature": "IsInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HandlerComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this handler is initialized"
+    },
+    {
+      "id": "set-active",
+      "name": "SetActive",
+      "category": "PacketHandler",
+      "signature": "SetActive(Target, Active)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HandlerComponent*"
+        },
+        {
+          "name": "Active",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets whether this handler is currently active\n@param Active\tWhether or not the handled should be active"
+    },
+    {
+      "id": "set-state-2b2e4a",
+      "name": "SetState",
+      "category": "PacketHandler",
+      "signature": "SetState(Target, State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HandlerComponent*"
+        },
+        {
+          "name": "State",
+          "type": "UE::Handler::Component::State"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Sets the state of the handler\n@param State\t\tThe new state for the handler"
+    },
+    {
+      "id": "initialized",
+      "name": "Initialized",
+      "category": "PacketHandler",
+      "signature": "Initialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HandlerComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Should be called when the handler is fully initialized on both remote and local"
+    },
+    {
+      "id": "startup-module",
+      "name": "StartupModule",
+      "category": "PacketHandler",
+      "signature": "StartupModule(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketHandlerComponentModuleInterface*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "shutdown-module",
+      "name": "ShutdownModule",
+      "category": "PacketHandler",
+      "signature": "ShutdownModule(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketHandlerComponentModuleInterface*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

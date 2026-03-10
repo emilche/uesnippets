@@ -21,6 +21,37 @@
   ],
   "functions": [
     {
+      "id": "aai-controller",
+      "name": "AAIController",
+      "category": "AIController",
+      "signature": "AAIController(Object Initializer)",
+      "params": [
+        {
+          "name": "Object Initializer",
+          "type": "FObjectInitializer&",
+          "default": "FObjectInitializer::Get()"
+        }
+      ],
+      "returnType": "public :"
+    },
+    {
+      "id": "set-pawn",
+      "name": "SetPawn",
+      "category": "AIController",
+      "signature": "SetPawn(Target, In Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "In Pawn",
+          "type": "APawn*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "move-to-actor",
       "name": "MoveToActor",
       "category": "AI",
@@ -122,6 +153,225 @@
       "docs": "Makes AI go toward specified Dest location, aborts any active path following\n@param AcceptanceRadius - finish move if pawn gets close enough\n@param bStopOnOverlap - add pawn's radius to AcceptanceRadius\n@param bUsePathfinding - use navigation data to calculate path (otherwise it will go in straight line)\n@param bProjectDestinationToNavigation - project location on navigation data before using it\n@param bCanStrafe - set focus related flag: bAllowStrafe\n@param FilterClass - navigation filter for pathfinding adjustments. If none specified DefaultNavigationFilterClass will be used\n@param bAllowPartialPath - use incomplete path when goal can't be reached\n@note AcceptanceRadius has default value or -1 due to Header Parser not being able to recognize UPathFollowingComponent::DefaultAcceptanceRadius"
     },
     {
+      "id": "move-to",
+      "name": "MoveTo",
+      "category": "AIController",
+      "signature": "MoveTo(Target, Move Request, Out Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Move Request",
+          "type": "FAIMoveRequest&"
+        },
+        {
+          "name": "Out Path",
+          "type": "FNavPathSharedPtr*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "FPathFollowingRequestResult",
+      "docs": "Makes AI go toward specified destination\n@param MoveRequest - details about move\n@param OutPath - optional output param, filled in with assigned path\n@return struct holding MoveId and enum code"
+    },
+    {
+      "id": "request-move",
+      "name": "RequestMove",
+      "category": "AIController",
+      "signature": "RequestMove(Target, Move Request, Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Move Request",
+          "type": "FAIMoveRequest&"
+        },
+        {
+          "name": "Path",
+          "type": "FNavPathSharedPtr"
+        }
+      ],
+      "returnType": "FAIRequestID",
+      "docs": "Passes move request and path object to path following"
+    },
+    {
+      "id": "find-path-for-move-request",
+      "name": "FindPathForMoveRequest",
+      "category": "AIController",
+      "signature": "FindPathForMoveRequest(Target, Move Request, Query, Out Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Move Request",
+          "type": "FAIMoveRequest&"
+        },
+        {
+          "name": "Query",
+          "type": "FPathFindingQuery&"
+        },
+        {
+          "name": "Out Path",
+          "type": "FNavPathSharedPtr&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finds path for given move request\n@param MoveRequest - details about move\n@param Query - pathfinding query for navigation system\n@param OutPath - generated path"
+    },
+    {
+      "id": "build-pathfinding-query-326084",
+      "name": "BuildPathfindingQuery",
+      "category": "AIController",
+      "signature": "BuildPathfindingQuery(Target, Move Request, Out Query)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Move Request",
+          "type": "FAIMoveRequest&"
+        },
+        {
+          "name": "Out Query",
+          "type": "FPathFindingQuery&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function for creating pathfinding query for this agent from move request data"
+    },
+    {
+      "id": "build-pathfinding-query-c1d2f5",
+      "name": "BuildPathfindingQuery",
+      "category": "AIController",
+      "signature": "BuildPathfindingQuery(Target, Move Request, Start Location, Out Query)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Move Request",
+          "type": "FAIMoveRequest&"
+        },
+        {
+          "name": "Start Location",
+          "type": "FVector&"
+        },
+        {
+          "name": "Out Query",
+          "type": "FPathFindingQuery&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function for creating pathfinding query for this agent from move request data and starting location"
+    },
+    {
+      "id": "pause-move",
+      "name": "PauseMove",
+      "category": "AIController",
+      "signature": "PauseMove(Target, Request To Pause)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Request To Pause",
+          "type": "FAIRequestID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "if AI is currently moving due to request given by RequestToPause, then the move will be paused"
+    },
+    {
+      "id": "resume-move",
+      "name": "ResumeMove",
+      "category": "AIController",
+      "signature": "ResumeMove(Target, Request To Resume)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Request To Resume",
+          "type": "FAIRequestID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "resumes last AI-performed, paused request provided it's ID was equivalent to RequestToResume"
+    },
+    {
+      "id": "stop-movement",
+      "name": "StopMovement",
+      "category": "AIController",
+      "signature": "StopMovement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Aborts the move the controller is currently performing"
+    },
+    {
+      "id": "on-move-completed",
+      "name": "OnMoveCompleted",
+      "category": "AIController",
+      "signature": "OnMoveCompleted(Target, Request ID, Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Request ID",
+          "type": "FAIRequestID"
+        },
+        {
+          "name": "Result",
+          "type": "FPathFollowingResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on completing current movement request"
+    },
+    {
+      "id": "get-current-move-request-id",
+      "name": "GetCurrentMoveRequestID",
+      "category": "AIController",
+      "signature": "GetCurrentMoveRequestID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "FAIRequestID",
+      "docs": "Returns the Move Request ID for the current move"
+    },
+    {
+      "id": "get-move-status",
+      "name": "GetMoveStatus",
+      "category": "AI",
+      "signature": "GetMoveStatus(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "EPathFollowingStatus::Type",
+      "docs": "Returns status of path following"
+    },
+    {
       "id": "has-partial-path",
       "name": "HasPartialPath",
       "category": "AI",
@@ -186,6 +436,41 @@
       "docs": "Starts executing behavior tree."
     },
     {
+      "id": "cleanup-brain-component",
+      "name": "CleanupBrainComponent",
+      "category": "AIController",
+      "signature": "CleanupBrainComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "merge-paths",
+      "name": "MergePaths",
+      "category": "AIController",
+      "signature": "MergePaths(Target, Initial Path, In Out Merged Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Initial Path",
+          "type": "FNavPathSharedPtr&"
+        },
+        {
+          "name": "In Out Merged Path",
+          "type": "FNavPathSharedPtr&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Merges the remaining points of InitialPath, with the points of InOutMergedPath. The resulting merged path is outputted into InOutMergedPath."
+    },
+    {
       "id": "use-blackboard",
       "name": "UseBlackboard",
       "category": "AI",
@@ -206,6 +491,24 @@
       ],
       "returnType": "public : bool",
       "docs": "Makes AI use the specified Blackboard asset & creates a Blackboard Component if one does not already exist.\n@param\tBlackboardAsset\t\t\tThe Blackboard asset to use.\n@param\tBlackboardComponent\t\tThe Blackboard component that was used or created to work with the passed-in Blackboard Asset.\n@return true if we successfully linked the blackboard asset to the blackboard component."
+    },
+    {
+      "id": "should-sync-blackboard-with",
+      "name": "ShouldSyncBlackboardWith",
+      "category": "AIController",
+      "signature": "ShouldSyncBlackboardWith(Target, Other Blackboard Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Other Blackboard Component",
+          "type": "UBlackboardComponent&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "does this AIController allow given UBlackboardComponent sync data with it"
     },
     {
       "id": "claim-task-resource",
@@ -263,6 +566,27 @@
       "returnType": "protected : void"
     },
     {
+      "id": "initialize-blackboard",
+      "name": "InitializeBlackboard",
+      "category": "AIController",
+      "signature": "InitializeBlackboard(Target, Blackboard Comp, Blackboard Asset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Blackboard Comp",
+          "type": "UBlackboardComponent&"
+        },
+        {
+          "name": "Blackboard Asset",
+          "type": "UBlackboardData&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "get-focal-point",
       "name": "GetFocalPoint",
       "category": "AI",
@@ -275,6 +599,23 @@
       ],
       "returnType": "public : FVector",
       "docs": "Retrieve the final position that controller should be looking at."
+    },
+    {
+      "id": "get-focal-point-for-priority",
+      "name": "GetFocalPointForPriority",
+      "category": "AIController",
+      "signature": "GetFocalPointForPriority(Target, In Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "In Priority",
+          "type": "EAIFocusPriority::Type"
+        }
+      ],
+      "returnType": "FVector"
     },
     {
       "id": "get-focal-point-on-actor",
@@ -295,7 +636,7 @@
       "docs": "Retrieve the focal point this controller should focus to on given actor."
     },
     {
-      "id": "set-focal-point",
+      "id": "set-focal-point-0fe828",
       "name": "SetFocalPoint",
       "category": "AI",
       "signature": "SetFocalPoint(Target, FP)",
@@ -313,7 +654,7 @@
       "docs": "Set the position that controller should be looking at."
     },
     {
-      "id": "set-focus",
+      "id": "set-focus-44797f",
       "name": "SetFocus",
       "category": "AI",
       "signature": "SetFocus(Target, New Focus)",
@@ -345,7 +686,7 @@
       "docs": "Get the focused actor."
     },
     {
-      "id": "clear-focus",
+      "id": "clear-focus-8768a2",
       "name": "ClearFocus",
       "category": "AI",
       "signature": "ClearFocus(Target)",
@@ -357,6 +698,388 @@
       ],
       "returnType": "Void",
       "docs": "Clears Focus, will also clear FocalPoint as a result"
+    },
+    {
+      "id": "suggest-toss-velocity",
+      "name": "SuggestTossVelocity",
+      "category": "AIController",
+      "signature": "SuggestTossVelocity(Target, Out Toss Velocity, Start, End, Toss Speed, Prefer High Arc, Collision Radius, Only Trace Up)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Out Toss Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Start",
+          "type": "FVector"
+        },
+        {
+          "name": "End",
+          "type": "FVector"
+        },
+        {
+          "name": "Toss Speed",
+          "type": "Float"
+        },
+        {
+          "name": "Prefer High Arc",
+          "type": "Bool"
+        },
+        {
+          "name": "Collision Radius",
+          "type": "Float",
+          "default": "0"
+        },
+        {
+          "name": "Only Trace Up",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Computes a launch velocity vector to toss a projectile and hit the given destination.\nPerformance note: Potentially expensive. Nonzero CollisionRadius and bOnlyTraceUp=false are the more expensive options.\n@param OutTossVelocity - out param stuffed with the computed velocity to use\n@param Start - desired start point of arc\n@param End - desired end point of arc\n@param TossSpeed - Initial speed of the theoretical projectile. Assumed to only change due to gravity for the entire lifetime of the projectile\n@param CollisionSize (optional) - is the size of bounding box of the tossed actor (defaults to (0,0,0)\n@param bOnlyTraceUp  (optional) - when true collision checks verifying the arc will only be done along the upward portion of the arc\n@return - true if a valid arc was computed, false if no valid solution could be found"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "AIController",
+      "signature": "Tick(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-initialize-components",
+      "name": "PostInitializeComponents",
+      "category": "AIController",
+      "signature": "PostInitializeComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-register-all-components",
+      "name": "PostRegisterAllComponents",
+      "category": "AIController",
+      "signature": "PostRegisterAllComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-possess",
+      "name": "OnPossess",
+      "category": "AIController",
+      "signature": "OnPossess(Target, In Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "In Pawn",
+          "type": "APawn*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "on-un-possess",
+      "name": "OnUnPossess",
+      "category": "AIController",
+      "signature": "OnUnPossess(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "should-postpone-path-updates",
+      "name": "ShouldPostponePathUpdates",
+      "category": "AIController",
+      "signature": "ShouldPostponePathUpdates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "public : bool"
+    },
+    {
+      "id": "display-debug",
+      "name": "DisplayDebug",
+      "category": "AIController",
+      "signature": "DisplayDebug(Target, Canvas, Debug Display, YL, Y Pos)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Canvas",
+          "type": "UCanvas*"
+        },
+        {
+          "name": "Debug Display",
+          "type": "FDebugDisplayInfo&"
+        },
+        {
+          "name": "YL",
+          "type": "Float&"
+        },
+        {
+          "name": "Y Pos",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "grab-debug-snapshot",
+      "name": "GrabDebugSnapshot",
+      "category": "AIController",
+      "signature": "GrabDebugSnapshot(Target, Snapshot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Snapshot",
+          "type": "FVisualLogEntry*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "AIController",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "line-of-sight-to",
+      "name": "LineOfSightTo",
+      "category": "AIController",
+      "signature": "LineOfSightTo(Target, Other, View Point, Alternate Checks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Other",
+          "type": "AActor*"
+        },
+        {
+          "name": "View Point",
+          "type": "FVector",
+          "default": "FVector(ForceInit)"
+        },
+        {
+          "name": "Alternate Checks",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks line to center and top of other actor\n@param Other is the actor whose visibility is being checked.\n@param ViewPoint is eye position visibility is being checked from.  If vect(0,0,0) passed in, uses current viewtarget's eye position.\n@param bAlternateChecks used only in AIController implementation\n@return true if controller's pawn can see Other actor."
+    },
+    {
+      "id": "actors-perception-updated",
+      "name": "ActorsPerceptionUpdated",
+      "category": "AIController",
+      "signature": "ActorsPerceptionUpdated(Target, Updated Actors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Updated Actors",
+          "type": "TArray<AActor*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notifies AIController of changes in given actors' perception"
+    },
+    {
+      "id": "update-control-rotation",
+      "name": "UpdateControlRotation",
+      "category": "AIController",
+      "signature": "UpdateControlRotation(Target, Delta Time, Update Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Update Pawn",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update direction AI is looking based on FocalPoint"
+    },
+    {
+      "id": "set-focal-point-7f4d74",
+      "name": "SetFocalPoint",
+      "category": "AIController",
+      "signature": "SetFocalPoint(Target, New Focus, In Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "New Focus",
+          "type": "FVector"
+        },
+        {
+          "name": "In Priority",
+          "type": "EAIFocusPriority::Type",
+          "default": "EAIFocusPriority::Gameplay"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set FocalPoint for given priority as absolute position or offset from base."
+    },
+    {
+      "id": "set-focus-309014",
+      "name": "SetFocus",
+      "category": "AIController",
+      "signature": "SetFocus(Target, New Focus, In Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "New Focus",
+          "type": "AActor*"
+        },
+        {
+          "name": "In Priority",
+          "type": "EAIFocusPriority::Type",
+          "default": "EAIFocusPriority::Gameplay"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set Focus actor for given priority, will set FocalPoint as a result."
+    },
+    {
+      "id": "clear-focus-59a34e",
+      "name": "ClearFocus",
+      "category": "AIController",
+      "signature": "ClearFocus(Target, In Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "In Priority",
+          "type": "EAIFocusPriority::Type"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears Focus for given priority, will also clear FocalPoint as a result\n@param InPriority focus priority to clear. If you don't know what to use you probably mean EAIFocusPriority::Gameplay"
+    },
+    {
+      "id": "set-perception-component",
+      "name": "SetPerceptionComponent",
+      "category": "AIController",
+      "signature": "SetPerceptionComponent(Target, In Perception Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "In Perception Component",
+          "type": "UAIPerceptionComponent&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-following-a-path",
+      "name": "IsFollowingAPath",
+      "category": "AIController",
+      "signature": "IsFollowingAPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-path-following-agent",
+      "name": "GetPathFollowingAgent",
+      "category": "AIController",
+      "signature": "GetPathFollowingAgent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "IPathFollowingAgentInterface*"
+    },
+    {
+      "id": "set-generic-team-id",
+      "name": "SetGenericTeamId",
+      "category": "AIController",
+      "signature": "SetGenericTeamId(Target, New Team ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "New Team ID",
+          "type": "FGenericTeamId&"
+        }
+      ],
+      "returnType": "public : void"
     },
     {
       "id": "on-gameplay-task-resources-claimed",
@@ -378,6 +1101,64 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-debug-icon",
+      "name": "GetDebugIcon",
+      "category": "AIController",
+      "signature": "GetDebugIcon(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "get-path-following-component",
+      "name": "GetPathFollowingComponent",
+      "category": "AI",
+      "signature": "GetPathFollowingComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "public : UPathFollowingComponent*",
+      "docs": "If true, AI controllers will ignore players."
+    },
+    {
+      "id": "get-ai-perception-component",
+      "name": "GetAIPerceptionComponent",
+      "category": "AI",
+      "signature": "GetAIPerceptionComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        }
+      ],
+      "returnType": "UAIPerceptionComponent*"
+    },
+    {
+      "id": "set-path-following-component",
+      "name": "SetPathFollowingComponent",
+      "category": "AI",
+      "signature": "SetPathFollowingComponent(Target, New PF Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "AAIController*"
+        },
+        {
+          "name": "New PF Component",
+          "type": "UPathFollowingComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Note that this function does not do any pathfollowing state transfer.\nIntended to be called as part of initialization/setup process"
     }
   ]
 }

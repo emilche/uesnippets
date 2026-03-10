@@ -1,0 +1,687 @@
+{
+  "id": "material-render-proxy",
+  "label": "MaterialRenderProxy",
+  "includepath": "Materials/MaterialRenderProxy.h",
+  "includes": [
+    "CoreTypes",
+    "Color",
+    "Vector2D",
+    "RenderResource",
+    "RHIImmutableSamplerState",
+    "Mutex",
+    "Task",
+    "BlendableInterface"
+  ],
+  "functions": [
+    {
+      "id": "f-uniform-expression-cache",
+      "name": "FUniformExpressionCache",
+      "category": "MaterialRenderProxy",
+      "signature": "FUniformExpressionCache()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Cached uniform expression values."
+    },
+    {
+      "id": "f-uniform-expression-cache-async-update-scope",
+      "name": "FUniformExpressionCacheAsyncUpdateScope",
+      "category": "MaterialRenderProxy",
+      "signature": "FUniformExpressionCacheAsyncUpdateScope()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Defines a scope to update deferred uniform expression caches using an async task to fill uniform buffers. If expression\ncaches are updated within the scope, an async task may be launched. Otherwise the update is synchronous."
+    },
+    {
+      "id": "wait-for-task",
+      "name": "WaitForTask",
+      "category": "MaterialRenderProxy",
+      "signature": "WaitForTask()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Call if a wait is required within the scope."
+    },
+    {
+      "id": "f-material-render-proxy-58b2f5",
+      "name": "FMaterialRenderProxy",
+      "category": "MaterialRenderProxy",
+      "signature": "FMaterialRenderProxy(In Material Name)",
+      "params": [
+        {
+          "name": "In Material Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A material render proxy used by the renderer."
+    },
+    {
+      "id": "f-material-render-proxy-0264ee",
+      "name": "FMaterialRenderProxy",
+      "category": "MaterialRenderProxy",
+      "signature": "FMaterialRenderProxy()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor."
+    },
+    {
+      "id": "evaluate-uniform-expressions",
+      "name": "EvaluateUniformExpressions",
+      "category": "MaterialRenderProxy",
+      "signature": "EvaluateUniformExpressions(Target, RHI Cmd List, Out Uniform Expression Cache, Context, Updater)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Out Uniform Expression Cache",
+          "type": "FUniformExpressionCache&"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        },
+        {
+          "name": "Updater",
+          "type": "FUniformExpressionCacheAsyncUpdater*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Evaluates uniform expressions and stores them in OutUniformExpressionCache.\n@param OutUniformExpressionCache - The uniform expression cache to build.\n@param MaterialRenderContext - The context for which to cache expressions."
+    },
+    {
+      "id": "cache-uniform-expressions",
+      "name": "CacheUniformExpressions",
+      "category": "MaterialRenderProxy",
+      "signature": "CacheUniformExpressions(Target, RHI Cmd List, Recreate Uniform Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Recreate Uniform Buffer",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Caches uniform expressions for efficient runtime evaluation."
+    },
+    {
+      "id": "cancel-cache-uniform-expressions",
+      "name": "CancelCacheUniformExpressions",
+      "category": "MaterialRenderProxy",
+      "signature": "CancelCacheUniformExpressions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cancels an in-flight cache operation."
+    },
+    {
+      "id": "cache-uniform-expressions-game-thread",
+      "name": "CacheUniformExpressions_GameThread",
+      "category": "MaterialRenderProxy",
+      "signature": "CacheUniformExpressions_GameThread(Target, Recreate Uniform Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Recreate Uniform Buffer",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enqueues a rendering command to cache uniform expressions for efficient runtime evaluation.\nbRecreateUniformBuffer - whether to recreate the material uniform buffer.\nThis is required if the FMaterial is being recompiled (the uniform buffer layout will change).\nThis should only be done if the calling code is using FMaterialUpdateContext to recreate the rendering state of primitives using this material, since cached mesh commands also cache uniform buffer pointers."
+    },
+    {
+      "id": "invalidate-uniform-expression-cache",
+      "name": "InvalidateUniformExpressionCache",
+      "category": "MaterialRenderProxy",
+      "signature": "InvalidateUniformExpressionCache(Target, Recreate Uniform Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Recreate Uniform Buffer",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidates the uniform expression cache."
+    },
+    {
+      "id": "update-uniform-expression-cache-if-needed-4e6ab1",
+      "name": "UpdateUniformExpressionCacheIfNeeded",
+      "category": "MaterialRenderProxy",
+      "signature": "UpdateUniformExpressionCacheIfNeeded(Target, In Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-uniform-expression-cache-if-needed-9c881b",
+      "name": "UpdateUniformExpressionCacheIfNeeded",
+      "category": "MaterialRenderProxy",
+      "signature": "UpdateUniformExpressionCacheIfNeeded(Target, RHI Cmd List, In Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "FMaterial*"
+    },
+    {
+      "id": "get-material-with-fallback",
+      "name": "GetMaterialWithFallback",
+      "category": "MaterialRenderProxy",
+      "signature": "GetMaterialWithFallback(Target, In Feature Level, Out Fallback Material Render Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "Out Fallback Material Render Proxy",
+          "type": "FMaterialRenderProxy*&"
+        }
+      ],
+      "returnType": "FMaterial&",
+      "docs": "Finds the FMaterial to use for rendering this FMaterialRenderProxy.  Will fall back to a default material if needed due to a content error, or async compilation.\nThe returned FMaterial is guaranteed to have a complete shader map, so all relevant shaders should be available\nOutFallbackMaterialRenderProxy - The proxy that corresponds to the returned FMaterial, should be used for further rendering.  May be a fallback material, or 'this' if no fallback was needed"
+    },
+    {
+      "id": "get-incomplete-material-with-fallback",
+      "name": "GetIncompleteMaterialWithFallback",
+      "category": "MaterialRenderProxy",
+      "signature": "GetIncompleteMaterialWithFallback(Target, In Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "FMaterial&",
+      "docs": "Finds the FMaterial to use for rendering this FMaterialRenderProxy.  Will fall back to a default material if needed due to a content error, or async compilation.\nWill always return a valid FMaterial, but unlike GetMaterialWithFallback, FMaterial's shader map may be incomplete"
+    },
+    {
+      "id": "get-vector-value",
+      "name": "GetVectorValue",
+      "category": "MaterialRenderProxy",
+      "signature": "GetVectorValue(Target, Parameter Info, Out Value, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Parameter Info",
+          "type": "FHashedMaterialParameterInfo&"
+        },
+        {
+          "name": "Out Value",
+          "type": "FLinearColor*"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-scalar-value",
+      "name": "GetScalarValue",
+      "category": "MaterialRenderProxy",
+      "signature": "GetScalarValue(Target, Parameter Info, Out Value, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Parameter Info",
+          "type": "FHashedMaterialParameterInfo&"
+        },
+        {
+          "name": "Out Value",
+          "type": "Float*"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-texture-value",
+      "name": "GetTextureValue",
+      "category": "MaterialRenderProxy",
+      "signature": "GetTextureValue(Target, Parameter Info, Out Value, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Parameter Info",
+          "type": "FHashedMaterialParameterInfo&"
+        },
+        {
+          "name": "Out Value",
+          "type": "UTexture**"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-texture-collection-value",
+      "name": "GetTextureCollectionValue",
+      "category": "MaterialRenderProxy",
+      "signature": "GetTextureCollectionValue(Target, Parameter Info, Out Value, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Parameter Info",
+          "type": "FHashedMaterialParameterInfo&"
+        },
+        {
+          "name": "Out Value",
+          "type": "UTextureCollection**"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-user-scene-texture-output",
+      "name": "GetUserSceneTextureOutput",
+      "category": "MaterialRenderProxy",
+      "signature": "GetUserSceneTextureOutput(Target, Base)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Base",
+          "type": "FMaterial*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "get-blendable-location",
+      "name": "GetBlendableLocation",
+      "category": "MaterialRenderProxy",
+      "signature": "GetBlendableLocation(Target, Base)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Base",
+          "type": "FMaterial*"
+        }
+      ],
+      "returnType": "EBlendableLocation"
+    },
+    {
+      "id": "get-blendable-priority",
+      "name": "GetBlendablePriority",
+      "category": "MaterialRenderProxy",
+      "signature": "GetBlendablePriority(Target, Base)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Base",
+          "type": "FMaterial*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "init-rhi",
+      "name": "InitRHI",
+      "category": "MaterialRenderProxy",
+      "signature": "InitRHI(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release-rhi",
+      "name": "ReleaseRHI",
+      "category": "MaterialRenderProxy",
+      "signature": "ReleaseRHI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release-resource",
+      "name": "ReleaseResource",
+      "category": "MaterialRenderProxy",
+      "signature": "ReleaseResource(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-deferred-cached-uniform-expressions-633e7b",
+      "name": "UpdateDeferredCachedUniformExpressions",
+      "category": "MaterialRenderProxy",
+      "signature": "UpdateDeferredCachedUniformExpressions()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-deferred-cached-uniform-expressions-cf8450",
+      "name": "UpdateDeferredCachedUniformExpressions",
+      "category": "MaterialRenderProxy",
+      "signature": "UpdateDeferredCachedUniformExpressions(RHI Cmd List, Task If Async)",
+      "params": [
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Task If Async",
+          "type": "UE::Tasks::FTask*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-deferred-uniform-expression-cache-requests",
+      "name": "HasDeferredUniformExpressionCacheRequests",
+      "category": "MaterialRenderProxy",
+      "signature": "HasDeferredUniformExpressionCacheRequests()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-preallocated-vt-stack",
+      "name": "GetPreallocatedVTStack",
+      "category": "MaterialRenderProxy",
+      "signature": "GetPreallocatedVTStack(Target, Context, Uniform Expression Set, VT Stack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        },
+        {
+          "name": "Uniform Expression Set",
+          "type": "FUniformExpressionSet&"
+        },
+        {
+          "name": "VT Stack",
+          "type": "FMaterialVirtualTextureStack&"
+        }
+      ],
+      "returnType": "private : IAllocatedVirtualTexture*"
+    },
+    {
+      "id": "allocate-vt-stack",
+      "name": "AllocateVTStack",
+      "category": "MaterialRenderProxy",
+      "signature": "AllocateVTStack(Target, RHI Cmd List, Context, Uniform Expression Set, VT Stack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        },
+        {
+          "name": "Uniform Expression Set",
+          "type": "FUniformExpressionSet&"
+        },
+        {
+          "name": "VT Stack",
+          "type": "FMaterialVirtualTextureStack&"
+        }
+      ],
+      "returnType": "IAllocatedVirtualTexture*"
+    },
+    {
+      "id": "f-colored-material-render-proxy",
+      "name": "FColoredMaterialRenderProxy",
+      "category": "MaterialRenderProxy",
+      "signature": "FColoredMaterialRenderProxy(In Parent, In Color, In Color Param Name)",
+      "params": [
+        {
+          "name": "In Parent",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "In Color Param Name",
+          "type": "Name",
+          "default": "NAME_Color"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "0 if not set, game thread pointer, do not dereference, only for comparison"
+    },
+    {
+      "id": "get-material-no-fallback",
+      "name": "GetMaterialNoFallback",
+      "category": "MaterialRenderProxy",
+      "signature": "GetMaterialNoFallback(Target, In Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FColoredMaterialRenderProxy*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "FMaterial*",
+      "docs": "Returns the FMaterial, without using a fallback if the FMaterial doesn't have a valid shader map. Can return NULL."
+    },
+    {
+      "id": "get-fallback",
+      "name": "GetFallback",
+      "category": "MaterialRenderProxy",
+      "signature": "GetFallback(Target, In Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FColoredMaterialRenderProxy*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "FMaterialRenderProxy*"
+    },
+    {
+      "id": "get-parameter-value",
+      "name": "GetParameterValue",
+      "category": "MaterialRenderProxy",
+      "signature": "GetParameterValue(Target, Type, Parameter Info, Out Value, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FColoredMaterialRenderProxy*"
+        },
+        {
+          "name": "Type",
+          "type": "EMaterialParameterType"
+        },
+        {
+          "name": "Parameter Info",
+          "type": "FHashedMaterialParameterInfo&"
+        },
+        {
+          "name": "Out Value",
+          "type": "FMaterialParameterValue&"
+        },
+        {
+          "name": "Context",
+          "type": "FMaterialRenderContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-colored-textured-material-render-proxy",
+      "name": "FColoredTexturedMaterialRenderProxy",
+      "category": "MaterialRenderProxy",
+      "signature": "FColoredTexturedMaterialRenderProxy(In Parent, In Color, In Color Param Name, In Texture, In Texture Param Name)",
+      "params": [
+        {
+          "name": "In Parent",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "In Color Param Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Texture",
+          "type": "UTexture*"
+        },
+        {
+          "name": "In Texture Param Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialization constructor."
+    },
+    {
+      "id": "f-override-selection-color-material-render-proxy",
+      "name": "FOverrideSelectionColorMaterialRenderProxy",
+      "category": "MaterialRenderProxy",
+      "signature": "FOverrideSelectionColorMaterialRenderProxy(In Parent, In Selection Color)",
+      "params": [
+        {
+          "name": "In Parent",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Selection Color",
+          "type": "FLinearColor&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A material render proxy which overrides the selection color"
+    },
+    {
+      "id": "f-lighting-density-material-render-proxy",
+      "name": "FLightingDensityMaterialRenderProxy",
+      "category": "MaterialRenderProxy",
+      "signature": "FLightingDensityMaterialRenderProxy(In Parent, In Color, In Lightmap Resolution)",
+      "params": [
+        {
+          "name": "In Parent",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "In Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "In Lightmap Resolution",
+          "type": "FVector2D&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "An material render proxy which overrides the material's Color and Lightmap resolution vector parameter."
+    }
+  ]
+}

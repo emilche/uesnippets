@@ -1,0 +1,319 @@
+{
+  "id": "malloc-leak-detection",
+  "label": "MallocLeakDetection",
+  "includepath": "HAL/MallocLeakDetection.h",
+  "includes": [
+    "Array",
+    "Map",
+    "Set",
+    "UnrealString",
+    "CoreTypes",
+    "MemoryBase",
+    "ThreadSafeBool",
+    "UnrealMemory",
+    "CityHash",
+    "Crc",
+    "ScopeLock"
+  ],
+  "functions": [
+    {
+      "id": "f-malloc-leak-detection",
+      "name": "FMallocLeakDetection",
+      "category": "MallocLeakDetection",
+      "signature": "FMallocLeakDetection()",
+      "params": [],
+      "returnType": "private :"
+    },
+    {
+      "id": "add-callstack",
+      "name": "AddCallstack",
+      "category": "MallocLeakDetection",
+      "signature": "AddCallstack(Target, Callstack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Callstack",
+          "type": "FCallstackTrack&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Track a callstack"
+    },
+    {
+      "id": "remove-callstack",
+      "name": "RemoveCallstack",
+      "category": "MallocLeakDetection",
+      "signature": "RemoveCallstack(Target, Callstack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Callstack",
+          "type": "FCallstackTrack&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "MallocLeakDetection",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "public : FMallocLeakDetection&",
+      "docs": "List of all currently allocated pointers"
+    },
+    {
+      "id": "handle-malloc-leak-command",
+      "name": "HandleMallocLeakCommand",
+      "category": "MallocLeakDetection",
+      "signature": "HandleMallocLeakCommand(Args)",
+      "params": [
+        {
+          "name": "Args",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-allocation-collection",
+      "name": "SetAllocationCollection",
+      "category": "MallocLeakDetection",
+      "signature": "SetAllocationCollection(Target, Enabled, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        },
+        {
+          "name": "Size",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable/disable collection of allocation with an optional filter on allocation size"
+    },
+    {
+      "id": "clear-data",
+      "name": "ClearData",
+      "category": "MallocLeakDetection",
+      "signature": "ClearData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clear currently accumulated data"
+    },
+    {
+      "id": "dump-open-callstacks",
+      "name": "DumpOpenCallstacks",
+      "category": "MallocLeakDetection",
+      "signature": "DumpOpenCallstacks(Target, File Name, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "File Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Options",
+          "type": "FMallocLeakReportOptions&",
+          "default": "FMallocLeakReportOptions()"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Dumps currently open callstacks"
+    },
+    {
+      "id": "checkpoint-linear-fit",
+      "name": "CheckpointLinearFit",
+      "category": "MallocLeakDetection",
+      "signature": "CheckpointLinearFit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform a linear fit checkpoint of all open callstacks"
+    },
+    {
+      "id": "malloc",
+      "name": "Malloc",
+      "category": "MallocLeakDetection",
+      "signature": "Malloc(Target, Ptr, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles new allocated pointer"
+    },
+    {
+      "id": "realloc",
+      "name": "Realloc",
+      "category": "MallocLeakDetection",
+      "signature": "Realloc(Target, Old Ptr, Old Size, New Ptr, New Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Old Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "Old Size",
+          "type": "SIZE_T"
+        },
+        {
+          "name": "New Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "New Size",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles reallocation"
+    },
+    {
+      "id": "free",
+      "name": "Free",
+      "category": "MallocLeakDetection",
+      "signature": "Free(Target, Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes allocated pointer from list"
+    },
+    {
+      "id": "set-disabled-for-this-thread",
+      "name": "SetDisabledForThisThread",
+      "category": "MallocLeakDetection",
+      "signature": "SetDisabledForThisThread(Target, Disabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Disabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disabled allocation tracking for this thread, @see MALLOCLEAK_IGNORE_SCOPE and FMallocLeakDetectionIgnoreScope."
+    },
+    {
+      "id": "is-disabled-for-this-thread",
+      "name": "IsDisabledForThisThread",
+      "category": "MallocLeakDetection",
+      "signature": "IsDisabledForThisThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true of allocation tracking for this thread is"
+    },
+    {
+      "id": "push-context",
+      "name": "PushContext",
+      "category": "MallocLeakDetection",
+      "signature": "PushContext(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Context",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pop-context",
+      "name": "PopContext",
+      "category": "MallocLeakDetection",
+      "signature": "PopContext(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Pops a context from the above"
+    },
+    {
+      "id": "get-open-callstacks",
+      "name": "GetOpenCallstacks",
+      "category": "MallocLeakDetection",
+      "signature": "GetOpenCallstacks(Target, Out Callstacks, Out Total Size, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocLeakDetection*"
+        },
+        {
+          "name": "Out Callstacks",
+          "type": "TArray<CallstackHashType>&"
+        },
+        {
+          "name": "Out Total Size",
+          "type": "SIZE_T&"
+        },
+        {
+          "name": "Options",
+          "type": "FMallocLeakReportOptions&",
+          "default": "FMallocLeakReportOptions()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns"
+    }
+  ]
+}

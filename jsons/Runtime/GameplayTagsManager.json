@@ -1,0 +1,1698 @@
+{
+  "id": "gameplay-tags-manager",
+  "label": "GameplayTagsManager",
+  "includepath": "GameplayTagsManager.h",
+  "includes": [
+    "AssetData",
+    "CoreMinimal",
+    "Stats",
+    "ObjectMacros",
+    "Object",
+    "ScriptMacros",
+    "GameplayTagContainer",
+    "DataTable",
+    "UniquePtr",
+    "ScopeLock",
+    "TransactionallySafeCriticalSection",
+    "Blake3",
+    "GameplayTagsManager.generated"
+  ],
+  "functions": [
+    {
+      "id": "f-gameplay-tag-table-row",
+      "name": "FGameplayTagTableRow",
+      "category": "GameplayTagsManager",
+      "signature": "FGameplayTagTableRow(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FGameplayTagTableRow&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-restricted-gameplay-tag-table-row",
+      "name": "FRestrictedGameplayTagTableRow",
+      "category": "GameplayTagsManager",
+      "signature": "FRestrictedGameplayTagTableRow(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FRestrictedGameplayTagTableRow&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-config-file-name",
+      "name": "GetConfigFileName",
+      "category": "GameplayTagsManager",
+      "signature": "GetConfigFileName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagSource*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the config file that created this source, if valid"
+    },
+    {
+      "id": "get-native-name",
+      "name": "GetNativeName",
+      "category": "GameplayTagsManager",
+      "signature": "GetNativeName()",
+      "params": [],
+      "returnType": "Name"
+    },
+    {
+      "id": "get-default-name",
+      "name": "GetDefaultName",
+      "category": "GameplayTagsManager",
+      "signature": "GetDefaultName()",
+      "params": [],
+      "returnType": "Name"
+    },
+    {
+      "id": "get-favorite-name",
+      "name": "GetFavoriteName",
+      "category": "GameplayTagsManager",
+      "signature": "GetFavoriteName()",
+      "params": [],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-favorite-name",
+      "name": "SetFavoriteName",
+      "category": "GameplayTagsManager",
+      "signature": "SetFavoriteName(Tag Source To Favorite)",
+      "params": [
+        {
+          "name": "Tag Source To Favorite",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-transient-editor-name",
+      "name": "GetTransientEditorName",
+      "category": "GameplayTagsManager",
+      "signature": "GetTransientEditorName()",
+      "params": [],
+      "returnType": "Name"
+    },
+    {
+      "id": "reset-node",
+      "name": "ResetNode",
+      "category": "GameplayTagsManager",
+      "signature": "ResetNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagNode*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the node of all of its values"
+    },
+    {
+      "id": "hash",
+      "name": "Hash",
+      "category": "GameplayTagsManager",
+      "signature": "Hash(Target, Hasher)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGameplayTagNode*"
+        },
+        {
+          "name": "Hasher",
+          "type": "FBlake3&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the hasher with a deterministic hash of the data on this. Used for e.g. IncrementalCook keys.\nDoes not include data from this node's child or parent nodes."
+    },
+    {
+      "id": "u-gameplay-tags-manager",
+      "name": "UGameplayTagsManager",
+      "category": "GameplayTagsManager",
+      "signature": "UGameplayTagsManager()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor"
+    },
+    {
+      "id": "request-gameplay-tag-container",
+      "name": "RequestGameplayTagContainer",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTagContainer(Target, Tag Strings, Out Tags Container, Error If Not Found)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Strings",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Out Tags Container",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Error If Not Found",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds the gameplay tags corresponding to the strings in the array TagStrings to OutTagsContainer\n@param TagStrings Array of strings to search for as tags to add to the tag container\n@param OutTagsContainer Container to add the found tags to.\n@param ErrorIfNotfound: ensure() that tags exists."
+    },
+    {
+      "id": "request-gameplay-tag",
+      "name": "RequestGameplayTag",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTag(Target, Tag Name, Error If Not Found)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        },
+        {
+          "name": "Error If Not Found",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "FGameplayTag",
+      "docs": "Gets the FGameplayTag that corresponds to the TagName\n@param TagName The Name of the tag to search for\n@param ErrorIfNotfound: ensure() that tag exists.\n@return Will return the corresponding FGameplayTag or an empty one if not found."
+    },
+    {
+      "id": "is-valid-gameplay-tag-string",
+      "name": "IsValidGameplayTagString",
+      "category": "GameplayTagsManager",
+      "signature": "IsValidGameplayTagString(Target, Tag String, Out Error, Out Fixed String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag String",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Error",
+          "type": "Text*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Out Fixed String",
+          "type": "String*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this is a valid gameplay tag string (foo.bar.baz). If false, it will fill\n@param TagString String to check for validity\n@param OutError If non-null and string invalid, will fill in with an error message\n@param OutFixedString If non-null and string invalid, will attempt to fix. Will be empty if no fix is possible\n@return True if this can be added to the tag dictionary, false if there's a syntax error"
+    },
+    {
+      "id": "find-gameplay-tag-from-partial-string-slow",
+      "name": "FindGameplayTagFromPartialString_Slow",
+      "category": "GameplayTagsManager",
+      "signature": "FindGameplayTagFromPartialString_Slow(Target, Partial String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Partial String",
+          "type": "String"
+        }
+      ],
+      "returnType": "FGameplayTag",
+      "docs": "Searches for a gameplay tag given a partial string. This is slow and intended mainly for console commands/utilities to make\ndeveloper life's easier. This will attempt to match as best as it can. If you pass \"A.b\" it will match on \"A.b.\" before it matches \"a.b.c\"."
+    },
+    {
+      "id": "add-native-gameplay-tag-64fe72",
+      "name": "AddNativeGameplayTag",
+      "category": "GameplayTagsManager",
+      "signature": "AddNativeGameplayTag(Target, Tag Name, Tag Dev Comment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        },
+        {
+          "name": "Tag Dev Comment",
+          "type": "String&",
+          "default": "TEXT(\"(Native)\")"
+        }
+      ],
+      "returnType": "FGameplayTag",
+      "docs": "Registers the given name as a gameplay tag, and tracks that it is being directly referenced from code\nThis can only be called during engine initialization, the table needs to be locked down before replication\n@param TagName The Name of the tag to add\n@param TagDevComment The developer comment clarifying the usage of the tag\n@return Will return the corresponding FGameplayTag"
+    },
+    {
+      "id": "add-native-gameplay-tag-c0ead8",
+      "name": "AddNativeGameplayTag",
+      "category": "GameplayTagsManager",
+      "signature": "AddNativeGameplayTag(Target, Tag Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Source",
+          "type": "FNativeGameplayTag*"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "remove-native-gameplay-tag",
+      "name": "RemoveNativeGameplayTag",
+      "category": "GameplayTagsManager",
+      "signature": "RemoveNativeGameplayTag(Target, Tag Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Source",
+          "type": "FNativeGameplayTag*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "done-adding-native-tags",
+      "name": "DoneAddingNativeTags",
+      "category": "GameplayTagsManager",
+      "signature": "DoneAddingNativeTags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Call to flush the list of native tags, once called it is unsafe to add more"
+    },
+    {
+      "id": "on-last-chance-to-add-native-tags",
+      "name": "OnLastChanceToAddNativeTags",
+      "category": "GameplayTagsManager",
+      "signature": "OnLastChanceToAddNativeTags()",
+      "params": [],
+      "returnType": "FSimpleMulticastDelegate&",
+      "docs": "This is a delegate that is called during initialization/initial loading and signals the last chance to add tags before we are considered to be fully loaded (all tags registered)."
+    },
+    {
+      "id": "call-or-register-on-done-adding-native-tags-delegate",
+      "name": "CallOrRegister_OnDoneAddingNativeTagsDelegate",
+      "category": "GameplayTagsManager",
+      "signature": "CallOrRegister_OnDoneAddingNativeTagsDelegate(Target, Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Delegate",
+          "type": "FSimpleMulticastDelegate::FDelegate&"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Register a callback for when native tags are done being added (this is also a safe point to consider that the gameplay tags have fully been initialized).\nOr, if the native tags have already been added (and thus we have registered all valid tags), then execute this Delegate immediately.\nThis is useful if your code is potentially executed during load time, and therefore any tags in your block of code could be not-yet-loaded, but possibly valid after being loaded."
+    },
+    {
+      "id": "request-gameplay-tag-parents",
+      "name": "RequestGameplayTagParents",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTagParents(Target, Gameplay Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Gets a Tag Container containing the supplied tag and all of its parents as explicit tags.\nFor example, passing in x.y.z would return a tag container with x.y.z, x.y, and x.\nThis will only work for tags that have been properly registered.\n@param GameplayTag The tag to use at the child most tag for this container\n@return A tag container with the supplied tag and all its parents added explicitly, or an empty container if that failed"
+    },
+    {
+      "id": "extract-parent-tags",
+      "name": "ExtractParentTags",
+      "category": "GameplayTagsManager",
+      "signature": "ExtractParentTags(Target, Gameplay Tag, Unique Parent Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Unique Parent Tags",
+          "type": "TArray<FGameplayTag>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Fills in an array of gameplay tags with all of tags that are the parents of the passed in tag.\nFor example, passing in x.y.z would add x.y and x to UniqueParentTags if they was not already there.\nThis is used by the GameplayTagContainer code and may work for unregistered tags depending on serialization settings.\n@param GameplayTag The gameplay tag to extract parent tags from\n@param UniqueParentTags A list of parent tags that will be added to if necessary\n@return true if any tags were added to UniqueParentTags"
+    },
+    {
+      "id": "request-gameplay-tag-children",
+      "name": "RequestGameplayTagChildren",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTagChildren(Target, Gameplay Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Gets a Tag Container containing the all tags in the hierarchy that are children of this tag. Does not return the original tag\n@param GameplayTag\t\t\t\t\tThe Tag to use at the parent tag\n@return A Tag Container with the supplied tag and all its parents added explicitly"
+    },
+    {
+      "id": "request-gameplay-tag-direct-parent",
+      "name": "RequestGameplayTagDirectParent",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTagDirectParent(Target, Gameplay Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "FGameplayTag",
+      "docs": "Returns direct parent GameplayTag of this GameplayTag, calling on x.y will return x"
+    },
+    {
+      "id": "load-gameplay-tag-tables",
+      "name": "LoadGameplayTagTables",
+      "category": "GameplayTagsManager",
+      "signature": "LoadGameplayTagTables(Target, Allow Async Load)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Allow Async Load",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Loads the tag tables referenced in the GameplayTagSettings object"
+    },
+    {
+      "id": "add-tag-ini-search-path",
+      "name": "AddTagIniSearchPath",
+      "category": "GameplayTagsManager",
+      "signature": "AddTagIniSearchPath(Target, Root Dir, Plugin Configs Cache)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Root Dir",
+          "type": "String&"
+        },
+        {
+          "name": "Plugin Configs Cache",
+          "type": "TSet<FString>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Loads tag inis contained in the specified path, passes an optional PluginConfigCache to speed up disk searches"
+    },
+    {
+      "id": "remove-tag-ini-search-path",
+      "name": "RemoveTagIniSearchPath",
+      "category": "GameplayTagsManager",
+      "signature": "RemoveTagIniSearchPath(Target, Root Dir)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Root Dir",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Tries to remove the specified search path, will return true if anything was removed"
+    },
+    {
+      "id": "get-tag-source-search-paths",
+      "name": "GetTagSourceSearchPaths",
+      "category": "GameplayTagsManager",
+      "signature": "GetTagSourceSearchPaths(Target, Out Paths)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Out Paths",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets all the current directories to look for tag sources in"
+    },
+    {
+      "id": "get-num-tag-source-search-paths",
+      "name": "GetNumTagSourceSearchPaths",
+      "category": "GameplayTagsManager",
+      "signature": "GetNumTagSourceSearchPaths(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of tag source search paths"
+    },
+    {
+      "id": "construct-gameplay-tag-tree",
+      "name": "ConstructGameplayTagTree",
+      "category": "GameplayTagsManager",
+      "signature": "ConstructGameplayTagTree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to construct the gameplay tag tree"
+    },
+    {
+      "id": "destroy-gameplay-tag-tree",
+      "name": "DestroyGameplayTagTree",
+      "category": "GameplayTagsManager",
+      "signature": "DestroyGameplayTagTree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to destroy the gameplay tag tree"
+    },
+    {
+      "id": "split-gameplay-tag-f-name",
+      "name": "SplitGameplayTagFName",
+      "category": "GameplayTagsManager",
+      "signature": "SplitGameplayTagFName(Target, Tag, Out Names)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Out Names",
+          "type": "TArray<FName>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Splits a tag such as x.y.z into an array of names {x,y,z}"
+    },
+    {
+      "id": "request-all-gameplay-tags",
+      "name": "RequestAllGameplayTags",
+      "category": "GameplayTagsManager",
+      "signature": "RequestAllGameplayTags(Target, Tag Container, Only Include Dictionary Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Container",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Only Include Dictionary Tags",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets the list of all registered tags, setting OnlyIncludeDictionaryTags will exclude implicitly added tags if possible"
+    },
+    {
+      "id": "validate-tag-creation",
+      "name": "ValidateTagCreation",
+      "category": "GameplayTagsManager",
+      "signature": "ValidateTagCreation(Target, Tag Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if if the passed in name is in the tag dictionary and can be created"
+    },
+    {
+      "id": "find-tag-source",
+      "name": "FindTagSource",
+      "category": "GameplayTagsManager",
+      "signature": "FindTagSource(Target, Tag Source Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Source Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FGameplayTagSource*",
+      "docs": "Returns the tag source for a given tag source name and type, or null if not found"
+    },
+    {
+      "id": "find-tag-sources-with-type",
+      "name": "FindTagSourcesWithType",
+      "category": "GameplayTagsManager",
+      "signature": "FindTagSourcesWithType(Target, Tag Source Type, Out Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Source Type",
+          "type": "EGameplayTagSourceType"
+        },
+        {
+          "name": "Out Array",
+          "type": "TArray<FGameplayTagSource*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fills in an array with all tag sources of a specific type"
+    },
+    {
+      "id": "find-tags-with-source",
+      "name": "FindTagsWithSource",
+      "category": "GameplayTagsManager",
+      "signature": "FindTagsWithSource(Target, Package Name Or Path, Out Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Package Name Or Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "Out Tags",
+          "type": "TArray<FGameplayTag>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "gameplay-tags-match-depth",
+      "name": "GameplayTagsMatchDepth",
+      "category": "GameplayTagsManager",
+      "signature": "GameplayTagsMatchDepth(Target, Gameplay Tag One, Gameplay Tag Two)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag One",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Gameplay Tag Two",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Check to see how closely two FGameplayTags match. Higher values indicate more matching terms in the tags.\n@param GameplayTagOne\tThe first tag to compare\n@param GameplayTagTwo\tThe second tag to compare\n@return the length of the longest matching pair"
+    },
+    {
+      "id": "get-number-of-tag-nodes",
+      "name": "GetNumberOfTagNodes",
+      "category": "GameplayTagsManager",
+      "signature": "GetNumberOfTagNodes(Target, Gameplay Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the number of parents a particular gameplay tag has.  Useful as a quick way to determine which tags may\nbe more \"specific\" than other tags without comparing whether they are in the same hierarchy or anything else.\nExample: \"TagA.SubTagA\" has 2 Tag Nodes.  \"TagA.SubTagA.LeafTagA\" has 3 Tag Nodes."
+    },
+    {
+      "id": "should-import-tags-from-ini",
+      "name": "ShouldImportTagsFromINI",
+      "category": "GameplayTagsManager",
+      "signature": "ShouldImportTagsFromINI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we should import tags from UGameplayTagsSettings objects (configured by INI files)"
+    },
+    {
+      "id": "should-unload-tags",
+      "name": "ShouldUnloadTags",
+      "category": "GameplayTagsManager",
+      "signature": "ShouldUnloadTags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If we are allowed to unload tags"
+    },
+    {
+      "id": "set-should-unload-tags-override",
+      "name": "SetShouldUnloadTagsOverride",
+      "category": "GameplayTagsManager",
+      "signature": "SetShouldUnloadTagsOverride(Target, Should Unload Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Should Unload Tags",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Pushes an override that supersedes bShouldAllowUnloadingTags to allow/disallow unloading of GameplayTags in controlled scenarios"
+    },
+    {
+      "id": "clear-should-unload-tags-override",
+      "name": "ClearShouldUnloadTagsOverride",
+      "category": "GameplayTagsManager",
+      "signature": "ClearShouldUnloadTagsOverride(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears runtime overrides, reverting to bShouldAllowUnloadingTags when determining GameplayTags unload behavior"
+    },
+    {
+      "id": "set-should-defer-gameplay-tag-tree-rebuilds",
+      "name": "SetShouldDeferGameplayTagTreeRebuilds",
+      "category": "GameplayTagsManager",
+      "signature": "SetShouldDeferGameplayTagTreeRebuilds(Target, Should Defer Rebuilds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Should Defer Rebuilds",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Pushes an override that suppresses calls to HandleGameplayTagTreeChanged that would result in a complete rebuild of the GameplayTag tree"
+    },
+    {
+      "id": "clear-should-defer-gameplay-tag-tree-rebuilds",
+      "name": "ClearShouldDeferGameplayTagTreeRebuilds",
+      "category": "GameplayTagsManager",
+      "signature": "ClearShouldDeferGameplayTagTreeRebuilds(Target, Rebuild Tree)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Rebuild Tree",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops suppressing GameplayTag tree rebuilds and (optionally) rebuilds the tree"
+    },
+    {
+      "id": "get-restricted-tag-config-files",
+      "name": "GetRestrictedTagConfigFiles",
+      "category": "GameplayTagsManager",
+      "signature": "GetRestrictedTagConfigFiles(Target, Restricted Config Files)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Restricted Config Files",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns a list of the ini files that contain restricted tags"
+    },
+    {
+      "id": "get-restricted-tag-sources",
+      "name": "GetRestrictedTagSources",
+      "category": "GameplayTagsManager",
+      "signature": "GetRestrictedTagSources(Target, Sources)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Sources",
+          "type": "TArray<FGameplayTagSource*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns a list of the source files that contain restricted tags"
+    },
+    {
+      "id": "get-owners-for-tag-source",
+      "name": "GetOwnersForTagSource",
+      "category": "GameplayTagsManager",
+      "signature": "GetOwnersForTagSource(Target, Source Name, Out Owners)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Source Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Owners",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns a list of the owners for a restricted tag config file. May be empty"
+    },
+    {
+      "id": "gameplay-tag-container-loaded",
+      "name": "GameplayTagContainerLoaded",
+      "category": "GameplayTagsManager",
+      "signature": "GameplayTagContainerLoaded(Target, Container, Serializing Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Container",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Serializing Property",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notification that a tag container has been loaded via serialize"
+    },
+    {
+      "id": "single-gameplay-tag-loaded",
+      "name": "SingleGameplayTagLoaded",
+      "category": "GameplayTagsManager",
+      "signature": "SingleGameplayTagLoaded(Target, Tag, Serializing Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Serializing Property",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notification that a gameplay tag has been loaded via serialize"
+    },
+    {
+      "id": "redirect-tags-for-container",
+      "name": "RedirectTagsForContainer",
+      "category": "GameplayTagsManager",
+      "signature": "RedirectTagsForContainer(Target, Container, Serializing Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Container",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Serializing Property",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles redirectors for an entire container, will also error on invalid tags"
+    },
+    {
+      "id": "redirect-single-gameplay-tag",
+      "name": "RedirectSingleGameplayTag",
+      "category": "GameplayTagsManager",
+      "signature": "RedirectSingleGameplayTag(Target, Tag, Serializing Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Serializing Property",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles redirectors for a single tag, will also error on invalid tag. This is only called for when individual tags are serialized on their own"
+    },
+    {
+      "id": "import-single-gameplay-tag",
+      "name": "ImportSingleGameplayTag",
+      "category": "GameplayTagsManager",
+      "signature": "ImportSingleGameplayTag(Target, Tag, Imported Tag Name, Import From Serialize)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Imported Tag Name",
+          "type": "Name"
+        },
+        {
+          "name": "Import From Serialize",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handles establishing a single tag from an imported tag name (accounts for redirects too). Called when tags are imported via text."
+    },
+    {
+      "id": "get-tag-name-from-net-index",
+      "name": "GetTagNameFromNetIndex",
+      "category": "GameplayTagsManager",
+      "signature": "GetTagNameFromNetIndex(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Index",
+          "type": "FGameplayTagNetIndex"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Gets a tag name from net index and vice versa, used for replication efficiency"
+    },
+    {
+      "id": "get-net-index-from-tag",
+      "name": "GetNetIndexFromTag",
+      "category": "GameplayTagsManager",
+      "signature": "GetNetIndexFromTag(Target, In Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "In Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "FGameplayTagNetIndex"
+    },
+    {
+      "id": "push-defer-on-gameplay-tag-tree-changed-broadcast",
+      "name": "PushDeferOnGameplayTagTreeChangedBroadcast",
+      "category": "GameplayTagsManager",
+      "signature": "PushDeferOnGameplayTagTreeChangedBroadcast(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tag"
+    },
+    {
+      "id": "pop-defer-on-gameplay-tag-tree-changed-broadcast",
+      "name": "PopDeferOnGameplayTagTreeChangedBroadcast",
+      "category": "GameplayTagsManager",
+      "signature": "PopDeferOnGameplayTagTreeChangedBroadcast(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-filtered-gameplay-root-tags",
+      "name": "GetFilteredGameplayRootTags",
+      "category": "GameplayTagsManager",
+      "signature": "GetFilteredGameplayRootTags(Target, In Filter String, Out Tag Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "In Filter String",
+          "type": "String&"
+        },
+        {
+          "name": "Out Tag Array",
+          "type": "TArray<TSharedPtr<FGameplayTagNode>>&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Cached number of bits we need to replicate tags. That is, Log2(Number of Tags). Will always be <= 16."
+    },
+    {
+      "id": "get-categories-meta-from-property-handle",
+      "name": "GetCategoriesMetaFromPropertyHandle",
+      "category": "GameplayTagsManager",
+      "signature": "GetCategoriesMetaFromPropertyHandle(Target, Property Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Property Handle",
+          "type": "TSharedPtr<IPropertyHandle>"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns \"Categories\" meta property from given handle, used for filtering by tag widget"
+    },
+    {
+      "id": "static-get-categories-meta-from-property-handle",
+      "name": "StaticGetCategoriesMetaFromPropertyHandle",
+      "category": "GameplayTagsManager",
+      "signature": "StaticGetCategoriesMetaFromPropertyHandle(Property Handle)",
+      "params": [
+        {
+          "name": "Property Handle",
+          "type": "TSharedPtr<IPropertyHandle>"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Helper function, made to be called by custom OnGetCategoriesMetaFromPropertyHandle handlers"
+    },
+    {
+      "id": "get-categories-meta-from-function",
+      "name": "GetCategoriesMetaFromFunction",
+      "category": "GameplayTagsManager",
+      "signature": "GetCategoriesMetaFromFunction(Func, Param Name)",
+      "params": [
+        {
+          "name": "Func",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Param Name",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns \"GameplayTagFilter\" meta property from given function, used for filtering by tag widget for any parameters of the function that end up as BP pins"
+    },
+    {
+      "id": "get-all-tags-from-source",
+      "name": "GetAllTagsFromSource",
+      "category": "GameplayTagsManager",
+      "signature": "GetAllTagsFromSource(Target, Tag Source, Out Tag Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Source",
+          "type": "Name"
+        },
+        {
+          "name": "Out Tag Array",
+          "type": "TArray<TSharedPtr<FGameplayTagNode>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets a list of all gameplay tag nodes added by the specific source"
+    },
+    {
+      "id": "is-dictionary-tag",
+      "name": "IsDictionaryTag",
+      "category": "GameplayTagsManager",
+      "signature": "IsDictionaryTag(Target, Tag Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this tag was explicitly registered, this is false for implictly added parent tags"
+    },
+    {
+      "id": "get-tag-editor-data-c3dff8",
+      "name": "GetTagEditorData",
+      "category": "GameplayTagsManager",
+      "signature": "GetTagEditorData(Target, Tag Name, Out Comment, Out First Tag Source, Out Is Tag Explicit, Out Is Restricted Tag, Out Allow Non Restricted Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Comment",
+          "type": "String&"
+        },
+        {
+          "name": "Out First Tag Source",
+          "type": "Name&"
+        },
+        {
+          "name": "Out Is Tag Explicit",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Is Restricted Tag",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Allow Non Restricted Children",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns information about tag. If not found return false"
+    },
+    {
+      "id": "get-tag-editor-data-edee7d",
+      "name": "GetTagEditorData",
+      "category": "GameplayTagsManager",
+      "signature": "GetTagEditorData(Target, Tag Name, Out Comment, Out Tag Sources, Out Is Tag Explicit, Out Is Restricted Tag, Out Allow Non Restricted Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Comment",
+          "type": "String&"
+        },
+        {
+          "name": "Out Tag Sources",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Out Is Tag Explicit",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Is Restricted Tag",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Allow Non Restricted Children",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns information about tag. If not found return false"
+    },
+    {
+      "id": "editor-refresh-gameplay-tag-tree",
+      "name": "EditorRefreshGameplayTagTree",
+      "category": "GameplayTagsManager",
+      "signature": "EditorRefreshGameplayTagTree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This is called after EditorRefreshGameplayTagTree. Useful if you need to do anything editor related when tags are added or removed"
+    },
+    {
+      "id": "suspend-editor-refresh-gameplay-tag-tree",
+      "name": "SuspendEditorRefreshGameplayTagTree",
+      "category": "GameplayTagsManager",
+      "signature": "SuspendEditorRefreshGameplayTagTree(Target, Suspend Token)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Suspend Token",
+          "type": "FGuid"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Suspends EditorRefreshGameplayTagTree requests"
+    },
+    {
+      "id": "resume-editor-refresh-gameplay-tag-tree",
+      "name": "ResumeEditorRefreshGameplayTagTree",
+      "category": "GameplayTagsManager",
+      "signature": "ResumeEditorRefreshGameplayTagTree(Target, Suspend Token)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Suspend Token",
+          "type": "FGuid"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resumes EditorRefreshGameplayTagTree requests; triggers a refresh if a request was made while it was suspended"
+    },
+    {
+      "id": "request-gameplay-tag-children-in-dictionary",
+      "name": "RequestGameplayTagChildrenInDictionary",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTagChildrenInDictionary(Target, Gameplay Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Gets a Tag Container containing all of the tags in the hierarchy that are children of this tag, and were explicitly added to the dictionary"
+    },
+    {
+      "id": "request-gameplay-tag-direct-descendants-in-dictionary",
+      "name": "RequestGameplayTagDirectDescendantsInDictionary",
+      "category": "GameplayTagsManager",
+      "signature": "RequestGameplayTagDirectDescendantsInDictionary(Target, Gameplay Tag, Selection Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "FGameplayTag&"
+        },
+        {
+          "name": "Selection Type",
+          "type": "EGameplayTagSelectionType"
+        }
+      ],
+      "returnType": "FGameplayTagContainer",
+      "docs": "Gets a Tag Container containing all of the tags in the hierarchy that are children of this tag, were explicitly added to the dictionary, and do not have any explicitly added tags between them and the specified tag"
+    },
+    {
+      "id": "notify-gameplay-tag-double-clicked-editor",
+      "name": "NotifyGameplayTagDoubleClickedEditor",
+      "category": "GameplayTagsManager",
+      "signature": "NotifyGameplayTagDoubleClickedEditor(Target, Tag Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "InContext"
+    },
+    {
+      "id": "show-gameplay-tag-as-hyper-link-editor",
+      "name": "ShowGameplayTagAsHyperLinkEditor",
+      "category": "GameplayTagsManager",
+      "signature": "ShowGameplayTagAsHyperLinkEditor(Target, Tag Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-cook-dependency",
+      "name": "CreateCookDependency",
+      "category": "GameplayTagsManager",
+      "signature": "CreateCookDependency(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "UE::Cook::FCookDependency",
+      "docs": "Used for incremental cooking. Create an FCookDependency that reports tags that have been read from ini.\nPackages that pass this dependency to AddCookLoadDependency or AddCookSaveDependency in their OnCookEvent or\n(if Ar.IsCooking()) Serialize function will be invalidated and recooked by the incremental cook whenever those\ntags change."
+    },
+    {
+      "id": "print-replication-indices",
+      "name": "PrintReplicationIndices",
+      "category": "GameplayTagsManager",
+      "signature": "PrintReplicationIndices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "print-replication-frequency-report",
+      "name": "PrintReplicationFrequencyReport",
+      "category": "GameplayTagsManager",
+      "signature": "PrintReplicationFrequencyReport(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mechanism for tracking what tags are frequently replicated"
+    },
+    {
+      "id": "notify-tag-replicated",
+      "name": "NotifyTagReplicated",
+      "category": "GameplayTagsManager",
+      "signature": "NotifyTagReplicated(Target, Tag, Was In Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag",
+          "type": "FGameplayTag"
+        },
+        {
+          "name": "Was In Container",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize-manager",
+      "name": "InitializeManager",
+      "category": "GameplayTagsManager",
+      "signature": "InitializeManager()",
+      "params": [],
+      "returnType": "private : void",
+      "docs": "Initializes the manager"
+    },
+    {
+      "id": "on-done-adding-native-tags-delegate",
+      "name": "OnDoneAddingNativeTagsDelegate",
+      "category": "GameplayTagsManager",
+      "signature": "OnDoneAddingNativeTagsDelegate()",
+      "params": [],
+      "returnType": "FSimpleMulticastDelegate&",
+      "docs": "finished loading/adding native tags"
+    },
+    {
+      "id": "insert-tag-into-node-array",
+      "name": "InsertTagIntoNodeArray",
+      "category": "GameplayTagsManager",
+      "signature": "InsertTagIntoNodeArray(Target, Tag, Full Tag, Parent Node, Node Array, Source Name, Dev Comment, Is Explicit Tag, Is Restricted Tag, Allow Non Restricted Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag",
+          "type": "Name"
+        },
+        {
+          "name": "Full Tag",
+          "type": "Name"
+        },
+        {
+          "name": "Parent Node",
+          "type": "TSharedPtr<FGameplayTagNode>"
+        },
+        {
+          "name": "Node Array",
+          "type": "TArray<TSharedPtr<FGameplayTagNode>>&"
+        },
+        {
+          "name": "Source Name",
+          "type": "Name"
+        },
+        {
+          "name": "Dev Comment",
+          "type": "String&"
+        },
+        {
+          "name": "Is Explicit Tag",
+          "type": "Bool"
+        },
+        {
+          "name": "Is Restricted Tag",
+          "type": "Bool"
+        },
+        {
+          "name": "Allow Non Restricted Children",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Helper function to insert a tag into a tag node array\n@param Tag\t\t\t\t\t\t\tShort name of tag to insert\n@param FullTag\t\t\t\t\t\tFull tag, passed in for performance\n@param ParentNode\t\t\t\t\tParent node, if any, for the tag\n@param NodeArray\t\t\t\t\t\tNode array to insert the new node into, if necessary (if the tag already exists, no insertion will occur)\n@param SourceName\t\t\t\t\tFile tag was added from\n@param DevComment\t\t\t\t\tComment from developer about this tag\n@param bIsExplicitTag\t\t\t\tIs the tag explicitly defined or is it implied by the existence of a child tag\n@param bIsRestrictedTag\t\t\t\tIs the tag a restricted tag or a regular gameplay tag\n@param bAllowNonRestrictedChildren\tIf the tag is a restricted tag, can it have regular gameplay tag children or should all of its children be restricted tags as well?\n@return Index of the node of the tag"
+    },
+    {
+      "id": "populate-tree-from-data-table",
+      "name": "PopulateTreeFromDataTable",
+      "category": "GameplayTagsManager",
+      "signature": "PopulateTreeFromDataTable(Target, Table)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Table",
+          "type": "UDataTable*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to populate the tag tree from each table"
+    },
+    {
+      "id": "add-tag-table-row",
+      "name": "AddTagTableRow",
+      "category": "GameplayTagsManager",
+      "signature": "AddTagTableRow(Target, Tag Row, Source Name, Is Restricted Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Row",
+          "type": "FGameplayTagTableRow&"
+        },
+        {
+          "name": "Source Name",
+          "type": "Name"
+        },
+        {
+          "name": "Is Restricted Tag",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-children-tags",
+      "name": "AddChildrenTags",
+      "category": "GameplayTagsManager",
+      "signature": "AddChildrenTags(Target, Tag Container, Gameplay Tag Node, Recurse All, Only Include Dictionary Tags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Container",
+          "type": "FGameplayTagContainer&"
+        },
+        {
+          "name": "Gameplay Tag Node",
+          "type": "TSharedPtr<FGameplayTagNode>"
+        },
+        {
+          "name": "Recurse All",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Only Include Dictionary Tags",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-restricted-gameplay-tag-source",
+      "name": "AddRestrictedGameplayTagSource",
+      "category": "GameplayTagsManager",
+      "signature": "AddRestrictedGameplayTagSource(Target, File Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "File Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-tags-from-additional-loose-ini-files",
+      "name": "AddTagsFromAdditionalLooseIniFiles",
+      "category": "GameplayTagsManager",
+      "signature": "AddTagsFromAdditionalLooseIniFiles(Target, Ini File List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Ini File List",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-all-parent-node-names",
+      "name": "GetAllParentNodeNames",
+      "category": "GameplayTagsManager",
+      "signature": "GetAllParentNodeNames(Target, Names List, Gameplay Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Names List",
+          "type": "TSet<FName>&"
+        },
+        {
+          "name": "Gameplay Tag",
+          "type": "TSharedPtr<FGameplayTagNode>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function for GameplayTagsMatch to get all parents when doing a parent match,\nNOTE: Must never be made public as it uses the FNames which should never be exposed\n@param NameList\t\tThe list we are adding all parent complete names too\n@param GameplayTag\tThe current Tag we are adding to the list"
+    },
+    {
+      "id": "find-or-add-tag-source",
+      "name": "FindOrAddTagSource",
+      "category": "GameplayTagsManager",
+      "signature": "FindOrAddTagSource(Target, Tag Source Name, Source Type, Root Dir To Use)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Tag Source Name",
+          "type": "Name"
+        },
+        {
+          "name": "Source Type",
+          "type": "EGameplayTagSourceType"
+        },
+        {
+          "name": "Root Dir To Use",
+          "type": "String&",
+          "default": "FString()"
+        }
+      ],
+      "returnType": "FGameplayTagSource*",
+      "docs": "Returns the tag source for a given tag source name, or null if not found"
+    },
+    {
+      "id": "construct-net-index",
+      "name": "ConstructNetIndex",
+      "category": "GameplayTagsManager",
+      "signature": "ConstructNetIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Constructs the net indices for each tag"
+    },
+    {
+      "id": "mark-children-of-node-conflict",
+      "name": "MarkChildrenOfNodeConflict",
+      "category": "GameplayTagsManager",
+      "signature": "MarkChildrenOfNodeConflict(Target, Cur Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Cur Node",
+          "type": "TSharedPtr<FGameplayTagNode>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks all of the nodes that descend from CurNode as having an ancestor node that has a source conflict."
+    },
+    {
+      "id": "broadcast-on-gameplay-tag-tree-changed",
+      "name": "BroadcastOnGameplayTagTreeChanged",
+      "category": "GameplayTagsManager",
+      "signature": "BroadcastOnGameplayTagTreeChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called in both editor and game when the tag tree changes during startup or editing"
+    },
+    {
+      "id": "handle-gameplay-tag-tree-changed",
+      "name": "HandleGameplayTagTreeChanged",
+      "category": "GameplayTagsManager",
+      "signature": "HandleGameplayTagTreeChanged(Target, Recreate Tree)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameplayTagsManager*"
+        },
+        {
+          "name": "Recreate Tree",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call after modifying the tag tree nodes, this will either call the full editor refresh or a limited game refresh"
+    }
+  ]
+}

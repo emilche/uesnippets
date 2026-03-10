@@ -1,0 +1,562 @@
+{
+  "id": "interactive-tool",
+  "label": "InteractiveTool",
+  "includepath": "InteractiveTool.h",
+  "includes": [
+    "Array",
+    "Map",
+    "UnrealString",
+    "CoreMinimal",
+    "Delegate",
+    "Platform",
+    "InputBehaviorSet",
+    "InteractiveToolActionSet",
+    "Text",
+    "AssertionMacros",
+    "Optional",
+    "Shader",
+    "EnableIf",
+    "Function",
+    "Models",
+    "UniquePtr",
+    "UnrealTemplate",
+    "ToolContextInterfaces",
+    "Class",
+    "Object",
+    "ObjectMacros",
+    "ObjectPtr",
+    "Package",
+    "UObjectGlobals",
+    "InteractiveTool.generated"
+  ],
+  "functions": [
+    {
+      "id": "save-properties",
+      "name": "SaveProperties",
+      "category": "InteractiveTool",
+      "signature": "SaveProperties(Target, Save From Tool, Cache Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Save From Tool",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Cache Identifier",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Save and restore values of current Tool Properties between tool invocations. The standard usage of\nthis setup is to call PropertySet->RestoreProperties() in the UInteractiveTool::Setup() implementation,\nand PropertySet->SaveProperties() in the UInteractiveTool::Shutdown() implementation.\nThe default behaviour of these functions is to Save or Restore every property in the property set.  It is not\nnecessary to save/restore all possible Properties (in many cases this would not make sense), so individual\nproperties may be skipped by adding the \"TransientToolProperty\" tag to their metadata on a property by property basis.\nProperty sets which need more exotic behaviour upon Save and Restore may override these routines\nGetDynamicPropertyCache() can be used to return an instance of the specified property set subclass which\nmay be used as a place to save/restore these properties by customized Save/Restore functions\nNote: the current design of this system assumes that the CDO will keep the referenced objects alive.\nThis assumption is incorrect in Runtime builds, and some external mechanism must be used to keep\nthe elements in the CachedPropertiesMap alive."
+    },
+    {
+      "id": "restore-properties",
+      "name": "RestoreProperties",
+      "category": "InteractiveTool",
+      "signature": "RestoreProperties(Target, Restore To Tool, Cache Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Restore To Tool",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Cache Identifier",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Restore the values of the Property Set with the given CacheIdentifier.\nThe Tool parameter is currently ignored."
+    },
+    {
+      "id": "save-restore-properties",
+      "name": "SaveRestoreProperties",
+      "category": "InteractiveTool",
+      "signature": "SaveRestoreProperties(Target, Restore To Tool, Cache Identifier, Saving)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Restore To Tool",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Cache Identifier",
+          "type": "String&"
+        },
+        {
+          "name": "Saving",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "get-dynamic-property-cache",
+      "name": "GetDynamicPropertyCache",
+      "category": "InteractiveTool",
+      "signature": "GetDynamicPropertyCache(Target, Cache Identifier, Was Created Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Cache Identifier",
+          "type": "String&"
+        },
+        {
+          "name": "Was Created Out",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "TObjectPtr<UInteractiveToolPropertySet>",
+      "docs": "GetDynamicPropertyCache return class-internal objects that subclasses can use to save/restore properties.\n@param CacheIdentifier multiple versions of the UInteractiveToolPropertySet can be stored, CacheIdentifier indicates which one to use\n@param bWasCreatedOut true is returned here if this is the first time the object was seen\n@return instance of the current subclass that can be used to save/restore values"
+    },
+    {
+      "id": "post-edit-change-property",
+      "name": "PostEditChangeProperty",
+      "category": "InteractiveTool",
+      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Property Changed Event",
+          "type": "FPropertyChangedEvent&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Posts a message to the OnModified delegate with the modified FProperty\n@warning Please consider listening to OnModified instead of overriding this function\n@warning this function is currently only called in Editor (not at runtime)"
+    },
+    {
+      "id": "u-interactive-tool",
+      "name": "UInteractiveTool",
+      "category": "InteractiveTool",
+      "signature": "UInteractiveTool()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "setup",
+      "name": "Setup",
+      "category": "InteractiveTool",
+      "signature": "Setup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by ToolManager to initialize the Tool *after* ToolBuilder::BuildTool() has been called"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "InteractiveTool",
+      "signature": "Shutdown(Target, Shutdown Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Shutdown Type",
+          "type": "EToolShutdownType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by ToolManager to shut down the Tool\n@param ShutdownType indicates how the tool should shutdown (ie Accept or Cancel current preview, etc)"
+    },
+    {
+      "id": "render",
+      "name": "Render",
+      "category": "InteractiveTool",
+      "signature": "Render(Target, Render API)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Render API",
+          "type": "IToolsContextRenderAPI*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allow the Tool to do any custom drawing (ie via PDI/RHI)\n@param RenderAPI Abstraction that provides access to Rendering in the current ToolsContext"
+    },
+    {
+      "id": "draw-hud",
+      "name": "DrawHUD",
+      "category": "InteractiveTool",
+      "signature": "DrawHUD(Target, Canvas, Render API)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Canvas",
+          "type": "FCanvas*"
+        },
+        {
+          "name": "Render API",
+          "type": "IToolsContextRenderAPI*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allow the Tool to do any custom screen space drawing\n@param Canvas the FCanvas to use to do the drawing\n@param RenderAPI Abstraction that provides access to Rendering in the current ToolsContext"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "InteractiveTool",
+      "signature": "Tick(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Non overrideable func which does processing and calls the tool's OnTick\n@param DeltaTime the time delta since last tick"
+    },
+    {
+      "id": "get-tool-manager",
+      "name": "GetToolManager",
+      "category": "InteractiveTool",
+      "signature": "GetToolManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "UInteractiveToolManager*",
+      "docs": "@return ToolManager that owns this Tool"
+    },
+    {
+      "id": "has-cancel",
+      "name": "HasCancel",
+      "category": "InteractiveTool",
+      "signature": "HasCancel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this Tool support being Cancelled, ie calling Shutdown(EToolShutdownType::Cancel)"
+    },
+    {
+      "id": "has-accept",
+      "name": "HasAccept",
+      "category": "InteractiveTool",
+      "signature": "HasAccept(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this Tool support being Accepted, ie calling Shutdown(EToolShutdownType::Accept)"
+    },
+    {
+      "id": "can-accept",
+      "name": "CanAccept",
+      "category": "InteractiveTool",
+      "signature": "CanAccept(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this Tool is currently in a state where it can be Accepted. This may be false if for example there was an error in the Tool."
+    },
+    {
+      "id": "add-input-behavior",
+      "name": "AddInputBehavior",
+      "category": "InteractiveTool",
+      "signature": "AddInputBehavior(Target, Behavior, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Behavior",
+          "type": "UInputBehavior*"
+        },
+        {
+          "name": "Source",
+          "type": "void*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add an input behavior for this Tool. Typically only effective when called during tool Setup(), as\nthe behavior set gets submitted to the input router after that call.\n@param Behavior behavior to add\n@param Source Optional pointer that could be used to identify the behavior for removal later."
+    },
+    {
+      "id": "remove-input-behaviors-by-source",
+      "name": "RemoveInputBehaviorsBySource",
+      "category": "InteractiveTool",
+      "signature": "RemoveInputBehaviorsBySource(Target, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Source",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove all input behaviors that had the given source pointer set during their addition.\nTypically only effective when called during tool Setup(), as the behavior set gets submitted\nto the input router after that call.\n@param Source Identifying pointer"
+    },
+    {
+      "id": "get-input-behaviors",
+      "name": "GetInputBehaviors",
+      "category": "InteractiveTool",
+      "signature": "GetInputBehaviors(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "UInputBehaviorSet*",
+      "docs": "@return Current input behavior set."
+    },
+    {
+      "id": "get-tool-properties",
+      "name": "GetToolProperties",
+      "category": "InteractiveTool",
+      "signature": "GetToolProperties(Target, Enabled Only)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Enabled Only",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "TArray<UObject*>",
+      "docs": "@return list of property UObjects for this tool (ie to add to a DetailsViewPanel, for example)"
+    },
+    {
+      "id": "add-tool-property-source-a7dbf9",
+      "name": "AddToolPropertySource",
+      "category": "InteractiveTool",
+      "signature": "AddToolPropertySource(Target, Property Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Property Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add a Property object for this Tool\n@param Property object to add"
+    },
+    {
+      "id": "add-tool-property-source-fc2f59",
+      "name": "AddToolPropertySource",
+      "category": "InteractiveTool",
+      "signature": "AddToolPropertySource(Target, Property Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Property Set",
+          "type": "UInteractiveToolPropertySet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add a PropertySet object for this Tool\n@param PropertySet Property Set object to add"
+    },
+    {
+      "id": "remove-tool-property-source",
+      "name": "RemoveToolPropertySource",
+      "category": "InteractiveTool",
+      "signature": "RemoveToolPropertySource(Target, Property Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Property Set",
+          "type": "UInteractiveToolPropertySet*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove a PropertySet object from this Tool. If found, will broadcast OnPropertySetsModified\n@param PropertySet property set to remove.\n@return true if PropertySet is found and removed"
+    },
+    {
+      "id": "replace-tool-property-source",
+      "name": "ReplaceToolPropertySource",
+      "category": "InteractiveTool",
+      "signature": "ReplaceToolPropertySource(Target, Cur Property Set, Replace With, Set To Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Cur Property Set",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Replace With",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Set To Enabled",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Replace a PropertySet object on this Tool with another property set. If replaced, will broadcast OnPropertySetsModified\n@param CurPropertySet property set to remove\n@param ReplaceWith property set to add\n@param bSetToEnabled if true, ReplaceWith property set is explicitly enabled (otherwise enable/disable state is unmodified)\n@return true if CurPropertySet is found and replaced"
+    },
+    {
+      "id": "set-tool-property-source-enabled",
+      "name": "SetToolPropertySourceEnabled",
+      "category": "InteractiveTool",
+      "signature": "SetToolPropertySourceEnabled(Target, Property Set, Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Property Set",
+          "type": "UInteractiveToolPropertySet*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Enable/Disable a PropertySet object for this Tool. If found and state was modified, will broadcast OnPropertySetsModified\n@param PropertySet Property Set object to modify\n@param bEnabled whether to enable or disable\n@return true if PropertySet was found"
+    },
+    {
+      "id": "notify-of-property-change-by-tool",
+      "name": "NotifyOfPropertyChangeByTool",
+      "category": "InteractiveTool",
+      "signature": "NotifyOfPropertyChangeByTool(Target, Property Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Property Set",
+          "type": "UInteractiveToolPropertySet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call after changing a propertyset internally in the tool to allow external views of the property\nset to update properly. This is meant as an outward notification mechanism, not a way to to\npass along notifications, so don't call this if the property is changed externally (i.e., this\nshould not usually be called from OnPropertyModified unless the tool adds changes of its own)."
+    },
+    {
+      "id": "update-accept-warnings",
+      "name": "UpdateAcceptWarnings",
+      "category": "InteractiveTool",
+      "signature": "UpdateAcceptWarnings(Target, Warning)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Warning",
+          "type": "EAcceptWarning"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to update a standard warning when we need to explain why \"Accept\" is disabled\nNote that calling this base implementation will clear any unrelated warnings.\nNote that this function is not automatically called by the base class.\n@param Warning Reason that tool cannot be accepted (or EAcceptWarning::NoWarning if no warning need be displayed)"
+    },
+    {
+      "id": "get-action-set",
+      "name": "GetActionSet",
+      "category": "InteractiveTool",
+      "signature": "GetActionSet(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        }
+      ],
+      "returnType": "public : FInteractiveToolActionSet*",
+      "docs": "Get the internal Action Set for this Tool. The action set is created and registered on-demand.\n@return pointer to initialized Action set"
+    },
+    {
+      "id": "execute-action",
+      "name": "ExecuteAction",
+      "category": "InteractiveTool",
+      "signature": "ExecuteAction(Target, Action ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Action ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request that the Action identified by ActionID be executed.\nDefault implementation forwards these requests to internal ToolActionSet."
+    },
+    {
+      "id": "register-actions",
+      "name": "RegisterActions",
+      "category": "InteractiveTool",
+      "signature": "RegisterActions(Target, Action Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Action Set",
+          "type": "FInteractiveToolActionSet&"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Override this function to register the set of Actions this Tool supports, using FInteractiveToolActionSet::RegisterAction.\nNote that for the actions to be triggered, you will also need to add corresponding registration per tool\n-- see Engine\\Plugins\\Editor\\ModelingToolsEditorMode\\Source\\ModelingToolsEditorMode\\Public\\ModelingToolsActions.h for examples"
+    }
+  ]
+}

@@ -1,0 +1,2047 @@
+{
+  "id": "p-impl-recast-nav-mesh",
+  "label": "PImplRecastNavMesh",
+  "includepath": "NavMesh/PImplRecastNavMesh.h",
+  "includes": [
+    "CoreMinimal",
+    "WeakObjectPtr",
+    "NavigationQueryFilter",
+    "NavigationTypes",
+    "RecastNavMesh",
+    "RecastQueryFilter",
+    "NavigationSystemBase",
+    "VisualLogger",
+    "RecastInternalDebugData",
+    "DetourNavMesh",
+    "DetourNavMeshQuery"
+  ],
+  "functions": [
+    {
+      "id": "fp-impl-recast-nav-mesh-4b2fe2",
+      "name": "FPImplRecastNavMesh",
+      "category": "PImplRecastNavMesh",
+      "signature": "FPImplRecastNavMesh(Owner)",
+      "params": [
+        {
+          "name": "Owner",
+          "type": "ARecastNavMesh*"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Engine Private! - Private Implementation details of ARecastNavMesh"
+    },
+    {
+      "id": "fp-impl-recast-nav-mesh-c3a683",
+      "name": "FPImplRecastNavMesh",
+      "category": "PImplRecastNavMesh",
+      "signature": "FPImplRecastNavMesh()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Dtor"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "PImplRecastNavMesh",
+      "signature": "Serialize(Target, Ar, Nav Mesh Version)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Nav Mesh Version",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serialization.\n@param Ar - The archive with which to serialize.\n@returns true if serialization was successful."
+    },
+    {
+      "id": "get-debug-geometry-for-tile-8d4435",
+      "name": "GetDebugGeometryForTile",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetDebugGeometryForTile(Target, Out Geometry, Tile Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Out Geometry",
+          "type": "FRecastDebugGeometry&"
+        },
+        {
+          "name": "Tile Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gather debug geometry.\n@params OutGeometry Output geometry.\n@params TileIndex Used to collect geometry for a specific tile, INDEX_NONE will gather all tiles.\n@return True if done collecting."
+    },
+    {
+      "id": "get-debug-geometry-for-tile-08db90",
+      "name": "GetDebugGeometryForTile",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetDebugGeometryForTile(Target, Out Geometry, Tile Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Out Geometry",
+          "type": "FRecastDebugGeometry&"
+        },
+        {
+          "name": "Tile Ref",
+          "type": "FNavTileRef"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gather debug geometry.\n@params OutGeometry Output geometry.\n@params TileRef Used to collect geometry for a specific tile, an invalid FNavTileRef will gather all tiles.\n@return True if done collecting."
+    },
+    {
+      "id": "get-nav-mesh-bounds",
+      "name": "GetNavMeshBounds",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        }
+      ],
+      "returnType": "FBox",
+      "docs": "Returns bounding box for the whole navmesh."
+    },
+    {
+      "id": "get-nav-mesh-tile-bounds",
+      "name": "GetNavMeshTileBounds",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshTileBounds(Target, Tile Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FBox",
+      "docs": "Returns bounding box for a given navmesh tile."
+    },
+    {
+      "id": "get-nav-mesh-tile-xy-fbd076",
+      "name": "GetNavMeshTileXY",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshTileXY(Target, Tile Index, Out X, Out Y, Out Layer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile Index",
+          "type": "Int"
+        },
+        {
+          "name": "Out X",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Y",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Layer",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves XY and layer coordinates of tile specified by index"
+    },
+    {
+      "id": "get-nav-mesh-tile-xy-26e7a2",
+      "name": "GetNavMeshTileXY",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshTileXY(Target, Point, Out X, Out Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector&"
+        },
+        {
+          "name": "Out X",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Y",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves XY coordinates of tile specified by position"
+    },
+    {
+      "id": "get-nav-mesh-tiles-at",
+      "name": "GetNavMeshTilesAt",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshTilesAt(Target, Tile X, Tile Y, Indices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves all tile indices at matching XY coordinates"
+    },
+    {
+      "id": "get-nav-mesh-tiles-in-290b70",
+      "name": "GetNavMeshTilesIn",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshTilesIn(Target, Inclusion Bounds, Indices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Inclusion Bounds",
+          "type": "TArray<FBox>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves list of tiles that intersect specified bounds"
+    },
+    {
+      "id": "get-nav-mesh-tiles-in-dadde2",
+      "name": "GetNavMeshTilesIn",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavMeshTilesIn(Target, Inclusion Bounds, Out Refs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Inclusion Bounds",
+          "type": "TArray<FBox>&"
+        },
+        {
+          "name": "Out Refs",
+          "type": "TArray<FNavTileRef>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves list of tiles that intersect specified bounds"
+    },
+    {
+      "id": "find-path",
+      "name": "FindPath",
+      "category": "PImplRecastNavMesh",
+      "signature": "FindPath(Target, Start Loc, End Loc, Cost Limit, Require Navigable End Location, Path, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Cost Limit",
+          "type": "FVector::FReal"
+        },
+        {
+          "name": "Require Navigable End Location",
+          "type": "Bool"
+        },
+        {
+          "name": "Path",
+          "type": "FNavMeshPath&"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "ENavigationQueryResult::Type",
+      "docs": "Supported queries"
+    },
+    {
+      "id": "test-path",
+      "name": "TestPath",
+      "category": "PImplRecastNavMesh",
+      "signature": "TestPath(Target, Start Loc, End Loc, Require Navigable End Location, Filter, Owner, Num Visited Nodes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Require Navigable End Location",
+          "type": "Bool"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Num Visited Nodes",
+          "type": "Int*",
+          "default": "0"
+        }
+      ],
+      "returnType": "ENavigationQueryResult::Type",
+      "docs": "Check if path exists"
+    },
+    {
+      "id": "raycast",
+      "name": "Raycast",
+      "category": "PImplRecastNavMesh",
+      "signature": "Raycast(Target, Start Loc, End Loc, In Query Filter, Owner, Raycast Result, Start Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "In Query Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Raycast Result",
+          "type": "ARecastNavMesh::FRaycastResult&"
+        },
+        {
+          "name": "Start Node",
+          "type": "NavNodeRef",
+          "default": "INVALID_NAVNODEREF"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Checks if the whole segment is in navmesh"
+    },
+    {
+      "id": "debug-pathfinding",
+      "name": "DebugPathfinding",
+      "category": "PImplRecastNavMesh",
+      "signature": "DebugPathfinding(Target, Start Loc, End Loc, Cost Limit, Require Navigable End Location, Filter, Owner, Steps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Cost Limit",
+          "type": "FVector::FReal"
+        },
+        {
+          "name": "Require Navigable End Location",
+          "type": "Bool"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Steps",
+          "type": "TArray<FRecastDebugPathfindingData>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Generates path from given query and collect data for every step of A* algorithm"
+    },
+    {
+      "id": "get-random-point",
+      "name": "GetRandomPoint",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetRandomPoint(Target, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "FNavLocation",
+      "docs": "Returns a random location on the navmesh."
+    },
+    {
+      "id": "test-cluster-path",
+      "name": "TestClusterPath",
+      "category": "PImplRecastNavMesh",
+      "signature": "TestClusterPath(Target, Start Loc, End Loc, Num Visited Nodes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Num Visited Nodes",
+          "type": "Int*",
+          "default": "0"
+        }
+      ],
+      "returnType": "ENavigationQueryResult::Type",
+      "docs": "Check if path exists using cluster graph"
+    },
+    {
+      "id": "get-random-point-in-cluster",
+      "name": "GetRandomPointInCluster",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetRandomPointInCluster(Target, Cluster Ref, Out Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Cluster Ref",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Out Location",
+          "type": "FNavLocation&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns a random location on the navmesh within cluster"
+    },
+    {
+      "id": "find-move-along-surface",
+      "name": "FindMoveAlongSurface",
+      "category": "PImplRecastNavMesh",
+      "signature": "FindMoveAlongSurface(Target, Start Location, Target Position, Out Location, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Location",
+          "type": "FNavLocation&"
+        },
+        {
+          "name": "Target Position",
+          "type": "FVector&"
+        },
+        {
+          "name": "Out Location",
+          "type": "FNavLocation&"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Tries to move current nav location towards target constrained to navigable area. Faster than ProjectPointToNavmesh.\n@param OutLocation if successful this variable will be filed with result\n@return true if successful, false otherwise"
+    },
+    {
+      "id": "project-point-to-nav-mesh",
+      "name": "ProjectPointToNavMesh",
+      "category": "PImplRecastNavMesh",
+      "signature": "ProjectPointToNavMesh(Target, Point, Result, Extent, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector&"
+        },
+        {
+          "name": "Result",
+          "type": "FNavLocation&"
+        },
+        {
+          "name": "Extent",
+          "type": "FVector&"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "project-point-multi",
+      "name": "ProjectPointMulti",
+      "category": "PImplRecastNavMesh",
+      "signature": "ProjectPointMulti(Target, Point, Out Locations, Extent, Min Z, Max Z, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector&"
+        },
+        {
+          "name": "Out Locations",
+          "type": "TArray<FNavLocation>&"
+        },
+        {
+          "name": "Extent",
+          "type": "FVector&"
+        },
+        {
+          "name": "Min Z",
+          "type": "FVector::FReal"
+        },
+        {
+          "name": "Max Z",
+          "type": "FVector::FReal"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Project single point and grab all vertical intersections"
+    },
+    {
+      "id": "find-nearest-poly",
+      "name": "FindNearestPoly",
+      "category": "PImplRecastNavMesh",
+      "signature": "FindNearestPoly(Target, Loc, Extent, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Extent",
+          "type": "FVector&"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "NavNodeRef",
+      "docs": "Returns nearest navmesh polygon to Loc, or INVALID_NAVNODEREF if Loc is not on the navmesh."
+    },
+    {
+      "id": "find-polys-around-circle",
+      "name": "FindPolysAroundCircle",
+      "category": "PImplRecastNavMesh",
+      "signature": "FindPolysAroundCircle(Target, Center Pos, Center Node Ref, Radius, Filter, Owner, Out Polys, Out Polys Parent, Out Polys Cost, Out Polys Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Center Pos",
+          "type": "FVector&"
+        },
+        {
+          "name": "Center Node Ref",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Radius",
+          "type": "FVector::FReal"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Out Polys",
+          "type": "TArray<NavNodeRef>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Out Polys Parent",
+          "type": "TArray<NavNodeRef>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Out Polys Cost",
+          "type": "TArray<float>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Out Polys Count",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Finds the polygons along the navigation graph that touch the specified circle. Return true if found any."
+    },
+    {
+      "id": "get-polys-within-pathing-distance",
+      "name": "GetPolysWithinPathingDistance",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolysWithinPathingDistance(Target, Start Loc, Pathing Distance, Filter, Owner, Found Polys, Debug Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Pathing Distance",
+          "type": "FVector::FReal"
+        },
+        {
+          "name": "Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Found Polys",
+          "type": "TArray<NavNodeRef>&"
+        },
+        {
+          "name": "Debug Data",
+          "type": "FRecastDebugPathfindingData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves all polys within given pathing distance from StartLocation.\n@NOTE query is not using string-pulled path distance (for performance reasons),\nit measured distance between middles of portal edges, do you might want to\nadd an extra margin to PathingDistance"
+    },
+    {
+      "id": "get-edges-for-path-corridor",
+      "name": "GetEdgesForPathCorridor",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetEdgesForPathCorridor(Target, Path Corridor, Path Corridor Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Path Corridor",
+          "type": "TArray<NavNodeRef>*"
+        },
+        {
+          "name": "Path Corridor Edges",
+          "type": "TArray<FNavigationPortalEdge>*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-straight-path",
+      "name": "FindStraightPath",
+      "category": "PImplRecastNavMesh",
+      "signature": "FindStraightPath(Target, Start Loc, End Loc, Path Corridor, Path Points, Custom Links)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Path Corridor",
+          "type": "TArray<NavNodeRef>&"
+        },
+        {
+          "name": "Path Points",
+          "type": "TArray<FNavPathPoint>&"
+        },
+        {
+          "name": "Custom Links",
+          "type": "TArray<FNavLinkId>*",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "finds stringpulled path from given corridor"
+    },
+    {
+      "id": "filter-polys",
+      "name": "FilterPolys",
+      "category": "PImplRecastNavMesh",
+      "signature": "FilterPolys(Target, Poly Refs, Filter, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly Refs",
+          "type": "TArray<NavNodeRef>&"
+        },
+        {
+          "name": "Filter",
+          "type": "FRecastQueryFilter*"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Filters nav polys in PolyRefs with Filter"
+    },
+    {
+      "id": "get-polys-in-tile",
+      "name": "GetPolysInTile",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolysInTile(Target, Tile Index, Polys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile Index",
+          "type": "Int"
+        },
+        {
+          "name": "Polys",
+          "type": "TArray<FNavPoly>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get all polys from tile"
+    },
+    {
+      "id": "update-navigation-link-area",
+      "name": "UpdateNavigationLinkArea",
+      "category": "PImplRecastNavMesh",
+      "signature": "UpdateNavigationLinkArea(Target, User Id, Area Type, Poly Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "User Id",
+          "type": "FNavLinkId"
+        },
+        {
+          "name": "Area Type",
+          "type": "Byte"
+        },
+        {
+          "name": "Poly Flags",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates area on polygons creating point-to-point connection with given UserId"
+    },
+    {
+      "id": "update-segment-link-area",
+      "name": "UpdateSegmentLinkArea",
+      "category": "PImplRecastNavMesh",
+      "signature": "UpdateSegmentLinkArea(Target, User Id, Area Type, Poly Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "User Id",
+          "type": "Int"
+        },
+        {
+          "name": "Area Type",
+          "type": "Byte"
+        },
+        {
+          "name": "Poly Flags",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates area on polygons creating segment-to-segment connection with given UserId"
+    },
+    {
+      "id": "process-segment-links-for-tile-2a3cb7",
+      "name": "ProcessSegmentLinksForTile",
+      "category": "PImplRecastNavMesh",
+      "signature": "ProcessSegmentLinksForTile(Target, Tile Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile Ref",
+          "type": "FNavTileRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates segment link connections for the give tile"
+    },
+    {
+      "id": "process-segment-links-for-tile-5e8fdf",
+      "name": "ProcessSegmentLinksForTile",
+      "category": "PImplRecastNavMesh",
+      "signature": "ProcessSegmentLinksForTile(Target, Tile Ref, Max Skipped Neigbor Tiles, Out Skipped Neigbor Tiles, Out Num Skipped Neigbor Tiles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile Ref",
+          "type": "FNavTileRef"
+        },
+        {
+          "name": "Max Skipped Neigbor Tiles",
+          "type": "UInt"
+        },
+        {
+          "name": "Out Skipped Neigbor Tiles",
+          "type": "dtTileRef*"
+        },
+        {
+          "name": "Out Num Skipped Neigbor Tiles",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates segment link connections for the give tile and stores the list of indices skipped to avoid generating duplicate links"
+    },
+    {
+      "id": "get-poly-center",
+      "name": "GetPolyCenter",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyCenter(Target, Poly ID, Out Center)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Out Center",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves center of the specified polygon. Returns false on error."
+    },
+    {
+      "id": "get-poly-verts",
+      "name": "GetPolyVerts",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyVerts(Target, Poly ID, Out Verts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Out Verts",
+          "type": "TArray<FVector>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves the vertices for the specified polygon. Returns false on error."
+    },
+    {
+      "id": "get-random-point-in-poly",
+      "name": "GetRandomPointInPoly",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetRandomPointInPoly(Target, Poly ID, Out Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Out Point",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves a random point inside the specified polygon. Returns false on error."
+    },
+    {
+      "id": "get-poly-surface-area",
+      "name": "GetPolySurfaceArea",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolySurfaceArea(Target, Poly ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        }
+      ],
+      "returnType": "FVector::FReal",
+      "docs": "Retrieves the surface area of the specified polygon. Returns 0 on error."
+    },
+    {
+      "id": "get-poly-data",
+      "name": "GetPolyData",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyData(Target, Poly ID, Flags, Area Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Flags",
+          "type": "UInt16&"
+        },
+        {
+          "name": "Area Type",
+          "type": "Byte&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves the flags for the specified polygon. Returns false on error."
+    },
+    {
+      "id": "get-poly-area-id",
+      "name": "GetPolyAreaID",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyAreaID(Target, Poly ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Retrieves area ID for the specified polygon."
+    },
+    {
+      "id": "set-poly-area-id",
+      "name": "SetPolyAreaID",
+      "category": "PImplRecastNavMesh",
+      "signature": "SetPolyAreaID(Target, Poly ID, Area ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Area ID",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets area ID for the specified polygon."
+    },
+    {
+      "id": "get-poly-neighbors",
+      "name": "GetPolyNeighbors",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyNeighbors(Target, Poly ID, Neighbors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Neighbors",
+          "type": "TArray<FNavigationPortalEdge>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Finds all polys connected with specified one"
+    },
+    {
+      "id": "get-poly-edges",
+      "name": "GetPolyEdges",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyEdges(Target, Poly ID, Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Edges",
+          "type": "TArray<FNavigationPortalEdge>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Finds all polys connected with specified one"
+    },
+    {
+      "id": "get-poly-wall-segments",
+      "name": "GetPolyWallSegments",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyWallSegments(Target, Poly ID, In Query Filter, Query Owner, Out Neighbors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "In Query Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Query Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Out Neighbors",
+          "type": "TArray<FNavigationPortalEdge>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Finds all wall segments for the specified polygon (walls or area borders)"
+    },
+    {
+      "id": "get-closest-point-on-poly",
+      "name": "GetClosestPointOnPoly",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetClosestPointOnPoly(Target, Poly ID, Test Pt, Point On Poly)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Test Pt",
+          "type": "FVector&"
+        },
+        {
+          "name": "Point On Poly",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Finds closest point constrained to given poly"
+    },
+    {
+      "id": "get-poly-tile-index",
+      "name": "GetPolyTileIndex",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyTileIndex(Target, Poly ID, Poly Index, Tile Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Poly Index",
+          "type": "UInt&"
+        },
+        {
+          "name": "Tile Index",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Decode poly ID into tile index and poly index"
+    },
+    {
+      "id": "get-poly-tile-ref",
+      "name": "GetPolyTileRef",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetPolyTileRef(Target, Poly Id, Out Poly Index, Out Tile Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly Id",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Out Poly Index",
+          "type": "UInt&"
+        },
+        {
+          "name": "Out Tile Ref",
+          "type": "FNavTileRef&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Decode poly ID into FNavTileRef and poly index"
+    },
+    {
+      "id": "get-nav-link-user-id",
+      "name": "GetNavLinkUserId",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetNavLinkUserId(Target, Link Poly ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Link Poly ID",
+          "type": "NavNodeRef"
+        }
+      ],
+      "returnType": "FNavLinkId"
+    },
+    {
+      "id": "get-link-end-points",
+      "name": "GetLinkEndPoints",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetLinkEndPoints(Target, Link Poly ID, Point A, Point B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Link Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Point A",
+          "type": "FVector&"
+        },
+        {
+          "name": "Point B",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves start and end point of offmesh link"
+    },
+    {
+      "id": "is-custom-link",
+      "name": "IsCustomLink",
+      "category": "PImplRecastNavMesh",
+      "signature": "IsCustomLink(Target, Poly Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly Ref",
+          "type": "NavNodeRef"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if poly is a custom link"
+    },
+    {
+      "id": "get-cluster-bounds",
+      "name": "GetClusterBounds",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetClusterBounds(Target, Cluster Ref, Out Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Cluster Ref",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Out Bounds",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves bounds of cluster. Returns false on error."
+    },
+    {
+      "id": "get-cluster-ref-from-poly-ref",
+      "name": "GetClusterRefFromPolyRef",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetClusterRefFromPolyRef(Target, Poly Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly Ref",
+          "type": "NavNodeRef"
+        }
+      ],
+      "returnType": "NavNodeRef"
+    },
+    {
+      "id": "get-filter-forbidden-flags",
+      "name": "GetFilterForbiddenFlags",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetFilterForbiddenFlags(Filter)",
+      "params": [
+        {
+          "name": "Filter",
+          "type": "FRecastQueryFilter*"
+        }
+      ],
+      "returnType": "UInt16"
+    },
+    {
+      "id": "set-filter-forbidden-flags",
+      "name": "SetFilterForbiddenFlags",
+      "category": "PImplRecastNavMesh",
+      "signature": "SetFilterForbiddenFlags(Filter, Forbidden Flags)",
+      "params": [
+        {
+          "name": "Filter",
+          "type": "FRecastQueryFilter*"
+        },
+        {
+          "name": "Forbidden Flags",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-area-cost-changed",
+      "name": "OnAreaCostChanged",
+      "category": "PImplRecastNavMesh",
+      "signature": "OnAreaCostChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release-detour-nav-mesh",
+      "name": "ReleaseDetourNavMesh",
+      "category": "PImplRecastNavMesh",
+      "signature": "ReleaseDetourNavMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-tile-cache-layers",
+      "name": "RemoveTileCacheLayers",
+      "category": "PImplRecastNavMesh",
+      "signature": "RemoveTileCacheLayers(Target, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-tile-cache-layer",
+      "name": "RemoveTileCacheLayer",
+      "category": "PImplRecastNavMesh",
+      "signature": "RemoveTileCacheLayer(Target, Tile X, Tile Y, Layer Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        },
+        {
+          "name": "Layer Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-tile-cache-layers",
+      "name": "AddTileCacheLayers",
+      "category": "PImplRecastNavMesh",
+      "signature": "AddTileCacheLayers(Target, Tile X, Tile Y, Layers)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        },
+        {
+          "name": "Layers",
+          "type": "TArray<FNavMeshTileData>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-tile-cache-layer",
+      "name": "AddTileCacheLayer",
+      "category": "PImplRecastNavMesh",
+      "signature": "AddTileCacheLayer(Target, Tile X, Tile Y, Layer Idx, Layer Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        },
+        {
+          "name": "Layer Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Layer Data",
+          "type": "FNavMeshTileData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-empty-tile-cache-layers",
+      "name": "MarkEmptyTileCacheLayers",
+      "category": "PImplRecastNavMesh",
+      "signature": "MarkEmptyTileCacheLayers(Target, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-tile-cache-layer",
+      "name": "GetTileCacheLayer",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetTileCacheLayer(Target, Tile X, Tile Y, Layer Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        },
+        {
+          "name": "Layer Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FNavMeshTileData"
+    },
+    {
+      "id": "get-tile-cache-layers",
+      "name": "GetTileCacheLayers",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetTileCacheLayers(Target, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FNavMeshTileData>"
+    },
+    {
+      "id": "has-tile-cache-layers",
+      "name": "HasTileCacheLayers",
+      "category": "PImplRecastNavMesh",
+      "signature": "HasTileCacheLayers(Target, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-recast-mesh",
+      "name": "SetRecastMesh",
+      "category": "PImplRecastNavMesh",
+      "signature": "SetRecastMesh(Target, Nav Mesh)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Nav Mesh",
+          "type": "dtNavMesh*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assigns recast generated navmesh to this instance.\n@param bOwnData if true from now on this FPImplRecastNavMesh instance will be responsible for this piece\nof memory"
+    },
+    {
+      "id": "get-total-data-size",
+      "name": "GetTotalDataSize",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetTotalDataSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        }
+      ],
+      "returnType": "SIZE_T"
+    },
+    {
+      "id": "get-compressed-tile-cache-size",
+      "name": "GetCompressedTileCacheSize",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetCompressedTileCacheSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the size of the compressed tile cache, this is slow"
+    },
+    {
+      "id": "apply-world-offset",
+      "name": "ApplyWorldOffset",
+      "category": "PImplRecastNavMesh",
+      "signature": "ApplyWorldOffset(Target, In Offset, World Shift)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "In Offset",
+          "type": "FVector&"
+        },
+        {
+          "name": "World Shift",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on world origin changes"
+    },
+    {
+      "id": "calc-segment-cost-on-poly",
+      "name": "CalcSegmentCostOnPoly",
+      "category": "PImplRecastNavMesh",
+      "signature": "CalcSegmentCostOnPoly(Target, Poly ID, Filter, Start Loc, End Loc)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Filter",
+          "type": "dtQueryFilter*"
+        },
+        {
+          "name": "Start Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Loc",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "FVector::FReal",
+      "docs": "calculated cost of given segment if traversed on specified poly. Function measures distance between specified points\nand returns cost of traversing this distance on given poly.\n@note no check if segment is on poly is performed."
+    },
+    {
+      "id": "serialize-recast-mesh-tile",
+      "name": "SerializeRecastMeshTile",
+      "category": "PImplRecastNavMesh",
+      "signature": "SerializeRecastMeshTile(Ar, Nav Mesh Version, Tile Data, Tile Data Size)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Nav Mesh Version",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Data",
+          "type": "unsigned char*&"
+        },
+        {
+          "name": "Tile Data Size",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recast's runtime navmesh data that we can query against"
+    },
+    {
+      "id": "serialize-compressed-tile-cache-data",
+      "name": "SerializeCompressedTileCacheData",
+      "category": "PImplRecastNavMesh",
+      "signature": "SerializeCompressedTileCacheData(Ar, Nav Mesh Version, Compressed Data, Compressed Data Size)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Nav Mesh Version",
+          "type": "Int"
+        },
+        {
+          "name": "Compressed Data",
+          "type": "unsigned char*&"
+        },
+        {
+          "name": "Compressed Data Size",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to serialize a Recast tile compressed data."
+    },
+    {
+      "id": "init-pathfinding",
+      "name": "InitPathfinding",
+      "category": "PImplRecastNavMesh",
+      "signature": "InitPathfinding(Target, Unreal Start, Unreal End, Query, Filter, Recast Start, Start Poly, Recast End, End Poly, Out Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Unreal Start",
+          "type": "FVector&"
+        },
+        {
+          "name": "Unreal End",
+          "type": "FVector&"
+        },
+        {
+          "name": "Query",
+          "type": "dtNavMeshQuery&"
+        },
+        {
+          "name": "Filter",
+          "type": "dtQueryFilter*"
+        },
+        {
+          "name": "Recast Start",
+          "type": "FVector&"
+        },
+        {
+          "name": "Start Poly",
+          "type": "dtPolyRef&"
+        },
+        {
+          "name": "Recast End",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Poly",
+          "type": "dtPolyRef&"
+        },
+        {
+          "name": "Out Path",
+          "type": "FNavMeshPath*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initialize data for pathfinding\n@param UnrealStart Start location for the desired path\n@param UnrealEnd End location for the desired path\n@param Query Query to use to project start and end position to the navmesh\n@param Filter Filters which polygons are acceptable to project start and end locations\n@param RecastStart Outputs the start location snapped to the navmesh\n@param StartPoly Outputs the navmesh poly at the start location\n@param RecastEnd Outputs the end location snapped to the navmesh. Equal to UnrealEnd when there's no navmesh at the end location.\n@param EndPoly Outputs the navmesh poly at the end location. Invalid when there's no navmesh at the end location\n@param OutPath [optional] When provided, Path will be used to store relevant error codes that this method can produce"
+    },
+    {
+      "id": "post-process-path",
+      "name": "PostProcessPath",
+      "category": "PImplRecastNavMesh",
+      "signature": "PostProcessPath(Target, Pathfind Result, Path, Query, Filter, Start Node, End Node, Unreal Start, Unreal End, Recast Start, Recast End, Path Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Pathfind Result",
+          "type": "dtStatus"
+        },
+        {
+          "name": "Path",
+          "type": "FNavMeshPath&"
+        },
+        {
+          "name": "Query",
+          "type": "dtNavMeshQuery&"
+        },
+        {
+          "name": "Filter",
+          "type": "dtQueryFilter*"
+        },
+        {
+          "name": "Start Node",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "End Node",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Unreal Start",
+          "type": "FVector"
+        },
+        {
+          "name": "Unreal End",
+          "type": "FVector"
+        },
+        {
+          "name": "Recast Start",
+          "type": "FVector"
+        },
+        {
+          "name": "Recast End",
+          "type": "FVector"
+        },
+        {
+          "name": "Path Result",
+          "type": "dtQueryResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks path flags, perform string pulling if needed"
+    },
+    {
+      "id": "get-debug-poly-edges",
+      "name": "GetDebugPolyEdges",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetDebugPolyEdges(Target, Tile, Internal Edges, Nav Mesh Edges, Internal Edge Verts, Nav Mesh Edge Verts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile",
+          "type": "dtMeshTile&"
+        },
+        {
+          "name": "Internal Edges",
+          "type": "Bool"
+        },
+        {
+          "name": "Nav Mesh Edges",
+          "type": "Bool"
+        },
+        {
+          "name": "Internal Edge Verts",
+          "type": "TArray<FVector>&"
+        },
+        {
+          "name": "Nav Mesh Edge Verts",
+          "type": "TArray<FVector>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-tile-poly-edges",
+      "name": "GetTilePolyEdges",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetTilePolyEdges(Target, Tile, Gather Interior Poly Edges, Gather Exterior Nav Mesh Edges, Out Interior Poly Edge Verts, Out Exterior Nav Mesh Edge Verts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile",
+          "type": "dtMeshTile&"
+        },
+        {
+          "name": "Gather Interior Poly Edges",
+          "type": "Bool"
+        },
+        {
+          "name": "Gather Exterior Nav Mesh Edges",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Interior Poly Edge Verts",
+          "type": "TArray<FVector>&"
+        },
+        {
+          "name": "Out Exterior Nav Mesh Edge Verts",
+          "type": "TArray<FVector>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Traverses given tile's edges and detects the ones that are either internal poly (i.e. not triangle, but whole navmesh polygon)\nor external navmesh edge. Returns a pair of verts for each edge found.\n@param Tile The tile whose edges to traverse.\n@param bGatherInteriorPolyEdges If true, populates OutPolyEdgeVerts with the tile's internal poly edges.\n@param bGatherExternalNavMeshEdges If true, populates OutNavMeshEdgeVerts with the tile's external navmesh edges.\n@param OutInteriorPolyEdgeVerts Output poly edge vertex array. Contains a pair of verts for each edge.\n@param OutExteriorNavMeshEdgeVerts Output navmesh edge vertex array. Contains a pair of verts for each edge.\n@note This is really slow."
+    },
+    {
+      "id": "get-edges-for-path-corridor-impl",
+      "name": "GetEdgesForPathCorridorImpl",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetEdgesForPathCorridorImpl(Target, Path Corridor, Path Corridor Edges, Nav Query)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Path Corridor",
+          "type": "TArray<NavNodeRef>*"
+        },
+        {
+          "name": "Path Corridor Edges",
+          "type": "TArray<FNavigationPortalEdge>*"
+        },
+        {
+          "name": "Nav Query",
+          "type": "dtNavMeshQuery&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "workhorse function finding portal edges between corridor polys"
+    },
+    {
+      "id": "get-tile-poly-edges-for-filter",
+      "name": "GetTilePolyEdgesForFilter",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetTilePolyEdgesForFilter(Target, Tile, In Query Filter, Out Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Tile",
+          "type": "dtMeshTile&"
+        },
+        {
+          "name": "In Query Filter",
+          "type": "FNavigationQueryFilter&"
+        },
+        {
+          "name": "Out Edges",
+          "type": "TArray<FNavigationWallEdge>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Traverse a tile and returns a list of all the edges around the passed in filter.\n@param Tile The tile whose edges to traverse.\n@param InQueryFilter the filter used to determine if an edge should be considered a border\n@param OutEdges Output edges array"
+    },
+    {
+      "id": "get-tiles-debug-geometry",
+      "name": "GetTilesDebugGeometry",
+      "category": "PImplRecastNavMesh",
+      "signature": "GetTilesDebugGeometry(Target, Generator, Tile, Vert Base, Out Geometry, Tile Idx, Forbidden Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Generator",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile",
+          "type": "dtMeshTile&"
+        },
+        {
+          "name": "Vert Base",
+          "type": "Int"
+        },
+        {
+          "name": "Out Geometry",
+          "type": "FRecastDebugGeometry&"
+        },
+        {
+          "name": "Tile Idx",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        },
+        {
+          "name": "Forbidden Flags",
+          "type": "UInt16",
+          "default": "0"
+        }
+      ],
+      "returnType": "protected : int32",
+      "docs": "@param ForbiddenFlags polys with flags matching the filter will get added to"
+    },
+    {
+      "id": "post-process-path-internal",
+      "name": "PostProcessPathInternal",
+      "category": "PImplRecastNavMesh",
+      "signature": "PostProcessPathInternal(Target, Find Path Status, Path, Nav Query, Query Filter, Start Poly ID, End Poly ID, Recast Start Pos, Recast End Pos, Path Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPImplRecastNavMesh*"
+        },
+        {
+          "name": "Find Path Status",
+          "type": "dtStatus"
+        },
+        {
+          "name": "Path",
+          "type": "FNavMeshPath&"
+        },
+        {
+          "name": "Nav Query",
+          "type": "dtNavMeshQuery&"
+        },
+        {
+          "name": "Query Filter",
+          "type": "dtQueryFilter*"
+        },
+        {
+          "name": "Start Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "End Poly ID",
+          "type": "NavNodeRef"
+        },
+        {
+          "name": "Recast Start Pos",
+          "type": "FVector&"
+        },
+        {
+          "name": "Recast End Pos",
+          "type": "FVector&"
+        },
+        {
+          "name": "Path Result",
+          "type": "dtQueryResult&"
+        }
+      ],
+      "returnType": "ENavigationQueryResult::Type"
+    }
+  ]
+}

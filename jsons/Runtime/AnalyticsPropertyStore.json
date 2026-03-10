@@ -1,0 +1,482 @@
+{
+  "id": "analytics-property-store",
+  "label": "AnalyticsPropertyStore",
+  "includepath": "AnalyticsPropertyStore.h",
+  "includes": [
+    "AsyncWork",
+    "Array",
+    "Map",
+    "UnrealString",
+    "CoreMinimal",
+    "CriticalSection",
+    "Platform",
+    "IAnalyticsPropertyStore",
+    "DateTime",
+    "EnumClassFlags",
+    "Timespan",
+    "Archive",
+    "MemoryReader",
+    "MemoryWriter",
+    "Stats",
+    "Function",
+    "UniquePtr"
+  ],
+  "functions": [
+    {
+      "id": "f-analytics-property-store",
+      "name": "FAnalyticsPropertyStore",
+      "category": "AnalyticsPropertyStore",
+      "signature": "FAnalyticsPropertyStore()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Implements a fast key/value database to store the metrics gathered to create the session summary event.\nThe store is buffered in memory until it is flushed to disk by calling Flush(). It is not designed to\nhandle millions of key/value pairs, but rather a small subset that fits in memory. The implementation\nreserve disk space ahead of time and can usually perform in-place update. Setting or getting intrinsic\ntypes (int32, uint32, int64, uint64, float, double, bool as well as FDateTime) doesn't allocate memory.\nThe string time is often updated in place if enough capacity was reserved. All store operations are\nthread safe and atomic from the caller perspective."
+    },
+    {
+      "id": "create",
+      "name": "Create",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Create(Target, Pathname, Capacity Hint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Pathname",
+          "type": "String&"
+        },
+        {
+          "name": "Capacity Hint",
+          "type": "UInt",
+          "default": "4 * 1024"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Create a new store, creating the file of the specified capacity and resetting the current state.\n@param Pathname The path to the file to create.\n@param CapacityHint The desired file capacity. The implementation has a minimum and maximum capacity to reserve.\n@param true if the file was created and the store created, false otherwise."
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Load(Target, Pathname)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Pathname",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load the specified file in memory, resetting the current state.\n@param Pathname The path to the file to open.\n@return true if the file was loaded successuflly, false if the file doesn't exist, the file format/version is invalid or if the file is corrupted (failed checksum)."
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "contains",
+      "name": "Contains",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Contains(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Remove(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remove-all",
+      "name": "RemoveAll",
+      "category": "AnalyticsPropertyStore",
+      "signature": "RemoveAll(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-e71f17",
+      "name": "Set",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Set(Target, Key, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "Int"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "set-5cec76",
+      "name": "Set",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Set(Target, Key, Value, Char Count Capacity Hint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "String&"
+        },
+        {
+          "name": "Char Count Capacity Hint",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "set-6a7bd9",
+      "name": "Set",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Set(Target, Key, Value, Condition Fn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "Int"
+        },
+        {
+          "name": "Condition Fn",
+          "type": "TFunction<bool ( int32*,int32& )>&"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "update",
+      "name": "Update",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Update(Target, Key, Update Fn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Update Fn",
+          "type": "TFunction<bool ( int32& )>&"
+        }
+      ],
+      "returnType": "EStatusCode",
+      "docs": "Actual"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Get(Target, Key, Out Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Out Value",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "visit-all",
+      "name": "VisitAll",
+      "category": "AnalyticsPropertyStore",
+      "signature": "VisitAll(Target, Visit Fn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Visit Fn",
+          "type": "TFunction<void ( FAnalyticsEventAttribute&& )>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "flush",
+      "name": "Flush",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Flush(Target, Async, Timeout)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Async",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Timeout",
+          "type": "FTimespan&",
+          "default": "FTimespan::MaxValue()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Flushes cached values to disk. Only one thread can flush at a time, causing possible latency if a flush is alreary happenning.\n@param bAsync Whether the data in flushed in a background thread or in the calling thread.\n@param Timeout Maximum time to wait before the flush starts (synchronous) or get scheduled (asynchronous). FTimespan::Zero() means no waiting.\n@return True if the flush was executed (synchronous) or scheduled (asynchronous), false if the operation timed out.\n@code\nStore.Flush(); // Flush in the calling thread, block until all threads has finished flushing.\nStore.Flush(false, FTimespan::Zero()); // Flush in the calling thread if possible, return immediatedly if another thread is already flushing.\nStore.Flush(true, FTimespan::Zero()); // Flush in a backgroud thread if no other thread is flushing, return immediatedly if another flushing task is running.\nStore.Flush(true);  // Flush in a background thread, might block if a thread is already flushing. (It doesn't queue several tasks).\n@endcode"
+    },
+    {
+      "id": "set-fixed-size-value-internal",
+      "name": "SetFixedSizeValueInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "SetFixedSizeValueInternal(Target, Key, Type Code, Value, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Type Code",
+          "type": "ETypeCode"
+        },
+        {
+          "name": "Value",
+          "type": "Byte*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "private : EStatusCode"
+    },
+    {
+      "id": "get-fixed-size-value-internal",
+      "name": "GetFixedSizeValueInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "GetFixedSizeValueInternal(Target, Key, Type Code, Out Value, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Type Code",
+          "type": "ETypeCode"
+        },
+        {
+          "name": "Out Value",
+          "type": "Byte*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "set-string-value-internal",
+      "name": "SetStringValueInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "SetStringValueInternal(Target, Key, Value, Char Count Capacity Hint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "String&"
+        },
+        {
+          "name": "Char Count Capacity Hint",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "get-string-value-internal",
+      "name": "GetStringValueInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "GetStringValueInternal(Target, Key, Out Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Out Value",
+          "type": "String&"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "set-date-time-value-internal",
+      "name": "SetDateTimeValueInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "SetDateTimeValueInternal(Target, Key, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "get-date-time-value-internal",
+      "name": "GetDateTimeValueInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "GetDateTimeValueInternal(Target, Key, Out Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Out Value",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "EStatusCode"
+    },
+    {
+      "id": "defragment",
+      "name": "Defragment",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Defragment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "flush-internal",
+      "name": "FlushInternal",
+      "category": "AnalyticsPropertyStore",
+      "signature": "FlushInternal(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        },
+        {
+          "name": "Data",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "AnalyticsPropertyStore",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsPropertyStore*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

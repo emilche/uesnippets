@@ -1,0 +1,558 @@
+{
+  "id": "sparse-dynamic-octree-3",
+  "label": "SparseDynamicOctree3",
+  "includepath": "Spatial/SparseDynamicOctree3.h",
+  "includes": [
+    "ParallelFor",
+    "BoxTypes",
+    "Array",
+    "BitArray",
+    "Map",
+    "Set",
+    "StaticArray",
+    "UnrealString",
+    "CoreMinimal",
+    "GeometryTypes",
+    "PlatformCrt",
+    "IntVectorTypes",
+    "IntrRay3AxisAlignedBox3",
+    "NumericLimits",
+    "Ray",
+    "UnrealMathSSE",
+    "Vector",
+    "MathUtil",
+    "AssertionMacros",
+    "SparseGrid3",
+    "DynamicVector",
+    "RefCountVector",
+    "SmallListSet"
+  ],
+  "functions": [
+    {
+      "id": "contains-object",
+      "name": "ContainsObject",
+      "category": "SparseDynamicOctree3",
+      "signature": "ContainsObject(Target, Object ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Objects will not be inserted more than this many levels deep from a Root cell"
+    },
+    {
+      "id": "insert-object",
+      "name": "InsertObject",
+      "category": "SparseDynamicOctree3",
+      "signature": "InsertObject(Target, Object ID, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Insert ObjectID into the Octree\n@param ObjectID ID of the object to insert\n@param Bounds bounding box of the object"
+    },
+    {
+      "id": "remove-object",
+      "name": "RemoveObject",
+      "category": "SparseDynamicOctree3",
+      "signature": "RemoveObject(Target, Object ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove an object from the octree\n@param ObjectID ID of the object\n@return true if the object was in the tree and removed"
+    },
+    {
+      "id": "reinsert-object",
+      "name": "ReinsertObject",
+      "category": "SparseDynamicOctree3",
+      "signature": "ReinsertObject(Target, Object ID, New Bounds, Cell ID Hint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "New Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Cell ID Hint",
+          "type": "UInt",
+          "default": "InvalidCellID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Update the position of an object in the octree. This is more efficient than doing a remove+insert\n@param ObjectID ID of the object\n@param NewBounds new bounding box of the object\n@return true if object was reinserted, false if the object was fine in it's existing cell"
+    },
+    {
+      "id": "check-if-object-needs-reinsert",
+      "name": "CheckIfObjectNeedsReinsert",
+      "category": "SparseDynamicOctree3",
+      "signature": "CheckIfObjectNeedsReinsert(Target, Object ID, New Bounds, Cell ID Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "New Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Cell ID Out",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if the object needs to be reinserted, if it has NewBounds.\n@param ObjectID ID of the object\n@param NewBounds new bounding box of the object\n@param CellIDOut returned CellID of the object, if it is in the tree. This can be passed to ReinsertObject() to save some computation.\n@return false if ObjectID is already in the tree, and NewBounds fits within the cell that currently contains ObjectID"
+    },
+    {
+      "id": "find-nearest-hit-object",
+      "name": "FindNearestHitObject",
+      "category": "SparseDynamicOctree3",
+      "signature": "FindNearestHitObject(Target, Ray, Get Object Bounds Func, Hit Object Dist Func, Max Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Get Object Bounds Func",
+          "type": "TFunctionRef<FAxisAlignedBox3d ( int )>"
+        },
+        {
+          "name": "Hit Object Dist Func",
+          "type": "TFunctionRef<double ( int,FRay3d& )>"
+        },
+        {
+          "name": "Max Distance",
+          "type": "Double",
+          "default": "TNumericLimits<double>::Max()"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find nearest ray-hit point with objects in tree\n@param Ray the ray\n@param GetObjectBoundsFunc function that returns bounding box of object identified by ObjectID\n@param HitObjectDistFunc function that returns distance along ray to hit-point on object identified by ObjectID (or TNumericLimits<double>::Max() on miss)\n@param MaxDistance maximum hit distance\n@return ObjectID of hit object, or -1 on miss"
+    },
+    {
+      "id": "containment-query",
+      "name": "ContainmentQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "ContainmentQuery(Target, Point, Object ID Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Object ID Func",
+          "type": "TFunctionRef<void ( int )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process ObjectIDs from all the cells with bounding boxes that contain query point\n@param Point query point\n@param ObjectIDFunc this function is called for each ObjectID"
+    },
+    {
+      "id": "containment-query-cancellable",
+      "name": "ContainmentQueryCancellable",
+      "category": "SparseDynamicOctree3",
+      "signature": "ContainmentQueryCancellable(Target, Point, Object ID Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Object ID Func",
+          "type": "TFunctionRef<bool ( int )>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Process ObjectIDs from all the cells with bounding boxes that contain query point\n@param Point query point\n@param ObjectIDFunc this function is called for each ObjectID. Returns true to continue query and false to abort\n@return true if query finished, false if it exited"
+    },
+    {
+      "id": "range-query-94aecb",
+      "name": "RangeQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "RangeQuery(Target, Bounds, Object ID Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Object ID Func",
+          "type": "TFunctionRef<void ( int )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process ObjectIDs from all the cells with bounding boxes that intersect Bounds\n@param Bounds query box\n@param ObjectIDFunc this function is called for each ObjectID"
+    },
+    {
+      "id": "range-query-69ffb0",
+      "name": "RangeQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "RangeQuery(Target, Bounds, Object I Ds Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Object I Ds Out",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect ObjectIDs from all the cells with bounding boxes that intersect Bounds\n@param Bounds query box\n@param ObjectIDsOut collected ObjectIDs are stored here"
+    },
+    {
+      "id": "parallel-range-query-5531e8",
+      "name": "ParallelRangeQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "ParallelRangeQuery(Target, Bounds, Object I Ds Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Object I Ds Out",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect ObjectIDs from all the cells with bounding boxes that intersect Bounds.\nCurrent implementation creates a separate TArray for each thread.\n@param Bounds query box\n@param ObjectIDsOut collected ObjectIDs are stored here"
+    },
+    {
+      "id": "parallel-range-query-588c1c",
+      "name": "ParallelRangeQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "ParallelRangeQuery(Target, Range Bounds Hint, Bounds Overlap Fn, Object I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Range Bounds Hint",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Bounds Overlap Fn",
+          "type": "TFunctionRef<bool ( FAxisAlignedBox3d& CellBounds )>"
+        },
+        {
+          "name": "Object I Ds",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect ObjectIDs from all the leaf cells that have bounding boxes that pass BoundsOverlapFn\n@param RangeBoundsHint A box to potentially limit the iteration range across cells. Note that\nthis might be ignored if the allocation of cells is such that trying to check for cells in that\nrange would take more time than just iterating over all allocated cells.\n@param BoundsOverlapFn Must be thread-safe. Used to determine if the cell is part\nof the desired range.\n@param ObjectIDsOut collected ObjectIDs are stored here"
+    },
+    {
+      "id": "parallel-overlap-any-query",
+      "name": "ParallelOverlapAnyQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "ParallelOverlapAnyQuery(Target, Shape Bounds, Object Overlap Fn, Bounds Overlap Fn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Shape Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Object Overlap Fn",
+          "type": "TFunctionRef<bool ( int32 )>"
+        },
+        {
+          "name": "Bounds Overlap Fn",
+          "type": "TFunctionRef<bool ( FAxisAlignedBox3d& )>"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find any overlap between a caller-defined query and any object ID. Returns the first overlap it finds.\n@param ShapeBounds Overall bounds of the custom query shape\n@param ObjectOverlapFn Custom function that indicates if the given ObjectID overlaps the query shape\n@param BoundsOverlapFn Optional custom function that indicates if the given bounding box overlaps the query shape, used to filter the octree search.\nNote the bounds overlap with ShapeBounds will already be called before calling this; only provide this if a more accurate overlap can be quickly checked.\n@return index of overlapping ObjectID or INDEX_NONE if no overlaps are found"
+    },
+    {
+      "id": "check-validity",
+      "name": "CheckValidity",
+      "category": "SparseDynamicOctree3",
+      "signature": "CheckValidity(Target, Is Valid Object ID Func, Get Object Bounds Func, Fail Mode, Verbose, Fail On Missing Objects)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Is Valid Object ID Func",
+          "type": "TFunctionRef<bool ( int )>"
+        },
+        {
+          "name": "Get Object Bounds Func",
+          "type": "TFunctionRef<FAxisAlignedBox3d ( int )>"
+        },
+        {
+          "name": "Fail Mode",
+          "type": "EValidityCheckFailMode",
+          "default": "EValidityCheckFailMode::Check"
+        },
+        {
+          "name": "Verbose",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Fail On Missing Objects",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Check that the octree is internally valid\n@param IsValidObjectIDFunc function that returns true if given ObjectID is valid\n@param GetObjectBoundSFunc function that returns bounding box of object identified by ObjectID\n@param FailMode how should validity checks fail\n@param bVerbose if true, print some debug info via UE_LOG\n@param bFailOnMissingObjects if true, assume ObjectIDs are dense and that all ObjectIDs must be in the tree"
+    },
+    {
+      "id": "compute-statistics",
+      "name": "ComputeStatistics",
+      "category": "SparseDynamicOctree3",
+      "signature": "ComputeStatistics(Target, Stats Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Stats Out",
+          "type": "FStatistics&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Populate given FStatistics with info about the octree"
+    },
+    {
+      "id": "find-current-containing-cell",
+      "name": "FindCurrentContainingCell",
+      "category": "SparseDynamicOctree3",
+      "signature": "FindCurrentContainingCell(Target, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "FSparseOctreeCell"
+    },
+    {
+      "id": "insert-spill",
+      "name": "Insert_Spill",
+      "category": "SparseDynamicOctree3",
+      "signature": "Insert_Spill(Target, Object ID, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "insert-new-root",
+      "name": "Insert_NewRoot",
+      "category": "SparseDynamicOctree3",
+      "signature": "Insert_NewRoot(Target, Object ID, Bounds, New Root Cell)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "New Root Cell",
+          "type": "FSparseOctreeCell"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "insert-to-cell",
+      "name": "Insert_ToCell",
+      "category": "SparseDynamicOctree3",
+      "signature": "Insert_ToCell(Target, Object ID, Bounds, Existing Cell)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Existing Cell",
+          "type": "FSparseOctreeCell&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "insert-new-child-cell",
+      "name": "Insert_NewChildCell",
+      "category": "SparseDynamicOctree3",
+      "signature": "Insert_NewChildCell(Target, Object ID, Bounds, Parent Cell ID, New Child Cell, Child Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Object ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Parent Cell ID",
+          "type": "Int"
+        },
+        {
+          "name": "New Child Cell",
+          "type": "FSparseOctreeCell"
+        },
+        {
+          "name": "Child Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-nearest-ray-cell-intersection",
+      "name": "FindNearestRayCellIntersection",
+      "category": "SparseDynamicOctree3",
+      "signature": "FindNearestRayCellIntersection(Target, Cell, Ray)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Cell",
+          "type": "FSparseOctreeCell&"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "branch-range-query",
+      "name": "BranchRangeQuery",
+      "category": "SparseDynamicOctree3",
+      "signature": "BranchRangeQuery(Target, Parent Cell, Bounds, Object I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSparseDynamicOctree3*"
+        },
+        {
+          "name": "Parent Cell",
+          "type": "FSparseOctreeCell*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Object I Ds",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

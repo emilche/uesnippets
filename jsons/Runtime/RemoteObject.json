@@ -1,0 +1,240 @@
+{
+  "id": "remote-object",
+  "label": "RemoteObject",
+  "includepath": "UObject/RemoteObject.h",
+  "includes": [
+    "CoreTypes",
+    "RemoteObjectTypes",
+    "ObjectMacros"
+  ],
+  "functions": [
+    {
+      "id": "get-global-server-id",
+      "name": "GetGlobalServerId",
+      "category": "RemoteObject",
+      "signature": "GetGlobalServerId()",
+      "params": [],
+      "returnType": "FRemoteServerId",
+      "docs": "Remote objects are unique UObjects that are referenced by a local server instance but their memory is actually owned by (exists on) another server.\nIt's possible that an object is remote but its memory hasn't been freed yet (UObject with EInternalObjectFlags::Remote flag that hasn't been GC'd yet).\nIn such case any attempt to access that object through TObjectPtr will result in its memory being migrated from a remote server to a local server.\nRemote object memory is freed in the next GC pass after the object has been migrated and any existing references to that object (must be referenced by TObjectPtr)\nwill be updated by GC to point to the remote object's FRemoteObjectStub."
+    },
+    {
+      "id": "f-remote-object-stub",
+      "name": "FRemoteObjectStub",
+      "category": "RemoteObject",
+      "signature": "FRemoteObjectStub(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "resolve-object-bde6f5",
+      "name": "ResolveObject",
+      "category": "RemoteObject",
+      "signature": "ResolveObject(Stub, Ref Type)",
+      "params": [
+        {
+          "name": "Stub",
+          "type": "FRemoteObjectStub*"
+        },
+        {
+          "name": "Ref Type",
+          "type": "ERemoteReferenceType",
+          "default": "ERemoteReferenceType::Strong"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Resolves a remote object given its stub, aborting the active transaction if the object is unavailable\n@param Stub Basic data required to migrate a remote object\n@param RefType Reference type that wants to resolve an object\n@return Resolved object"
+    },
+    {
+      "id": "resolve-object-304cde",
+      "name": "ResolveObject",
+      "category": "RemoteObject",
+      "signature": "ResolveObject(Object, Ref Type)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Ref Type",
+          "type": "ERemoteReferenceType",
+          "default": "ERemoteReferenceType::Strong"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Resolves a remote object, aborting the active transaction if the object is unavailable\n@param Object Object to resolve (remote object memory that has not yet been GC'd)\n@param RefType Reference type that wants to resolve an object\n@return Resolved object"
+    },
+    {
+      "id": "touch-resident-object",
+      "name": "TouchResidentObject",
+      "category": "RemoteObject",
+      "signature": "TouchResidentObject(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "can-resolve-object",
+      "name": "CanResolveObject",
+      "category": "RemoteObject",
+      "signature": "CanResolveObject(Object Id)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Resolves a remote object\n@param Object Object id to resolve\n@param RefType Reference type that wants to resolve an object\n@return True if a remote object can be resolved"
+    },
+    {
+      "id": "is-remote-e46ffd",
+      "name": "IsRemote",
+      "category": "RemoteObject",
+      "signature": "IsRemote(Object Id)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if an object associated with the specified unique id is remote\n@return True if an object associated with the specified unique id is remote"
+    },
+    {
+      "id": "is-remote-0b9131",
+      "name": "IsRemote",
+      "category": "RemoteObject",
+      "signature": "IsRemote(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if an object (memory that has not yet been GC'd) is remote\n@return True if the object is remote"
+    },
+    {
+      "id": "is-owned-721dc1",
+      "name": "IsOwned",
+      "category": "RemoteObject",
+      "signature": "IsOwned(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if a locally resident object is owned by this server"
+    },
+    {
+      "id": "is-owned-4517ec",
+      "name": "IsOwned",
+      "category": "RemoteObject",
+      "signature": "IsOwned(Object Id)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FRemoteObjectId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if an object id is owned by this server\nWe are only able to check if we own the object. If we don't\nown the object then we don't have a reliable way of knowing\nwho the owner is, which is why the below GetOwnerServerId\nfunction requires the object be locally resident"
+    },
+    {
+      "id": "get-owner-server-id",
+      "name": "GetOwnerServerId",
+      "category": "RemoteObject",
+      "signature": "GetOwnerServerId(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "FRemoteServerId",
+      "docs": "Get the owner server id for a locally resident object"
+    },
+    {
+      "id": "change-owner-server-id",
+      "name": "ChangeOwnerServerId",
+      "category": "RemoteObject",
+      "signature": "ChangeOwnerServerId(Object, New Owner Server Id)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "New Owner Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the owner server id for a locally resident object"
+    },
+    {
+      "id": "get-physics-server-id",
+      "name": "GetPhysicsServerId",
+      "category": "RemoteObject",
+      "signature": "GetPhysicsServerId(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "FRemoteServerId",
+      "docs": "Get the physics server id where the object should be simulated on"
+    },
+    {
+      "id": "change-physics-server-id",
+      "name": "ChangePhysicsServerId",
+      "category": "RemoteObject",
+      "signature": "ChangePhysicsServerId(Object, New Physics Server Id)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "New Physics Server Id",
+          "type": "FRemoteServerId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the physics id where the object should go to"
+    },
+    {
+      "id": "clear-all-physics-server-id",
+      "name": "ClearAllPhysicsServerId",
+      "category": "RemoteObject",
+      "signature": "ClearAllPhysicsServerId()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-all-physics-server-id",
+      "name": "UpdateAllPhysicsServerId",
+      "category": "RemoteObject",
+      "signature": "UpdateAllPhysicsServerId(Physics Server Merging Map)",
+      "params": [
+        {
+          "name": "Physics Server Merging Map",
+          "type": "TMap<uint32,uint32>&"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

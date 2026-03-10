@@ -22,7 +22,7 @@
           "type": "Bool"
         }
       ],
-      "returnType": "class ULevel"
+      "returnType": "public : UWorld*"
     },
     {
       "id": "new-map-from-template",
@@ -269,6 +269,80 @@
       "docs": "Helper function that attempts to reload the specified top-level packages.\n@param\tPackagesToReload\t\tThe list of packages that should be reloaded\n@param\tbOutAnyPackagesReloaded\tTrue if the set of loaded packages was changed\n@param\tOutErrorMessage\t\t\tAn error message specifying any problems with reloading packages\n@param\tInteractionMode\t\t\tWhether the function is allowed to ask the user questions (such as whether to reload dirty packages)"
     },
     {
+      "id": "get-on-load-map-start-delegate",
+      "name": "GetOnLoadMapStartDelegate",
+      "category": "FileHelpers",
+      "signature": "GetOnLoadMapStartDelegate()",
+      "params": [],
+      "returnType": "FOnLoadMapStart&"
+    },
+    {
+      "id": "get-on-load-map-end-delegate",
+      "name": "GetOnLoadMapEndDelegate",
+      "category": "FileHelpers",
+      "signature": "GetOnLoadMapEndDelegate()",
+      "params": [],
+      "returnType": "FOnLoadMapEnd&"
+    },
+    {
+      "id": "open-level-picking-dialog",
+      "name": "OpenLevelPickingDialog",
+      "category": "FileHelpers",
+      "signature": "OpenLevelPickingDialog(On Levels Chosen, On Level Picking Cancelled, Allow Multiple Selection)",
+      "params": [
+        {
+          "name": "On Levels Chosen",
+          "type": "FOnLevelsChosen&"
+        },
+        {
+          "name": "On Level Picking Cancelled",
+          "type": "FOnLevelPickingCancelled&"
+        },
+        {
+          "name": "Allow Multiple Selection",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Opens a non-modal dialog to allow the user to choose a level\n@param\tOnLevelsChosen\t\t\t\tDelegate executed when one more more levels have been selected\n@param\tOnLevelPickingDialogClosed\tDelegate executed when the level picking dialog is closed\n@param\tbAllowMultipleSelection\t\tIf true, more than one level can be chosen"
+    },
+    {
+      "id": "is-valid-map-filename",
+      "name": "IsValidMapFilename",
+      "category": "FileHelpers",
+      "signature": "IsValidMapFilename(Map Filename, Out Error Message)",
+      "params": [
+        {
+          "name": "Map Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Out Error Message",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the specified map filename is valid for loading or saving.\nWhen returning false, OutErrorMessage is supplied with a display string describing the reason why the map name is invalid."
+    },
+    {
+      "id": "attempt-unload-inactive-world-package",
+      "name": "AttemptUnloadInactiveWorldPackage",
+      "category": "FileHelpers",
+      "signature": "AttemptUnloadInactiveWorldPackage(Package To Unload, Out Error Message)",
+      "params": [
+        {
+          "name": "Package To Unload",
+          "type": "UPackage*"
+        },
+        {
+          "name": "Out Error Message",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Unloads the specified package potentially containing an inactive world.\nWhen returning false, OutErrorMessage is supplied with a display string describing the reason why the world could not be unloaded."
+    },
+    {
       "id": "load-map-6fb796",
       "name": "LoadMap",
       "category": "Editor Scripting ",
@@ -318,6 +392,85 @@
       ],
       "returnType": "Bool",
       "docs": "Saves the specified map package, returning true on success.\n@param\tWorld\t\t\tThe world to save.\n@param\tFilename\t\tMap package filename, including path.\n@return\t\t\t\t\ttrue if the map was saved successfully."
+    },
+    {
+      "id": "save-level",
+      "name": "SaveLevel",
+      "category": "FileHelpers",
+      "signature": "SaveLevel(Level, Default Filename, Out Saved Filename)",
+      "params": [
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "Default Filename",
+          "type": "String&",
+          "default": "TEXT( \"\" )"
+        },
+        {
+          "name": "Out Saved Filename",
+          "type": "String*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Saves the specified level.  SaveAs is performed as necessary.\n@param\tLevel\t\t\t\tThe level to be saved.\n@param\tDefaultFilename\t\tFile name to use for this level if it doesn't have one yet (or empty string to prompt)\n@param\tOutSavedFilename\tWhen returning true, this string will be set to the filename of the saved level.\n@return\t\t\t\ttrue if the level was saved."
+    },
+    {
+      "id": "save-map-data-packages",
+      "name": "SaveMapDataPackages",
+      "category": "FileHelpers",
+      "signature": "SaveMapDataPackages(World, Check Dirty)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Check Dirty",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Saves packages which contain map data but are not map packages themselves.\n@param\tWorld\t\t\t\tThe world map data packages to be saved.\n@param\tbCheckDirty\t\t\tIf true, only packages that are dirty will be saved.\n@return\t\t\t\ttrue if the data packages were saved."
+    },
+    {
+      "id": "save-assets-as",
+      "name": "SaveAssetsAs",
+      "category": "FileHelpers",
+      "signature": "SaveAssetsAs(Assets, Out Saved Assets)",
+      "params": [
+        {
+          "name": "Assets",
+          "type": "TArray<UObject*>&"
+        },
+        {
+          "name": "Out Saved Assets",
+          "type": "TArray<UObject*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Does a SaveAs for the specified assets.\n@param Assets The collection of assets to save.\n@param SavedAssets The collection of corresponding saved assets (contains original asset if not resaved)."
+    },
+    {
+      "id": "save-level-as",
+      "name": "SaveLevelAs",
+      "category": "FileHelpers",
+      "signature": "SaveLevelAs(Level, Out Saved Filename)",
+      "params": [
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "Out Saved Filename",
+          "type": "String*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Does a saveAs for the specified level.\n@param\tLevel\t\t\t\tThe Level to be SaveAs'd.\n@param\tOutSavedFilename\tWhen returning true, this string will be set to the filename of the saved level.\n@return\t\t\t\t\t\ttrue if the world was saved."
     },
     {
       "id": "save-dirty-packages-d26a3a",
@@ -372,6 +525,58 @@
       "docs": "Looks at all currently loaded packages and saves them if their \"bDirty\" flag is set, optionally prompting the user to select which packages to save)\n@param\tbPromptUserToSave\t\t\ttrue if we should prompt the user to save dirty packages we found. false to assume all dirty packages should be saved.  Regardless of this setting the user will be prompted for checkout(if needed) unless bFastSave is set\n@param\tbSaveMapPackages\t\t\ttrue if map packages should be saved\n@param\tbSaveContentPackages\t\ttrue if we should save content packages.\n@param\tbFastSave\t\t\t\t\ttrue if we should do a fast save. (I.E dont prompt the user to save, dont prompt for checkout, and only save packages that are currently writable).  Note: Still prompts for SaveAs if a package needs a filename\n@param\tbNotifyNoPackagesSaved\t\ttrue if a notification should be displayed when no packages need to be saved.\n@param\tbCanBeDeclined\t\t\t\ttrue if the user prompt should contain a \"Don't Save\" button in addition to \"Cancel\", which won't result in a failure return code.\n@param\tbOutPackagesNeededSaving\twhen not NULL, will be set to true if there was any work to be done, and false otherwise.\n@param\tShouldIgnorePackageFunction callback that allows filtering if package should be saved or not.\n@param\tbSkipExternalObjectSave\t\ttrue if saved package should skip saving their own external packages.\n@return\t\t\t\t\t\t\t\ttrue on success, false on fail."
     },
     {
+      "id": "save-dirty-content-packages",
+      "name": "SaveDirtyContentPackages",
+      "category": "FileHelpers",
+      "signature": "SaveDirtyContentPackages(Save Content Classes, Prompt User To Save, Fast Save, Notify No Packages Saved, Can Be Declined)",
+      "params": [
+        {
+          "name": "Save Content Classes",
+          "type": "TArray<UClass*>&"
+        },
+        {
+          "name": "Prompt User To Save",
+          "type": "Bool"
+        },
+        {
+          "name": "Fast Save",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Notify No Packages Saved",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Can Be Declined",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Looks at all currently loaded packages and saves them if their \"bDirty\" flag is set and they include specified clasees, optionally prompting the user to select which packages to save)\n@param\tSaveContentClasses\t\t\tsave only specified classes or children classes\n@param\tbPromptUserToSave\t\t\ttrue if we should prompt the user to save dirty packages we found. false to assume all dirty packages should be saved.  Regardless of this setting the user will be prompted for checkout(if needed) unless bFastSave is set\n@param\tbFastSave\t\t\t\t\ttrue if we should do a fast save. (I.E dont prompt the user to save, dont prompt for checkout, and only save packages that are currently writable).  Note: Still prompts for SaveAs if a package needs a filename\n@param\tbNotifyNoPackagesSaved\t\ttrue if a notification should be displayed when no packages need to be saved.\n@param\tbCanBeDeclined\t\t\t\ttrue if the user prompt should contain a \"Don't Save\" button in addition to \"Cancel\", which won't result in a failure return code.\n@return\t\t\t\t\t\t\t\ttrue on success, false on fail."
+    },
+    {
+      "id": "get-dirty-world-packages",
+      "name": "GetDirtyWorldPackages",
+      "category": "FileHelpers",
+      "signature": "GetDirtyWorldPackages(Out Dirty Packages, Should Ignore Package Function)",
+      "params": [
+        {
+          "name": "Out Dirty Packages",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "Should Ignore Package Function",
+          "type": "FShouldIgnorePackageFunctionRef&",
+          "default": "FShouldIgnorePackage::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Appends array with all currently dirty world packages.\n@param OutDirtyPackages Array to append dirty packages to."
+    },
+    {
       "id": "get-dirty-content-packages-bcef85",
       "name": "GetDirtyContentPackages",
       "category": "Editor Scripting ",
@@ -389,6 +594,473 @@
       ],
       "returnType": "Void",
       "docs": "Appends array with all currently dirty content packages.\n@param OutDirtyPackages Array to append dirty packages to."
+    },
+    {
+      "id": "get-dirty-packages",
+      "name": "GetDirtyPackages",
+      "category": "FileHelpers",
+      "signature": "GetDirtyPackages(Out Dirty Packages, Should Ignore Package Function)",
+      "params": [
+        {
+          "name": "Out Dirty Packages",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "Should Ignore Package Function",
+          "type": "FShouldIgnorePackageFunctionRef&",
+          "default": "FShouldIgnorePackage::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Appends array with all currently dirty packages\n@param OutDirtyPackages Array to append dirty packages to.\n@param FilterFunction Allows filtering out some dirty packages."
+    },
+    {
+      "id": "prepare-worlds-for-explicit-save",
+      "name": "PrepareWorldsForExplicitSave",
+      "category": "FileHelpers",
+      "signature": "PrepareWorldsForExplicitSave(Worlds)",
+      "params": [
+        {
+          "name": "Worlds",
+          "type": "TArray<UWorld*>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcasts the OnPrepareWorldsForExplicitSave event to allow validation and changes to worlds before they're saved.\nUsed for Editor triggered explicit saves caused by user input such as ctrl+s, or clicking the save button.\nChanges to worlds include dirtying the world itself or affecting its ExternalActors through Adds/Removes/Edits.\n@param Worlds A list of the worlds that will be broadcasted."
+    },
+    {
+      "id": "prompt-for-checkout-and-save-e30cf6",
+      "name": "PromptForCheckoutAndSave",
+      "category": "FileHelpers",
+      "signature": "PromptForCheckoutAndSave(Packages To Save, In Out Params)",
+      "params": [
+        {
+          "name": "Packages To Save",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "In Out Params",
+          "type": "FPromptForCheckoutAndSaveParams&"
+        }
+      ],
+      "returnType": "EPromptReturnCode",
+      "docs": "If true, only packages that are dirty in PackagesToSave will be saved"
+    },
+    {
+      "id": "prompt-for-checkout-and-save-f7c155",
+      "name": "PromptForCheckoutAndSave",
+      "category": "FileHelpers",
+      "signature": "PromptForCheckoutAndSave(Packages To Save, Check Dirty, Prompt To Save, Title, Message, Out Failed Packages, Already Checked Out, Can Be Declined)",
+      "params": [
+        {
+          "name": "Packages To Save",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "Check Dirty",
+          "type": "Bool"
+        },
+        {
+          "name": "Prompt To Save",
+          "type": "Bool"
+        },
+        {
+          "name": "Title",
+          "type": "Text&"
+        },
+        {
+          "name": "Message",
+          "type": "Text&"
+        },
+        {
+          "name": "Out Failed Packages",
+          "type": "TArray<UPackage*>*",
+          "default": "NULL"
+        },
+        {
+          "name": "Already Checked Out",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Can Be Declined",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "EPromptReturnCode"
+    },
+    {
+      "id": "prompt-for-checkout-and-save-b65816",
+      "name": "PromptForCheckoutAndSave",
+      "category": "FileHelpers",
+      "signature": "PromptForCheckoutAndSave(Packages To Save, Check Dirty, Prompt To Save, Out Failed Packages, Already Checked Out, Can Be Declined)",
+      "params": [
+        {
+          "name": "Packages To Save",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "Check Dirty",
+          "type": "Bool"
+        },
+        {
+          "name": "Prompt To Save",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Failed Packages",
+          "type": "TArray<UPackage*>*",
+          "default": "NULL"
+        },
+        {
+          "name": "Already Checked Out",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Can Be Declined",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "EPromptReturnCode"
+    },
+    {
+      "id": "import-5da329",
+      "name": "Import",
+      "category": "FileHelpers",
+      "signature": "Import()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Presents the user with a file dialog for importing.\nIf the import is not a merge (bMerging is false), AskSaveChanges() is called first."
+    },
+    {
+      "id": "import-e655b5",
+      "name": "Import",
+      "category": "FileHelpers",
+      "signature": "Import(In Filename)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export",
+      "name": "Export",
+      "category": "FileHelpers",
+      "signature": "Export(Export Selected Actors Only)",
+      "params": [
+        {
+          "name": "Export Selected Actors Only",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prompt-to-checkout-packages",
+      "name": "PromptToCheckoutPackages",
+      "category": "FileHelpers",
+      "signature": "PromptToCheckoutPackages(Check Dirty, Packages To Check Out, Out Packages Checked Out Or Made Writable, Out Packages Not Needing Checkout, Prompting After Modify, Allow Skip)",
+      "params": [
+        {
+          "name": "Check Dirty",
+          "type": "Bool"
+        },
+        {
+          "name": "Packages To Check Out",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "Out Packages Checked Out Or Made Writable",
+          "type": "TArray<UPackage*>*",
+          "default": "NULL"
+        },
+        {
+          "name": "Out Packages Not Needing Checkout",
+          "type": "TArray<UPackage*>*",
+          "default": "NULL"
+        },
+        {
+          "name": "Prompting After Modify",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Allow Skip",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Prompt the user with a check-box dialog allowing them to check out the provided packages\nfrom source control, if desired\n@param\tbCheckDirty\t\t\t\t\t\t\t\tIf true, non-dirty packages won't be added to the dialog\n@param\tPackagesToCheckOut\t\t\t\t\t\tReference to array of packages to prompt the user with for possible check out\n@param\tOutPackagesCheckedOutOrMadeWritable\t\tIf not NULL, this array will be populated with packages that the user selected to check out or make writable.\n@param\tOutPackagesNotNeedingCheckout\t\t\tIf not NULL, this array will be populated with packages that the user was not prompted about and do not need to be checked out to save.  Useful for saving packages even if the user canceled the checkout dialog.\n@param\tbPromptingAfterModify\t\t\t\t\tIf true, we are prompting the user after an object has been modified, which changes the cancel button to \"Ask me later\".\n@param\tbAllowSkip\t\t\t\t\t\t\t\tIf true, user can skip the checkout / make writable.\n@return\ttrue if the user did not cancel out of the dialog and has potentially checked out some files\n(or if there is no source control integration); false if the user cancelled the dialog"
+    },
+    {
+      "id": "checkout-packages-94dda3",
+      "name": "CheckoutPackages",
+      "category": "FileHelpers",
+      "signature": "CheckoutPackages(Pkgs To Check Out, Out Packages Checked Out, Error If Already Checked Out, Confirm Package Branch Check Out Status)",
+      "params": [
+        {
+          "name": "Pkgs To Check Out",
+          "type": "TArray<UPackage*>&"
+        },
+        {
+          "name": "Out Packages Checked Out",
+          "type": "TArray<UPackage*>*",
+          "default": "NULL"
+        },
+        {
+          "name": "Error If Already Checked Out",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Confirm Package Branch Check Out Status",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "ECommandResult::Type",
+      "docs": "Check out the specified packages from source control and report any errors while checking out\n@param\tPkgsToCheckOut\t\t\t\t\t\t\tReference to array of packages to check out\n@param\tOutPackagesCheckedOut\t\t\t\t\tIf not NULL, this array will be populated with packages that were checked out.\n@param\tbErrorIfAlreadyCheckedOut\t\t\t\ttrue to consider being unable to checkout a package because it is already checked out an error, false to allow this without error\n@param\tbConfirmPackageBranchCheckOutStatus\t\ttrue to prompt user on whether a package that is checked out or modified in another branch should be checked out, false to silently attempt check out.\n@return\ttrue if all the packages were checked out successfully"
+    },
+    {
+      "id": "checkout-packages-17aa3b",
+      "name": "CheckoutPackages",
+      "category": "FileHelpers",
+      "signature": "CheckoutPackages(Pkgs To Check Out, Out Packages Checked Out, Error If Already Checked Out)",
+      "params": [
+        {
+          "name": "Pkgs To Check Out",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Out Packages Checked Out",
+          "type": "TArray<FString>*",
+          "default": "NULL"
+        },
+        {
+          "name": "Error If Already Checked Out",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "ECommandResult::Type",
+      "docs": "Check out the specified packages from source control and report any errors while checking out\n@param\tPkgsToCheckOut\t\t\t\t\t\t\tReference to array of package names to check out\n@param\tOutPackagesCheckedOut\t\t\t\t\tIf not NULL, this array will be populated with packages that were checked out.\n@param\tbErrorIfAlreadyCheckedOut\t\t\t\ttrue to consider being unable to checkout a package because it is already checked out an error, false to allow this without error\n@return\tthe result of the check out operation"
+    },
+    {
+      "id": "prompt-to-checkout-levels-0fa31c",
+      "name": "PromptToCheckoutLevels",
+      "category": "FileHelpers",
+      "signature": "PromptToCheckoutLevels(Check Dirty, Specific Levels To Check Out, Out Packages Not Needing Checkout)",
+      "params": [
+        {
+          "name": "Check Dirty",
+          "type": "Bool"
+        },
+        {
+          "name": "Specific Levels To Check Out",
+          "type": "TArray<ULevel*>&"
+        },
+        {
+          "name": "Out Packages Not Needing Checkout",
+          "type": "TArray<UPackage*>*",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Prompt the user with a check-box dialog allowing them to check out relevant level packages\nfrom source control\n@param\tbCheckDirty\t\t\t\t\tIf true, non-dirty packages won't be added to the dialog\n@param\tSpecificLevelsToCheckOut\tIf specified, only the provided levels' packages will display in the\ndialog if they are under source control; If nothing is specified, all levels\nreferenced by GWorld whose packages are under source control will be displayed\n@param\tOutPackagesNotNeedingCheckout\tIf not null, this array will be populated with packages that the user was not prompted about and do not need to be checked out to save.  Useful for saving packages even if the user canceled the checkout dialog.\n@return\ttrue if the user did not cancel out of the dialog and has potentially checked out some files (or if there is\nno source control integration); false if the user cancelled the dialog"
+    },
+    {
+      "id": "prompt-to-checkout-levels-47a3b5",
+      "name": "PromptToCheckoutLevels",
+      "category": "FileHelpers",
+      "signature": "PromptToCheckoutLevels(Check Dirty, Specific Level To Check Out)",
+      "params": [
+        {
+          "name": "Check Dirty",
+          "type": "Bool"
+        },
+        {
+          "name": "Specific Level To Check Out",
+          "type": "ULevel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Overloaded version of PromptToCheckOutLevels which prompts the user with a check-box dialog allowing\nthem to check out the relevant level package if necessary\n@param\tbCheckDirty\t\t\t\tIf true, non-dirty packages won't be added to the dialog\n@param\tSpecificLevelToCheckOut\tThe level whose package will display in the dialog if it is\nunder source control\n@return\ttrue if the user did not cancel out of the dialog and has potentially checked out some files (or if there is\nno source control integration); false if the user cancelled the dialog"
+    },
+    {
+      "id": "load-default-map-at-startup",
+      "name": "LoadDefaultMapAtStartup",
+      "category": "FileHelpers",
+      "signature": "LoadDefaultMapAtStartup()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Loads a simple example map"
+    },
+    {
+      "id": "get-filter-string",
+      "name": "GetFilterString",
+      "category": "FileHelpers",
+      "signature": "GetFilterString(Interaction)",
+      "params": [
+        {
+          "name": "Interaction",
+          "type": "EFileInteraction"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a file filter string appropriate for a specific file interaction.\n@param\tInteraction\t\tA file interaction to get a filter string for.\n@return\t\t\t\t\tA filter string."
+    },
+    {
+      "id": "find-all-package-files",
+      "name": "FindAllPackageFiles",
+      "category": "FileHelpers",
+      "signature": "FindAllPackageFiles(Out Packages)",
+      "params": [
+        {
+          "name": "Out Packages",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Looks for package files in the known content paths on disk.\n@param\tOutPackages\t\tAll found package filenames."
+    },
+    {
+      "id": "find-all-submittable-package-files",
+      "name": "FindAllSubmittablePackageFiles",
+      "category": "FileHelpers",
+      "signature": "FindAllSubmittablePackageFiles(Out Packages, Include Maps)",
+      "params": [
+        {
+          "name": "Out Packages",
+          "type": "TMap<FString,FSourceControlStatePtr>&"
+        },
+        {
+          "name": "Include Maps",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Looks for source control submittable files in the known content paths on disk.\n@param\tOutPackages\t\tAll found package filenames and their source control state\n@param\tbIncludeMaps\tIf true, also adds maps to the list"
+    },
+    {
+      "id": "find-all-submittable-project-files",
+      "name": "FindAllSubmittableProjectFiles",
+      "category": "FileHelpers",
+      "signature": "FindAllSubmittableProjectFiles(Out Project Files)",
+      "params": [
+        {
+          "name": "Out Project Files",
+          "type": "TMap<FString,FSourceControlStatePtr>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Looks for source control submittable non-package project files for the current project.\n@param\tOutProjectFiles\tAll found project filenames and their source control state."
+    },
+    {
+      "id": "find-all-config-files",
+      "name": "FindAllConfigFiles",
+      "category": "FileHelpers",
+      "signature": "FindAllConfigFiles(Out Config Files)",
+      "params": [
+        {
+          "name": "Out Config Files",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Looks for config files for the current project.\n@param\tOutConfigFiles\tAll found config filenames."
+    },
+    {
+      "id": "find-all-submittable-config-files",
+      "name": "FindAllSubmittableConfigFiles",
+      "category": "FileHelpers",
+      "signature": "FindAllSubmittableConfigFiles(Out Config Files)",
+      "params": [
+        {
+          "name": "Out Config Files",
+          "type": "TMap<FString,FSourceControlStatePtr>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Looks for source control submittable non-package config files for the current project.\n@param\tOutConfigFiles\tAll found config filenames and their source control state."
+    },
+    {
+      "id": "is-map-package-asset-ab61a0",
+      "name": "IsMapPackageAsset",
+      "category": "FileHelpers",
+      "signature": "IsMapPackageAsset(Object Path)",
+      "params": [
+        {
+          "name": "Object Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function used to decide whether a package name is a map package or not. Map packages aren't added to the additional package list.\n@param\tObjectPath\t\tThe path to the package to test\n@return\t\t\t\t\tTrue if package is a map"
+    },
+    {
+      "id": "is-map-package-asset-108c07",
+      "name": "IsMapPackageAsset",
+      "category": "FileHelpers",
+      "signature": "IsMapPackageAsset(Object Path, Map File Path)",
+      "params": [
+        {
+          "name": "Object Path",
+          "type": "String&"
+        },
+        {
+          "name": "Map File Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function used to decide whether a package name is a map package or not. Map packages aren't added to the additional package list.\n@param\tObjectPath\t\tThe path to the package to test\n@param\tMapFilePath\t\tOUT parameter that returns the map file path if it exists.\n@return\t\t\t\t\tTrue if package is a map"
+    },
+    {
+      "id": "extract-package-name",
+      "name": "ExtractPackageName",
+      "category": "FileHelpers",
+      "signature": "ExtractPackageName(Object Path)",
+      "params": [
+        {
+          "name": "Object Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Helper function used to extract the package name from the object path\n@param\tObjectPath\t\tThe path to the package to test\n@return\t\t\t\t\tThe package name from the string"
+    },
+    {
+      "id": "get-filename-4a7c60",
+      "name": "GetFilename",
+      "category": "FileHelpers",
+      "signature": "GetFilename(Package Name)",
+      "params": [
+        {
+          "name": "Package Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "get-filename-414e45",
+      "name": "GetFilename",
+      "category": "FileHelpers",
+      "signature": "GetFilename(Level Object)",
+      "params": [
+        {
+          "name": "Level Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "String"
     }
   ]
 }

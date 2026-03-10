@@ -1,0 +1,2294 @@
+{
+  "id": "media-player-facade",
+  "label": "MediaPlayerFacade",
+  "includepath": "MediaPlayerFacade.h",
+  "includes": [
+    "Queue",
+    "UnrealString",
+    "CoreTypes",
+    "Delegate",
+    "CriticalSection",
+    "IMediaClockSink",
+    "IMediaEventSink",
+    "IMediaPlayerLifecycleManager",
+    "IMediaTickable",
+    "IMediaTimeSource",
+    "IMediaTracks",
+    "Text",
+    "MathFwd",
+    "Quat",
+    "Range",
+    "RangeSet",
+    "Rotator",
+    "MediaPlayerOptions",
+    "MediaSampleSink",
+    "MediaSampleSinks",
+    "Guid",
+    "Optional",
+    "Timespan",
+    "Timecode",
+    "Variant",
+    "Atomic",
+    "SharedPointer",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-media-player-facade-ea2033",
+      "name": "FMediaPlayerFacade",
+      "category": "MediaPlayerFacade",
+      "signature": "FMediaPlayerFacade(In Media Player)",
+      "params": [
+        {
+          "name": "In Media Player",
+          "type": "TWeakObjectPtr<UMediaPlayer>"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Facade for low-level media player objects.\nThe purpose of this class is to provide a simpler interface to low-level media player\nimplementations. It implements common functionality, such as translating between time\ncodes and play times, and manages the selection and creation of player implementations\nfor a given media source.\nNote that, unlike the low-level methods in IMediaTracks, most track and track format\nrelated methods in this class allow for INDEX_NONE to be used as track and format\nindices in order to indicate the 'current selection'."
+    },
+    {
+      "id": "f-media-player-facade-185497",
+      "name": "FMediaPlayerFacade",
+      "category": "MediaPlayerFacade",
+      "signature": "FMediaPlayerFacade()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Virtual destructor."
+    },
+    {
+      "id": "add-audio-sample-sink",
+      "name": "AddAudioSampleSink",
+      "category": "MediaPlayerFacade",
+      "signature": "AddAudioSampleSink(Target, Sample Sink)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Sample Sink",
+          "type": "TSharedRef<FMediaAudioSampleSink,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Add the given audio sample sink to this player.\n@param SampleSink The sink to receive audio samples.\n@see  AddCaptionSampleSink, AddMetadataSampleSink, AddSubtitleSampleSink, AddVideoSampleSink"
+    },
+    {
+      "id": "add-caption-sample-sink",
+      "name": "AddCaptionSampleSink",
+      "category": "MediaPlayerFacade",
+      "signature": "AddCaptionSampleSink(Target, Sample Sink)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Sample Sink",
+          "type": "TSharedRef<FMediaOverlaySampleSink,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the given audio sample sink to this player.\n@param SampleSink The sink to receive caption samples.\n@see AddAudioSampleSink, AddMetadataSampleSink, AddSubtitleSampleSink, AddVideoSampleSink"
+    },
+    {
+      "id": "add-metadata-sample-sink",
+      "name": "AddMetadataSampleSink",
+      "category": "MediaPlayerFacade",
+      "signature": "AddMetadataSampleSink(Target, Sample Sink)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Sample Sink",
+          "type": "TSharedRef<FMediaBinarySampleSink,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the given audio sample sink to this player.\n@param SampleSink The sink to receive metadata samples.\n@see AddAudioSampleSink, AddCaptionSampleSink, AddSubtitleSampleSink, AddVideoSampleSink"
+    },
+    {
+      "id": "add-subtitle-sample-sink",
+      "name": "AddSubtitleSampleSink",
+      "category": "MediaPlayerFacade",
+      "signature": "AddSubtitleSampleSink(Target, Sample Sink)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Sample Sink",
+          "type": "TSharedRef<FMediaOverlaySampleSink,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the given audio sample sink to this player.\n@param SampleSink The sink to receive subtitle samples.\n@see AddAudioSampleSink, AddCaptionSampleSink, AddMetadataSampleSink, AddVideoSampleSink"
+    },
+    {
+      "id": "add-video-sample-sink",
+      "name": "AddVideoSampleSink",
+      "category": "MediaPlayerFacade",
+      "signature": "AddVideoSampleSink(Target, Sample Sink)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Sample Sink",
+          "type": "TSharedRef<FMediaTextureSampleSink,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the given audio sample sink to this player.\n@param SampleSink The sink to receive video samples.\n@see AddAudioSampleSink, AddCaptionSampleSink, AddMetadataSampleSink, AddSubtitleSampleSink"
+    },
+    {
+      "id": "can-pause",
+      "name": "CanPause",
+      "category": "MediaPlayerFacade",
+      "signature": "CanPause(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback can be paused.\nPlayback can be paused if the media supports pausing\nand if it is currently playing.\n@return true if pausing is allowed, false otherwise.\n@see CanResume, CanScrub, CanSeek, Pause"
+    },
+    {
+      "id": "can-play-url",
+      "name": "CanPlayUrl",
+      "category": "MediaPlayerFacade",
+      "signature": "CanPlayUrl(Target, Url, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Url",
+          "type": "String&"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the specified URL can be played by this player.\nIf a desired player name is set for this player, it will only check\nwhether that particular player type can play the specified URL.\n@param Url The URL to check.\n@param Options Optional media parameters.\n@see CanPlaySource, SetDesiredPlayerName"
+    },
+    {
+      "id": "can-resume",
+      "name": "CanResume",
+      "category": "MediaPlayerFacade",
+      "signature": "CanResume(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback can be resumed.\nPlayback can be resumed if media is loaded and\nif it is not already playing.\n@return true if resuming is allowed, false otherwise.\n@see CanPause, CanScrub, CanSeek, SetRate"
+    },
+    {
+      "id": "can-scrub",
+      "name": "CanScrub",
+      "category": "MediaPlayerFacade",
+      "signature": "CanScrub(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback can be scrubbed.\n@return true if scrubbing is allowed, false otherwise.\n@see CanPause, CanResume, CanSeek, Seek"
+    },
+    {
+      "id": "can-seek",
+      "name": "CanSeek",
+      "category": "MediaPlayerFacade",
+      "signature": "CanSeek(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback can jump to a position.\n@return true if seeking is allowed, false otherwise.\n@see CanPause, CanResume, CanScrub, Seek"
+    },
+    {
+      "id": "supports-playback-time-range",
+      "name": "SupportsPlaybackTimeRange",
+      "category": "MediaPlayerFacade",
+      "signature": "SupportsPlaybackTimeRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether the player supports playing back of range within the media.\n@return true if playing back a range is supported, false otherwise.\n@see GetPlaybackTimeRange, SetPlaybackTimeRange"
+    },
+    {
+      "id": "close",
+      "name": "Close",
+      "category": "MediaPlayerFacade",
+      "signature": "Close(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Close the currently open media, if any."
+    },
+    {
+      "id": "get-audio-track-channels",
+      "name": "GetAudioTrackChannels",
+      "category": "MediaPlayerFacade",
+      "signature": "GetAudioTrackChannels(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the number of channels in the specified audio track.\n@param TrackIndex Index of the audio track.\n@param FormatIndex Index of the track format.\n@return Number of channels.\n@see GetAudioTrackSampleRate, GetAudioTrackType"
+    },
+    {
+      "id": "get-audio-track-sample-rate",
+      "name": "GetAudioTrackSampleRate",
+      "category": "MediaPlayerFacade",
+      "signature": "GetAudioTrackSampleRate(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the sample rate of the specified audio track.\n@param TrackIndex Index of the audio track.\n@param FormatIndex Index of the track format.\n@return Samples per second.\n@see GetAudioTrackChannels, GetAudioTrackType"
+    },
+    {
+      "id": "get-audio-track-type",
+      "name": "GetAudioTrackType",
+      "category": "MediaPlayerFacade",
+      "signature": "GetAudioTrackType(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get the type of the specified audio track format.\n@param TrackIndex The index of the track.\n@param FormatIndex Index of the track format.\n@return Audio format type string.\n@see GetAudioTrackSampleRate, GetAudioTrackSampleRate"
+    },
+    {
+      "id": "get-duration",
+      "name": "GetDuration",
+      "category": "MediaPlayerFacade",
+      "signature": "GetDuration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FTimespan",
+      "docs": "Get the media's duration.\n@return A time span representing the duration.\n@see GetTime, Seek"
+    },
+    {
+      "id": "get-guid",
+      "name": "GetGuid",
+      "category": "MediaPlayerFacade",
+      "signature": "GetGuid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FGuid&",
+      "docs": "Get the player's globally unique identifier.\n@return The Guid.\n@see SetGuid"
+    },
+    {
+      "id": "get-info",
+      "name": "GetInfo",
+      "category": "MediaPlayerFacade",
+      "signature": "GetInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get debug information about the player and currently opened media.\n@return Information string.\n@see GetStats"
+    },
+    {
+      "id": "get-media-info",
+      "name": "GetMediaInfo",
+      "category": "MediaPlayerFacade",
+      "signature": "GetMediaInfo(Target, Info Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Info Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FVariant",
+      "docs": "Get information about the media that is playing.\n@param\tInfoName\t\tName of the information we want.\n@returns\t\t\t\t\tRequested information, or empty if not available.\n@see\t\t\t\t\t\tUMediaPlayer::GetMediaInfo."
+    },
+    {
+      "id": "get-media-name",
+      "name": "GetMediaName",
+      "category": "MediaPlayerFacade",
+      "signature": "GetMediaName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Get the human readable name of the currently loaded media source.\n@return Media source name, or empty text if no media is opened\n@see GetPlayerName, GetUrl"
+    },
+    {
+      "id": "get-media-metadata",
+      "name": "GetMediaMetadata",
+      "category": "MediaPlayerFacade",
+      "signature": "GetMediaMetadata(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "TSharedPtr<TMap<FString,TArray<TUniquePtr<IMediaMetadataItem>>>,ESPMode::ThreadSafe>",
+      "docs": "Get meta data contained in the current stream\n@return Map with arrays of IMediaMetaDataItem entries describing any metadata found in the current stream\n@note Listen to EMediaEvent::MetadataChanged to catch updates to this data"
+    },
+    {
+      "id": "get-num-tracks",
+      "name": "GetNumTracks",
+      "category": "MediaPlayerFacade",
+      "signature": "GetNumTracks(Target, Track Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of tracks of the given type.\n@param TrackType The type of media tracks.\n@return Number of tracks.\n@see GetSelectedTrack, SelectTrack"
+    },
+    {
+      "id": "get-num-track-formats",
+      "name": "GetNumTrackFormats",
+      "category": "MediaPlayerFacade",
+      "signature": "GetNumTrackFormats(Target, Track Type, Track Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of formats of the specified track.\n@param TrackType The type of media tracks.\n@param TrackIndex The index of the track.\n@return Number of formats.\n@see GetNumTracks, GetSelectedTrack, SelectTrack"
+    },
+    {
+      "id": "get-player-name",
+      "name": "GetPlayerName",
+      "category": "MediaPlayerFacade",
+      "signature": "GetPlayerName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Get the name of the current native media player.\n@return Player name, or NAME_None if not available.\n@see GetMediaName"
+    },
+    {
+      "id": "get-rate",
+      "name": "GetRate",
+      "category": "MediaPlayerFacade",
+      "signature": "GetRate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get the media's current playback rate.\n@return The playback rate.\n@see SetRate, SupportsRate"
+    },
+    {
+      "id": "get-selected-track",
+      "name": "GetSelectedTrack",
+      "category": "MediaPlayerFacade",
+      "signature": "GetSelectedTrack(Target, Track Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the index of the currently selected track of the given type.\n@param TrackType The type of track to get.\n@return The index of the selected track, or INDEX_NONE if no track is active.\n@see GetNumTracks, SelectTrack"
+    },
+    {
+      "id": "get-stats",
+      "name": "GetStats",
+      "category": "MediaPlayerFacade",
+      "signature": "GetStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get playback statistics information.\n@return Information string.\n@see GetInfo"
+    },
+    {
+      "id": "get-supported-rates",
+      "name": "GetSupportedRates",
+      "category": "MediaPlayerFacade",
+      "signature": "GetSupportedRates(Target, Unthinned)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Unthinned",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "TRangeSet<float>",
+      "docs": "Get the supported playback rates.\n@param Unthinned Whether the rates are for unthinned playback (default = true).\n@return The ranges of supported rates.\n@see SetRate, SupportsRate"
+    },
+    {
+      "id": "get-playback-time-range",
+      "name": "GetPlaybackTimeRange",
+      "category": "MediaPlayerFacade",
+      "signature": "GetPlaybackTimeRange(Target, In Range To Get)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "In Range To Get",
+          "type": "EMediaTimeRangeType"
+        }
+      ],
+      "returnType": "TRange<FTimespan>",
+      "docs": "Returns the current playback range of the media.\nIf playing back a range is not supported, the range returned will be equal\nto [ 0, GetDuration() ).\nThe media may have an implicit default range provided by the container format\nor other means without having called SetPlaybackTimeRange().\nThe media may have internal time values not starting at 0, which are\nconveyed by the range.\nSince the range may be only a portion of the media, the duration of the\nreturned range may be less than the media overall duration returned by\nGetDuration().\nFor live video streams the range may change dynamically as new content\nbecomes available and old content falls off the timeline.\n@param InRangeToGet The type of range to get.\n`Absolute` returns the media's smallest and largest timeline values.\nUnless continuously changing in a Live stream this is usually the\nsame as [ 0, GetDuration() ]. The base time does not have to be\nzero though.\n`Current` returns the currently set range, which is a subset of the\nabsolute range.\n@return The playback range as queried for or an empty range if there is no open player.\n@see SupportsPlaybackTimeRange, SetPlaybackTimeRange, GetDuration"
+    },
+    {
+      "id": "get-time",
+      "name": "GetTime",
+      "category": "MediaPlayerFacade",
+      "signature": "GetTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FTimespan",
+      "docs": "Get the media's current playback time.\n@return Playback time.\n@see GetDuration, Seek"
+    },
+    {
+      "id": "get-time-stamp",
+      "name": "GetTimeStamp",
+      "category": "MediaPlayerFacade",
+      "signature": "GetTimeStamp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FMediaTimeStamp",
+      "docs": "Get the media's current playback time stamp.\n@return Playback time stamp."
+    },
+    {
+      "id": "get-display-time-stamp",
+      "name": "GetDisplayTimeStamp",
+      "category": "MediaPlayerFacade",
+      "signature": "GetDisplayTimeStamp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FMediaTimeStamp",
+      "docs": "Get the media's current playback time stamp in a \"display\" version\n@return Playback time stamp.\n@note The timestamp returned here will reflect a user-logic oriented version.\n(e.g. during seeks this will return the seek target rather than the last valid frame still displayed)"
+    },
+    {
+      "id": "get-video-timecode",
+      "name": "GetVideoTimecode",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTimecode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "TOptional<FTimecode>",
+      "docs": "Get the timecode from the video track, if one is available.\nIf available, the returned value will be the timecode of the sample most recently\nsent into the video sink.\n@return Most recently delivered video timecode from the video track.\n@note Even if timecode is available, the value returned reflects the timecode\nthat most recently delivered to the video sink. During a seek operation\nthe timecode will be unset."
+    },
+    {
+      "id": "get-last-processed-video-sample-time-range",
+      "name": "GetLastProcessedVideoSampleTimeRange",
+      "category": "MediaPlayerFacade",
+      "signature": "GetLastProcessedVideoSampleTimeRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "TRange<FMediaTimeStamp>",
+      "docs": "Returns the last video sample time range that has been enqueued in the video sink."
+    },
+    {
+      "id": "get-track-display-name",
+      "name": "GetTrackDisplayName",
+      "category": "MediaPlayerFacade",
+      "signature": "GetTrackDisplayName(Target, Track Type, Track Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Get the human readable name of the specified track.\n@param TrackType The type of track.\n@param TrackIndex The index of the track.\n@return Display name.\n@see GetNumTracks, GetTrackLanguage"
+    },
+    {
+      "id": "get-track-format",
+      "name": "GetTrackFormat",
+      "category": "MediaPlayerFacade",
+      "signature": "GetTrackFormat(Target, Track Type, Track Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the index of the active format of the specified track.\n@param TrackType The type of track.\n@param TrackIndex The index of the track.\n@return The index of the selected format.\n@see GetNumTrackFormats, GetSelectedTrack, SetTrackFormat"
+    },
+    {
+      "id": "get-track-language",
+      "name": "GetTrackLanguage",
+      "category": "MediaPlayerFacade",
+      "signature": "GetTrackLanguage(Target, Track Type, Track Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get the language tag of the specified track.\n@param TrackType The type of track.\n@param TrackIndex The index of the track.\n@return Language tag, i.e. \"en-US\" for English, or \"und\" for undefined.\n@see GetNumTracks, GetTrackDisplayName"
+    },
+    {
+      "id": "get-video-track-aspect-ratio",
+      "name": "GetVideoTrackAspectRatio",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTrackAspectRatio(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get the aspect ratio of the specified video track.\n@param TrackIndex The index of the track.\n@param FormatIndex Index of the track format.\n@return Aspect ratio.\n@see GetVideoTrackDimensions, GetVideoTrackFrameRate, GetVideoTrackFrameRates, GetVideoTrackType"
+    },
+    {
+      "id": "get-video-track-dimensions",
+      "name": "GetVideoTrackDimensions",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTrackDimensions(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIntPoint",
+      "docs": "Get the width and height of the specified video track.\n@param TrackIndex The index of the track.\n@param FormatIndex Index of the track format.\n@return Video dimensions.\n@see GetVideoTrackAspectRatio, GetVideoTrackFrameRate, GetVideoTrackFrameRates, GetVideoTrackType"
+    },
+    {
+      "id": "get-video-track-frame-rate",
+      "name": "GetVideoTrackFrameRate",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTrackFrameRate(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get frame rate of the specified video track.\n@param TrackIndex The index of the track.\n@param FormatIndex Index of the track format.\n@return Video frame rate.\n@see GetVideoTrackAspectRatio, GetVideoTrackDimensions, GetVideoTrackFrameRates, GetVideoTrackType"
+    },
+    {
+      "id": "get-video-track-frame-rates",
+      "name": "GetVideoTrackFrameRates",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTrackFrameRates(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TRange<float>",
+      "docs": "Get the supported range of frame rates of the specified video track.\n@param TrackIndex The index of the track.\n@param FormatIndex Index of the track format.\n@return Frame rate range (in frames per second).\n@see GetVideoTrackAspectRatio, GetVideoTrackDimensions, GetVideoTrackFrameRate, GetVideoTrackType"
+    },
+    {
+      "id": "get-video-track-type",
+      "name": "GetVideoTrackType",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTrackType(Target, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get the type of the specified video track format.\n@param TrackIndex The index of the track.\n@param FormatIndex Index of the track format.\n@return Video format type string.\n@see GetVideoTrackAspectRatio, GetVideoTrackDimensions, GetVideoTrackFrameRate, GetVideoTrackFrameRates"
+    },
+    {
+      "id": "get-view-field",
+      "name": "GetViewField",
+      "category": "MediaPlayerFacade",
+      "signature": "GetViewField(Target, Out Horizontal, Out Vertical)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Out Horizontal",
+          "type": "Float&"
+        },
+        {
+          "name": "Out Vertical",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get the field of view.\n@param OutHorizontal Will contain the horizontal field of view.\n@param OutVertical Will contain the vertical field of view.\n@return true on success, false if feature is not available or if field of view has never been set.\n@see GetViewOrientation, SetViewField"
+    },
+    {
+      "id": "get-view-orientation",
+      "name": "GetViewOrientation",
+      "category": "MediaPlayerFacade",
+      "signature": "GetViewOrientation(Target, Out Orientation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Out Orientation",
+          "type": "FQuat&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get the view's orientation.\n@param OutOrientation Will contain the view orientation.\n@return true on success, false if feature is not available or if orientation has never been set.\n@see GetViewField, SetViewOrientation"
+    },
+    {
+      "id": "has-error",
+      "name": "HasError",
+      "category": "MediaPlayerFacade",
+      "signature": "HasError(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether the player is in an error state.\n@see IsReady"
+    },
+    {
+      "id": "is-buffering",
+      "name": "IsBuffering",
+      "category": "MediaPlayerFacade",
+      "signature": "IsBuffering(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the player is currently buffering data.\n@return true if buffering, false otherwise.\n@see GetState, IsConnecting, IsLooping"
+    },
+    {
+      "id": "is-connecting",
+      "name": "IsConnecting",
+      "category": "MediaPlayerFacade",
+      "signature": "IsConnecting(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the player is currently connecting to a media source.\n@return true if connecting, false otherwise.\n@see GetState, IsBuffering, IsLooping"
+    },
+    {
+      "id": "is-looping",
+      "name": "IsLooping",
+      "category": "MediaPlayerFacade",
+      "signature": "IsLooping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback is looping.\n@return true if looping, false otherwise.\n@see GetState, IsBuffering, IsConnecting, SetLooping"
+    },
+    {
+      "id": "is-paused",
+      "name": "IsPaused",
+      "category": "MediaPlayerFacade",
+      "signature": "IsPaused(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback is currently paused.\n@return true if playback is paused, false otherwise.\n@see CanPause, IsPlaying, IsReady, Pause"
+    },
+    {
+      "id": "is-playing",
+      "name": "IsPlaying",
+      "category": "MediaPlayerFacade",
+      "signature": "IsPlaying(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether playback is in progress.\n@return true if playback has started, false otherwise.\n@see CanPlay, IsPaused, IsReady, Play"
+    },
+    {
+      "id": "is-preparing",
+      "name": "IsPreparing",
+      "category": "MediaPlayerFacade",
+      "signature": "IsPreparing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the media is currently opening or buffering.\n@return true if playback is being prepared, false otherwise.\n@see CanPlay, IsPaused, IsReady, Play"
+    },
+    {
+      "id": "is-closed",
+      "name": "IsClosed",
+      "category": "MediaPlayerFacade",
+      "signature": "IsClosed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether media is currently closed.\n@return true if media is closed, false otherwise."
+    },
+    {
+      "id": "is-ready",
+      "name": "IsReady",
+      "category": "MediaPlayerFacade",
+      "signature": "IsReady(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether media is ready for playback.\nA player is ready for playback if it has a media source opened that\nfinished preparing and is not in an error state.\n@return true if media is ready, false otherwise.\n@see HasError, IsPaused, IsPlaying, Stop"
+    },
+    {
+      "id": "open",
+      "name": "Open",
+      "category": "MediaPlayerFacade",
+      "signature": "Open(Target, Url, Options, Player Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Url",
+          "type": "String&"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        },
+        {
+          "name": "Player Options",
+          "type": "FMediaPlayerOptions*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Open a media source from a URL with optional parameters.\n@param Url The URL of the media to open (file name or web address).\n@param Options Optional media parameters.\n@param PlayerOptions Optional player parameters.\n@return true if the media is being opened, false otherwise."
+    },
+    {
+      "id": "query-cache-state",
+      "name": "QueryCacheState",
+      "category": "MediaPlayerFacade",
+      "signature": "QueryCacheState(Target, Track Type, State, Out Time Ranges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "State",
+          "type": "EMediaCacheState"
+        },
+        {
+          "name": "Out Time Ranges",
+          "type": "TRangeSet<FTimespan>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Query the time ranges of cached media samples for the specified caching state.\n@param State The sample state we're interested in.\n@param OutTimeRanges Will contain the set of matching sample time ranges."
+    },
+    {
+      "id": "seek",
+      "name": "Seek",
+      "category": "MediaPlayerFacade",
+      "signature": "Seek(Target, Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Time",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Seeks to the specified playback time.\n@param Time The playback time to set.\n@return true on success, false otherwise.\n@see GetTime, Rewind"
+    },
+    {
+      "id": "is-seeking",
+      "name": "IsSeeking",
+      "category": "MediaPlayerFacade",
+      "signature": "IsSeeking(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "A seek has been requested, waiting to receive samples.\n@see Seek"
+    },
+    {
+      "id": "get-seek-target",
+      "name": "GetSeekTarget",
+      "category": "MediaPlayerFacade",
+      "signature": "GetSeekTarget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FMediaTimeStamp",
+      "docs": "If valid, returns the current seek request.\n@see Seek, IsSeeking"
+    },
+    {
+      "id": "set-next-seek",
+      "name": "SetNextSeek",
+      "category": "MediaPlayerFacade",
+      "signature": "SetNextSeek(Target, In Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "In Time",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set seek to be done after current seek is completed.\n@remark This value is reset if Seek is called directly."
+    },
+    {
+      "id": "select-track",
+      "name": "SelectTrack",
+      "category": "MediaPlayerFacade",
+      "signature": "SelectTrack(Target, Track Type, Track Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Select the active track of the given type.\nThe selected track will use its currently active format. Active formats will\nbe remembered on a per track basis. The first available format is active by\ndefault. To switch the track format, use SetTrackFormat instead.\n@param TrackType The type of track to select.\n@param TrackIndex The index of the track to select, or INDEX_NONE to deselect.\n@return true if the track was selected, false otherwise.\n@see GetNumTracks, GetSelectedTrack, SetTrackFormat"
+    },
+    {
+      "id": "set-block-on-time",
+      "name": "SetBlockOnTime",
+      "category": "MediaPlayerFacade",
+      "signature": "SetBlockOnTime(Target, Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Time",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the time on which to block.\nIf set, this player will block in TickFetch until the video sample\nfor the specified time are actually available.\n@param Time The time to block on, or FTimespan::MinValue to disable.\n@see TickFetch\n@note Deprecated: Use SetBlockOnTimeRange instead"
+    },
+    {
+      "id": "set-block-on-time-range",
+      "name": "SetBlockOnTimeRange",
+      "category": "MediaPlayerFacade",
+      "signature": "SetBlockOnTimeRange(Target, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the time range on which to block.\nIf set, this player will block in TickFetch until the video sample\nfor the specified time are actually available.\n@param TimeRange The time range to block on, use empty range to disable"
+    },
+    {
+      "id": "set-cache-window",
+      "name": "SetCacheWindow",
+      "category": "MediaPlayerFacade",
+      "signature": "SetCacheWindow(Target, Ahead, Behind)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Ahead",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Behind",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set sample caching options.\n@param Ahead Duration of samples to cache ahead of the play head.\n@param Behind Duration of samples to cache behind the play head."
+    },
+    {
+      "id": "set-guid",
+      "name": "SetGuid",
+      "category": "MediaPlayerFacade",
+      "signature": "SetGuid(Target, Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the player's globally unique identifier.\n@param Guid The GUID to set.\n@see GetGuid"
+    },
+    {
+      "id": "set-looping",
+      "name": "SetLooping",
+      "category": "MediaPlayerFacade",
+      "signature": "SetLooping(Target, Looping)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Looping",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Enables or disables playback looping.\n@param Looping Whether playback should be looped.\n@return true on success, false otherwise.\n@see IsLooping"
+    },
+    {
+      "id": "set-media-options",
+      "name": "SetMediaOptions",
+      "category": "MediaPlayerFacade",
+      "signature": "SetMediaOptions(Target, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Changes media ooptions on the player."
+    },
+    {
+      "id": "set-rate",
+      "name": "SetRate",
+      "category": "MediaPlayerFacade",
+      "signature": "SetRate(Target, Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Rate",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Changes the media's playback rate.\n@param Rate The playback rate to set.\n@return true on success, false otherwise.\n@see GetRate, SupportsRate"
+    },
+    {
+      "id": "set-playback-time-range",
+      "name": "SetPlaybackTimeRange",
+      "category": "MediaPlayerFacade",
+      "signature": "SetPlaybackTimeRange(Target, In Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "In Time Range",
+          "type": "TRange<FTimespan>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Sets a new media playback range.\nHas an effect only if SupportsPlaybackTimeRange() returns true and the media supports it.\nA live stream cannot be constrained to a range.\nThe range will be clamped if necessary to be within the media's absolute time range.\nChanging the time range may trigger an implicit Seek() depending on where the current\nplayback position is located with regard to the new range.\nUnless prevented by the media a playback range can be cleared by passing an empty range.\n@param InTimeRange The new playback range to set.\n@return true if successful, false otherwise.\n@see SupportsPlaybackTimeRange, GetPlaybackTimeRange"
+    },
+    {
+      "id": "set-native-volume",
+      "name": "SetNativeVolume",
+      "category": "MediaPlayerFacade",
+      "signature": "SetNativeVolume(Target, Volume)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Volume",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Changes the media's native volume.\n@param Rate The volume to set.\n@return true on success, false otherwise.\n@see NativeAudioOut"
+    },
+    {
+      "id": "set-track-format",
+      "name": "SetTrackFormat",
+      "category": "MediaPlayerFacade",
+      "signature": "SetTrackFormat(Target, Track Type, Track Index, Format Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Type",
+          "type": "EMediaTrackType"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the format on the specified track.\nSelecting the format will not switch to the specified track. To switch\ntracks, use SelectTrack instead. If the track is already selected, the\nformat change will be applied immediately.\n@param TrackType The type of track to update.\n@param TrackIndex The index of the track to update.\n@param FormatIndex The index of the format to select (must be valid).\n@return true if the track was selected, false otherwise.\n@see GetNumTrackFormats, GetNumTracks, GetTrackFormat, SelectTrack"
+    },
+    {
+      "id": "set-video-track-frame-rate",
+      "name": "SetVideoTrackFrameRate",
+      "category": "MediaPlayerFacade",
+      "signature": "SetVideoTrackFrameRate(Target, Track Index, Format Index, Frame Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        },
+        {
+          "name": "Frame Rate",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the frame rate of the specified video track.\n@param TrackIndex The index of the track, or INDEX_NONE for the selected one.\n@param FormatIndex Index of the track format, or INDEX_NONE for the selected one.\n@param FrameRate The frame rate to set (must be in range of format's supported frame rates).\n@return true on success, false otherwise.\n@see GetVideoTrackAspectRatio, GetVideoTrackDimensions, GetVideoTrackFrameRate, GetVideoTrackFrameRates, GetVideoTrackType"
+    },
+    {
+      "id": "set-view-field",
+      "name": "SetViewField",
+      "category": "MediaPlayerFacade",
+      "signature": "SetViewField(Target, Horizontal, Vertical, Absolute)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Horizontal",
+          "type": "Float"
+        },
+        {
+          "name": "Vertical",
+          "type": "Float"
+        },
+        {
+          "name": "Absolute",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the field of view.\n@param Horizontal Horizontal field of view (in Euler degrees).\n@param Vertical Vertical field of view (in Euler degrees).\n@param Whether the field of view change should be absolute (true) or relative (false).\n@return true on success, false otherwise.\n@see GetViewField, SetViewOrientation"
+    },
+    {
+      "id": "set-view-orientation",
+      "name": "SetViewOrientation",
+      "category": "MediaPlayerFacade",
+      "signature": "SetViewOrientation(Target, Orientation, Absolute)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Orientation",
+          "type": "FQuat&"
+        },
+        {
+          "name": "Absolute",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the view's orientation.\n@param Orientation Quaternion representing the orientation.\n@param Whether the orientation change should be absolute (true) or relative (false).\n@return true on success, false otherwise.\n@see GetViewOrientation, SetViewField"
+    },
+    {
+      "id": "supports-rate",
+      "name": "SupportsRate",
+      "category": "MediaPlayerFacade",
+      "signature": "SupportsRate(Target, Rate, Unthinned)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Rate",
+          "type": "Float"
+        },
+        {
+          "name": "Unthinned",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the specified playback rate is supported.\n@param Rate The playback rate to check.\n@param Unthinned Whether no frames should be dropped at the given rate.\n@see CanScrub, CanSeek"
+    },
+    {
+      "id": "set-last-audio-rendered-sample-time",
+      "name": "SetLastAudioRenderedSampleTime",
+      "category": "MediaPlayerFacade",
+      "signature": "SetLastAudioRenderedSampleTime(Target, Sample Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Sample Time",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record last audio sample played to track audio sync (for automated tests)\n@param SampleTime Time of media sample currently being played\n@return true if playback is being prepared, false otherwise."
+    },
+    {
+      "id": "get-last-audio-rendered-sample-time",
+      "name": "GetLastAudioRenderedSampleTime",
+      "category": "MediaPlayerFacade",
+      "signature": "GetLastAudioRenderedSampleTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "FTimespan",
+      "docs": "Get time of last audio sample played\n@return Time of last audio sample played."
+    },
+    {
+      "id": "set-are-events-safe-for-any-thread",
+      "name": "SetAreEventsSafeForAnyThread",
+      "category": "MediaPlayerFacade",
+      "signature": "SetAreEventsSafeForAnyThread(Target, In Are Events Safe For Any Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "In Are Events Safe For Any Thread",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets whether the player can broadcast events when running on a thread other than the game thread.\n@param bInAreEventsSafeForAnyThread If true then allow broadcast when not on the game thread."
+    },
+    {
+      "id": "tick-fetch",
+      "name": "TickFetch",
+      "category": "MediaPlayerFacade",
+      "signature": "TickFetch(Target, Delta Time, Timecode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Timecode",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "tick-input",
+      "name": "TickInput",
+      "category": "MediaPlayerFacade",
+      "signature": "TickInput(Target, Delta Time, Timecode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Timecode",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tick-output",
+      "name": "TickOutput",
+      "category": "MediaPlayerFacade",
+      "signature": "TickOutput(Target, Delta Time, Timecode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Timecode",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tick-tickable",
+      "name": "TickTickable",
+      "category": "MediaPlayerFacade",
+      "signature": "TickTickable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "block-on-fetch",
+      "name": "BlockOnFetch",
+      "category": "MediaPlayerFacade",
+      "signature": "BlockOnFetch(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "protected : bool",
+      "docs": "Whether sample fetching should block.\n@return true if sample fetching should block, false otherwise."
+    },
+    {
+      "id": "flush",
+      "name": "Flush",
+      "category": "MediaPlayerFacade",
+      "signature": "Flush(Target, Exclude Player, On Seek)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Exclude Player",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "On Seek",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flush all media sample sinks & player plugin."
+    },
+    {
+      "id": "get-time-stamp-internal",
+      "name": "GetTimeStampInternal",
+      "category": "MediaPlayerFacade",
+      "signature": "GetTimeStampInternal(Target, For Display)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "For Display",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "FMediaTimeStamp",
+      "docs": "Internal function to retrieve the current timestamp"
+    },
+    {
+      "id": "get-audio-track-format",
+      "name": "GetAudioTrackFormat",
+      "category": "MediaPlayerFacade",
+      "signature": "GetAudioTrackFormat(Target, Track Index, Format Index, Out Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        },
+        {
+          "name": "Out Format",
+          "type": "FMediaAudioTrackFormat&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get details about the specified audio track format.\n@param TrackIndex The index of the audio track.\n@param FormatIndex The index of the track's format.\n@param OutFormat Will contain the format details.\n@return true on success, false otherwise.\n@see GetVideoTrackFormat"
+    },
+    {
+      "id": "get-player-factory-for-url",
+      "name": "GetPlayerFactoryForUrl",
+      "category": "MediaPlayerFacade",
+      "signature": "GetPlayerFactoryForUrl(Target, Url, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Url",
+          "type": "String&"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        }
+      ],
+      "returnType": "IMediaPlayerFactory*",
+      "docs": "Get a player that can play the specified media URL.\n@param Url The URL to play.\n@param Options The media options for the URL.\n@return The player if found, or nullptr otherwise."
+    },
+    {
+      "id": "get-video-track-format",
+      "name": "GetVideoTrackFormat",
+      "category": "MediaPlayerFacade",
+      "signature": "GetVideoTrackFormat(Target, Track Index, Format Index, Out Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Track Index",
+          "type": "Int"
+        },
+        {
+          "name": "Format Index",
+          "type": "Int"
+        },
+        {
+          "name": "Out Format",
+          "type": "FMediaVideoTrackFormat&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get details about the specified audio track format.\n@param TrackIndex The index of the audio track.\n@param FormatIndex The index of the track's format.\n@param OutFormat Will contain the format details.\n@return true on success, false otherwise.\n@see GetVideoTrackFormat"
+    },
+    {
+      "id": "process-event",
+      "name": "ProcessEvent",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessEvent(Target, Event, Is Broadcast Allowed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Event",
+          "type": "EMediaEvent"
+        },
+        {
+          "name": "Is Broadcast Allowed",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process the given media event.\n@param Event The event to process.\n@param bIsBroadcastAllowed If true then we can broadcast events, if false then they will sent when possible."
+    },
+    {
+      "id": "reset-tracks",
+      "name": "ResetTracks",
+      "category": "MediaPlayerFacade",
+      "signature": "ResetTracks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset all tracks."
+    },
+    {
+      "id": "update-track-selection-with-player",
+      "name": "UpdateTrackSelectionWithPlayer",
+      "category": "MediaPlayerFacade",
+      "signature": "UpdateTrackSelectionWithPlayer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Setup track selection with player."
+    },
+    {
+      "id": "select-default-tracks",
+      "name": "SelectDefaultTracks",
+      "category": "MediaPlayerFacade",
+      "signature": "SelectDefaultTracks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Select the default media tracks."
+    },
+    {
+      "id": "have-audio-playback",
+      "name": "HaveAudioPlayback",
+      "category": "MediaPlayerFacade",
+      "signature": "HaveAudioPlayback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "protected : bool"
+    },
+    {
+      "id": "have-video-playback",
+      "name": "HaveVideoPlayback",
+      "category": "MediaPlayerFacade",
+      "signature": "HaveVideoPlayback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-unpaused-rate",
+      "name": "GetUnpausedRate",
+      "category": "MediaPlayerFacade",
+      "signature": "GetUnpausedRate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "receive-media-event",
+      "name": "ReceiveMediaEvent",
+      "category": "MediaPlayerFacade",
+      "signature": "ReceiveMediaEvent(Target, Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Event",
+          "type": "EMediaEvent"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "notify-lifetime-manager-delegate-player-open",
+      "name": "NotifyLifetimeManagerDelegate_PlayerOpen",
+      "category": "MediaPlayerFacade",
+      "signature": "NotifyLifetimeManagerDelegate_PlayerOpen(Target, New Lifecycle Manager Delegate Control, In Url, Options, In Player Options, Player Factory, Will Create Player, Will Use New Resources, New Player Instance ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "New Lifecycle Manager Delegate Control",
+          "type": "IMediaPlayerLifecycleManagerDelegate::IControlRef&"
+        },
+        {
+          "name": "In Url",
+          "type": "String&"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        },
+        {
+          "name": "In Player Options",
+          "type": "FMediaPlayerOptions*"
+        },
+        {
+          "name": "Player Factory",
+          "type": "IMediaPlayerFactory*"
+        },
+        {
+          "name": "Will Create Player",
+          "type": "Bool"
+        },
+        {
+          "name": "Will Use New Resources",
+          "type": "UInt"
+        },
+        {
+          "name": "New Player Instance ID",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "notify-lifetime-manager-delegate-player-created",
+      "name": "NotifyLifetimeManagerDelegate_PlayerCreated",
+      "category": "MediaPlayerFacade",
+      "signature": "NotifyLifetimeManagerDelegate_PlayerCreated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "notify-lifetime-manager-delegate-player-create-failed",
+      "name": "NotifyLifetimeManagerDelegate_PlayerCreateFailed",
+      "category": "MediaPlayerFacade",
+      "signature": "NotifyLifetimeManagerDelegate_PlayerCreateFailed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "notify-lifetime-manager-delegate-player-closed",
+      "name": "NotifyLifetimeManagerDelegate_PlayerClosed",
+      "category": "MediaPlayerFacade",
+      "signature": "NotifyLifetimeManagerDelegate_PlayerClosed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "notify-lifetime-manager-delegate-player-destroyed",
+      "name": "NotifyLifetimeManagerDelegate_PlayerDestroyed",
+      "category": "MediaPlayerFacade",
+      "signature": "NotifyLifetimeManagerDelegate_PlayerDestroyed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "notify-lifetime-manager-delegate-player-resources-released",
+      "name": "NotifyLifetimeManagerDelegate_PlayerResourcesReleased",
+      "category": "MediaPlayerFacade",
+      "signature": "NotifyLifetimeManagerDelegate_PlayerResourcesReleased(Target, Resource Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Resource Flags",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "process-audio-samples",
+      "name": "ProcessAudioSamples",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessAudioSamples(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-video-samples",
+      "name": "ProcessVideoSamples",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessVideoSamples(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "process-caption-samples",
+      "name": "ProcessCaptionSamples",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessCaptionSamples(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-subtitle-samples",
+      "name": "ProcessSubtitleSamples",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessSubtitleSamples(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-metadata-samples",
+      "name": "ProcessMetadataSamples",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessMetadataSamples(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-audio-samples-v-1",
+      "name": "ProcessAudioSamplesV1",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessAudioSamplesV1(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-video-samples-v-1",
+      "name": "ProcessVideoSamplesV1",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessVideoSamplesV1(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-subtitle-samples-v-1",
+      "name": "ProcessSubtitleSamplesV1",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessSubtitleSamplesV1(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-caption-samples-v-1",
+      "name": "ProcessCaptionSamplesV1",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessCaptionSamplesV1(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-metadata-samples-v-1",
+      "name": "ProcessMetadataSamplesV1",
+      "category": "MediaPlayerFacade",
+      "signature": "ProcessMetadataSamplesV1(Target, Samples, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Samples",
+          "type": "IMediaSamples&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-video-sample-still-good",
+      "name": "IsVideoSampleStillGood",
+      "category": "MediaPlayerFacade",
+      "signature": "IsVideoSampleStillGood(Target, Last Sample Time Range, Time Range, Reverse)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Last Sample Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        },
+        {
+          "name": "Reverse",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "monitor-audio-enablement",
+      "name": "MonitorAudioEnablement",
+      "category": "MediaPlayerFacade",
+      "signature": "MonitorAudioEnablement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-seek-status",
+      "name": "UpdateSeekStatus",
+      "category": "MediaPlayerFacade",
+      "signature": "UpdateSeekStatus(Target, P Check Time Stamp)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "P Check Time Stamp",
+          "type": "FMediaTimeStamp*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pre-sample-processing-time-handling",
+      "name": "PreSampleProcessingTimeHandling",
+      "category": "MediaPlayerFacade",
+      "signature": "PreSampleProcessingTimeHandling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-playback-time-range",
+      "name": "GetCurrentPlaybackTimeRange",
+      "category": "MediaPlayerFacade",
+      "signature": "GetCurrentPlaybackTimeRange(Target, Time Range, Rate, Delta Time, Purge Sample Related)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        },
+        {
+          "name": "Rate",
+          "type": "Float"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Purge Sample Related",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "post-sample-processing-time-handling",
+      "name": "PostSampleProcessingTimeHandling",
+      "category": "MediaPlayerFacade",
+      "signature": "PostSampleProcessingTimeHandling(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "destroy-player",
+      "name": "DestroyPlayer",
+      "category": "MediaPlayerFacade",
+      "signature": "DestroyPlayer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "continue-open",
+      "name": "ContinueOpen",
+      "category": "MediaPlayerFacade",
+      "signature": "ContinueOpen(Target, New Lifecycle Manager Delegate Control, Url, Options, Player Options, Player Factory, Reused Player, Create New Player, New Player Instance ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "New Lifecycle Manager Delegate Control",
+          "type": "IMediaPlayerLifecycleManagerDelegate::IControlRef"
+        },
+        {
+          "name": "Url",
+          "type": "String&"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        },
+        {
+          "name": "Player Options",
+          "type": "FMediaPlayerOptions*"
+        },
+        {
+          "name": "Player Factory",
+          "type": "IMediaPlayerFactory*"
+        },
+        {
+          "name": "Reused Player",
+          "type": "TSharedPtr<IMediaPlayer,ESPMode::ThreadSafe>"
+        },
+        {
+          "name": "Create New Player",
+          "type": "Bool"
+        },
+        {
+          "name": "New Player Instance ID",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "send-sink-event",
+      "name": "SendSinkEvent",
+      "category": "MediaPlayerFacade",
+      "signature": "SendSinkEvent(Target, Event, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        },
+        {
+          "name": "Event",
+          "type": "EMediaSampleSinkEvent"
+        },
+        {
+          "name": "Data",
+          "type": "FMediaSampleSinkEventData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-adjusted-block-on-range",
+      "name": "GetAdjustedBlockOnRange",
+      "category": "MediaPlayerFacade",
+      "signature": "GetAdjustedBlockOnRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMediaPlayerFacade*"
+        }
+      ],
+      "returnType": "private : TRange<FMediaTimeStamp>",
+      "docs": "Audio sample sinks."
+    }
+  ]
+}

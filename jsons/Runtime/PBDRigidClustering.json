@@ -1,0 +1,1292 @@
+{
+  "id": "pbd-rigid-clustering",
+  "label": "PBDRigidClustering",
+  "includepath": "Chaos/PBDRigidClustering.h",
+  "includes": [
+    "ClusterUnionManager",
+    "ChaosSolverConfiguration",
+    "PBDRigidClusteredParticles",
+    "PBDCollisionConstraints",
+    "Transform",
+    "CollisionResolutionTypes",
+    "ExternalCollisionData",
+    "TriangleMesh",
+    "ClusterCreationParameters",
+    "GeometryParticlesfwd",
+    "BufferedData",
+    "PBDRigidClusteringTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-rigid-clustering-a2d291",
+      "name": "FRigidClustering",
+      "category": "PBDRigidClustering",
+      "signature": "FRigidClustering(In Evolution, In Particles, In Strain Modifiers)",
+      "params": [
+        {
+          "name": "In Evolution",
+          "type": "FRigidEvolution&"
+        },
+        {
+          "name": "In Particles",
+          "type": "FPBDRigidClusteredParticles&"
+        },
+        {
+          "name": "In Strain Modifiers",
+          "type": "TArray<ISimCallbackObject*>*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-rigid-clustering-0f130e",
+      "name": "FRigidClustering",
+      "category": "PBDRigidClustering",
+      "signature": "FRigidClustering()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-cluster-particle",
+      "name": "CreateClusterParticle",
+      "category": "PBDRigidClustering",
+      "signature": "CreateClusterParticle(Target, Cluster Group Index, Children, Parameters, Proxy Geometry, Force Mass Orientation, Existing Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Cluster Group Index",
+          "type": "Int"
+        },
+        {
+          "name": "Children",
+          "type": "TArray<Chaos::FPBDRigidParticleHandle*>&&"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        },
+        {
+          "name": "Proxy Geometry",
+          "type": "Chaos::FImplicitObjectPtr&",
+          "default": "nullptr"
+        },
+        {
+          "name": "Force Mass Orientation",
+          "type": "FRigidTransform3*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Existing Index",
+          "type": "FUniqueIdx*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Chaos::FPBDRigidClusteredParticleHandle*",
+      "docs": "Initialize a cluster with the specified children.\n\\p ClusterGroupIndex - Index to join cluster into.\n\\p Children - List of children that should belong to the cluster\n\\p Parameters - ClusterParticleHandle must be valid, this is the parent cluster body.\nProxyGeometry : Collision default for the cluster, automatically generated otherwise.\nForceMassOrientation : Inertial alignment into mass space."
+    },
+    {
+      "id": "create-cluster-particle-from-cluster-children",
+      "name": "CreateClusterParticleFromClusterChildren",
+      "category": "PBDRigidClustering",
+      "signature": "CreateClusterParticleFromClusterChildren(Target, Children, Parent, Cluster World TM, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Children",
+          "type": "TArray<FPBDRigidParticleHandle*>&&"
+        },
+        {
+          "name": "Parent",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Cluster World TM",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&"
+        }
+      ],
+      "returnType": "Chaos::FPBDRigidClusteredParticleHandle*",
+      "docs": "CreateClusterParticleFromClusterChildren\nChildren : Rigid body ID to include in the cluster."
+    },
+    {
+      "id": "add-particles-to-cluster",
+      "name": "AddParticlesToCluster",
+      "category": "PBDRigidClustering",
+      "signature": "AddParticlesToCluster(Target, Cluster, In Children, Child To Parent Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Cluster",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "In Children",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Child To Parent Map",
+          "type": "TMap<FPBDRigidParticleHandle*,FPBDRigidParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "= FClusterCreationParameters()"
+    },
+    {
+      "id": "remove-particles-from-cluster",
+      "name": "RemoveParticlesFromCluster",
+      "category": "PBDRigidClustering",
+      "signature": "RemoveParticlesFromCluster(Target, Cluster, In Children)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Cluster",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "In Children",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Manually remove a set of particles from the cluster."
+    },
+    {
+      "id": "union-cluster-groups",
+      "name": "UnionClusterGroups",
+      "category": "PBDRigidClustering",
+      "signature": "UnionClusterGroups(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "UnionClusterGroups\nClusters that share a group index should be unioned into a single cluster prior to simulation.\nThe GroupIndex should be set on creation, and never touched by the client again."
+    },
+    {
+      "id": "deactivate-cluster-particle",
+      "name": "DeactivateClusterParticle",
+      "category": "PBDRigidClustering",
+      "signature": "DeactivateClusterParticle(Target, Clustered Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "TSet<FPBDRigidParticleHandle*>",
+      "docs": "DeactivateClusterParticle\nRelease all the particles within the cluster particle"
+    },
+    {
+      "id": "release-cluster-particles-236b99",
+      "name": "ReleaseClusterParticles",
+      "category": "PBDRigidClustering",
+      "signature": "ReleaseClusterParticles(Target, Clustered Particle, Force Release)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Force Release",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "TSet<FPBDRigidParticleHandle*>",
+      "docs": "ReleaseClusterParticles (BasedOnStrain)\nRelease clusters based on the passed in \\p ExternalStrainArray, or the\nparticle handle's current \\c CollisionImpulses() value. Any cluster bodies\nthat have a strain value less than this valid will be released from the\ncluster."
+    },
+    {
+      "id": "release-cluster-particles-no-internal-cluster",
+      "name": "ReleaseClusterParticlesNoInternalCluster",
+      "category": "PBDRigidClustering",
+      "signature": "ReleaseClusterParticlesNoInternalCluster(Target, Clustered Particle, Force Release)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Force Release",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "TSet<FPBDRigidParticleHandle*>"
+    },
+    {
+      "id": "release-cluster-particles-6b2710",
+      "name": "ReleaseClusterParticles",
+      "category": "PBDRigidClustering",
+      "signature": "ReleaseClusterParticles(Target, Children Particles, Trigger Break Events)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Children Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>"
+        },
+        {
+          "name": "Trigger Break Events",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "TSet<FPBDRigidParticleHandle*>",
+      "docs": "ReleaseClusterParticles\nRelease all rigid body IDs passed,"
+    },
+    {
+      "id": "force-release-child-particle-and-parents",
+      "name": "ForceReleaseChildParticleAndParents",
+      "category": "PBDRigidClustering",
+      "signature": "ForceReleaseChildParticleAndParents(Target, Child Clustered Particle, Trigger Break Events)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Child Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Trigger Break Events",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force Release a particle at any level by making sure their parent particles are also release if necessary\n@Warning this will force all particles including the ones in the parent chain to be made breakable"
+    },
+    {
+      "id": "destroy-cluster-particle",
+      "name": "DestroyClusterParticle",
+      "category": "PBDRigidClustering",
+      "signature": "DestroyClusterParticle(Target, Clustered Particle, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterDestoryParameters&",
+          "default": "FClusterDestoryParameters()"
+        }
+      ],
+      "returnType": "FPBDRigidClusteredParticleHandle*",
+      "docs": "DestroyClusterParticle\nDisable the cluster particle and remove from all internal clustering\nstructures. This will not activate children.\nReturns the active parent cluster that might need to be rebuilt because\nits geometry might be pointing to deleted particle handels."
+    },
+    {
+      "id": "break-cluster",
+      "name": "BreakCluster",
+      "category": "PBDRigidClustering",
+      "signature": "BreakCluster(Target, Clustered Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "BreakCluster\nBreaks a cluster (internal or not) by applying max external strain to all its children\n@param ClusteredParticle handle of the cluster to break\n@return true if the cluster was successfully found and act upon"
+    },
+    {
+      "id": "break-clusters-by-proxy",
+      "name": "BreakClustersByProxy",
+      "category": "PBDRigidClustering",
+      "signature": "BreakClustersByProxy(Target, Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Proxy",
+          "type": "IPhysicsProxyBase*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "BreakClustersByProxy\nBreaks clusters (internal or not) own by a specific proxy by applying max external strain to all its children\n@param Proxy proxy owning the clusters to break\n@return true if any cluster was successfully found and act upon"
+    },
+    {
+      "id": "advance-clustering",
+      "name": "AdvanceClustering",
+      "category": "PBDRigidClustering",
+      "signature": "AdvanceClustering(Target, Dt, Collision Rule)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        },
+        {
+          "name": "Collision Rule",
+          "type": "FPBDCollisionConstraints&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "AdvanceClustering\nAdvance the cluster forward in time;\n... Union unprocessed geometry.\n... Release bodies based collision impulses.\n... Updating properties as necessary."
+    },
+    {
+      "id": "breaking-model-a01d6e",
+      "name": "BreakingModel",
+      "category": "PBDRigidClustering",
+      "signature": "BreakingModel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "BreakingModel\nImplements the promotion breaking model, where strain impulses are\nsummed onto the cluster body, and released if greater than the\nencoded strain. The remainder strains are propagated back down to\nthe children clusters."
+    },
+    {
+      "id": "breaking-model-fadf08",
+      "name": "BreakingModel",
+      "category": "PBDRigidClustering",
+      "signature": "BreakingModel(Target, In Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "In Particles",
+          "type": "TArray<FPBDRigidClusteredParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "visitor",
+      "name": "Visitor",
+      "category": "PBDRigidClustering",
+      "signature": "Visitor(Target, Cluster, Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Cluster",
+          "type": "FClusterHandle"
+        },
+        {
+          "name": "Function",
+          "type": "FVisitorFunction"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Visitor\nWalk all the decendents of the current cluster and execute FVisitorFunction.\nFVisitorFunction = [](FRigidClustering& Clustering, FRigidHandle RigidHandle){}"
+    },
+    {
+      "id": "get-active-cluster-index",
+      "name": "GetActiveClusterIndex",
+      "category": "PBDRigidClustering",
+      "signature": "GetActiveClusterIndex(Target, Child)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Child",
+          "type": "FPBDRigidParticleHandle*"
+        }
+      ],
+      "returnType": "FPBDRigidParticleHandle*",
+      "docs": "GetActiveClusterIndex\nGet the current childs active cluster. Returns INDEX_NONE if\nnot active or driven."
+    },
+    {
+      "id": "reset-all-events",
+      "name": "ResetAllEvents",
+      "category": "PBDRigidClustering",
+      "signature": "ResetAllEvents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset all events ( this include breaking, crumbling event and tracking data"
+    },
+    {
+      "id": "find-closest-child",
+      "name": "FindClosestChild",
+      "category": "PBDRigidClustering",
+      "signature": "FindClosestChild(Target, Clustered Particle, World Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "World Location",
+          "type": "FVec3&"
+        }
+      ],
+      "returnType": "FPBDRigidParticleHandle*",
+      "docs": "FindClosestChild\nFind the closest child of an active cluster from a world position\ncurrent implementation will pick the closest based on the distance from the center\nfuture implementation may expose option for more precise queries\n@param ClusteredParticle active cluster handle to query the children from\n@param WorldLocation world space location to find the closest child from"
+    },
+    {
+      "id": "find-closest-particle",
+      "name": "FindClosestParticle",
+      "category": "PBDRigidClustering",
+      "signature": "FindClosestParticle(Particles, World Location)",
+      "params": [
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "World Location",
+          "type": "FVec3&"
+        }
+      ],
+      "returnType": "FPBDRigidParticleHandle*",
+      "docs": "FindClosest\nFind the closest particle from an array of  particle\ncurrent implementation will pick the closest based on the distance from the center\nfuture implementation may expose option for more precise queries\n@param Particles array of clustered particles to select from\n@param WorldLocation world space location to find the closest particle from"
+    },
+    {
+      "id": "find-children-within-radius",
+      "name": "FindChildrenWithinRadius",
+      "category": "PBDRigidClustering",
+      "signature": "FindChildrenWithinRadius(Target, Clustered Particle, World Location, Radius, Always Return Closest)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "World Location",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Radius",
+          "type": "FReal"
+        },
+        {
+          "name": "Always Return Closest",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TArray<FPBDRigidParticleHandle*>",
+      "docs": "FindChildrenWithinRadius\nFind the children of an active cluster from a world position and a radius\ncurrent implementation will pick the closest based on the distance from the center\nfuture implementation may expose option for more precise queries\nif bAlwaysReturnClosest is checked this will always return  the closest from the location even if the radius does not encompass any center of mass\n@param ClusteredParticle active cluster handle to query the children from\n@param WorldLocation world space location to find the closest child from\n@param Radius Radius to use from the WorldLocation\n@param bAlwaysReturnClosest if radius query does not return anything still return the closest from the point"
+    },
+    {
+      "id": "find-particles-within-radius",
+      "name": "FindParticlesWithinRadius",
+      "category": "PBDRigidClustering",
+      "signature": "FindParticlesWithinRadius(Particles, World Location, Radius, Always Return Closest)",
+      "params": [
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "World Location",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Radius",
+          "type": "FReal"
+        },
+        {
+          "name": "Always Return Closest",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TArray<FPBDRigidParticleHandle*>",
+      "docs": "FindParticlesWithinRadius\nFind the closest particle from an array of  particle from a world position and a radius\ncurrent implementation will pick the closest based on the distance from the center\nfuture implementation may expose option for more precise queries\nif bAlwaysReturnClosest is checked this will always return  the closest from the location even if the radius does not encompass any center of mass\n@param Particles array of clustered particles to select from\n@param WorldLocation world space location to find the closest particle from\n@param bAlwaysReturnClosest if radius query does not return anything still return the closest from the point"
+    },
+    {
+      "id": "generate-connection-graph-ccfdb1",
+      "name": "GenerateConnectionGraph",
+      "category": "PBDRigidClustering",
+      "signature": "GenerateConnectionGraph(Target, Particles, Parameters, From Particles, To Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        },
+        {
+          "name": "From Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "To Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-connection-graph-bc0849",
+      "name": "GenerateConnectionGraph",
+      "category": "PBDRigidClustering",
+      "signature": "GenerateConnectionGraph(Target, Parent, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Parent",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-connection-graph",
+      "name": "ClearConnectionGraph",
+      "category": "PBDRigidClustering",
+      "signature": "ClearConnectionGraph(Target, Parent)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Parent",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-internal-strain",
+      "name": "SetInternalStrain",
+      "category": "PBDRigidClustering",
+      "signature": "SetInternalStrain(Target, Particle, Strain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Strain",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-external-strain",
+      "name": "SetExternalStrain",
+      "category": "PBDRigidClustering",
+      "signature": "SetExternalStrain(Target, Particle, Strain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Strain",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-convex-optimizer",
+      "name": "BuildConvexOptimizer",
+      "category": "PBDRigidClustering",
+      "signature": "BuildConvexOptimizer(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "BuildConvexOptimizer\nCreate the convex optimizer unique ptr and loop over the particle geometry to simplify\nall the convexes within the hierarchy\n@param Particle particle on which the geometry will be simplified"
+    },
+    {
+      "id": "should-unions-have-collision-particles",
+      "name": "ShouldUnionsHaveCollisionParticles",
+      "category": "PBDRigidClustering",
+      "signature": "ShouldUnionsHaveCollisionParticles()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remove-node-connections",
+      "name": "RemoveNodeConnections",
+      "category": "PBDRigidClustering",
+      "signature": "RemoveNodeConnections(Target, Child)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Child",
+          "type": "FPBDRigidParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-node-connection",
+      "name": "CreateNodeConnection",
+      "category": "PBDRigidClustering",
+      "signature": "CreateNodeConnection(Target, A, B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "A",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "B",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cleanup-internal-clusters-for-proxies",
+      "name": "CleanupInternalClustersForProxies",
+      "category": "PBDRigidClustering",
+      "signature": "CleanupInternalClustersForProxies(Target, Proxies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Proxies",
+          "type": "TArrayView<IPhysicsProxyBase*>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "CleanupInternalClustersForProxies\nFor a given set of physics proxies, cleanup any tracked internal clusters that we've marked as being empty."
+    },
+    {
+      "id": "handle-connectivity-on-release-cluster-particle",
+      "name": "HandleConnectivityOnReleaseClusterParticle",
+      "category": "PBDRigidClustering",
+      "signature": "HandleConnectivityOnReleaseClusterParticle(Target, Clustered Particle, Create New Clusters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Create New Clusters",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TSet<FPBDRigidParticleHandle*>",
+      "docs": "Handles leveraging the connectivity edges on the children of the clustered particle to produce the desired effects."
+    },
+    {
+      "id": "disable-cluster",
+      "name": "DisableCluster",
+      "category": "PBDRigidClustering",
+      "signature": "DisableCluster(Target, Clustered Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-strain-from-collision",
+      "name": "ComputeStrainFromCollision",
+      "category": "PBDRigidClustering",
+      "signature": "ComputeStrainFromCollision(Target, Collision Rule, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Collision Rule",
+          "type": "FPBDCollisionConstraints&"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "reset-collision-impulse-array",
+      "name": "ResetCollisionImpulseArray",
+      "category": "PBDRigidClustering",
+      "signature": "ResetCollisionImpulseArray(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-strain-modifiers",
+      "name": "ApplyStrainModifiers",
+      "category": "PBDRigidClustering",
+      "signature": "ApplyStrainModifiers(Target, Strained Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Strained Particles",
+          "type": "TArray<FPBDRigidClusteredParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-connectivity-graph-using-point-implicit-c08ea2",
+      "name": "UpdateConnectivityGraphUsingPointImplicit",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateConnectivityGraphUsingPointImplicit(Target, Particles, Collision Thickness Percent, From Particles, To Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Collision Thickness Percent",
+          "type": "FReal"
+        },
+        {
+          "name": "From Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "To Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Connectivity"
+    },
+    {
+      "id": "update-connectivity-graph-using-point-implicit-2c3413",
+      "name": "UpdateConnectivityGraphUsingPointImplicit",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateConnectivityGraphUsingPointImplicit(Target, Parent, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Parent",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fix-connectivity-graph-using-delaunay-triangulation-248975",
+      "name": "FixConnectivityGraphUsingDelaunayTriangulation",
+      "category": "PBDRigidClustering",
+      "signature": "FixConnectivityGraphUsingDelaunayTriangulation(Target, Particles, Parameters, From Particles, To Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        },
+        {
+          "name": "From Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "To Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fix-connectivity-graph-using-delaunay-triangulation-9933a9",
+      "name": "FixConnectivityGraphUsingDelaunayTriangulation",
+      "category": "PBDRigidClustering",
+      "signature": "FixConnectivityGraphUsingDelaunayTriangulation(Target, Parent, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Parent",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-connectivity-graph-using-delaunay-triangulation-f37232",
+      "name": "UpdateConnectivityGraphUsingDelaunayTriangulation",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateConnectivityGraphUsingDelaunayTriangulation(Target, Particles, Parameters, From Particles, To Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        },
+        {
+          "name": "From Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "To Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-connectivity-graph-using-delaunay-triangulation-846360",
+      "name": "UpdateConnectivityGraphUsingDelaunayTriangulation",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateConnectivityGraphUsingDelaunayTriangulation(Target, Parent, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Parent",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-connectivity-graph-using-delaunay-triangulation-with-bounds-overlaps-ef8ec5",
+      "name": "UpdateConnectivityGraphUsingDelaunayTriangulationWithBoundsOverlaps",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateConnectivityGraphUsingDelaunayTriangulationWithBoundsOverlaps(Target, Particles, Parameters, From Particles, To Particles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particles",
+          "type": "TArray<FPBDRigidParticleHandle*>&"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        },
+        {
+          "name": "From Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "To Particles",
+          "type": "TSet<FPBDRigidParticleHandle*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-connectivity-graph-using-delaunay-triangulation-with-bounds-overlaps-84588d",
+      "name": "UpdateConnectivityGraphUsingDelaunayTriangulationWithBoundsOverlaps",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateConnectivityGraphUsingDelaunayTriangulationWithBoundsOverlaps(Target, Parent, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Parent",
+          "type": "Chaos::FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Parameters",
+          "type": "FClusterCreationParameters&",
+          "default": "FClusterCreationParameters()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-child-from-parent",
+      "name": "RemoveChildFromParent",
+      "category": "PBDRigidClustering",
+      "signature": "RemoveChildFromParent(Target, Child, Clustered Parent)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Child",
+          "type": "FPBDRigidParticleHandle*"
+        },
+        {
+          "name": "Clustered Parent",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-child-from-parent-and-children-array",
+      "name": "RemoveChildFromParentAndChildrenArray",
+      "category": "PBDRigidClustering",
+      "signature": "RemoveChildFromParentAndChildrenArray(Target, Child, Clustered Parent)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Child",
+          "type": "FPBDRigidParticleHandle*"
+        },
+        {
+          "name": "Clustered Parent",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "track-breaking-collision",
+      "name": "TrackBreakingCollision",
+      "category": "PBDRigidClustering",
+      "signature": "TrackBreakingCollision(Target, Clustered Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "restore-breaking-momentum",
+      "name": "RestoreBreakingMomentum",
+      "category": "PBDRigidClustering",
+      "signature": "RestoreBreakingMomentum(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-from-momentum-restoring-structures",
+      "name": "RemoveFromMomentumRestoringStructures",
+      "category": "PBDRigidClustering",
+      "signature": "RemoveFromMomentumRestoringStructures(Target, Particle To Remove)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particle To Remove",
+          "type": "FPBDRigidParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "send-breaking-event",
+      "name": "SendBreakingEvent",
+      "category": "PBDRigidClustering",
+      "signature": "SendBreakingEvent(Target, Clustered Particle, From Crumble)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "From Crumble",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "send-crumbling-event",
+      "name": "SendCrumblingEvent",
+      "category": "PBDRigidClustering",
+      "signature": "SendCrumblingEvent(Target, Clustered Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release-cluster-particles-impl",
+      "name": "ReleaseClusterParticlesImpl",
+      "category": "PBDRigidClustering",
+      "signature": "ReleaseClusterParticlesImpl(Target, Clustered Particle, Force Release, Create New Clusters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Force Release",
+          "type": "Bool"
+        },
+        {
+          "name": "Create New Clusters",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TSet<FPBDRigidParticleHandle*>"
+    },
+    {
+      "id": "find-islands-in-children",
+      "name": "FindIslandsInChildren",
+      "category": "PBDRigidClustering",
+      "signature": "FindIslandsInChildren(Target, Clustered Particle, Traverse Intercluster Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Clustered Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Traverse Intercluster Edges",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TArray<FParticleIsland>"
+    },
+    {
+      "id": "create-clusters-from-new-islands",
+      "name": "CreateClustersFromNewIslands",
+      "category": "PBDRigidClustering",
+      "signature": "CreateClustersFromNewIslands(Target, Islands, Clustered Parent)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Islands",
+          "type": "TArray<FParticleIsland>&"
+        },
+        {
+          "name": "Clustered Parent",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "TArray<FPBDRigidParticleHandle*>"
+    },
+    {
+      "id": "update-top-level-particle",
+      "name": "UpdateTopLevelParticle",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateTopLevelParticle(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Particle",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-cluster-particle-properties-from-children",
+      "name": "UpdateClusterParticlePropertiesFromChildren",
+      "category": "PBDRigidClustering",
+      "signature": "UpdateClusterParticlePropertiesFromChildren(Target, Cluster, Children, Child To Parent Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRigidClustering*"
+        },
+        {
+          "name": "Cluster",
+          "type": "FPBDRigidClusteredParticleHandle*"
+        },
+        {
+          "name": "Children",
+          "type": "FRigidHandleArray&"
+        },
+        {
+          "name": "Child To Parent Map",
+          "type": "TMap<FPBDRigidParticleHandle*,FPBDRigidParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This function is a bit more versatile than the name suggests. This function can either be used to update the cluster properties\nincrementally or entirely rebuild the properties all over again. This all depends on whether the input children is\neither 1) the new children or 2) all the children as well as what those initial properties are set to."
+    }
+  ]
+}

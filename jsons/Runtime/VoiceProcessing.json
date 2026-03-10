@@ -1,0 +1,251 @@
+{
+  "id": "voice-processing",
+  "label": "VoiceProcessing",
+  "includepath": "DSP/VoiceProcessing.h",
+  "includes": [
+    "CoreMinimal",
+    "Delay",
+    "AudioFFT",
+    "MultithreadedPatching"
+  ],
+  "functions": [
+    {
+      "id": "f-moving-averager",
+      "name": "FMovingAverager",
+      "category": "VoiceProcessing",
+      "signature": "FMovingAverager(Num Samples)",
+      "params": [
+        {
+          "name": "Num Samples",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "This class buffers audio while maintaining a running average of the underlying buffer.\nThis is useful for cases where we can't use a peak detector with asymptotic tracking.\nFor example: lookahead limiters, silence detection, etc."
+    },
+    {
+      "id": "process-input",
+      "name": "ProcessInput",
+      "category": "VoiceProcessing",
+      "signature": "ProcessInput(Target, Input, Output)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovingAverager*"
+        },
+        {
+          "name": "Input",
+          "type": "Float&"
+        },
+        {
+          "name": "Output",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "set-num-samples",
+      "name": "SetNumSamples",
+      "category": "VoiceProcessing",
+      "signature": "SetNumSamples(Target, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovingAverager*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-moving-vector-averager",
+      "name": "FMovingVectorAverager",
+      "category": "VoiceProcessing",
+      "signature": "FMovingVectorAverager(Num Samples)",
+      "params": [
+        {
+          "name": "Num Samples",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Vectorized version of FMovingAverager."
+    },
+    {
+      "id": "process-audio-2f1b01",
+      "name": "ProcessAudio",
+      "category": "VoiceProcessing",
+      "signature": "ProcessAudio(Target, Input, Output)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovingVectorAverager*"
+        },
+        {
+          "name": "Input",
+          "type": "VectorRegister4Float&"
+        },
+        {
+          "name": "Output",
+          "type": "VectorRegister4Float&"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "f-silence-detection",
+      "name": "FSilenceDetection",
+      "category": "VoiceProcessing",
+      "signature": "FSilenceDetection(In Onset Threshold, In Release Threshold, Attack Duration In Samples, Release Duration In Samples)",
+      "params": [
+        {
+          "name": "In Onset Threshold",
+          "type": "Float"
+        },
+        {
+          "name": "In Release Threshold",
+          "type": "Float"
+        },
+        {
+          "name": "Attack Duration In Samples",
+          "type": "Int"
+        },
+        {
+          "name": "Release Duration In Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "This object will return buffered audio while the input signal is louder than the specified threshold,\nand buffer audio when the input signal otherwise."
+    },
+    {
+      "id": "process-buffer",
+      "name": "ProcessBuffer",
+      "category": "VoiceProcessing",
+      "signature": "ProcessBuffer(Target, In Audio, Out Audio, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSilenceDetection*"
+        },
+        {
+          "name": "In Audio",
+          "type": "Float*"
+        },
+        {
+          "name": "Out Audio",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "set-threshold",
+      "name": "SetThreshold",
+      "category": "VoiceProcessing",
+      "signature": "SetThreshold(Target, In Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSilenceDetection*"
+        },
+        {
+          "name": "In Threshold",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-amplitude",
+      "name": "GetCurrentAmplitude",
+      "category": "VoiceProcessing",
+      "signature": "GetCurrentAmplitude(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSilenceDetection*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "f-slow-adaptive-gain-control",
+      "name": "FSlowAdaptiveGainControl",
+      "category": "VoiceProcessing",
+      "signature": "FSlowAdaptiveGainControl(In Gain Target, In Adaptive Rate, In Gain Min, In Gain Max)",
+      "params": [
+        {
+          "name": "In Gain Target",
+          "type": "Float"
+        },
+        {
+          "name": "In Adaptive Rate",
+          "type": "Int"
+        },
+        {
+          "name": "In Gain Min",
+          "type": "Float",
+          "default": "0.01f"
+        },
+        {
+          "name": "In Gain Max",
+          "type": "Float",
+          "default": "2.0f"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "This object accepts an input buffer and current amplitude estimate of that input buffer,\nThen applies a computed gain target. Works like a standard feed forward limiter, with a threshold of 0."
+    },
+    {
+      "id": "process-audio-5661af",
+      "name": "ProcessAudio",
+      "category": "VoiceProcessing",
+      "signature": "ProcessAudio(Target, In Audio, Num Samples, In Amplitude)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlowAdaptiveGainControl*"
+        },
+        {
+          "name": "In Audio",
+          "type": "Float*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        },
+        {
+          "name": "In Amplitude",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "set-adaptive-rate",
+      "name": "SetAdaptiveRate",
+      "category": "VoiceProcessing",
+      "signature": "SetAdaptiveRate(Target, In Adaptive Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlowAdaptiveGainControl*"
+        },
+        {
+          "name": "In Adaptive Rate",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

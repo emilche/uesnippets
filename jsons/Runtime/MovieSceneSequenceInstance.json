@@ -1,0 +1,412 @@
+{
+  "id": "movie-scene-sequence-instance",
+  "label": "MovieSceneSequenceInstance",
+  "includepath": "EntitySystem/MovieSceneSequenceInstance.h",
+  "includes": [
+    "MovieSceneCompiledDataID",
+    "Array",
+    "SortedMap",
+    "UnrealString",
+    "CoreTypes",
+    "IDelegateInstance",
+    "MovieSceneEntityIDs",
+    "MovieSceneEntityLedger",
+    "MovieSceneEntityManager",
+    "MovieSceneSequenceInstanceHandle",
+    "MovieScenePlayback",
+    "MovieSceneSequenceID",
+    "UniquePtr"
+  ],
+  "functions": [
+    {
+      "id": "conditional-recompile",
+      "name": "ConditionalRecompile",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "ConditionalRecompile(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Specifies what cached data should be invalidated in a sequence instance."
+    },
+    {
+      "id": "dissect-context",
+      "name": "DissectContext",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "DissectContext(Target, Context, Out Dissections)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Out Dissections",
+          "type": "TArray<TRange<FFrameTime>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called only for top-level sequence instances before any updates to it with the specified context.\nThis allows the sequence an opportunity to dissect the context into a series of distinct evaluations to force determinism.\n@param Linker     The linker that owns this sequence instance\n@param Context    The overall context that this sequence instance is being evaluated with\n@param OutDissections   An array to populate with dissected time ranges that should be evaluated separately, in order."
+    },
+    {
+      "id": "start",
+      "name": "Start",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "Start(Target, In Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "In Context",
+          "type": "FMovieSceneContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called for root level instances that have either never evaluated, or have previously finished evaluating\n@param Linker     The linker that owns this sequence instance\n@param InContext  The context that this sequence instance is to be evaluated with"
+    },
+    {
+      "id": "pre-evaluation",
+      "name": "PreEvaluation",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "PreEvaluation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when this instance has been queued for evaluation in order for it to do any pre-work setup.\n@param Linker     The linker that owns this sequence instance"
+    },
+    {
+      "id": "update",
+      "name": "Update",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "Update(Target, In Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "In Context",
+          "type": "FMovieSceneContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after dissection for root level instances in order for this sequence instacne to update any entities it needs for evaluation.\n@param Linker     The linker that owns this sequence instance\n@param InContext  The (potentially dissected) context that this sequence instance is to be evaluated with"
+    },
+    {
+      "id": "can-finish-immediately",
+      "name": "CanFinishImmediately",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "CanFinishImmediately(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this instance can be finished immediately without any last update.\n@param Linker     The linker that owns this sequence instance\n@return           Whether the instance can be finished immediately"
+    },
+    {
+      "id": "finish",
+      "name": "Finish",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "Finish(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark this instance as finished, causing all its entities to be unlinked and the instance to become inactive at the end of the next update.\n@param Linker     The linker that owns this sequence instance"
+    },
+    {
+      "id": "post-evaluation",
+      "name": "PostEvaluation",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "PostEvaluation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when this sequence instance has been evaluated in order for it to do any clean-up or other post-update work\n@param Linker     The linker that owns this sequence instance"
+    },
+    {
+      "id": "run-legacy-track-templates",
+      "name": "RunLegacyTrackTemplates",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "RunLegacyTrackTemplates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to run legacy track templates"
+    },
+    {
+      "id": "get-player",
+      "name": "GetPlayer",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "GetPlayer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "IMovieScenePlayer*",
+      "docs": "Retrieve the IMovieScenePlayer that is playing back the top level sequence for this instance\n@return A pointer to this instance's player"
+    },
+    {
+      "id": "get-player-index",
+      "name": "GetPlayerIndex",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "GetPlayerIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "UInt16",
+      "docs": "Retrieve the IMovieScenePlayer's unique index"
+    },
+    {
+      "id": "find-sub-instance",
+      "name": "FindSubInstance",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "FindSubInstance(Target, Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "Sequence ID",
+          "type": "FMovieSceneSequenceID"
+        }
+      ],
+      "returnType": "FInstanceHandle",
+      "docs": "Attempt to locate a sub instance based on its sequence ID"
+    },
+    {
+      "id": "find-entity",
+      "name": "FindEntity",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "FindEntity(Target, Owner, Entity ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FMovieSceneEntityID",
+      "docs": "Attempt to locate an entity given its owner and ID"
+    },
+    {
+      "id": "find-entities",
+      "name": "FindEntities",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "FindEntities(Target, Owner, Out Entity I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Out Entity I Ds",
+          "type": "TArray<FMovieSceneEntityID>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Attempt to locate all entities given their owner"
+    },
+    {
+      "id": "get-sub-sequence-path",
+      "name": "GetSubSequencePath",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "GetSubSequencePath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "FSubSequencePath",
+      "docs": "Retrieve a path for this sequence instance back to the root"
+    },
+    {
+      "id": "invalidate-cached-data",
+      "name": "InvalidateCachedData",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "InvalidateCachedData(Target, Invalidation Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "Invalidation Type",
+          "type": "ESequenceInstanceInvalidationType",
+          "default": "ESequenceInstanceInvalidationType::All"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidate any cached data that may be being used for evaluation due to a change in the source asset data"
+    },
+    {
+      "id": "destroy-immediately",
+      "name": "DestroyImmediately",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "DestroyImmediately(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy this sequence instance immediately - Finish must previously have been called"
+    },
+    {
+      "id": "override-root-sequence",
+      "name": "OverrideRootSequence",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "OverrideRootSequence(Target, New Root Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "New Root Sequence ID",
+          "type": "FMovieSceneSequenceID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to override the simulated root sequence ID for this instance. Only valid for IsRootSequence() instances."
+    },
+    {
+      "id": "evaluate-condition",
+      "name": "EvaluateCondition",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "EvaluateCondition(Target, Binding ID, Sequence ID, Condition, Condition Owner Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        },
+        {
+          "name": "Binding ID",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Sequence ID",
+          "type": "FMovieSceneSequenceID&"
+        },
+        {
+          "name": "Condition",
+          "type": "UMovieSceneCondition*"
+        },
+        {
+          "name": "Condition Owner Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Evaluate a condition on this sequence instance hierarchy, utilizing any cache as relevant."
+    },
+    {
+      "id": "f-sequence-instance-50008a",
+      "name": "FSequenceInstance",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "FSequenceInstance(Playback State)",
+      "params": [
+        {
+          "name": "Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Constructor for top level sequences"
+    },
+    {
+      "id": "f-sequence-instance-cc712d",
+      "name": "FSequenceInstance",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "FSequenceInstance(Playback State, This Instance Handle, In Parent Instance Handle, In Sequence ID)",
+      "params": [
+        {
+          "name": "Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        },
+        {
+          "name": "This Instance Handle",
+          "type": "FInstanceHandle"
+        },
+        {
+          "name": "In Parent Instance Handle",
+          "type": "FInstanceHandle"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Constructor for sub sequences"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "Initialize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequenceInstance*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finish initializing this sequence instance"
+    },
+    {
+      "id": "f-sequence-instance-218f43",
+      "name": "FSequenceInstance",
+      "category": "MovieSceneSequenceInstance",
+      "signature": "FSequenceInstance()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor"
+    }
+  ]
+}

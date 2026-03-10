@@ -1,0 +1,1440 @@
+{
+  "id": "bulk-data",
+  "label": "BulkData",
+  "includepath": "Serialization/BulkData.h",
+  "includes": [
+    "AsyncFileHandle",
+    "BulkDataBuffer",
+    "Array",
+    "ContainerAllocationPolicies",
+    "Map",
+    "SortedMap",
+    "StringView",
+    "StringFwd",
+    "UnrealString",
+    "CoreMinimal",
+    "CoreTypes",
+    "GenericPlatformFile",
+    "MemoryBase",
+    "IoChunkId",
+    "IoDispatcherPriority",
+    "PackageId",
+    "NumericLimits",
+    "AssertionMacros",
+    "CompressionFlags",
+    "EnumClassFlags",
+    "OptionalFwd",
+    "PackagePath",
+    "PackageSegment",
+    "Archive",
+    "BulkDataCookedIndex",
+    "CustomVersion",
+    "FileRegions",
+    "Function",
+    "IsPODType",
+    "RefCounting",
+    "UniquePtr",
+    "PimplPtr",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "make-io-filename-hash-78351a",
+      "name": "MakeIoFilenameHash",
+      "category": "BulkData",
+      "signature": "MakeIoFilenameHash(Target, Filename)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "FIoFilenameHash",
+      "docs": "-----------------------------------------------------------------------------\nI/O filename helper(s)\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "make-io-filename-hash-fafe05",
+      "name": "MakeIoFilenameHash",
+      "category": "BulkData",
+      "signature": "MakeIoFilenameHash(Target, Chunk ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Chunk ID",
+          "type": "FIoChunkId&"
+        }
+      ],
+      "returnType": "FIoFilenameHash",
+      "docs": "Helpers to create the hash from a chunk id. Returns IOFILENAMEHASH_NONE if and only if the chunk id is invalid."
+    },
+    {
+      "id": "lex-to-string-c8c64d",
+      "name": "LexToString",
+      "category": "BulkData",
+      "signature": "LexToString(Target, Flags, Sb)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Flags",
+          "type": "EBulkDataFlags"
+        },
+        {
+          "name": "Sb",
+          "type": "FStringBuilderBase&"
+        }
+      ],
+      "returnType": "FStringBuilderBase&",
+      "docs": "Assigned at runtime to indicate that the BulkData object should be considered for discard even if it cannot load from disk."
+    },
+    {
+      "id": "lex-to-string-f394fe",
+      "name": "LexToString",
+      "category": "BulkData",
+      "signature": "LexToString(Target, Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Flags",
+          "type": "EBulkDataFlags"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "f-owned-bulk-data-ptr",
+      "name": "FOwnedBulkDataPtr",
+      "category": "BulkData",
+      "signature": "FOwnedBulkDataPtr()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-pointer",
+      "name": "GetPointer",
+      "category": "BulkData",
+      "signature": "GetPointer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOwnedBulkDataPtr*"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "from-serialized",
+      "name": "FromSerialized",
+      "category": "BulkData",
+      "signature": "FromSerialized(Ar, Element Size, Out Meta Data, Out Duplicate Offset)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Element Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Out Meta Data",
+          "type": "FBulkMetaData&"
+        },
+        {
+          "name": "Out Duplicate Offset",
+          "type": "Int64&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Serializes FBulkMetaResource from the given archive and builds the returned FBulkMetaData from it.\nThe offset for duplicated data will also be returned\nAll fields of OutMetaData will be overwritten, including lock status."
+    },
+    {
+      "id": "steal-file-mapping",
+      "name": "StealFileMapping",
+      "category": "BulkData",
+      "signature": "StealFileMapping(Target, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAllocatedPtr*"
+        },
+        {
+          "name": "Owner",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "FOwnedBulkDataPtr*"
+    },
+    {
+      "id": "f-bulk-data-f5c28b",
+      "name": "FBulkData",
+      "category": "BulkData",
+      "signature": "FBulkData(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FBulkData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy constructor. Use the common routine to perform the copy.\n@param Other the source array to copy"
+    },
+    {
+      "id": "f-bulk-data-d76554",
+      "name": "FBulkData",
+      "category": "BulkData",
+      "signature": "FBulkData()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "-----------------------------------------------------------------------------\nConstructors and operators\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "dump-bulk-data-usage",
+      "name": "DumpBulkDataUsage",
+      "category": "BulkData",
+      "signature": "DumpBulkDataUsage(Log)",
+      "params": [
+        {
+          "name": "Log",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "-----------------------------------------------------------------------------\nStatic functions.\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "get-bulk-data-size",
+      "name": "GetBulkDataSize",
+      "category": "BulkData",
+      "signature": "GetBulkDataSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "-----------------------------------------------------------------------------\nAccessors\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "get-bulk-data-size-on-disk",
+      "name": "GetBulkDataSizeOnDisk",
+      "category": "BulkData",
+      "signature": "GetBulkDataSizeOnDisk(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Returns the size of the bulk data on disk. This can differ from GetBulkDataSize if\nBULKDATA_SerializeCompressed is set.\n@return Size of the bulk data on disk or INDEX_NONE in case there's no association"
+    },
+    {
+      "id": "get-bulk-data-offset-in-file",
+      "name": "GetBulkDataOffsetInFile",
+      "category": "BulkData",
+      "signature": "GetBulkDataOffsetInFile(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Returns the offset into the file the bulk data is located at.\n@return Offset into the file or INDEX_NONE in case there is no association"
+    },
+    {
+      "id": "is-stored-compressed-on-disk",
+      "name": "IsStoredCompressedOnDisk",
+      "category": "BulkData",
+      "signature": "IsStoredCompressedOnDisk(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the bulk data is stored compressed on disk.\n@return true if data is compressed on disk, false otherwise"
+    },
+    {
+      "id": "can-load-from-disk",
+      "name": "CanLoadFromDisk",
+      "category": "BulkData",
+      "signature": "CanLoadFromDisk(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the data can be loaded from disk."
+    },
+    {
+      "id": "does-exist",
+      "name": "DoesExist",
+      "category": "BulkData",
+      "signature": "DoesExist(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the data references a file that currently exists and can be referenced by the file system."
+    },
+    {
+      "id": "get-decompression-format-abccd0",
+      "name": "GetDecompressionFormat",
+      "category": "BulkData",
+      "signature": "GetDecompressionFormat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Returns flags usable to decompress the bulk data\n@return NAME_None if the data was not compressed on disk, or valid format to pass to FCompression::UncompressMemory for this data"
+    },
+    {
+      "id": "is-bulk-data-loaded",
+      "name": "IsBulkDataLoaded",
+      "category": "BulkData",
+      "signature": "IsBulkDataLoaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the bulk data is currently loaded and resident in memory.\n@return true if bulk data is loaded, false otherwise"
+    },
+    {
+      "id": "is-async-loading-complete",
+      "name": "IsAsyncLoadingComplete",
+      "category": "BulkData",
+      "signature": "IsAsyncLoadingComplete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-available-for-use",
+      "name": "IsAvailableForUse",
+      "category": "BulkData",
+      "signature": "IsAvailableForUse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this bulk data is used\n@return true if BULKDATA_Unused is not set"
+    },
+    {
+      "id": "set-bulk-data-flags",
+      "name": "SetBulkDataFlags",
+      "category": "BulkData",
+      "signature": "SetBulkDataFlags(Target, Bulk Data Flags To Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Bulk Data Flags To Set",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enables the given flags without affecting any previously set flags.\n@param BulkDataFlagsToSet\tBulk data flags to set"
+    },
+    {
+      "id": "reset-bulk-data-flags",
+      "name": "ResetBulkDataFlags",
+      "category": "BulkData",
+      "signature": "ResetBulkDataFlags(Target, Bulk Data Flags To Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Bulk Data Flags To Set",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable the given flags and disable all other flags.\nThis can be used with ::GetBulkDataFlags() to effectively\nreset the flags to a previous state.\n@param BulkDataFlagsToSet\tBulk data flags to set"
+    },
+    {
+      "id": "get-bulk-data-flags",
+      "name": "GetBulkDataFlags",
+      "category": "BulkData",
+      "signature": "GetBulkDataFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Gets the current bulk data flags.\n@return Bulk data flags currently set"
+    },
+    {
+      "id": "set-cooked-index",
+      "name": "SetCookedIndex",
+      "category": "BulkData",
+      "signature": "SetCookedIndex(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Index",
+          "type": "FBulkDataCookedIndex"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-bulk-data-alignment",
+      "name": "GetBulkDataAlignment",
+      "category": "BulkData",
+      "signature": "GetBulkDataAlignment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Gets the current bulk data alignment.\n@return Bulk data alignment currently set"
+    },
+    {
+      "id": "clear-bulk-data-flags",
+      "name": "ClearBulkDataFlags",
+      "category": "BulkData",
+      "signature": "ClearBulkDataFlags(Target, Bulk Data Flags To Clear)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Bulk Data Flags To Clear",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the passed in bulk data flags.\n@param BulkDataFlagsToClear\tBulk data flags to clear"
+    },
+    {
+      "id": "create-chunk-id",
+      "name": "CreateChunkId",
+      "category": "BulkData",
+      "signature": "CreateChunkId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "FIoChunkId",
+      "docs": "Returns a FIoChunkId for the bulkdata payload, this will be invalid if the bulkdata is not stored in the IoStore"
+    },
+    {
+      "id": "get-debug-name",
+      "name": "GetDebugName",
+      "category": "BulkData",
+      "signature": "GetDebugName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a string representing the bulk data for debugging purposes."
+    },
+    {
+      "id": "get-copy",
+      "name": "GetCopy",
+      "category": "BulkData",
+      "signature": "GetCopy(Target, Dest, Discard Internal Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Dest",
+          "type": "void**"
+        },
+        {
+          "name": "Discard Internal Copy",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "-----------------------------------------------------------------------------\nData retrieval and manipulation.\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "lock",
+      "name": "Lock",
+      "category": "BulkData",
+      "signature": "Lock(Target, Lock Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Lock Flags",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Locks the bulk data and returns a pointer to it.\n@param\tLockFlags\tFlags determining lock behavior"
+    },
+    {
+      "id": "lock-read-only",
+      "name": "LockReadOnly",
+      "category": "BulkData",
+      "signature": "LockReadOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Locks the bulk data and returns a read-only pointer to it.\nThis variant can be called on a const bulkdata"
+    },
+    {
+      "id": "realloc",
+      "name": "Realloc",
+      "category": "BulkData",
+      "signature": "Realloc(Target, Element Count, Element Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Element Count",
+          "type": "Int64"
+        },
+        {
+          "name": "Element Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Change size of locked bulk data. Only valid if locked via read-write lock.\n@param ElementCount\tNumber of elements to allocate.\n@param ElementSize\tSize in bytes of the individual element."
+    },
+    {
+      "id": "unlock",
+      "name": "Unlock",
+      "category": "BulkData",
+      "signature": "Unlock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unlocks bulk data after which point the pointer returned by Lock no longer is valid."
+    },
+    {
+      "id": "remove-bulk-data",
+      "name": "RemoveBulkData",
+      "category": "BulkData",
+      "signature": "RemoveBulkData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears/removes any currently allocated data payload and resets element count to 0.\nNote that once this has been called, the bulkdata object will no longer be able to reload\nit's payload from disk!"
+    },
+    {
+      "id": "load-bulk-data-with-file-reader",
+      "name": "LoadBulkDataWithFileReader",
+      "category": "BulkData",
+      "signature": "LoadBulkDataWithFileReader(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load the bulk data using a file reader. Works even when no archive is attached to the bulk data..\n@return Whether the operation succeeded."
+    },
+    {
+      "id": "can-load-bulk-data-with-file-reader",
+      "name": "CanLoadBulkDataWithFileReader",
+      "category": "BulkData",
+      "signature": "CanLoadBulkDataWithFileReader(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test if it is possible to load the bulk data using a file reader, even when no archive is attached to the bulk data.\n@return Whether the operation is allowed."
+    },
+    {
+      "id": "force-bulk-data-resident",
+      "name": "ForceBulkDataResident",
+      "category": "BulkData",
+      "signature": "ForceBulkDataResident(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forces the bulk data to be resident in memory and detaches the archive."
+    },
+    {
+      "id": "store-compressed-on-disk",
+      "name": "StoreCompressedOnDisk",
+      "category": "BulkData",
+      "signature": "StoreCompressedOnDisk(Target, Compression Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Compression Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets whether we should store the data compressed on disk.\n@param CompressionFormat\t\tThe format to use for compression e.g. NAME_None or NAME_Oodle.\nThis should likely not be used - bulk data that gets deployed should be compressed via UnrealPak so that\nit can leverage hardware compression as available, and editor bulk data is compressed by default and should use\nFEditorBulkData::SetCompressionOptions to control that if necessary."
+    },
+    {
+      "id": "unload-bulk-data",
+      "name": "UnloadBulkData",
+      "category": "BulkData",
+      "signature": "UnloadBulkData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Deallocates bulk data without detaching the archive, so that further bulk data accesses require a reload.\nOnly supported in editor builds.\n@return Whether the operation succeeded."
+    },
+    {
+      "id": "serialize-f79ed2",
+      "name": "Serialize",
+      "category": "BulkData",
+      "signature": "Serialize(Target, Ar, Owner, Attempt File Mapping, Element Size, File Region Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Attempt File Mapping",
+          "type": "Bool"
+        },
+        {
+          "name": "Element Size",
+          "type": "Int"
+        },
+        {
+          "name": "File Region Type",
+          "type": "EFileRegionType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serialize function used to serialize this bulk data structure.\n@param Ar\tArchive to serialize with\n@param Owner\tObject owning the bulk data\n@param Idx\tIndex of bulk data item being serialized\n@param bAttemptFileMapping\tIf true, attempt to map this instead of loading it into malloc'ed memory\n@param FileRegionType\tWhen cooking, a hint describing the type of data, used by some platforms to improve compression ratios"
+    },
+    {
+      "id": "get-bulk-data-versions",
+      "name": "GetBulkDataVersions",
+      "category": "BulkData",
+      "signature": "GetBulkDataVersions(Target, Inline Archive, Out UE Version, Out Licensee UE Version, Out Custom Versions)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Inline Archive",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Out UE Version",
+          "type": "FPackageFileVersion&"
+        },
+        {
+          "name": "Out Licensee UE Version",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Custom Versions",
+          "type": "FCustomVersionContainer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the CustomVersions used in the file containing the BulkData payload. If !IsInSeparateFile, this will be\nthe custom versions from the archive used to serialize the FBulkData, which the caller must provide.\nOtherwise, the CustomVersions come from the separate file and this function will look them up.\n@param InlineArchive The archive that was used to load this object"
+    },
+    {
+      "id": "set-flags-from-disk-written-values",
+      "name": "SetFlagsFromDiskWrittenValues",
+      "category": "BulkData",
+      "signature": "SetFlagsFromDiskWrittenValues(Target, In Bulk Data Flags, In Bulk Data Offset In File, In Bulk Data Size On Disk, Linker Summary Bulk Data Start Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "In Bulk Data Flags",
+          "type": "EBulkDataFlags"
+        },
+        {
+          "name": "In Bulk Data Offset In File",
+          "type": "Int64"
+        },
+        {
+          "name": "In Bulk Data Size On Disk",
+          "type": "Int64"
+        },
+        {
+          "name": "Linker Summary Bulk Data Start Offset",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When saving BulkData, if we are overwriting the file we need to update the BulkData's (flags,offset,size) to be\nable to load from the new file. But SerializeBulkData modifies those values when loading, so the in-memory values after\nloading from disk are not the same as the values on disk.\nThis function handles running the same steps that SerializeBulkData does, but skips the deserialization of the BulkData."
+    },
+    {
+      "id": "open-async-read-handle",
+      "name": "OpenAsyncReadHandle",
+      "category": "BulkData",
+      "signature": "OpenAsyncReadHandle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "IAsyncReadFileHandle*",
+      "docs": "-----------------------------------------------------------------------------\nAsync Streaming Interface.\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "create-streaming-request-c68660",
+      "name": "CreateStreamingRequest",
+      "category": "BulkData",
+      "signature": "CreateStreamingRequest(Target, Priority, Complete Callback, User Supplied Memory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Priority",
+          "type": "EAsyncIOPriorityAndFlags"
+        },
+        {
+          "name": "Complete Callback",
+          "type": "FBulkDataIORequestCallBack*"
+        },
+        {
+          "name": "User Supplied Memory",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "IBulkDataIORequest*",
+      "docs": "Create an async read request for the bulk data.\nThis version will load the entire data range that the FBulkData represents.\n@param Priority\t\t\t\tPriority and flags of the request. If this includes AIOP_FLAG_PRECACHE, then memory will never be returned. The request should always be canceled and waited for, even for a precache request.\n@param CompleteCallback\t\tCalled from an arbitrary thread when the request is complete. Can be nullptr, if non-null, must remain valid until it is called. It will always be called.\n@param UserSuppliedMemory\tA pointer to memory for the IO request to be written to, it is up to the caller to make sure that it is large enough. If the pointer is null then the system will allocate memory instead.\n@return\t\t\t\t\t\tA request for the read. This is owned by the caller and must be deleted by the caller."
+    },
+    {
+      "id": "create-streaming-request-de7e4c",
+      "name": "CreateStreamingRequest",
+      "category": "BulkData",
+      "signature": "CreateStreamingRequest(Target, Offset In Bulk Data, Bytes To Read, Priority, Complete Callback, User Supplied Memory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Offset In Bulk Data",
+          "type": "Int64"
+        },
+        {
+          "name": "Bytes To Read",
+          "type": "Int64"
+        },
+        {
+          "name": "Priority",
+          "type": "EAsyncIOPriorityAndFlags"
+        },
+        {
+          "name": "Complete Callback",
+          "type": "FBulkDataIORequestCallBack*"
+        },
+        {
+          "name": "User Supplied Memory",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "IBulkDataIORequest*",
+      "docs": "Create an async read request for the bulk data.\nThis version allows the user to request a subset of the data that the FBulkData represents.\n@param OffsetInBulkData\t\tOffset into the bulk data to start reading from.\n@param BytesToRead\t\t\tThe number of bytes to read. If this request is AIOP_Preache, the size can be anything, even MAX_int64, otherwise the size and offset must be fully contained in the file.\n@param Priority\t\t\t\tPriority and flags of the request. If this includes AIOP_FLAG_PRECACHE, then memory will never be returned. The request should always be canceled and waited for, even for a precache request.\n@param CompleteCallback\t\tCalled from an arbitrary thread when the request is complete. Can be nullptr, if non-null, must remain valid until it is called. It will always be called.\n@param UserSuppliedMemory\tA pointer to memory for the IO request to be written to, it is up to the caller to make sure that it is large enough. If the pointer is null then the system will allocate memory instead.\n@return\t\t\t\t\t\tA request for the read. This is owned by the caller and must be deleted by the caller."
+    },
+    {
+      "id": "set-bulk-data-flags-on",
+      "name": "SetBulkDataFlagsOn",
+      "category": "BulkData",
+      "signature": "SetBulkDataFlagsOn(In Out Accumulator, Flags To Set)",
+      "params": [
+        {
+          "name": "In Out Accumulator",
+          "type": "EBulkDataFlags&"
+        },
+        {
+          "name": "Flags To Set",
+          "type": "EBulkDataFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable the given flags in the given accumulator variable."
+    },
+    {
+      "id": "clear-bulk-data-flags-on",
+      "name": "ClearBulkDataFlagsOn",
+      "category": "BulkData",
+      "signature": "ClearBulkDataFlagsOn(In Out Accumulator, Flags To Clear)",
+      "params": [
+        {
+          "name": "In Out Accumulator",
+          "type": "EBulkDataFlags&"
+        },
+        {
+          "name": "Flags To Clear",
+          "type": "EBulkDataFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disable the given flags in the given accumulator variable."
+    },
+    {
+      "id": "has-flags",
+      "name": "HasFlags",
+      "category": "BulkData",
+      "signature": "HasFlags(Flags, Contains)",
+      "params": [
+        {
+          "name": "Flags",
+          "type": "EBulkDataFlags"
+        },
+        {
+          "name": "Contains",
+          "type": "EBulkDataFlags"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether all of the specified flags are set."
+    },
+    {
+      "id": "get-decompression-format-16e083",
+      "name": "GetDecompressionFormat",
+      "category": "BulkData",
+      "signature": "GetDecompressionFormat(In Flags)",
+      "params": [
+        {
+          "name": "In Flags",
+          "type": "EBulkDataFlags"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Returns decompress method flags specified by the given bulk data flags."
+    },
+    {
+      "id": "serialize-bulk-data",
+      "name": "SerializeBulkData",
+      "category": "BulkData",
+      "signature": "SerializeBulkData(Target, Ar, Data, Data Size, In Bulk Data Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Data Size",
+          "type": "Int64"
+        },
+        {
+          "name": "In Bulk Data Flags",
+          "type": "EBulkDataFlags"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "-----------------------------------------------------------------------------\nClass specific virtuals.\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "serialize-payload",
+      "name": "SerializePayload",
+      "category": "BulkData",
+      "signature": "SerializePayload(Target, Ar, Serialization Flags, Region Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Serialization Flags",
+          "type": "EBulkDataFlags"
+        },
+        {
+          "name": "Region Type",
+          "type": "TOptional<EFileRegionType>&"
+        }
+      ],
+      "returnType": "private : int64"
+    },
+    {
+      "id": "detach-from-archive",
+      "name": "DetachFromArchive",
+      "category": "BulkData",
+      "signature": "DetachFromArchive(Target, Ar, Ensure Bulk Data Is Loaded)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive*"
+        },
+        {
+          "name": "Ensure Bulk Data Is Loaded",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Detaches the bulk data from the passed in archive. Needs to match the archive we are currently\nattached to.\n@param Ar\t\t\t\t\t\tArchive to detach from\n@param bEnsureBulkDataIsLoaded\twhether to ensure that bulk data is load before detaching from archive"
+    },
+    {
+      "id": "make-sure-bulk-data-is-loaded",
+      "name": "MakeSureBulkDataIsLoaded",
+      "category": "BulkData",
+      "signature": "MakeSureBulkDataIsLoaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "-----------------------------------------------------------------------------\nInternal helpers\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "try-load-data-into-memory",
+      "name": "TryLoadDataIntoMemory",
+      "category": "BulkData",
+      "signature": "TryLoadDataIntoMemory(Target, Dest)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        },
+        {
+          "name": "Dest",
+          "type": "FIoBuffer"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads the data from disk into the specified memory block. This requires us still being attached to an\narchive we can use for serialization.\n@param Dest Memory to serialize data into\n@return Whether the load succeeded"
+    },
+    {
+      "id": "needs-offset-fixup",
+      "name": "NeedsOffsetFixup",
+      "category": "BulkData",
+      "signature": "NeedsOffsetFixup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the offset needs fixing when serialized"
+    },
+    {
+      "id": "can-discard-internal-data",
+      "name": "CanDiscardInternalData",
+      "category": "BulkData",
+      "signature": "CanDiscardInternalData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkData*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "serialize-5a3388",
+      "name": "Serialize",
+      "category": "BulkData",
+      "signature": "Serialize(Target, Ar, Owner, Formats To Save, Single Use, In Alignment, Inline, Mapped)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFormatContainer*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Formats To Save",
+          "type": "TArray<FName>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Single Use",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "In Alignment",
+          "type": "UInt16",
+          "default": "DEFAULT_ALIGNMENT"
+        },
+        {
+          "name": "Inline",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Mapped",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize-attempt-mapped-load",
+      "name": "SerializeAttemptMappedLoad",
+      "category": "BulkData",
+      "signature": "SerializeAttemptMappedLoad(Target, Ar, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFormatContainer*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-builder-732c6b",
+      "name": "FBuilder",
+      "category": "BulkData",
+      "signature": "FBuilder()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Handle to a bulk data I/O batch read request."
+    },
+    {
+      "id": "f-builder-e5e2c8",
+      "name": "FBuilder",
+      "category": "BulkData",
+      "signature": "FBuilder(Max Count)",
+      "params": [
+        {
+          "name": "Max Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "protected :"
+    },
+    {
+      "id": "get-batch",
+      "name": "GetBatch",
+      "category": "BulkData",
+      "signature": "GetBatch(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuilder*"
+        }
+      ],
+      "returnType": "FBulkDataBatchRequest::FBatchHandle&"
+    },
+    {
+      "id": "issue-batch",
+      "name": "IssueBatch",
+      "category": "BulkData",
+      "signature": "IssueBatch(Target, Out Request, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuilder*"
+        },
+        {
+          "name": "Out Request",
+          "type": "FBulkDataBatchRequest*"
+        },
+        {
+          "name": "Callback",
+          "type": "FCompletionCallback&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "wait",
+      "name": "Wait",
+      "category": "BulkData",
+      "signature": "Wait(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkDataBatchRequest*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Blocks the calling thread until the request is completed. Waiting on an invalid request will immediately return."
+    },
+    {
+      "id": "wait-for-e35b01",
+      "name": "WaitFor",
+      "category": "BulkData",
+      "signature": "WaitFor(Target, Milliseconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkDataBatchRequest*"
+        },
+        {
+          "name": "Milliseconds",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Waits the specified amount of time in milliseconds for the request to be completed.\n@return True if the request was completed before the wait time elapsed, otherwise false. Waiting on an invalid request returns false."
+    },
+    {
+      "id": "wait-for-afa923",
+      "name": "WaitFor",
+      "category": "BulkData",
+      "signature": "WaitFor(Target, Wait Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkDataBatchRequest*"
+        },
+        {
+          "name": "Wait Time",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Waits the specified amount of time for the request to be completed.\n@return True if the request was completed before the wait time elapsed, otherwise false. Waiting on an invalid request returns false."
+    },
+    {
+      "id": "update-priority",
+      "name": "UpdatePriority",
+      "category": "BulkData",
+      "signature": "UpdatePriority(Target, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBulkDataBatchRequest*"
+        },
+        {
+          "name": "Priority",
+          "type": "EAsyncIOPriorityAndFlags"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adjusts the priority of the request(s) (if possible).\n@param Priority The new priority to use"
+    },
+    {
+      "id": "f-batch-builder",
+      "name": "FBatchBuilder",
+      "category": "BulkData",
+      "signature": "FBatchBuilder(Max Count)",
+      "params": [
+        {
+          "name": "Max Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Issue one or more I/O request in a single batch."
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "BulkData",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchBuilder*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the batch is empty."
+    },
+    {
+      "id": "read-b5af77",
+      "name": "Read",
+      "category": "BulkData",
+      "signature": "Read(Target, Bulk Data, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchBuilder*"
+        },
+        {
+          "name": "Bulk Data",
+          "type": "FBulkData&"
+        },
+        {
+          "name": "Priority",
+          "type": "EAsyncIOPriorityAndFlags",
+          "default": "DefaultPriority"
+        }
+      ],
+      "returnType": "FBatchBuilder&",
+      "docs": "Read the entire bulk data and copy the result to the specified instance."
+    },
+    {
+      "id": "issue-4ce972",
+      "name": "Issue",
+      "category": "BulkData",
+      "signature": "Issue(Target, Callback, Out Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchBuilder*"
+        },
+        {
+          "name": "Callback",
+          "type": "FCompletionCallback&&"
+        },
+        {
+          "name": "Out Request",
+          "type": "FBulkDataBatchRequest&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Issue the batch.\n@param Callback\t\tCompletion callback.\n@param OutRequest\tA handle to the batch request."
+    },
+    {
+      "id": "issue-880675",
+      "name": "Issue",
+      "category": "BulkData",
+      "signature": "Issue(Target, Out Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchBuilder*"
+        },
+        {
+          "name": "Out Request",
+          "type": "FBulkDataBatchRequest&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Issue the batch.\n@param OutRequest\tA handle to the batch request."
+    },
+    {
+      "id": "issue-c5255c",
+      "name": "Issue",
+      "category": "BulkData",
+      "signature": "Issue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchBuilder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Issue the batch.\n@note Assumes one or more handle(s) has been passed into any of the read operations."
+    },
+    {
+      "id": "read-471296",
+      "name": "Read",
+      "category": "BulkData",
+      "signature": "Read(Target, Bulk Data, Offset, Size, Priority, Dst, Out Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchBuilder*"
+        },
+        {
+          "name": "Bulk Data",
+          "type": "FBulkData&"
+        },
+        {
+          "name": "Offset",
+          "type": "UInt64"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Priority",
+          "type": "EAsyncIOPriorityAndFlags"
+        },
+        {
+          "name": "Dst",
+          "type": "FIoBuffer&"
+        },
+        {
+          "name": "Out Request",
+          "type": "FBulkDataBatchReadRequest*"
+        }
+      ],
+      "returnType": "private : FBatchBuilder&"
+    },
+    {
+      "id": "f-scatter-gather-builder",
+      "name": "FScatterGatherBuilder",
+      "category": "BulkData",
+      "signature": "FScatterGatherBuilder(Max Count)",
+      "params": [
+        {
+          "name": "Max Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Reads one or more bulk data and copies the result into a single I/O buffer."
+    },
+    {
+      "id": "read-60a344",
+      "name": "Read",
+      "category": "BulkData",
+      "signature": "Read(Target, Bulk Data, Offset, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScatterGatherBuilder*"
+        },
+        {
+          "name": "Bulk Data",
+          "type": "FBulkData&"
+        },
+        {
+          "name": "Offset",
+          "type": "UInt64",
+          "default": "0"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64",
+          "default": "MAX_uint64"
+        }
+      ],
+      "returnType": "FScatterGatherBuilder&",
+      "docs": "Read the bulk data from the specified offset and size."
+    },
+    {
+      "id": "issue-14d509",
+      "name": "Issue",
+      "category": "BulkData",
+      "signature": "Issue(Target, Dst, Priority, Callback, Out Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScatterGatherBuilder*"
+        },
+        {
+          "name": "Dst",
+          "type": "FIoBuffer&"
+        },
+        {
+          "name": "Priority",
+          "type": "EAsyncIOPriorityAndFlags"
+        },
+        {
+          "name": "Callback",
+          "type": "FCompletionCallback&&"
+        },
+        {
+          "name": "Out Request",
+          "type": "FBulkDataBatchRequest&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Issue the batch.\n@param Dst\t\t\tAn empty or preallocated I/O buffer.\n@param Priority\t\tThe I/O priority.\n@param Callback\t\tA callback triggered when the operation is completed.\n@param OutRequest\tA handle to the batch request.\n@note Assumes one or more handle(s) has been passed into any of the read operations."
+    }
+  ]
+}

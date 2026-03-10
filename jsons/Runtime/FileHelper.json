@@ -1,0 +1,572 @@
+{
+  "id": "file-helper",
+  "label": "FileHelper",
+  "includepath": "Misc/FileHelper.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "ContainersFwd",
+    "StringFwd",
+    "StringView",
+    "UnrealString",
+    "CoreTypes",
+    "FileManager",
+    "PlatformCrt",
+    "Color",
+    "MathFwd",
+    "MemoryFwd",
+    "EnumClassFlags",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "buffer-to-string",
+      "name": "BufferToString",
+      "category": "FileHelper",
+      "signature": "BufferToString(Result, Buffer, Size)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "String&"
+        },
+        {
+          "name": "Buffer",
+          "type": "Byte*"
+        },
+        {
+          "name": "Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "-----------------------------------------------------------------------------\nFFileHelper\n-----------------------------------------------------------------------------"
+    },
+    {
+      "id": "load-file-to-array",
+      "name": "LoadFileToArray",
+      "category": "FileHelper",
+      "signature": "LoadFileToArray(Result, Filename, Flags)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a binary file to a dynamic array with two uninitialized bytes at end as padding.\n@param Result    Receives the contents of the file\n@param Filename  The file to read\n@param Flags     Flags to pass to IFileManager::CreateFileReader"
+    },
+    {
+      "id": "load-file-in-blocks",
+      "name": "LoadFileInBlocks",
+      "category": "FileHelper",
+      "signature": "LoadFileInBlocks(Filename, Block Visitor, Offset, Size, Flags, Block Size)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "FStringView"
+        },
+        {
+          "name": "Block Visitor",
+          "type": "TFunctionRef<void ( FMemoryView )>"
+        },
+        {
+          "name": "Offset",
+          "type": "Int64",
+          "default": "0"
+        },
+        {
+          "name": "Size",
+          "type": "Int64",
+          "default": "-1"
+        },
+        {
+          "name": "Flags",
+          "type": "UInt",
+          "default": "0"
+        },
+        {
+          "name": "Block Size",
+          "type": "Int64",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a binary file a block at a time into a buffer and call the visitor each time the buffer is populated\nwith a new block. This uses less memory and has higher cache coherency than loading the entire file into\na block of bytes, and is more performant than reading the file a byte at a time. Useful for e.g. hashing or\nparsing.\n@param Filename The file to read\n@param BlockVisitor Function called repeatedly with each sequential block.\nSize of the input might change for performance and should not be assumed. Possibly the entire file will\nbe passed in a single block. If LoadFileInBlocks returns true, the sum of sizes in each call to\nBlockVisitor equals the size of the requested range of the the file on disk. If the requested range\nhas size 0, LoadFileInBlocks will return true and the BlockVisitor will not be called.\n@param Offset Start of the range of bytes to read from the file. If less than zero or larger than filesize,\nit will be silently clamped to the [0,FileSize] range. This may result in LoadFileInBlocks returning true\nbut using an empty range and not calling BlockVisitor.\n@param Length of the range of bytes to read from the file. If less than zero, all bytes between Offset and end\nof file are read. If larger than the size of the range between Offset and end of file, it will be\nsilently shortened to the size of the range.\n@param Flags Flags to pass to IFileManager::CreateFileReader\n@param BlockSize Size of the internally-allocated buffer to read bytes into and pass to each call to\nBlockVisitor. Sizes <= 0 use the default-selected block size for the current platform."
+    },
+    {
+      "id": "load-file-to-string-5ed185",
+      "name": "LoadFileToString",
+      "category": "FileHelper",
+      "signature": "LoadFileToString(Result, Reader, Verify Flags)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "String&"
+        },
+        {
+          "name": "Reader",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Verify Flags",
+          "type": "EHashOptions",
+          "default": "EHashOptions::None"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads a text file from an FArchive to an FString. Supports all combination of ANSI/Unicode files and platforms.\n@param Result       String representation of the loaded file\n@param Reader       The archive to load from\n@param VerifyFlags  Flags controlling the hash verification behavior ( see EHashOptions )"
+    },
+    {
+      "id": "load-file-to-string-709035",
+      "name": "LoadFileToString",
+      "category": "FileHelper",
+      "signature": "LoadFileToString(Result, Filename, Verify Flags, Read Flags)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "String&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Verify Flags",
+          "type": "EHashOptions",
+          "default": "EHashOptions::None"
+        },
+        {
+          "name": "Read Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a text file to an FString. Supports all combination of ANSI/Unicode files and platforms.\n@param Result       String representation of the loaded file\n@param Filename     Name of the file to load\n@param VerifyFlags  Flags controlling the hash verification behavior ( see EHashOptions )"
+    },
+    {
+      "id": "load-file-to-string-e2b20c",
+      "name": "LoadFileToString",
+      "category": "FileHelper",
+      "signature": "LoadFileToString(Result, Platform File, Filename, Verify Flags, Read Flags)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "String&"
+        },
+        {
+          "name": "Platform File",
+          "type": "IPlatformFile*"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Verify Flags",
+          "type": "EHashOptions",
+          "default": "EHashOptions::None"
+        },
+        {
+          "name": "Read Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a text file to an FString. Supports all combination of ANSI/Unicode files and platforms.\n@param Result       String representation of the loaded file\n@param PlatformFile PlatformFile interface to use\n@param Filename     Name of the file to load\n@param VerifyFlags  Flags controlling the hash verification behavior ( see EHashOptions )"
+    },
+    {
+      "id": "load-file-to-string-array-63773e",
+      "name": "LoadFileToStringArray",
+      "category": "FileHelper",
+      "signature": "LoadFileToStringArray(Result, Filename)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a text file to an array of strings. Supports all combination of ANSI/Unicode files and platforms.\n@param Result       String representation of the loaded file\n@param Filename     Name of the file to load"
+    },
+    {
+      "id": "load-file-to-string-array-d0621e",
+      "name": "LoadFileToStringArray",
+      "category": "FileHelper",
+      "signature": "LoadFileToStringArray(Result, Filename, Verify Flags)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Verify Flags",
+          "type": "EHashOptions"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "load-file-to-string-array-with-predicate-329449",
+      "name": "LoadFileToStringArrayWithPredicate",
+      "category": "FileHelper",
+      "signature": "LoadFileToStringArrayWithPredicate(Result, Filename, Predicate)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Predicate",
+          "type": "TFunctionRef<bool ( FString& )>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a text file to an array of strings, filtered by a user-defined predicate. Supports all combination of ANSI/Unicode files and platforms.\n@param Result       String representation of the loaded file\n@param Filename     Name of the file to load\n@param Predicate    Condition for whether or not to add the line to the array"
+    },
+    {
+      "id": "load-file-to-string-array-with-predicate-2d1100",
+      "name": "LoadFileToStringArrayWithPredicate",
+      "category": "FileHelper",
+      "signature": "LoadFileToStringArrayWithPredicate(Result, Filename, Predicate, Verify Flags)",
+      "params": [
+        {
+          "name": "Result",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Predicate",
+          "type": "TFunctionRef<bool ( FString& )>"
+        },
+        {
+          "name": "Verify Flags",
+          "type": "EHashOptions"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "load-file-to-string-with-line-visitor",
+      "name": "LoadFileToStringWithLineVisitor",
+      "category": "FileHelper",
+      "signature": "LoadFileToStringWithLineVisitor(Filename, Visitor)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<void ( FStringView Line )>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a text file and invoke a visitor for each line. Supports all combination of ANSI/Unicode files and platforms.\n@param Filename     Name of the file to load\n@param Visitor      Visitor to invoke for each non-empty line in the file"
+    },
+    {
+      "id": "save-array-to-file",
+      "name": "SaveArrayToFile",
+      "category": "FileHelper",
+      "signature": "SaveArrayToFile(Array, Filename, File Manager, Write Flags)",
+      "params": [
+        {
+          "name": "Array",
+          "type": "TArrayView64<uint8>"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "File Manager",
+          "type": "IFileManager*",
+          "default": "&IFileManager::Get()"
+        },
+        {
+          "name": "Write Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Save a binary array to a file."
+    },
+    {
+      "id": "save-string-to-file",
+      "name": "SaveStringToFile",
+      "category": "FileHelper",
+      "signature": "SaveStringToFile(String, Filename, Encoding Options, File Manager, Write Flags)",
+      "params": [
+        {
+          "name": "String",
+          "type": "FStringView"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Encoding Options",
+          "type": "EEncodingOptions",
+          "default": "EEncodingOptions::AutoDetect"
+        },
+        {
+          "name": "File Manager",
+          "type": "IFileManager*",
+          "default": "&IFileManager::Get()"
+        },
+        {
+          "name": "Write Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Write the FString to a file.\nSupports all combination of ANSI/Unicode files and platforms."
+    },
+    {
+      "id": "save-string-array-to-file",
+      "name": "SaveStringArrayToFile",
+      "category": "FileHelper",
+      "signature": "SaveStringArrayToFile(Lines, Filename, Encoding Options, File Manager, Write Flags)",
+      "params": [
+        {
+          "name": "Lines",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Encoding Options",
+          "type": "EEncodingOptions",
+          "default": "EEncodingOptions::AutoDetect"
+        },
+        {
+          "name": "File Manager",
+          "type": "IFileManager*",
+          "default": "&IFileManager::Get()"
+        },
+        {
+          "name": "Write Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Write the FString to a file.\nSupports all combination of ANSI/Unicode files and platforms."
+    },
+    {
+      "id": "create-bitmap-0e4c06",
+      "name": "CreateBitmap",
+      "category": "FileHelper",
+      "signature": "CreateBitmap(Pattern, Data Width, Data Height, Data, Sub Rectangle, File Manager, Out Filename, In Write Alpha, Color Channel)",
+      "params": [
+        {
+          "name": "Pattern",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Data Width",
+          "type": "Int"
+        },
+        {
+          "name": "Data Height",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "FColor*"
+        },
+        {
+          "name": "Sub Rectangle",
+          "type": "FIntRect*",
+          "default": "NULL"
+        },
+        {
+          "name": "File Manager",
+          "type": "IFileManager*",
+          "default": "&IFileManager::Get()"
+        },
+        {
+          "name": "Out Filename",
+          "type": "String*",
+          "default": "NULL"
+        },
+        {
+          "name": "In Write Alpha",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Color Channel",
+          "type": "EColorChannel",
+          "default": "EColorChannel::All"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Saves a 24/32Bit BMP file to disk for debug image dump purposes\nfor general image saving (to BMP or any other format); use FImageUtils::SaveImage instead\nCreateBitmap is mainly for debug dump images\nnote this also calls SendDataToPCViaUnrealConsole\nand uses GenerateNextBitmapFilename if Pattern does not have \".bmp\" on it\n@param Pattern filename with path, must not be 0, if with \"bmp\" extension (e.g. \"out.bmp\") the filename stays like this, if without (e.g. \"out\") automatic index numbers are addended (e.g. \"out00002.bmp\")\n@param DataWidth - Width of the bitmap supplied in Data >0\n@param DataHeight - Height of the bitmap supplied in Data >0\n@param Data must not be 0\n@param SubRectangle optional, specifies a sub-rectangle of the source image to save out. If NULL, the whole bitmap is saved\n@param FileManager must not be 0\n@param OutFilename optional, if specified filename will be output\n@param bInWriteAlpha optional, specifies whether to write out the alpha channel. Will force BMP V4 format.\n@param ColorChannel optional, specifies a specific channel to write out (will be written out to all channels gray scale).\n@return true if success"
+    },
+    {
+      "id": "generate-next-bitmap-filename",
+      "name": "GenerateNextBitmapFilename",
+      "category": "FileHelper",
+      "signature": "GenerateNextBitmapFilename(Pattern, Extension, Out Filename, File Manager)",
+      "params": [
+        {
+          "name": "Pattern",
+          "type": "String&"
+        },
+        {
+          "name": "Extension",
+          "type": "String&"
+        },
+        {
+          "name": "Out Filename",
+          "type": "String&"
+        },
+        {
+          "name": "File Manager",
+          "type": "IFileManager*",
+          "default": "&IFileManager::Get()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Generates the next unique bitmap filename with a specified extension\n@param Pattern\t\tFilename with path, but without extension.\n@param Extension\t\tFile extension to be appended\n@param OutFilename\tReference to an FString where the newly generated filename will be placed\n@param FileManager\tReference to a IFileManager (or the global instance by default)\n@return true if success"
+    },
+    {
+      "id": "generate-date-time-based-bitmap-filename",
+      "name": "GenerateDateTimeBasedBitmapFilename",
+      "category": "FileHelper",
+      "signature": "GenerateDateTimeBasedBitmapFilename(Pattern, Extension, Out Filename)",
+      "params": [
+        {
+          "name": "Pattern",
+          "type": "String&"
+        },
+        {
+          "name": "Extension",
+          "type": "String&"
+        },
+        {
+          "name": "Out Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Generates the next unique bitmap filename with a specified extension\n@param Pattern\t\tFilename with path, but without extension.\n@param Extension\t\tFile extension to be appended\n@param OutFilename\tReference to an FString where the newly generated filename will be placed\n@return true if success"
+    },
+    {
+      "id": "load-ansi-text-file-to-strings",
+      "name": "LoadANSITextFileToStrings",
+      "category": "FileHelper",
+      "signature": "LoadANSITextFileToStrings(In Filename, In File Manager, Out Strings)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In File Manager",
+          "type": "IFileManager*"
+        },
+        {
+          "name": "Out Strings",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load the given ANSI text file to an array of strings - one FString per line of the file.\nIntended for use in simple text parsing actions\n@param\tInFilename\t\t\tThe text file to read, full path\n@param\tInFileManager\t\tThe filemanager to use - NULL will use &IFileManager::Get()\n@param\tOutStrings\t\t\tThe array of FStrings to fill in\n@return\tbool\t\t\t\ttrue if successful, false if not"
+    },
+    {
+      "id": "is-filename-valid-for-saving",
+      "name": "IsFilenameValidForSaving",
+      "category": "FileHelper",
+      "signature": "IsFilenameValidForSaving(Filename, Out Error)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Out Error",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks to see if a filename is valid for saving.\nA filename must be under FPlatformMisc::GetMaxPathLength() to be saved\n@param Filename\tFilename, with or without path information, to check.\n@param OutError\tIf an error occurs, this is the reason why"
+    },
+    {
+      "id": "create-bitmap-adbe0b",
+      "name": "CreateBitmap",
+      "category": "FileHelper",
+      "signature": "CreateBitmap(Pattern, Data Width, Data Height, Data, Sub Rectangle, File Manager, Out Filename, In Write Alpha, Channel Mask)",
+      "params": [
+        {
+          "name": "Pattern",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Data Width",
+          "type": "Int"
+        },
+        {
+          "name": "Data Height",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "FColor*"
+        },
+        {
+          "name": "Sub Rectangle",
+          "type": "FIntRect*"
+        },
+        {
+          "name": "File Manager",
+          "type": "IFileManager*"
+        },
+        {
+          "name": "Out Filename",
+          "type": "String*"
+        },
+        {
+          "name": "In Write Alpha",
+          "type": "Bool"
+        },
+        {
+          "name": "Channel Mask",
+          "type": "EChannelMask"
+        }
+      ],
+      "returnType": "PRAGMA_DISABLE_DEPRECATION_WARNINGS bool"
+    }
+  ]
+}

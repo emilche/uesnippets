@@ -1,0 +1,221 @@
+{
+  "id": "ticker",
+  "label": "Ticker",
+  "includepath": "Containers/Ticker.h",
+  "includes": [
+    "Array",
+    "ContainerAllocationPolicies",
+    "MpscQueue",
+    "CoreTypes",
+    "Delegate",
+    "Function",
+    "SharedPointer",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "get-core-ticker",
+      "name": "GetCoreTicker",
+      "category": "Ticker",
+      "signature": "GetCoreTicker()",
+      "params": [],
+      "returnType": "nodiscard ] ] FTSTicker&",
+      "docs": "Thread-safe ticker class. Fires delegates after a delay."
+    },
+    {
+      "id": "add-ticker-a1d930",
+      "name": "AddTicker",
+      "category": "Ticker",
+      "signature": "AddTicker(Target, In Delegate, In Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTSTicker*"
+        },
+        {
+          "name": "In Delegate",
+          "type": "FTickerDelegate&"
+        },
+        {
+          "name": "In Delay",
+          "type": "Float",
+          "default": "0.0f"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Add a new ticker with a given delay / interval\nCan be called concurrently. Resources used by the delegate must be released on the ticking thread.\n@param InDelegate Delegate to fire after the delay\n@param InDelay Delay until next fire; 0 means \"next frame\""
+    },
+    {
+      "id": "add-ticker-3be3cb",
+      "name": "AddTicker",
+      "category": "Ticker",
+      "signature": "AddTicker(Target, In Name, In Delay, In Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTSTicker*"
+        },
+        {
+          "name": "In Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Delay",
+          "type": "Float"
+        },
+        {
+          "name": "In Function",
+          "type": "TUniqueFunction<bool ( float )>&&"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Add a new ticker with a given delay / interval.\nCan be called concurrently.\n@param InName Name of this ticker for profiling\n@param InDelay Delay until next fire; 0 means \"next frame\"\n@param Function Function to execute. Should return true to fire after another InDelay time"
+    },
+    {
+      "id": "remove-ticker",
+      "name": "RemoveTicker",
+      "category": "Ticker",
+      "signature": "RemoveTicker(Handle)",
+      "params": [
+        {
+          "name": "Handle",
+          "type": "FDelegateHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes a previously added ticker delegate.\nCan be called concurrently. If is caleld in the middle of the delegate execution, it blocks until the execution finishes, and thus guarantees\nthat the delegate won't be executed after the call.\n@param Handle The handle of the ticker to remove."
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "Ticker",
+      "signature": "Tick(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTSTicker*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fire all tickers who have passed their delay and reschedule the ones that return true\nNote: This reschedule has timer skew, meaning we always wait a full Delay period after\neach invocation even if we missed the last interval by a bit. For instance, setting a\ndelay of 0.1 seconds will not necessarily fire the delegate 10 times per second, depending\non the Tick() rate. What this DOES guarantee is that a delegate will never be called MORE\nFREQUENTLY than the Delay interval, regardless of how far we miss the scheduled interval.\nMust not be called concurrently.\n@param DeltaTime\ttime that has passed since the last tick call"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "Ticker",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTSTicker*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the instance to its default state. Must be called from the ticking thread."
+    },
+    {
+      "id": "f-element-db8948",
+      "name": "FElement",
+      "category": "Ticker",
+      "signature": "FElement()",
+      "params": [],
+      "returnType": "nodiscard ] ]",
+      "docs": "Default ctor is only required to implement CurrentElement handling without making it a pointer."
+    },
+    {
+      "id": "f-element-241a69",
+      "name": "FElement",
+      "category": "Ticker",
+      "signature": "FElement(In Fire Time, In Delay Time, In Delegate)",
+      "params": [
+        {
+          "name": "In Fire Time",
+          "type": "Double"
+        },
+        {
+          "name": "In Delay Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Delegate",
+          "type": "FTickerDelegate&"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "This is the ctor that the code will generally use."
+    },
+    {
+      "id": "f-element-4e2963",
+      "name": "FElement",
+      "category": "Ticker",
+      "signature": "FElement(In Fire Time, In Delay Time, In Function)",
+      "params": [
+        {
+          "name": "In Fire Time",
+          "type": "Double"
+        },
+        {
+          "name": "In Delay Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Function",
+          "type": "TUniqueFunction<bool ( float )>&&"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "This is the ctor that the code will generally use."
+    },
+    {
+      "id": "fire",
+      "name": "Fire",
+      "category": "Ticker",
+      "signature": "Fire(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FElement*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Fire the delegate if it is fireable *"
+    },
+    {
+      "id": "fts-ticker-object-base-d2e752",
+      "name": "FTSTickerObjectBase",
+      "category": "Ticker",
+      "signature": "FTSTickerObjectBase(In Delay, Ticker)",
+      "params": [
+        {
+          "name": "In Delay",
+          "type": "Float",
+          "default": "0.0f"
+        },
+        {
+          "name": "Ticker",
+          "type": "FTSTicker&",
+          "default": "FTSTicker::GetCoreTicker()"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Constructor\n@param InDelay Delay until next fire; 0 means \"next frame\"\n@param Ticker the ticker to register with. Defaults to FTSTicker::GetCoreTicker()."
+    },
+    {
+      "id": "fts-ticker-object-base-ce3e79",
+      "name": "FTSTickerObjectBase",
+      "category": "Ticker",
+      "signature": "FTSTickerObjectBase()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Virtual destructor."
+    }
+  ]
+}

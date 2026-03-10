@@ -1,0 +1,1187 @@
+{
+  "id": "generic-platform-crash-context",
+  "label": "GenericPlatformCrashContext",
+  "includepath": "GenericPlatform/GenericPlatformCrashContext.h",
+  "includes": [
+    "Array",
+    "ContainersFwd",
+    "StringFwd",
+    "StringView",
+    "UnrealString",
+    "CoreTypes",
+    "Delegate",
+    "DelegateCombinations",
+    "GenericPlatformStackWalk",
+    "PlatformMemory",
+    "PlatformProcess",
+    "PlatformStackWalk",
+    "AssertionMacros",
+    "Optional",
+    "SecureHash",
+    "Timespan",
+    "Function",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "attended-status-to-string",
+      "name": "AttendedStatusToString",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AttendedStatusToString(Status)",
+      "params": [
+        {
+          "name": "Status",
+          "type": "EUnattendedStatus"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Portable thread stack frame"
+    },
+    {
+      "id": "begin-node",
+      "name": "BeginNode",
+      "category": "GenericPlatformCrashContext",
+      "signature": "BeginNode(Target, Name, State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSerializer*"
+        },
+        {
+          "name": "Name",
+          "type": "String&"
+        },
+        {
+          "name": "State",
+          "type": "EState"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "end-node",
+      "name": "EndNode",
+      "category": "GenericPlatformCrashContext",
+      "signature": "EndNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSerializer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-result",
+      "name": "GetResult",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetResult(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSerializer*"
+        }
+      ],
+      "returnType": "FQueueData"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "GenericPlatformCrashContext",
+      "signature": "Initialize()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Contains a runtime crash's properties that are common for all platforms.\nThis may change in the future."
+    },
+    {
+      "id": "initialize-from-context",
+      "name": "InitializeFromContext",
+      "category": "GenericPlatformCrashContext",
+      "signature": "InitializeFromContext(Context, Enabled Plugins, Engine Data, Game Data, File Path Data, GPU Breadcrumbs)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FSessionContext&"
+        },
+        {
+          "name": "Enabled Plugins",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Engine Data",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Game Data",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "File Path Data",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "GPU Breadcrumbs",
+          "type": "FGPUBreadcrumbsSharedContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialized crash context, using a crash context (e.g. shared from another process)."
+    },
+    {
+      "id": "get-cached-session-context",
+      "name": "GetCachedSessionContext",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetCachedSessionContext()",
+      "params": [],
+      "returnType": "FSessionContext&",
+      "docs": "Get the current cached session context"
+    },
+    {
+      "id": "get-game-name",
+      "name": "GetGameName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetGameName()",
+      "params": [],
+      "returnType": "String",
+      "docs": "Gets the current standardized game name for use in a Crash Reporter report."
+    },
+    {
+      "id": "set-out-of-process-crash-reporter-exit-code",
+      "name": "SetOutOfProcessCrashReporterExitCode",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetOutOfProcessCrashReporterExitCode(Exit Code)",
+      "params": [
+        {
+          "name": "Exit Code",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the out of process crash reporter exit code if known. The out of process reporter is expected to run in background, waiting for a signal to handle a\ncrashes/ensures/assert, but sometimes it crashes. If the engine detects that its associated out of process crash reporter died and if the child process exit\ncode can be retrieved, it can be exposed through this function.\n@see GetOutOfProcessCrashReporterExitCode"
+    },
+    {
+      "id": "get-out-of-process-crash-reporter-exit-code",
+      "name": "GetOutOfProcessCrashReporterExitCode",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetOutOfProcessCrashReporterExitCode()",
+      "params": [],
+      "returnType": "TOptional<int32>",
+      "docs": "Return the out-of-process crash reporter exit code if available. The exit code is available if crash reporter process died while the application it monitors was still running.\nThen engine periodically poll the health of the crash reporter process and try to read its exit code if it unexpectedly died.\n@note This function is useful to try diagnose why the crash reporter died (crashed/killed/asserted) and gather data for the analytics."
+    },
+    {
+      "id": "f-generic-crash-context",
+      "name": "FGenericCrashContext",
+      "category": "GenericPlatformCrashContext",
+      "signature": "FGenericCrashContext(In Type, Error Message)",
+      "params": [
+        {
+          "name": "In Type",
+          "type": "ECrashContextType"
+        },
+        {
+          "name": "Error Message",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Default constructor. Optionally pass a process handle if building a crash context for a process other then current."
+    },
+    {
+      "id": "get-temp-session-context-file-path",
+      "name": "GetTempSessionContextFilePath",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetTempSessionContextFilePath(Process ID)",
+      "params": [
+        {
+          "name": "Process ID",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get the file path to the temporary session context file that we create for the given process."
+    },
+    {
+      "id": "cleanup-temp-session-context-files",
+      "name": "CleanupTempSessionContextFiles",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CleanupTempSessionContextFiles(Expiration Age)",
+      "params": [
+        {
+          "name": "Expiration Age",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clean up expired context files that were left-over on the user disks (because the consumer crashed and/or failed to delete it)."
+    },
+    {
+      "id": "serialize-content-to-buffer",
+      "name": "SerializeContentToBuffer",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SerializeContentToBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes all data to the buffer."
+    },
+    {
+      "id": "get-unique-crash-name",
+      "name": "GetUniqueCrashName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetUniqueCrashName(Target, GUID Buffer, Buffer Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "GUID Buffer",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Buffer Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@return a globally unique crash name."
+    },
+    {
+      "id": "is-full-crash-dump",
+      "name": "IsFullCrashDump",
+      "category": "GenericPlatformCrashContext",
+      "signature": "IsFullCrashDump(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return whether this crash is a full memory minidump"
+    },
+    {
+      "id": "serialize-as-xml",
+      "name": "SerializeAsXML",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SerializeAsXML(Target, Filename)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes crash's informations to the specified filename. Should be overridden for platforms where using FFileHelper is not safe, all POSIX platforms."
+    },
+    {
+      "id": "serialize-session-context",
+      "name": "SerializeSessionContext",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SerializeSessionContext(Buffer)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes session context to the given buffer.\nNOTE: Assumes that the buffer already has a header and section open."
+    },
+    {
+      "id": "append-escaped-xml-string",
+      "name": "AppendEscapedXMLString",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AppendEscapedXMLString(Out Buffer, Text)",
+      "params": [
+        {
+          "name": "Out Buffer",
+          "type": "String&"
+        },
+        {
+          "name": "Text",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Escapes and appends specified text to XML string"
+    },
+    {
+      "id": "append-portable-callstack",
+      "name": "AppendPortableCallstack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AppendPortableCallstack(Out Buffer, Stack Frames)",
+      "params": [
+        {
+          "name": "Out Buffer",
+          "type": "String&"
+        },
+        {
+          "name": "Stack Frames",
+          "type": "TConstArrayView<FCrashStackFrame>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unescape-xml-string",
+      "name": "UnescapeXMLString",
+      "category": "GenericPlatformCrashContext",
+      "signature": "UnescapeXMLString(Text)",
+      "params": [
+        {
+          "name": "Text",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Unescapes a specified XML string, naive implementation."
+    },
+    {
+      "id": "get-crash-type-string",
+      "name": "GetCrashTypeString",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetCrashTypeString(Type)",
+      "params": [
+        {
+          "name": "Type",
+          "type": "ECrashContextType"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Helper to get the standard string for the crash type based on crash event bool values."
+    },
+    {
+      "id": "get-crash-game-name",
+      "name": "GetCrashGameName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetCrashGameName()",
+      "params": [],
+      "returnType": "String",
+      "docs": "Get the Game Name of the crash"
+    },
+    {
+      "id": "get-crash-config-file-path",
+      "name": "GetCrashConfigFilePath",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetCrashConfigFilePath()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Helper to get the crash report client config filepath saved by this instance and copied to each crash report folder."
+    },
+    {
+      "id": "get-crash-config-folder",
+      "name": "GetCrashConfigFolder",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetCrashConfigFolder()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Helper to get the crash report client config folder used by GetCrashConfigFilePath()."
+    },
+    {
+      "id": "purge-old-crash-config",
+      "name": "PurgeOldCrashConfig",
+      "category": "GenericPlatformCrashContext",
+      "signature": "PurgeOldCrashConfig()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Helper to clean out old files in the crash report client config folder."
+    },
+    {
+      "id": "set-epic-account-id",
+      "name": "SetEpicAccountId",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetEpicAccountId(Epic Account Id)",
+      "params": [
+        {
+          "name": "Epic Account Id",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set or change the epic account id associated with the crash session. Will override the epic account id stored in the registry for reporting when present."
+    },
+    {
+      "id": "reset-engine-data",
+      "name": "ResetEngineData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "ResetEngineData()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Clears the engine data dictionary"
+    },
+    {
+      "id": "set-engine-data",
+      "name": "SetEngineData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetEngineData(Key, Value)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates (or adds if not already present) arbitrary engine data to the crash context (will remove the key if passed an empty string)"
+    },
+    {
+      "id": "set-gpu-breadcrumbs",
+      "name": "SetGPUBreadcrumbs",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetGPUBreadcrumbs(Data)",
+      "params": [
+        {
+          "name": "Data",
+          "type": "FGPUBreadcrumbCrashData&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates (or adds if not already present) GPU breadcrumb data."
+    },
+    {
+      "id": "get-engine-data-b3db97",
+      "name": "GetEngineData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetEngineData()",
+      "params": [],
+      "returnType": "TMap<FString,FString>&",
+      "docs": "Get the engine data dictionary"
+    },
+    {
+      "id": "reset-game-data",
+      "name": "ResetGameData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "ResetGameData()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Clears the game data dictionary"
+    },
+    {
+      "id": "set-game-data",
+      "name": "SetGameData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetGameData(Key, Value)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "String&"
+        },
+        {
+          "name": "Value",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates (or adds if not already present) arbitrary game data to the crash context (will remove the key if passed an empty string)"
+    },
+    {
+      "id": "get-game-data-e00d45",
+      "name": "GetGameData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetGameData()",
+      "params": [],
+      "returnType": "TMap<FString,FString>&",
+      "docs": "Get the game data dictionary"
+    },
+    {
+      "id": "add-plugin",
+      "name": "AddPlugin",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddPlugin(Plugin Desc)",
+      "params": [
+        {
+          "name": "Plugin Desc",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a plugin descriptor string to the enabled plugins list in the crash context"
+    },
+    {
+      "id": "add-file",
+      "name": "AddFile",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddFile(Absolute Source Path)",
+      "params": [
+        {
+          "name": "Absolute Source Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a file to bundle with the crash report"
+    },
+    {
+      "id": "dump-log",
+      "name": "DumpLog",
+      "category": "GenericPlatformCrashContext",
+      "signature": "DumpLog(Crash Folder Absolute)",
+      "params": [
+        {
+          "name": "Crash Folder Absolute",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Flushes the logs. In the case of in memory logs is used on this configuration, dumps them to file. Returns the name of the file"
+    },
+    {
+      "id": "dump-additional-context",
+      "name": "DumpAdditionalContext",
+      "category": "GenericPlatformCrashContext",
+      "signature": "DumpAdditionalContext(Crash Folder Absolute)",
+      "params": [
+        {
+          "name": "Crash Folder Absolute",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collects additional crash context providers. See FAdditionalCrashContextStack."
+    },
+    {
+      "id": "copy-shared-crash-context",
+      "name": "CopySharedCrashContext",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CopySharedCrashContext(Dst)",
+      "params": [
+        {
+          "name": "Dst",
+          "type": "FSharedCrashContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes a shared crash context from current state. Will not set all fields in Dst."
+    },
+    {
+      "id": "set-memory-stats",
+      "name": "SetMemoryStats",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetMemoryStats(Memory Stats)",
+      "params": [
+        {
+          "name": "Memory Stats",
+          "type": "FPlatformMemoryStats&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "We can't gather memory stats in crash handling function, so we gather them just before raising\nexception and use in crash reporting."
+    },
+    {
+      "id": "set-anticheat-provider",
+      "name": "SetAnticheatProvider",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetAnticheatProvider(Anticheat Provider)",
+      "params": [
+        {
+          "name": "Anticheat Provider",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the Anticheat client provider."
+    },
+    {
+      "id": "on-thread-stuck",
+      "name": "OnThreadStuck",
+      "category": "GenericPlatformCrashContext",
+      "signature": "OnThreadStuck(Thread Id)",
+      "params": [
+        {
+          "name": "Thread Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a flag that one of the threads is stuck.\nThis is meant to be bound to the ThreadHeartBeat::OnThreadStuck delegate. Not all platforms register to save this flag."
+    },
+    {
+      "id": "on-thread-unstuck",
+      "name": "OnThreadUnstuck",
+      "category": "GenericPlatformCrashContext",
+      "signature": "OnThreadUnstuck(Thread Id)",
+      "params": [
+        {
+          "name": "Thread Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the stuck flag.\nThis is meant to be bound to the ThreadHeartBeat::OnThreadUnstuck delegate. Not all platforms register to save this flag."
+    },
+    {
+      "id": "create-crash-report-directory",
+      "name": "CreateCrashReportDirectory",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CreateCrashReportDirectory(Crash GUID Root, Crash Index, Out Crash Directory Absolute)",
+      "params": [
+        {
+          "name": "Crash GUID Root",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Crash Index",
+          "type": "Int"
+        },
+        {
+          "name": "Out Crash Directory Absolute",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Attempts to create the output report directory."
+    },
+    {
+      "id": "set-engine-exit",
+      "name": "SetEngineExit",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetEngineExit(Is Request Exit)",
+      "params": [
+        {
+          "name": "Is Request Exit",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notify the crash context exit has been requested."
+    },
+    {
+      "id": "set-num-minidump-frames-to-ignore",
+      "name": "SetNumMinidumpFramesToIgnore",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetNumMinidumpFramesToIgnore(Target, In Num Minidump Frames To Ignore)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "In Num Minidump Frames To Ignore",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the number of stack frames to ignore when symbolicating from a minidump"
+    },
+    {
+      "id": "capture-portable-call-stack-eb9377",
+      "name": "CapturePortableCallStack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CapturePortableCallStack(Target, Error Program Counter, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Error Program Counter",
+          "type": "void*"
+        },
+        {
+          "name": "Context",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Generate raw call stack for crash report (image base + offset) for the calling thread\n@param ErrorProgramCounter The program counter of where the occur occurred in the callstack being captured\n@param Context Optional thread context information"
+    },
+    {
+      "id": "capture-thread-portable-call-stack",
+      "name": "CaptureThreadPortableCallStack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CaptureThreadPortableCallStack(Target, Thread Id, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Thread Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Context",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Generate raw call stack for crash report (image base + offset) for a different thread\n@param InThreadId The thread id of the thread to capture the callstack for\n@param Context Optional thread context information"
+    },
+    {
+      "id": "capture-portable-call-stack-7a5417",
+      "name": "CapturePortableCallStack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CapturePortableCallStack(Target, Num Stack Frames To Ignore, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Num Stack Frames To Ignore",
+          "type": "Int"
+        },
+        {
+          "name": "Context",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-portable-call-stack",
+      "name": "SetPortableCallStack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetPortableCallStack(Target, Stack Frames, Num Stack Frames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Stack Frames",
+          "type": "UInt64*"
+        },
+        {
+          "name": "Num Stack Frames",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the portable callstack to a specified stack"
+    },
+    {
+      "id": "get-portable-call-stack",
+      "name": "GetPortableCallStack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetPortableCallStack(Target, Stack Frames, Num Stack Frames, Out Call Stack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Stack Frames",
+          "type": "UInt64*"
+        },
+        {
+          "name": "Num Stack Frames",
+          "type": "Int"
+        },
+        {
+          "name": "Out Call Stack",
+          "type": "TArray<FCrashStackFrame>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets the portable callstack to a specified stack and puts it into OutCallStack"
+    },
+    {
+      "id": "capture-modules",
+      "name": "CaptureModules",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CaptureModules(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Store info about loaded modules"
+    },
+    {
+      "id": "get-modules",
+      "name": "GetModules",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetModules(Target, Out Modules)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Out Modules",
+          "type": "TArray<FStackWalkModuleInfo>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets info about loaded modules and stores it in the given array"
+    },
+    {
+      "id": "add-portable-thread-call-stacks",
+      "name": "AddPortableThreadCallStacks",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddPortableThreadCallStacks(Target, Threads)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Threads",
+          "type": "TConstArrayView<FThreadCallStack>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a portable callstack for a thread"
+    },
+    {
+      "id": "add-portable-thread-call-stack",
+      "name": "AddPortableThreadCallStack",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddPortableThreadCallStack(Target, Thread Id, Thread Name, Stack Frames, Num Stack Frames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Thread Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Thread Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Stack Frames",
+          "type": "UInt64*"
+        },
+        {
+          "name": "Num Stack Frames",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "copy-platform-specific-files",
+      "name": "CopyPlatformSpecificFiles",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CopyPlatformSpecificFiles(Target, Output Directory, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        },
+        {
+          "name": "Output Directory",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Context",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows platform implementations to copy files to report directory."
+    },
+    {
+      "id": "cleanup-platform-specific-files",
+      "name": "CleanupPlatformSpecificFiles",
+      "category": "GenericPlatformCrashContext",
+      "signature": "CleanupPlatformSpecificFiles()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Cleanup platform specific files - called on startup, implemented per platform"
+    },
+    {
+      "id": "set-deployment-name",
+      "name": "SetDeploymentName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetDeploymentName(Epic App)",
+      "params": [
+        {
+          "name": "Epic App",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the current deployment name (ie. EpicApp)"
+    },
+    {
+      "id": "get-deployment-name",
+      "name": "GetDeploymentName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetDeploymentName()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Get the current deployment name (ie. EpicApp)"
+    },
+    {
+      "id": "set-crash-trigger",
+      "name": "SetCrashTrigger",
+      "category": "GenericPlatformCrashContext",
+      "signature": "SetCrashTrigger(Type)",
+      "params": [
+        {
+          "name": "Type",
+          "type": "ECrashTrigger"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the type of crash triggered. Used to distinguish crashes caused for debugging purposes."
+    },
+    {
+      "id": "get-callstack-property",
+      "name": "GetCallstackProperty",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetCallstackProperty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Allow platform implementations to provide a callstack property. Primarily used when non-native code triggers a crash."
+    },
+    {
+      "id": "get-engine-data-5ed830",
+      "name": "GetEngineData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetEngineData(Key)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String*",
+      "docs": "Get arbitrary engine data from the crash context"
+    },
+    {
+      "id": "get-game-data-785926",
+      "name": "GetGameData",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetGameData(Key)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String*",
+      "docs": "Get arbitrary game data from the crash context"
+    },
+    {
+      "id": "generate-new-crash-guid-base",
+      "name": "GenerateNewCrashGuidBase",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GenerateNewCrashGuidBase()",
+      "params": [],
+      "returnType": "String",
+      "docs": "Generate a new crash guid base string."
+    },
+    {
+      "id": "add-crash-property-internal",
+      "name": "AddCrashPropertyInternal",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddCrashPropertyInternal(Buffer, Property Name, Property Value)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        },
+        {
+          "name": "Property Name",
+          "type": "FStringView"
+        },
+        {
+          "name": "Property Value",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes a common property to the buffer."
+    },
+    {
+      "id": "add-platform-specific-properties",
+      "name": "AddPlatformSpecificProperties",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddPlatformSpecificProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericCrashContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes platform specific properties to the buffer."
+    },
+    {
+      "id": "add-header",
+      "name": "AddHeader",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddHeader(Buffer)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Writes header information to the buffer."
+    },
+    {
+      "id": "add-footer",
+      "name": "AddFooter",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddFooter(Buffer)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes footer to the buffer."
+    },
+    {
+      "id": "begin-section",
+      "name": "BeginSection",
+      "category": "GenericPlatformCrashContext",
+      "signature": "BeginSection(Buffer, Section Name)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        },
+        {
+          "name": "Section Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "end-section",
+      "name": "EndSection",
+      "category": "GenericPlatformCrashContext",
+      "signature": "EndSection(Buffer, Section Name)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        },
+        {
+          "name": "Section Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-section",
+      "name": "AddSection",
+      "category": "GenericPlatformCrashContext",
+      "signature": "AddSection(Buffer, Section Name, Section Content)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "String&"
+        },
+        {
+          "name": "Section Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Section Content",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-recovery-server-name",
+      "name": "GetRecoveryServerName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetRecoveryServerName()",
+      "params": [],
+      "returnType": "String",
+      "docs": "Generates a name for the disaster recovery service embedded in the CrashReporterClientEditor."
+    },
+    {
+      "id": "make-session-name",
+      "name": "MakeSessionName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "MakeSessionName()",
+      "params": [],
+      "returnType": "String",
+      "docs": "Generates a name for the disaster recovery session."
+    },
+    {
+      "id": "tokenize-session-name",
+      "name": "TokenizeSessionName",
+      "category": "GenericPlatformCrashContext",
+      "signature": "TokenizeSessionName(Session Name, Out Server Name, Seq Num, Proj Name, Date Time)",
+      "params": [
+        {
+          "name": "Session Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Server Name",
+          "type": "String*"
+        },
+        {
+          "name": "Seq Num",
+          "type": "Int*"
+        },
+        {
+          "name": "Proj Name",
+          "type": "String*"
+        },
+        {
+          "name": "Date Time",
+          "type": "FDateTime*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Tokenize the session name into its components."
+    },
+    {
+      "id": "get-thread-context-provider",
+      "name": "GetThreadContextProvider",
+      "category": "GenericPlatformCrashContext",
+      "signature": "GetThreadContextProvider()",
+      "params": [],
+      "returnType": "FAdditionalCrashContextStack&",
+      "docs": "A thread local stack of callbacks that can be issued at time of the crash."
+    },
+    {
+      "id": "push-provider",
+      "name": "PushProvider",
+      "category": "GenericPlatformCrashContext",
+      "signature": "PushProvider(Provider)",
+      "params": [
+        {
+          "name": "Provider",
+          "type": "FScopedAdditionalCrashContextProvider*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pop-provider",
+      "name": "PopProvider",
+      "category": "GenericPlatformCrashContext",
+      "signature": "PopProvider()",
+      "params": [],
+      "returnType": "Void"
+    }
+  ]
+}

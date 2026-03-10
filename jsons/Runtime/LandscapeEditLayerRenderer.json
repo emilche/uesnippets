@@ -1,0 +1,142 @@
+{
+  "id": "landscape-edit-layer-renderer",
+  "label": "LandscapeEditLayerRenderer",
+  "includepath": "LandscapeEditLayerRenderer.h",
+  "includes": [
+    "CoreMinimal",
+    "LandscapeEditTypes",
+    "LandscapeUtils",
+    "LandscapeEditLayerRendererState",
+    "LandscapeEditLayerTargetTypeState",
+    "LandscapeEditLayerTypes",
+    "LandscapeEditLayerMergeRenderContext",
+    "LandscapeEditLayerMergeRenderBlackboardItem",
+    "LandscapeEditLayerRenderer.generated"
+  ],
+  "functions": [
+    {
+      "id": "get-edit-layer-renderer-states",
+      "name": "GetEditLayerRendererStates",
+      "category": "LandscapeEditLayerRenderer",
+      "signature": "GetEditLayerRendererStates(Target, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IEditLayerRendererProvider*"
+        },
+        {
+          "name": "Return",
+          "type": "FMergeContext* InMergeContext ) PURE_VIRTUAL ( IEditLayerRendererProvider::GetEditLayerRendererStates,"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL TArray<FEditLayerRendererState>",
+      "docs": "@param InMergeContext context containing all sorts of information related to this merge operation\n@return a list of renderer states (i.e. a ILandscapeEditLayerRenderer and its current state) to be processed in that order by the merge operation"
+    },
+    {
+      "id": "get-renderer-state-info",
+      "name": "GetRendererStateInfo",
+      "category": "LandscapeEditLayerRenderer",
+      "signature": "GetRendererStateInfo(Target, In Merge Context, Out Supported Target Type State, Out Enabled Target Type State, Get Renderer State Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ILandscapeEditLayerRenderer*"
+        },
+        {
+          "name": "In Merge Context",
+          "type": "UE::Landscape::EditLayers::FMergeContext*"
+        },
+        {
+          "name": "Out Supported Target Type State",
+          "type": "UE::Landscape::EditLayers::FEditLayerTargetTypeState&"
+        },
+        {
+          "name": "Out Enabled Target Type State",
+          "type": "UE::Landscape::EditLayers::FEditLayerTargetTypeState&"
+        },
+        {
+          "name": "Get Renderer State Info",
+          "type": "TArray<TBitArray<>>& OutTargetLayerGroups ) PURE_VIRTUAL ( ILandscapeEditLayerRenderer::"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL void",
+      "docs": "GetRendererStateInfo retrieves the current state of this renderer (what it can and does render, as well as how to group target layers together), and part of this will then be mutable for the duration of the merge.\nThe idea is that FEditLayerRendererState's SupportedTargetTypeState tells the capabilities of this renderer, while EnabledTargetTypeState tells what it currently does render.\nA target type must be both supported and enabled in order to have this renderer affect it and the \"enabled\" state can be changed at will by the user (e.g. to temporarily disable\na given edit layer just for the duration of the merge) : see FEditLayerRendererState\n@param InMergeContext context containing all sorts of information related to this merge operation\n@param OutSupportedTargetTypeState List of all target types / weightmaps that this renderer supports (e.g. if, say ELandscapeToolTargetType::Weightmap, is not included, the renderer\nwill *not* be used at all when rendering any kind of weightmap)\n@param OutEnabledTargetTypeMask List of all target types / weightmaps that this renderer is currently enabled for (i.e. default state of this renderer wrt this target type).\nA target type must be both supported and enabled in order to have this renderer affect it.\nThe \"enabled\" state can be changed at will by the user (e.g. to temporarily disable a given edit layer) : see FEditLayerRendererState\n@param OutTargetLayerGroups List of groups of target layers that this renderer requires to be rendered together.\nThis allows it to perform horizontal blending (i.e.adjust the weights of the targeted weightmaps wrt one another).\nDepending on the other renderer's needs, the final target layer groups might contain more layers than was requested by a given renderer. This only means that more layers will be processed together\nand if this renderer doesn't act on one of these layers, it will simply do nothing with it in its RenderLayer function"
+    },
+    {
+      "id": "get-edit-layer-renderer-debug-name",
+      "name": "GetEditLayerRendererDebugName",
+      "category": "LandscapeEditLayerRenderer",
+      "signature": "GetEditLayerRendererDebugName(Target, TEXT)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ILandscapeEditLayerRenderer*"
+        },
+        {
+          "name": "TEXT",
+          "type": ") PURE_VIRTUAL ( ILandscapeEditLayerRenderer::GetEditLayerRendererDebugName,return"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL FString",
+      "docs": "@return the a debug name for this renderer"
+    },
+    {
+      "id": "get-render-items",
+      "name": "GetRenderItems",
+      "category": "LandscapeEditLayerRenderer",
+      "signature": "GetRenderItems(Target, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ILandscapeEditLayerRenderer*"
+        },
+        {
+          "name": "Return",
+          "type": "UE::Landscape::EditLayers::FMergeContext* InMergeContext ) PURE_VIRTUAL ( ILandscapeEditLayerRenderer::GetRenderItems,"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL TArray<UE::Landscape::EditLayers::FEditLayerRenderItem>",
+      "docs": "GetRenderItems retrieves information about the areas this renderer renders to and specifically what respective input area they require to render properly\n@param InMergeContext context containing all sorts of information related to this merge operation\n@return list of all render items that affect this renderer"
+    },
+    {
+      "id": "get-render-flags",
+      "name": "GetRenderFlags",
+      "category": "LandscapeEditLayerRenderer",
+      "signature": "GetRenderFlags(Target, None)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ILandscapeEditLayerRenderer*"
+        },
+        {
+          "name": "None",
+          "type": "UE::Landscape::EditLayers::FMergeContext* InMergeContext ) PURE_VIRTUAL ( ILandscapeEditLayerRenderer::GetRenderFlags,return UE::Landscape::EditLayers::ERenderFlags::"
+        }
+      ],
+      "returnType": "UE::Landscape::EditLayers::ERenderFlags",
+      "docs": "@param InMergeContext context containing all sorts of information related to this merge operation\n@return details about how this renderer's render method is implemented"
+    },
+    {
+      "id": "render-layer",
+      "name": "RenderLayer",
+      "category": "LandscapeEditLayerRenderer",
+      "signature": "RenderLayer(Target, Render Params, False)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ILandscapeEditLayerRenderer*"
+        },
+        {
+          "name": "Render Params",
+          "type": "UE::Landscape::EditLayers::FRenderParams&"
+        },
+        {
+          "name": "False",
+          "type": "UE::Landscape::FRDGBuilderRecorder& RDGBuilderRecorder ) PURE_VIRTUAL ( ILandscapeEditLayerRenderer::RenderLayer,return"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL bool",
+      "docs": "RenderLayer is where the renderer has a chance to render its content and eventually blend it with the merged result of all preceding layers (if ERenderFlags::BlendMode_SeparateBlend is not returned)\nIt operates on a limited set of components (depending on the size of the render batches) and on a set of target layers (e.g. multiple weightmaps).\nIt guarantees access to the merged result from preceding layers of each target layer.\n@param RenderParams contains parameters necessary for this render (affected components, merge context, etc.)\n@param RDGBuilderRecorder recorder to append operations to a single FRDGBuilder, if the the recorder in \"recording\" mode. In \"immediate\" mode, a render command will be enqueued immediately.\nThe recorder can be in 2 states, depending on the result from GetRenderFlags\n- ERenderFlags::RenderMode_Immediate : the recorder is in immediate mode renderer can enqueue render commands just like any other game thread-based renderer\n- ERenderFlags::RenderMode_Recorded : the function runs on the game thread but is *not* meant to enqueue render commands directly. Instead, it registers\nconsecutive \"render commands\" via \"RDG/render command\" accumulated on a FRDGBuilderRecorder. This allows to coalesce several render commands onto the same FRDGBuilder (which is critical\nfor performance) while still allowing to interleave game thread-based renders (flushing the command recorder, enqueuing the game thread-based render, and starting recording on the same (or a\nnew) command recorder again...)\nTLDR: when using the ERenderFlags::RenderMode_Recorded method, the user should use the command recorder to enqueue lambdas instead if enqueuing render commands directly.\nCorollary: Any render command issued by RenderLayer will end up being pushed before the render operations recorded on the RDG command recorder (unless it is flushed), so there's no reason\nto actually do it, unless you want those commands to run before the recorded commands\n@return true if anything was rendered"
+    }
+  ]
+}

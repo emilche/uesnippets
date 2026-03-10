@@ -1,0 +1,744 @@
+{
+  "id": "net-trace-internal",
+  "label": "NetTraceInternal",
+  "includepath": "Net/Core/Trace/Private/NetTraceInternal.h",
+  "includes": [
+    "NetTraceConfig",
+    "PlatformTime",
+    "Array",
+    "ContainerAllocationPolicies",
+    "UnrealString",
+    "CoreTypes",
+    "NetworkGuid",
+    "NetDebugName",
+    "NameTypes",
+    "TraceAuxiliary"
+  ],
+  "functions": [
+    {
+      "id": "set-trace-verbosity",
+      "name": "SetTraceVerbosity",
+      "category": "NetTraceInternal",
+      "signature": "SetTraceVerbosity(Verbosity)",
+      "params": [
+        {
+          "name": "Verbosity",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the runtime trace verbosity level, Verbosity == 0 means that it is disabled"
+    },
+    {
+      "id": "trace-end-session",
+      "name": "TraceEndSession",
+      "category": "NetTraceInternal",
+      "signature": "TraceEndSession(Game Instance Id)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace end of session for a GameInstance"
+    },
+    {
+      "id": "trace-instance-updated",
+      "name": "TraceInstanceUpdated",
+      "category": "NetTraceInternal",
+      "signature": "TraceInstanceUpdated(Game Instance Id, Is Server, Name)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Is Server",
+          "type": "Bool"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace that information about the current GameInstance has been updated"
+    },
+    {
+      "id": "create-trace-collector",
+      "name": "CreateTraceCollector",
+      "category": "NetTraceInternal",
+      "signature": "CreateTraceCollector()",
+      "params": [],
+      "returnType": "FNetTraceCollector*",
+      "docs": "Create a new trace collector if tracing is enabled"
+    },
+    {
+      "id": "destroy-trace-collector",
+      "name": "DestroyTraceCollector",
+      "category": "NetTraceInternal",
+      "signature": "DestroyTraceCollector(Collector)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy trace collector without reporting the collected events"
+    },
+    {
+      "id": "fold-trace-collector",
+      "name": "FoldTraceCollector",
+      "category": "NetTraceInternal",
+      "signature": "FoldTraceCollector(Dst Collector, Src Collector, Offset, Level Offset)",
+      "params": [
+        {
+          "name": "Dst Collector",
+          "type": "FNetTraceCollector*"
+        },
+        {
+          "name": "Src Collector",
+          "type": "FNetTraceCollector*"
+        },
+        {
+          "name": "Offset",
+          "type": "UInt"
+        },
+        {
+          "name": "Level Offset",
+          "type": "UInt",
+          "default": "0U"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Folds events into DstCollector"
+    },
+    {
+      "id": "fold-bunch-collector",
+      "name": "FoldBunchCollector",
+      "category": "NetTraceInternal",
+      "signature": "FoldBunchCollector(Dst Collector, Src Collector)",
+      "params": [
+        {
+          "name": "Dst Collector",
+          "type": "FNetTraceCollector*"
+        },
+        {
+          "name": "Src Collector",
+          "type": "FNetTraceCollector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Folds bunch into DstCollector, if the src and dst are the same bunch it is assumed that a bunch already is open and that it will be closed"
+    },
+    {
+      "id": "push-stream-offset",
+      "name": "PushStreamOffset",
+      "category": "NetTraceInternal",
+      "signature": "PushStreamOffset(Collector, Offset)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector*"
+        },
+        {
+          "name": "Offset",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Events will be offset by the provided offset, useful when doing partial reads using separate bitstreams, Does not support nesting"
+    },
+    {
+      "id": "pop-stream-offset",
+      "name": "PopStreamOffset",
+      "category": "NetTraceInternal",
+      "signature": "PopStreamOffset(Collector)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-packet-content-event",
+      "name": "BeginPacketContentEvent",
+      "category": "NetTraceInternal",
+      "signature": "BeginPacketContentEvent(Collector, Event Type, Pos)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        },
+        {
+          "name": "Event Type",
+          "type": "ENetTracePacketContentEventType"
+        },
+        {
+          "name": "Pos",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Begin a new PacketContentEvent"
+    },
+    {
+      "id": "end-packet-content-event",
+      "name": "EndPacketContentEvent",
+      "category": "NetTraceInternal",
+      "signature": "EndPacketContentEvent(Collector, Event Index, Pos)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        },
+        {
+          "name": "Event Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Pos",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "End a PacketContent event"
+    },
+    {
+      "id": "trace-packet-content-event",
+      "name": "TracePacketContentEvent",
+      "category": "NetTraceInternal",
+      "signature": "TracePacketContentEvent(Collector, In Net Trace Name Id, Start Pos, End Pos, Verbosity)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        },
+        {
+          "name": "In Net Trace Name Id",
+          "type": "UE::Net::FNetDebugNameId"
+        },
+        {
+          "name": "Start Pos",
+          "type": "UInt"
+        },
+        {
+          "name": "End Pos",
+          "type": "UInt"
+        },
+        {
+          "name": "Verbosity",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace PacketContent event"
+    },
+    {
+      "id": "begin-bunch",
+      "name": "BeginBunch",
+      "category": "NetTraceInternal",
+      "signature": "BeginBunch(Collector)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark the beginning of a new Bunch"
+    },
+    {
+      "id": "discard-bunch",
+      "name": "DiscardBunch",
+      "category": "NetTraceInternal",
+      "signature": "DiscardBunch(Collector)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discard any events Collected since BeginBunch"
+    },
+    {
+      "id": "end-bunch",
+      "name": "EndBunch",
+      "category": "NetTraceInternal",
+      "signature": "EndBunch(Dst Collector, Bunch Name, Start Pos, Header Bits, Bunch Bits, Bunch Info)",
+      "params": [
+        {
+          "name": "Dst Collector",
+          "type": "FNetTraceCollector&"
+        },
+        {
+          "name": "Bunch Name",
+          "type": "UE::Net::FNetDebugNameId"
+        },
+        {
+          "name": "Start Pos",
+          "type": "UInt"
+        },
+        {
+          "name": "Header Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "Bunch Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "Bunch Info",
+          "type": "FNetTraceBunchInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace end of a bunch, all events recorded between BeginBunch/EndBunch will be part of the bunch"
+    },
+    {
+      "id": "trace-bunch",
+      "name": "TraceBunch",
+      "category": "NetTraceInternal",
+      "signature": "TraceBunch(Dst Collector, Bunch Info, Bunch Name, Start Pos, Header Bits, Bunch Bits, Bunch Collector)",
+      "params": [
+        {
+          "name": "Dst Collector",
+          "type": "FNetTraceCollector&"
+        },
+        {
+          "name": "Bunch Info",
+          "type": "FNetTraceBunchInfo&"
+        },
+        {
+          "name": "Bunch Name",
+          "type": "Name"
+        },
+        {
+          "name": "Start Pos",
+          "type": "UInt"
+        },
+        {
+          "name": "Header Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "Bunch Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "Bunch Collector",
+          "type": "FNetTraceCollector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "TraceBunch, Commits all events in BunchCollector to DstCollector, if DstCollector == BunchCollector it is assumed that we are Ending the bunch"
+    },
+    {
+      "id": "pop-send-bunch",
+      "name": "PopSendBunch",
+      "category": "NetTraceInternal",
+      "signature": "PopSendBunch(Collector)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "PopSendBunch, last send bunch is considered to be merged with the next one, mark this by zeroing out the BunchHeaderSize"
+    },
+    {
+      "id": "trace-collected-events",
+      "name": "TraceCollectedEvents",
+      "category": "NetTraceInternal",
+      "signature": "TraceCollectedEvents(Collector, Game Instance Id, Connection Id, Packet Type)",
+      "params": [
+        {
+          "name": "Collector",
+          "type": "FNetTraceCollector&"
+        },
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Packet Type",
+          "type": "ENetTracePacketType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace all events in the bunch"
+    },
+    {
+      "id": "trace-packet-dropped",
+      "name": "TracePacketDropped",
+      "category": "NetTraceInternal",
+      "signature": "TracePacketDropped(Game Instance Id, Connection Id, Packet Sequence Number, Packet Type)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Packet Sequence Number",
+          "type": "UInt"
+        },
+        {
+          "name": "Packet Type",
+          "type": "ENetTracePacketType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace if the packet was dropped"
+    },
+    {
+      "id": "trace-packet",
+      "name": "TracePacket",
+      "category": "NetTraceInternal",
+      "signature": "TracePacket(Game Instance Id, Connection Id, Packet Sequence Number, Packet Bits, Packet Type)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Packet Sequence Number",
+          "type": "UInt"
+        },
+        {
+          "name": "Packet Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "Packet Type",
+          "type": "ENetTracePacketType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace incoming or outgoing packet"
+    },
+    {
+      "id": "trace-object-created",
+      "name": "TraceObjectCreated",
+      "category": "NetTraceInternal",
+      "signature": "TraceObjectCreated(Game Instance Id, Net Object Id, Name, Type Identifier, Owner Id)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Net Object Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Name",
+          "type": "UE::Net::FNetDebugName*"
+        },
+        {
+          "name": "Type Identifier",
+          "type": "UInt64"
+        },
+        {
+          "name": "Owner Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace that we have created a new object with the given ObjectId"
+    },
+    {
+      "id": "trace-object-destroyed",
+      "name": "TraceObjectDestroyed",
+      "category": "NetTraceInternal",
+      "signature": "TraceObjectDestroyed(Game Instance Id, Net Object Id)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Net Object Id",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace that a handle has been destroyed, the handle contains required info"
+    },
+    {
+      "id": "trace-connection-created",
+      "name": "TraceConnectionCreated",
+      "category": "NetTraceInternal",
+      "signature": "TraceConnectionCreated(Game Instance Id, Connection Id)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace that we have added a new connection for the given GameInstanceId"
+    },
+    {
+      "id": "trace-connection-state-updated",
+      "name": "TraceConnectionStateUpdated",
+      "category": "NetTraceInternal",
+      "signature": "TraceConnectionStateUpdated(Game Instance Id, Connection Id, Connection State Value)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection State Value",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace that the Connection State the given connection has been set"
+    },
+    {
+      "id": "trace-connection-updated",
+      "name": "TraceConnectionUpdated",
+      "category": "NetTraceInternal",
+      "signature": "TraceConnectionUpdated(Game Instance Id, Connection Id, Address String, Owning Actor)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Address String",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Owning Actor",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace additional information related to the given connection"
+    },
+    {
+      "id": "trace-connection-closed",
+      "name": "TraceConnectionClosed",
+      "category": "NetTraceInternal",
+      "signature": "TraceConnectionClosed(Game Instance Id, Connection Id)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace that we have removed a connection for the given GameInstanceId"
+    },
+    {
+      "id": "trace-packet-stats-counter-76c6e0",
+      "name": "TracePacketStatsCounter",
+      "category": "NetTraceInternal",
+      "signature": "TracePacketStatsCounter(Game Instance Id, Connection Id, Counter Name Id, Stat Value)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Counter Name Id",
+          "type": "UE::Net::FNetDebugNameId"
+        },
+        {
+          "name": "Stat Value",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trace stats counters for networking"
+    },
+    {
+      "id": "trace-packet-stats-counter-ad91e4",
+      "name": "TracePacketStatsCounter",
+      "category": "NetTraceInternal",
+      "signature": "TracePacketStatsCounter(Game Instance Id, Connection Id, Counter Name, Stat Value)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Counter Name",
+          "type": "UE::Net::FNetDebugName*"
+        },
+        {
+          "name": "Stat Value",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trace-frame-stats-counter",
+      "name": "TraceFrameStatsCounter",
+      "category": "NetTraceInternal",
+      "signature": "TraceFrameStatsCounter(Game Instance Id, Counter Name Id, Stat Value)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Counter Name Id",
+          "type": "UE::Net::FNetDebugNameId"
+        },
+        {
+          "name": "Stat Value",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trace-name",
+      "name": "TraceName",
+      "category": "NetTraceInternal",
+      "signature": "TraceName(Name)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "UE::Net::FNetDebugNameId",
+      "docs": "Trace the name"
+    },
+    {
+      "id": "trace-object-polled",
+      "name": "TraceObjectPolled",
+      "category": "NetTraceInternal",
+      "signature": "TraceObjectPolled(Game Instance Id, Net Object Id, Cycles, Is Dirty)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Net Object Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Cycles",
+          "type": "UInt64"
+        },
+        {
+          "name": "Is Dirty",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trace-object-quantized",
+      "name": "TraceObjectQuantized",
+      "category": "NetTraceInternal",
+      "signature": "TraceObjectQuantized(Game Instance Id, Net Object Id, Cycles)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Net Object Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Cycles",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trace-object-written",
+      "name": "TraceObjectWritten",
+      "category": "NetTraceInternal",
+      "signature": "TraceObjectWritten(Game Instance Id, Net Object Id, Cycles)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Net Object Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Cycles",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trace-sub-object",
+      "name": "TraceSubObject",
+      "category": "NetTraceInternal",
+      "signature": "TraceSubObject(Game Instance Id, Parent Net Object Id, Sub Object Net Object Id)",
+      "params": [
+        {
+          "name": "Game Instance Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Parent Net Object Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Sub Object Net Object Id",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "id": "analytics-session-summary-manager",
+  "label": "AnalyticsSessionSummaryManager",
+  "includepath": "AnalyticsSessionSummaryManager.h",
+  "includes": [
+    "AnalyticsEventAttribute",
+    "Array",
+    "Map",
+    "UnrealString",
+    "CoreMinimal",
+    "Platform",
+    "PlatformCrt",
+    "IAnalyticsPropertyStore",
+    "Timespan",
+    "SharedPointer"
+  ],
+  "functions": [
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "LexToString(Target, Shutdown Type Code)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Shutdown Type Code",
+          "type": "EAnalyticsSessionShutdownType"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Defines how the principal process (the application for which analytics is gathered) exited. When the analytics session summary manager aggregates the summaries for a session,\nit looks for 'ShutdownTypeCode' key and if the key is found, it converts it to its string representation and add the 'ShutdownType' property known by the analytics backend."
+    },
+    {
+      "id": "f-analytics-session-summary-manager-472de0",
+      "name": "FAnalyticsSessionSummaryManager",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "FAnalyticsSessionSummaryManager(Process Name, Process Group Id, User Id, App Id, App Version, Session Id, Saved Dir)",
+      "params": [
+        {
+          "name": "Process Name",
+          "type": "String&"
+        },
+        {
+          "name": "Process Group Id",
+          "type": "String&"
+        },
+        {
+          "name": "User Id",
+          "type": "String&"
+        },
+        {
+          "name": "App Id",
+          "type": "String&"
+        },
+        {
+          "name": "App Version",
+          "type": "String&"
+        },
+        {
+          "name": "Session Id",
+          "type": "String&"
+        },
+        {
+          "name": "Saved Dir",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Manages the lifecycle of analytics summaries created by an application and its subsidiary processes. It manages the\nsummary files created by the processes, tracks which processes are working together, aggregates the summaries\nfrom collaborating processes, discards outdated sessions and sends the final summary reports.\nSeveral processes can collaborate to collect analytics for one principal process. The common case being the Editor acting as\nthe principal process and CrashReportClient (CRC) acting as a subsidiary process. The principal process and its subsidiaries\nform a group of processes tied together. The last process of the group to exit is responsible to aggregates and sends the final\nreport for the principal process. For any reasons, if the final report cannot be sent by a group, the responsibility to deal\nwith the left over is put on the principal process. The principal process is responsible to clean up the left over from its\nprevious execution(s) and possibly salvage and send reports delayed."
+    },
+    {
+      "id": "f-analytics-session-summary-manager-692c69",
+      "name": "FAnalyticsSessionSummaryManager",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "FAnalyticsSessionSummaryManager(Process Name, Process Group Id, Principal Process Id, Saved Dir)",
+      "params": [
+        {
+          "name": "Process Name",
+          "type": "String&"
+        },
+        {
+          "name": "Process Group Id",
+          "type": "String&"
+        },
+        {
+          "name": "Principal Process Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Saved Dir",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Constructs a manager for a subsidiary process, usually a companion process that collects extra information on the behalf of the principal process.\n@param ProcessName The process tag name of the subsidiary process. Ex. \"CrashReportClient\".\n@param ProcessGroupId A unique ID shared by the principal and subsidiary processes. This is how information created by various processes is associated.\n@param PrincipalProcessId The principal process ID to which this subsidiary process is associated.\n@param SavedDir The directory where files will be persisted. Should be the same for the principal and the subsidiary processes. If unspecified, the manager uses its internal default."
+    },
+    {
+      "id": "f-analytics-session-summary-manager-3bb29b",
+      "name": "FAnalyticsSessionSummaryManager",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "FAnalyticsSessionSummaryManager()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor."
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "Tick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discovers and salvages/sends/cleans up left over from previous execution(s), if any. Only the principal process can send left over sessions."
+    },
+    {
+      "id": "make-store",
+      "name": "MakeStore",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "MakeStore(Target, Initial Capacity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Initial Capacity",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "TSharedPtr<IAnalyticsPropertyStore>",
+      "docs": "Creates a new property store associated to this manager process group. The manager only sends an analytics session summary when all\ncollecting processes have closed their property store. Ensure to flush and release the store before calling the manager Shutdown() to\nensure the session is sent as soon a possible. Subsequent calls to MakeStore will increment an internal counter in the store's filename.\n@param InitialCapacity The amount of space to reserve in the file."
+    },
+    {
+      "id": "set-sender",
+      "name": "SetSender",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "SetSender(Target, Sender)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Sender",
+          "type": "TSharedPtr<IAnalyticsSessionSummarySender>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a summary sender to enable the manager to send sessions. If the sender is null, the sessions are not sent. If the\nsender is set, the manager will periodically search and send pending sessions, usually the one left over from\nprocesses that died unexpectedly. As a rule, the principal process is responsible to send the left over summary sessions\nand a subsidiary process only sends the current sessions summary if it is the last process of the group to exit. The manager\ndeletes the session data while sending."
+    },
+    {
+      "id": "set-user-id",
+      "name": "SetUserId",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "SetUserId(Target, User Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "User Id",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a the user id used for reporting analytics. Allows for changing the application user after startup. Will set the user id on\nall existing stores created from this session summary manager."
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "Shutdown(Target, Discard)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Discard",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shuts down and sends the session summaries that can be sent, if a sender is set. Remember to flush and discard the\nproperty store returned by MakeStore() before shutting down to prevent delaying the report.\n@param bDiscard Whether the current session is discarded or not. Discarded sessions are not sent.\n@see SetSender()\n@see MakeStore()"
+    },
+    {
+      "id": "cleanup-expired-files",
+      "name": "CleanupExpiredFiles",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "CleanupExpiredFiles(Saved Dir)",
+      "params": [
+        {
+          "name": "Saved Dir",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cleans up all expired files that match the analytics session filename pattern. The manager automaticallly clean up if\nit runs, but if the analytics is off and the manager is not instantiated anymore, some dead files can be left over.\n@param SavedDir The directory used to save the analytic files. If unspecified, use the internal default."
+    },
+    {
+      "id": "f-analytics-session-summary-manager-b4fa33",
+      "name": "FAnalyticsSessionSummaryManager",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "FAnalyticsSessionSummaryManager(Process Name, Process Group Id, In Current Process Id, Principal Process Id, User Id, App Id, App Version, Session Id, Session Root Dir)",
+      "params": [
+        {
+          "name": "Process Name",
+          "type": "String&"
+        },
+        {
+          "name": "Process Group Id",
+          "type": "String&"
+        },
+        {
+          "name": "In Current Process Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Principal Process Id",
+          "type": "UInt"
+        },
+        {
+          "name": "User Id",
+          "type": "String&"
+        },
+        {
+          "name": "App Id",
+          "type": "String&"
+        },
+        {
+          "name": "App Version",
+          "type": "String&"
+        },
+        {
+          "name": "Session Id",
+          "type": "String&"
+        },
+        {
+          "name": "Session Root Dir",
+          "type": "String&"
+        }
+      ],
+      "returnType": "private :",
+      "docs": "Information about a property store used by a process."
+    },
+    {
+      "id": "get-session-files",
+      "name": "GetSessionFiles",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "GetSessionFiles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        }
+      ],
+      "returnType": "TMap<FString,FProcessGroup>",
+      "docs": "Returns all processes group (key is process group id) for which files exists."
+    },
+    {
+      "id": "process-summary",
+      "name": "ProcessSummary",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "ProcessSummary(Target, Process Group Id, Process Group)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Process Group Id",
+          "type": "String&"
+        },
+        {
+          "name": "Process Group",
+          "type": "FProcessGroup&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Processes the information collected by the principal and its subsidiary processes and decides if a summmary can be aggregated and sent."
+    },
+    {
+      "id": "aggregate-summaries",
+      "name": "AggregateSummaries",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "AggregateSummaries(Target, Process Group Id, Process Group, Out Summary Properties, Out Internal Properties)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Process Group Id",
+          "type": "String&"
+        },
+        {
+          "name": "Process Group",
+          "type": "FProcessGroup&"
+        },
+        {
+          "name": "Out Summary Properties",
+          "type": "TArray<FAnalyticsEventAttribute>&"
+        },
+        {
+          "name": "Out Internal Properties",
+          "type": "TArray<FAnalyticsEventAttribute>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads the summaries created for the application and its subsidiary processes (like Editor/CRC combo) and aggregates summary properties."
+    },
+    {
+      "id": "cleanup-files",
+      "name": "CleanupFiles",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "CleanupFiles(Target, Property Files, On Success)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        },
+        {
+          "name": "Property Files",
+          "type": "TArray<FPropertyFileInfo>&"
+        },
+        {
+          "name": "On Success",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Deletes the files used to record and perist the properties."
+    },
+    {
+      "id": "is-principal-process",
+      "name": "IsPrincipalProcess",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "IsPrincipalProcess(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this manager instance represents the principal process of a group."
+    },
+    {
+      "id": "prune-tracked-property-stores",
+      "name": "PruneTrackedPropertyStores",
+      "category": "AnalyticsSessionSummaryManager",
+      "signature": "PruneTrackedPropertyStores(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsSessionSummaryManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Prune the list of property stores for invalid entries."
+    }
+  ]
+}

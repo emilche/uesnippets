@@ -30,14 +30,14 @@
       "params": [
         {
           "name": "Target",
-          "type": "UInitialActiveSoundParams*"
+          "type": "UAudioComponent*"
         },
         {
           "name": "In Override Attenuation",
           "type": "Bool"
         }
       ],
-      "returnType": "class UAudioComponent : public USceneComponent,public ISoundParameterControllerInterface,public FQuartzTickableObject"
+      "returnType": "Void"
     },
     {
       "id": "set-attenuation-settings",
@@ -54,7 +54,7 @@
           "type": "USoundAttenuation*"
         }
       ],
-      "returnType": "uint8 bOverrideSubtitlePriority : 1"
+      "returnType": "Void"
     },
     {
       "id": "set-attenuation-overrides",
@@ -71,7 +71,7 @@
           "type": "FSoundAttenuationSettings&"
         }
       ],
-      "returnType": "struct FSoundAttenuationSettings AttenuationOverrides"
+      "returnType": "Void"
     },
     {
       "id": "set-sound",
@@ -88,7 +88,7 @@
           "type": "USoundBase*"
         }
       ],
-      "returnType": "TObjectPtr<USoundConcurrency> ConcurrencySettings_DEPRECATED"
+      "returnType": "Void"
     },
     {
       "id": "fade-in",
@@ -281,6 +281,40 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "reset-parameters",
+      "name": "ResetParameters",
+      "category": "AudioComponent",
+      "signature": "ResetParameters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "play-queued-quantized-internal",
+      "name": "PlayQueuedQuantizedInternal",
+      "category": "AudioComponent",
+      "signature": "PlayQueuedQuantizedInternal(Target, World Context Object, In Command Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "World Context Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "In Command Info",
+          "type": "FAudioComponentCommandInfo"
+        }
+      ],
+      "returnType": "public : void"
     },
     {
       "id": "stop",
@@ -871,7 +905,438 @@
       "docs": "Removes the given set of Modulators to the modulators currently set on the Audio Component. This performs a logical subtraction of the sets, so modulators that are not in the given set will stay.\nTo completely overwrite current Modulation settings, use SetModulationRouting.\n@param Modulators The set of modulators to remove from the given destination on the component.\n@param Destination The destination to remove the modulators from."
     },
     {
-      "id": "get-attenuation-settings-to-apply",
+      "id": "playback-completed-879fc7",
+      "name": "PlaybackCompleted",
+      "category": "AudioComponent",
+      "signature": "PlaybackCompleted(Audio Component ID, Failed To Start)",
+      "params": [
+        {
+          "name": "Audio Component ID",
+          "type": "UInt64"
+        },
+        {
+          "name": "Failed To Start",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "playback-completed-0253f0",
+      "name": "PlaybackCompleted",
+      "category": "AudioComponent",
+      "signature": "PlaybackCompleted(Target, Failed To Start)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Failed To Start",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Called by the ActiveSound to inform the component that playback is finished"
+    },
+    {
+      "id": "is-in-audible-range",
+      "name": "IsInAudibleRange",
+      "category": "AudioComponent",
+      "signature": "IsInAudibleRange(Target, Out Max Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Out Max Distance",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not the sound is audible."
+    },
+    {
+      "id": "set-bus-send-effect-internal",
+      "name": "SetBusSendEffectInternal",
+      "category": "AudioComponent",
+      "signature": "SetBusSendEffectInternal(Target, In Source Bus, In Audio Bus, Send Level, In Bus Send Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Source Bus",
+          "type": "USoundSourceBus*"
+        },
+        {
+          "name": "In Audio Bus",
+          "type": "UAudioBus*"
+        },
+        {
+          "name": "Send Level",
+          "type": "Float"
+        },
+        {
+          "name": "In Bus Send Type",
+          "type": "EBusSendType"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "broadcast-play-state",
+      "name": "BroadcastPlayState",
+      "category": "AudioComponent",
+      "signature": "BroadcastPlayState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-audio-time-seconds",
+      "name": "GetAudioTimeSeconds",
+      "category": "AudioComponent",
+      "signature": "GetAudioTimeSeconds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Returns the owning world's \"AudioTime\" - affected by world pause, but not time dilation.  If no world exists, returns the application time"
+    },
+    {
+      "id": "set-fade-in-complete",
+      "name": "SetFadeInComplete",
+      "category": "AudioComponent",
+      "signature": "SetFadeInComplete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Set when the sound is finished with initial fading in"
+    },
+    {
+      "id": "set-is-virtualized",
+      "name": "SetIsVirtualized",
+      "category": "AudioComponent",
+      "signature": "SetIsVirtualized(Target, In Is Virtualized)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Is Virtualized",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets whether or not sound instance is virtualized"
+    },
+    {
+      "id": "set-source-buffer-listener",
+      "name": "SetSourceBufferListener",
+      "category": "AudioComponent",
+      "signature": "SetSourceBufferListener(Target, In Source Buffer Listener, Should Zero Buffer After)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Source Buffer Listener",
+          "type": "FSharedISourceBufferListenerPtr&"
+        },
+        {
+          "name": "Should Zero Buffer After",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets Source Buffer Listener"
+    },
+    {
+      "id": "post-edit-change-property",
+      "name": "PostEditChangeProperty",
+      "category": "AudioComponent",
+      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Property Changed Event",
+          "type": "FPropertyChangedEvent&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-detailed-info-internal",
+      "name": "GetDetailedInfoInternal",
+      "category": "AudioComponent",
+      "signature": "GetDetailedInfoInternal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "post-load",
+      "name": "PostLoad",
+      "category": "AudioComponent",
+      "signature": "PostLoad(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "AudioComponent",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-destroy",
+      "name": "BeginDestroy",
+      "category": "AudioComponent",
+      "signature": "BeginDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "activate",
+      "name": "Activate",
+      "category": "AudioComponent",
+      "signature": "Activate(Target, Reset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Reset",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "deactivate",
+      "name": "Deactivate",
+      "category": "AudioComponent",
+      "signature": "Deactivate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-update-transform",
+      "name": "OnUpdateTransform",
+      "category": "AudioComponent",
+      "signature": "OnUpdateTransform(Target, Update Transform Flags, Teleport)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Update Transform Flags",
+          "type": "EUpdateTransformFlags"
+        },
+        {
+          "name": "Teleport",
+          "type": "ETeleportType",
+          "default": "ETeleportType::None"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "calc-bounds",
+      "name": "CalcBounds",
+      "category": "AudioComponent",
+      "signature": "CalcBounds(Target, Local To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "FBoxSphereBounds"
+    },
+    {
+      "id": "on-register",
+      "name": "OnRegister",
+      "category": "AudioComponent",
+      "signature": "OnRegister(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-unregister",
+      "name": "OnUnregister",
+      "category": "AudioComponent",
+      "signature": "OnUnregister(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "additional-stat-object",
+      "name": "AdditionalStatObject",
+      "category": "AudioComponent",
+      "signature": "AdditionalStatObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "UObject*"
+    },
+    {
+      "id": "is-ready-for-owner-to-auto-destroy",
+      "name": "IsReadyForOwnerToAutoDestroy",
+      "category": "AudioComponent",
+      "signature": "IsReadyForOwnerToAutoDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "end-play",
+      "name": "EndPlay",
+      "category": "AudioComponent",
+      "signature": "EndPlay(Target, End Play Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "End Play Reason",
+          "type": "EEndPlayReason::Type"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "adjust-volume-internal",
+      "name": "AdjustVolumeInternal",
+      "category": "AudioComponent",
+      "signature": "AdjustVolumeInternal(Target, Adjust Volume Duration, Adjust Volume Level, Is Fade Out, Fade Curve)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Adjust Volume Duration",
+          "type": "Float"
+        },
+        {
+          "name": "Adjust Volume Level",
+          "type": "Float"
+        },
+        {
+          "name": "Is Fade Out",
+          "type": "Bool"
+        },
+        {
+          "name": "Fade Curve",
+          "type": "EAudioFaderCurve"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-attenuation-settings-to-apply-ff55f5",
+      "name": "GetAttenuationSettingsToApply",
+      "category": "AudioComponent",
+      "signature": "GetAttenuationSettingsToApply(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "FSoundAttenuationSettings*",
+      "docs": "Returns a pointer to the attenuation settings to be used (if any) for this audio component dependent on the SoundAttenuation asset or overrides set."
+    },
+    {
+      "id": "get-attenuation-settings-asset",
+      "name": "GetAttenuationSettingsAsset",
+      "category": "AudioComponent",
+      "signature": "GetAttenuationSettingsAsset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "TObjectPtr<USoundAttenuation>"
+    },
+    {
+      "id": "get-attenuation-settings-to-apply-30042c",
       "name": "GetAttenuationSettingsToApply",
       "category": "Audio",
       "signature": "GetAttenuationSettingsToApply(Target, Out Attenuation Settings)",
@@ -887,6 +1352,174 @@
       ],
       "returnType": "Bool",
       "docs": "Retrieves Attenuation Settings data on the targeted Audio Component. Returns FALSE if no settings were found.\nBecause the Attenuation Settings data structure is copied, FALSE returns will return default values."
+    },
+    {
+      "id": "collect-attenuation-shapes-for-visualization",
+      "name": "CollectAttenuationShapesForVisualization",
+      "category": "AudioComponent",
+      "signature": "CollectAttenuationShapesForVisualization(Target, Shape Details Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Shape Details Map",
+          "type": "TMultiMap<EAttenuationShape::Type,FBaseAttenuationSettings::AttenuationShapeDetails>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collects the various attenuation shapes that may be applied to the sound played by the audio component for visualization\nin the editor or via the in game debug visualization."
+    },
+    {
+      "id": "get-audio-component-from-id",
+      "name": "GetAudioComponentFromID",
+      "category": "AudioComponent",
+      "signature": "GetAudioComponentFromID(Audio Component ID)",
+      "params": [
+        {
+          "name": "Audio Component ID",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "UAudioComponent*"
+    },
+    {
+      "id": "set-playback-times",
+      "name": "SetPlaybackTimes",
+      "category": "AudioComponent",
+      "signature": "SetPlaybackTimes(Target, In Sound Wave Playback Times)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Sound Wave Playback Times",
+          "type": "TMap<uint32,float>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-source-effect-chain",
+      "name": "SetSourceEffectChain",
+      "category": "AudioComponent",
+      "signature": "SetSourceEffectChain(Target, In Source Effect Chain)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Source Effect Chain",
+          "type": "USoundEffectSourcePresetChain*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-audio-device",
+      "name": "GetAudioDevice",
+      "category": "AudioComponent",
+      "signature": "GetAudioDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "FAudioDevice*",
+      "docs": "SoundParameterControllerInterface Implementation"
+    },
+    {
+      "id": "get-f-name-for-stat-id",
+      "name": "GetFNameForStatID",
+      "category": "AudioComponent",
+      "signature": "GetFNameForStatID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "cancel-auto-attachment",
+      "name": "CancelAutoAttachment",
+      "category": "AudioComponent",
+      "signature": "CancelAutoAttachment(Target, Detach From Parent, My World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "Detach From Parent",
+          "type": "Bool"
+        },
+        {
+          "name": "My World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Restore relative transform from auto attachment and optionally detach from parent (regardless of whether it was an auto attachment)."
+    },
+    {
+      "id": "play-internal",
+      "name": "PlayInternal",
+      "category": "AudioComponent",
+      "signature": "PlayInternal(Target, In Play Request Data, In Sound Override)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Play Request Data",
+          "type": "PlayInternalRequestData&"
+        },
+        {
+          "name": "In Sound Override",
+          "type": "USoundBase*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Source Buffer Listener."
+    },
+    {
+      "id": "update-sprite-texture",
+      "name": "UpdateSpriteTexture",
+      "category": "AudioComponent",
+      "signature": "UpdateSpriteTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Utility function that updates which texture is displayed on the sprite dependent on the properties of the Audio Component."
+    },
+    {
+      "id": "process-command",
+      "name": "ProcessCommand",
+      "category": "AudioComponent",
+      "signature": "ProcessCommand(Target, In Queue Command Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioComponent*"
+        },
+        {
+          "name": "In Queue Command Data",
+          "type": "Audio::FQuartzQueueCommandData&"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

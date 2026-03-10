@@ -1,0 +1,287 @@
+{
+  "id": "direct-link-endpoint",
+  "label": "DirectLinkEndpoint",
+  "includepath": "DirectLinkEndpoint.h",
+  "includes": [
+    "Future",
+    "Array",
+    "Map",
+    "UnrealString",
+    "DirectLinkCommon",
+    "Platform",
+    "PlatformCrt",
+    "IMessageContext",
+    "EngineVersion",
+    "EnumClassFlags",
+    "Guid",
+    "SharedPointer",
+    "UniquePtr",
+    "UnrealTemplate",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "f-endpoint-03b429",
+      "name": "FEndpoint",
+      "category": "DirectLinkEndpoint",
+      "signature": "FEndpoint(In Name)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "FEndpoint class is the main interface for sending and receiving data with\nthe DirectLink system.\nInstances of this class discover themselves (through MessageBus) and can see\nSources and Destinations available on each others. This is automatic and\nworks for multiple applications. With that system, one can expose data from\nan application and consume it from another.\nAn endpoint can exposes N sources and N Destinations. That being said, a\nmore classic setup is to have an 'exporter' process that only exposes\nsources, and some 'consumer' process that only have Destinations.\nAs a convention, 'consumers' have the responsibility to handle the\nconnections management. Exporters have the sole responsibility to exposes\ntheir data.\nSetup example:\n- Exporter process\n- Source \"My First Source\"\n- Source \"My Second Source\"\n- Consumer process\n- Destination \"Viewport\"\nThe consumer process can handle the connections between Sources and\nDestinations with the OpenStream and CloseStream methods."
+    },
+    {
+      "id": "f-endpoint-61e8e8",
+      "name": "FEndpoint",
+      "category": "DirectLinkEndpoint",
+      "signature": "FEndpoint()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-verbose",
+      "name": "SetVerbose",
+      "category": "DirectLinkEndpoint",
+      "signature": "SetVerbose(Target, Verbose)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Verbose",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-source",
+      "name": "AddSource",
+      "category": "DirectLinkEndpoint",
+      "signature": "AddSource(Target, Name, Visibility)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Name",
+          "type": "String&"
+        },
+        {
+          "name": "Visibility",
+          "type": "EVisibility",
+          "default": "EVisibility::Public"
+        }
+      ],
+      "returnType": "FSourceHandle",
+      "docs": "Add a Source to that endpoint. A source can hold content (a scene snapshot)\nand is able to stream that content to remote destinations.\n@param Name          User facing name for this source.\n@param Visibility    Whether that Source is visible to remote endpoints\n@return              A Handle required by other Source related methods"
+    },
+    {
+      "id": "remove-source",
+      "name": "RemoveSource",
+      "category": "DirectLinkEndpoint",
+      "signature": "RemoveSource(Target, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Source",
+          "type": "FSourceHandle&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Closes all streams related to this Source and remove it from the endpoint.\n@param Source Handle of the source to remove"
+    },
+    {
+      "id": "set-source-root",
+      "name": "SetSourceRoot",
+      "category": "DirectLinkEndpoint",
+      "signature": "SetSourceRoot(Target, Source, In Root, Snapshot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Source",
+          "type": "FSourceHandle&"
+        },
+        {
+          "name": "In Root",
+          "type": "ISceneGraphNode*"
+        },
+        {
+          "name": "Snapshot",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the root of the content that should be exposed from that source.\n@param Source        Handle of the source to setup\n@param InRoot        Root of the graph that should be exposed\n@param bSnapshot     Whether the graph should be snapshotted right away"
+    },
+    {
+      "id": "snapshot-source",
+      "name": "SnapshotSource",
+      "category": "DirectLinkEndpoint",
+      "signature": "SnapshotSource(Target, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Source",
+          "type": "FSourceHandle&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Use the Source root to discover the graph and snapshot the content in its current state.\n@param Source        Handle of the source to snapshot"
+    },
+    {
+      "id": "add-destination",
+      "name": "AddDestination",
+      "category": "DirectLinkEndpoint",
+      "signature": "AddDestination(Target, Name, Visibility, Connection Request Handler)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Name",
+          "type": "String&"
+        },
+        {
+          "name": "Visibility",
+          "type": "EVisibility"
+        },
+        {
+          "name": "Connection Request Handler",
+          "type": "TSharedPtr<IConnectionRequestHandler>&"
+        }
+      ],
+      "returnType": "FDestinationHandle",
+      "docs": "Add a Destination on that endpoint\n@param Name          Name of that destination\n@param Visibility    Whether this destination should be visible to remote endpoints\n@param ConnectionRequestHandler Object that will handle connections requests from Sources\n@return              A handle to the new destination"
+    },
+    {
+      "id": "remove-destination",
+      "name": "RemoveDestination",
+      "category": "DirectLinkEndpoint",
+      "signature": "RemoveDestination(Target, Destination)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Destination",
+          "type": "FDestinationHandle&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disconnect all streams related to that destination and removes the\nDestination itself from that endpoint\n@param Destination   Handle of the destination to remove"
+    },
+    {
+      "id": "get-raw-info-copy",
+      "name": "GetRawInfoCopy",
+      "category": "DirectLinkEndpoint",
+      "signature": "GetRawInfoCopy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        }
+      ],
+      "returnType": "FRawInfo",
+      "docs": "Get a snapshot of the current state of the DirectLink swarm. It includes\ndiscovered Endpoints, their sources and destinations, and the streams\ndescriptions.\n@return              Description of the last state of swarm"
+    },
+    {
+      "id": "add-endpoint-observer",
+      "name": "AddEndpointObserver",
+      "category": "DirectLinkEndpoint",
+      "signature": "AddEndpointObserver(Target, Observer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Observer",
+          "type": "IEndpointObserver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Register an IEndpointObserver that will be notified periodically with the last state of the swarm.\n@param Observer      Object that should be notified"
+    },
+    {
+      "id": "remove-endpoint-observer",
+      "name": "RemoveEndpointObserver",
+      "category": "DirectLinkEndpoint",
+      "signature": "RemoveEndpointObserver(Target, Observer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Observer",
+          "type": "IEndpointObserver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes a previously added observer\n@param Observer      Observer to remove"
+    },
+    {
+      "id": "open-stream",
+      "name": "OpenStream",
+      "category": "DirectLinkEndpoint",
+      "signature": "OpenStream(Target, Source Id, Destination Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Source Id",
+          "type": "FSourceHandle&"
+        },
+        {
+          "name": "Destination Id",
+          "type": "FDestinationHandle&"
+        }
+      ],
+      "returnType": "EOpenStreamResult",
+      "docs": "Open a Stream between a Source and a Destination\n@param SourceId      Handle to the Source\n@param DestinationId Handle to the Destination\n@return              Whether the stream is correctly opened"
+    },
+    {
+      "id": "close-stream",
+      "name": "CloseStream",
+      "category": "DirectLinkEndpoint",
+      "signature": "CloseStream(Target, Source Id, Destination Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEndpoint*"
+        },
+        {
+          "name": "Source Id",
+          "type": "FSourceHandle&"
+        },
+        {
+          "name": "Destination Id",
+          "type": "FDestinationHandle&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Close a previously opened stream\n@param SourceId      Handle to the Source\n@param DestinationId Handle to the Destination"
+    }
+  ]
+}

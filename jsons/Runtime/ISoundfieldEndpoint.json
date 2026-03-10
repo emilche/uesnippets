@@ -1,0 +1,292 @@
+{
+  "id": "i-soundfield-endpoint",
+  "label": "ISoundfieldEndpoint",
+  "includepath": "ISoundfieldEndpoint.h",
+  "includes": [
+    "AudioMixerNullDevice",
+    "Array",
+    "CoreMinimal",
+    "CoreTypes",
+    "MultithreadedPatching",
+    "IModularFeatures",
+    "CriticalSection",
+    "ThreadSafeCounter",
+    "ISoundfieldFormat",
+    "AssertionMacros",
+    "SubclassOf",
+    "UniquePtr",
+    "NameTypes",
+    "Object",
+    "ObjectMacros",
+    "UObjectGlobals",
+    "ISoundfieldEndpoint.generated"
+  ],
+  "functions": [
+    {
+      "id": "get-proxy",
+      "name": "GetProxy",
+      "category": "ISoundfieldEndpoint",
+      "signature": "GetProxy(Target, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USoundfieldEndpointSettingsBase*"
+        },
+        {
+          "name": "Nullptr",
+          "type": ") PURE_VIRTUAL ( USoundfieldEndpointSettingsBase::GetProxy,return"
+        }
+      ],
+      "returnType": "public : TUniquePtr<ISoundfieldEndpointSettingsProxy>"
+    },
+    {
+      "id": "i-soundfield-endpoint",
+      "name": "ISoundfieldEndpoint",
+      "category": "ISoundfieldEndpoint",
+      "signature": "ISoundfieldEndpoint(Num Render Callbacks To Buffer)",
+      "params": [
+        {
+          "name": "Num Render Callbacks To Buffer",
+          "type": "Int"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Class that allows soundfield-encoded audio to be sent to an arbitrary locale.\nFor endpoint types that support receiving our downmixed interleaved audio data directly, implement IAudioEndpoint instead."
+    },
+    {
+      "id": "push-audio",
+      "name": "PushAudio",
+      "category": "ISoundfieldEndpoint",
+      "signature": "PushAudio(Target, In Packet)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        },
+        {
+          "name": "In Packet",
+          "type": "TUniquePtr<ISoundfieldAudioPacket>&&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Push a soundfield packet to the buffer."
+    },
+    {
+      "id": "set-new-settings",
+      "name": "SetNewSettings",
+      "category": "ISoundfieldEndpoint",
+      "signature": "SetNewSettings(Target, In New Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        },
+        {
+          "name": "In New Settings",
+          "type": "TUniquePtr<ISoundfieldEndpointSettingsProxy>&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Post new settings for this endpoint.\nThere is no type safety on this call, so make sure that you are using the correct implementation\nof IAudioEndpointSettingsProxy for this implementation of IAudioEndpoint."
+    },
+    {
+      "id": "get-num-packets-buffer",
+      "name": "GetNumPacketsBuffer",
+      "category": "ISoundfieldEndpoint",
+      "signature": "GetNumPacketsBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-remainder-in-packet-buffer",
+      "name": "GetRemainderInPacketBuffer",
+      "category": "ISoundfieldEndpoint",
+      "signature": "GetRemainderInPacketBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "process-audio-if-necessary",
+      "name": "ProcessAudioIfNecessary",
+      "category": "ISoundfieldEndpoint",
+      "signature": "ProcessAudioIfNecessary(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If this endpoint hasn't created it's own async callback thread but still requires an explicit callback, this should be called."
+    },
+    {
+      "id": "pop-audio",
+      "name": "PopAudio",
+      "category": "ISoundfieldEndpoint",
+      "signature": "PopAudio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "TUniquePtr<ISoundfieldAudioPacket>",
+      "docs": "METHODS USED BY IMPLEMENTATIONS OF ISoundfieldEndpoint:"
+    },
+    {
+      "id": "poll-settings",
+      "name": "PollSettings",
+      "category": "ISoundfieldEndpoint",
+      "signature": "PollSettings(Target, Settings Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        },
+        {
+          "name": "Settings Callback",
+          "type": "TFunctionRef<void ( ISoundfieldEndpointSettingsProxy* )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Use this as a thread safe way to use the current settings posted to this IAudioEndpoint. Locks with IAudioEndpoint::SetSettings.\n@param[in] NewSettingsRetrieved lambda used to work with the retrieved settings.\nThis lambda is called immediately and synchronously, but is used\nto safely scope usage of the IAudioEndpointSettingsProxy pointer.\nNote that the resulting ISoundfieldEndpointSettingsProxy can be null."
+    },
+    {
+      "id": "start-running-callback",
+      "name": "StartRunningCallback",
+      "category": "ISoundfieldEndpoint",
+      "signature": "StartRunningCallback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If EndpointRequiresCallback() returns true, this will be used to spawn an async thread and begin calling OnAudioCallback."
+    },
+    {
+      "id": "stop-running-callback",
+      "name": "StopRunningCallback",
+      "category": "ISoundfieldEndpoint",
+      "signature": "StopRunningCallback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "run-callback-synchronously",
+      "name": "RunCallbackSynchronously",
+      "category": "ISoundfieldEndpoint",
+      "signature": "RunCallbackSynchronously(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpoint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "ISoundfieldEndpoint",
+      "signature": "Get(In Name)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "ISoundfieldEndpointFactory*",
+      "docs": "Get a registered endpoint factory by name."
+    },
+    {
+      "id": "get-all-soundfield-endpoint-types",
+      "name": "GetAllSoundfieldEndpointTypes",
+      "category": "ISoundfieldEndpoint",
+      "signature": "GetAllSoundfieldEndpointTypes()",
+      "params": [],
+      "returnType": "TArray<FName>"
+    },
+    {
+      "id": "default-soundfield-endpoint-name",
+      "name": "DefaultSoundfieldEndpointName",
+      "category": "ISoundfieldEndpoint",
+      "signature": "DefaultSoundfieldEndpointName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "This is the default name used when a user creates a soundfield endpoint submix.\nSoundfied Endpoint submixes with this type will send their audio to the default output\nwith no encoding."
+    },
+    {
+      "id": "create-decoder-stream",
+      "name": "CreateDecoderStream",
+      "category": "ISoundfieldEndpoint",
+      "signature": "CreateDecoderStream(Target, Init Info, Initial Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpointFactory*"
+        },
+        {
+          "name": "Init Info",
+          "type": "FAudioPluginInitializationParams&"
+        },
+        {
+          "name": "Initial Settings",
+          "type": "ISoundfieldEncodingSettingsProxy&"
+        }
+      ],
+      "returnType": "TUniquePtr<ISoundfieldDecoderStream>",
+      "docs": "This function is not necessary to override, since audio sent to an endpoint does not need to be decoded to interleaved audio buffers."
+    },
+    {
+      "id": "get-soundfield-format-name",
+      "name": "GetSoundfieldFormatName",
+      "category": "ISoundfieldEndpoint",
+      "signature": "GetSoundfieldFormatName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpointFactory*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "can-transcode-to-soundfield-format",
+      "name": "CanTranscodeToSoundfieldFormat",
+      "category": "ISoundfieldEndpoint",
+      "signature": "CanTranscodeToSoundfieldFormat(Target, Destination Format, Destination Encoding Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldEndpointFactory*"
+        },
+        {
+          "name": "Destination Format",
+          "type": "Name"
+        },
+        {
+          "name": "Destination Encoding Settings",
+          "type": "ISoundfieldEncodingSettingsProxy&"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

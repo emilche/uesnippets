@@ -1,0 +1,808 @@
+{
+  "id": "movie-scene-sequence-transform",
+  "label": "MovieSceneSequenceTransform",
+  "includepath": "Evaluation/MovieSceneSequenceTransform.h",
+  "includes": [
+    "ContainersFwd",
+    "Array",
+    "MovieSceneFwd",
+    "AssertionMacros",
+    "FrameNumber",
+    "FrameTime",
+    "MovieSceneTimeTransform",
+    "MovieSceneTimeWarping",
+    "MovieSceneTimeWarpVariant",
+    "MovieSceneSequenceTransform.generated"
+  ],
+  "functions": [
+    {
+      "id": "f-frame-time",
+      "name": "FFrameTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "FFrameTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTransformBreadcrumbs*"
+        }
+      ],
+      "returnType": "operator TArrayView<"
+    },
+    {
+      "id": "f-movie-scene-warp-counter",
+      "name": "FMovieSceneWarpCounter",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "FMovieSceneWarpCounter()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "as-linear",
+      "name": "AsLinear",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "AsLinear(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseNestedSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform",
+      "docs": "Convert this transform to its linear form.\n@note This is only valid to call where IsLinear() is true"
+    },
+    {
+      "id": "inverse",
+      "name": "Inverse",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "Inverse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseNestedSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneNestedSequenceTransform",
+      "docs": "Convert this transform to its inverse (ie a transform that converts from untransformed space to transformed space)"
+    },
+    {
+      "id": "try-transform-time-95efde",
+      "name": "TryTransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TryTransformTime(Target, Time, Breadcrumb)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseNestedSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Breadcrumb",
+          "type": "FFrameTime"
+        }
+      ],
+      "returnType": "TOptional<FFrameTime>",
+      "docs": "Attempt to transform the specified time by this inverse transform. The operation can fail if the time does not map to the un-transformed time space (for example, when looping).\n@param Time        The time to transform\n@param Breadcrumb  A breadcrumb in the un-transformed space to assist in resolving ambiguous transformations (ie, to transform into the correct time based on the breadcrumb's loop)\n@return The transformed time if successful, or an epty optional otherwise"
+    },
+    {
+      "id": "try-transform-time-9e4d72",
+      "name": "TryTransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TryTransformTime(Target, Time, Breadcrumb, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseNestedSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Breadcrumb",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Params",
+          "type": "UE::MovieScene::FInverseTransformTimeParams&"
+        }
+      ],
+      "returnType": "TOptional<FFrameTime>",
+      "docs": "Attempt to transform the specified time by this inverse transform. The operation can fail if the time does not map to the un-transformed time space (for example, when looping).\n@param Time        The time to transform\n@param Breadcrumb  A breadcrumb in the un-transformed space to assist in resolving ambiguous transformations (ie, to transform into the correct time based on the breadcrumb's loop)\n@param Params      Parameter structure that controls how to perform the inverse operation (ie to disallow cycling outside of the current loop; to ignore clamps etc)\n@return The transformed time if successful, or an epty optional otherwise"
+    },
+    {
+      "id": "transform-time-within-range-37ec12",
+      "name": "TransformTimeWithinRange",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformTimeWithinRange(Target, Time, Visitor, Untransformed Range Start, Untransformed Range End)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseNestedSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<bool ( FFrameTime )>&"
+        },
+        {
+          "name": "Untransformed Range Start",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Untransformed Range End",
+          "type": "FFrameTime"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Attempt to transform the specified time by this inverse transform within a specified un-transformed range, calling a functor for every instance of the specified time in the un-transformed space.\n@param Time        The time to transform\n@param Visitor     A callback to invoke for every instance of Time in the untransformed range. The result of the functor determines whether to continue iteration (true) or not (false).\n@param UntransformedRangeStart      The inclusive start time in untransformed space within which to allow Visitor to be invoked\n@param UntransformedRangeEnd        The inclusive end time in untransformed space within which to allow Visitor to be invoked\n@return True if every invocation of Visitor returned true, or there were no invocations; false if any invocation of Visitor returned false."
+    },
+    {
+      "id": "f-movie-scene-nested-sequence-transform",
+      "name": "FMovieSceneNestedSequenceTransform",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "FMovieSceneNestedSequenceTransform()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Default construction to an identity linear transform"
+    },
+    {
+      "id": "transform-time-e05aca",
+      "name": "TransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformTime(Target, Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        }
+      ],
+      "returnType": "FFrameTime",
+      "docs": "Transform the specified time from untransformed to transformed space\n@param Time    The untransformed time to transform\n@return the transformed time"
+    },
+    {
+      "id": "transform-time-eac7bb",
+      "name": "TransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformTime(Target, Time, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Params",
+          "type": "UE::MovieScene::FTransformTimeParams&"
+        }
+      ],
+      "returnType": "FFrameTime",
+      "docs": "Transform the specified time from untransformed to transformed space\n@param Time    The untransformed time to transform\n@param Params  Transformation parameters, allowing control over the transformation, and gathering of breadcrumbs\n@return the transformed time"
+    },
+    {
+      "id": "compute-traversed-hull",
+      "name": "ComputeTraversedHull",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "ComputeTraversedHull(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>",
+      "docs": "Given a range in untransformed space, compute the hull of times that this range encompass when transformed.\nFor instance, if this transform represents a loop of [0, 10) an input range of:\n- [15,19) would yield [5,9)\n- [5,25) would yield [0,10)\n@note Disjoint ranges are not supported by this function. An input of [5, 19) under the previous example would yield\n[0, 9) because we can only return a single range."
+    },
+    {
+      "id": "supports-boundaries",
+      "name": "SupportsBoundaries",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "SupportsBoundaries(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether this transformation supports 'boundaries'. A boundary is implementation defined,\nbut is generally a loop or cycle point."
+    },
+    {
+      "id": "get-warp-domain",
+      "name": "GetWarpDomain",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "GetWarpDomain(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        }
+      ],
+      "returnType": "TOptional<UE::MovieScene::ETimeWarpChannelDomain>",
+      "docs": "Retrieve this nested transform's time-warp domain, if it has one"
+    },
+    {
+      "id": "extract-boundaries-within-range-d4cd1c",
+      "name": "ExtractBoundariesWithinRange",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "ExtractBoundariesWithinRange(Target, Untransformed Range, Visitor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        },
+        {
+          "name": "Untransformed Range",
+          "type": "TRange<FFrameTime>&"
+        },
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<bool ( FFrameTime )>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Extract all the boundaries for this transform within the specified untransformed start and end time,\ninvoking Visitor for every boundary that is present within the range. Iteration will continue until\nVisitor returns false, at which point this function itself will return false.\n@param UntransformedRange       The range within which Visitor can be invoked in untransformed space\n@param Visitor                  A functor to invoke for every boundary that is found within the range. Return value signifies whether iteration continues (true) or not (false)\n@return (true) if there were no boundaries, or Visitor returned true for all encountered boundaries; false otherwise"
+    },
+    {
+      "id": "to-string",
+      "name": "ToString",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "ToString(Target, Out Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneNestedSequenceTransform*"
+        },
+        {
+          "name": "Out Builder",
+          "type": "TStringBuilderBase<TCHAR>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Convert this transformation to a string representation"
+    },
+    {
+      "id": "is-identity",
+      "name": "IsIdentity",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "IsIdentity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this transform is an identity transformation (ie, a*T = a)"
+    },
+    {
+      "id": "transform-time-a2f4ab",
+      "name": "TransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformTime(Target, In Time, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Params",
+          "type": "UE::MovieScene::FTransformTimeParams&"
+        }
+      ],
+      "returnType": "FFrameTime",
+      "docs": "Transform the specified time into the inner-most (transformed) space\n@param Time       The input time to transform\n@param Params     Parameters for controlling the transform operation, and harvesting breadcrumbs\n@return The resulting time in transformed space"
+    },
+    {
+      "id": "find-first-warp-domain",
+      "name": "FindFirstWarpDomain",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "FindFirstWarpDomain(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "TOptional<UE::MovieScene::ETimeWarpChannelDomain>",
+      "docs": "Retrieve the first active timewarp domain that is present in this transform, if any is present at all"
+    },
+    {
+      "id": "add-b19b98",
+      "name": "Add",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "Add(Target, In Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "In Transform",
+          "type": "FMovieSceneTimeTransform"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Add the specified linear transform to the end of this transform stack (ie, applying it last)"
+    },
+    {
+      "id": "add-97999a",
+      "name": "Add",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "Add(Target, In Offset, In Time Warp)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "In Offset",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "In Time Warp",
+          "type": "FMovieSceneTimeWarpVariant&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the specified warping transform to the end of this transform stack with an offset (ie, applying it last)"
+    },
+    {
+      "id": "add-loop",
+      "name": "AddLoop",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "AddLoop(Target, Start, End)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Start",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "End",
+          "type": "FFrameNumber"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add an entry to this transform denoting it should loop between the specified start and end point\n@note Start and End are interpreted in the transformed space of the current stack of transforms in this class.\n@param Start     The start frame number of the loop\n@param End       The ending frame number of the loop"
+    },
+    {
+      "id": "append",
+      "name": "Append",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "Append(Target, Tail)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Tail",
+          "type": "FMovieSceneSequenceTransform&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append another transform to this one, resulting in a transform that effectively goes from this -> Tail\n@param Tail      The transform to append"
+    },
+    {
+      "id": "extract-boundaries-within-range-668ed5",
+      "name": "ExtractBoundariesWithinRange",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "ExtractBoundariesWithinRange(Target, Untransformed Start, Untransformed End, Visitor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Untransformed Start",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Untransformed End",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<bool ( FFrameTime )>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Extract all the boundaries for this transform within the specified untransformed start and end time,\ninvoking Visitor for every boundary that is present within the range. Iteration will continue until\nVisitor returns false, at which point this function itself will return false.\n@param UntransformedStart       The inclusive start of the range within which Visitor can be invoked\n@param UntransformedEnd         The inclusive end of the range within which Visitor can be invoked\n@param Visitor                  A functor to invoke for every boundary that is found within the range. Return value signifies whether iteration continues (true) or not (false)\n@return (true) if there were no boundaries, or Visitor returned true for all encountered boundaries; false otherwise"
+    },
+    {
+      "id": "transform-time-4ac2da",
+      "name": "TransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformTime(Target, In Time, Out Time, Out Warp Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Out Time",
+          "type": "FFrameTime&"
+        },
+        {
+          "name": "Out Warp Counter",
+          "type": "FMovieSceneWarpCounter&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-time-scale",
+      "name": "GetTimeScale",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "GetTimeScale(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "transform-range-pure",
+      "name": "TransformRangePure",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformRangePure(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>"
+    },
+    {
+      "id": "transform-range-unwarped",
+      "name": "TransformRangeUnwarped",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformRangeUnwarped(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>"
+    },
+    {
+      "id": "transform-range-constrained",
+      "name": "TransformRangeConstrained",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformRangeConstrained(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>"
+    },
+    {
+      "id": "inverse-no-looping",
+      "name": "InverseNoLooping",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseNoLooping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneSequenceTransform"
+    },
+    {
+      "id": "inverse-linear-only",
+      "name": "InverseLinearOnly",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseLinearOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform"
+    },
+    {
+      "id": "inverse-from-all-first-warps",
+      "name": "InverseFromAllFirstWarps",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseFromAllFirstWarps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform"
+    },
+    {
+      "id": "inverse-from-warp-df0d94",
+      "name": "InverseFromWarp",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseFromWarp(Target, Warp Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Warp Counter",
+          "type": "FMovieSceneWarpCounter&"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform"
+    },
+    {
+      "id": "inverse-from-warp-b89400",
+      "name": "InverseFromWarp",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseFromWarp(Target, Warp Counts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Warp Counts",
+          "type": "TArrayView<uint32>&"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform"
+    },
+    {
+      "id": "inverse-from-all-first-loops",
+      "name": "InverseFromAllFirstLoops",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseFromAllFirstLoops(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneSequenceTransform"
+    },
+    {
+      "id": "inverse-from-loop-71e157",
+      "name": "InverseFromLoop",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseFromLoop(Target, Loop Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Loop Counter",
+          "type": "FMovieSceneWarpCounter&"
+        }
+      ],
+      "returnType": "FMovieSceneSequenceTransform"
+    },
+    {
+      "id": "inverse-from-loop-118d7c",
+      "name": "InverseFromLoop",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "InverseFromLoop(Target, Loop Counts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSequenceTransform*"
+        },
+        {
+          "name": "Loop Counts",
+          "type": "TArrayView<uint32>&"
+        }
+      ],
+      "returnType": "FMovieSceneSequenceTransform"
+    },
+    {
+      "id": "try-transform-time-3210a9",
+      "name": "TryTransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TryTransformTime(Target, Time, Breadcrumbs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Breadcrumbs",
+          "type": "FMovieSceneTransformBreadcrumbs&"
+        }
+      ],
+      "returnType": "TOptional<FFrameTime>",
+      "docs": "Attempt to transform the specified transformed time into its untransformed space.\nThis function can fail if the time does not map to any other times in the untransformed space.\n@param Time         The transformed time to convert to untransformed space\n@param Breadcrumbs  A trail of breadcrumbs that lead us from untransformed to transformed space.\nThe algorithm will attempt to find the closest solution to each breadcrumb as it goes.\n@return The time in untransformed space if succesful, or an empty optional otherwise."
+    },
+    {
+      "id": "try-transform-time-fa36e6",
+      "name": "TryTransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TryTransformTime(Target, Time, Breadcrumbs, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Breadcrumbs",
+          "type": "FMovieSceneTransformBreadcrumbs&"
+        },
+        {
+          "name": "Params",
+          "type": "UE::MovieScene::FInverseTransformTimeParams&"
+        }
+      ],
+      "returnType": "TOptional<FFrameTime>",
+      "docs": "Attempt to transform the specified transformed time into its untransformed space.\nThis function can fail if the time does not map to any other times in the untransformed space.\n@param Time         The transformed time to convert to untransformed space\n@param Breadcrumbs  A trail of breadcrumbs that lead us from untransformed to transformed space.\nThe algorithm will attempt to find the closest solution to each breadcrumb as it goes.\n@param Params       Additional parameters that control the algotihm, such as whether it can look forwards, backwards, or across cycles/loops.\n@return The time in untransformed space if succesful, or an empty optional otherwise."
+    },
+    {
+      "id": "try-transform-time-feb643",
+      "name": "TryTransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TryTransformTime(Target, Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        }
+      ],
+      "returnType": "TOptional<FFrameTime>",
+      "docs": "Fallback overload that does not require a breadcrumb trail if one is not available.\nAttempt to transform the specified transformed time into its untransformed space.\nThis function can fail if the time does not map to any other times in the untransformed space.\n@note This overload may yield unexpected times due to the lack of breadcrumb context. Breadcrumbs should be used if possible.\n@param Time         The transformed time to convert to untransformed space\n@return The time in untransformed space if succesful, or an empty optional otherwise."
+    },
+    {
+      "id": "try-transform-time-6ac1d0",
+      "name": "TryTransformTime",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TryTransformTime(Target, Time, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Params",
+          "type": "UE::MovieScene::FInverseTransformTimeParams&"
+        }
+      ],
+      "returnType": "TOptional<FFrameTime>",
+      "docs": "Fallback overload that does not require a breadcrumb trail if one is not available.\nAttempt to transform the specified transformed time into its untransformed space.\nThis function can fail if the time does not map to any other times in the untransformed space.\n@note This overload may yield unexpected times due to the lack of breadcrumb context. Breadcrumbs should be used if possible.\n@param Time         The transformed time to convert to untransformed space\n@param Params       Additional parameters that control the algotihm, such as whether it can look forwards, backwards, or across cycles/loops.\n@return The time in untransformed space if succesful, or an empty optional otherwise."
+    },
+    {
+      "id": "transform-time-within-range-ee18cd",
+      "name": "TransformTimeWithinRange",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformTimeWithinRange(Target, Time, Visitor, Start Breadcrumbs, End Breadcrumbs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<bool ( FFrameTime )>&"
+        },
+        {
+          "name": "Start Breadcrumbs",
+          "type": "FMovieSceneTransformBreadcrumbs&"
+        },
+        {
+          "name": "End Breadcrumbs",
+          "type": "FMovieSceneTransformBreadcrumbs&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Transforms a time from transformed to untransformed space within a finite range specified by two breadcrumb trails.\nFor each solution that exists in the untransformed space, Visitor will be invoked and its result defines whether the\nalgorithm continues (true) or terminates early (false).\n@param Time              The transformed time to convert to untransformed space\n@param Visitor           A functor to invoke for every solution that exists within the range.\nReturning true will allow the algorithm to continue, false will cause it to terminate early.\n@param StartBreadCrumbs  A breadcrumb trail for the start of the allowable range to solve within.\n@param EndBreadCrumbs    A breadcrumb trail for the end of the allowable range to solve within.\n@return False if any invocation of Visitor returned false, true otherwise (if there were no solutions, or every invocation of Visitor returned true)."
+    },
+    {
+      "id": "transform-finite-range-within-range",
+      "name": "TransformFiniteRangeWithinRange",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "TransformFiniteRangeWithinRange(Target, Range, Visitor, Start Breadcrumbs, End Breadcrumbs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        },
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<bool ( TRange<FFrameTime> )>"
+        },
+        {
+          "name": "Start Breadcrumbs",
+          "type": "FMovieSceneTransformBreadcrumbs&"
+        },
+        {
+          "name": "End Breadcrumbs",
+          "type": "FMovieSceneTransformBreadcrumbs&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Transforms a finite range in the transformed space, to non-empty ranges in untransformed space.\nFor each solution that exists in the untransformed space, Visitor will be invoked and its result defines whether the\nalgorithm continues (true) or terminates early (false).\n@param Range             The range in transformed space to convert to untransformed space.\n@param Visitor           A functor to invoke for every solution that exists within the range.\nReturning true will allow the algorithm to continue, false will cause it to terminate early.\n@param StartBreadCrumbs  A breadcrumb trail for the start of the allowable range to solve within.\n@param EndBreadCrumbs    A breadcrumb trail for the end of the allowable range to solve within.\n@return False if any invocation of Visitor returned false, true otherwise (if there were no solutions, or every invocation of Visitor returned true)."
+    },
+    {
+      "id": "as-legacy-linear-time-transform",
+      "name": "AsLegacyLinearTimeTransform",
+      "category": "MovieSceneSequenceTransform",
+      "signature": "AsLegacyLinearTimeTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneInverseSequenceTransform*"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform",
+      "docs": "Legacy function that folds all linear transforms together. Does not account for non-linear transforms and should not be used any more."
+    }
+  ]
+}

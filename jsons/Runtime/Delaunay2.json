@@ -1,0 +1,329 @@
+{
+  "id": "delaunay-2",
+  "label": "Delaunay2",
+  "includepath": "CompGeom/Delaunay2.h",
+  "includes": [
+    "BoxTypes",
+    "Array",
+    "ArrayView",
+    "CoreMinimal",
+    "GeneralPolygon2",
+    "PlatformCrt",
+    "IndexTypes",
+    "LineTypes",
+    "RandomStream",
+    "UnrealMathSSE",
+    "Vector2D",
+    "MathUtil",
+    "PlaneTypes",
+    "Polygon2",
+    "PimplPtr",
+    "UnrealTemplate",
+    "VectorTypes"
+  ],
+  "functions": [
+    {
+      "id": "triangulate",
+      "name": "Triangulate",
+      "category": "Delaunay2",
+      "signature": "Triangulate(Target, Vertices, Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Vertices",
+          "type": "TArrayView<TVector2<double>>"
+        },
+        {
+          "name": "Edges",
+          "type": "TArrayView<FIndex2i>",
+          "default": "TArrayView<const FIndex2i>()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute an (optionally constrained) Delaunay triangulation.\nNote this clears any previously-held triangulation data, and triangulates the passed-in vertices (and optional edges) from scratch\n@return false if triangulation failed"
+    },
+    {
+      "id": "constrain-edges",
+      "name": "ConstrainEdges",
+      "category": "Delaunay2",
+      "signature": "ConstrainEdges(Target, Vertices, Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Vertices",
+          "type": "TArrayView<TVector2<double>>"
+        },
+        {
+          "name": "Edges",
+          "type": "TArrayView<FIndex2i>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Update an already-computed triangulation so the given edges are in the triangulation.\nNote: Assumes the edges do not intersect other constrained edges OR existing vertices in the triangulation\n@return true if edges were successfully inserted.\nNote: Will not detect failure due to intersection of constrained edges unless member bValidateEdges == true."
+    },
+    {
+      "id": "get-triangles",
+      "name": "GetTriangles",
+      "category": "Delaunay2",
+      "signature": "GetTriangles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        }
+      ],
+      "returnType": "TArray<FIndex3i>"
+    },
+    {
+      "id": "get-triangles-and-adjacency",
+      "name": "GetTrianglesAndAdjacency",
+      "category": "Delaunay2",
+      "signature": "GetTrianglesAndAdjacency(Target, Triangles, Adjacency)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<FIndex3i>&"
+        },
+        {
+          "name": "Adjacency",
+          "type": "TArray<FIndex3i>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-filled-triangles-6aa549",
+      "name": "GetFilledTriangles",
+      "category": "Delaunay2",
+      "signature": "GetFilledTriangles(Target, Triangles Out, Edges, Fill Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<FIndex3i>&"
+        },
+        {
+          "name": "Edges",
+          "type": "TArrayView<FIndex2i>"
+        },
+        {
+          "name": "Fill Mode",
+          "type": "EFillMode",
+          "default": "EFillMode::PositiveWinding"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get (by reference) the triangles that are inside the given edges, removing the outer boundary triangles\nIf a Winding-Number-based fill mode is used, assumes edges are oriented and tracks the winding number across edges\n@param TrianglesOut\t\t\t\tWill be filled with a subset of the triangulation that is 'inside' the given edges, as defined by the FillMode\n@param Edges\t\t\t\t\t\tThe array of edges that were already constrained in the triangulation (by a previous call to Triangulate or ConstrainEdges)\n@param FillMode\t\t\t\t\tStrategy to use to define which triangles to include in the output\n@return\t\t\t\t\t\t\ttrue if the result was well defined and consistent; false otherwise. Solid fill mode always has a well defined result; Winding-number-based fills do not if the edges have open spans.\nNote the triangulation will still be filled by best-effort even if the function returns false."
+    },
+    {
+      "id": "get-filled-triangles-generalized-winding",
+      "name": "GetFilledTrianglesGeneralizedWinding",
+      "category": "Delaunay2",
+      "signature": "GetFilledTrianglesGeneralizedWinding(Target, Triangles Out, Vertices, Edges, Fill Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<FIndex3i>&"
+        },
+        {
+          "name": "Vertices",
+          "type": "TArrayView<TVector2<double>>"
+        },
+        {
+          "name": "Edges",
+          "type": "TArrayView<FIndex2i>"
+        },
+        {
+          "name": "Fill Mode",
+          "type": "EFillMode",
+          "default": "EFillMode::PositiveWinding"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get (by reference) the triangles that are inside the given edges, using a generalized winding number method to determine which triangles are inside\nNot valid for EFillMode::Solid, will fall back to the above GetFilledTriangles method in that case.\nThis method is for triangulations where the edges did not define a fully-closed shape, either by construction or due to un-resolved edge intersections in the input.\nNote that it is slower than the standard GetFilledTriangles, and is worse for closed polygons where all edges were successfully constrained.\n@param TrianglesOut\t\t\t\tWill be filled with a subset of the triangulation that is 'inside' the given edges, as defined by the FillMode\n@param Vertices\t\t\t\t\tThe array of vertices that were used in the triangulation (by the previous call to Triangulate)\n@param Edges\t\t\t\t\t\tThe array of edges that were already constrained in the triangulation (by a previous call to Triangulate or ConstrainEdges)\n@param FillMode\t\t\t\t\tStrategy to use to define which triangles to include in the output\n@return\t\t\t\t\t\t\ttrue if the result was well defined and consistent; false otherwise. Solid fill mode always has a well defined result; Winding-number-based fills do not if the edges have open spans.\nNote the triangulation will still be filled by best-effort even if the function returns false."
+    },
+    {
+      "id": "get-filled-triangles-430fef",
+      "name": "GetFilledTriangles",
+      "category": "Delaunay2",
+      "signature": "GetFilledTriangles(Target, Triangles Out, Boundary Edges, Hole Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<FIndex3i>&"
+        },
+        {
+          "name": "Boundary Edges",
+          "type": "TArrayView<FIndex2i>"
+        },
+        {
+          "name": "Hole Edges",
+          "type": "TArrayView<FIndex2i>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get (by reference) the triangles that are inside the given edges, removing the outside-boundary triangles and the inside-hole triangles\n@param TrianglesOut\t\t\t\t\tWill be filled with a subset of the triangulation that is 'inside' the given edges, as defined by the FillMode\n@param BoundaryEdges\t\t\t\t\tConstrained edges in the triangulation that define the boundary of the desired shape\n@param HoleEdges\t\t\t\t\t\tConstrained edges in the triangulation that define inner holes of the desired shape\n@return\t\t\t\t\t\t\t\ttrue if any result was successfully computed (including an empty result).\nCurrently only returns false if Triangulate() has not been called yet."
+    },
+    {
+      "id": "is-delaunay",
+      "name": "IsDelaunay",
+      "category": "Delaunay2",
+      "signature": "IsDelaunay(Target, Vertices, Skip Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Vertices",
+          "type": "TArrayView<FVector2f>"
+        },
+        {
+          "name": "Skip Edges",
+          "type": "TArrayView<FIndex2i>",
+          "default": "TArrayView<const FIndex2i>()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-edges",
+      "name": "HasEdges",
+      "category": "Delaunay2",
+      "signature": "HasEdges(Target, Edges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Edges",
+          "type": "TArrayView<FIndex2i>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "fix-duplicates-on-edge",
+      "name": "FixDuplicatesOnEdge",
+      "category": "Delaunay2",
+      "signature": "FixDuplicatesOnEdge(Target, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Edge",
+          "type": "FIndex2i&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-edge",
+      "name": "HasEdge",
+      "category": "Delaunay2",
+      "signature": "HasEdge(Target, Edge, Remap Duplicates)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Edge",
+          "type": "FIndex2i&"
+        },
+        {
+          "name": "Remap Duplicates",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-duplicates",
+      "name": "HasDuplicates",
+      "category": "Delaunay2",
+      "signature": "HasDuplicates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remap-if-duplicate",
+      "name": "RemapIfDuplicate",
+      "category": "Delaunay2",
+      "signature": "RemapIfDuplicate(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-voronoi-cells",
+      "name": "GetVoronoiCells",
+      "category": "Delaunay2",
+      "signature": "GetVoronoiCells(Target, Vertices, Include Boundary, Clip Bounds, Expand Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Vertices",
+          "type": "TArrayView<FVector2d>"
+        },
+        {
+          "name": "Include Boundary",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Clip Bounds",
+          "type": "FAxisAlignedBox2d",
+          "default": "FAxisAlignedBox2d::Empty()"
+        },
+        {
+          "name": "Expand Bounds",
+          "type": "Double",
+          "default": "0.0"
+        }
+      ],
+      "returnType": "TArray<TArray<FVector2d>>",
+      "docs": "Get Voronoi diagram cells as dual of the Delaunay triangulation.  You must call Triangulate() before calling this.\n@param Vertices\t\t\tVertices of the Delaunay triangulation, to be used as the sites of the Voronoi diagram\n@param bIncludeBoundary\tIf true, include the cells on the boundary of the diagram.  These cells are conceptually infinite, but will be clipped to a bounding box.\n@param ClipBounds\t\tIf non-empty, all Voronoi diagram cells will be clipped to this rectangle.\n@param ExpandBounds\t\tAmount to expand the clipping bounds beyond the Bounds argument (or the bounding box of non-boundary Voronoi cells, if Bounds was empty)\n@return\t\t\t\t\tThe cells of each Voronoi site, or an empty array if the Triangulation was not yet computed"
+    }
+  ]
+}

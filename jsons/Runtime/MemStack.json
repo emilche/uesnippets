@@ -1,0 +1,247 @@
+{
+  "id": "mem-stack",
+  "label": "MemStack",
+  "includepath": "Misc/MemStack.h",
+  "includes": [
+    "ContainerAllocationPolicies",
+    "LockFreeFixedSizeAllocator",
+    "CoreGlobals",
+    "CoreTypes",
+    "MemoryBase",
+    "PlatformCrt",
+    "ThreadSafeCounter",
+    "ThreadSingleton",
+    "UnrealMemory",
+    "UnrealMathUtility",
+    "AssertionMacros",
+    "Build",
+    "NoopCounter",
+    "AlignmentTemplates",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "MemStack",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "FPageAllocator&"
+    },
+    {
+      "id": "f-page-allocator",
+      "name": "FPageAllocator",
+      "category": "MemStack",
+      "signature": "FPageAllocator()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "alloc",
+      "name": "Alloc",
+      "category": "MemStack",
+      "signature": "Alloc(Target, Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        },
+        {
+          "name": "Alignment",
+          "type": "Int",
+          "default": "MIN_ALIGNMENT"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "free",
+      "name": "Free",
+      "category": "MemStack",
+      "signature": "Free(Target, Mem)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        },
+        {
+          "name": "Mem",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "alloc-small",
+      "name": "AllocSmall",
+      "category": "MemStack",
+      "signature": "AllocSmall(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "free-small",
+      "name": "FreeSmall",
+      "category": "MemStack",
+      "signature": "FreeSmall(Target, Mem)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        },
+        {
+          "name": "Mem",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "bytes-used",
+      "name": "BytesUsed",
+      "category": "MemStack",
+      "signature": "BytesUsed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "bytes-free",
+      "name": "BytesFree",
+      "category": "MemStack",
+      "signature": "BytesFree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "latch-protected-mode",
+      "name": "LatchProtectedMode",
+      "category": "MemStack",
+      "signature": "LatchProtectedMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPageAllocator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-mem-stack-base",
+      "name": "FMemStackBase",
+      "category": "MemStack",
+      "signature": "FMemStackBase(Page Size)",
+      "params": [
+        {
+          "name": "Page Size",
+          "type": "EPageSize",
+          "default": "EPageSize::Small"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Simple linear-allocation memory stack.\nItems are allocated via PushBytes() or the specialized operator new()s.\nItems are freed en masse by using FMemMark to Pop() them."
+    },
+    {
+      "id": "get-byte-count",
+      "name": "GetByteCount",
+      "category": "MemStack",
+      "signature": "GetByteCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMemStackBase*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the number of bytes allocated for this FMemStack that are currently in use."
+    },
+    {
+      "id": "contains-pointer",
+      "name": "ContainsPointer",
+      "category": "MemStack",
+      "signature": "ContainsPointer(Target, Pointer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMemStackBase*"
+        },
+        {
+          "name": "Pointer",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "allocate-new-chunk",
+      "name": "AllocateNewChunk",
+      "category": "MemStack",
+      "signature": "AllocateNewChunk(Target, Min Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMemStackBase*"
+        },
+        {
+          "name": "Min Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Allocate a new chunk of memory of at least MinSize size,\nupdates the memory stack's Chunks table and ActiveChunks counter."
+    },
+    {
+      "id": "free-chunks",
+      "name": "FreeChunks",
+      "category": "MemStack",
+      "signature": "FreeChunks(Target, New Top Chunk)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMemStackBase*"
+        },
+        {
+          "name": "New Top Chunk",
+          "type": "FTaggedMemory*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Frees the chunks above the specified chunk on the stack."
+    },
+    {
+      "id": "on-invalid-mem-stack-allocator-num",
+      "name": "OnInvalidMemStackAllocatorNum",
+      "category": "MemStack",
+      "signature": "OnInvalidMemStackAllocatorNum(Target, New Num, Num Bytes Per Element)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMemStack*"
+        },
+        {
+          "name": "New Num",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bytes Per Element",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "noreturn ] ] void"
+    }
+  ]
+}

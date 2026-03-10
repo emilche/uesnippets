@@ -1,0 +1,709 @@
+{
+  "id": "movie-scene-pre-animated-state-extension",
+  "label": "MovieScenePreAnimatedStateExtension",
+  "includepath": "Evaluation/PreAnimatedState/MovieScenePreAnimatedStateExtension.h",
+  "includes": [
+    "Array",
+    "ContainerAllocationPolicies",
+    "Map",
+    "SortedMap",
+    "SparseArray",
+    "CoreTypes",
+    "MovieScenePropertySystemTypes",
+    "MovieSceneSequenceInstanceHandle",
+    "MovieSceneAnimTypeID",
+    "IMovieScenePreAnimatedStorage",
+    "MovieScenePreAnimatedStateTypes",
+    "MovieScenePreAnimatedStorageID",
+    "AssertionMacros",
+    "Less",
+    "SharedPointer",
+    "UniquePtr",
+    "ObjectKey"
+  ],
+  "functions": [
+    {
+      "id": "f-pre-animated-state-extension",
+      "name": "FPreAnimatedStateExtension",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "FPreAnimatedStateExtension()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Pre-animated state extension that houses all cached values for objects animated by a specific UMovieSceneEntitySystemLinker\n- The presence of this extension denotes that pre-animated state should be stored in one form or another.\nIf the extension is not present, this implies that there are no IMovieScenePlayers that need global Restore State, and no tracks set to 'Restore State'.\nFPreAnimatedStateExtension::NumRequestsForGlobalState defines whether this extension needs to cache any and all changes or not\n- Each specific 'type' of pre-animated state is defined by a unique StorageID (TPreAnimatedStorageID), registered through RegisterStorage\n- Pre-animated state is grouped into buckets in order to preserve significant ordering constraints (for instance, each object must restore state in the reverse order it was cached)\n- Groups are managed by registered IPreAnimatedStateGroupManager instances. The main implementation is FPreAnimatedObjectGroupManager, which maintains an object to group mapping"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "Initialize(Target, In Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "allocate-group",
+      "name": "AllocateGroup",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "AllocateGroup(Target, Group Manager)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Group Manager",
+          "type": "TSharedPtr<IPreAnimatedStateGroupManager>"
+        }
+      ],
+      "returnType": "FPreAnimatedStorageGroupHandle",
+      "docs": "Called by group managers to allocate a new group"
+    },
+    {
+      "id": "free-group",
+      "name": "FreeGroup",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "FreeGroup(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Index",
+          "type": "FPreAnimatedStorageGroupHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by group managers to free an existing group"
+    },
+    {
+      "id": "restore-global-state",
+      "name": "RestoreGlobalState",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "RestoreGlobalState(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Params",
+          "type": "FRestoreStateParams&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Restore any state for any persistent tokens captured during the course of evaluation\n@param Params    Parameters for restoration - if TerminalInstanceHandle is invalid then _all_ state will be restored, regardless of the instance it was cached from"
+    },
+    {
+      "id": "discard-global-state",
+      "name": "DiscardGlobalState",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "DiscardGlobalState(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Params",
+          "type": "FRestoreStateParams&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discards any state for any persistent tokens captured during the course of evaluation without restoring it.\n@param Params    Parameters for restoration - if TerminalInstanceHandle is invalid then _all_ state will be discarded, regardless of the instance it was cached from"
+    },
+    {
+      "id": "restore-state-for-group",
+      "name": "RestoreStateForGroup",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "RestoreStateForGroup(Target, Group Handle, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FPreAnimatedStorageGroupHandle"
+        },
+        {
+          "name": "Params",
+          "type": "FRestoreStateParams&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Restore any state cached for the specified group\n@params GroupHandle  Handle to the group to restore\n@param  Params       Parameters for restoration"
+    },
+    {
+      "id": "replace-object-for-group",
+      "name": "ReplaceObjectForGroup",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "ReplaceObjectForGroup(Target, Group Handle, Old Object, New Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FPreAnimatedStorageGroupHandle"
+        },
+        {
+          "name": "Old Object",
+          "type": "FObjectKey&"
+        },
+        {
+          "name": "New Object",
+          "type": "FObjectKey&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called during blueprint re-instancing to replace the object bound to a specific group handle with another."
+    },
+    {
+      "id": "discard-transient-state",
+      "name": "DiscardTransientState",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "DiscardTransientState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discard any transient state and all meta-data for any currently animating objects, whilst preserving the cached values internally.\nCalling this function will cause any currently animating 'RestoreState' sections to re-cache their values if they are re-evaluated\nAny 'RestoreState' sections which are deleted or subsequently not-evaluated will not cause their values to be restored"
+    },
+    {
+      "id": "discard-state-for-group",
+      "name": "DiscardStateForGroup",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "DiscardStateForGroup(Target, Group Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FPreAnimatedStorageGroupHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discard any and all cached values for the specified group without restoring them.\n@note This function should only be used to forcibly serialize animated values into a level"
+    },
+    {
+      "id": "discard-state-for-storage",
+      "name": "DiscardStateForStorage",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "DiscardStateForStorage(Target, Storage ID, Storage Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Storage ID",
+          "type": "FPreAnimatedStorageID"
+        },
+        {
+          "name": "Storage Index",
+          "type": "FPreAnimatedStorageIndex"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discard the specified cached value and any and all capture source tracking related to it."
+    },
+    {
+      "id": "contains-any-state-for-instance-handle",
+      "name": "ContainsAnyStateForInstanceHandle",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "ContainsAnyStateForInstanceHandle(Target, Root Instance Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Root Instance Handle",
+          "type": "FRootInstanceHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Search for any captured state that originated from the specified root instance handle\nWARNING: This is a linear search across all state, and so is potentially very slow"
+    },
+    {
+      "id": "save-pre-animated-state-82c287",
+      "name": "SavePreAnimatedState",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "SavePreAnimatedState(Target, In Token Type, Producer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Token Type",
+          "type": "FMovieSceneAnimTypeID"
+        },
+        {
+          "name": "Producer",
+          "type": "IMovieScenePreAnimatedGlobalTokenProducer&"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "save-pre-animated-state-d8895f",
+      "name": "SavePreAnimatedState",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "SavePreAnimatedState(Target, In Object, In Token Type, Producer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Token Type",
+          "type": "FMovieSceneAnimTypeID"
+        },
+        {
+          "name": "Producer",
+          "type": "IMovieScenePreAnimatedTokenProducer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "save-pre-animated-state-directly-24c18c",
+      "name": "SavePreAnimatedStateDirectly",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "SavePreAnimatedStateDirectly(Target, In Token Type, Producer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Token Type",
+          "type": "FMovieSceneAnimTypeID"
+        },
+        {
+          "name": "Producer",
+          "type": "IMovieScenePreAnimatedGlobalTokenProducer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "save-pre-animated-state-directly-f8047f",
+      "name": "SavePreAnimatedStateDirectly",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "SavePreAnimatedStateDirectly(Target, In Object, In Token Type, Producer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Token Type",
+          "type": "FMovieSceneAnimTypeID"
+        },
+        {
+          "name": "Producer",
+          "type": "IMovieScenePreAnimatedTokenProducer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-entity-meta-data",
+      "name": "GetEntityMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetEntityMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "public : FPreAnimatedEntityCaptureSource*"
+    },
+    {
+      "id": "get-or-create-entity-meta-data",
+      "name": "GetOrCreateEntityMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetOrCreateEntityMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedEntityCaptureSource*"
+    },
+    {
+      "id": "get-track-instance-meta-data",
+      "name": "GetTrackInstanceMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetTrackInstanceMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedTrackInstanceCaptureSources*"
+    },
+    {
+      "id": "get-or-create-track-instance-meta-data",
+      "name": "GetOrCreateTrackInstanceMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetOrCreateTrackInstanceMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedTrackInstanceCaptureSources*"
+    },
+    {
+      "id": "get-track-instance-input-meta-data",
+      "name": "GetTrackInstanceInputMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetTrackInstanceInputMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedTrackInstanceInputCaptureSources*"
+    },
+    {
+      "id": "get-or-create-track-instance-input-meta-data",
+      "name": "GetOrCreateTrackInstanceInputMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetOrCreateTrackInstanceInputMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedTrackInstanceInputCaptureSources*"
+    },
+    {
+      "id": "get-template-meta-data",
+      "name": "GetTemplateMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetTemplateMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedTemplateCaptureSources*"
+    },
+    {
+      "id": "get-or-create-template-meta-data",
+      "name": "GetOrCreateTemplateMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetOrCreateTemplateMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedTemplateCaptureSources*"
+    },
+    {
+      "id": "get-evaluation-hook-meta-data",
+      "name": "GetEvaluationHookMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetEvaluationHookMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedEvaluationHookCaptureSources*"
+    },
+    {
+      "id": "get-or-create-evaluation-hook-meta-data",
+      "name": "GetOrCreateEvaluationHookMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetOrCreateEvaluationHookMetaData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "FPreAnimatedEvaluationHookCaptureSources*"
+    },
+    {
+      "id": "has-active-capture-source",
+      "name": "HasActiveCaptureSource",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "HasActiveCaptureSource(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-weak-capture-source",
+      "name": "AddWeakCaptureSource",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "AddWeakCaptureSource(Target, In Weak Meta Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Weak Meta Data",
+          "type": "TWeakPtr<IPreAnimatedCaptureSource>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-weak-capture-source",
+      "name": "RemoveWeakCaptureSource",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "RemoveWeakCaptureSource(Target, In Weak Meta Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "In Weak Meta Data",
+          "type": "TWeakPtr<IPreAnimatedCaptureSource>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "ensure-meta-data",
+      "name": "EnsureMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "EnsureMetaData(Target, Entry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Entry",
+          "type": "FPreAnimatedStateEntry&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-source-meta-data",
+      "name": "AddSourceMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "AddSourceMetaData(Target, Entry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Entry",
+          "type": "FPreAnimatedStateEntry&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "meta-data-exists",
+      "name": "MetaDataExists",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "MetaDataExists(Target, Entry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Entry",
+          "type": "FPreAnimatedStateEntry&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-meta-data",
+      "name": "AddMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "AddMetaData(Target, Meta Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Meta Data",
+          "type": "FPreAnimatedStateMetaData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-meta-data",
+      "name": "RemoveMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "RemoveMetaData(Target, Meta Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Meta Data",
+          "type": "FPreAnimatedStateMetaData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-meta-data",
+      "name": "UpdateMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "UpdateMetaData(Target, Meta Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Meta Data",
+          "type": "FPreAnimatedStateMetaData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-storage-requirement",
+      "name": "GetStorageRequirement",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetStorageRequirement(Target, Entry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Entry",
+          "type": "FPreAnimatedStateEntry&"
+        }
+      ],
+      "returnType": "EPreAnimatedStorageRequirement"
+    },
+    {
+      "id": "free-group-internal",
+      "name": "FreeGroupInternal",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "FreeGroupInternal(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Handle",
+          "type": "FPreAnimatedStorageGroupHandle"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "AddReferencedObjects(Target, Reference Collector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Reference Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-meta-data",
+      "name": "FindMetaData",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "FindMetaData(Target, Entry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Entry",
+          "type": "FPreAnimatedStateEntry&"
+        }
+      ],
+      "returnType": "FAggregatePreAnimatedStateMetaData*"
+    },
+    {
+      "id": "get-or-add-meta-data-internal",
+      "name": "GetOrAddMetaDataInternal",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "GetOrAddMetaDataInternal(Target, Entry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreAnimatedStateExtension*"
+        },
+        {
+          "name": "Entry",
+          "type": "FPreAnimatedStateEntry&"
+        }
+      ],
+      "returnType": "FAggregatePreAnimatedStateMetaData*"
+    },
+    {
+      "id": "register-storage-internal",
+      "name": "RegisterStorageInternal",
+      "category": "MovieScenePreAnimatedStateExtension",
+      "signature": "RegisterStorageInternal()",
+      "params": [],
+      "returnType": "private : FPreAnimatedStorageID",
+      "docs": "Linker is always valid because this extension is owned by the Linker"
+    }
+  ]
+}

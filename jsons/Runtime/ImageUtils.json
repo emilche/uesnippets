@@ -1,0 +1,768 @@
+{
+  "id": "image-utils",
+  "label": "ImageUtils",
+  "includepath": "ImageUtils.h",
+  "includes": [
+    "CoreMinimal",
+    "Guid",
+    "ImageCore",
+    "Texture"
+  ],
+  "functions": [
+    {
+      "id": "load-image",
+      "name": "LoadImage",
+      "category": "ImageUtils",
+      "signature": "LoadImage(Filename, Out Image)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Class of static image utility functions.\nProvides load/save of FImage\nand conversion from Texture2D/RenderTarget to/from FImage\nin Engine, cannot be used by standalone texture build workers"
+    },
+    {
+      "id": "save-image-by-extension",
+      "name": "SaveImageByExtension",
+      "category": "ImageUtils",
+      "signature": "SaveImageByExtension(Filename, In Image, Quality)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Quality",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Save an image.  Extension of Filename will be used for output image file format.\nFImageView can be made from any surface pointer.\n@param Filename\t\t\t\tFile name to save to, with extension to identify format\n@param InImage\t\t\t\tImage to save\n@param Quality\t\t\t\tMainly for JPEG, but special values have some meaning for other formats\nIf Filename has no extension, an appropriate one is automatically generated based on image format."
+    },
+    {
+      "id": "save-image-auto-format",
+      "name": "SaveImageAutoFormat",
+      "category": "ImageUtils",
+      "signature": "SaveImageAutoFormat(Filename, In Image, Quality)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Quality",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Save an image.  Output format will be chosen automatically based on the Image pixel format\neg. EXR for float, PNG for BGRA8\nextension will be added to file name\n@param Filename\t\t\t\tFile name to save to, auto extension will be added\n@param InImage\t\t\t\tImage to save\n@param Quality\t\t\t\tMainly for JPEG, but special values have some meaning for other formats"
+    },
+    {
+      "id": "compress-image",
+      "name": "CompressImage",
+      "category": "ImageUtils",
+      "signature": "CompressImage(Out Data, To Format Extension, In Image, Quality)",
+      "params": [
+        {
+          "name": "Out Data",
+          "type": "TArray64<uint8>&"
+        },
+        {
+          "name": "To Format Extension",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Quality",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "\"Compress\" an image to a file format.  Here \"Compress\" really means put an image into file format binary.\nExtension is used to identify file format, eg. png/jpeg/etc.\nFImageView can be made from any surface pointer.\n@param OutData\t\t\t\tFilled with file format Image data\n@param ToFormatExtension\t\tcan be a full name like \"xxx.png\" or just the extension like \"png\"\nToFormatExtension == null is okay & means use default output format\n@param InImage\t\t\t\tImage to save\n@param Quality\t\t\t\tMainly for JPEG, but special values have some meaning for other formats"
+    },
+    {
+      "id": "decompress-image",
+      "name": "DecompressImage",
+      "category": "ImageUtils",
+      "signature": "DecompressImage(In Compressed Data, In Compressed Size, Out Image)",
+      "params": [
+        {
+          "name": "In Compressed Data",
+          "type": "void*"
+        },
+        {
+          "name": "In Compressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "\"Decompress\" an image to a file format.  Here \"Compress\" really means put an image into file format binary.\n@param InCompressedData\t\tFile formatted image bits to unpack\n@param InCompressedSize\t\tSize of InCompressedData\n@param OutImage\t\t\t\tFilled with the decompressed image and allocated as needed"
+    },
+    {
+      "id": "export-texture-source-to-dds",
+      "name": "ExportTextureSourceToDDS",
+      "category": "ImageUtils",
+      "signature": "ExportTextureSourceToDDS(Out Data, Texture, Block Index, Layer Index)",
+      "params": [
+        {
+          "name": "Out Data",
+          "type": "TArray64<uint8>&"
+        },
+        {
+          "name": "Texture",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Block Index",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Layer Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Export Texture (2D,Array,Cube,CubeArray,Volume) to DDS\nreads from texture source, not platform data\n@param OutData    Filled with DDS file format\n@param Texture    Texture (2D,Array,Cube,CubeArray,Volume) to export\n@param BlockIndex Block to export (optional)\n@param LayerIndex Layer to export (optional)"
+    },
+    {
+      "id": "export-render-target-to-dds",
+      "name": "ExportRenderTargetToDDS",
+      "category": "ImageUtils",
+      "signature": "ExportRenderTargetToDDS(Out Data, Tex RT)",
+      "params": [
+        {
+          "name": "Out Data",
+          "type": "TArray64<uint8>&"
+        },
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Export Texture RenderTarget (2D,Array,Cube,CubeArray,Volume) to DDS\nreads from texture rendertarget RHI texture\n@param OutData    Filled with DDS file format\n@param TexRT    Texture RenderTarget (2D,Array,Cube,CubeArray,Volume) to export"
+    },
+    {
+      "id": "get-texture-2-d-source-image",
+      "name": "GetTexture2DSourceImage",
+      "category": "ImageUtils",
+      "signature": "GetTexture2DSourceImage(Texture, Out Image)",
+      "params": [
+        {
+          "name": "Texture",
+          "type": "UTexture2D*"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "if Texture source is available, get it as an FImage\n@param Texture\t\tTexture to get gets from\n@param OutImage\t\tFilled with the image copy and allocated as needed"
+    },
+    {
+      "id": "image-resize-e32bc3",
+      "name": "ImageResize",
+      "category": "ImageUtils",
+      "signature": "ImageResize(Src Width, Src Height, Src Data, Dst Width, Dst Height, Dst Data, Resize SRG Bin Linear Space, Force Opaque Output)",
+      "params": [
+        {
+          "name": "Src Width",
+          "type": "Int"
+        },
+        {
+          "name": "Src Height",
+          "type": "Int"
+        },
+        {
+          "name": "Src Data",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "Dst Width",
+          "type": "Int"
+        },
+        {
+          "name": "Dst Height",
+          "type": "Int"
+        },
+        {
+          "name": "Dst Data",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "Resize SRG Bin Linear Space",
+          "type": "Bool"
+        },
+        {
+          "name": "Force Opaque Output",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resizes the given image using FImageCore::ResizeImage.\nDestination array will be emptied and resized.\nprefer FImageCore::ResizeImage instead.\nprefer using FImage or FImageView not FColor arrays.\n@param SrcWidth\t\t\t\tSource image width.\n@param SrcHeight\t\t\t\tSource image height.\n@param SrcData\t\t\t\tSource image data.\n@param DstWidth\t\t\t\tDestination image width.\n@param DstHeight\t\t\t\tDestination image height.\n@param DstData\t\t\t\tDestination image data. (will be resized)\n@param bResizeSRGBinLinearSpace\t\t\tConvert sRGB to linear for gamma-correct resize.  Should be true if the Src is SRGB diffuse color; should be false for masks and normal maps.\n@param bForceOpaqueOutput\tAlways output 255 for the alpha channel.  BEWARE defaults to true so alpha is killed by default.\nBEWARE: the FColor variant of this function fills with opaque alpha by default.  The FLinearColor variant does not"
+    },
+    {
+      "id": "image-resize-ba0703",
+      "name": "ImageResize",
+      "category": "ImageUtils",
+      "signature": "ImageResize(Src Width, Src Height, Src Data, Dst Width, Dst Height, Dst Data)",
+      "params": [
+        {
+          "name": "Src Width",
+          "type": "Int"
+        },
+        {
+          "name": "Src Height",
+          "type": "Int"
+        },
+        {
+          "name": "Src Data",
+          "type": "TArray64<FLinearColor>&"
+        },
+        {
+          "name": "Dst Width",
+          "type": "Int"
+        },
+        {
+          "name": "Dst Height",
+          "type": "Int"
+        },
+        {
+          "name": "Dst Data",
+          "type": "TArray64<FLinearColor>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resizes the given image using FImageCore::ResizeImage.\nDestination array will be emptied and resized.\nprefer FImageCore::ResizeImage instead.\nprefer using FImage or FImageView not FColor arrays.\n@param SrcWidth\tSource image width.\n@param SrcHeight\tSource image height.\n@param SrcData\tSource image data.\n@param DstWidth\tDestination image width.\n@param DstHeight Destination image height.\n@param DstData\tDestination image data. (will be resized)\nBEWARE: the FColor variant of this function fills with opaque alpha by default.  The FLinearColor variant does not"
+    },
+    {
+      "id": "create-texture-2-d",
+      "name": "CreateTexture2D",
+      "category": "ImageUtils",
+      "signature": "CreateTexture2D(Src Width, Src Height, Src Data, Outer, Name, Flags, In Params)",
+      "params": [
+        {
+          "name": "Src Width",
+          "type": "Int"
+        },
+        {
+          "name": "Src Height",
+          "type": "Int"
+        },
+        {
+          "name": "Src Data",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "Outer",
+          "type": "UObject*"
+        },
+        {
+          "name": "Name",
+          "type": "String&"
+        },
+        {
+          "name": "Flags",
+          "type": "EObjectFlags&"
+        },
+        {
+          "name": "In Params",
+          "type": "FCreateTexture2DParameters&"
+        }
+      ],
+      "returnType": "UTexture2D*",
+      "docs": "Creates a 2D texture from a array of raw color data.\n@param SrcWidth\t\tSource image width.\n@param SrcHeight\t\tSource image height.\n@param SrcData\t\tSource image data.\n@param Outer\t\t\tOuter for the texture object.\n@param Name\t\t\tName for the texture object.\n@param Flags\t\t\tObject flags for the texture object.\n@param InParams\t\tParams about how to set up the texture.\n@return\t\t\t\tReturns a pointer to the constructed 2D texture object.\nthis fills a TextureSource , and will then Build a Platform texture from that\ncan be used WITH_EDITOR only\ncontrast to CreateTexture2DFromImage\nPrefer the more modern CreateTexture from FImage."
+    },
+    {
+      "id": "create-texture",
+      "name": "CreateTexture",
+      "category": "ImageUtils",
+      "signature": "CreateTexture(Texture Class, Image, Outer, Name, Flags, Do Post Edit Change)",
+      "params": [
+        {
+          "name": "Texture Class",
+          "type": "ETextureClass"
+        },
+        {
+          "name": "Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Outer",
+          "type": "UObject*"
+        },
+        {
+          "name": "Name",
+          "type": "String&"
+        },
+        {
+          "name": "Flags",
+          "type": "EObjectFlags",
+          "default": "RF_NoFlags"
+        },
+        {
+          "name": "Do Post Edit Change",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "UTexture*",
+      "docs": "Creates a texture of any type from an Image\nThis is the modern preferred way to create a texture.\nIf you need to change the default settings, then use DoPostEditChange = false, and call PostEditChange() yourself after setting all properties.\nTypically you may want to set LODGroup and CompressionSettings.\nthis fills the TextureSource , and will then Build a Platform texture from that\ncan be used WITH_EDITOR only"
+    },
+    {
+      "id": "create-texture-2-d-from-image",
+      "name": "CreateTexture2DFromImage",
+      "category": "ImageUtils",
+      "signature": "CreateTexture2DFromImage(Image)",
+      "params": [
+        {
+          "name": "Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "UTexture2D*",
+      "docs": "Creates a 2D texture from an FImage\n@param Image\t\t\tImage that will be copied into a Texture\n@return\t\t\t\tReturns a pointer to the constructed 2D texture object.\nNOTE: this makes a Transient texture with the Image in the PlatformData\nthis is different than making a Texture via TextureSource.Init(Image)"
+    },
+    {
+      "id": "crop-and-scale-image",
+      "name": "CropAndScaleImage",
+      "category": "ImageUtils",
+      "signature": "CropAndScaleImage(Src Width, Src Height, Desired Width, Desired Height, Src Data, Dst Data)",
+      "params": [
+        {
+          "name": "Src Width",
+          "type": "Int"
+        },
+        {
+          "name": "Src Height",
+          "type": "Int"
+        },
+        {
+          "name": "Desired Width",
+          "type": "Int"
+        },
+        {
+          "name": "Desired Height",
+          "type": "Int"
+        },
+        {
+          "name": "Src Data",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "Dst Data",
+          "type": "TArray<FColor>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Crops, and scales an image from a raw image array.\n@param SrcWidth\t\t\tSource image width.\n@param SrcHeight\t\t\tSource image height.\n@param DesiredWidth\t\tDesired Width.\n@param DesiredHeight\t\tDesired Height.\n@param SrcData\t\t\tRaw image array.\n@param DstData\t\t\tcompressed image array."
+    },
+    {
+      "id": "thumbnail-compress-image-array",
+      "name": "ThumbnailCompressImageArray",
+      "category": "ImageUtils",
+      "signature": "ThumbnailCompressImageArray(Image Width, Image Height, Src Data, Dst Data)",
+      "params": [
+        {
+          "name": "Image Width",
+          "type": "Int"
+        },
+        {
+          "name": "Image Height",
+          "type": "Int"
+        },
+        {
+          "name": "Src Data",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "Dst Data",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compress image to thumbnail enabled format (png or jpg) uint8 array.\n@param ImageHeight\t\tSource image width.\n@param ImageWidth\t\tSource image height.\n@param SrcData\t\t\tRaw image array.\n@param DstData\t\t\tcompressed image array."
+    },
+    {
+      "id": "png-compress-image-array",
+      "name": "PNGCompressImageArray",
+      "category": "ImageUtils",
+      "signature": "PNGCompressImageArray(Image Width, Image Height, Src Data, Dst Data)",
+      "params": [
+        {
+          "name": "Image Width",
+          "type": "Int"
+        },
+        {
+          "name": "Image Height",
+          "type": "Int"
+        },
+        {
+          "name": "Src Data",
+          "type": "TArrayView64<FColor>&"
+        },
+        {
+          "name": "Dst Data",
+          "type": "TArray64<uint8>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compress image to PNG format uint8 array.\ndeprecated, use CompressImage instead\n@param ImageHeight\t\tSource image width.\n@param ImageWidth\t\tSource image height.\n@param SrcData\t\t\tRaw image array.\n@param DstData\t\t\tcompressed image array."
+    },
+    {
+      "id": "create-checkerboard-texture",
+      "name": "CreateCheckerboardTexture",
+      "category": "ImageUtils",
+      "signature": "CreateCheckerboardTexture(Color One, Color Two, Checker Size)",
+      "params": [
+        {
+          "name": "Color One",
+          "type": "FColor",
+          "default": "FColor(64, 64, 64)"
+        },
+        {
+          "name": "Color Two",
+          "type": "FColor",
+          "default": "FColor(128, 128, 128)"
+        },
+        {
+          "name": "Checker Size",
+          "type": "Int",
+          "default": "32"
+        }
+      ],
+      "returnType": "UTexture2D*",
+      "docs": "Creates a new UTexture2D with a checkerboard pattern.\n@param ColorOne\t\tThe color of half of the squares.\n@param ColorTwo\t\tThe color of the other half of the squares.\n@param CheckerSize\tThe size in pixels of each side of the texture."
+    },
+    {
+      "id": "create-checkerboard-texture-2-d-array",
+      "name": "CreateCheckerboardTexture2DArray",
+      "category": "ImageUtils",
+      "signature": "CreateCheckerboardTexture2DArray(Color One, Color Two, Checker Size, Array Size)",
+      "params": [
+        {
+          "name": "Color One",
+          "type": "FColor",
+          "default": "FColor(64, 64, 64)"
+        },
+        {
+          "name": "Color Two",
+          "type": "FColor",
+          "default": "FColor(128, 128, 128)"
+        },
+        {
+          "name": "Checker Size",
+          "type": "Int",
+          "default": "32"
+        },
+        {
+          "name": "Array Size",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "UTexture2DArray*",
+      "docs": "Creates a new UTexture2DArray with a checkerboard pattern.\n@param ColorOne\t\tThe color of half of the squares.\n@param ColorTwo\t\tThe color of the other half of the squares.\n@param CheckerSize\tThe size in pixels of each side of the texture.\n@param ArraySize\t\tThe number of elements in the array."
+    },
+    {
+      "id": "create-checkerboard-cube-texture",
+      "name": "CreateCheckerboardCubeTexture",
+      "category": "ImageUtils",
+      "signature": "CreateCheckerboardCubeTexture(Color One, Color Two, Checker Size)",
+      "params": [
+        {
+          "name": "Color One",
+          "type": "FColor",
+          "default": "FColor(64, 64, 64)"
+        },
+        {
+          "name": "Color Two",
+          "type": "FColor",
+          "default": "FColor(128, 128, 128)"
+        },
+        {
+          "name": "Checker Size",
+          "type": "Int",
+          "default": "32"
+        }
+      ],
+      "returnType": "UTextureCube*",
+      "docs": "Creates a new UTextureCube with a checkerboard pattern.\n@param ColorOne\t\tThe color of half of the squares.\n@param ColorTwo\t\tThe color of the other half of the squares.\n@param CheckerSize\tThe size in pixels of each side of the texture."
+    },
+    {
+      "id": "create-checkerboard-texture-cube-array",
+      "name": "CreateCheckerboardTextureCubeArray",
+      "category": "ImageUtils",
+      "signature": "CreateCheckerboardTextureCubeArray(Color One, Color Two, Checker Size, Array Size)",
+      "params": [
+        {
+          "name": "Color One",
+          "type": "FColor",
+          "default": "FColor(64, 64, 64)"
+        },
+        {
+          "name": "Color Two",
+          "type": "FColor",
+          "default": "FColor(128, 128, 128)"
+        },
+        {
+          "name": "Checker Size",
+          "type": "Int",
+          "default": "32"
+        },
+        {
+          "name": "Array Size",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "UTextureCubeArray*",
+      "docs": "Creates a new UTextureCubeArray with a checkerboard pattern.\n@param ColorOne\t\tThe color of half of the squares.\n@param ColorTwo\t\tThe color of the other half of the squares.\n@param CheckerSize\tThe size in pixels of each side of the texture.\n@param ArraySize\t\tThe number of elements in the array."
+    },
+    {
+      "id": "create-checkerboard-volume-texture",
+      "name": "CreateCheckerboardVolumeTexture",
+      "category": "ImageUtils",
+      "signature": "CreateCheckerboardVolumeTexture(Color One, Color Two, Checker Size)",
+      "params": [
+        {
+          "name": "Color One",
+          "type": "FColor",
+          "default": "FColor(64, 64, 64)"
+        },
+        {
+          "name": "Color Two",
+          "type": "FColor",
+          "default": "FColor(128, 128, 128)"
+        },
+        {
+          "name": "Checker Size",
+          "type": "Int",
+          "default": "16"
+        }
+      ],
+      "returnType": "UVolumeTexture*",
+      "docs": "Creates a new UVolumeTexture with a checkerboard pattern.\n@param ColorOne\t\tThe color of half of the squares.\n@param ColorTwo\t\tThe color of the other half of the squares.\n@param CheckerSize\tThe size in pixels of each side of the texture."
+    },
+    {
+      "id": "export-render-target-2-d-as-hdr",
+      "name": "ExportRenderTarget2DAsHDR",
+      "category": "ImageUtils",
+      "signature": "ExportRenderTarget2DAsHDR(Tex RT, Ar)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget2D*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exports a UTextureRenderTarget2D as an HDR image on the disk.\nHDR is very low quality, prefer EXR or PNG instead\nDeprecated.  Prefer GetRenderTargetImage.\n@param TexRT\t\tThe render target to export\n@param Ar\t\t\tArchive to fill with data.\n@return\t\t\tExport operation success or failure."
+    },
+    {
+      "id": "export-render-target-2-d-as-exr",
+      "name": "ExportRenderTarget2DAsEXR",
+      "category": "ImageUtils",
+      "signature": "ExportRenderTarget2DAsEXR(Tex RT, Ar)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget2D*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exports a UTextureRenderTarget2D as a EXR image on the disk.\nDeprecated.  Prefer GetRenderTargetImage.\n@param TexRT\t\tThe render target to export\n@param Ar\t\tArchive to fill with data.\n@return\t\t\tExport operation success or failure."
+    },
+    {
+      "id": "export-render-target-2-d-as-png",
+      "name": "ExportRenderTarget2DAsPNG",
+      "category": "ImageUtils",
+      "signature": "ExportRenderTarget2DAsPNG(Tex RT, Ar)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget2D*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exports a UTextureRenderTarget2D as a PNG image on the disk.\nDeprecated.  Prefer GetRenderTargetImage.\n@param TexRT\t\tThe render target to export\n@param Ar\t\tArchive to fill with data.\n@return\t\t\tExport operation success or failure."
+    },
+    {
+      "id": "export-texture-2-d-as-hdr",
+      "name": "ExportTexture2DAsHDR",
+      "category": "ImageUtils",
+      "signature": "ExportTexture2DAsHDR(Tex RT, Ar)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTexture2D*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exports a UTexture2D as an HDR image on the disk.\nDeprecated.  Prefer GetTexture2DSourceImage + SaveImage.\nHDR is very low quality, prefer EXR or PNG instead\n@param TexRT\t\tThe texture to export\n@param Ar\t\t\tArchive to fill with data.\n@return\t\t\tExport operation success or failure."
+    },
+    {
+      "id": "import-file-as-texture-2-d",
+      "name": "ImportFileAsTexture2D",
+      "category": "ImageUtils",
+      "signature": "ImportFileAsTexture2D(Filename)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "UTexture2D*",
+      "docs": "Imports a texture file from disk and creates Texture2D from it\nnote this make a Transient / PlatformData only Texture (no TextureSource)"
+    },
+    {
+      "id": "import-buffer-as-texture-2-d",
+      "name": "ImportBufferAsTexture2D",
+      "category": "ImageUtils",
+      "signature": "ImportBufferAsTexture2D(Buffer)",
+      "params": [
+        {
+          "name": "Buffer",
+          "type": "TArrayView64<uint8>"
+        }
+      ],
+      "returnType": "UTexture2D*",
+      "docs": "Imports a texture a buffer and creates Texture2D from it\nnote this make a Transient / PlatformData only Texture (no TextureSource)"
+    },
+    {
+      "id": "export-render-target-cube-as-hdr",
+      "name": "ExportRenderTargetCubeAsHDR",
+      "category": "ImageUtils",
+      "signature": "ExportRenderTargetCubeAsHDR(Tex RT, Ar)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTargetCube*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exports a UTextureRenderTargetCube as an HDR image on the disk.\nthis does GenerateLongLatUnwrap\n@param TexRT\t\tThe render target cube to export\n@param Ar\t\t\tArchive to fill with data.\n@return\t\t\tExport operation success or failure."
+    },
+    {
+      "id": "export-texture-cube-as-hdr",
+      "name": "ExportTextureCubeAsHDR",
+      "category": "ImageUtils",
+      "signature": "ExportTextureCubeAsHDR(Tex RT, Ar)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureCube*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exports a UTextureCube as an HDR image on the disk.\nthis does GenerateLongLatUnwrap\n@param TexRT\t\tThe texture cube to export\n@param Ar\t\t\tArchive to fill with data.\n@return\t\t\tExport operation success or failure."
+    },
+    {
+      "id": "get-raw-data",
+      "name": "GetRawData",
+      "category": "ImageUtils",
+      "signature": "GetRawData(Tex RT, Raw Data)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget2D*"
+        },
+        {
+          "name": "Raw Data",
+          "type": "TArray64<uint8>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-render-target-image-83b13a",
+      "name": "GetRenderTargetImage",
+      "category": "ImageUtils",
+      "signature": "GetRenderTargetImage(Tex RT, Out Image)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget*"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get the contents of a RenderTarget into an Image\n@param TexRT\t\tThe texture rendertarget to copy from\n@param OutImage\tFilled with the image, allocated as needed\nWorks for Cubes, Volumes, etc.  (fills Image slices)"
+    },
+    {
+      "id": "get-render-target-image-781ae5",
+      "name": "GetRenderTargetImage",
+      "category": "ImageUtils",
+      "signature": "GetRenderTargetImage(Tex RT, Out Image, Rect)",
+      "params": [
+        {
+          "name": "Tex RT",
+          "type": "UTextureRenderTarget*"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Rect",
+          "type": "FIntRect&"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

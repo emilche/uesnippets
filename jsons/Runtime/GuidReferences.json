@@ -1,0 +1,144 @@
+{
+  "id": "guid-references",
+  "label": "GuidReferences",
+  "includepath": "Net/Core/Misc/GuidReferences.h",
+  "includes": [
+    "Array",
+    "Map",
+    "Set",
+    "CoreMinimal",
+    "CoreTypes",
+    "NetworkGuid",
+    "BitReader",
+    "Tuple",
+    "CoreNet",
+    "WeakObjectPtr"
+  ],
+  "functions": [
+    {
+      "id": "f-guid-references-5fc49f",
+      "name": "FGuidReferences",
+      "category": "GuidReferences",
+      "signature": "FGuidReferences(In Reader, In Mark, In Unmapped GUI Ds, In Mapped Dynamic GUI Ds, In Parent Index, In Cmd Index, In Package Map)",
+      "params": [
+        {
+          "name": "In Reader",
+          "type": "FBitReader&"
+        },
+        {
+          "name": "In Mark",
+          "type": "FBitReaderMark&"
+        },
+        {
+          "name": "In Unmapped GUI Ds",
+          "type": "TSet<FNetworkGUID>&"
+        },
+        {
+          "name": "In Mapped Dynamic GUI Ds",
+          "type": "TSet<FNetworkGUID>&"
+        },
+        {
+          "name": "In Parent Index",
+          "type": "Int"
+        },
+        {
+          "name": "In Cmd Index",
+          "type": "Int"
+        },
+        {
+          "name": "In Package Map",
+          "type": "UPackageMap*"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "References to Objects (including Actors, Components, etc.) are replicated as NetGUIDs, since\nthe literal memory pointers will be different across game instances. In these cases, actual\nreplicated data for the Object will be handled elsewhere (either on its own Actor channel,\nor on its Owning Actor's channel, as a replicated subobject).\nAs Objects are replicated and received, these GUID References will become \"mapped\", and the\nnetworking system will update the corresponding properties with pointers to the appropriate objects.\nAs Objects are destroyed (due to game play, actor channels closing, relevancy, etc.), GUID References\nwill be \"unmapped\", and their corresponding properties will nulled out.\nThe process of Mapping and Unmapping can happen numerous times for the same object (e.g., if an Actor\ngoes in and out of relevancy repeatedly).\nThis class helps manage those references for specific replicated properties.\nA FGuidReferences instance will be created for each Replicated Property that is a reference to an object.\nGuid References may also be nested in properties (like dynamic arrays), so we'll recursively track\nthose as well."
+    },
+    {
+      "id": "f-guid-references-a18fe1",
+      "name": "FGuidReferences",
+      "category": "GuidReferences",
+      "signature": "FGuidReferences()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-guid-references-812cfa",
+      "name": "FGuidReferences",
+      "category": "GuidReferences",
+      "signature": "FGuidReferences(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FGuidReferences&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-unmapped-guid",
+      "name": "AddUnmappedGUID",
+      "category": "GuidReferences",
+      "signature": "AddUnmappedGUID(Target, In GUID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGuidReferences*"
+        },
+        {
+          "name": "In GUID",
+          "type": "FNetworkGUID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts tracking InGUID if not already and calls UPackageMap::AddUnmappedNetGUIDReference if bRemapStableSubobjects is enabled."
+    },
+    {
+      "id": "remove-unmapped-guid",
+      "name": "RemoveUnmappedGUID",
+      "category": "GuidReferences",
+      "signature": "RemoveUnmappedGUID(Target, In GUID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGuidReferences*"
+        },
+        {
+          "name": "In GUID",
+          "type": "FNetworkGUID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops tracking a GUID and calls UPackageMap::RemoveUnmappedNetGUIDReference if bRemapStableSubobjects is enabled."
+    },
+    {
+      "id": "update-unmapped-gui-ds",
+      "name": "UpdateUnmappedGUIDs",
+      "category": "GuidReferences",
+      "signature": "UpdateUnmappedGUIDs(Target, In Package Map, Original Object, Property, Abs Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGuidReferences*"
+        },
+        {
+          "name": "In Package Map",
+          "type": "UPackageMap*"
+        },
+        {
+          "name": "Original Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Property",
+          "type": "FProperty*"
+        },
+        {
+          "name": "Abs Offset",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Called by FRepLayout to update GUID tracking when updating unmapped objects."
+    }
+  ]
+}

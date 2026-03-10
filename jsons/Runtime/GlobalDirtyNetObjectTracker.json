@@ -1,0 +1,95 @@
+{
+  "id": "global-dirty-net-object-tracker",
+  "label": "GlobalDirtyNetObjectTracker",
+  "includepath": "Net/Core/DirtyNetObjectTracker/GlobalDirtyNetObjectTracker.h",
+  "includes": [
+    "NetBitArray",
+    "NetHandle",
+    "ContainersFwd"
+  ],
+  "functions": [
+    {
+      "id": "mark-net-object-state-dirty",
+      "name": "MarkNetObjectStateDirty",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "MarkNetObjectStateDirty()",
+      "params": [],
+      "returnType": "public : void",
+      "docs": "Marks an object as dirty. Assumes Init() has been called."
+    },
+    {
+      "id": "create-poller",
+      "name": "CreatePoller",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "CreatePoller(In Pre Reset Delegate)",
+      "params": [
+        {
+          "name": "In Pre Reset Delegate",
+          "type": "FPreResetDelegate"
+        }
+      ],
+      "returnType": "FPollHandle",
+      "docs": "Create a poller which is assumed to call PollDirtyNetObjects(). Assumes Init() has been called."
+    },
+    {
+      "id": "get-dirty-net-objects",
+      "name": "GetDirtyNetObjects",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "GetDirtyNetObjects(Handle)",
+      "params": [
+        {
+          "name": "Handle",
+          "type": "FPollHandle&"
+        }
+      ],
+      "returnType": "TSet<FNetHandle>&",
+      "docs": "Returns the objects with dirty state. The reference can only be assumed to be valid until the next call to ResetDirtyNetObjects().\nA matching call to ResetDirtyNetObjects() is required but should not be called until all pollers have had the chance to call GetDirtyNetObjects().\nAssumes Init() has been called."
+    },
+    {
+      "id": "lock-dirty-list-until-reset",
+      "name": "LockDirtyListUntilReset",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "LockDirtyListUntilReset(Handle)",
+      "params": [
+        {
+          "name": "Handle",
+          "type": "FPollHandle&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Detect any updates to the dirty list until all pollers have gathered and reset the list."
+    },
+    {
+      "id": "reset-dirty-net-objects",
+      "name": "ResetDirtyNetObjects",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "ResetDirtyNetObjects()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Clears the set of dirty net objects. GetDirtyNetObjects() must be called first. Some synchronization is needed between pollers such that all pollers have the chance to call GetDirtyNetObjects() first.\nIt may be a good idea to have the polling done in a NetDriver TickFlush() or similar and resetting done in PostTickFlush().\nAssumes Init() has been called."
+    },
+    {
+      "id": "reset-dirty-net-objects-if-single-poller",
+      "name": "ResetDirtyNetObjectsIfSinglePoller",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "ResetDirtyNetObjectsIfSinglePoller()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Reset the list of dirty net objects but only if there is a single poller registered in the system.\nReturns true if the reset was executed."
+    },
+    {
+      "id": "destroy-poller",
+      "name": "DestroyPoller",
+      "category": "GlobalDirtyNetObjectTracker",
+      "signature": "DestroyPoller(Handle Index)",
+      "params": [
+        {
+          "name": "Handle Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Called by NetPollHandle destructor."
+    }
+  ]
+}

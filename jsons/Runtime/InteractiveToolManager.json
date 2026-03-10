@@ -1,0 +1,739 @@
+{
+  "id": "interactive-tool-manager",
+  "label": "InteractiveToolManager",
+  "includepath": "InteractiveToolManager.h",
+  "includes": [
+    "CoreMinimal",
+    "Object",
+    "InteractiveTool",
+    "InteractiveToolBuilder",
+    "InputRouter",
+    "InteractiveToolChange",
+    "ToolContextInterfaces",
+    "InteractiveToolManager.generated"
+  ],
+  "functions": [
+    {
+      "id": "u-interactive-tool-manager",
+      "name": "UInteractiveToolManager",
+      "category": "InteractiveToolManager",
+      "signature": "UInteractiveToolManager()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "InteractiveToolManager",
+      "signature": "Initialize(Target, Queries API, Transactions API, Input Router)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Queries API",
+          "type": "IToolsContextQueriesAPI*"
+        },
+        {
+          "name": "Transactions API",
+          "type": "IToolsContextTransactionsAPI*"
+        },
+        {
+          "name": "Input Router",
+          "type": "UInputRouter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the ToolManager with the necessary Context-level state. UInteractiveToolsContext calls this, you should not."
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "InteractiveToolManager",
+      "signature": "Shutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shutdown the ToolManager. Called by UInteractiveToolsContext."
+    },
+    {
+      "id": "do-post-build",
+      "name": "DoPostBuild",
+      "category": "InteractiveToolManager",
+      "signature": "DoPostBuild(Target, Side, In Built Tool, In Tool Builder, In Builder State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        },
+        {
+          "name": "In Built Tool",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "In Tool Builder",
+          "type": "UInteractiveToolBuilder*"
+        },
+        {
+          "name": "In Builder State",
+          "type": "FToolBuilderState&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called immediately after a tool is built. Broadcasts OnToolPostBuild."
+    },
+    {
+      "id": "do-post-setup",
+      "name": "DoPostSetup",
+      "category": "InteractiveToolManager",
+      "signature": "DoPostSetup(Target, Side, In Interactive Tool, In Tool Builder, In Builder State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        },
+        {
+          "name": "In Interactive Tool",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "In Tool Builder",
+          "type": "UInteractiveToolBuilder*"
+        },
+        {
+          "name": "In Builder State",
+          "type": "FToolBuilderState&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called immediately after a tool's Setup is called. Broadcasts OnToolPostSetup."
+    },
+    {
+      "id": "register-tool-type",
+      "name": "RegisterToolType",
+      "category": "InteractiveToolManager",
+      "signature": "RegisterToolType(Target, Identifier, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Identifier",
+          "type": "String&"
+        },
+        {
+          "name": "Builder",
+          "type": "UInteractiveToolBuilder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Register a new ToolBuilder\n@param Identifier string used to identify this Builder\n@param Builder new ToolBuilder instance"
+    },
+    {
+      "id": "unregister-tool-type",
+      "name": "UnregisterToolType",
+      "category": "InteractiveToolManager",
+      "signature": "UnregisterToolType(Target, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Identifier",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unregisters a ToolBuilder\n@param Identifier string used to identify this Builder\n@param Builder new ToolBuilder instance"
+    },
+    {
+      "id": "select-active-tool-type",
+      "name": "SelectActiveToolType",
+      "category": "InteractiveToolManager",
+      "signature": "SelectActiveToolType(Target, Side, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        },
+        {
+          "name": "Identifier",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set active ToolBuilder for a ToolSide via string identifier\n@param Side which \"side\" should we set this Builder on\n@param Identifier name of ToolBuilder that was passed to RegisterToolType()"
+    },
+    {
+      "id": "get-active-tool-type",
+      "name": "GetActiveToolType",
+      "category": "InteractiveToolManager",
+      "signature": "GetActiveToolType(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "String&",
+      "docs": "Get active ToolBuilder string identifier for a ToolSide\n@param Side which \"side\" should we get this Builder from"
+    },
+    {
+      "id": "can-activate-tool",
+      "name": "CanActivateTool",
+      "category": "InteractiveToolManager",
+      "signature": "CanActivateTool(Target, E Side, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "E Side",
+          "type": "EToolSide"
+        },
+        {
+          "name": "Identifier",
+          "type": "String"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if a named Tool type can currently be activated on the given ToolSide\n@param Side which \"side\" you would like to active the tool on\n@param Identifier string name of the Tool type\n@return true if the Tool type could be activated"
+    },
+    {
+      "id": "activate-tool",
+      "name": "ActivateTool",
+      "category": "InteractiveToolManager",
+      "signature": "ActivateTool(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Try to activate a new Tool instance on the given Side. If another tool is already active, it\nwill be shut down according to ToolSwitchMode.\n@param Side which \"side\" you would like to active the tool on\n@return true if a new Tool instance was created and initialized"
+    },
+    {
+      "id": "has-active-tool",
+      "name": "HasActiveTool",
+      "category": "InteractiveToolManager",
+      "signature": "HasActiveTool(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if there is an active Tool on the given Side\n@param Side which Side to check\n@return true if there is an active Tool on that side"
+    },
+    {
+      "id": "has-any-active-tool",
+      "name": "HasAnyActiveTool",
+      "category": "InteractiveToolManager",
+      "signature": "HasAnyActiveTool(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if there are any active tools"
+    },
+    {
+      "id": "get-active-tool",
+      "name": "GetActiveTool",
+      "category": "InteractiveToolManager",
+      "signature": "GetActiveTool(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "UInteractiveTool*",
+      "docs": "Get pointer to active Tool on a given side\n@param Side which Side is being requested\n@return pointer to Tool instance active on that Side, or nullptr if no such Tool exists"
+    },
+    {
+      "id": "get-active-tool-builder",
+      "name": "GetActiveToolBuilder",
+      "category": "InteractiveToolManager",
+      "signature": "GetActiveToolBuilder(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "UInteractiveToolBuilder*",
+      "docs": "Get pointer to active Tool Builder on a given side\n@param Side which Side is being requested\n@return pointer to Tool Builder instance active on that Side, or nullptr if no such ToolBuilder exists"
+    },
+    {
+      "id": "get-active-tool-name",
+      "name": "GetActiveToolName",
+      "category": "InteractiveToolManager",
+      "signature": "GetActiveToolName(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Get name of registered ToolBuilder that created active tool for given side, or empty string if no tool is active\n@param Side which Side is being requested\n@return name of tool, or empty string if no tool is active"
+    },
+    {
+      "id": "can-accept-active-tool",
+      "name": "CanAcceptActiveTool",
+      "category": "InteractiveToolManager",
+      "signature": "CanAcceptActiveTool(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if an active Tool on the given Side can be Accepted in its current state\n@param Side which Side to check\n@return true if there is an active Tool and it returns true from HasAccept() and CanAccept()"
+    },
+    {
+      "id": "can-cancel-active-tool",
+      "name": "CanCancelActiveTool",
+      "category": "InteractiveToolManager",
+      "signature": "CanCancelActiveTool(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if an active Tool on the given Side can be Canceled\n@param Side which Side to check\n@return true if there is an active Tool and it returns true from HasCancel()"
+    },
+    {
+      "id": "deactivate-tool",
+      "name": "DeactivateTool",
+      "category": "InteractiveToolManager",
+      "signature": "DeactivateTool(Target, Side, Shutdown Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        },
+        {
+          "name": "Shutdown Type",
+          "type": "EToolShutdownType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shut down an active Tool on the given side\n@param Side which \"side\" you would like to shut down\n@param ShutdownType how should the tool be terminated (eg Accept/Cancel)"
+    },
+    {
+      "id": "configure-change-tracking-mode",
+      "name": "ConfigureChangeTrackingMode",
+      "category": "InteractiveToolManager",
+      "signature": "ConfigureChangeTrackingMode(Target, Change Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Change Mode",
+          "type": "EToolChangeTrackingMode"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Configure how tool changes emit change events. See EToolChangeTrackingMode for details."
+    },
+    {
+      "id": "display-message",
+      "name": "DisplayMessage",
+      "category": "InteractiveToolManager",
+      "signature": "DisplayMessage(Target, Message, Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Message",
+          "type": "Text&"
+        },
+        {
+          "name": "Level",
+          "type": "EToolMessageLevel"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Post a message via the Transactions API"
+    },
+    {
+      "id": "post-invalidation",
+      "name": "PostInvalidation",
+      "category": "InteractiveToolManager",
+      "signature": "PostInvalidation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request an Invalidation via the Transactions API (ie to cause a repaint, etc)"
+    },
+    {
+      "id": "begin-undo-transaction",
+      "name": "BeginUndoTransaction",
+      "category": "InteractiveToolManager",
+      "signature": "BeginUndoTransaction(Target, Description)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Description",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request that the Context open a Transaction, whatever that means to the current Context\n@param Description text description of this transaction (this is the string that appears on undo/redo in the UE Editor)"
+    },
+    {
+      "id": "end-undo-transaction",
+      "name": "EndUndoTransaction",
+      "category": "InteractiveToolManager",
+      "signature": "EndUndoTransaction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request that the Context close and commit the open Transaction"
+    },
+    {
+      "id": "emit-object-change",
+      "name": "EmitObjectChange",
+      "category": "InteractiveToolManager",
+      "signature": "EmitObjectChange(Target, Target Object, Change, Description)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Target Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Change",
+          "type": "TUniquePtr<FToolCommandChange>"
+        },
+        {
+          "name": "Description",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forward an FChange object to the Context\n@param TargetObject the object that the FChange applies to\n@param Change the change object that the Context should insert into the transaction history\n@param Description text description of this change (this is the string that appears on undo/redo in the UE Editor)"
+    },
+    {
+      "id": "request-selection-change",
+      "name": "RequestSelectionChange",
+      "category": "InteractiveToolManager",
+      "signature": "RequestSelectionChange(Target, Selection Change)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Selection Change",
+          "type": "FSelectedObjectsChangeList&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Forward an FChange object to the Context"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "InteractiveToolManager",
+      "signature": "Tick(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick any active Tools. Called by UInteractiveToolsContext"
+    },
+    {
+      "id": "render",
+      "name": "Render",
+      "category": "InteractiveToolManager",
+      "signature": "Render(Target, Render API)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Render API",
+          "type": "IToolsContextRenderAPI*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Render any active Tools. Called by UInteractiveToolsContext."
+    },
+    {
+      "id": "draw-hud",
+      "name": "DrawHUD",
+      "category": "InteractiveToolManager",
+      "signature": "DrawHUD(Target, Canvas, Render API)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Canvas",
+          "type": "FCanvas*"
+        },
+        {
+          "name": "Render API",
+          "type": "IToolsContextRenderAPI*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Let active Tools do their screen space drawing. Called by UInteractiveToolsContext."
+    },
+    {
+      "id": "post-active-tool-shutdown-request",
+      "name": "PostActiveToolShutdownRequest",
+      "category": "InteractiveToolManager",
+      "signature": "PostActiveToolShutdownRequest(Target, Tool, Shutdown Type, Show Unexpected Shutdown Message, Unexpected Shutdown Message)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Tool",
+          "type": "UInteractiveTool*"
+        },
+        {
+          "name": "Shutdown Type",
+          "type": "EToolShutdownType"
+        },
+        {
+          "name": "Show Unexpected Shutdown Message",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Unexpected Shutdown Message",
+          "type": "Text&",
+          "default": "FText()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "A Tool (or other code) can call this function to request that the Tool be deactivated.\nThe Tool must be active. By default, ::DeactivateTool() wil be called. However if some\nexternal code has bound to the OnToolShutdownRequest delegate, the request will be\nforwarded to that function first (::DeactivateTool() will still be called if it returns false)\nIf this function is called during InteractiveTool::Setup(), the Tool invocation will be aborted,\nie the Tool will be immediately shutdown with EToolShutdownType::Cancel, and never become \"Active\"/etc.\nNote also that in this case the shutdown request *will not* be forwarded to the OnToolShutdownRequest delegate.\n@param bShowUnexpectedShutdownMessage if this was an unexpected shutdown, passing true here, along with a non-empty UnexpectedShutdownMessage, will result in OnToolUnexpectedShutdownMessage being called\n@param UnexpectedShutdownMessage message provided by the caller meant to explain why the Tool has unexpectedly been shut down"
+    },
+    {
+      "id": "get-paired-gizmo-manager",
+      "name": "GetPairedGizmoManager",
+      "category": "InteractiveToolManager",
+      "signature": "GetPairedGizmoManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "UInteractiveGizmoManager*"
+    },
+    {
+      "id": "get-context-object-store",
+      "name": "GetContextObjectStore",
+      "category": "InteractiveToolManager",
+      "signature": "GetContextObjectStore(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "UContextObjectStore*",
+      "docs": "@return the context object store from the owning tools context."
+    },
+    {
+      "id": "activate-tool-internal",
+      "name": "ActivateToolInternal",
+      "category": "InteractiveToolManager",
+      "signature": "ActivateToolInternal(Target, Side)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "deactivate-tool-internal",
+      "name": "DeactivateToolInternal",
+      "category": "InteractiveToolManager",
+      "signature": "DeactivateToolInternal(Target, Side, Shutdown Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Side",
+          "type": "EToolSide"
+        },
+        {
+          "name": "Shutdown Type",
+          "type": "EToolShutdownType"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply",
+      "name": "Apply",
+      "category": "InteractiveToolManager",
+      "signature": "Apply(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBeginToolChange*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "FBeginToolChange is used by UInteractiveToolManager to back out of a Tool on Undo.\nNo action is taken on Redo, ie we do not re-start the Tool on Redo."
+    },
+    {
+      "id": "revert",
+      "name": "Revert",
+      "category": "InteractiveToolManager",
+      "signature": "Revert(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBeginToolChange*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-expired",
+      "name": "HasExpired",
+      "category": "InteractiveToolManager",
+      "signature": "HasExpired(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBeginToolChange*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "to-string",
+      "name": "ToString",
+      "category": "InteractiveToolManager",
+      "signature": "ToString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBeginToolChange*"
+        }
+      ],
+      "returnType": "String"
+    }
+  ]
+}

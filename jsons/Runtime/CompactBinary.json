@@ -1,0 +1,908 @@
+{
+  "id": "compact-binary",
+  "label": "CompactBinary",
+  "includepath": "Serialization/CompactBinary.h",
+  "includes": [
+    "StringFwd",
+    "StringView",
+    "CoreTypes",
+    "UnrealMemory",
+    "IoHash",
+    "CompositeBuffer",
+    "MemoryFwd",
+    "MemoryView",
+    "SharedBuffer",
+    "AssertionMacros",
+    "EnumClassFlags",
+    "BytesToHex",
+    "Function",
+    "RemoveReference",
+    "UnrealTemplate",
+    "type_traits",
+    "IsTriviallyDestructible"
+  ],
+  "functions": [
+    {
+      "id": "get-range-size",
+      "name": "GetRangeSize",
+      "category": "CompactBinary",
+      "signature": "GetRangeSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCbFieldIterator*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Returns the size of the fields in the range in bytes."
+    },
+    {
+      "id": "get-range-hash",
+      "name": "GetRangeHash",
+      "category": "CompactBinary",
+      "signature": "GetRangeHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCbFieldIterator*"
+        }
+      ],
+      "returnType": "FIoHash",
+      "docs": "Calculate the hash of every field in the range."
+    },
+    {
+      "id": "append-range-hash",
+      "name": "AppendRangeHash",
+      "category": "CompactBinary",
+      "signature": "AppendRangeHash(Target, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCbFieldIterator*"
+        },
+        {
+          "name": "Builder",
+          "type": "FIoHashBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append the hash of every field in the range."
+    },
+    {
+      "id": "copy-range-to-0feb6d",
+      "name": "CopyRangeTo",
+      "category": "CompactBinary",
+      "signature": "CopyRangeTo(Target, Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCbFieldIterator*"
+        },
+        {
+          "name": "Buffer",
+          "type": "FMutableMemoryView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the field range into a buffer of exactly GetRangeSize() bytes."
+    },
+    {
+      "id": "copy-range-to-c76579",
+      "name": "CopyRangeTo",
+      "category": "CompactBinary",
+      "signature": "CopyRangeTo(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCbFieldIterator*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the field range into an archive, as if calling CopyTo on every field."
+    },
+    {
+      "id": "iterate-range-attachments",
+      "name": "IterateRangeAttachments",
+      "category": "CompactBinary",
+      "signature": "IterateRangeAttachments(Target, Visitor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCbFieldIterator*"
+        },
+        {
+          "name": "Visitor",
+          "type": "FCbFieldVisitor"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invoke the visitor for every attachment in the field range."
+    },
+    {
+      "id": "f-cb-object-id",
+      "name": "FCbObjectId",
+      "category": "CompactBinary",
+      "signature": "FCbObjectId(Object Id)",
+      "params": [
+        {
+          "name": "Object Id",
+          "type": "FMemoryView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct an ObjectId from a view of 12 bytes."
+    },
+    {
+      "id": "new-object-id",
+      "name": "NewObjectId",
+      "category": "CompactBinary",
+      "signature": "NewObjectId()",
+      "params": [],
+      "returnType": "nodiscard ] ] FCbObjectId"
+    },
+    {
+      "id": "f-cb-field-view",
+      "name": "FCbFieldView",
+      "category": "CompactBinary",
+      "signature": "FCbFieldView(Data, Type)",
+      "params": [
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Type",
+          "type": "ECbFieldType",
+          "default": "ECbFieldType::HasFieldType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct a field from a pointer to its data and an optional externally-provided type.\n@param Data Pointer to the start of the field data.\n@param Type HasFieldType means that Data contains the type. Otherwise, use the given type."
+    },
+    {
+      "id": "as-object-view",
+      "name": "AsObjectView",
+      "category": "CompactBinary",
+      "signature": "AsObjectView(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbObjectView",
+      "docs": "Access the field as an object. Defaults to an empty object on error."
+    },
+    {
+      "id": "as-array-view",
+      "name": "AsArrayView",
+      "category": "CompactBinary",
+      "signature": "AsArrayView(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbArrayView",
+      "docs": "Access the field as an array. Defaults to an empty array on error."
+    },
+    {
+      "id": "as-binary-view",
+      "name": "AsBinaryView",
+      "category": "CompactBinary",
+      "signature": "AsBinaryView(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FMemoryView",
+          "default": "FMemoryView()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FMemoryView",
+      "docs": "Access the field as binary. Returns the provided default on error."
+    },
+    {
+      "id": "as-string",
+      "name": "AsString",
+      "category": "CompactBinary",
+      "signature": "AsString(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FUtf8StringView",
+          "default": "FUtf8StringView()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FUtf8StringView",
+      "docs": "Access the field as a string. Returns the provided default on error."
+    },
+    {
+      "id": "as-float",
+      "name": "AsFloat",
+      "category": "CompactBinary",
+      "signature": "AsFloat(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "Float",
+          "default": "0.0f"
+        }
+      ],
+      "returnType": "nodiscard ] ] float",
+      "docs": "Access the field as a float. Returns the provided default on error."
+    },
+    {
+      "id": "as-double",
+      "name": "AsDouble",
+      "category": "CompactBinary",
+      "signature": "AsDouble(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "Double",
+          "default": "0.0"
+        }
+      ],
+      "returnType": "nodiscard ] ] double",
+      "docs": "Access the field as a double. Returns the provided default on error."
+    },
+    {
+      "id": "as-bool",
+      "name": "AsBool",
+      "category": "CompactBinary",
+      "signature": "AsBool(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Access the field as a bool. Returns the provided default on error."
+    },
+    {
+      "id": "as-object-attachment",
+      "name": "AsObjectAttachment",
+      "category": "CompactBinary",
+      "signature": "AsObjectAttachment(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FIoHash&",
+          "default": "FIoHash()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIoHash",
+      "docs": "Access the field as a hash referencing an object attachment. Returns the provided default on error."
+    },
+    {
+      "id": "as-binary-attachment",
+      "name": "AsBinaryAttachment",
+      "category": "CompactBinary",
+      "signature": "AsBinaryAttachment(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FIoHash&",
+          "default": "FIoHash()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIoHash",
+      "docs": "Access the field as a hash referencing a binary attachment. Returns the provided default on error."
+    },
+    {
+      "id": "as-attachment",
+      "name": "AsAttachment",
+      "category": "CompactBinary",
+      "signature": "AsAttachment(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FIoHash&",
+          "default": "FIoHash()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIoHash",
+      "docs": "Access the field as a hash referencing an attachment. Returns the provided default on error."
+    },
+    {
+      "id": "as-hash",
+      "name": "AsHash",
+      "category": "CompactBinary",
+      "signature": "AsHash(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FIoHash&",
+          "default": "FIoHash()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIoHash",
+      "docs": "Access the field as a hash. Returns the provided default on error."
+    },
+    {
+      "id": "as-uuid-e87cf3",
+      "name": "AsUuid",
+      "category": "CompactBinary",
+      "signature": "AsUuid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FGuid",
+      "docs": "Access the field as a UUID. Returns a nil UUID on error."
+    },
+    {
+      "id": "as-uuid-d3df78",
+      "name": "AsUuid",
+      "category": "CompactBinary",
+      "signature": "AsUuid(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FGuid",
+      "docs": "Access the field as a UUID. Returns the provided default on error."
+    },
+    {
+      "id": "as-date-time-ticks",
+      "name": "AsDateTimeTicks",
+      "category": "CompactBinary",
+      "signature": "AsDateTimeTicks(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "Int64",
+          "default": "0"
+        }
+      ],
+      "returnType": "nodiscard ] ] int64",
+      "docs": "Access the field as a date/time tick count. Returns the provided default on error."
+    },
+    {
+      "id": "as-date-time-2381b6",
+      "name": "AsDateTime",
+      "category": "CompactBinary",
+      "signature": "AsDateTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FDateTime",
+      "docs": "Access the field as a date/time. Returns a date/time at the epoch on error."
+    },
+    {
+      "id": "as-date-time-c351b1",
+      "name": "AsDateTime",
+      "category": "CompactBinary",
+      "signature": "AsDateTime(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FDateTime"
+        }
+      ],
+      "returnType": "nodiscard ] ] FDateTime",
+      "docs": "Access the field as a date/time. Returns the provided default on error."
+    },
+    {
+      "id": "as-time-span-ticks",
+      "name": "AsTimeSpanTicks",
+      "category": "CompactBinary",
+      "signature": "AsTimeSpanTicks(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "Int64",
+          "default": "0"
+        }
+      ],
+      "returnType": "nodiscard ] ] int64",
+      "docs": "Access the field as a timespan tick count. Returns the provided default on error."
+    },
+    {
+      "id": "as-time-span-50111a",
+      "name": "AsTimeSpan",
+      "category": "CompactBinary",
+      "signature": "AsTimeSpan(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FTimespan",
+      "docs": "Access the field as a timespan. Returns an empty timespan on error."
+    },
+    {
+      "id": "as-time-span-7aa379",
+      "name": "AsTimeSpan",
+      "category": "CompactBinary",
+      "signature": "AsTimeSpan(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "nodiscard ] ] FTimespan",
+      "docs": "Access the field as a timespan. Returns the provided default on error."
+    },
+    {
+      "id": "as-object-id",
+      "name": "AsObjectId",
+      "category": "CompactBinary",
+      "signature": "AsObjectId(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FCbObjectId&",
+          "default": "FCbObjectId()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbObjectId",
+      "docs": "Access the field as an object identifier. Returns the provided default on error."
+    },
+    {
+      "id": "as-custom-by-id",
+      "name": "AsCustomById",
+      "category": "CompactBinary",
+      "signature": "AsCustomById(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FCbCustomById",
+          "default": "FCbCustomById()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbCustomById",
+      "docs": "Access the field as a custom sub-type with an integer identifier. Returns the provided default on error."
+    },
+    {
+      "id": "as-custom-by-name",
+      "name": "AsCustomByName",
+      "category": "CompactBinary",
+      "signature": "AsCustomByName(Target, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "FCbCustomByName",
+          "default": "FCbCustomByName()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbCustomByName",
+      "docs": "Access the field as a custom sub-type with a string identifier. Returns the provided default on error."
+    },
+    {
+      "id": "as-custom-655eb5",
+      "name": "AsCustom",
+      "category": "CompactBinary",
+      "signature": "AsCustom(Target, Id, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Default",
+          "type": "FMemoryView",
+          "default": "FMemoryView()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FMemoryView",
+      "docs": "Access the field as a custom sub-type with an integer identifier. Returns the provided default on error."
+    },
+    {
+      "id": "as-custom-0a8425",
+      "name": "AsCustom",
+      "category": "CompactBinary",
+      "signature": "AsCustom(Target, Name, Default)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Name",
+          "type": "FUtf8StringView"
+        },
+        {
+          "name": "Default",
+          "type": "FMemoryView",
+          "default": "FMemoryView()"
+        }
+      ],
+      "returnType": "nodiscard ] ] FMemoryView",
+      "docs": "Access the field as a custom sub-type with a string identifier. Returns the provided default on error."
+    },
+    {
+      "id": "get-size",
+      "name": "GetSize",
+      "category": "CompactBinary",
+      "signature": "GetSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint64",
+      "docs": "Returns the size of the field in bytes, including the type and name."
+    },
+    {
+      "id": "get-hash",
+      "name": "GetHash",
+      "category": "CompactBinary",
+      "signature": "GetHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIoHash",
+      "docs": "Calculate the hash of the field, including the type and name."
+    },
+    {
+      "id": "append-hash",
+      "name": "AppendHash",
+      "category": "CompactBinary",
+      "signature": "AppendHash(Target, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Builder",
+          "type": "FIoHashBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append the hash of the field, including the type and name."
+    },
+    {
+      "id": "equals",
+      "name": "Equals",
+      "category": "CompactBinary",
+      "signature": "Equals(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Other",
+          "type": "FCbFieldView&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether this field is identical to the other field.\nPerforms a deep comparison of any contained arrays or objects and their fields. Comparison\nassumes that both fields are valid and are written in the canonical format. Fields must be\nwritten in the same order in arrays and objects, and name comparison is case sensitive. If\nthese assumptions do not hold, this may return false for equivalent inputs. Validation can\nbe performed with ValidateCompactBinary, except for field order and field name case."
+    },
+    {
+      "id": "copy-to-d27a4b",
+      "name": "CopyTo",
+      "category": "CompactBinary",
+      "signature": "CopyTo(Target, Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Buffer",
+          "type": "FMutableMemoryView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the field into a buffer of exactly GetSize() bytes, including the type and name."
+    },
+    {
+      "id": "copy-to-9d6056",
+      "name": "CopyTo",
+      "category": "CompactBinary",
+      "signature": "CopyTo(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the field into an archive, including its type and name."
+    },
+    {
+      "id": "iterate-attachments",
+      "name": "IterateAttachments",
+      "category": "CompactBinary",
+      "signature": "IterateAttachments(Target, Visitor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Visitor",
+          "type": "FCbFieldVisitor"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invoke the visitor for every attachment in the field."
+    },
+    {
+      "id": "create-view-iterator",
+      "name": "CreateViewIterator",
+      "category": "CompactBinary",
+      "signature": "CreateViewIterator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbFieldViewIterator",
+      "docs": "Create an iterator for the fields of an array or object, otherwise an empty iterator."
+    },
+    {
+      "id": "get-view",
+      "name": "GetView",
+      "category": "CompactBinary",
+      "signature": "GetView(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "protected : FMemoryView",
+      "docs": "Returns a view of the raw byte array for the ObjectId."
+    },
+    {
+      "id": "get-view-no-type",
+      "name": "GetViewNoType",
+      "category": "CompactBinary",
+      "signature": "GetViewNoType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "FMemoryView",
+      "docs": "Returns a view of the name and value, which excludes the type."
+    },
+    {
+      "id": "get-value-size",
+      "name": "GetValueSize",
+      "category": "CompactBinary",
+      "signature": "GetValueSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Returns the size of the value in bytes, which is the field excluding the type and name."
+    },
+    {
+      "id": "as-integer",
+      "name": "AsInteger",
+      "category": "CompactBinary",
+      "signature": "AsInteger(Target, Default, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbFieldView*"
+        },
+        {
+          "name": "Default",
+          "type": "UInt64"
+        },
+        {
+          "name": "Params",
+          "type": "UE::CompactBinary::Private::FIntegerParams"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "f-cb-array-view",
+      "name": "FCbArrayView",
+      "category": "CompactBinary",
+      "signature": "FCbArrayView()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Array of FCbField[View] that have no names.\nAccessing a field of the array requires iteration. Access by index is not provided because the\ncost of accessing an item by index scales linearly with the index.\nThis type only provides a view into memory and does not perform any memory management itself.\nUse FCbArray to hold a reference to the underlying memory when necessary."
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "CompactBinary",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbArrayView*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Returns the number of items in the array."
+    },
+    {
+      "id": "f-cb-object-view",
+      "name": "FCbObjectView",
+      "category": "CompactBinary",
+      "signature": "FCbObjectView()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Array of FCbField[View] that have unique names.\nAccessing the fields of an object is always a safe operation, even if the requested field does\nnot exist. Fields may be accessed by name or through iteration. When a field is requested that\nis not found in the object, the field that it returns has no value (evaluates to false) though\nattempting to access the empty field is also safe, as described by FCbFieldView.\nThis type only provides a view into memory and does not perform any memory management itself.\nUse FCbObject to hold a reference to the underlying memory when necessary."
+    },
+    {
+      "id": "find-view",
+      "name": "FindView",
+      "category": "CompactBinary",
+      "signature": "FindView(Target, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbObjectView*"
+        },
+        {
+          "name": "Name",
+          "type": "FUtf8StringView"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbFieldView",
+      "docs": "Find a field by case-sensitive name comparison.\nThe cost of this operation scales linearly with the number of fields in the object. Prefer to\niterate over the fields only once when consuming an object.\n@param Name The name of the field.\n@return The matching field if found, otherwise a field with no value."
+    },
+    {
+      "id": "find-view-ignore-case",
+      "name": "FindViewIgnoreCase",
+      "category": "CompactBinary",
+      "signature": "FindViewIgnoreCase(Target, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbObjectView*"
+        },
+        {
+          "name": "Name",
+          "type": "FUtf8StringView"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCbFieldView",
+      "docs": "Find a field by case-insensitive name comparison."
+    },
+    {
+      "id": "bool",
+      "name": "bool",
+      "category": "CompactBinary",
+      "signature": "bool(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbObjectView*"
+        }
+      ],
+      "returnType": "operator",
+      "docs": "Whether the field has a value."
+    },
+    {
+      "id": "get-buffer",
+      "name": "GetBuffer",
+      "category": "CompactBinary",
+      "signature": "GetBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCbField*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompositeBuffer",
+      "docs": "Returns a buffer that contains the field as it would be serialized by CopyTo."
+    },
+    {
+      "id": "clone-range",
+      "name": "CloneRange",
+      "category": "CompactBinary",
+      "signature": "CloneRange(It)",
+      "params": [
+        {
+          "name": "It",
+          "type": "FCbFieldViewIterator&"
+        }
+      ],
+      "returnType": "public : [ [ nodiscard ] ] FCbFieldIterator",
+      "docs": "Iterator for FCbField.\n@see TCbFieldIterator"
+    }
+  ]
+}

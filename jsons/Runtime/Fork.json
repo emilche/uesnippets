@@ -1,0 +1,156 @@
+{
+  "id": "fork",
+  "label": "Fork",
+  "includepath": "Misc/Fork.h",
+  "includes": [
+    "CoreTypes",
+    "PlatformAffinity"
+  ],
+  "functions": [
+    {
+      "id": "is-fork-requested",
+      "name": "IsForkRequested",
+      "category": "Fork",
+      "signature": "IsForkRequested()",
+      "params": [],
+      "returnType": "public : bool",
+      "docs": "Helper functions for processes that fork in order to share memory pages.\nAbout multithreading:\nWhen a process gets forked, any existing threads will not exist on the new forked process.\nTo solve this we use forkable threads that are notified when the fork occurs and will automatically convert themselves into real runnable threads.\nOn the master process, these forkable threads will be fake threads that are executed on the main thread and will block the critical path.\nCurrently the game code is responsible for calling Fork on itself than calling FForkProcessHelper::OnForkingOccured to transform the forkable threads.\nIdeally the fork point is done right after the game has loaded all the assets it wants to share so it can maximize the shared memory pool.\nFrom the fork point any memory page that gets written into by a forked process will be transferred into a unique page for this process."
+    },
+    {
+      "id": "is-forked-multithread-instance",
+      "name": "IsForkedMultithreadInstance",
+      "category": "Fork",
+      "signature": "IsForkedMultithreadInstance()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Are we a forked process that supports multithreading\nThis only becomes true after its safe to be multithread.\nSince a process can be forked mid-tick, there is a period of time where IsForkedChildProcess is true but IsForkedMultithreadInstance will be false"
+    },
+    {
+      "id": "is-forked-child-process",
+      "name": "IsForkedChildProcess",
+      "category": "Fork",
+      "signature": "IsForkedChildProcess()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Is this a process that was forked"
+    },
+    {
+      "id": "set-is-forked-child-process",
+      "name": "SetIsForkedChildProcess",
+      "category": "Fork",
+      "signature": "SetIsForkedChildProcess(Child Index)",
+      "params": [
+        {
+          "name": "Child Index",
+          "type": "UInt16",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the forked child process flag and index given to this child process"
+    },
+    {
+      "id": "get-forked-child-process-index",
+      "name": "GetForkedChildProcessIndex",
+      "category": "Fork",
+      "signature": "GetForkedChildProcessIndex()",
+      "params": [],
+      "returnType": "UInt16",
+      "docs": "Returns the unique index of this forked child process. Index 0 is for the master server"
+    },
+    {
+      "id": "on-forking-occured",
+      "name": "OnForkingOccured",
+      "category": "Fork",
+      "signature": "OnForkingOccured()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Event triggered when a fork occurred on the child process and its safe to create real threads"
+    },
+    {
+      "id": "supports-multithreading-post-fork",
+      "name": "SupportsMultithreadingPostFork",
+      "category": "Fork",
+      "signature": "SupportsMultithreadingPostFork()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Tells if we allow multithreading on forked processes.\nDefault is set to false but can be configured to always be true via DEFAULT_MULTITHREAD_FORKED_PROCESSES\nEnabled via -PostForkThreading\nDisabled via -DisablePostForkThreading"
+    },
+    {
+      "id": "create-forkable-thread",
+      "name": "CreateForkableThread",
+      "category": "Fork",
+      "signature": "CreateForkableThread(In Runnable, In Thread Name, In Stack Size, In Thread Pri, In Thread Affinity Mask, In Create Flags, Allow Pre Fork)",
+      "params": [
+        {
+          "name": "In Runnable",
+          "type": "FRunnable*"
+        },
+        {
+          "name": "In Thread Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Stack Size",
+          "type": "UInt",
+          "default": "0"
+        },
+        {
+          "name": "In Thread Pri",
+          "type": "EThreadPriority",
+          "default": "TPri_Normal"
+        },
+        {
+          "name": "In Thread Affinity Mask",
+          "type": "UInt64",
+          "default": "FPlatformAffinity::GetNoAffinityMask()"
+        },
+        {
+          "name": "In Create Flags",
+          "type": "EThreadCreateFlags",
+          "default": "EThreadCreateFlags::None"
+        },
+        {
+          "name": "Allow Pre Fork",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "FRunnableThread*",
+      "docs": "Creates a thread according to the environment it's in:\nIn environments with SupportsMultithreading: create a real thread that will tick the runnable object itself\nIn environments without multithreading: create a fake thread that is ticked by the main thread.\nIn environments without multithreading but that allows multithreading post-fork:\nIf called on the original master process: will create a forkable thread that is ticked in the main thread pre-fork but becomes a real thread post-fork\nIf called on a forked child process: will create a real thread immediately"
+    },
+    {
+      "id": "low-level-pre-fork",
+      "name": "LowLevelPreFork",
+      "category": "Fork",
+      "signature": "LowLevelPreFork()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Performs low-level cross-platform actions that should happen immediately BEFORE forking in a well-specified order.\nRuns after any higher level code like calling into game-level constructs or anything that may allocate memory.\nE.g. notifies GMalloc to optimize for memory sharing across parent/child process\nNote: This will be called multiple times on the parent before each fork."
+    },
+    {
+      "id": "low-level-post-fork-parent",
+      "name": "LowLevelPostForkParent",
+      "category": "Fork",
+      "signature": "LowLevelPostForkParent()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Performs low-level cross-platform actions that should happen immediately AFTER forking in the PARENT process in a well-specified order.\nRuns before any higher level code like calling into game-level constructs.\nE.g. notifies GMalloc to optimize for memory sharing across parent/child process"
+    },
+    {
+      "id": "low-level-post-fork-child",
+      "name": "LowLevelPostForkChild",
+      "category": "Fork",
+      "signature": "LowLevelPostForkChild(Child Index)",
+      "params": [
+        {
+          "name": "Child Index",
+          "type": "UInt16",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Performs low-level cross-platform actions that should happen immediately AFTER forking in the CHILD process in a well-specified order.\nRuns before any higher level code like calling into game-level constructs.\nE.g. notifies GMalloc to optimize for memory sharing across parent/child process"
+    }
+  ]
+}

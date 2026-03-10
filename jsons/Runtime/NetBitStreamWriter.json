@@ -1,0 +1,189 @@
+{
+  "id": "net-bit-stream-writer",
+  "label": "NetBitStreamWriter",
+  "includepath": "Iris/Serialization/NetBitStreamWriter.h",
+  "includes": [
+    "CoreTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-net-bit-stream-writer",
+      "name": "FNetBitStreamWriter",
+      "category": "NetBitStreamWriter",
+      "signature": "FNetBitStreamWriter()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "init-bytes",
+      "name": "InitBytes",
+      "category": "NetBitStreamWriter",
+      "signature": "InitBytes(Target, Buffer, Byte Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Byte Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "InitBytes must be called before writing to the stream.\n@param Buffer The buffer must be at least 4-byte aligned.\n@param ByteCount The number of bytes that is allowed to be written. Must be a multiple of 4."
+    },
+    {
+      "id": "write-bits",
+      "name": "WriteBits",
+      "category": "NetBitStreamWriter",
+      "signature": "WriteBits(Target, Value, Bit Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Value",
+          "type": "UInt"
+        },
+        {
+          "name": "Bit Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes the BitCount least significant bits from Value. There's no validation of the Value, meaning\nit is allowed to contain garbage in the bits that are not going to be written to the buffer.\nIf the BitCount exceeds the remaining space no bits will be written and the stream will be\nmarked as overflown."
+    },
+    {
+      "id": "write-bit-stream",
+      "name": "WriteBitStream",
+      "category": "NetBitStreamWriter",
+      "signature": "WriteBitStream(Target, Src, Src Bit Offset, Bit Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Src",
+          "type": "UInt*"
+        },
+        {
+          "name": "Src Bit Offset",
+          "type": "UInt"
+        },
+        {
+          "name": "Bit Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes BitCount bits from Src starting at SrcBitOffset. Assumes that Src was written to via\nthis class or that bits were written in order from lowest to highest memory address.\nIf the BitCount exceeds the remaining space no bits will be written and the stream will be\nmarked as overflown."
+    },
+    {
+      "id": "commit-writes",
+      "name": "CommitWrites",
+      "category": "NetBitStreamWriter",
+      "signature": "CommitWrites(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Commits pending writes to the buffer. Before this call, or the destruction of this instance, the buffer\nmay not be up to date. Typically called after all WriteBits() calls have been made."
+    },
+    {
+      "id": "seek",
+      "name": "Seek",
+      "category": "NetBitStreamWriter",
+      "signature": "Seek(Target, Bit Position)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Bit Position",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Seek to a specific BitPosition. If the stream is overflown and you seek back to a position\nwhere you can still write bits the stream will no longer be considered overflown."
+    },
+    {
+      "id": "do-overflow",
+      "name": "DoOverflow",
+      "category": "NetBitStreamWriter",
+      "signature": "DoOverflow(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force an overflow."
+    },
+    {
+      "id": "create-substream",
+      "name": "CreateSubstream",
+      "category": "NetBitStreamWriter",
+      "signature": "CreateSubstream(Target, Max Bit Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Max Bit Count",
+          "type": "UInt",
+          "default": "~0U"
+        }
+      ],
+      "returnType": "FNetBitStreamWriter",
+      "docs": "Creates a substream at the current bit position. The substream must be committed or discarded. Only one active substream at a time is allowed,\nbut a substream can have an active substream as well. Once the substream has been commited or discarded a new substream may be created. No\nwrites may be performed to this stream until the substream has been committed or discarded. Any write to a substream that occurs before overflow\ncan modify the stream buffer contents regardless of whether the stream is committed or discarded.\nThe returned BitStreamWriter will have similar behavior to a newly constructed regular FNetBitStreamWriter.\n@param MaxBitCount The maximum allowed bits that may be written. The value will be clamped to the number of bits left in this stream/substream.\n@return A BitStreamWriter that can be written to just like a regular BitStreamWriter."
+    },
+    {
+      "id": "commit-substream",
+      "name": "CommitSubstream",
+      "category": "NetBitStreamWriter",
+      "signature": "CommitSubstream(Target, Substream)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Substream",
+          "type": "FNetBitStreamWriter&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Commits a substream to this stream. Substreams that are overflown or do not belong to this stream will be ignored.\nIf the substream is valid then this stream's bit position will be updated. CommitWrites() is not called by this method."
+    },
+    {
+      "id": "discard-substream",
+      "name": "DiscardSubstream",
+      "category": "NetBitStreamWriter",
+      "signature": "DiscardSubstream(Target, Substream)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBitStreamWriter*"
+        },
+        {
+          "name": "Substream",
+          "type": "FNetBitStreamWriter&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discards a substream of this stream. This stream's bit position will remain intact. The buffer may be modified anyway as mentioned in CreateSubStream()."
+    }
+  ]
+}

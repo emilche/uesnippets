@@ -1,0 +1,305 @@
+{
+  "id": "chunked-data-stream",
+  "label": "ChunkedDataStream",
+  "includepath": "Iris/ReplicationSystem/ChunkedDataStream/ChunkedDataStream.h",
+  "includes": [
+    "DataStream",
+    "IrisObjectReferencePackageMap",
+    "ChunkedDataStream.generated"
+  ],
+  "functions": [
+    {
+      "id": "f-chunked-data-stream-export-write-scope",
+      "name": "FChunkedDataStreamExportWriteScope",
+      "category": "ChunkedDataStream",
+      "signature": "FChunkedDataStreamExportWriteScope(Data Stream)",
+      "params": [
+        {
+          "name": "Data Stream",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Scope used to setup PackageMap owned by ChunkedDataStream to write and capture exports"
+    },
+    {
+      "id": "get-package-map",
+      "name": "GetPackageMap",
+      "category": "ChunkedDataStream",
+      "signature": "GetPackageMap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChunkedDataStreamExportWriteScope*"
+        }
+      ],
+      "returnType": "UIrisObjectReferencePackageMap*",
+      "docs": "Get UIrisObjectReferencePackageMap associated with the DataStream"
+    },
+    {
+      "id": "f-chunked-data-stream-export-read-scope",
+      "name": "FChunkedDataStreamExportReadScope",
+      "category": "ChunkedDataStream",
+      "signature": "FChunkedDataStreamExportReadScope(Data Stream)",
+      "params": [
+        {
+          "name": "Data Stream",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Scope used to setup PackageMap owned by ChunkedDataStream for reading captured exports"
+    },
+    {
+      "id": "enqueue-payload",
+      "name": "EnqueuePayload",
+      "category": "ChunkedDataStream",
+      "signature": "EnqueuePayload(Target, Payload)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Payload",
+          "type": "TSharedPtr<TArray64<uint8>>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Enqueue Payload for sending,\nObject References written to the payload by using the PackageMap associated with the DataStream will be appended to the payload.\n@param Payload SharedPtr to Payload to send, The DataStream will hold a shared reference until the transfer is complete.\n@return false if SendBuffer is full"
+    },
+    {
+      "id": "dispatch-received-payload",
+      "name": "DispatchReceivedPayload",
+      "category": "ChunkedDataStream",
+      "signature": "DispatchReceivedPayload(Target, Dispatch Payload Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Dispatch Payload Function",
+          "type": "TFunctionRef<void ( TConstArrayView64<uint8> )>"
+        }
+      ],
+      "returnType": "EDispatchResult",
+      "docs": "Dispatch received Payload\nObject References can be read from the payload through the PackageMap associated with the DataStream.\n@param DispatchDataChunkFunction Reference to TFunction to process Payload."
+    },
+    {
+      "id": "dispatch-received-payloads",
+      "name": "DispatchReceivedPayloads",
+      "category": "ChunkedDataStream",
+      "signature": "DispatchReceivedPayloads(Target, Dispatch Payload Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Dispatch Payload Function",
+          "type": "TFunctionRef<void ( TConstArrayView64<uint8> )>"
+        }
+      ],
+      "returnType": "EDispatchResult",
+      "docs": "Dispatch all received Payloads\nObject References can be read from the payload through the PackageMap associated with the DataStream.\n@param DispatchDataChunkFunction Reference to TFunction to process Payload."
+    },
+    {
+      "id": "get-num-received-payloads-pending-dispatch",
+      "name": "GetNumReceivedPayloadsPendingDispatch",
+      "category": "ChunkedDataStream",
+      "signature": "GetNumReceivedPayloadsPendingDispatch(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the number of received payloads that are ready for dispatch"
+    },
+    {
+      "id": "get-queued-byte-count",
+      "name": "GetQueuedByteCount",
+      "category": "ChunkedDataStream",
+      "signature": "GetQueuedByteCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get number of payload bytes that is yet to be acknowledged"
+    },
+    {
+      "id": "set-max-undispatched-payload-bytes",
+      "name": "SetMaxUndispatchedPayloadBytes",
+      "category": "ChunkedDataStream",
+      "signature": "SetMaxUndispatchedPayloadBytes(Target, Max Undispatched Payload Bytes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Max Undispatched Payload Bytes",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the maximum number of undispatched payload bytes we can have on the receiing side.\n@param MaxUndispatchedPayloadBytes Stream will be set in error state and close if we have received too much data without dispatching it"
+    },
+    {
+      "id": "set-max-enqueued-payload-bytes",
+      "name": "SetMaxEnqueuedPayloadBytes",
+      "category": "ChunkedDataStream",
+      "signature": "SetMaxEnqueuedPayloadBytes(Target, Max Enqueued Payload Bytes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Max Enqueued Payload Bytes",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the maximum number of enqueued payload bytes we can have on the sending side.\n@param MaxEnqueuedPayloadBytes Stream will be set in error state and close if we have received too much data without dispatching it"
+    },
+    {
+      "id": "has-error",
+      "name": "HasError",
+      "category": "ChunkedDataStream",
+      "signature": "HasError(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the stream is in an error state and should be closed."
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "ChunkedDataStream",
+      "signature": "Init(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Params",
+          "type": "UDataStream::FInitParameters&"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "deinit",
+      "name": "Deinit",
+      "category": "ChunkedDataStream",
+      "signature": "Deinit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-write",
+      "name": "BeginWrite",
+      "category": "ChunkedDataStream",
+      "signature": "BeginWrite(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Params",
+          "type": "FBeginWriteParameters&"
+        }
+      ],
+      "returnType": "EWriteResult"
+    },
+    {
+      "id": "write-data",
+      "name": "WriteData",
+      "category": "ChunkedDataStream",
+      "signature": "WriteData(Target, Context, Out Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Context",
+          "type": "UE::Net::FNetSerializationContext&"
+        },
+        {
+          "name": "Out Record",
+          "type": "FDataStreamRecord*&"
+        }
+      ],
+      "returnType": "EWriteResult"
+    },
+    {
+      "id": "read-data",
+      "name": "ReadData",
+      "category": "ChunkedDataStream",
+      "signature": "ReadData(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Context",
+          "type": "UE::Net::FNetSerializationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-packet-delivery-status",
+      "name": "ProcessPacketDeliveryStatus",
+      "category": "ChunkedDataStream",
+      "signature": "ProcessPacketDeliveryStatus(Target, Status, Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        },
+        {
+          "name": "Status",
+          "type": "UE::Net::EPacketDeliveryStatus"
+        },
+        {
+          "name": "Record",
+          "type": "FDataStreamRecord*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-acknowledged-all-reliable-data",
+      "name": "HasAcknowledgedAllReliableData",
+      "category": "ChunkedDataStream",
+      "signature": "HasAcknowledgedAllReliableData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UChunkedDataStream*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

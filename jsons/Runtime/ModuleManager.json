@@ -1,0 +1,1038 @@
+{
+  "id": "module-manager",
+  "label": "ModuleManager",
+  "includepath": "Modules/ModuleManager.h",
+  "includes": [
+    "Array",
+    "ContainerAllocationPolicies",
+    "Map",
+    "UnrealString",
+    "CoreTypes",
+    "Delegate",
+    "CriticalSection",
+    "PlatformCrt",
+    "PreprocessorHelpers",
+    "AssertionMacros",
+    "Build",
+    "CoreMisc",
+    "EnumClassFlags",
+    "Optional",
+    "ModuleBoilerplate",
+    "ModuleInterface",
+    "Archive",
+    "Atomic",
+    "SharedPointer",
+    "UniquePtr",
+    "UnrealTemplate",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "get-classes-to-reinstance-for-hot-reload",
+      "name": "GetClassesToReinstanceForHotReload",
+      "category": "ModuleManager",
+      "signature": "GetClassesToReinstanceForHotReload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "TMap<UClass*,UClass*>&"
+    },
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "ModuleManager",
+      "signature": "LexToString(Target, Load Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Load Result",
+          "type": "EModuleLoadResult"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Enumerates reasons for failed module loads."
+    },
+    {
+      "id": "f-module-manager",
+      "name": "FModuleManager",
+      "category": "ModuleManager",
+      "signature": "FModuleManager()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Implements the module manager.\nThe module manager is used to load and unload modules, as well as to keep track of all of the\nmodules that are currently loaded. You can access this singleton using FModuleManager::Get()."
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "ModuleManager",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "FModuleManager&",
+      "docs": "Gets the singleton instance of the module manager.\n@return The module manager instance."
+    },
+    {
+      "id": "tear-down",
+      "name": "TearDown",
+      "category": "ModuleManager",
+      "signature": "TearDown()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destroys singleton if it exists. Get() must not be called after Destroy()."
+    },
+    {
+      "id": "abandon-module",
+      "name": "AbandonModule",
+      "category": "ModuleManager",
+      "signature": "AbandonModule(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Abandons a loaded module, leaving it loaded in memory but no longer tracking it in the module manager.\n@param InModuleName The name of the module to abandon.  Should not include path, extension or platform/configuration info.  This is just the \"module name\" part of the module file name.\n@see IsModuleLoaded, LoadModule, LoadModuleWithFailureReason, UnloadModule"
+    },
+    {
+      "id": "add-module",
+      "name": "AddModule",
+      "category": "ModuleManager",
+      "signature": "AddModule(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a module to our list of modules, unless it's already known.\n@param InModuleName The base name of the module file.  Should not include path, extension or platform/configuration info.  This is just the \"name\" part of the module file name.  Names should be globally unique."
+    },
+    {
+      "id": "refresh-module-filename-from-manifest",
+      "name": "RefreshModuleFilenameFromManifest",
+      "category": "ModuleManager",
+      "signature": "RefreshModuleFilenameFromManifest(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-module",
+      "name": "GetModule",
+      "category": "ModuleManager",
+      "signature": "GetModule(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "IModuleInterface*",
+      "docs": "Gets the specified module.\n@param InModuleName Name of the module to return.\n@return \tThe module, or nullptr if the module is not loaded.\n@see GetModuleChecked, GetModulePtr"
+    },
+    {
+      "id": "is-module-loaded",
+      "name": "IsModuleLoaded",
+      "category": "ModuleManager",
+      "signature": "IsModuleLoaded(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether the specified module is currently loaded.\nThis is an O(1) operation.\n@param InModuleName The base name of the module file.  Should not include path, extension or platform/configuration info.  This is just the \"module name\" part of the module file name.  Names should be globally unique.\n@return true if module is currently loaded, false otherwise.\n@see AbandonModule, LoadModule, LoadModuleWithFailureReason, UnloadModule"
+    },
+    {
+      "id": "load-module",
+      "name": "LoadModule",
+      "category": "ModuleManager",
+      "signature": "LoadModule(Target, In Module Name, In Load Module Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Load Module Flags",
+          "type": "ELoadModuleFlags",
+          "default": "ELoadModuleFlags::None"
+        }
+      ],
+      "returnType": "IModuleInterface*",
+      "docs": "Loads the specified module.\n@param InModuleName The base name of the module file.  Should not include path, extension or platform/configuration info.  This is just the \"module name\" part of the module file name.  Names should be globally unique.\n@param InLoadModuleFlags Optional flags for module load operation.\n@return The loaded module, or nullptr if the load operation failed.\n@see AbandonModule, IsModuleLoaded, LoadModuleChecked, LoadModulePtr, LoadModuleWithFailureReason, UnloadModule"
+    },
+    {
+      "id": "load-module-checked",
+      "name": "LoadModuleChecked",
+      "category": "ModuleManager",
+      "signature": "LoadModuleChecked(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "IModuleInterface&",
+      "docs": "Loads the specified module, checking to ensure it exists.\n@param InModuleName The base name of the module file.  Should not include path, extension or platform/configuration info.  This is just the \"module name\" part of the module file name.  Names should be globally unique.\n@return The loaded module, or nullptr if the load operation failed.\n@see AbandonModule, IsModuleLoaded, LoadModuleChecked, LoadModulePtr, LoadModuleWithFailureReason, UnloadModule"
+    },
+    {
+      "id": "load-module-with-callback",
+      "name": "LoadModuleWithCallback",
+      "category": "ModuleManager",
+      "signature": "LoadModuleWithCallback(Target, In Module Name, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads a module in memory then calls PostLoad.\n@param InModuleName The name of the module to load.\n@param Ar The archive to receive error messages, if any.\n@return true on success, false otherwise.\n@see UnloadOrAbandonModuleWithCallback"
+    },
+    {
+      "id": "load-module-with-failure-reason",
+      "name": "LoadModuleWithFailureReason",
+      "category": "ModuleManager",
+      "signature": "LoadModuleWithFailureReason(Target, In Module Name, Out Failure Reason, In Load Module Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Failure Reason",
+          "type": "EModuleLoadResult&"
+        },
+        {
+          "name": "In Load Module Flags",
+          "type": "ELoadModuleFlags",
+          "default": "ELoadModuleFlags::None"
+        }
+      ],
+      "returnType": "IModuleInterface*",
+      "docs": "Loads the specified module and returns a result.\n@param InModuleName The base name of the module file.  Should not include path, extension or platform/configuration info.  This is just the \"module name\" part of the module file name.  Names should be globally unique.\n@param OutFailureReason Will contain the result.\n@param InLoadModuleFlags Optional flags for module load operation.\n@return The loaded module (null if the load operation failed).\n@see AbandonModule, IsModuleLoaded, LoadModule, LoadModuleChecked, LoadModulePtr, UnloadModule"
+    },
+    {
+      "id": "query-module",
+      "name": "QueryModule",
+      "category": "ModuleManager",
+      "signature": "QueryModule(Target, In Module Name, Out Module Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Module Status",
+          "type": "FModuleStatus&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Queries information about a specific module name.\n@param InModuleName Module to query status for.\n@param OutModuleStatus Status of the specified module.\n@return true if the module was found and the OutModuleStatus is valid, false otherwise.\n@see QueryModules"
+    },
+    {
+      "id": "query-modules",
+      "name": "QueryModules",
+      "category": "ModuleManager",
+      "signature": "QueryModules(Target, Out Module Statuses)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Out Module Statuses",
+          "type": "TArray<FModuleStatus>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Queries information about all of the currently known modules.\n@param OutModuleStatuses Status of all modules. Note that the array will be cleared before the results are added to it.\n@see QueryModule"
+    },
+    {
+      "id": "unload-module",
+      "name": "UnloadModule",
+      "category": "ModuleManager",
+      "signature": "UnloadModule(Target, In Module Name, Is Shutdown, Allow Unload Code)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Is Shutdown",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Allow Unload Code",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Unloads a specific module\nNOTE: You can manually unload a module before the normal shutdown occurs with this, but be careful as you may be unloading another\nmodule's dependency too early!\n@param InModuleName The name of the module to unload.  Should not include path, extension or platform/configuration info.  This is just the \"module name\" part of the module file name.\n@param bIsShutdown Is this unload module call occurring at shutdown (default = false).\n@param bAllowUnloadCode Allow unloading of code library if possible (default = true).\n@return true if module was unloaded successfully, false otherwise.\n@see AbandonModule, IsModuleLoaded, LoadModule, LoadModuleWithFailureReason"
+    },
+    {
+      "id": "unload-or-abandon-module-with-callback",
+      "name": "UnloadOrAbandonModuleWithCallback",
+      "category": "ModuleManager",
+      "signature": "UnloadOrAbandonModuleWithCallback(Target, In Module Name, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calls PreUnload then either unloads or abandons a module in memory, depending on whether the module supports unloading.\n@param InModuleName The name of the module to unload.\n@param Ar The archive to receive error messages, if any.\n@see LoadModuleWithCallback"
+    },
+    {
+      "id": "abandon-module-with-callback",
+      "name": "AbandonModuleWithCallback",
+      "category": "ModuleManager",
+      "signature": "AbandonModuleWithCallback(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calls PreUnload then abandons a module in memory.\n@param InModuleName The name of the module to unload.\n@see LoadModuleWithCallback"
+    },
+    {
+      "id": "add-extra-binary-search-paths",
+      "name": "AddExtraBinarySearchPaths",
+      "category": "ModuleManager",
+      "signature": "AddExtraBinarySearchPaths(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add any extra search paths that may be required"
+    },
+    {
+      "id": "get-module-ptr-internal",
+      "name": "GetModulePtr_Internal",
+      "category": "ModuleManager",
+      "signature": "GetModulePtr_Internal(Module Name)",
+      "params": [
+        {
+          "name": "Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "private : IModuleInterface*"
+    },
+    {
+      "id": "find-modules",
+      "name": "FindModules",
+      "category": "ModuleManager",
+      "signature": "FindModules(Target, Wildcard Without Extension, Out Modules)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Wildcard Without Extension",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Modules",
+          "type": "TArray<FName>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finds module files on the disk for loadable modules matching the specified wildcard.\n@param WildcardWithoutExtension Filename part (no path, no extension, no build config info) to search for.\n@param OutModules List of modules found."
+    },
+    {
+      "id": "module-exists",
+      "name": "ModuleExists",
+      "category": "ModuleManager",
+      "signature": "ModuleExists(Target, Module Name, Out Module File Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Module Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Module File Path",
+          "type": "String*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines if a module with the given name exists, regardless of whether it is currently loaded.\n@param ModuleName Name of the module to look for.\n@param OutModuleFilePath If non-null, the assembly filename of the module will be written.\nEmpty string will be written if ModuleExists returns false or assembly is unknown due to e.g.\nMonolithic executable.\n@return Whether the module exists."
+    },
+    {
+      "id": "get-module-count",
+      "name": "GetModuleCount",
+      "category": "ModuleManager",
+      "signature": "GetModuleCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of loaded modules.\n@return The number of modules."
+    },
+    {
+      "id": "unload-modules-at-shutdown",
+      "name": "UnloadModulesAtShutdown",
+      "category": "ModuleManager",
+      "signature": "UnloadModulesAtShutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unloads modules during the shutdown process. Modules are unloaded in reverse order to when their StartupModule() FINISHES.\nThe practical implication of this is that if module A depends on another module B, and A loads B during A's StartupModule,\nthat B will actually get Unloaded after A during shutdown. This allows A's ShutdownModule() call to still reference module B.\nYou can manually unload a module yourself which will change this ordering, but be careful as you may be unloading another\nmodule's dependency!\nThis method is Usually called at various points while exiting an application."
+    },
+    {
+      "id": "start-processing-newly-loaded-objects",
+      "name": "StartProcessingNewlyLoadedObjects",
+      "category": "ModuleManager",
+      "signature": "StartProcessingNewlyLoadedObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by the engine at startup to let the Module Manager know that it's now\nsafe to process new UObjects discovered by loading C++ modules."
+    },
+    {
+      "id": "add-binaries-directory",
+      "name": "AddBinariesDirectory",
+      "category": "ModuleManager",
+      "signature": "AddBinariesDirectory(Target, In Directory, Is Game Directory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Directory",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Is Game Directory",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an engine binaries directory."
+    },
+    {
+      "id": "load-module-binary-only",
+      "name": "LoadModuleBinaryOnly",
+      "category": "ModuleManager",
+      "signature": "LoadModuleBinaryOnly(Target, Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Will load the binary without doing initialization.\nCalling this will not make it possible to unload the module again"
+    },
+    {
+      "id": "set-game-binaries-directory",
+      "name": "SetGameBinariesDirectory",
+      "category": "ModuleManager",
+      "signature": "SetGameBinariesDirectory(Target, In Directory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Directory",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the game binaries directory\n@param InDirectory The game binaries directory."
+    },
+    {
+      "id": "get-game-binaries-directory",
+      "name": "GetGameBinariesDirectory",
+      "category": "ModuleManager",
+      "signature": "GetGameBinariesDirectory(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Gets the game binaries directory"
+    },
+    {
+      "id": "is-module-up-to-date",
+      "name": "IsModuleUpToDate",
+      "category": "ModuleManager",
+      "signature": "IsModuleUpToDate(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks to see if the specified module exists and is compatible with the current engine version.\n@param InModuleName The base name of the module file.\n@return true if module exists and is up to date, false otherwise."
+    },
+    {
+      "id": "does-loaded-module-have-u-objects",
+      "name": "DoesLoadedModuleHaveUObjects",
+      "category": "ModuleManager",
+      "signature": "DoesLoadedModuleHaveUObjects(Target, Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines whether the specified module contains UObjects.  The module must already be loaded into\nmemory before calling this function.\n@param ModuleName Name of the loaded module to check.\n@return True if the module was found to contain UObjects, or false if it did not (or wasn't loaded.)"
+    },
+    {
+      "id": "get-ubt-configuration",
+      "name": "GetUBTConfiguration",
+      "category": "ModuleManager",
+      "signature": "GetUBTConfiguration()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Gets the build configuration for compiling modules, as required by UBT.\n@return\tConfiguration name for UBT."
+    },
+    {
+      "id": "get-module-filename",
+      "name": "GetModuleFilename",
+      "category": "ModuleManager",
+      "signature": "GetModuleFilename(Target, Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Gets the filename for a module. The return value is a full path of a module known to the module manager."
+    },
+    {
+      "id": "set-module-filename",
+      "name": "SetModuleFilename",
+      "category": "ModuleManager",
+      "signature": "SetModuleFilename(Target, Module Name, Filename)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the filename for a module. The module is not reloaded immediately, but the new name will be used for subsequent unload/load events."
+    },
+    {
+      "id": "has-any-overriden-module-filename",
+      "name": "HasAnyOverridenModuleFilename",
+      "category": "ModuleManager",
+      "signature": "HasAnyOverridenModuleFilename(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines if any non-default module instances are loaded (eg. hot reloaded modules)"
+    },
+    {
+      "id": "save-current-state-for-bootstrap",
+      "name": "SaveCurrentStateForBootstrap",
+      "category": "ModuleManager",
+      "signature": "SaveCurrentStateForBootstrap(Target, Filename)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Save the current module manager's state into a file for bootstrapping other processes."
+    },
+    {
+      "id": "exec-dev",
+      "name": "Exec_Dev",
+      "category": "ModuleManager",
+      "signature": "Exec_Dev(Target, Inworld, Cmd, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Inworld",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "protected : bool"
+    },
+    {
+      "id": "make-unique-module-filename",
+      "name": "MakeUniqueModuleFilename",
+      "category": "ModuleManager",
+      "signature": "MakeUniqueModuleFilename(Target, In Module Name, Unique Suffix, Unique Module File Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Unique Suffix",
+          "type": "String&"
+        },
+        {
+          "name": "Unique Module File Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Type definition for maps of module names to module infos."
+    },
+    {
+      "id": "add-module-to-modules-list",
+      "name": "AddModuleToModulesList",
+      "category": "ModuleManager",
+      "signature": "AddModuleToModulesList(Target, In Module Name, Module Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Module Info",
+          "type": "FModuleManager::ModuleInfoRef&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-module-paths-cache",
+      "name": "ResetModulePathsCache",
+      "category": "ModuleManager",
+      "signature": "ResetModulePathsCache(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears module path cache"
+    },
+    {
+      "id": "on-object-cleanup",
+      "name": "OnObjectCleanup",
+      "category": "ModuleManager",
+      "signature": "OnObjectCleanup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Signal that objects used by an unloading dynamic library should be cleaned up now"
+    },
+    {
+      "id": "warn-if-it-wasnt-safe-to-load-here",
+      "name": "WarnIfItWasntSafeToLoadHere",
+      "category": "ModuleManager",
+      "signature": "WarnIfItWasntSafeToLoadHere(In Module Name)",
+      "params": [
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "find-module",
+      "name": "FindModule",
+      "category": "ModuleManager",
+      "signature": "FindModule(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ModuleInfoPtr",
+      "docs": "Thread safe module finding routine."
+    },
+    {
+      "id": "find-module-checked",
+      "name": "FindModuleChecked",
+      "category": "ModuleManager",
+      "signature": "FindModuleChecked(Target, In Module Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ModuleInfoRef"
+    },
+    {
+      "id": "find-module-paths",
+      "name": "FindModulePaths",
+      "category": "ModuleManager",
+      "signature": "FindModulePaths(Target, Name Pattern, Out Module Paths)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Name Pattern",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Module Paths",
+          "type": "TMap<FName,FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finds modules matching a given name wildcard."
+    },
+    {
+      "id": "find-module-paths-in-directory",
+      "name": "FindModulePathsInDirectory",
+      "category": "ModuleManager",
+      "signature": "FindModulePathsInDirectory(Target, Directory Name, Is Game Directory, Out Module Paths)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Directory Name",
+          "type": "String&"
+        },
+        {
+          "name": "Is Game Directory",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Module Paths",
+          "type": "TMap<FName,FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finds modules within a given directory."
+    },
+    {
+      "id": "serialize-state-for-bootstrap-impl",
+      "name": "SerializeStateForBootstrap_Impl",
+      "category": "ModuleManager",
+      "signature": "SerializeStateForBootstrap_Impl(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serialize a bootstrapping state into or from an archive."
+    },
+    {
+      "id": "refresh-module-filename-from-manifest-impl",
+      "name": "RefreshModuleFilenameFromManifestImpl",
+      "category": "ModuleManager",
+      "signature": "RefreshModuleFilenameFromManifestImpl(Target, In Module Name, Module Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "In Module Name",
+          "type": "Name"
+        },
+        {
+          "name": "Module Info",
+          "type": "FModuleInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Refreshes the filename of a new module from the manifest"
+    },
+    {
+      "id": "process-pending-statically-linked-module-initializers",
+      "name": "ProcessPendingStaticallyLinkedModuleInitializers",
+      "category": "ModuleManager",
+      "signature": "ProcessPendingStaticallyLinkedModuleInitializers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds pending module initializer registrations to the StaticallyLinkedModuleInitializers map."
+    },
+    {
+      "id": "f-module-initializer-entry-dcc1a9",
+      "name": "FModuleInitializerEntry",
+      "category": "ModuleManager",
+      "signature": "FModuleInitializerEntry(In Name, In Function, In Name 2)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Function",
+          "type": "FInitializeModuleFunctionPtr"
+        },
+        {
+          "name": "In Name 2",
+          "type": "TCHAR*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Intrusive linked list containing name and initializer function pointer of loaded modules.\nUse this instead of \"InitializeModule()\" when possible"
+    },
+    {
+      "id": "f-module-initializer-entry-4f546e",
+      "name": "FModuleInitializerEntry",
+      "category": "ModuleManager",
+      "signature": "FModuleInitializerEntry()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-active-reload-type",
+      "name": "GetActiveReloadType",
+      "category": "ModuleManager",
+      "signature": "GetActiveReloadType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "EActiveReloadType",
+      "docs": "Enumerates the type of reload in progress"
+    },
+    {
+      "id": "get-active-reload-interface",
+      "name": "GetActiveReloadInterface",
+      "category": "ModuleManager",
+      "signature": "GetActiveReloadInterface(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "IReload*",
+      "docs": "Get the currently active reload interface."
+    },
+    {
+      "id": "is-reload-active",
+      "name": "IsReloadActive",
+      "category": "ModuleManager",
+      "signature": "IsReloadActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper method to check to see if reloading is active.\nThis method respects the GIsHotReload setting."
+    },
+    {
+      "id": "begin-reload",
+      "name": "BeginReload",
+      "category": "ModuleManager",
+      "signature": "BeginReload(Target, Active Reload Type, Interface)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        },
+        {
+          "name": "Active Reload Type",
+          "type": "EActiveReloadType"
+        },
+        {
+          "name": "Interface",
+          "type": "IReload&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Begins the reload process."
+    },
+    {
+      "id": "end-reload",
+      "name": "EndReload",
+      "category": "ModuleManager",
+      "signature": "EndReload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FModuleManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ends the reload process"
+    }
+  ]
+}

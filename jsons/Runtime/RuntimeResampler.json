@@ -1,0 +1,155 @@
+{
+  "id": "runtime-resampler",
+  "label": "RuntimeResampler",
+  "includepath": "DSP/RuntimeResampler.h",
+  "includes": [
+    "BufferVectorOperations",
+    "Dsp",
+    "MultichannelBuffer"
+  ],
+  "functions": [
+    {
+      "id": "f-runtime-resampler",
+      "name": "FRuntimeResampler",
+      "category": "RuntimeResampler",
+      "signature": "FRuntimeResampler(In Num Channels)",
+      "params": [
+        {
+          "name": "In Num Channels",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Linear interpolating resampler which supports any number of channels of audio, interleaved or deinterleaved.\nTo support different types of input and output objects, add a new \"Process...\" method which wraps around calls to\nProcessAudioInternal()."
+    },
+    {
+      "id": "set-frame-ratio",
+      "name": "SetFrameRatio",
+      "category": "RuntimeResampler",
+      "signature": "SetFrameRatio(Target, In Ratio, In Num Frames To Interpolate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeResampler*"
+        },
+        {
+          "name": "In Ratio",
+          "type": "Float"
+        },
+        {
+          "name": "In Num Frames To Interpolate",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the number of input frames to read per an output frame. 0.5 is\nhalf speed, 1.f is normal speed, 2.0 is double speed.\n@param InRatio - Ratio of input frames consumed per an output frame produced.\n@param InNumFramesToInterpolate - Number of output frames over which\nto interpolate the frame ratio."
+    },
+    {
+      "id": "get-num-input-frames-needed-to-produce-output-frames",
+      "name": "GetNumInputFramesNeededToProduceOutputFrames",
+      "category": "RuntimeResampler",
+      "signature": "GetNumInputFramesNeededToProduceOutputFrames(Target, In Num Output Frames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeResampler*"
+        },
+        {
+          "name": "In Num Output Frames",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the minimum number of input frames needed to produce the desired\nnumber of output frames given the current state of the resampler.\n@param InNumOutputFrames - The desired number of output frames.\n@return The minimum number of input frames."
+    },
+    {
+      "id": "get-num-output-frames-produced-by-input-frames",
+      "name": "GetNumOutputFramesProducedByInputFrames",
+      "category": "RuntimeResampler",
+      "signature": "GetNumOutputFramesProducedByInputFrames(Target, In Num Input Frames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeResampler*"
+        },
+        {
+          "name": "In Num Input Frames",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the maximum number of output frames that can be produced\nfrom the provided number of input frames given the current state of the resampler.\n@param InNumInputFrames - The number of provided input frames.\n@return The maximum number of output frames."
+    },
+    {
+      "id": "process-circular-buffer",
+      "name": "ProcessCircularBuffer",
+      "category": "RuntimeResampler",
+      "signature": "ProcessCircularBuffer(Target, In Audio, Out Audio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeResampler*"
+        },
+        {
+          "name": "In Audio",
+          "type": "FMultichannelCircularBuffer&"
+        },
+        {
+          "name": "Out Audio",
+          "type": "FMultichannelBuffer&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Consumes audio from the input buffer and produces audio in the output buffer.\nThe desired number of frames to produce is determined by the output audio buffer\nsize. For the desired number of samples to be produced, the input audio must have the minimum\nnumber of frames needed to produce the output frames (see `GetNumInputFramesNeededToProduceOutputFrames(...)`).\nInput samples which are no longer needed are removed from the input buffer.\n@param InAudio - Multichannel circular buffer of input audio.\n@param OutAudio - Multichannel buffer of output audio.\nFMultichannelBuffer\n@return Actual number of frames produced."
+    },
+    {
+      "id": "process-interleaved",
+      "name": "ProcessInterleaved",
+      "category": "RuntimeResampler",
+      "signature": "ProcessInterleaved(Target, Input, Output, Out Num Input Frames Consumed, Out Num Output Frames Produced)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeResampler*"
+        },
+        {
+          "name": "Input",
+          "type": "TArrayView<float>"
+        },
+        {
+          "name": "Output",
+          "type": "TArrayView<float>"
+        },
+        {
+          "name": "Out Num Input Frames Consumed",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Num Output Frames Produced",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Consumes audio in an interleaved channel format from the input buffer and produces audio in the output buffer.\nThe desired number of frames to produce is determined by the output audio buffer\nsize. For the desired number of samples to be produced, the input audio must have the minimum\nnumber of frames needed to produce the output frames (see `GetNumInputFramesNeededToProduceOutputFrames(...)`).\n@param InAudio - Multichannel interleaved audio to use as input.\n@param OutAudio - Buffer to receive multichannel interleaved output audio.\n@param OutNumInputFramesConsumed - Receives the actual number of frames of input consumed.\n@param OutNumOutputFramesProduced - Receives the actual number of frames of output produced."
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "RuntimeResampler",
+      "signature": "Reset(Target, In Num Channels)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRuntimeResampler*"
+        },
+        {
+          "name": "In Num Channels",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the internal state of the resampler. Call this if the next audio data to be submitted\nis unrelated to the audio that has been submitted previously."
+    }
+  ]
+}

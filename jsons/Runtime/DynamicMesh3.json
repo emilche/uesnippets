@@ -1,0 +1,2543 @@
+{
+  "id": "dynamic-mesh-3",
+  "label": "DynamicMesh3",
+  "includepath": "DynamicMesh/DynamicMesh3.h",
+  "includes": [
+    "BoxTypes",
+    "Array",
+    "ArrayView",
+    "UnrealString",
+    "FrameTypes",
+    "GeometryTypes",
+    "Platform",
+    "IndexTypes",
+    "InfoTypes",
+    "UnrealMathSSE",
+    "Vector",
+    "Vector2D",
+    "MathUtil",
+    "AssertionMacros",
+    "Optional",
+    "Quaternion",
+    "Archive",
+    "Function",
+    "UniquePtr",
+    "UnrealTemplate",
+    "CompactMaps",
+    "DynamicVector",
+    "IndexUtil",
+    "IteratorUtil",
+    "RefCountVector",
+    "SmallListSet",
+    "VectorTypes",
+    "VectorUtil",
+    "atomic",
+    "initializer_list"
+  ],
+  "functions": [
+    {
+      "id": "f-dynamic-mesh-3-19ba31",
+      "name": "FDynamicMesh3",
+      "category": "DynamicMesh3",
+      "signature": "FDynamicMesh3()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "InvalidID indicates that a vertex/edge/triangle ID is invalid"
+    },
+    {
+      "id": "f-dynamic-mesh-3-870886",
+      "name": "FDynamicMesh3",
+      "category": "DynamicMesh3",
+      "signature": "FDynamicMesh3(Copy Mesh)",
+      "params": [
+        {
+          "name": "Copy Mesh",
+          "type": "FDynamicMesh3&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy/Move construction"
+    },
+    {
+      "id": "f-dynamic-mesh-3-a7e65a",
+      "name": "FDynamicMesh3",
+      "category": "DynamicMesh3",
+      "signature": "FDynamicMesh3(Move Mesh)",
+      "params": [
+        {
+          "name": "Move Mesh",
+          "type": "FDynamicMesh3&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-dynamic-mesh-3-1a8b4d",
+      "name": "FDynamicMesh3",
+      "category": "DynamicMesh3",
+      "signature": "FDynamicMesh3(Want Normals, Want Colors, Want U Vs, Want Tri Groups)",
+      "params": [
+        {
+          "name": "Want Normals",
+          "type": "Bool"
+        },
+        {
+          "name": "Want Colors",
+          "type": "Bool"
+        },
+        {
+          "name": "Want U Vs",
+          "type": "Bool"
+        },
+        {
+          "name": "Want Tri Groups",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct an empty mesh with specified attributes"
+    },
+    {
+      "id": "f-dynamic-mesh-3-35f1cd",
+      "name": "FDynamicMesh3",
+      "category": "DynamicMesh3",
+      "signature": "FDynamicMesh3(Flags)",
+      "params": [
+        {
+          "name": "Flags",
+          "type": "EMeshComponents"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-dynamic-mesh-3-90fd54",
+      "name": "FDynamicMesh3",
+      "category": "DynamicMesh3",
+      "signature": "FDynamicMesh3(Generator)",
+      "params": [
+        {
+          "name": "Generator",
+          "type": "FMeshShapeGenerator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construction from Mesh Generator"
+    },
+    {
+      "id": "copy-b4396b",
+      "name": "Copy",
+      "category": "DynamicMesh3",
+      "signature": "Copy(Target, Copy Mesh, Normals, Colors, U Vs, Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Copy Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Normals",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Colors",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "U Vs",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Attributes",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set internal data structures to be a copy of input mesh using the specified attributes"
+    },
+    {
+      "id": "copy-8060cb",
+      "name": "Copy",
+      "category": "DynamicMesh3",
+      "signature": "Copy(Target, Generator)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Generator",
+          "type": "FMeshShapeGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initialize mesh from the output of a MeshShapeGenerator (assumes Generate() was already called)\n@return false if any triangles defined in Generator were skipped due to invalid topology"
+    },
+    {
+      "id": "append-with-offsets",
+      "name": "AppendWithOffsets",
+      "category": "DynamicMesh3",
+      "signature": "AppendWithOffsets(Target, To Append, Out Append Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "To Append",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Out Append Info",
+          "type": "FAppendInfo*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append the ToAppend mesh geometry to this mesh, preserving element IDs aside from a constant offset.\nAttributes from the ToAppend mesh will only be included if they already exist on this mesh.\nIf more attributes are needed, consider calling EnableMatchingAttributes.\nNote that OutAppendInfo optionally provides some offsets for convenience, but callers may also compute the offset for any element type\nby storing the corresponding MaxID before calling AppendWithOffsets.\n@param ToAppend Mesh to append\n@param OutAppendInfo Optionally stores offsets and number of IDs appended for mesh elements."
+    },
+    {
+      "id": "compact-copy",
+      "name": "CompactCopy",
+      "category": "DynamicMesh3",
+      "signature": "CompactCopy(Target, Copy Mesh, Normals, Colors, U Vs, Attributes, Compact Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Copy Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Normals",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Colors",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "U Vs",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Attributes",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Compact Info",
+          "type": "FCompactMaps*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy input mesh while compacting, i.e. removing unused vertices/triangles/edges.\nNote that it is currently unsafe to hold on to the attribute set pointer (returned from Attributes())\nacross the CompactCopy call, as the latter may rebuild an entirely new attribute set.\n@param CopyMesh Mesh to copy\n@param bNormals if true, will copy normals\n@param bColors if true, will copy colors\n@param bUVs if true, will copy UVs\n@param bAttributes if true, will copy attributes\n@param CompactInfo if not nullptr, will be filled with mapping indicating how vertex and triangle IDs were changed during compaction"
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "category": "DynamicMesh3",
+      "signature": "Clear(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discard all data"
+    },
+    {
+      "id": "enable-matching-attributes",
+      "name": "EnableMatchingAttributes",
+      "category": "DynamicMesh3",
+      "signature": "EnableMatchingAttributes(Target, To Match, Clear Existing, Discard Extra Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "To Match",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Clear Existing",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Discard Extra Attributes",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensure that all the same extended attributes available in ToMatch are also enabled.\nBy default, clears existing attributes, so that there will be an exact match\nIf bClearExisting is passed as false, existing attributes are not removed/cleared.\nIf bDiscardExtraAttributes=true and bClearExisting=false, extra attributes not in ToMatch are discarded, but existing attributes are not cleared/reset"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "DynamicMesh3",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serialize FEdge to an archive."
+    },
+    {
+      "id": "get-components-flags",
+      "name": "GetComponentsFlags",
+      "category": "DynamicMesh3",
+      "signature": "GetComponentsFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return bitwise-or of EMeshComponents flags specifying which extra data this mesh has"
+    },
+    {
+      "id": "enumerate-vertex-triangles",
+      "name": "EnumerateVertexTriangles",
+      "category": "DynamicMesh3",
+      "signature": "EnumerateVertexTriangles(Target, Vertex ID, Apply Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Apply Func",
+          "type": "TFunctionRef<void ( int32 )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call ApplyFunc for each one-ring triangle of a vertex. Currently this is significantly more efficient than VtxTrianglesItr() in many use cases."
+    },
+    {
+      "id": "enumerate-edge-triangles",
+      "name": "EnumerateEdgeTriangles",
+      "category": "DynamicMesh3",
+      "signature": "EnumerateEdgeTriangles(Target, Edge ID, Apply Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Apply Func",
+          "type": "TFunctionRef<void ( int32 )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call ApplyFunc for each triangle connected to an Edge (1 or 2 triangles)"
+    },
+    {
+      "id": "append-vertex-20f3eb",
+      "name": "AppendVertex",
+      "category": "DynamicMesh3",
+      "signature": "AppendVertex(Target, Vert Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vert Info",
+          "type": "FVertexInfo&"
+        }
+      ],
+      "returnType": "public : int",
+      "docs": "Append vertex at position and other fields, returns vid"
+    },
+    {
+      "id": "append-vertex-7f5359",
+      "name": "AppendVertex",
+      "category": "DynamicMesh3",
+      "signature": "AppendVertex(Target, Source Mesh, Source Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Source Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Source Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Copy vertex SourceVertexID from existing SourceMesh, returns new vertex id"
+    },
+    {
+      "id": "append-triangle",
+      "name": "AppendTriangle",
+      "category": "DynamicMesh3",
+      "signature": "AppendTriangle(Target, Tri Vertices, Group ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Tri Vertices",
+          "type": "FIndex3i&"
+        },
+        {
+          "name": "Group ID",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "TriVertices must be distinct and refer to existing, valid vertices"
+    },
+    {
+      "id": "insert-vertex",
+      "name": "InsertVertex",
+      "category": "DynamicMesh3",
+      "signature": "InsertVertex(Target, Vertex ID, Vert Info, Unsafe)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vert Info",
+          "type": "FVertexInfo&"
+        },
+        {
+          "name": "Unsafe",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Insert vertex at given index, assuming it is unused.\nIf bUnsafe, we use fast id allocation that does not update free list.\nYou should only be using this between BeginUnsafeVerticesInsert() / EndUnsafeVerticesInsert() calls"
+    },
+    {
+      "id": "insert-triangle",
+      "name": "InsertTriangle",
+      "category": "DynamicMesh3",
+      "signature": "InsertTriangle(Target, Triangle ID, Tri Vertices, Group ID, Unsafe)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Tri Vertices",
+          "type": "FIndex3i&"
+        },
+        {
+          "name": "Group ID",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Unsafe",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Insert triangle at given index, assuming it is unused.\nIf bUnsafe, we use fast id allocation that does not update free list.\nYou should only be using this between BeginUnsafeTrianglesInsert() / EndUnsafeTrianglesInsert() calls"
+    },
+    {
+      "id": "get-vertex",
+      "name": "GetVertex",
+      "category": "DynamicMesh3",
+      "signature": "GetVertex(Target, Vertex ID, Vert Info, Want Normals, Want Colors, Want U Vs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vert Info",
+          "type": "FVertexInfo&"
+        },
+        {
+          "name": "Want Normals",
+          "type": "Bool"
+        },
+        {
+          "name": "Want Colors",
+          "type": "Bool"
+        },
+        {
+          "name": "Want U Vs",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get extended vertex information"
+    },
+    {
+      "id": "get-vertex-info",
+      "name": "GetVertexInfo",
+      "category": "DynamicMesh3",
+      "signature": "GetVertexInfo(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVertexInfo",
+      "docs": "Get all vertex information available"
+    },
+    {
+      "id": "get-max-vtx-edge-count",
+      "name": "GetMaxVtxEdgeCount",
+      "category": "DynamicMesh3",
+      "signature": "GetMaxVtxEdgeCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the max valence of all vertices in the mesh"
+    },
+    {
+      "id": "get-tri-neighbour-tris",
+      "name": "GetTriNeighbourTris",
+      "category": "DynamicMesh3",
+      "signature": "GetTriNeighbourTris(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIndex3i",
+      "docs": "Find the neighbour triangles of a triangle (any of them might be InvalidID)"
+    },
+    {
+      "id": "get-oriented-boundary-edge-v",
+      "name": "GetOrientedBoundaryEdgeV",
+      "category": "DynamicMesh3",
+      "signature": "GetOrientedBoundaryEdgeV(Target, Edge ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIndex2i",
+      "docs": "Return edge vertex indices, but oriented based on attached triangle (rather than min-sorted)"
+    },
+    {
+      "id": "enable-mesh-components",
+      "name": "EnableMeshComponents",
+      "category": "DynamicMesh3",
+      "signature": "EnableMeshComponents(Target, Mesh Components Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Mesh Components Flags",
+          "type": "Int"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Enable requested set of mesh components (triangle groups and vertex normals/colors/UVs)\nand discard any that are not requested\n@param MeshComponentsFlags A 'bitwise or' of requested EMeshComponents flags"
+    },
+    {
+      "id": "enable-vertex-normals",
+      "name": "EnableVertexNormals",
+      "category": "DynamicMesh3",
+      "signature": "EnableVertexNormals(Target, Initial Normal)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Initial Normal",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "discard-vertex-normals",
+      "name": "DiscardVertexNormals",
+      "category": "DynamicMesh3",
+      "signature": "DiscardVertexNormals(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-vertex-colors",
+      "name": "EnableVertexColors",
+      "category": "DynamicMesh3",
+      "signature": "EnableVertexColors(Target, Initial Color)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Initial Color",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "discard-vertex-colors",
+      "name": "DiscardVertexColors",
+      "category": "DynamicMesh3",
+      "signature": "DiscardVertexColors(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-vertex-u-vs",
+      "name": "EnableVertexUVs",
+      "category": "DynamicMesh3",
+      "signature": "EnableVertexUVs(Target, Initial UV)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Initial UV",
+          "type": "FVector2f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "discard-vertex-u-vs",
+      "name": "DiscardVertexUVs",
+      "category": "DynamicMesh3",
+      "signature": "DiscardVertexUVs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-triangle-groups",
+      "name": "EnableTriangleGroups",
+      "category": "DynamicMesh3",
+      "signature": "EnableTriangleGroups(Target, Initial Group ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Initial Group ID",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "discard-triangle-groups",
+      "name": "DiscardTriangleGroups",
+      "category": "DynamicMesh3",
+      "signature": "DiscardTriangleGroups(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-attributes",
+      "name": "EnableAttributes",
+      "category": "DynamicMesh3",
+      "signature": "EnableAttributes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "discard-attributes",
+      "name": "DiscardAttributes",
+      "category": "DynamicMesh3",
+      "signature": "DiscardAttributes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-boundary-vertex",
+      "name": "IsBoundaryVertex",
+      "category": "DynamicMesh3",
+      "signature": "IsBoundaryVertex(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the vertex is part of any boundary edges"
+    },
+    {
+      "id": "is-boundary-triangle",
+      "name": "IsBoundaryTriangle",
+      "category": "DynamicMesh3",
+      "signature": "IsBoundaryTriangle(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if any edge of triangle is a boundary edge"
+    },
+    {
+      "id": "find-edge",
+      "name": "FindEdge",
+      "category": "DynamicMesh3",
+      "signature": "FindEdge(Target, Vertex A, Vertex B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex A",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex B",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find id of edge connecting A and B"
+    },
+    {
+      "id": "find-edge-from-tri",
+      "name": "FindEdgeFromTri",
+      "category": "DynamicMesh3",
+      "signature": "FindEdgeFromTri(Target, Vertex A, Vertex B, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex A",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex B",
+          "type": "Int"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find edgeid for edge [a,b] from triangle that contains the edge. Faster than FindEdge() because it is constant-time."
+    },
+    {
+      "id": "find-edge-from-tri-pair",
+      "name": "FindEdgeFromTriPair",
+      "category": "DynamicMesh3",
+      "signature": "FindEdgeFromTriPair(Target, Triangle A, Triangle B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle A",
+          "type": "Int"
+        },
+        {
+          "name": "Triangle B",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find edgeid for edge connecting two triangles"
+    },
+    {
+      "id": "find-triangle",
+      "name": "FindTriangle",
+      "category": "DynamicMesh3",
+      "signature": "FindTriangle(Target, A, B, C)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "A",
+          "type": "Int"
+        },
+        {
+          "name": "B",
+          "type": "Int"
+        },
+        {
+          "name": "C",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find triangle made up of any permutation of vertices [a,b,c]"
+    },
+    {
+      "id": "get-edge-opposing-v",
+      "name": "GetEdgeOpposingV",
+      "category": "DynamicMesh3",
+      "signature": "GetEdgeOpposingV(Target, Edge ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIndex2i",
+      "docs": "If edge has vertices [a,b], and is connected two triangles [a,b,c] and [a,b,d],\nthis returns [c,d], or [c,InvalidID] for a boundary edge"
+    },
+    {
+      "id": "get-vtx-nbrhood",
+      "name": "GetVtxNbrhood",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxNbrhood(Target, Edge ID, Vertex ID, Other Vert Out, Opp Vert 1 Out, Opp Vert 2 Out, Tri 1 Out, Tri 2 Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Other Vert Out",
+          "type": "Int&"
+        },
+        {
+          "name": "Opp Vert 1 Out",
+          "type": "Int&"
+        },
+        {
+          "name": "Opp Vert 2 Out",
+          "type": "Int&"
+        },
+        {
+          "name": "Tri 1 Out",
+          "type": "Int&"
+        },
+        {
+          "name": "Tri 2 Out",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Given an edge and vertex on that edge, returns other vertex of edge, the two opposing verts, and the two connected triangles (OppVert2Out and Tri2Out are be InvalidID for boundary edge)"
+    },
+    {
+      "id": "get-vtx-boundary-edges",
+      "name": "GetVtxBoundaryEdges",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxBoundaryEdges(Target, Vertex ID, Edge 0 Out, Edge 1 Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Edge 0 Out",
+          "type": "Int&"
+        },
+        {
+          "name": "Edge 1 Out",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns count of boundary edges at vertex, and the first two boundary\nedges if found. If return is > 2, call GetAllVtxBoundaryEdges"
+    },
+    {
+      "id": "get-all-vtx-boundary-edges",
+      "name": "GetAllVtxBoundaryEdges",
+      "category": "DynamicMesh3",
+      "signature": "GetAllVtxBoundaryEdges(Target, Vertex ID, Edge List Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Edge List Out",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find edge ids of boundary edges connected to vertex.\n@param vID Vertex ID\n@param EdgeListOut boundary edge IDs are appended to this list\n@return count of number of elements of e that were filled"
+    },
+    {
+      "id": "get-vtx-triangle-count",
+      "name": "GetVtxTriangleCount",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxTriangleCount(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "return # of triangles attached to vID, or -1 if invalid vertex"
+    },
+    {
+      "id": "get-vtx-triangles",
+      "name": "GetVtxTriangles",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxTriangles(Target, Vertex ID, Triangles Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Get triangle one-ring at vertex."
+    },
+    {
+      "id": "get-vtx-single-triangle",
+      "name": "GetVtxSingleTriangle",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxSingleTriangle(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return Triangle ID for a single triangle connected to VertexID, or InvalidID if VertexID does not exist or has no attached triangles"
+    },
+    {
+      "id": "get-vtx-contiguous-triangles",
+      "name": "GetVtxContiguousTriangles",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxContiguousTriangles(Target, Vertex ID, Triangles Out, Contiguous Group Lengths, Group Is Loop)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Contiguous Group Lengths",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Group Is Loop",
+          "type": "TArray<bool>&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Get triangles connected to vertex in contiguous order, with multiple groups if vertex is a bowtie.\n@param VertexID Vertex ID to search around\n@param TrianglesOut All triangles connected to the vertex, in contiguous order; if there are multiple contiguous groups they are packed one after another\n@param ContiguousGroupLengths Lengths of contiguous groups packed into TrianglesOut (if not a bowtie, this will just be a length-one array w/ {TrianglesOut.Num()})\n@param GroupIsLoop Indicates whether each contiguous group is a loop (first triangle connected to last) or not"
+    },
+    {
+      "id": "is-group-boundary-edge",
+      "name": "IsGroupBoundaryEdge",
+      "category": "DynamicMesh3",
+      "signature": "IsGroupBoundaryEdge(Target, Edge ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the two triangles connected to edge have different group IDs"
+    },
+    {
+      "id": "is-group-boundary-vertex",
+      "name": "IsGroupBoundaryVertex",
+      "category": "DynamicMesh3",
+      "signature": "IsGroupBoundaryVertex(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if vertex has more than one tri group in its tri nbrhood"
+    },
+    {
+      "id": "is-group-junction-vertex",
+      "name": "IsGroupJunctionVertex",
+      "category": "DynamicMesh3",
+      "signature": "IsGroupJunctionVertex(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if more than two group boundary edges meet at vertex (ie 3+ groups meet at this vertex)"
+    },
+    {
+      "id": "get-vertex-groups",
+      "name": "GetVertexGroups",
+      "category": "DynamicMesh3",
+      "signature": "GetVertexGroups(Target, Vertex ID, Groups Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Groups Out",
+          "type": "FIndex4i&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns up to 4 group IDs at vertex. Returns false if > 4 encountered"
+    },
+    {
+      "id": "get-all-vertex-groups",
+      "name": "GetAllVertexGroups",
+      "category": "DynamicMesh3",
+      "signature": "GetAllVertexGroups(Target, Vertex ID, Groups Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Groups Out",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns all group IDs at vertex"
+    },
+    {
+      "id": "is-bowtie-vertex",
+      "name": "IsBowtieVertex",
+      "category": "DynamicMesh3",
+      "signature": "IsBowtieVertex(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns true if vID is a \"bowtie\" vertex, ie multiple disjoint triangle sets in one-ring"
+    },
+    {
+      "id": "is-closed",
+      "name": "IsClosed",
+      "category": "DynamicMesh3",
+      "signature": "IsClosed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if mesh has no boundary edges"
+    },
+    {
+      "id": "get-bounds",
+      "name": "GetBounds",
+      "category": "DynamicMesh3",
+      "signature": "GetBounds(Target, Parallel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Parallel",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "public : FAxisAlignedBox3d",
+      "docs": "Returns bounding box of all mesh vertices (including unreferenced vertices)"
+    },
+    {
+      "id": "get-vertex-frame",
+      "name": "GetVertexFrame",
+      "category": "DynamicMesh3",
+      "signature": "GetVertexFrame(Target, Vertex ID, Frame Normal Y, Use Normal)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Frame Normal Y",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Use Normal",
+          "type": "FVector3d*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "FFrame3d",
+      "docs": "Compute a normal/tangent frame at vertex that is \"stable\" as long as\nthe mesh topology doesn't change, meaning that one axis of the frame\nwill be computed from projection of outgoing edge.\nBy default, frame.Z is normal, and .X points along mesh edge.\nRequires that VertexNormals are available, or UseNormal != nullptr, otherwise returns default Frame3d\n@param bFrameNormalY if true, then frame.Y is normal (X still points along mesh edge)\n@param UseNormal if defined, this normal is used instead of VertexNormals normal"
+    },
+    {
+      "id": "get-tri-normal",
+      "name": "GetTriNormal",
+      "category": "DynamicMesh3",
+      "signature": "GetTriNormal(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Calculate face normal of triangle"
+    },
+    {
+      "id": "get-tri-area",
+      "name": "GetTriArea",
+      "category": "DynamicMesh3",
+      "signature": "GetTriArea(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Calculate area triangle"
+    },
+    {
+      "id": "get-tri-info",
+      "name": "GetTriInfo",
+      "category": "DynamicMesh3",
+      "signature": "GetTriInfo(Target, Triangle ID, Normal, Area, Centroid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Normal",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Area",
+          "type": "Double&"
+        },
+        {
+          "name": "Centroid",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute triangle normal, area, and centroid all at once. Re-uses vertex\nlookups and computes normal & area simultaneously. *However* does not produce\nthe same normal/area as separate calls, because of this."
+    },
+    {
+      "id": "get-tri-centroid",
+      "name": "GetTriCentroid",
+      "category": "DynamicMesh3",
+      "signature": "GetTriCentroid(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Compute centroid of triangle"
+    },
+    {
+      "id": "get-tri-bary-point-4a13a7",
+      "name": "GetTriBaryPoint",
+      "category": "DynamicMesh3",
+      "signature": "GetTriBaryPoint(Target, Triangle ID, Bary 0, Bary 1, Bary 2)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bary 0",
+          "type": "Double"
+        },
+        {
+          "name": "Bary 1",
+          "type": "Double"
+        },
+        {
+          "name": "Bary 2",
+          "type": "Double"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Interpolate vertex positions of triangle using barycentric coordinates"
+    },
+    {
+      "id": "get-tri-bary-normal",
+      "name": "GetTriBaryNormal",
+      "category": "DynamicMesh3",
+      "signature": "GetTriBaryNormal(Target, Triangle ID, Bary 0, Bary 1, Bary 2)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bary 0",
+          "type": "Double"
+        },
+        {
+          "name": "Bary 1",
+          "type": "Double"
+        },
+        {
+          "name": "Bary 2",
+          "type": "Double"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Interpolate vertex normals of triangle using barycentric coordinates"
+    },
+    {
+      "id": "get-tri-bary-point-1d2982",
+      "name": "GetTriBaryPoint",
+      "category": "DynamicMesh3",
+      "signature": "GetTriBaryPoint(Target, Triangle ID, Bary 0, Bary 1, Bary 2, Vert Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bary 0",
+          "type": "Double"
+        },
+        {
+          "name": "Bary 1",
+          "type": "Double"
+        },
+        {
+          "name": "Bary 2",
+          "type": "Double"
+        },
+        {
+          "name": "Vert Info",
+          "type": "FVertexInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute interpolated vertex attributes at point of triangle"
+    },
+    {
+      "id": "get-tri-bounds",
+      "name": "GetTriBounds",
+      "category": "DynamicMesh3",
+      "signature": "GetTriBounds(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FAxisAlignedBox3d",
+      "docs": "Construct bounding box of triangle as efficiently as possible"
+    },
+    {
+      "id": "get-tri-frame",
+      "name": "GetTriFrame",
+      "category": "DynamicMesh3",
+      "signature": "GetTriFrame(Target, Triangle ID, Edge)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Edge",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "FFrame3d",
+      "docs": "Construct stable frame at triangle centroid, where frame.Z is face normal, and frame.X is aligned with edge nEdge of triangle."
+    },
+    {
+      "id": "get-tri-solid-angle",
+      "name": "GetTriSolidAngle",
+      "category": "DynamicMesh3",
+      "signature": "GetTriSolidAngle(Target, Triangle ID, P)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Compute solid angle of oriented triangle tID relative to point p - see WindingNumber()"
+    },
+    {
+      "id": "get-tri-internal-angle-r",
+      "name": "GetTriInternalAngleR",
+      "category": "DynamicMesh3",
+      "signature": "GetTriInternalAngleR(Target, Triangle ID, I)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "I",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Compute internal angle at vertex i of triangle (where i is 0,1,2);"
+    },
+    {
+      "id": "get-tri-internal-angles-r",
+      "name": "GetTriInternalAnglesR",
+      "category": "DynamicMesh3",
+      "signature": "GetTriInternalAnglesR(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Compute internal angles at all vertices of triangle"
+    },
+    {
+      "id": "get-edge-normal",
+      "name": "GetEdgeNormal",
+      "category": "DynamicMesh3",
+      "signature": "GetEdgeNormal(Target, Edge ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Returns average normal of connected face normals"
+    },
+    {
+      "id": "get-edge-point",
+      "name": "GetEdgePoint",
+      "category": "DynamicMesh3",
+      "signature": "GetEdgePoint(Target, Edge ID, Parameter T)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Parameter T",
+          "type": "Double"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Get point along edge, t clamped to range [0,1]"
+    },
+    {
+      "id": "get-vtx-one-ring-centroid",
+      "name": "GetVtxOneRingCentroid",
+      "category": "DynamicMesh3",
+      "signature": "GetVtxOneRingCentroid(Target, Vertex ID, Centroid Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Centroid Out",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fastest possible one-ring centroid. This is used inside many other algorithms\nso it helps to have it be maximally efficient"
+    },
+    {
+      "id": "calculate-winding-number",
+      "name": "CalculateWindingNumber",
+      "category": "DynamicMesh3",
+      "signature": "CalculateWindingNumber(Target, Query Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Query Point",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Compute mesh winding number, from Jacobson et. al., Robust Inside-Outside Segmentation using Generalized Winding Numbers\nhttp://igl.ethz.ch/projects/winding-number/\nreturns ~0 for points outside a closed, consistently oriented mesh, and a positive or negative integer\nfor points inside, with value > 1 depending on how many \"times\" the point inside the mesh (like in 2D polygon winding)"
+    },
+    {
+      "id": "compact-in-place",
+      "name": "CompactInPlace",
+      "category": "DynamicMesh3",
+      "signature": "CompactInPlace(Target, Compact Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Compact Info",
+          "type": "FCompactMaps*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Compact mesh in-place, by moving vertices around and rewriting indices.\nShould be faster if the amount of compacting is not too significant, and is useful in some places.\n@param CompactInfo if not nullptr, will be filled with mapping indicating how vertex and triangle IDs were changed during compaction"
+    },
+    {
+      "id": "remove-unused-vertices",
+      "name": "RemoveUnusedVertices",
+      "category": "DynamicMesh3",
+      "signature": "RemoveUnusedVertices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove unused vertices. Note: Does not compact the remaining vertices."
+    },
+    {
+      "id": "has-unused-vertices",
+      "name": "HasUnusedVertices",
+      "category": "DynamicMesh3",
+      "signature": "HasUnusedVertices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if any vertices are unused (not in any triangles)"
+    },
+    {
+      "id": "reverse-orientation",
+      "name": "ReverseOrientation",
+      "category": "DynamicMesh3",
+      "signature": "ReverseOrientation(Target, Flip Normals)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Flip Normals",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reverse the ccw/cw orientation of all triangles in the mesh, and\noptionally flip the vertex normals if they exist"
+    },
+    {
+      "id": "reverse-tri-orientation",
+      "name": "ReverseTriOrientation",
+      "category": "DynamicMesh3",
+      "signature": "ReverseTriOrientation(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Reverse the ccw/cw orientation of a triangle"
+    },
+    {
+      "id": "remove-vertex",
+      "name": "RemoveVertex",
+      "category": "DynamicMesh3",
+      "signature": "RemoveVertex(Target, Vertex ID, Preserve Manifold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Preserve Manifold",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Remove vertex VertexID and all connected triangles.\nReturns Failed_VertexStillReferenced if VertexID is still referenced by any triangles.\nIf bPreserveManifold is true, checks that we will not create a bowtie vertex first.\nIn this case, returns Failed_WouldCreateBowtie if removing the triangles would create a bowtie."
+    },
+    {
+      "id": "remove-triangle",
+      "name": "RemoveTriangle",
+      "category": "DynamicMesh3",
+      "signature": "RemoveTriangle(Target, Triangle ID, Remove Isolated Vertices, Preserve Manifold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Remove Isolated Vertices",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Preserve Manifold",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Remove a triangle from the mesh. Also removes any unreferenced edges after tri is removed.\nIf bRemoveIsolatedVertices is true, then if you remove all tris from a vert, that vert is also removed.\nIf bPreserveManifold, we check that you will not create a bow tie vertex (and return false).\nIf this check is not done, you have to make sure you don't create a bow tie, because other\ncode assumes we don't have bow ties, and will not handle it properly"
+    },
+    {
+      "id": "set-triangle",
+      "name": "SetTriangle",
+      "category": "DynamicMesh3",
+      "signature": "SetTriangle(Target, Triangle ID, New Vertices, Remove Isolated Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "New Vertices",
+          "type": "FIndex3i&"
+        },
+        {
+          "name": "Remove Isolated Vertices",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Rewrite the triangle to reference the new tuple of vertices.\n@todo this function currently does not guarantee that the returned mesh is well-formed. Only call if you know it's OK."
+    },
+    {
+      "id": "split-edge-f3d270",
+      "name": "SplitEdge",
+      "category": "DynamicMesh3",
+      "signature": "SplitEdge(Target, Edge AB, Split Info, Split Parameter T)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge AB",
+          "type": "Int"
+        },
+        {
+          "name": "Split Info",
+          "type": "FEdgeSplitInfo&"
+        },
+        {
+          "name": "Split Parameter T",
+          "type": "Double",
+          "default": "0.5"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Split an edge of the mesh by inserting a vertex. This creates a new triangle on either side of the edge (ie a 2-4 split).\nIf the original edge had vertices [a,b], with triangles t0=[a,b,c] and t1=[b,a,d],  then the split inserts new vertex f.\nAfter the split t0=[a,f,c] and t1=[f,a,d], and we have t2=[f,b,c] and t3=[f,d,b]  (it's best to draw it out on paper...)\n@param EdgeAB index of the edge to be split\n@param SplitInfo returned information about new and modified mesh elements\n@param SplitParameterT defines the position along the edge that we split at, must be between 0 and 1, and is assumed to be based on the order of vertices returned by GetEdgeV()\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "split-edge-ec3b76",
+      "name": "SplitEdge",
+      "category": "DynamicMesh3",
+      "signature": "SplitEdge(Target, Edge Vert A, Edge Vert B, Split Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge Vert A",
+          "type": "Int"
+        },
+        {
+          "name": "Edge Vert B",
+          "type": "Int"
+        },
+        {
+          "name": "Split Info",
+          "type": "FEdgeSplitInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Splits the edge between two vertices at the midpoint, if this edge exists\n@param EdgeVertA index of first vertex\n@param EdgeVertB index of second vertex\n@param SplitInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "flip-edge-083b9a",
+      "name": "FlipEdge",
+      "category": "DynamicMesh3",
+      "signature": "FlipEdge(Target, Edge AB, Flip Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge AB",
+          "type": "Int"
+        },
+        {
+          "name": "Flip Info",
+          "type": "FEdgeFlipInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Flip/Rotate an edge of the mesh. This does not change the number of edges, vertices, or triangles.\nBoundary edges of the mesh cannot be flipped.\n@param EdgeAB index of edge to be flipped\n@param FlipInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "flip-edge-318818",
+      "name": "FlipEdge",
+      "category": "DynamicMesh3",
+      "signature": "FlipEdge(Target, Edge Vert A, Edge Vert B, Flip Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge Vert A",
+          "type": "Int"
+        },
+        {
+          "name": "Edge Vert B",
+          "type": "Int"
+        },
+        {
+          "name": "Flip Info",
+          "type": "FEdgeFlipInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "calls FlipEdge() on the edge between two vertices, if it exists\n@param EdgeVertA index of first vertex\n@param EdgeVertB index of second vertex\n@param FlipInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "split-vertex",
+      "name": "SplitVertex",
+      "category": "DynamicMesh3",
+      "signature": "SplitVertex(Target, Vertex ID, Triangles To Update, Split Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Triangles To Update",
+          "type": "TArrayView<int>&"
+        },
+        {
+          "name": "Split Info",
+          "type": "FVertexSplitInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Clones the given vertex and updates any provided triangles to use the new vertex if/where they used the old one.\n@param VertexID the vertex to split\n@param TrianglesToUpdate triangles that should be updated to use the new vertex anywhere they previously had the old one\n@param SplitInfo returned info about the new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "split-vertex-would-leave-isolated",
+      "name": "SplitVertexWouldLeaveIsolated",
+      "category": "DynamicMesh3",
+      "signature": "SplitVertexWouldLeaveIsolated(Target, Vertex ID, Triangles To Update)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Triangles To Update",
+          "type": "TArrayView<int>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Tests whether splitting the given vertex with the given triangles would leave no triangles attached to the original vertex (creating an isolated vertex)\n@param VertexID the vertex to split\n@param TrianglesToUpdate triangles that should be updated to use the new vertex anywhere they previously had the old one\n@return true if calling SplitVertex with these arguments would leave an isolated vertex at the original VertexID"
+    },
+    {
+      "id": "can-collapse-edge-29c04d",
+      "name": "CanCollapseEdge",
+      "category": "DynamicMesh3",
+      "signature": "CanCollapseEdge(Target, V Keep, V Remove, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "V Keep",
+          "type": "Int"
+        },
+        {
+          "name": "V Remove",
+          "type": "Int"
+        },
+        {
+          "name": "Options",
+          "type": "FCollapseEdgeOptions&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "When false, collapse is disallowed if the edge is the boundary of a single triangle hole,\nsuch that collapsing it would clse the hole. I.e. collapse is dissallowed if there\nis some vertex that connects vKeep and vRemove that is not part of the triangle(s) being\ncollapsed (note that if such a vertex is connected by a non-boundary edge, collapse will\nalways be disallowed regardless of bAllowHoleCollapse, as it would create non-manifold geometry)."
+    },
+    {
+      "id": "can-collapse-edge-f889e1",
+      "name": "CanCollapseEdge",
+      "category": "DynamicMesh3",
+      "signature": "CanCollapseEdge(Target, V Keep, V Remove, Edge Parameter T)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "V Keep",
+          "type": "Int"
+        },
+        {
+          "name": "V Remove",
+          "type": "Int"
+        },
+        {
+          "name": "Edge Parameter T",
+          "type": "Double",
+          "default": "0"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Tests whether collapsing the specified edge using the CollapseEdge function would succeed.\nEquivalent to calling the options overload with default options.\n@param KeepVertID index of the vertex that should be kept\n@param RemoveVertID index of the vertex that should be removed\n@param EdgeParameterT vKeep is moved to Lerp(KeepPos, RemovePos, EdgeParameterT). Note: Does not currently affect whether the edge is collapsable.\n@return Ok if the edge can be collapsed, or enum value indicating why the operation cannot be applied"
+    },
+    {
+      "id": "collapse-edge-328d9e",
+      "name": "CollapseEdge",
+      "category": "DynamicMesh3",
+      "signature": "CollapseEdge(Target, Keep Vert ID, Remove Vert ID, Edge Parameter T, Options, Collapse Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Keep Vert ID",
+          "type": "Int"
+        },
+        {
+          "name": "Remove Vert ID",
+          "type": "Int"
+        },
+        {
+          "name": "Edge Parameter T",
+          "type": "Double"
+        },
+        {
+          "name": "Options",
+          "type": "FCollapseEdgeOptions&"
+        },
+        {
+          "name": "Collapse Info",
+          "type": "FEdgeCollapseInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Collapse the edge between the two vertices, if topologically possible.\n@param KeepVertID index of the vertex that should be kept\n@param RemoveVertID index of the vertex that should be removed\n@param EdgeParameterT vKeep is moved to Lerp(KeepPos, RemovePos, EdgeParameterT)\n@param Options Sets options for the collapse\n@param CollapseInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "collapse-edge-fdaaa1",
+      "name": "CollapseEdge",
+      "category": "DynamicMesh3",
+      "signature": "CollapseEdge(Target, Keep Vert ID, Remove Vert ID, Edge Parameter T, Collapse Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Keep Vert ID",
+          "type": "Int"
+        },
+        {
+          "name": "Remove Vert ID",
+          "type": "Int"
+        },
+        {
+          "name": "Edge Parameter T",
+          "type": "Double"
+        },
+        {
+          "name": "Collapse Info",
+          "type": "FEdgeCollapseInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Collapse the edge between the two vertices, if topologically possible. Equivalent to calling\nthe options overload with default options.\n@param KeepVertID index of the vertex that should be kept\n@param RemoveVertID index of the vertex that should be removed\n@param EdgeParameterT vKeep is moved to Lerp(KeepPos, RemovePos, EdgeParameterT)\n@param CollapseInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "merge-edges-562e92",
+      "name": "MergeEdges",
+      "category": "DynamicMesh3",
+      "signature": "MergeEdges(Target, Keep Edge ID, Discard Edge ID, Interpolation T, Merge Info, Check Valid Orientation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Keep Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Discard Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Interpolation T",
+          "type": "Double"
+        },
+        {
+          "name": "Merge Info",
+          "type": "FMergeEdgesInfo&"
+        },
+        {
+          "name": "Check Valid Orientation",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Given two edges of the mesh, weld both their vertices, so that one edge is removed.\nThis could result in one neighbour edge-pair attached to each vertex also collapsing,\nso those cases are detected and handled (eg middle edge-pair in abysmal ascii drawing below)\n._._._.    (dots are vertices)\n\\._./\n@param KeepEdgeID index of the edge that should be kept\n@param DiscardEdgeID index of the edge that should be removed\n@param InterpolationT each kept vertex is moved to Lerp(KeptPos, RemovePos, InterpolationT)\n@param MergeInfo returned information about new and modified mesh elements\n@param CheckValidOrientation perform edge consistency orientation checks before merging. Specifically,\ncheck that each discarded vertex is closer to the vertex it is being collapsed to than the other\nkept vertex (where the pairing is determined by the adjoining triangle winding).\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "merge-edges-e97e78",
+      "name": "MergeEdges",
+      "category": "DynamicMesh3",
+      "signature": "MergeEdges(Target, Keep Edge ID, Discard Edge ID, Merge Info, Check Valid Orientation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Keep Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Discard Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Merge Info",
+          "type": "FMergeEdgesInfo&"
+        },
+        {
+          "name": "Check Valid Orientation",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Weld one edge to the other. Equivalent to calling the other overload with 0 for InterpolationT\n(i.e. the vertices stay at unmodified kept vertex positions)."
+    },
+    {
+      "id": "merge-vertices",
+      "name": "MergeVertices",
+      "category": "DynamicMesh3",
+      "signature": "MergeVertices(Target, Keep Vid, Discard Vid, Interpolation T, Options, Merge Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Keep Vid",
+          "type": "Int"
+        },
+        {
+          "name": "Discard Vid",
+          "type": "Int"
+        },
+        {
+          "name": "Interpolation T",
+          "type": "Double"
+        },
+        {
+          "name": "Options",
+          "type": "FMergeVerticesOptions&"
+        },
+        {
+          "name": "Merge Info",
+          "type": "FMergeVerticesInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Weld DiscardVid to KeepVid, if topologically possible and options allow. If the vertices are connected\nby an existing edge, this resolves as a collapse of that edge, and therefore calls OnCollapseEdge in\noverlays. If not, but the two vertices share a vertex neighbor, this resolves as a weld of the intervening\nedges (failing if the edges are not boundary edges, since that would create non-manifold edge), and therefore\ncalls OnMergeEdges in the overlays. Otherwise, the merge resolves as bowtie creation, and calls OnMergeVertices\nin the overlays.\n@param KeepVid vertex ID of the kept vertex\n@param DiscardVid vertex ID of the vertex whose triangles are reattached to the kept vertex\n@param InterpolationT the kept vertex is moved to Lerp(KeptPos, RemovePos, InterpolationT)\n@param Options set the options for the merge\n@param MergeInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "poke-triangle",
+      "name": "PokeTriangle",
+      "category": "DynamicMesh3",
+      "signature": "PokeTriangle(Target, Triangle ID, Bary Coordinates, Poke Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bary Coordinates",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Poke Info",
+          "type": "FPokeTriangleInfo&"
+        }
+      ],
+      "returnType": "EMeshResult",
+      "docs": "Insert a new vertex inside a triangle, ie do a 1 to 3 triangle split\n@param TriangleID index of triangle to poke\n@param BaryCoordinates barycentric coordinates of poke position\n@param PokeInfo returned information about new and modified mesh elements\n@return Ok on success, or enum value indicates why operation cannot be applied. Mesh remains unmodified on error."
+    },
+    {
+      "id": "mesh-info-string",
+      "name": "MeshInfoString",
+      "category": "DynamicMesh3",
+      "signature": "MeshInfoString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "public : FString",
+      "docs": "Returns a debug string that contains mesh statistics and other information"
+    },
+    {
+      "id": "get-byte-count",
+      "name": "GetByteCount",
+      "category": "DynamicMesh3",
+      "signature": "GetByteCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "SIZE_T"
+    },
+    {
+      "id": "is-same-as-cfdf1c",
+      "name": "IsSameAs",
+      "category": "DynamicMesh3",
+      "signature": "IsSameAs(Target, Other Mesh, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Other Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Options",
+          "type": "FSameAsOptions&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if another mesh is the same as this mesh. By default only checks\nvertices and triangles, turn on other parameters w/ flags"
+    },
+    {
+      "id": "is-same-as-568452",
+      "name": "IsSameAs",
+      "category": "DynamicMesh3",
+      "signature": "IsSameAs(Target, Other Mesh, Options, Out Mesh Difference Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Other Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Options",
+          "type": "FSameAsOptions&"
+        },
+        {
+          "name": "Out Mesh Difference Info",
+          "type": "FMeshDifferenceInfo&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if another mesh is the same as this mesh. By default only checks\nvertices and triangles, turn on other parameters w/ flags\n@param OutMeshDifferenceInfo If the meshes are not the same, this struct may provide additional info as to the source of difference. Note it will only indicate the first difference found, not a complete report of differences."
+    },
+    {
+      "id": "is-same-as-helper",
+      "name": "IsSameAs_Helper",
+      "category": "DynamicMesh3",
+      "signature": "IsSameAs_Helper(Target, Other Mesh, Options, Out Mesh Difference Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Other Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Options",
+          "type": "FSameAsOptions&"
+        },
+        {
+          "name": "Out Mesh Difference Info",
+          "type": "FMeshDifferenceInfo*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "private : bool"
+    },
+    {
+      "id": "check-validity",
+      "name": "CheckValidity",
+      "category": "DynamicMesh3",
+      "signature": "CheckValidity(Target, Validity Options, Fail Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Validity Options",
+          "type": "FValidityOptions",
+          "default": "FValidityOptions()"
+        },
+        {
+          "name": "Fail Mode",
+          "type": "EValidityCheckFailMode",
+          "default": "EValidityCheckFailMode::Check"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks that the mesh is well-formed, ie all internal data structures are consistent"
+    },
+    {
+      "id": "add-triangle-internal",
+      "name": "AddTriangleInternal",
+      "category": "DynamicMesh3",
+      "signature": "AddTriangleInternal(Target, A, B, C, E 0, E 1, E 2)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "A",
+          "type": "Int"
+        },
+        {
+          "name": "B",
+          "type": "Int"
+        },
+        {
+          "name": "C",
+          "type": "Int"
+        },
+        {
+          "name": "E 0",
+          "type": "Int"
+        },
+        {
+          "name": "E 1",
+          "type": "Int"
+        },
+        {
+          "name": "E 2",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "replace-edge-vertex",
+      "name": "ReplaceEdgeVertex",
+      "category": "DynamicMesh3",
+      "signature": "ReplaceEdgeVertex(Target, Edge ID, V Old, V New)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "V Old",
+          "type": "Int"
+        },
+        {
+          "name": "V New",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "replace-edge-triangle",
+      "name": "ReplaceEdgeTriangle",
+      "category": "DynamicMesh3",
+      "signature": "ReplaceEdgeTriangle(Target, Edge ID, T Old, T New)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "T Old",
+          "type": "Int"
+        },
+        {
+          "name": "T New",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "replace-triangle-edge",
+      "name": "ReplaceTriangleEdge",
+      "category": "DynamicMesh3",
+      "signature": "ReplaceTriangleEdge(Target, Edge ID, E Old, E New)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "E Old",
+          "type": "Int"
+        },
+        {
+          "name": "E New",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-triangle-edge",
+      "name": "FindTriangleEdge",
+      "category": "DynamicMesh3",
+      "signature": "FindTriangleEdge(Target, Triangle ID, V A, V B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "V A",
+          "type": "Int"
+        },
+        {
+          "name": "V B",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-edge-internal",
+      "name": "FindEdgeInternal",
+      "category": "DynamicMesh3",
+      "signature": "FindEdgeInternal(Target, V A, V B, Is Boundary)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "V A",
+          "type": "Int"
+        },
+        {
+          "name": "V B",
+          "type": "Int"
+        },
+        {
+          "name": "Is Boundary",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "reverse-tri-orientation-internal",
+      "name": "ReverseTriOrientationInternal",
+      "category": "DynamicMesh3",
+      "signature": "ReverseTriOrientationInternal(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "stash-debug-mesh",
+      "name": "StashDebugMesh",
+      "category": "DynamicMesh3",
+      "signature": "StashDebugMesh(Target, Mesh, Debug Mesh Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Debug Mesh Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Store a copy of Mesh in a global Debug Meshes TMap<DebugMeshName, Mesh>.\nThe mesh will exist until the Engine exits, unless FetchDebugMesh or ClearAllDebugMeshes removes it"
+    },
+    {
+      "id": "fetch-debug-mesh",
+      "name": "FetchDebugMesh",
+      "category": "DynamicMesh3",
+      "signature": "FetchDebugMesh(Target, Debug Mesh Name, Mesh Out, Clear)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Debug Mesh Name",
+          "type": "String"
+        },
+        {
+          "name": "Mesh Out",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Clear",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If a mesh was previously stored via StashDebugMesh with the given DebugMeshName,\ncopy it to MeshOut, and optionally remove it from the Debug Meshes map"
+    },
+    {
+      "id": "clear-all-debug-meshes",
+      "name": "ClearAllDebugMeshes",
+      "category": "DynamicMesh3",
+      "signature": "ClearAllDebugMeshes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Discard all debug meshes stored in the global Debug Meshes map"
+    }
+  ]
+}

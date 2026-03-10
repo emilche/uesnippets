@@ -1,0 +1,97 @@
+{
+  "id": "graph-convert",
+  "label": "GraphConvert",
+  "includepath": "Experimental/Graph/GraphConvert.h",
+  "includes": [
+    "Sort",
+    "Unique",
+    "Array",
+    "ArrayView",
+    "Map",
+    "Platform",
+    "AssertionMacros",
+    "EnumClassFlags",
+    "IdentityFunctor",
+    "Invoke",
+    "ElementType",
+    "utility"
+  ],
+  "functions": [
+    {
+      "id": "construct-transpose-graph",
+      "name": "ConstructTransposeGraph",
+      "category": "GraphConvert",
+      "signature": "ConstructTransposeGraph(Graph, Options)",
+      "params": [
+        {
+          "name": "Graph",
+          "type": "TConstArrayView<TConstArrayView<FVertex>>"
+        },
+        {
+          "name": "Options",
+          "type": "EConvertToGraphOptions",
+          "default": "EConvertToGraphOptions::None"
+        }
+      ],
+      "returnType": "FGraph",
+      "docs": "Return a new buffer and graph with the same vertices but with each edge reversed. If and only if (i,j) is an edge\nin the input Graph, (j,i) is an edge in the output TransposeGraph.\n@param Graph A standard GraphConvert-format Graph. @see ConvertToGraph for a description of the format.\nEntries in these edges lists must themselves be valid indices into Graph.\n@param Options for the conversion, @see EConvertToGraphOptions."
+    },
+    {
+      "id": "try-construct-condensation-graph",
+      "name": "TryConstructCondensationGraph",
+      "category": "GraphConvert",
+      "signature": "TryConstructCondensationGraph(Graph, Out Graph, Out Condensation Vertex To Input Vertex, Out Input Vertex To Condensation Vertex, Options)",
+      "params": [
+        {
+          "name": "Graph",
+          "type": "TConstArrayView<TConstArrayView<FVertex>>"
+        },
+        {
+          "name": "Out Graph",
+          "type": "FGraph&"
+        },
+        {
+          "name": "Out Condensation Vertex To Input Vertex",
+          "type": "FMappingOneToMany*"
+        },
+        {
+          "name": "Out Input Vertex To Condensation Vertex",
+          "type": "FMappingManyToOne*"
+        },
+        {
+          "name": "Options",
+          "type": "EConvertToGraphOptions",
+          "default": "EConvertToGraphOptions::None"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return a new graph where cycles in the input graph have been replaced by a single vertex. The new graph is\ntopologically sorted from root to leaf. If the input graph has no cycles, the function returns false and the\nOutGraph is reset to empty.\nAfter conversion you can iterate over the OutCondensationVertexToInputVertex mapping to go through the map topologically.\n@param Graph The input graph, may contain cycles. @see ConvertToGraph for a description of the format.\n@param OutGraph Output value that holds the graph.\nIt has no cycles and the vertices are topologically sorted from root to leaf.\n@param OutCondensationVertexToInputVertex Output value, optional, can be null. If non-null, it is populated with a\nmapping between the vertices in the condensation and the vertices in the input graph. See @FMappingOneToMany\nfor a description of the format.\nVertices in the condensation which correspond to input vertices which were not in a cycle map to single element.\nThis value is populated even if the function returns false.\n@param OutInputVertexToCondensationVertex Output value, optional, can be null. If non-null, it is populated with a\nmapping from vertices in the input graph to vertices in the condensation. See @FMappingManyToOne for a description\nof the format.\n@param Options for the conversion, @see EConvertToGraphOptions.\n@return True if the input graph had any cycles, false otherwise. If false is returned, OutGraph is reset to empty,\nbut the other output variables are still populated if present."
+    },
+    {
+      "id": "construct-partial-transpose-graph",
+      "name": "ConstructPartialTransposeGraph",
+      "category": "GraphConvert",
+      "signature": "ConstructPartialTransposeGraph(Graph, In Vertices, Max Out Graph Edges, Out Input Vertices Present In Output Graph)",
+      "params": [
+        {
+          "name": "Graph",
+          "type": "TConstArrayView<TConstArrayView<FVertex>>"
+        },
+        {
+          "name": "In Vertices",
+          "type": "TArrayView<FVertex>"
+        },
+        {
+          "name": "Max Out Graph Edges",
+          "type": "Int64"
+        },
+        {
+          "name": "Out Input Vertices Present In Output Graph",
+          "type": "TArray<FVertex>&"
+        }
+      ],
+      "returnType": "FGraph",
+      "docs": "Construct the TransposeGraph (see @ConstructTransposeGraph), but only include edges in the original graph\nfrom the given vertices (in the transpose graph, edges will be present to the given vertices).\nAdditionally, limit the number of edges in the returned graph, and report which InVertices were added.\nThis is used to create a partial ReachedBy graph from a large Reachability graph.\n@param InVertices Vertices in the input graph, edges from which will be included in the output.\nThis list will be modified: vertices will be sorted from largest number of edges to smallest.\n@param OutInputVerticesPresentInOutputGraph Output value. Populated with a list of which vertices from\nInVertices were used when constructing the output graph."
+    }
+  ]
+}

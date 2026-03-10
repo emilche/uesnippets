@@ -26,7 +26,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FFXSystemSpawnParameters*"
+          "type": "UFXSystemComponent*"
         },
         {
           "name": "Parameter Name",
@@ -37,7 +37,7 @@
           "type": "Bool"
         }
       ],
-      "returnType": "TObjectPtr<USceneComponent> AttachToComponent",
+      "returnType": "public : void",
       "docs": "Change a named boolean parameter, ParticleSystemComponent converts to float."
     },
     {
@@ -165,6 +165,28 @@
       "docs": "Get the referenced FXSystem asset."
     },
     {
+      "id": "set-emitter-enable",
+      "name": "SetEmitterEnable",
+      "category": "Effects",
+      "signature": "SetEmitterEnable(Target, Emitter Name, New Enable State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UFXSystemComponent*"
+        },
+        {
+          "name": "Emitter Name",
+          "type": "Name"
+        },
+        {
+          "name": "New Enable State",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enables / disables an emitter by halting spawning of new particles.\nYou will still pay the cost of the emitter update.\n@param\tEmitterName\t\t\tThe name of the emitter\n@param\tbNewEnableState\t\tThe value to set it to"
+    },
+    {
       "id": "set-auto-attachment-parameters",
       "name": "SetAutoAttachmentParameters",
       "category": "Effects",
@@ -231,6 +253,102 @@
       "docs": "Deactivates this system and releases it to the pool on completion.\nUsage of this PSC reference after this call is unsafe.\nYou should clear out your references to it."
     },
     {
+      "id": "requires-lwc-tile-recache",
+      "name": "RequiresLWCTileRecache",
+      "category": "ParticleSystemComponent",
+      "signature": "RequiresLWCTileRecache(Current Tile, Current Location)",
+      "params": [
+        {
+          "name": "Current Tile",
+          "type": "FVector3f"
+        },
+        {
+          "name": "Current Location",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we have crossed LWC tiles to the point that we may introduce artifacts."
+    },
+    {
+      "id": "precache-asset-ps-os",
+      "name": "PrecacheAssetPSOs",
+      "category": "ParticleSystemComponent",
+      "signature": "PrecacheAssetPSOs(Target, FX System Asset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UFXSystemComponent*"
+        },
+        {
+          "name": "FX System Asset",
+          "type": "UFXSystemAsset*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "cancel-auto-attachment",
+      "name": "CancelAutoAttachment",
+      "category": "ParticleSystemComponent",
+      "signature": "CancelAutoAttachment(Target, Detach From Parent, My World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Detach From Parent",
+          "type": "Bool"
+        },
+        {
+          "name": "My World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This is set when any of our \"don't tick me\" timeout values have fired"
+    },
+    {
+      "id": "should-be-tick-managed",
+      "name": "ShouldBeTickManaged",
+      "category": "ParticleSystemComponent",
+      "signature": "ShouldBeTickManaged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-manager-tick-data",
+      "name": "GetManagerTickData",
+      "category": "ParticleSystemComponent",
+      "signature": "GetManagerTickData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "FPSCTickData&"
+    },
+    {
+      "id": "get-world-manager",
+      "name": "GetWorldManager",
+      "category": "ParticleSystemComponent",
+      "signature": "GetWorldManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "FParticleSystemWorldManager*"
+    },
+    {
       "id": "set-auto-attach-params",
       "name": "SetAutoAttachParams",
       "category": "Effects",
@@ -255,8 +373,161 @@
           "default": "EAttachLocation::KeepRelativeOffset"
         }
       ],
-      "returnType": "bDeactivateTriggered = true",
+      "returnType": "Void",
       "docs": "DEPRECATED: Set AutoAttachParent, AutoAttachSocketName, AutoAttachLocationType to the specified parameters. Does not change bAutoManageAttachment; that must be set separately.\n@param  Parent\t\t\tComponent to attach to.\n@param  SocketName\t\tSocket on Parent to attach to.\n@param  LocationType\t\tOption for how we handle our location when we attach to Parent.\n@see bAutoManageAttachment, AutoAttachParent, AutoAttachSocketName, AutoAttachLocationType"
+    },
+    {
+      "id": "set-required-significance",
+      "name": "SetRequiredSignificance",
+      "category": "ParticleSystemComponent",
+      "signature": "SetRequiredSignificance(Target, New Required Significance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "New Required Significance",
+          "type": "EParticleSignificanceLevel"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Cached copy of the instance params"
+    },
+    {
+      "id": "should-manage-significance",
+      "name": "ShouldManageSignificance",
+      "category": "ParticleSystemComponent",
+      "signature": "ShouldManageSignificance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether this component should have it's significance managed by game code."
+    },
+    {
+      "id": "on-significance-changed",
+      "name": "OnSignificanceChanged",
+      "category": "ParticleSystemComponent",
+      "signature": "OnSignificanceChanged(Target, Significant, Apply To Emitters, Async)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Significant",
+          "type": "Bool"
+        },
+        {
+          "name": "Apply To Emitters",
+          "type": "Bool"
+        },
+        {
+          "name": "Async",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When the overall significance for the component is changed."
+    },
+    {
+      "id": "get-approx-distance-squared",
+      "name": "GetApproxDistanceSquared",
+      "category": "ParticleSystemComponent",
+      "signature": "GetApproxDistanceSquared(Target, Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Returns the approximate distance squared from this component to the passed location."
+    },
+    {
+      "id": "can-consider-invisible",
+      "name": "CanConsiderInvisible",
+      "category": "ParticleSystemComponent",
+      "signature": "CanConsiderInvisible(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True if this component can be considered invisible and potentially culled."
+    },
+    {
+      "id": "can-skip-tick-due-to-visibility",
+      "name": "CanSkipTickDueToVisibility",
+      "category": "ParticleSystemComponent",
+      "signature": "CanSkipTickDueToVisibility(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "can-be-occluded",
+      "name": "CanBeOccluded",
+      "category": "ParticleSystemComponent",
+      "signature": "CanBeOccluded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "true if this component can be occluded."
+    },
+    {
+      "id": "complete",
+      "name": "Complete",
+      "category": "ParticleSystemComponent",
+      "signature": "Complete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-beam-end-point",
+      "name": "SetBeamEndPoint",
+      "category": "Effects",
+      "signature": "SetBeamEndPoint(Target, Emitter Index, New End Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Emitter Index",
+          "type": "Int"
+        },
+        {
+          "name": "New End Point",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the beam end point\n@param\tEmitterIndex\t\tThe index of the emitter to set it on\n@param\tNewEndPoint\t\t\tThe value to set it to"
     },
     {
       "id": "set-beam-source-point",
@@ -593,26 +864,181 @@
       "docs": "Get the beam target strength\n@param\tEmitterIndex\t\tThe index of the emitter to get\n@param\tTargetIndex\t\t\tWhich beam within the emitter to get\n@param\tOutTargetStrength\tValue of target tangent\n@return\ttrue\t\tEmitterIndex and TargetIndex are valid - OutTargetStrength is valid\nfalse\t\tEmitterIndex or TargetIndex is invalid - OutTargetStrength is invalid"
     },
     {
-      "id": "set-emitter-enable",
-      "name": "SetEmitterEnable",
+      "id": "set-material-parameter",
+      "name": "SetMaterialParameter",
       "category": "Effects",
-      "signature": "SetEmitterEnable(Target, Emitter Name, New Enable State)",
+      "signature": "SetMaterialParameter(Target, Parameter Name, Param)",
       "params": [
         {
           "name": "Target",
           "type": "UParticleSystemComponent*"
         },
         {
-          "name": "Emitter Name",
+          "name": "Parameter Name",
           "type": "Name"
         },
         {
-          "name": "New Enable State",
-          "type": "Bool"
+          "name": "Param",
+          "type": "UMaterialInterface*"
         }
       ],
       "returnType": "Void",
-      "docs": "Enables / disables an emitter by halting spawning of new particles.\nYou will still pay the cost of the emitter update.\n@param\tEmitterName\t\t\tThe name of the emitter\n@param\tbNewEnableState\t\tThe value to set it to"
+      "docs": "Set a named material instance parameter on this ParticleSystemComponent.\nUpdates the parameter if it already exists, or creates a new entry if not."
+    },
+    {
+      "id": "get-float-parameter",
+      "name": "GetFloatParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "GetFloatParameter(Target, In Name, Out Float)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Float",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the Float parameter value for the given name.\n@param\tInName\t\tName of the parameter\n@param\tOutFloat\tThe value of the parameter found\n@return\ttrue\t\tParameter was found - OutFloat is valid\nfalse\t\tParameter was not found - OutFloat is invalid"
+    },
+    {
+      "id": "get-vector-parameter",
+      "name": "GetVectorParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "GetVectorParameter(Target, In Name, Out Vector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Vector",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the Vector parameter value for the given name.\n@param\tInName\t\tName of the parameter\n@param\tOutVector\tThe value of the parameter found\n@return\ttrue\t\tParameter was found - OutVector is valid\nfalse\t\tParameter was not found - OutVector is invalid"
+    },
+    {
+      "id": "get-any-vector-parameter",
+      "name": "GetAnyVectorParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "GetAnyVectorParameter(Target, In Name, Out Vector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Vector",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the Vector parameter value for the given name...also looks for colors and floats and returns those\n@param\tInName\t\tName of the parameter\n@param\tOutVector\tThe value of the parameter found\n@return\ttrue\t\tParameter was found - OutVector is valid\nfalse\t\tParameter was not found - OutVector is invalid"
+    },
+    {
+      "id": "get-color-parameter",
+      "name": "GetColorParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "GetColorParameter(Target, In Name, Out Color)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Color",
+          "type": "FLinearColor&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the Color parameter value for the given name.\n@param\tInName\t\tName of the parameter\n@param\tOutColor\tThe value of the parameter found\n@return\ttrue\t\tParameter was found - OutColor is valid\nfalse\t\tParameter was not found - OutColor is invalid"
+    },
+    {
+      "id": "get-actor-parameter",
+      "name": "GetActorParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "GetActorParameter(Target, In Name, Out Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Actor",
+          "type": "AActor*&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the Actor parameter value for the given name.\n@param\tInName\t\tName of the parameter\n@param\tOutActor\tThe value of the parameter found\n@return\ttrue\t\tParameter was found - OutActor is valid\nfalse\t\tParameter was not found - OutActor is invalid"
+    },
+    {
+      "id": "get-material-parameter",
+      "name": "GetMaterialParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "GetMaterialParameter(Target, In Name, Out Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Material",
+          "type": "UMaterialInterface*&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the Material parameter value for the given name.\n@param\tInName\t\tName of the parameter\n@param\tOutMaterial\tThe value of the parameter found\n@return\ttrue\t\tParameter was found - OutMaterial is valid\nfalse\t\tParameter was not found - OutMaterial is invalid"
+    },
+    {
+      "id": "clear-parameter",
+      "name": "ClearParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "ClearParameter(Target, Parameter Name, Parameter Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        },
+        {
+          "name": "Parameter Type",
+          "type": "EParticleSysParamType",
+          "default": "EParticleSysParamType(0)"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "clears the specified parameter, returning it to the default value set in the template\n@param ParameterName name of parameter to remove\n@param ParameterType type of parameter to remove; if omitted or PSPT_None is specified, all parameters with the given name are removed"
     },
     {
       "id": "set-template",
@@ -645,6 +1071,33 @@
       ],
       "returnType": "Int",
       "docs": "Get the current number of active particles in this system"
+    },
+    {
+      "id": "get-owned-trail-emitters",
+      "name": "GetOwnedTrailEmitters",
+      "category": "ParticleSystemComponent",
+      "signature": "GetOwnedTrailEmitters(Target, Out Trail Emitters, In Owner, Set Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Out Trail Emitters",
+          "type": "TrailEmitterArray&"
+        },
+        {
+          "name": "In Owner",
+          "type": "void*"
+        },
+        {
+          "name": "Set Owner",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Array of trail emitters."
     },
     {
       "id": "begin-trails",
@@ -721,6 +1174,803 @@
       "docs": "Sets the defining data for all trails in this component.\n@param\tInFirstSocketName\tThe name of the first socket for the trail.\n@param\tInSecondSocketName\tThe name of the second socket for the trail.\n@param\tInWidthMode\t\t\tHow the width value is applied to the trail.\n@param\tInWidth\t\t\t\tThe width of the trail."
     },
     {
+      "id": "check-for-errors",
+      "name": "CheckForErrors",
+      "category": "ParticleSystemComponent",
+      "signature": "CheckForErrors(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Cached copy of the transform for async work"
+    },
+    {
+      "id": "is-ready-for-owner-to-auto-destroy",
+      "name": "IsReadyForOwnerToAutoDestroy",
+      "category": "ParticleSystemComponent",
+      "signature": "IsReadyForOwnerToAutoDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "tick-component",
+      "name": "TickComponent",
+      "category": "ParticleSystemComponent",
+      "signature": "TickComponent(Target, Delta Time, Tick Type, This Tick Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Tick Type",
+          "type": "ELevelTick"
+        },
+        {
+          "name": "This Tick Function",
+          "type": "FActorComponentTickFunction*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-component-tick-enabled",
+      "name": "SetComponentTickEnabled",
+      "category": "ParticleSystemComponent",
+      "signature": "SetComponentTickEnabled(Target, Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-component-tick-enabled",
+      "name": "IsComponentTickEnabled",
+      "category": "ParticleSystemComponent",
+      "signature": "IsComponentTickEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "on-attachment-changed",
+      "name": "OnAttachmentChanged",
+      "category": "ParticleSystemComponent",
+      "signature": "OnAttachmentChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-child-attached",
+      "name": "OnChildAttached",
+      "category": "ParticleSystemComponent",
+      "signature": "OnChildAttached(Target, Child Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Child Component",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-child-detached",
+      "name": "OnChildDetached",
+      "category": "ParticleSystemComponent",
+      "signature": "OnChildDetached(Target, Child Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Child Component",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-end-of-frame-update-during-tick",
+      "name": "OnEndOfFrameUpdateDuringTick",
+      "category": "ParticleSystemComponent",
+      "signature": "OnEndOfFrameUpdateDuringTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-render-state-concurrent",
+      "name": "CreateRenderState_Concurrent",
+      "category": "ParticleSystemComponent",
+      "signature": "CreateRenderState_Concurrent(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Context",
+          "type": "FRegisterComponentContext*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "send-render-transform-concurrent",
+      "name": "SendRenderTransform_Concurrent",
+      "category": "ParticleSystemComponent",
+      "signature": "SendRenderTransform_Concurrent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "destroy-render-state-concurrent",
+      "name": "DestroyRenderState_Concurrent",
+      "category": "ParticleSystemComponent",
+      "signature": "DestroyRenderState_Concurrent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-register",
+      "name": "OnRegister",
+      "category": "ParticleSystemComponent",
+      "signature": "OnRegister(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-unregister",
+      "name": "OnUnregister",
+      "category": "ParticleSystemComponent",
+      "signature": "OnUnregister(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "send-render-dynamic-data-concurrent",
+      "name": "SendRenderDynamicData_Concurrent",
+      "category": "ParticleSystemComponent",
+      "signature": "SendRenderDynamicData_Concurrent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-detail-mode",
+      "name": "GetCurrentDetailMode",
+      "category": "ParticleSystemComponent",
+      "signature": "GetCurrentDetailMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Decide which detail mode should be applied to this particle system. If we have an editor\noverride specified, use that. Otherwise use the global cached value"
+    },
+    {
+      "id": "compute-tick-component-concurrent",
+      "name": "ComputeTickComponent_Concurrent",
+      "category": "ParticleSystemComponent",
+      "signature": "ComputeTickComponent_Concurrent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Possibly parallel phase of TickComponent *"
+    },
+    {
+      "id": "finalize-tick-component",
+      "name": "FinalizeTickComponent",
+      "category": "ParticleSystemComponent",
+      "signature": "FinalizeTickComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "After the possibly parallel phase of TickComponent, we fire events, etc *"
+    },
+    {
+      "id": "force-reset",
+      "name": "ForceReset",
+      "category": "ParticleSystemComponent",
+      "signature": "ForceReset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "marshal-params-for-async-tick",
+      "name": "MarshalParamsForAsyncTick",
+      "category": "ParticleSystemComponent",
+      "signature": "MarshalParamsForAsyncTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "wait-for-async-and-finalize",
+      "name": "WaitForAsyncAndFinalize",
+      "category": "ParticleSystemComponent",
+      "signature": "WaitForAsyncAndFinalize(Target, Behavior, Definitely Game Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Behavior",
+          "type": "EForceAsyncWorkCompletion"
+        },
+        {
+          "name": "Definitely Game Thread",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Wait on the async task and call finalize on the tick *"
+    },
+    {
+      "id": "cache-view-relevance-flags",
+      "name": "CacheViewRelevanceFlags",
+      "category": "ParticleSystemComponent",
+      "signature": "CacheViewRelevanceFlags(Target, Template To Cache)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Template To Cache",
+          "type": "UParticleSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cache view relevance flags."
+    },
+    {
+      "id": "post-load",
+      "name": "PostLoad",
+      "category": "ParticleSystemComponent",
+      "signature": "PostLoad(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "begin-destroy",
+      "name": "BeginDestroy",
+      "category": "ParticleSystemComponent",
+      "signature": "BeginDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "finish-destroy",
+      "name": "FinishDestroy",
+      "category": "ParticleSystemComponent",
+      "signature": "FinishDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pre-edit-change",
+      "name": "PreEditChange",
+      "category": "ParticleSystemComponent",
+      "signature": "PreEditChange(Target, Property That Will Change)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Property That Will Change",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-edit-change-chain-property",
+      "name": "PostEditChangeChainProperty",
+      "category": "ParticleSystemComponent",
+      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Property Changed Event",
+          "type": "FPropertyChangedChainEvent&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "ParticleSystemComponent",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-resource-size-ex",
+      "name": "GetResourceSizeEx",
+      "category": "ParticleSystemComponent",
+      "signature": "GetResourceSizeEx(Target, Cumulative Resource Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Cumulative Resource Size",
+          "type": "FResourceSizeEx&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-detailed-info-internal",
+      "name": "GetDetailedInfoInternal",
+      "category": "ParticleSystemComponent",
+      "signature": "GetDetailedInfoInternal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "get-num-materials",
+      "name": "GetNumMaterials",
+      "category": "ParticleSystemComponent",
+      "signature": "GetNumMaterials(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-material",
+      "name": "GetMaterial",
+      "category": "ParticleSystemComponent",
+      "signature": "GetMaterial(Target, Element Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Element Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "set-material",
+      "name": "SetMaterial",
+      "category": "ParticleSystemComponent",
+      "signature": "SetMaterial(Target, Element Index, Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Element Index",
+          "type": "Int"
+        },
+        {
+          "name": "Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "calc-bounds",
+      "name": "CalcBounds",
+      "category": "ParticleSystemComponent",
+      "signature": "CalcBounds(Target, Local To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "FBoxSphereBounds"
+    },
+    {
+      "id": "create-scene-proxy",
+      "name": "CreateSceneProxy",
+      "category": "ParticleSystemComponent",
+      "signature": "CreateSceneProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "FPrimitiveSceneProxy*"
+    },
+    {
+      "id": "get-used-materials",
+      "name": "GetUsedMaterials",
+      "category": "ParticleSystemComponent",
+      "signature": "GetUsedMaterials(Target, Out Materials, Get Debug Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Out Materials",
+          "type": "TArray<UMaterialInterface*>&"
+        },
+        {
+          "name": "Get Debug Materials",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-streaming-render-asset-info",
+      "name": "GetStreamingRenderAssetInfo",
+      "category": "ParticleSystemComponent",
+      "signature": "GetStreamingRenderAssetInfo(Target, Level Context, Out Streaming Render Assets)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Level Context",
+          "type": "FStreamingTextureLevelContext&"
+        },
+        {
+          "name": "Out Streaming Render Assets",
+          "type": "TArray<FStreamingRenderAssetPrimitiveInfo>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-body-instance",
+      "name": "GetBodyInstance",
+      "category": "ParticleSystemComponent",
+      "signature": "GetBodyInstance(Target, Bone Name, Get Welded, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Bone Name",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "Get Welded",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Index",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "FBodyInstance*"
+    },
+    {
+      "id": "should-activate",
+      "name": "ShouldActivate",
+      "category": "ParticleSystemComponent",
+      "signature": "ShouldActivate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "protected : bool"
+    },
+    {
+      "id": "get-material-property-path",
+      "name": "GetMaterialPropertyPath",
+      "category": "ParticleSystemComponent",
+      "signature": "GetMaterialPropertyPath(Target, Element Index, Out Owner, Out Property Path, Out Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Element Index",
+          "type": "Int"
+        },
+        {
+          "name": "Out Owner",
+          "type": "UObject*&"
+        },
+        {
+          "name": "Out Property Path",
+          "type": "String&"
+        },
+        {
+          "name": "Out Property",
+          "type": "FProperty*&"
+        }
+      ],
+      "returnType": "public : bool"
+    },
+    {
+      "id": "activate",
+      "name": "Activate",
+      "category": "ParticleSystemComponent",
+      "signature": "Activate(Target, Reset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Reset",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "deactivate",
+      "name": "Deactivate",
+      "category": "ParticleSystemComponent",
+      "signature": "Deactivate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "deactivate-immediate",
+      "name": "DeactivateImmediate",
+      "category": "ParticleSystemComponent",
+      "signature": "DeactivateImmediate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forces component to deactivate immediately."
+    },
+    {
+      "id": "apply-world-offset",
+      "name": "ApplyWorldOffset",
+      "category": "ParticleSystemComponent",
+      "signature": "ApplyWorldOffset(Target, In Offset, World Shift)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Offset",
+          "type": "FVector&"
+        },
+        {
+          "name": "World Shift",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "activate-system",
+      "name": "ActivateSystem",
+      "category": "ParticleSystemComponent",
+      "signature": "ActivateSystem(Target, Flag As Just Attached)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Flag As Just Attached",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Activate the system"
+    },
+    {
+      "id": "deactivate-system",
+      "name": "DeactivateSystem",
+      "category": "ParticleSystemComponent",
+      "signature": "DeactivateSystem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Deactivate the system"
+    },
+    {
+      "id": "particle-line-check",
+      "name": "ParticleLineCheck",
+      "category": "ParticleSystemComponent",
+      "signature": "ParticleLineCheck(Target, Hit, Source Actor, End, Start, Half Extent, Object Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "Source Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "End",
+          "type": "FVector&"
+        },
+        {
+          "name": "Start",
+          "type": "FVector&"
+        },
+        {
+          "name": "Half Extent",
+          "type": "FVector&"
+        },
+        {
+          "name": "Object Params",
+          "type": "FCollisionObjectQueryParams&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "compute-can-tick-in-any-thread",
+      "name": "ComputeCanTickInAnyThread",
+      "category": "ParticleSystemComponent",
+      "signature": "ComputeCanTickInAnyThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Decide if this psys can tick in any thread, and set bIsElligibleForAsyncTick"
+    },
+    {
       "id": "create-named-dynamic-material-instance",
       "name": "CreateNamedDynamicMaterialInstance",
       "category": "Rendering",
@@ -744,6 +1994,44 @@
       "docs": "Creates a Dynamic Material Instance for the specified named material override, optionally from the supplied material.\n@param Name - The slot name of the material to replace.  If invalid, the material is unchanged and NULL is returned."
     },
     {
+      "id": "get-material-by-name",
+      "name": "GetMaterialByName",
+      "category": "ParticleSystemComponent",
+      "signature": "GetMaterialByName(Target, Material Slot Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Material Slot Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "set-material-by-name",
+      "name": "SetMaterialByName",
+      "category": "ParticleSystemComponent",
+      "signature": "SetMaterialByName(Target, Material Slot Name, Source Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Material Slot Name",
+          "type": "Name"
+        },
+        {
+          "name": "Source Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "get-named-material",
       "name": "GetNamedMaterial",
       "category": "Rendering",
@@ -760,6 +2048,443 @@
       ],
       "returnType": "class UMaterialInterface*",
       "docs": "Returns a named material. If this named material is not found, returns NULL."
+    },
+    {
+      "id": "get-named-material-index",
+      "name": "GetNamedMaterialIndex",
+      "category": "ParticleSystemComponent",
+      "signature": "GetNamedMaterialIndex(Target, In Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the index into the EmitterMaterials array for this named. If there are no named material slots or this material is not found, INDEX_NONE is returned."
+    },
+    {
+      "id": "get-name-for-material",
+      "name": "GetNameForMaterial",
+      "category": "ParticleSystemComponent",
+      "signature": "GetNameForMaterial(Target, In Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "returns the name associated with the passed in material, returns NAME_None if it is not found"
+    },
+    {
+      "id": "get-approx-memory-usage",
+      "name": "GetApproxMemoryUsage",
+      "category": "ParticleSystemComponent",
+      "signature": "GetApproxMemoryUsage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Returns an approximate memory usage value for this component."
+    },
+    {
+      "id": "update-lod-information",
+      "name": "UpdateLODInformation",
+      "category": "ParticleSystemComponent",
+      "signature": "UpdateLODInformation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "create-dynamic-data-from-replay",
+      "name": "CreateDynamicDataFromReplay",
+      "category": "ParticleSystemComponent",
+      "signature": "CreateDynamicDataFromReplay(Emitter Instance, Emitter Replay Data, Selected, In Feature Level)",
+      "params": [
+        {
+          "name": "Emitter Instance",
+          "type": "FParticleEmitterInstance*"
+        },
+        {
+          "name": "Emitter Replay Data",
+          "type": "FDynamicEmitterReplayDataBase*"
+        },
+        {
+          "name": "Selected",
+          "type": "Bool"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "FDynamicEmitterDataBase*",
+      "docs": "Static: Supplied with a chunk of replay data, this method will create dynamic emitter data that can\nbe used to render the particle system\n@param\tEmitterInstance\t\tEmitter instance this replay is playing on\n@param\tEmitterReplayData\tIncoming replay data of any time, cannot be NULL\n@param\tbSelected\t\t\ttrue if the particle system is currently selected\n@param\tInFeatureLevel\t\tThe relevant shader feature level\n@return\tThe newly created dynamic data, or NULL on failure"
+    },
+    {
+      "id": "create-dynamic-data",
+      "name": "CreateDynamicData",
+      "category": "ParticleSystemComponent",
+      "signature": "CreateDynamicData(Target, In Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "FParticleDynamicData*",
+      "docs": "Creates dynamic particle data for rendering the particle system this frame.  This function\nhandle creation of dynamic data for regularly simulated particles, but also handles capture\nand playback of particle replay data.\n@param InFeatureLevel - The relevant shader feature level.\n@return\tReturns the dynamic data to render this frame"
+    },
+    {
+      "id": "orient-z-axis-toward-camera",
+      "name": "OrientZAxisTowardCamera",
+      "category": "ParticleSystemComponent",
+      "signature": "OrientZAxisTowardCamera(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Orients the Z axis of the ParticleSystemComponent toward the camera while preserving the X axis direction"
+    },
+    {
+      "id": "clear-dynamic-data",
+      "name": "ClearDynamicData",
+      "category": "ParticleSystemComponent",
+      "signature": "ClearDynamicData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears dynamic data on the rendering thread."
+    },
+    {
+      "id": "update-dynamic-data",
+      "name": "UpdateDynamicData",
+      "category": "ParticleSystemComponent",
+      "signature": "UpdateDynamicData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "init-particles",
+      "name": "InitParticles",
+      "category": "ParticleSystemComponent",
+      "signature": "InitParticles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-particles",
+      "name": "ResetParticles",
+      "category": "ParticleSystemComponent",
+      "signature": "ResetParticles(Target, Empty Instances)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Empty Instances",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-burst-lists",
+      "name": "ResetBurstLists",
+      "category": "ParticleSystemComponent",
+      "signature": "ResetBurstLists(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-instances",
+      "name": "UpdateInstances",
+      "category": "ParticleSystemComponent",
+      "signature": "UpdateInstances(Target, Empty Instances)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Empty Instances",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-completed",
+      "name": "HasCompleted",
+      "category": "ParticleSystemComponent",
+      "signature": "HasCompleted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "initialize-system",
+      "name": "InitializeSystem",
+      "category": "ParticleSystemComponent",
+      "signature": "InitializeSystem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "conditional-cache-view-relevance-flags",
+      "name": "ConditionalCacheViewRelevanceFlags",
+      "category": "ParticleSystemComponent",
+      "signature": "ConditionalCacheViewRelevanceFlags(Target, New Template)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "New Template",
+          "type": "UParticleSystem*",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cache the view-relevance for each emitter at each LOD level if needed.\n@param\tNewTemplate\t\tThe UParticleSystem* to use as the template.\nIf NULL, use the currently set template."
+    },
+    {
+      "id": "auto-populate-instance-properties",
+      "name": "AutoPopulateInstanceProperties",
+      "category": "ParticleSystemComponent",
+      "signature": "AutoPopulateInstanceProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Auto-populate the instance parameters based on contained modules."
+    },
+    {
+      "id": "report-event-spawn",
+      "name": "ReportEventSpawn",
+      "category": "ParticleSystemComponent",
+      "signature": "ReportEventSpawn(Target, In Event Name, In Emitter Time, In Location, In Velocity, In Event Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Event Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Emitter Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Location",
+          "type": "FVector"
+        },
+        {
+          "name": "In Velocity",
+          "type": "FVector"
+        },
+        {
+          "name": "In Event Data",
+          "type": "TArray<UParticleModuleEventSendToGame*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Event reporting..."
+    },
+    {
+      "id": "report-event-death",
+      "name": "ReportEventDeath",
+      "category": "ParticleSystemComponent",
+      "signature": "ReportEventDeath(Target, In Event Name, In Emitter Time, In Location, In Velocity, In Event Data, In Particle Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Event Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Emitter Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Location",
+          "type": "FVector"
+        },
+        {
+          "name": "In Velocity",
+          "type": "FVector"
+        },
+        {
+          "name": "In Event Data",
+          "type": "TArray<UParticleModuleEventSendToGame*>&"
+        },
+        {
+          "name": "In Particle Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record a death event.\n@param\tInEventName\t\t\tThe name of the event that fired.\n@param\tInEmitterTime\t\tThe emitter time when the event fired.\n@param\tInLocation\t\t\tThe location of the particle when the event fired.\n@param\tInVelocity\t\t\tThe velocity of the particle when the event fired.\n@param  InEventData         Gamespecific event data payload\n@param\tInParticleTime\t\tThe relative life of the particle when the event fired."
+    },
+    {
+      "id": "report-event-collision",
+      "name": "ReportEventCollision",
+      "category": "ParticleSystemComponent",
+      "signature": "ReportEventCollision(Target, In Event Name, In Emitter Time, In Location, In Direction, In Velocity, In Event Data, In Particle Time, In Normal, In Time, In Item, In Bone Name, Phys Mat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Event Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Emitter Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Location",
+          "type": "FVector"
+        },
+        {
+          "name": "In Direction",
+          "type": "FVector"
+        },
+        {
+          "name": "In Velocity",
+          "type": "FVector"
+        },
+        {
+          "name": "In Event Data",
+          "type": "TArray<UParticleModuleEventSendToGame*>&"
+        },
+        {
+          "name": "In Particle Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Normal",
+          "type": "FVector"
+        },
+        {
+          "name": "In Time",
+          "type": "Float"
+        },
+        {
+          "name": "In Item",
+          "type": "Int"
+        },
+        {
+          "name": "In Bone Name",
+          "type": "Name"
+        },
+        {
+          "name": "Phys Mat",
+          "type": "UPhysicalMaterial*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record a collision event.\n@param\tInEventName\t\tThe name of the event that fired.\n@param\tInEmitterTime\tThe emitter time when the event fired.\n@param\tInLocation\t\tThe location of the particle when the event fired.\n@param\tInDirection\t\tThe direction of the particle when the event fired.\n@param\tInVelocity\t\tThe velocity of the particle when the event fired.\n@param  InEventData         Gamespecific event data payload\n@param\tInParticleTime\tThe relative life of the particle when the event fired.\n@param\tInNormal\t\tNormal vector of the collision in coordinate system of the returner. Zero=none.\n@param\tInTime\t\t\tTime until hit, if line check.\n@param\tInItem\t\t\tPrimitive data item which was hit, INDEX_NONE=none.\n@param\tInBoneName\t\tName of bone we hit (for skeletal meshes)."
+    },
+    {
+      "id": "report-event-burst",
+      "name": "ReportEventBurst",
+      "category": "ParticleSystemComponent",
+      "signature": "ReportEventBurst(Target, In Event Name, In Emitter Time, Particle Count, In Location, In Event Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Event Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Emitter Time",
+          "type": "Float"
+        },
+        {
+          "name": "Particle Count",
+          "type": "Int"
+        },
+        {
+          "name": "In Location",
+          "type": "FVector"
+        },
+        {
+          "name": "In Event Data",
+          "type": "TArray<UParticleModuleEventSendToGame*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record a bursting event.\n@param\tInEventName\t\t\tThe name of the event that fired.\n@param\tInEmitterTime\t\tThe emitter time when the event fired.\n@param  InParticleCount     The number of particles spawned in the burst\n@param\tInLocation\t\t\tThe location of the particle emitter when the event fired."
     },
     {
       "id": "generate-particle-event",
@@ -794,6 +2519,220 @@
       ],
       "returnType": "Void",
       "docs": "Record a kismet event.\n@param\tInEventName\t\t\t\tThe name of the event that fired.\n@param\tInEmitterTime\t\t\tThe emitter time when the event fired.\n@param\tInLocation\t\t\t\tThe location of the particle when the event fired.\n@param\tInVelocity\t\t\t\tThe velocity of the particle when the event fired.\n@param\tInNormal\t\t\t\tNormal vector of the collision in coordinate system of the returner. Zero=none."
+    },
+    {
+      "id": "find-replay-clip-for-id-number",
+      "name": "FindReplayClipForIDNumber",
+      "category": "ParticleSystemComponent",
+      "signature": "FindReplayClipForIDNumber(Target, In Clip ID Number)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In Clip ID Number",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UParticleSystemReplay*",
+      "docs": "Finds the replay clip of the specified ID number\n@return Returns the replay clip or NULL if none"
+    },
+    {
+      "id": "kill-particles-forced",
+      "name": "KillParticlesForced",
+      "category": "ParticleSystemComponent",
+      "signature": "KillParticlesForced(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-vector-rand-parameter",
+      "name": "SetVectorRandParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "SetVectorRandParameter(Target, Parameter Name, Param, Param Low)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        },
+        {
+          "name": "Param",
+          "type": "FVector&"
+        },
+        {
+          "name": "Param Low",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a named random vector instance parameter on this ParticleSystemComponent.\nUpdates the parameter if it already exists, or creates a new entry if not."
+    },
+    {
+      "id": "set-vector-unit-rand-parameter",
+      "name": "SetVectorUnitRandParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "SetVectorUnitRandParameter(Target, Parameter Name, Param, Param Low)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        },
+        {
+          "name": "Param",
+          "type": "FVector&"
+        },
+        {
+          "name": "Param Low",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a named random unit vector instance parameter on this ParticleSystemComponent.\nUpdates the parameter if it already exists, or creates a new entry if not."
+    },
+    {
+      "id": "set-float-rand-parameter",
+      "name": "SetFloatRandParameter",
+      "category": "ParticleSystemComponent",
+      "signature": "SetFloatRandParameter(Target, Parameter Name, Param, Param Low)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        },
+        {
+          "name": "Param",
+          "type": "Float"
+        },
+        {
+          "name": "Param Low",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a named random float instance parameter on this ParticleSystemComponent.\nUpdates the parameter if it already exists, or creates a new entry if not."
+    },
+    {
+      "id": "force-update-bounds",
+      "name": "ForceUpdateBounds",
+      "category": "ParticleSystemComponent",
+      "signature": "ForceUpdateBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force the component to update its bounding box."
+    },
+    {
+      "id": "rewind-emitter-instances",
+      "name": "RewindEmitterInstances",
+      "category": "ParticleSystemComponent",
+      "signature": "RewindEmitterInstances(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "determine-lod-level-for-location",
+      "name": "DetermineLODLevelForLocation",
+      "category": "ParticleSystemComponent",
+      "signature": "DetermineLODLevelForLocation(Target, Effect Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "Effect Location",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This will determine which LOD to use based off the specific ParticleSystem passed in\nand the distance to where that PS is being displayed.\n@note:  This is distance based LOD not perf based.  Perf and distance are orthogonal concepts."
+    },
+    {
+      "id": "set-lod-level",
+      "name": "SetLODLevel",
+      "category": "ParticleSystemComponent",
+      "signature": "SetLODLevel(Target, In LOD Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        },
+        {
+          "name": "In LOD Level",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the LOD level of the particle system"
+    },
+    {
+      "id": "get-lod-level",
+      "name": "GetLODLevel",
+      "category": "ParticleSystemComponent",
+      "signature": "GetLODLevel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the LOD level of the particle system"
+    },
+    {
+      "id": "reset-to-defaults",
+      "name": "ResetToDefaults",
+      "category": "ParticleSystemComponent",
+      "signature": "ResetToDefaults(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "stops the emitter, unregisters the component, and resets the component's properties to the values of its template"
+    },
+    {
+      "id": "should-compute-lod-from-game-thread",
+      "name": "ShouldComputeLODFromGameThread",
+      "category": "ParticleSystemComponent",
+      "signature": "ShouldComputeLODFromGameThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UParticleSystemComponent*"
+        }
+      ],
+      "returnType": "private : bool",
+      "docs": "Returns true if this component can and should compute it's LOD without\nvisibility information from the renderer."
     }
   ]
 }

@@ -1,0 +1,203 @@
+{
+  "id": "audio-thread",
+  "label": "AudioThread",
+  "includepath": "AudioThread.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "Pipe"
+  ],
+  "functions": [
+    {
+      "id": "start-audio-thread",
+      "name": "StartAudioThread",
+      "category": "AudioThread",
+      "signature": "StartAudioThread()",
+      "params": [],
+      "returnType": "public : void",
+      "docs": "Starts the audio thread."
+    },
+    {
+      "id": "stop-audio-thread",
+      "name": "StopAudioThread",
+      "category": "AudioThread",
+      "signature": "StopAudioThread()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Stops the audio thread."
+    },
+    {
+      "id": "run-command-on-audio-thread",
+      "name": "RunCommandOnAudioThread",
+      "category": "AudioThread",
+      "signature": "RunCommandOnAudioThread(In Function, In Stat Id)",
+      "params": [
+        {
+          "name": "In Function",
+          "type": "TUniqueFunction<void ( )>"
+        },
+        {
+          "name": "In Stat Id",
+          "type": "TStatId",
+          "default": "TStatId()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Execute a command on the audio thread. If it's safe the command will execute immediately."
+    },
+    {
+      "id": "process-all-commands",
+      "name": "ProcessAllCommands",
+      "category": "AudioThread",
+      "signature": "ProcessAllCommands()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Processes all enqueued audio thread commands."
+    },
+    {
+      "id": "run-command-on-game-thread",
+      "name": "RunCommandOnGameThread",
+      "category": "AudioThread",
+      "signature": "RunCommandOnGameThread(In Function, In Stat Id)",
+      "params": [
+        {
+          "name": "In Function",
+          "type": "TUniqueFunction<void ( )>"
+        },
+        {
+          "name": "In Stat Id",
+          "type": "TStatId",
+          "default": "TStatId()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Execute a (presumably audio) command on the game thread. If GIsAudioThreadRunning is false the command will execute immediately"
+    },
+    {
+      "id": "set-use-threaded-audio",
+      "name": "SetUseThreadedAudio",
+      "category": "AudioThread",
+      "signature": "SetUseThreadedAudio(In Use Threaded Audio)",
+      "params": [
+        {
+          "name": "In Use Threaded Audio",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-using-threaded-audio",
+      "name": "IsUsingThreadedAudio",
+      "category": "AudioThread",
+      "signature": "IsUsingThreadedAudio()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "suspend-audio-thread",
+      "name": "SuspendAudioThread",
+      "category": "AudioThread",
+      "signature": "SuspendAudioThread()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "resume-audio-thread",
+      "name": "ResumeAudioThread",
+      "category": "AudioThread",
+      "signature": "ResumeAudioThread()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-audio-thread-stat-id",
+      "name": "GetCurrentAudioThreadStatId",
+      "category": "AudioThread",
+      "signature": "GetCurrentAudioThreadStatId()",
+      "params": [],
+      "returnType": "String",
+      "docs": "Retrieves the current audio thread stat id. Useful for reporting when an audio thread command stalls or deadlocks."
+    },
+    {
+      "id": "reset-audio-thread-timers",
+      "name": "ResetAudioThreadTimers",
+      "category": "AudioThread",
+      "signature": "ResetAudioThreadTimers()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-longest-task-info",
+      "name": "GetLongestTaskInfo",
+      "category": "AudioThread",
+      "signature": "GetLongestTaskInfo(Out Longest Task, Out Longest Task Time Ms)",
+      "params": [
+        {
+          "name": "Out Longest Task",
+          "type": "String&"
+        },
+        {
+          "name": "Out Longest Task Time Ms",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-audio-command-fence",
+      "name": "FAudioCommandFence",
+      "category": "AudioThread",
+      "signature": "FAudioCommandFence()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Used to track pending audio commands from the game thread."
+    },
+    {
+      "id": "begin-fence",
+      "name": "BeginFence",
+      "category": "AudioThread",
+      "signature": "BeginFence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioCommandFence*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a fence command to the audio command queue.\nConceptually, the pending fence count is incremented to reflect the pending fence command.\nOnce the rendering thread has executed the fence command, it decrements the pending fence count."
+    },
+    {
+      "id": "wait",
+      "name": "Wait",
+      "category": "AudioThread",
+      "signature": "Wait(Target, Process Game Thread Tasks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioCommandFence*"
+        },
+        {
+          "name": "Process Game Thread Tasks",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Waits for pending fence commands to retire.\n@param bProcessGameThreadTasks, if true we are on a short callstack where it is safe to process arbitrary game thread tasks while we wait"
+    },
+    {
+      "id": "is-fence-complete",
+      "name": "IsFenceComplete",
+      "category": "AudioThread",
+      "signature": "IsFenceComplete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAudioCommandFence*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

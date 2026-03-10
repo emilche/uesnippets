@@ -1,0 +1,844 @@
+{
+  "id": "kismet-reinstance-utilities",
+  "label": "KismetReinstanceUtilities",
+  "includepath": "Kismet2/KismetReinstanceUtilities.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "SubclassOf",
+    "ActorComponent",
+    "GCObject"
+  ],
+  "functions": [
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "KismetReinstanceUtilities",
+      "signature": "AddReferencedObjects(Target, Collector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Blueprints reuses its UClass* from compile to compile, but it's more\nintuitive to just replace a UClass* with a new instance (e.g. from a\npackage reload). This flag tells the reinstancer to replace references\nto old classes with references to new classes."
+    },
+    {
+      "id": "optionally-refresh-nodes",
+      "name": "OptionallyRefreshNodes",
+      "category": "KismetReinstanceUtilities",
+      "signature": "OptionallyRefreshNodes(BP)",
+      "params": [
+        {
+          "name": "BP",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "blueprint-was-recompiled",
+      "name": "BlueprintWasRecompiled",
+      "category": "KismetReinstanceUtilities",
+      "signature": "BlueprintWasRecompiled(Target, BP, Bytecode Only)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "BP",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "Bytecode Only",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-blueprint-compile-reinstancer-14bead",
+      "name": "FBlueprintCompileReinstancer",
+      "category": "KismetReinstanceUtilities",
+      "signature": "FBlueprintCompileReinstancer()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "save-class-field-mapping",
+      "name": "SaveClassFieldMapping",
+      "category": "KismetReinstanceUtilities",
+      "signature": "SaveClassFieldMapping(Target, In Class To Reinstance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "In Class To Reinstance",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Saves a mapping of field names to their UField equivalents, so we can remap any bytecode that references them later"
+    },
+    {
+      "id": "generate-field-mappings",
+      "name": "GenerateFieldMappings",
+      "category": "KismetReinstanceUtilities",
+      "signature": "GenerateFieldMappings(Target, Field Mapping)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Field Mapping",
+          "type": "TMap<FFieldVariant,FFieldVariant>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper to gather mappings from the old class's fields to the new class's version"
+    },
+    {
+      "id": "reinstance-objects",
+      "name": "ReinstanceObjects",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReinstanceObjects(Target, Force Always Reinstance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Force Always Reinstance",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reinstances all objects in the ObjectReinstancingMap"
+    },
+    {
+      "id": "update-bytecode-references",
+      "name": "UpdateBytecodeReferences",
+      "category": "KismetReinstanceUtilities",
+      "signature": "UpdateBytecodeReferences(Target, Out Dependent Blueprints, Out Field Mapping)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Out Dependent Blueprints",
+          "type": "TSet<UBlueprint*>&"
+        },
+        {
+          "name": "Out Field Mapping",
+          "type": "TMap<FFieldVariant,FFieldVariant>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates references to properties and functions of the class that has in the bytecode of dependent blueprints"
+    },
+    {
+      "id": "save-sparse-class-data",
+      "name": "SaveSparseClassData",
+      "category": "KismetReinstanceUtilities",
+      "signature": "SaveSparseClassData(Target, For Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "For Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Populates SCDSnapshot, for use via PropagateSparseClassDataToNewClass"
+    },
+    {
+      "id": "take-ownership-of-sparse-class-data",
+      "name": "TakeOwnershipOfSparseClassData",
+      "category": "KismetReinstanceUtilities",
+      "signature": "TakeOwnershipOfSparseClassData(Target, For Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "For Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Instructs the reinstancer to take ownership of the sparse class data - doing so will make it difficult to identify archetype data"
+    },
+    {
+      "id": "propagate-sparse-class-data-to-new-class",
+      "name": "PropagateSparseClassDataToNewClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "PropagateSparseClassDataToNewClass(Target, New Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "New Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies an owned sparse class data instance to a new class and frees any owned SCD"
+    },
+    {
+      "id": "finish-update-bytecode-references",
+      "name": "FinishUpdateBytecodeReferences",
+      "category": "KismetReinstanceUtilities",
+      "signature": "FinishUpdateBytecodeReferences(Dependent B Ps, Field Mappings)",
+      "params": [
+        {
+          "name": "Dependent B Ps",
+          "type": "TSet<UBlueprint*>&"
+        },
+        {
+          "name": "Field Mappings",
+          "type": "TMap<FFieldVariant,FFieldVariant>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Consumes the set and map populated by calls to UpdateBytecodeReferences"
+    },
+    {
+      "id": "replace-instances-of-class-376a68",
+      "name": "ReplaceInstancesOfClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReplaceInstancesOfClass(Old Class, New Class, Original CDO, Objects That Should Use Old Stuff, Class Object Replaced, Preserve Root Component)",
+      "params": [
+        {
+          "name": "Old Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "New Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Original CDO",
+          "type": "UObject*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Objects That Should Use Old Stuff",
+          "type": "TSet<UObject*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Class Object Replaced",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Preserve Root Component",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "replace-instances-of-class-ex",
+      "name": "ReplaceInstancesOfClassEx",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReplaceInstancesOfClassEx(Parameters)",
+      "params": [
+        {
+          "name": "Parameters",
+          "type": "FReplaceInstancesOfClassParameters&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "batch-replace-instances-of-class-10e5fe",
+      "name": "BatchReplaceInstancesOfClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "BatchReplaceInstancesOfClass(In Old To New Class Map, Batch Params)",
+      "params": [
+        {
+          "name": "In Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Batch Params",
+          "type": "PRAGMA_DISABLE_DEPRECATION_WARNINGS FBatchReplaceInstancesOfClassParameters&",
+          "default": "FBatchReplaceInstancesOfClassParameters()\nPRAGMA_ENABLE_DEPRECATION_WARNINGS"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "replace-instances-of-class-df30c1",
+      "name": "ReplaceInstancesOfClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReplaceInstancesOfClass(Old Class, New Class, Params)",
+      "params": [
+        {
+          "name": "Old Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "New Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Params",
+          "type": "FReplaceInstancesOfClassParameters&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Replace all instances of OldClass with a new instance of NewClass"
+    },
+    {
+      "id": "batch-replace-instances-of-class-7da741",
+      "name": "BatchReplaceInstancesOfClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "BatchReplaceInstancesOfClass(In Old To New Class Map, Params)",
+      "params": [
+        {
+          "name": "In Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Params",
+          "type": "FReplaceInstancesOfClassParameters&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Batch replaces a mapping of one or more classes to their new class"
+    },
+    {
+      "id": "move-cdo-to-new-class",
+      "name": "MoveCDOToNewClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "MoveCDOToNewClass(Owner Class, Old To New Map, Avoid CDO Duplication)",
+      "params": [
+        {
+          "name": "Owner Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Old To New Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Avoid CDO Duplication",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "UClass*",
+      "docs": "Function used to safely discard a CDO, so that the class can have its layout changed, callers must move parent CDOs aside before moving child CDOs aside:"
+    },
+    {
+      "id": "move-dependent-skel-to-reinst",
+      "name": "MoveDependentSkelToReinst",
+      "category": "KismetReinstanceUtilities",
+      "signature": "MoveDependentSkelToReinst(Owner Class, Old To New Map)",
+      "params": [
+        {
+          "name": "Owner Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Old To New Map",
+          "type": "TMap<UClass*,UClass*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Moves CDOs aside to immutable versions of classes(`REINST`) so that the CDO's can safely be GC'd.\nThese `REINST` classes will be re-parented to a native parent that we know will not be churning\nthrough this function again later, so we avoid O(N^2) processing of REINST classes.\nMaps each given `SKEL` class to its appropriate `REINST` version of itself"
+    },
+    {
+      "id": "get-sorted-class-hierarchy",
+      "name": "GetSortedClassHierarchy",
+      "category": "KismetReinstanceUtilities",
+      "signature": "GetSortedClassHierarchy(Class To Search, Out Hierarchy, Out Native Parent)",
+      "params": [
+        {
+          "name": "Class To Search",
+          "type": "UClass*"
+        },
+        {
+          "name": "Out Hierarchy",
+          "type": "TArray<UClass*>&"
+        },
+        {
+          "name": "Out Native Parent",
+          "type": "UClass**"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gathers the full class Hierarchy of the ClassToSearch, sorted top down (0 index being UObject, n being the subclasses)"
+    },
+    {
+      "id": "is-reinst-class",
+      "name": "IsReinstClass",
+      "category": "KismetReinstanceUtilities",
+      "signature": "IsReinstClass(Class)",
+      "params": [
+        {
+          "name": "Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the given class is a REINST class (starts with the 'REINST_' prefix)"
+    },
+    {
+      "id": "reconstruct-owner-instances",
+      "name": "ReconstructOwnerInstances",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReconstructOwnerInstances(Component Class)",
+      "params": [
+        {
+          "name": "Component Class",
+          "type": "TSubclassOf<UActorComponent>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When re-instancing a component, we have to make sure all instance owners'\nconstruction scripts are re-ran (in-case modifying the component alters\nthe construction of the actor).\n@param  ComponentClass    Identifies the component that was altered (used to find all its instances, and thusly all instance owners)."
+    },
+    {
+      "id": "verify-replacement",
+      "name": "VerifyReplacement",
+      "category": "KismetReinstanceUtilities",
+      "signature": "VerifyReplacement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Verify that all instances of the duplicated class have been replaced and collected"
+    },
+    {
+      "id": "finalize-fast-reinstancing",
+      "name": "FinalizeFastReinstancing",
+      "category": "KismetReinstanceUtilities",
+      "signature": "FinalizeFastReinstancing(Target, Objects To Replace)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Objects To Replace",
+          "type": "TArray<UObject*>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reinstance-inner",
+      "name": "ReinstanceInner",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReinstanceInner(Target, Force Always Reinstance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Force Always Reinstance",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "protected : TSharedPtr<FReinstanceFinalizer>"
+    },
+    {
+      "id": "reinstance-fast",
+      "name": "ReinstanceFast",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReinstanceFast(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        }
+      ],
+      "returnType": "TSharedPtr<FReinstanceFinalizer>"
+    },
+    {
+      "id": "compile-children",
+      "name": "CompileChildren",
+      "category": "KismetReinstanceUtilities",
+      "signature": "CompileChildren(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-blueprint-compile-reinstancer-47f73b",
+      "name": "FBlueprintCompileReinstancer",
+      "category": "KismetReinstanceUtilities",
+      "signature": "FBlueprintCompileReinstancer(In Class To Reinstance, Flags)",
+      "params": [
+        {
+          "name": "In Class To Reinstance",
+          "type": "UClass*"
+        },
+        {
+          "name": "Flags",
+          "type": "EBlueprintCompileReinstancerFlags",
+          "default": "EBlueprintCompileReinstancerFlags::AutoInferSaveOnCompile"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the reinstancer up to work on every object of the specified class\n@param InClassToReinstance\t\tClass being reinstanced\n@param bIsBytecodeOnly\t\t\tTRUE if only the bytecode is being recompiled\n@param bSkipGC\t\t\t\t\tTRUE if garbage collection should be skipped\n@param bAutoInferSaveOnCompile\tTRUE if the reinstancer should infer whether or not save on compile should occur, FALSE if it should never save on compile"
+    },
+    {
+      "id": "reparent-child-f4f615",
+      "name": "ReparentChild",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReparentChild(Target, Child BP)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Child BP",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reparents the specified blueprint or class to be the duplicated class in order to allow properties to be copied from the previous CDO to the new one"
+    },
+    {
+      "id": "reparent-child-077740",
+      "name": "ReparentChild",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReparentChild(Target, Child Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintCompileReinstancer*"
+        },
+        {
+          "name": "Child Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "copy-properties-for-unrelated-objects",
+      "name": "CopyPropertiesForUnrelatedObjects",
+      "category": "KismetReinstanceUtilities",
+      "signature": "CopyPropertiesForUnrelatedObjects(Old Object, New Object, Clear External References, Force Delta Serialization, Only Handle Direct Sub Objects, Old To New Instance Map, Old To New Class Map)",
+      "params": [
+        {
+          "name": "Old Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "New Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Clear External References",
+          "type": "Bool"
+        },
+        {
+          "name": "Force Delta Serialization",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Only Handle Direct Sub Objects",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Old To New Instance Map",
+          "type": "TMap<UObject*,UObject*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Attempts to copy as many properties as possible from the old object to the new.\nUse during BP compilation to copy properties from the old CDO to the new one.\n@param OldObject\t\t\t\t\t\tThe old object to copy properties from\n@param NewObject\t\t\t\t\t\tThe new Object to copy properties to\n@param bClearExternalReferences\t\tIf true then attempt to replace references to old classes and instances on this object with the corresponding new ones\n@param bForceDeltaSerialization\t\tIf true the delta serialization will be used when copying\n@param bOnlyHandleDirectSubObjects\tIf true will only copy/handle immediate subobjects\n@param OldToNewInstanceMap\t\t\tIf != null it will be used to replace any references found in this object\n@param OldToNewClassMap\t\t\t\tif != null it will be used to replace any class references found in this object"
+    },
+    {
+      "id": "pre-create-sub-objects-for-reinstantiation",
+      "name": "PreCreateSubObjectsForReinstantiation",
+      "category": "KismetReinstanceUtilities",
+      "signature": "PreCreateSubObjectsForReinstantiation(Old To New Class Map, Old Object, New U Object, Created Instance Map, Old To New Instance Map, Ordered List Of Object To Copy)",
+      "params": [
+        {
+          "name": "Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Old Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "New U Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Created Instance Map",
+          "type": "TMap<UObject*,UObject*>&"
+        },
+        {
+          "name": "Old To New Instance Map",
+          "type": "TMap<UObject*,UObject*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Ordered List Of Object To Copy",
+          "type": "TArray<TTuple<UObject*,UObject*>>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This method will pre-create all non-default sub object needed for a re-instantiation, what is left is to CopyPropertiesForUnrelatedObjects on the created instances map to finish the re-instancing\nIf the re-instancing is done in a big batch and part to the sub object might already be re-instantiated, you will need to provide those via the OldToNewInstanceMap\n@param OldToNewClassMap in case there are subobject that will need new class type\n@param OldObject to pre-create its non-default sub objects\n@param NewUObject where to store those pre-created sub objects\n@param CreatedInstanceMap in/out of the result of all of the pre-created objects\n@param OldToNewInstanceMap optional parameter of the possible re-instanced sub objects if any\n@param OrderedListOfObjectToCopy List of object to copy in order"
+    },
+    {
+      "id": "replace-object-helper",
+      "name": "ReplaceObjectHelper",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReplaceObjectHelper(Old Object, Old Class, New U Object, New Class, Old To New Instance Map, Old To New Class Map, Old To New Name Map, Old Obj Index, Objects To Replace, Potential Editors For Refreshing, Owners To Rerun Construction Script, Get Attach Children Array, Is Component, Archetypes Are Up To Date)",
+      "params": [
+        {
+          "name": "Old Object",
+          "type": "UObject*&"
+        },
+        {
+          "name": "Old Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "New U Object",
+          "type": "UObject*&"
+        },
+        {
+          "name": "New Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Old To New Instance Map",
+          "type": "TMap<UObject*,UObject*>&"
+        },
+        {
+          "name": "Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Old To New Name Map",
+          "type": "TMap<UObject*,FName>&"
+        },
+        {
+          "name": "Old Obj Index",
+          "type": "Int"
+        },
+        {
+          "name": "Objects To Replace",
+          "type": "TArray<UObject*>&"
+        },
+        {
+          "name": "Potential Editors For Refreshing",
+          "type": "TArray<UObject*>&"
+        },
+        {
+          "name": "Owners To Rerun Construction Script",
+          "type": "TSet<AActor*>&"
+        },
+        {
+          "name": "Get Attach Children Array",
+          "type": "TFunctionRef<TArray<TObjectPtr<USceneComponent>>& ( USceneComponent* )>"
+        },
+        {
+          "name": "Is Component",
+          "type": "Bool"
+        },
+        {
+          "name": "Archetypes Are Up To Date",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Helper to replace an instance of an object"
+    },
+    {
+      "id": "pre-populate-instancing-graph-for-archetype",
+      "name": "PrePopulateInstancingGraphForArchetype",
+      "category": "KismetReinstanceUtilities",
+      "signature": "PrePopulateInstancingGraphForArchetype(Instancing Graph, Old Instance, In Archetype, Old To New Instance Map)",
+      "params": [
+        {
+          "name": "Instancing Graph",
+          "type": "FObjectInstancingGraph&"
+        },
+        {
+          "name": "Old Instance",
+          "type": "TNotNull<UObject*>"
+        },
+        {
+          "name": "In Archetype",
+          "type": "UObject*"
+        },
+        {
+          "name": "Old To New Instance Map",
+          "type": "TMap<UObject*,UObject*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Pre-populate instancing graph for a specified instance if needed\n@param InstancingGraph The instancing graph to populate\n@param OldInstance Object that is about to be reallocated\n@param InArchetype Archetype of ObjectInstance\n@param OldToNewInstanceMap Possible instance mapping of instances\n@return false if the instancing graph is not needed"
+    },
+    {
+      "id": "pre-create-sub-objects-for-reinstantiation-inner",
+      "name": "PreCreateSubObjectsForReinstantiation_Inner",
+      "category": "KismetReinstanceUtilities",
+      "signature": "PreCreateSubObjectsForReinstantiation_Inner(Old Instanced Sub Objects, Old To New Class Map, Old Object, New U Object, Created Instance Map, Old To New Instance Map, Ordered List Of Object To Copy)",
+      "params": [
+        {
+          "name": "Old Instanced Sub Objects",
+          "type": "TSet<UObject*>*"
+        },
+        {
+          "name": "Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Old Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "New U Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Created Instance Map",
+          "type": "TMap<UObject*,UObject*>&"
+        },
+        {
+          "name": "Old To New Instance Map",
+          "type": "TMap<UObject*,UObject*>*"
+        },
+        {
+          "name": "Ordered List Of Object To Copy",
+          "type": "TArray<TTuple<UObject*,UObject*>>*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles the sub object pre-creation recursively"
+    },
+    {
+      "id": "replace-instances-of-class-inner",
+      "name": "ReplaceInstancesOfClass_Inner",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReplaceInstancesOfClass_Inner(In Old To New Class Map, Params)",
+      "params": [
+        {
+          "name": "In Old To New Class Map",
+          "type": "TMap<UClass*,UClass*>&"
+        },
+        {
+          "name": "Params",
+          "type": "FReplaceInstancesOfClassParameters&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles the work of ReplaceInstancesOfClass, handling both normal replacement of instances and batch"
+    },
+    {
+      "id": "reinstancer-ordering-function",
+      "name": "ReinstancerOrderingFunction",
+      "category": "KismetReinstanceUtilities",
+      "signature": "ReinstancerOrderingFunction(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "UClass*"
+        },
+        {
+          "name": "B",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if A is higher up the class hierarchy"
+    },
+    {
+      "id": "cache-archetypes",
+      "name": "CacheArchetypes",
+      "category": "KismetReinstanceUtilities",
+      "signature": "CacheArchetypes(Objects To Replace, Cache Manager, Cached Archetype Objects)",
+      "params": [
+        {
+          "name": "Objects To Replace",
+          "type": "TArray<UObject*>&"
+        },
+        {
+          "name": "Cache Manager",
+          "type": "FEditorCacheArchetypeManager&"
+        },
+        {
+          "name": "Cached Archetype Objects",
+          "type": "TSet<UObject*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper for caching archetypes before objects are reconstructed"
+    },
+    {
+      "id": "calculate-construction-hash",
+      "name": "CalculateConstructionHash",
+      "category": "KismetReinstanceUtilities",
+      "signature": "CalculateConstructionHash(For Class)",
+      "params": [
+        {
+          "name": "For Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "FBlake3Hash",
+      "docs": "Returns a hash identifying the result of constructing an instance of the provided Class"
+    },
+    {
+      "id": "calculate-construction-hash-if-necessary",
+      "name": "CalculateConstructionHashIfNecessary",
+      "category": "KismetReinstanceUtilities",
+      "signature": "CalculateConstructionHashIfNecessary(For Class)",
+      "params": [
+        {
+          "name": "For Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "FBlake3Hash",
+      "docs": "Returns the above, but only if there are instances of the class that would require reinstancing"
+    }
+  ]
+}

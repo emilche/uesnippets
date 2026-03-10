@@ -1,0 +1,247 @@
+{
+  "id": "reliable-net-blob-queue",
+  "label": "ReliableNetBlobQueue",
+  "includepath": "Iris/ReplicationSystem/NetBlob/ReliableNetBlobQueue.h",
+  "includes": [
+    "CoreTypes",
+    "NetRefHandle",
+    "PacketNotification",
+    "RefCounting"
+  ],
+  "functions": [
+    {
+      "id": "is-safe-to-destroy",
+      "name": "IsSafeToDestroy",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsSafeToDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if it's safe to destroy this queue."
+    },
+    {
+      "id": "enqueue",
+      "name": "Enqueue",
+      "category": "ReliableNetBlobQueue",
+      "signature": "Enqueue(Target, Blob)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Blob",
+          "type": "TRefCountPtr<FNetBlob>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Put a blob to be sent in the queue. Returns true if the blob was successfully queued and false if the queue was full."
+    },
+    {
+      "id": "peek",
+      "name": "Peek",
+      "category": "ReliableNetBlobQueue",
+      "signature": "Peek(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "TRefCountPtr<FNetBlob>*",
+      "docs": "On the receiving end this will return a pointer to the next blob that can be processed."
+    },
+    {
+      "id": "pop",
+      "name": "Pop",
+      "category": "ReliableNetBlobQueue",
+      "signature": "Pop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "On the receiving end this will remove the next blob to be processed from the queue. Call after processing the blob returned from Peek()."
+    },
+    {
+      "id": "dequeue-unreliable",
+      "name": "DequeueUnreliable",
+      "category": "ReliableNetBlobQueue",
+      "signature": "DequeueUnreliable(Target, Unreliable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Unreliable",
+          "type": "TArray<TRefCountPtr<FNetBlob>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "On the receiving end this will move all received unreliable NetBlobs to the array and release them from the queue. This breaks the ordering guarantees provided by using Peek and Pop. Reliable NetBlobs are unaffected by this operation."
+    },
+    {
+      "id": "get-unreliable-count",
+      "name": "GetUnreliableCount",
+      "category": "ReliableNetBlobQueue",
+      "signature": "GetUnreliableCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "SIZE_T",
+      "docs": "Count all unreliable blobs"
+    },
+    {
+      "id": "drop-unreliable",
+      "name": "DropUnreliable",
+      "category": "ReliableNetBlobQueue",
+      "signature": "DropUnreliable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "On sending side this will drop all unreliable in the queue to avoid creating a backlog of unsent unreliable blobs"
+    },
+    {
+      "id": "serialize-with-object",
+      "name": "SerializeWithObject",
+      "category": "ReliableNetBlobQueue",
+      "signature": "SerializeWithObject(Target, Context, Ref Handle, Out Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Ref Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Out Record",
+          "type": "FReplicationRecord&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Serializes as many blobs as possible using their respective SerializeWithObject() method. It is assumed the NetRefHandle will be\nreconstructed somehow on the receiving end and passed to DeserializeWithObject().\nThis provides an opportunity for FNetObjectAttachments, such as FNetRPCs, to avoid serializing the same NetRefHandle redundantly.\n@param Context A FNetSerializationContext.\n@param RefHandle The handle for the blobs' target object.\n@param OutRecord The record to pass to CommitReplicationRecord() if a packet containing the serialized data was sent.\n@return The number of blobs that were serialized."
+    },
+    {
+      "id": "deserialize-with-object",
+      "name": "DeserializeWithObject",
+      "category": "ReliableNetBlobQueue",
+      "signature": "DeserializeWithObject(Target, Context, Ref Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Ref Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Deserializes blobs with object using their respective DeserializeWithObject() method.\n@return The number of blobs that were deserialized.\n@see SerializeWithObject"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "ReliableNetBlobQueue",
+      "signature": "Serialize(Target, Context, Out Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Out Record",
+          "type": "FReplicationRecord&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Serializes as many blobs as possible using their respective Serialize() method.\n@param Context A FNetSerializationContext.\n@param OutRecord The record to pass to CommitReplicationRecord() if a packet containing the serialized data was sent.\n@return The number of blobs that were serialized."
+    },
+    {
+      "id": "deserialize",
+      "name": "Deserialize",
+      "category": "ReliableNetBlobQueue",
+      "signature": "Deserialize(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Deserializes blobs with object using their respective Deserialize() method.\n@return The number of blobs that were deserialized.\n@see Serialize"
+    },
+    {
+      "id": "commit-replication-record",
+      "name": "CommitReplicationRecord",
+      "category": "ReliableNetBlobQueue",
+      "signature": "CommitReplicationRecord(Target, Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Record",
+          "type": "FReplicationRecord&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call after a packet containing serialized data was sent.\n@see SerializeWithObject, Serialize"
+    },
+    {
+      "id": "process-packet-delivery-status",
+      "name": "ProcessPacketDeliveryStatus",
+      "category": "ReliableNetBlobQueue",
+      "signature": "ProcessPacketDeliveryStatus(Target, Status, Record)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Status",
+          "type": "EPacketDeliveryStatus"
+        },
+        {
+          "name": "Record",
+          "type": "FReplicationRecord&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For each packet for which CommitReplicationRecord() was called ProcessPacketDeliveryStatus() needs\nto be called in the same order when it's known whether the packet was delivered or not.\n@param Status Whether the packet was delivered or not or if the record should simply be discarded due to closing a connection.\n@param Record The record that was obtained via a Serialize/SerializeWithObject call and passed to CommitReplicationRecord.\n@see CommitReplicationRecord"
+    }
+  ]
+}

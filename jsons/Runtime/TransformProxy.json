@@ -1,0 +1,302 @@
+{
+  "id": "transform-proxy",
+  "label": "TransformProxy",
+  "includepath": "BaseGizmos/TransformProxy.h",
+  "includes": [
+    "StateTargets",
+    "Array",
+    "UnrealString",
+    "CoreMinimal",
+    "Delegate",
+    "Platform",
+    "InteractiveToolChange",
+    "Text",
+    "Transform",
+    "Function",
+    "UniquePtr",
+    "Object",
+    "ObjectMacros",
+    "UObjectGlobals",
+    "WeakObjectPtr",
+    "WeakObjectPtrTemplates",
+    "TransformProxy.generated"
+  ],
+  "functions": [
+    {
+      "id": "add-component",
+      "name": "AddComponent",
+      "category": "TransformProxy",
+      "signature": "AddComponent(Target, Component, Modify Component On Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        },
+        {
+          "name": "Component",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Modify Component On Transform",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Add a component sub-object to the proxy set.\n@param bModifyComponentOnTransform if true, Component->Modify() is called before the Component transform is updated\n@warning The internal shared transform is regenerated each time a component is added"
+    },
+    {
+      "id": "add-component-custom",
+      "name": "AddComponentCustom",
+      "category": "TransformProxy",
+      "signature": "AddComponentCustom(Target, Component, Get Transform Func, Set Transform Func, User Defined Index, Modify Component On Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        },
+        {
+          "name": "Component",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Get Transform Func",
+          "type": "TUniqueFunction<FTransform ( void )>"
+        },
+        {
+          "name": "Set Transform Func",
+          "type": "TUniqueFunction<void ( FTransform& )>"
+        },
+        {
+          "name": "User Defined Index",
+          "type": "Int64",
+          "default": "0"
+        },
+        {
+          "name": "Modify Component On Transform",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add a component sub-object to the proxy set with custom transform access functions. This can be used\nto do things like add an ISM Instance to the TransformProxy.\n@param GetTransformFunc return current transform\n@param SetTransformFunc set current transform\n@param UserDefinedIndex an arbitrary integer that can be provided, not currently used but may be useful in subclasses\n@param bModifyComponentOnTransform if true, Component->Modify() is called before the Component transform is updated\n@warning The internal shared transform is regenerated each time a component is added"
+    },
+    {
+      "id": "get-transform",
+      "name": "GetTransform",
+      "category": "TransformProxy",
+      "signature": "GetTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "FTransform",
+      "docs": "@return the shared transform for all the sub-objects"
+    },
+    {
+      "id": "set-transform",
+      "name": "SetTransform",
+      "category": "TransformProxy",
+      "signature": "SetTransform(Target, Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        },
+        {
+          "name": "Transform",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the main transform and then update the sub-objects based on their relative transformations"
+    },
+    {
+      "id": "begin-transform-edit-sequence",
+      "name": "BeginTransformEditSequence",
+      "category": "TransformProxy",
+      "signature": "BeginTransformEditSequence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "In some use cases SetTransform() will be called repeatedly (eg during an interactive gizmo edit). External\ncode may know and/or need to know when such a sequence starts/ends. The OnBeginTransformEdit/OnEndTransformEdit delegates\ncan provide these notifications, however client code must call BeginTransformEditSequence()/EndTransformEditSequence() to fire those delegates\nas the TransformProxy doesn't know about this external state.\n@note FTransformProxyChangeSource will call these functions on Begin/End"
+    },
+    {
+      "id": "end-transform-edit-sequence",
+      "name": "EndTransformEditSequence",
+      "category": "TransformProxy",
+      "signature": "EndTransformEditSequence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "External clients should call this when done a sequence of SetTransform calls (see BeginTransformEditSequence)"
+    },
+    {
+      "id": "begin-pivot-edit-sequence",
+      "name": "BeginPivotEditSequence",
+      "category": "TransformProxy",
+      "signature": "BeginPivotEditSequence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clients should call this before a sequence of SetTransform calls that have bSetPivotMode as true\n(see comment in BeginTransformEditSequence)."
+    },
+    {
+      "id": "end-pivot-edit-sequence",
+      "name": "EndPivotEditSequence",
+      "category": "TransformProxy",
+      "signature": "EndPivotEditSequence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clients should call this when done with a sequence of SetTransform that have bSetPivotMode as true\n(see comment in BeginTransformEditSequence)."
+    },
+    {
+      "id": "update-shared-transform",
+      "name": "UpdateSharedTransform",
+      "category": "TransformProxy",
+      "signature": "UpdateSharedTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recalculate main SharedTransform when object set changes"
+    },
+    {
+      "id": "update-object-transforms",
+      "name": "UpdateObjectTransforms",
+      "category": "TransformProxy",
+      "signature": "UpdateObjectTransforms(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recalculate per-object relative transforms"
+    },
+    {
+      "id": "update-objects",
+      "name": "UpdateObjects",
+      "category": "TransformProxy",
+      "signature": "UpdateObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransformProxy*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Propagate a transform update to the sub-objects"
+    },
+    {
+      "id": "apply",
+      "name": "Apply",
+      "category": "TransformProxy",
+      "signature": "Apply(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransformProxyChange*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "FTransformProxyChange tracks a change to the base transform for a TransformProxy"
+    },
+    {
+      "id": "revert",
+      "name": "Revert",
+      "category": "TransformProxy",
+      "signature": "Revert(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransformProxyChange*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-change",
+      "name": "BeginChange",
+      "category": "TransformProxy",
+      "signature": "BeginChange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransformProxyChangeSource*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "end-change",
+      "name": "EndChange",
+      "category": "TransformProxy",
+      "signature": "EndChange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransformProxyChangeSource*"
+        }
+      ],
+      "returnType": "TUniquePtr<FToolCommandChange>"
+    },
+    {
+      "id": "get-change-target",
+      "name": "GetChangeTarget",
+      "category": "TransformProxy",
+      "signature": "GetChangeTarget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransformProxyChangeSource*"
+        }
+      ],
+      "returnType": "UObject*"
+    },
+    {
+      "id": "get-change-description",
+      "name": "GetChangeDescription",
+      "category": "TransformProxy",
+      "signature": "GetChangeDescription(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransformProxyChangeSource*"
+        }
+      ],
+      "returnType": "Text"
+    }
+  ]
+}

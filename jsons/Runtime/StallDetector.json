@@ -1,0 +1,281 @@
+{
+  "id": "stall-detector",
+  "label": "StallDetector",
+  "includepath": "ProfilingDebugging/StallDetector.h",
+  "includes": [
+    "Array",
+    "Set",
+    "UnrealString",
+    "CoreTypes",
+    "Delegate",
+    "GenericPlatformCrashContext",
+    "CriticalSection",
+    "PreprocessorHelpers",
+    "LogMacros",
+    "Build",
+    "ScopeLock",
+    "CountersTrace",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "f-stall-detector-stats-cfe881",
+      "name": "FStallDetectorStats",
+      "category": "StallDetector",
+      "signature": "FStallDetectorStats(In Name, In Budget Seconds, In Reporting Mode)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Budget Seconds",
+          "type": "Double"
+        },
+        {
+          "name": "In Reporting Mode",
+          "type": "EStallDetectorReportingMode"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "The reporting behavior of the detector"
+    },
+    {
+      "id": "f-stall-detector-stats-4385aa",
+      "name": "FStallDetectorStats",
+      "category": "StallDetector",
+      "signature": "FStallDetectorStats()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destruct a stats object, just removes it from the instance tracking"
+    },
+    {
+      "id": "on-stall-completed",
+      "name": "OnStallCompleted",
+      "category": "StallDetector",
+      "signature": "OnStallCompleted(Target, In Overage Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallDetectorStats*"
+        },
+        {
+          "name": "In Overage Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stall detector scope has ended, record the interval"
+    },
+    {
+      "id": "tabulate-stats",
+      "name": "TabulateStats",
+      "category": "StallDetector",
+      "signature": "TabulateStats(Tabulated Results)",
+      "params": [
+        {
+          "name": "Tabulated Results",
+          "type": "TArray<TabulatedResult>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-stall-timer",
+      "name": "FStallTimer",
+      "category": "StallDetector",
+      "signature": "FStallTimer()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "FStallTimer tracks remaining time from some budget, and access is protected from multiple threads.\nOwned by FStallDetector"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "StallDetector",
+      "signature": "Reset(Target, In Seconds, In Remaining Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallTimer*"
+        },
+        {
+          "name": "In Seconds",
+          "type": "Double"
+        },
+        {
+          "name": "In Remaining Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the timer with the current timestamp and remaining time to track"
+    },
+    {
+      "id": "check-a207e6",
+      "name": "Check",
+      "category": "StallDetector",
+      "signature": "Check(Target, In Seconds, Out Delta Seconds, Out Overage Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallTimer*"
+        },
+        {
+          "name": "In Seconds",
+          "type": "Double"
+        },
+        {
+          "name": "Out Delta Seconds",
+          "type": "Double&"
+        },
+        {
+          "name": "Out Overage Seconds",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform a check against the specified timestamp and provide some useful details"
+    },
+    {
+      "id": "pause",
+      "name": "Pause",
+      "category": "StallDetector",
+      "signature": "Pause(Target, In Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallTimer*"
+        },
+        {
+          "name": "In Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Pause the timer"
+    },
+    {
+      "id": "resume",
+      "name": "Resume",
+      "category": "StallDetector",
+      "signature": "Resume(Target, In Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallTimer*"
+        },
+        {
+          "name": "In Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resume the timer"
+    },
+    {
+      "id": "f-stall-detector-6a1257",
+      "name": "FStallDetector",
+      "category": "StallDetector",
+      "signature": "FStallDetector(In Stats)",
+      "params": [
+        {
+          "name": "In Stats",
+          "type": "FStallDetectorStats&"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "FStallDetector is meant to be constructed and destructed across a single scope to measure that specific timespan"
+    },
+    {
+      "id": "f-stall-detector-6dface",
+      "name": "FStallDetector",
+      "category": "StallDetector",
+      "signature": "FStallDetector()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destruct the stall detector and perform a check if appropriate (the default behavior)"
+    },
+    {
+      "id": "check-and-reset",
+      "name": "CheckAndReset",
+      "category": "StallDetector",
+      "signature": "CheckAndReset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallDetector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform a Check and then reset the timer to the current time\nThis changes the mode of this class to defer the first check, and skip the destruction check\nThis mode enables this class to used as a global or static, and CheckAndReset() callable periodically"
+    },
+    {
+      "id": "seconds",
+      "name": "Seconds",
+      "category": "StallDetector",
+      "signature": "Seconds()",
+      "params": [],
+      "returnType": "Double",
+      "docs": "Sample the same clock that the stall detector uses internally"
+    },
+    {
+      "id": "startup",
+      "name": "Startup",
+      "category": "StallDetector",
+      "signature": "Startup()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Initialize Stall Detector API resources"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "StallDetector",
+      "signature": "Shutdown()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Cleanup Stall Detector API resources"
+    },
+    {
+      "id": "is-running",
+      "name": "IsRunning",
+      "category": "StallDetector",
+      "signature": "IsRunning()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Stall Detector API is running?"
+    },
+    {
+      "id": "check-56147a",
+      "name": "Check",
+      "category": "StallDetector",
+      "signature": "Check(Target, Final Check, In Check Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallDetector*"
+        },
+        {
+          "name": "Final Check",
+          "type": "Bool"
+        },
+        {
+          "name": "In Check Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Event that triggers when we detect that a stall in any instance is occuring\nNote: It is possible for multiple instances to stall at the same time,\ndelegates should take this into account"
+    },
+    {
+      "id": "f-stall-detector-pause",
+      "name": "FStallDetectorPause",
+      "category": "StallDetector",
+      "signature": "FStallDetectorPause()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "FStallDetectorPause checks, pauses, and resumes the current thread's stack of stall detectors across it's lifetime"
+    }
+  ]
+}

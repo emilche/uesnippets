@@ -1,0 +1,340 @@
+{
+  "id": "movie-scene-playback",
+  "label": "MovieScenePlayback",
+  "includepath": "Evaluation/MovieScenePlayback.h",
+  "includes": [
+    "Array",
+    "CoreMinimal",
+    "MovieSceneSequenceTransform",
+    "MovieSceneTimeTransform",
+    "MovieSceneTimeWarping",
+    "Platform",
+    "PlatformCrt",
+    "NumericLimits",
+    "Range",
+    "RangeBound",
+    "AssertionMacros",
+    "FrameNumber",
+    "FrameRate",
+    "FrameTime",
+    "Optional",
+    "MovieSceneFwd",
+    "MovieSceneTimeHelpers"
+  ],
+  "functions": [
+    {
+      "id": "f-movie-scene-evaluation-range-e99582",
+      "name": "FMovieSceneEvaluationRange",
+      "category": "MovieScenePlayback",
+      "signature": "FMovieSceneEvaluationRange(In Time, In Frame Rate)",
+      "params": [
+        {
+          "name": "In Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "In Frame Rate",
+          "type": "FFrameRate"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enumeration specifying whether we're playing forwards or backwards"
+    },
+    {
+      "id": "f-movie-scene-evaluation-range-8ea490",
+      "name": "FMovieSceneEvaluationRange",
+      "category": "MovieScenePlayback",
+      "signature": "FMovieSceneEvaluationRange(In Range, In Frame Rate, In Direction)",
+      "params": [
+        {
+          "name": "In Range",
+          "type": "TRange<FFrameTime>"
+        },
+        {
+          "name": "In Frame Rate",
+          "type": "FFrameRate"
+        },
+        {
+          "name": "In Direction",
+          "type": "EPlayDirection"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct this range from a raw range and a direction"
+    },
+    {
+      "id": "f-movie-scene-evaluation-range-e59a42",
+      "name": "FMovieSceneEvaluationRange",
+      "category": "MovieScenePlayback",
+      "signature": "FMovieSceneEvaluationRange(In Current Time, In Previous Time, In Frame Rate, Inclusive Previous Time, Preferred Direction)",
+      "params": [
+        {
+          "name": "In Current Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "In Previous Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "In Frame Rate",
+          "type": "FFrameRate"
+        },
+        {
+          "name": "Inclusive Previous Time",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Preferred Direction",
+          "type": "EPlayDirection",
+          "default": "EPlayDirection::Forwards"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct this range from 2 times, and whether the range should include the previous time or not"
+    },
+    {
+      "id": "time-range-to-number-range",
+      "name": "TimeRangeToNumberRange",
+      "category": "MovieScenePlayback",
+      "signature": "TimeRangeToNumberRange(In Frame Time Range)",
+      "params": [
+        {
+          "name": "In Frame Time Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameNumber>",
+      "docs": "Convert a frame time range to a frame number range comprising all the frame numbers traversed in the range"
+    },
+    {
+      "id": "number-range-to-time-range",
+      "name": "NumberRangeToTimeRange",
+      "category": "MovieScenePlayback",
+      "signature": "NumberRangeToTimeRange(In Frame Time Range)",
+      "params": [
+        {
+          "name": "In Frame Time Range",
+          "type": "TRange<FFrameNumber>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>",
+      "docs": "Convert a frame number range to a frame time range"
+    },
+    {
+      "id": "get-traversed-frame-number-range",
+      "name": "GetTraversedFrameNumberRange",
+      "category": "MovieScenePlayback",
+      "signature": "GetTraversedFrameNumberRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationRange*"
+        }
+      ],
+      "returnType": "TRange<FFrameNumber>",
+      "docs": "Get the range of frame numbers traversed over this evaluation range by flooring the lower bound, and ceiling the upper bound.\nFor example: a time range of [1.5, 5.6] will yield the equivalent of [1, 6). A time range of (2.0, 2.9) will yield the equivalent of [2,3)."
+    },
+    {
+      "id": "reset-range",
+      "name": "ResetRange",
+      "category": "MovieScenePlayback",
+      "signature": "ResetRange(Target, New Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationRange*"
+        },
+        {
+          "name": "New Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset this range to a new range while retaining the current framerate and direction"
+    },
+    {
+      "id": "get-sequence-to-root-transform",
+      "name": "GetSequenceToRootTransform",
+      "category": "MovieScenePlayback",
+      "signature": "GetSequenceToRootTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneContext*"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform",
+      "docs": "Get the inverse transform of the current sub sequence, to transform local times back to root times."
+    },
+    {
+      "id": "get-sequence-to-root-sequence-transform",
+      "name": "GetSequenceToRootSequenceTransform",
+      "category": "MovieScenePlayback",
+      "signature": "GetSequenceToRootSequenceTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneContext*"
+        }
+      ],
+      "returnType": "FMovieSceneInverseSequenceTransform",
+      "docs": "Get the inverse sequence transform of the current sub sequence, to transform local times back to root times."
+    },
+    {
+      "id": "transform",
+      "name": "Transform",
+      "category": "MovieScenePlayback",
+      "signature": "Transform(Target, In Transform, New Frame Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneContext*"
+        },
+        {
+          "name": "In Transform",
+          "type": "FMovieSceneSequenceTransform&"
+        },
+        {
+          "name": "New Frame Rate",
+          "type": "FFrameRate"
+        }
+      ],
+      "returnType": "FMovieSceneContext",
+      "docs": "Transform this context to a different sub sequence space"
+    },
+    {
+      "id": "set-time-base",
+      "name": "SetTimeBase",
+      "category": "MovieScenePlayback",
+      "signature": "SetTimeBase(Target, In Input Rate, In Output Rate, Input Evaluation Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        },
+        {
+          "name": "In Input Rate",
+          "type": "FFrameRate"
+        },
+        {
+          "name": "In Output Rate",
+          "type": "FFrameRate"
+        },
+        {
+          "name": "Input Evaluation Type",
+          "type": "EMovieSceneEvaluationType"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Assign the input and output rates that frame times should be interpreted as.\n@param InInputRate           The framerate to interpret any frame time provided to this class\n@param InOutputRate          The framerate to use when returning any frame range from this class\n@param InputEvaluationType   Whether we're using frame-locked or sub-frame evaluation"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "MovieScenePlayback",
+      "signature": "Reset(Target, Start Pos)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        },
+        {
+          "name": "Start Pos",
+          "type": "FFrameTime"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset this position to the specified time.\n@note Future calls to 'PlayTo' will include this time in its resulting evaluation range"
+    },
+    {
+      "id": "jump-to",
+      "name": "JumpTo",
+      "category": "MovieScenePlayback",
+      "signature": "JumpTo(Target, New Position, Preferred Direction)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        },
+        {
+          "name": "New Position",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Preferred Direction",
+          "type": "EPlayDirection",
+          "default": "EPlayDirection::Forwards"
+        }
+      ],
+      "returnType": "public : FMovieSceneEvaluationRange",
+      "docs": "Jump to the specified input time.\n@note Will reset previous play position. Any subsequent call to 'PlayTo' will include NewPosition.\n@param NewPosition         The new frame time to set, in InputRate space\n@return A range encompassing only the specified time, in OutputRate space."
+    },
+    {
+      "id": "play-to",
+      "name": "PlayTo",
+      "category": "MovieScenePlayback",
+      "signature": "PlayTo(Target, New Position, Preferred Direction)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        },
+        {
+          "name": "New Position",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Preferred Direction",
+          "type": "EPlayDirection",
+          "default": "EPlayDirection::Forwards"
+        }
+      ],
+      "returnType": "FMovieSceneEvaluationRange",
+      "docs": "Play from the previously evaluated play time, to the specified time\n@param NewPosition         The new frame time to set, in InputRate space\n@return An evaluation range from the previously evaluated time to the specified time, in OutputRate space."
+    },
+    {
+      "id": "get-last-range",
+      "name": "GetLastRange",
+      "category": "MovieScenePlayback",
+      "signature": "GetLastRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        }
+      ],
+      "returnType": "TOptional<FMovieSceneEvaluationRange>",
+      "docs": "Get a range that encompasses the last evaluated range in OutputRate space.\n@return An optional evaluation range in OutputRate space."
+    },
+    {
+      "id": "get-current-position-as-range",
+      "name": "GetCurrentPositionAsRange",
+      "category": "MovieScenePlayback",
+      "signature": "GetCurrentPositionAsRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        }
+      ],
+      "returnType": "FMovieSceneEvaluationRange",
+      "docs": "Get a range encompassing only the current time, if available (in OutputRate space)\n@return An optional evaluation range in OutputRate space."
+    },
+    {
+      "id": "check-invariants",
+      "name": "CheckInvariants",
+      "category": "MovieScenePlayback",
+      "signature": "CheckInvariants(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieScenePlaybackPosition*"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Check this class's invariants"
+    }
+  ]
+}

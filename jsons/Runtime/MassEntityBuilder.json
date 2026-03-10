@@ -1,0 +1,282 @@
+{
+  "id": "mass-entity-builder",
+  "label": "MassEntityBuilder",
+  "includepath": "MassEntityBuilder.h",
+  "includes": [
+    "MassArchetypeTypes",
+    "MassEntityConcepts",
+    "MassEntityHandle",
+    "MassEntityTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-entity-builder-28bec9",
+      "name": "FEntityBuilder",
+      "category": "MassEntityBuilder",
+      "signature": "FEntityBuilder(In Entity Manager)",
+      "params": [
+        {
+          "name": "In Entity Manager",
+          "type": "FMassEntityManager&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "FEntityBuilder is a utility struct that provides a convenient way to create and configure entities\nin the Mass framework. It bridges multiple APIs from FMassEntityManager, MassSpawnerSubsystem,\nMassEntityTemplates, and other related components, allowing for streamlined entity creation and configuration.\nKey Features:\n- Can be seamlessly used in place of FMassEntityHandle, allowing for consistent and intuitive usage.\n- An entity only gets created once Commit() is called\n- Copyable, but copied instances represent new entities without carrying over the reserved entity handle.\nExample Usage:\n{\nFEntityBuilder Builder(EntityManager);\nBuilder.Add<FTransformFragment>(FTransform(FVector(100, 200, 300)))\n.Commit();\t// the entity gets reserved and built by this call\n}\n{\nFEntityBuilder Builder(EntityManager);\nFMassEntityHandle ReservedEntity = Builder; // Entity handle reserved, can be used for commands.\nBuilder.Add_GetRef<FTransformFragment>().GetMutableTransform().SetTranslation(FVector(100, 200, 300));\nBuilder.Commit(); // Entity creation is finalized at this point.\n}\n// Example of chaining with FMassEntityManager's MakeEntityBuilder() method:\nFMassEntityHandle NewEntity = EntityManager.MakeEntityBuilder()\n.Add<FMassStaticRepresentationTag>()\n.Add<FTransformFragment>()\n.Add<FAgentRadiusFragment>(FAgentRadiusFragment{ .Radius = 35.f})\n.Add<FMassVelocityFragment>()\n.Commit();\nCurrent Limitations:\n- Committing entities while Mass's processing is in progress is not yet supported; this functionality will be implemented in the near future.\n- no support for entity grouping"
+    },
+    {
+      "id": "f-entity-builder-b20385",
+      "name": "FEntityBuilder",
+      "category": "MassEntityBuilder",
+      "signature": "FEntityBuilder(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FEntityBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy constructor - copies-create a new instance that represents a new entity and does not carry over reserved handle."
+    },
+    {
+      "id": "f-entity-builder-7d1f4f",
+      "name": "FEntityBuilder",
+      "category": "MassEntityBuilder",
+      "signature": "FEntityBuilder()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor - automatically commits entity creation if not explicitly aborted or committed beforehand."
+    },
+    {
+      "id": "make",
+      "name": "Make",
+      "category": "MassEntityBuilder",
+      "signature": "Make(In Entity Manager, Composition, Initial Fragment Values, Const Shared Fragments, Shared Fragments)",
+      "params": [
+        {
+          "name": "In Entity Manager",
+          "type": "TSharedRef<FMassEntityManager>&"
+        },
+        {
+          "name": "Composition",
+          "type": "FMassArchetypeCompositionDescriptor&"
+        },
+        {
+          "name": "Initial Fragment Values",
+          "type": "TConstArrayView<FInstancedStruct>",
+          "default": "{}"
+        },
+        {
+          "name": "Const Shared Fragments",
+          "type": "TConstArrayView<FConstSharedStruct>",
+          "default": "{}"
+        },
+        {
+          "name": "Shared Fragments",
+          "type": "TConstArrayView<FSharedStruct>",
+          "default": "{}"
+        }
+      ],
+      "returnType": "FEntityBuilder",
+      "docs": "Creates an instance of FEntityBuilder and populates it with provided data"
+    },
+    {
+      "id": "commit",
+      "name": "Commit",
+      "category": "MassEntityBuilder",
+      "signature": "Commit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "FMassEntityHandle",
+      "docs": "Finalizes the creation of the entity with the specified fragments and configurations.\nNote that this function needs to be called manually, no automated entity creation will take place upon builder's destruction."
+    },
+    {
+      "id": "commit-and-reprepare",
+      "name": "CommitAndReprepare",
+      "category": "MassEntityBuilder",
+      "signature": "CommitAndReprepare(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "FMassEntityHandle",
+      "docs": "A wrapper for \"Commit\" call that, once that's done, prepares the builder for another commit, forgetting the\nhandle for the entity just created, and reverting the state back to \"ReadyToCommit\"\n@see Commit"
+    },
+    {
+      "id": "reprepare",
+      "name": "Reprepare",
+      "category": "MassEntityBuilder",
+      "signature": "Reprepare(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "if the builder is in \"Committed\" state it will roll back to ReadyToSubmit and reset the stored entity handle"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "MassEntityBuilder",
+      "signature": "Reset(Target, Release Entity Handle If Reserved)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        },
+        {
+          "name": "Release Entity Handle If Reserved",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the builder to its initial state, discarding all previous entity configurations.\n@param bReleaseEntityHandleIfReserved configures what to do with the reserved entity handle, if it's valid."
+    },
+    {
+      "id": "set-reserved-entity-handle",
+      "name": "SetReservedEntityHandle",
+      "category": "MassEntityBuilder",
+      "signature": "SetReservedEntityHandle(Target, Reserved Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        },
+        {
+          "name": "Reserved Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Stores ReservedEntityHandle as the cached EntityHandle. The ReservedEntityHandle is expected to be valid\nand represent a reserved entity. These expectations will be checked via ensures.\nIf the existing EntityHandle also represents a valid, reserved entity, that handle will be released.\n@return whether the ReservedEntityHandle has been stored."
+    },
+    {
+      "id": "append-data-from-entity",
+      "name": "AppendDataFromEntity",
+      "category": "MassEntityBuilder",
+      "signature": "AppendDataFromEntity(Target, Source Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        },
+        {
+          "name": "Source Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Appends all element types and values stored by the entity indicated by SourceEntityHandle.\n@param SourceEntityHandle valid handle for a fully constructed, built entity.\n@return whether the operation was successful"
+    },
+    {
+      "id": "copy-data-from-entity",
+      "name": "CopyDataFromEntity",
+      "category": "MassEntityBuilder",
+      "signature": "CopyDataFromEntity(Target, Source Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        },
+        {
+          "name": "Source Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Copies all element types and values stored by the entity indicated by SourceEntityHandle. Any existing builder data will be overridden\n@param SourceEntityHandle valid handle for a fully constructed, built entity.\n@return whether the operation was successful"
+    },
+    {
+      "id": "add",
+      "name": "Add",
+      "category": "MassEntityBuilder",
+      "signature": "Add(Target, Element Instance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        },
+        {
+          "name": "Element Instance",
+          "type": "FInstancedStruct&"
+        }
+      ],
+      "returnType": "FEntityBuilder&",
+      "docs": "Adds a fragment instance to the Entity Builder, treating the contents according to its type"
+    },
+    {
+      "id": "get-entity-handle",
+      "name": "GetEntityHandle",
+      "category": "MassEntityBuilder",
+      "signature": "GetEntityHandle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FMassEntityHandle",
+      "docs": "Converts the builder to a FMassEntityHandle, reserving the entity handle if not already committed."
+    },
+    {
+      "id": "get-archetype-handle",
+      "name": "GetArchetypeHandle",
+      "category": "MassEntityBuilder",
+      "signature": "GetArchetypeHandle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FMassArchetypeHandle"
+    },
+    {
+      "id": "cache-shared-fragment-value",
+      "name": "CacheSharedFragmentValue",
+      "category": "MassEntityBuilder",
+      "signature": "CacheSharedFragmentValue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cache-archetype-handle",
+      "name": "CacheArchetypeHandle",
+      "category": "MassEntityBuilder",
+      "signature": "CacheArchetypeHandle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "invalidate-cached-data",
+      "name": "InvalidateCachedData",
+      "category": "MassEntityBuilder",
+      "signature": "InvalidateCachedData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEntityBuilder*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

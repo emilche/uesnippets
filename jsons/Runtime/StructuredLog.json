@@ -1,0 +1,232 @@
+{
+  "id": "structured-log",
+  "label": "StructuredLog",
+  "includepath": "Logging/StructuredLog.h",
+  "includes": [
+    "Insertable",
+    "StringFwd",
+    "LogCategory",
+    "LogMacros",
+    "LogVerbosity",
+    "OptionalFwd",
+    "CompactBinary",
+    "CompactBinaryWriter",
+    "IsArrayOrRefOfType",
+    "Models",
+    "Requires",
+    "UnrealTypeTraits",
+    "atomic",
+    "type_traits"
+  ],
+  "functions": [
+    {
+      "id": "now",
+      "name": "Now",
+      "category": "StructuredLog",
+      "signature": "Now()",
+      "params": [],
+      "returnType": "public : FLogTime",
+      "docs": "Template format is \"Text with {Fields} embedded {Like}{This}. {{Double to escape.}}\""
+    },
+    {
+      "id": "from-utc-time",
+      "name": "FromUtcTime",
+      "category": "StructuredLog",
+      "signature": "FromUtcTime(Utc Time)",
+      "params": [
+        {
+          "name": "Utc Time",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "FLogTime"
+    },
+    {
+      "id": "get-utc-time",
+      "name": "GetUtcTime",
+      "category": "StructuredLog",
+      "signature": "GetUtcTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLogTime*"
+        }
+      ],
+      "returnType": "FDateTime",
+      "docs": "Returns the UTC time. 0 ticks when the time was not set."
+    },
+    {
+      "id": "format-message-to",
+      "name": "FormatMessageTo",
+      "category": "StructuredLog",
+      "signature": "FormatMessageTo(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLogRecord*"
+        },
+        {
+          "name": "Out",
+          "type": "FUtf8StringBuilderBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Formats the message using the format, template, and fields."
+    },
+    {
+      "id": "convert-to-common-log",
+      "name": "ConvertToCommonLog",
+      "category": "StructuredLog",
+      "signature": "ConvertToCommonLog(Target, Out Format, Out Fields)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLogRecord*"
+        },
+        {
+          "name": "Out Format",
+          "type": "FUtf8StringBuilderBase&"
+        },
+        {
+          "name": "Out Fields",
+          "type": "FCbWriter&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts this record into a common format string and compatible fields.\nThe common format string uses '{{' as a literal '{' and uses as a literal '}}'.\nThe common format string contains no format specifiers or format argument modifiers.\nThe common format string uses field names matching [A-Za-z0-9_]+.\nWhen a compatible field is an object, it will have a string field named $text containing the formatted value.\nA compatible field will never be an array.\n@param OutFormat   Appended with a transformed version of the format from Template.\n@param OutFields   Must be within an object scope. Appended with a compatible version of Fields."
+    },
+    {
+      "id": "dispatch-dynamic-log-record",
+      "name": "DispatchDynamicLogRecord",
+      "category": "StructuredLog",
+      "signature": "DispatchDynamicLogRecord(Record)",
+      "params": [
+        {
+          "name": "Record",
+          "type": "FLogRecord&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Advanced function to dispatch a log record to active output devices.\nAlways use UE_LOGFMT or its variants when possible.\nDynamic dispatch bypasses many optimizations provided by the macros.\nAnything pointed to by the record MUST remain valid until threaded logs have been flushed.\nFiltering by category or verbosity is the responsibility of the caller.\nActive log contexts will not be added to this record. If they are needed that is the responsibility of the caller."
+    },
+    {
+      "id": "visit-log-context",
+      "name": "VisitLogContext",
+      "category": "StructuredLog",
+      "signature": "VisitLogContext(Visitor)",
+      "params": [
+        {
+          "name": "Visitor",
+          "type": "TFunctionRef<void ( FCbField& )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Advanced function to visit the log contexts for the calling thread.\nInvokes the visitor once for each context, in order from the oldest context added on this thread to the newest.\nIf there are multiple contexts with the same name, only the newest will be visited."
+    },
+    {
+      "id": "log-with-no-fields",
+      "name": "LogWithNoFields",
+      "category": "StructuredLog",
+      "signature": "LogWithNoFields(Category, Log)",
+      "params": [
+        {
+          "name": "Category",
+          "type": "FLogCategoryBase&"
+        },
+        {
+          "name": "Log",
+          "type": "FStaticLogRecord&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "log-with-field-array",
+      "name": "LogWithFieldArray",
+      "category": "StructuredLog",
+      "signature": "LogWithFieldArray(Category, Log, Fields, Field Count)",
+      "params": [
+        {
+          "name": "Category",
+          "type": "FLogCategoryBase&"
+        },
+        {
+          "name": "Log",
+          "type": "FStaticLogRecord&"
+        },
+        {
+          "name": "Fields",
+          "type": "FLogField*"
+        },
+        {
+          "name": "Field Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fatal-log-with-no-fields",
+      "name": "FatalLogWithNoFields",
+      "category": "StructuredLog",
+      "signature": "FatalLogWithNoFields(Category, Log)",
+      "params": [
+        {
+          "name": "Category",
+          "type": "FLogCategoryBase&"
+        },
+        {
+          "name": "Log",
+          "type": "FStaticLogRecord&"
+        }
+      ],
+      "returnType": "noreturn ] ] void"
+    },
+    {
+      "id": "fatal-log-with-field-array",
+      "name": "FatalLogWithFieldArray",
+      "category": "StructuredLog",
+      "signature": "FatalLogWithFieldArray(Category, Log, Fields, Field Count)",
+      "params": [
+        {
+          "name": "Category",
+          "type": "FLogCategoryBase&"
+        },
+        {
+          "name": "Log",
+          "type": "FStaticLogRecord&"
+        },
+        {
+          "name": "Fields",
+          "type": "FLogField*"
+        },
+        {
+          "name": "Field Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "noreturn ] ] void"
+    },
+    {
+      "id": "f-log-context-c3906f",
+      "name": "FLogContext",
+      "category": "StructuredLog",
+      "signature": "FLogContext(Field)",
+      "params": [
+        {
+          "name": "Field",
+          "type": "FLogField&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-log-context-d41240",
+      "name": "FLogContext",
+      "category": "StructuredLog",
+      "signature": "FLogContext()",
+      "params": [],
+      "returnType": "Void"
+    }
+  ]
+}

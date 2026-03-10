@@ -1,0 +1,300 @@
+{
+  "id": "notification-manager",
+  "label": "NotificationManager",
+  "includepath": "Framework/Notifications/NotificationManager.h",
+  "includes": [
+    "CoreMinimal",
+    "SlateFwd",
+    "LockFreeList",
+    "SlateRect",
+    "SWindow",
+    "IConsoleManager",
+    "CoreAsyncTaskNotificationImpl"
+  ],
+  "functions": [
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "NotificationManager",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "public : FSlateNotificationManager&",
+      "docs": "A class which manages a group of notification windows"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "NotificationManager",
+      "signature": "Tick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the manager"
+    },
+    {
+      "id": "set-root-window",
+      "name": "SetRootWindow",
+      "category": "NotificationManager",
+      "signature": "SetRootWindow(Target, In Root Window)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Root Window",
+          "type": "TSharedRef<SWindow>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Provide a window under which all notifications should nest."
+    },
+    {
+      "id": "add-notification",
+      "name": "AddNotification",
+      "category": "NotificationManager",
+      "signature": "AddNotification(Target, Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "Info",
+          "type": "FNotificationInfo&"
+        }
+      ],
+      "returnType": "TSharedPtr<SNotificationItem>",
+      "docs": "Adds a floating notification\n@param Info \t\tContains various settings used to initialize the notification"
+    },
+    {
+      "id": "queue-notification",
+      "name": "QueueNotification",
+      "category": "NotificationManager",
+      "signature": "QueueNotification(Target, Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "Info",
+          "type": "FNotificationInfo*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Thread safe method of queuing a notification for presentation on the next tick\n@param Info \t\tPointer to heap allocated notification info. Released by FSlateNotificationManager once the notification is displayed;"
+    },
+    {
+      "id": "start-progress-notification",
+      "name": "StartProgressNotification",
+      "category": "NotificationManager",
+      "signature": "StartProgressNotification(Target, Display Text, Total Work To Do)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "Display Text",
+          "type": "Text"
+        },
+        {
+          "name": "Total Work To Do",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FProgressNotificationHandle",
+      "docs": "Begin a progress notification. These notifications should be used for background work not blocking work. Use SlowTask for blocking work\n@param DisplayText\t\tDisplay text used to describe the type of work to the user\n@param TotalWorkToDo\t\tArbitrary number of work units to perform. If more than one progress notification is active this work is summed with any other active notifications.\nThis value usually represents the number of steps to be completed\n@return NotificationHandle\tA handle that can be used to update the progress or cancel the notification"
+    },
+    {
+      "id": "update-progress-notification",
+      "name": "UpdateProgressNotification",
+      "category": "NotificationManager",
+      "signature": "UpdateProgressNotification(Target, In Handle, Total Work Done, Updated Total Work To Do, Updated Display Text)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FProgressNotificationHandle"
+        },
+        {
+          "name": "Total Work Done",
+          "type": "Int"
+        },
+        {
+          "name": "Updated Total Work To Do",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Updated Display Text",
+          "type": "Text",
+          "default": "FText::GetEmpty()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates a progress notification.\n@param InHandle\t\tHandle to the notification that was previously created with StartProgressNotification\n@param TotalWorkDone\t\tThe total number of work uits done for the notification. This is NOT an incremental value.\n@param UpdatedTotalWorkToDo\t(Optional) If the total work to do changes you can update the value here. Note that if the total work left increases but the total work done does not, the progress bar may go backwards\n@param UpdatedDisplayText\t(Optional) Updated display text of the notification\n@return NotificationHandle\tA handle that can be used to update the progress or cancel the notification"
+    },
+    {
+      "id": "cancel-progress-notification",
+      "name": "CancelProgressNotification",
+      "category": "NotificationManager",
+      "signature": "CancelProgressNotification(Target, In Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FProgressNotificationHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cancels an active notification"
+    },
+    {
+      "id": "set-progress-notification-handler",
+      "name": "SetProgressNotificationHandler",
+      "category": "NotificationManager",
+      "signature": "SetProgressNotificationHandler(Target, New Handler)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "New Handler",
+          "type": "IProgressNotificationHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the progress notification handler for the current application. Only one handler is used at a time.\nThis handler is not managed in any way. If your handler is being destroyed call SetProgressNotificationHandler(nullptr)"
+    },
+    {
+      "id": "force-notifications-in-front",
+      "name": "ForceNotificationsInFront",
+      "category": "NotificationManager",
+      "signature": "ForceNotificationsInFront(Target, In Window)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Window",
+          "type": "TSharedRef<SWindow>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called back from the SlateApplication when a window is activated/resized\nWe need to keep notifications topmost in the z-order so we manage it here directly\nas there isn't a cross-platform OS-level way of making a 'topmost child'.\n@param ActivateEvent \tInformation about the activation event"
+    },
+    {
+      "id": "get-windows",
+      "name": "GetWindows",
+      "category": "NotificationManager",
+      "signature": "GetWindows(Target, Out Windows)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "Out Windows",
+          "type": "TArray<TSharedRef<SWindow>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets all the windows that represent notifications\n@returns an array of windows that contain notifications."
+    },
+    {
+      "id": "register-staged-notification",
+      "name": "RegisterStagedNotification",
+      "category": "NotificationManager",
+      "signature": "RegisterStagedNotification(Target, In Notification)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Notification",
+          "type": "TSharedPtr<IAsyncTaskNotificationImpl>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Register a Staged Async Notification, allowing the NotificationManager to keep a reference to it"
+    },
+    {
+      "id": "unregister-staged-notification",
+      "name": "UnregisterStagedNotification",
+      "category": "NotificationManager",
+      "signature": "UnregisterStagedNotification(Target, In Notification)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Notification",
+          "type": "TSharedPtr<IAsyncTaskNotificationImpl>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unregister a previously added Staged Notification"
+    },
+    {
+      "id": "f-slate-notification-manager",
+      "name": "FSlateNotificationManager",
+      "category": "NotificationManager",
+      "signature": "FSlateNotificationManager()",
+      "params": [],
+      "returnType": "protected :",
+      "docs": "Protect constructor as this is a singleton"
+    },
+    {
+      "id": "create-stack-for-area",
+      "name": "CreateStackForArea",
+      "category": "NotificationManager",
+      "signature": "CreateStackForArea(Target, In Rectangle, Window)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        },
+        {
+          "name": "In Rectangle",
+          "type": "FSlateRect&"
+        },
+        {
+          "name": "Window",
+          "type": "TSharedPtr<SWindow>"
+        }
+      ],
+      "returnType": "TSharedRef<SNotificationList>",
+      "docs": "Create a notification list for the specified screen rectangle"
+    },
+    {
+      "id": "shutdown-on-pre-exit",
+      "name": "ShutdownOnPreExit",
+      "category": "NotificationManager",
+      "signature": "ShutdownOnPreExit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateNotificationManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "FCoreDelegates::OnPreExit shutdown callback"
+    }
+  ]
+}

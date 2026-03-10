@@ -1,0 +1,270 @@
+{
+  "id": "analytics-provider-et-event-cache",
+  "label": "AnalyticsProviderETEventCache",
+  "includepath": "AnalyticsProviderETEventCache.h",
+  "includes": [
+    "AnalyticsEventAttribute",
+    "Array",
+    "UnrealString",
+    "CoreMinimal",
+    "CoreTypes",
+    "CriticalSection",
+    "DateTime",
+    "ScopeLock",
+    "Function",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "f-analytics-provider-et-event-cache",
+      "name": "FAnalyticsProviderETEventCache",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "FAnalyticsProviderETEventCache(Maximum Payload Size, In Preallocated Payload Size)",
+      "params": [
+        {
+          "name": "Maximum Payload Size",
+          "type": "Int",
+          "default": "-1"
+        },
+        {
+          "name": "In Preallocated Payload Size",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Mixin class for Epic Telemetry implementors.\nThe purpose of this class is to support the concept of caching events that are added via the standard RecordEvent API\nand serializing them into a payload in a Json format compatible with Epic's backend data collectors.\nThe job of transporting these payloads to an external collector (generally expected to be via HTTP) is left to\nhigher level classes to implement.\nAll public APIs in this class are threadsafe. Implemented via crappy critical sections for now, but they are safe."
+    },
+    {
+      "id": "add-to-cache-bfc9e2",
+      "name": "AddToCache",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "AddToCache(Target, Event Name, Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        },
+        {
+          "name": "Event Name",
+          "type": "String"
+        },
+        {
+          "name": "Attributes",
+          "type": "TArray<FAnalyticsEventAttribute>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new event to the cache.\nIf the estimated payload size will increase beyond MaximumPayloadSize then a flush will be queued here. This will make HasFlushesQueued() == true."
+    },
+    {
+      "id": "add-to-cache-9c97f3",
+      "name": "AddToCache",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "AddToCache(Target, Event Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        },
+        {
+          "name": "Event Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-default-attributes",
+      "name": "SetDefaultAttributes",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "SetDefaultAttributes(Target, Default Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        },
+        {
+          "name": "Default Attributes",
+          "type": "TArray<FAnalyticsEventAttribute>&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets an array of attributes that will automatically be appended to any event that is sent.\nLogical effect is like adding them to all events before calling RecordEvent.\nPractically, it is implemented much more efficiently from a storage and allocation perspective."
+    },
+    {
+      "id": "get-default-attributes",
+      "name": "GetDefaultAttributes",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "GetDefaultAttributes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "TArray<FAnalyticsEventAttribute>",
+      "docs": "@return the current array of default attributes."
+    },
+    {
+      "id": "get-default-attribute-count",
+      "name": "GetDefaultAttributeCount",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "GetDefaultAttributeCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the number of default attributes are currently being applied."
+    },
+    {
+      "id": "get-default-attribute",
+      "name": "GetDefaultAttribute",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "GetDefaultAttribute(Target, Attribute Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        },
+        {
+          "name": "Attribute Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FAnalyticsEventAttribute",
+      "docs": "Range checking is not done, similar to TArray. Use GetDefaultAttributeCount() first!\n@return one attribute of the default attributes so we don't have to copy the entire attribute array."
+    },
+    {
+      "id": "flush-cache",
+      "name": "FlushCache",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "FlushCache(Target, Out Event Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        },
+        {
+          "name": "Out Event Count",
+          "type": "SIZE_T*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Flushes the cache as a string. This method is inefficient because we build up the array directly as UTF8. If nothing is cached, returns an empty string."
+    },
+    {
+      "id": "flush-cache-utf-8",
+      "name": "FlushCacheUTF8",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "FlushCacheUTF8(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "TArray<uint8>",
+      "docs": "Flushes the cache as a UTF8 char array. Returns a uint8 because that's what IHttpRequest prefers. If nothing is cached, returns an empty array."
+    },
+    {
+      "id": "can-flush",
+      "name": "CanFlush",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "CanFlush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines whether we have anything we need to flush, either a queued flush or existing events in the payload."
+    },
+    {
+      "id": "has-flushes-queued",
+      "name": "HasFlushesQueued",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "HasFlushesQueued(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Lets external code know that there are payloads queued for flush.\nThis happens when AddCache() calls cause the payload size to exceed MaxPayloadSize.\nCalling code needs to notice this and flush the queue."
+    },
+    {
+      "id": "get-num-cached-events",
+      "name": "GetNumCachedEvents",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "GetNumCachedEvents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of cached events (doesn't include any flushes that are already queued for flush)."
+    },
+    {
+      "id": "set-preallocated-payload-size",
+      "name": "SetPreallocatedPayloadSize",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "SetPreallocatedPayloadSize(Target, In Set Preallocated Payload Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        },
+        {
+          "name": "In Set Preallocated Payload Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the preallocated payload size\n@param InPreallocatedCacheSize size to preallocate the payload buffer to during init and after flushing. If negative, will match the INI-configured MaximumPayloadSize."
+    },
+    {
+      "id": "get-set-preallocated-payload-size",
+      "name": "GetSetPreallocatedPayloadSize",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "GetSetPreallocatedPayloadSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the preallocated size of the payload buffer."
+    },
+    {
+      "id": "on-startup-module",
+      "name": "OnStartupModule",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "OnStartupModule()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "queue-flush",
+      "name": "QueueFlush",
+      "category": "AnalyticsProviderETEventCache",
+      "signature": "QueueFlush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnalyticsProviderETEventCache*"
+        }
+      ],
+      "returnType": "private : void"
+    }
+  ]
+}

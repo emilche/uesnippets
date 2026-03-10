@@ -1,0 +1,790 @@
+{
+  "id": "movie-scene-evaluation-state",
+  "label": "MovieSceneEvaluationState",
+  "includepath": "Evaluation/MovieSceneEvaluationState.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "ContainerAllocationPolicies",
+    "Map",
+    "CoreMinimal",
+    "Delegate",
+    "MulticastDelegateBase",
+    "MovieSceneSharedPlaybackState",
+    "IMovieScenePlaybackCapability",
+    "MovieSceneEvaluationKey",
+    "PersistentEvaluationData",
+    "Platform",
+    "PlatformCrt",
+    "Guid",
+    "MovieSceneSequence",
+    "MovieSceneSequenceID",
+    "UniquePtr",
+    "UnrealTypeTraits",
+    "WeakObjectPtr",
+    "WeakObjectPtrTemplates"
+  ],
+  "functions": [
+    {
+      "id": "get-binding-override",
+      "name": "GetBindingOverride",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetBindingOverride(Target, In Operand)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStaticBindingOverrides*"
+        },
+        {
+          "name": "In Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        }
+      ],
+      "returnType": "FMovieSceneEvaluationOperand*",
+      "docs": "Retrieves any override for the given operand"
+    },
+    {
+      "id": "add-binding-override",
+      "name": "AddBindingOverride",
+      "category": "MovieSceneEvaluationState",
+      "signature": "AddBindingOverride(Target, In Operand, In Override Operand)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStaticBindingOverrides*"
+        },
+        {
+          "name": "In Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "In Override Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an override for the given operand"
+    },
+    {
+      "id": "remove-binding-override",
+      "name": "RemoveBindingOverride",
+      "category": "MovieSceneEvaluationState",
+      "signature": "RemoveBindingOverride(Target, In Operand)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStaticBindingOverrides*"
+        },
+        {
+          "name": "In Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes any override set for the given operand"
+    },
+    {
+      "id": "find-bound-objects-0c9273",
+      "name": "FindBoundObjects",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindBoundObjects(Target, In Binding ID, In Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Binding ID",
+          "type": "FGuid&"
+        },
+        {
+          "name": "In Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "TArrayView<TWeakObjectPtr<>>",
+      "docs": "Invoked when a binding is either explicitly invalidated (as a result of a spawnable being spawned, or a binding override being added)\nor when a previously resolved binding becomes invalid"
+    },
+    {
+      "id": "iterate-bound-objects",
+      "name": "IterateBoundObjects",
+      "category": "MovieSceneEvaluationState",
+      "signature": "IterateBoundObjects(Target, In Binding ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Binding ID",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "TArrayView<TWeakObjectPtr<>>",
+      "docs": "Find all objects that are bound to the specified binding ID\n@note Does not update bindings if they are out of date, or invalid\n@param InBindingID\t\tThe object binding GUID for a spawnable or posessable in a UMovieScene\n@return An iterable type of all objects bound to the specified ID."
+    },
+    {
+      "id": "set-sequence-821c6c",
+      "name": "SetSequence",
+      "category": "MovieSceneEvaluationState",
+      "signature": "SetSequence(Target, In Sequence, In Sequence ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Sequence",
+          "type": "UMovieSceneSequence&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the sequence that this cache applies to\n@param InSequence\t\tThe sequence that this cache applies to\n@param InSequenceID\t\tThe ID of the sequence within the root sequence"
+    },
+    {
+      "id": "find-object-id-e8010c",
+      "name": "FindObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindObjectId(Target, In Object, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Attempt deduce the posessable or spawnable that relates to the specified object\n@note Will forcably resolve any out of date bindings in the entire sequence\n@param InObject\t\t\tThe object whose binding ID is to be find\n@param Player\t\t\tThe movie scene player that is playing back the sequence\n@return The object's spawnable or possessable GUID, or a zero GUID if it was not found"
+    },
+    {
+      "id": "find-cached-object-id-a5d985",
+      "name": "FindCachedObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindCachedObjectId(Target, In Object, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Attempt deduce the posessable or spawnable that relates to the specified object\n@note Does not clear the existing cache\n@param InObject\t\t\tThe object whose binding ID is to be find\n@param Player\t\t\tThe movie scene player that is playing back the sequence\n@return The object's spawnable or possessable GUID, or a zero GUID if it was not found"
+    },
+    {
+      "id": "invalidate-expired-objects",
+      "name": "InvalidateExpiredObjects",
+      "category": "MovieSceneEvaluationState",
+      "signature": "InvalidateExpiredObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidate any object bindings for objects that have been destroyed"
+    },
+    {
+      "id": "invalidate-032fe8",
+      "name": "Invalidate",
+      "category": "MovieSceneEvaluationState",
+      "signature": "Invalidate(Target, In Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidate the object bindings for a specific object binding ID in this sequence\n@param InGuid\t\t\tThe object binding ID to invalidate bindings for"
+    },
+    {
+      "id": "invalidate-a3735a",
+      "name": "Invalidate",
+      "category": "MovieSceneEvaluationState",
+      "signature": "Invalidate(Target, In Guid, In Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidate the object bindings for a specific object binding ID in the specified sequence ID.\nIf the sequence ID matches this one, then we will look for the guid in this sequence.\nIf it does not, then we will see if any of our object bindings reference that one, and if so, they will be invalidated.\n@param InGuid\t\t\tThe object binding ID to invalidate bindings for"
+    },
+    {
+      "id": "invalidate-if-valid",
+      "name": "InvalidateIfValid",
+      "category": "MovieSceneEvaluationState",
+      "signature": "InvalidateIfValid(Target, In Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidate the object bindings for a specific object binding ID if they are not already invalidated\n@param InGuid\t\t\tThe object binding ID to invalidate bindings for"
+    },
+    {
+      "id": "get-binding-activation-8e2893",
+      "name": "GetBindingActivation",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetBindingActivation(Target, In Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the current activation on the provided binding. If no binding lifetime track is present, true will be returned.\n@param InGuid\t\t\tThe object binding ID"
+    },
+    {
+      "id": "set-binding-activation-9c27e0",
+      "name": "SetBindingActivation",
+      "category": "MovieSceneEvaluationState",
+      "signature": "SetBindingActivation(Target, In Guid, Active)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Active",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the binding to either active or inactive. Inactive bindings will invalidate and not resolve while inactive.\n@param InGuid\t\t\tThe object binding ID\n@param bActive\t\t    Where to activate or deactivate the binding."
+    },
+    {
+      "id": "find-bound-objects-4e306a",
+      "name": "FindBoundObjects",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindBoundObjects(Target, In Binding ID, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Binding ID",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "public : TArrayView<TWeakObjectPtr<>>"
+    },
+    {
+      "id": "set-sequence-0570b8",
+      "name": "SetSequence",
+      "category": "MovieSceneEvaluationState",
+      "signature": "SetSequence(Target, In Sequence, In Sequence ID, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Sequence",
+          "type": "UMovieSceneSequence&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-object-id-201986",
+      "name": "FindObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindObjectId(Target, In Object, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "FGuid"
+    },
+    {
+      "id": "find-cached-object-id-ff7969",
+      "name": "FindCachedObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindCachedObjectId(Target, In Object, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "FGuid"
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "category": "MovieSceneEvaluationState",
+      "signature": "Clear(Target, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "filter-object-bindings-231cb6",
+      "name": "FilterObjectBindings",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FilterObjectBindings(Target, Predicate Object, Player, Out Bindings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        },
+        {
+          "name": "Predicate Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        },
+        {
+          "name": "Out Bindings",
+          "type": "TArray<FMovieSceneObjectBindingID>*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "assign-sequence-914470",
+      "name": "AssignSequence",
+      "category": "MovieSceneEvaluationState",
+      "signature": "AssignSequence(Target, In Sequence ID, In Sequence, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "In Sequence",
+          "type": "UMovieSceneSequence&"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign a sequence to a specific ID\n@param InSequenceID\t\tThe sequence ID to assign to\n@param InSequence\t\tThe sequence to assign"
+    },
+    {
+      "id": "find-sequence",
+      "name": "FindSequence",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindSequence(Target, In Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        }
+      ],
+      "returnType": "UMovieSceneSequence*",
+      "docs": "Attempt to locate a sequence from its ID\n@param InSequenceID\t\tThe sequence ID to lookup"
+    },
+    {
+      "id": "find-sequence-id",
+      "name": "FindSequenceId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindSequenceId(Target, In Sequence)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "In Sequence",
+          "type": "UMovieSceneSequence*"
+        }
+      ],
+      "returnType": "FMovieSceneSequenceID",
+      "docs": "Attempt to locate a sequence ID from a sequence\n@param InSequence\t\tThe sequence to look up"
+    },
+    {
+      "id": "find-object-id-f4e7a4",
+      "name": "FindObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindObjectId(Target, Object, In Sequence ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Attempt deduce the posessable or spawnable that relates to the specified object\n@note Will forcably resolve any out of date bindings in the entire sequence\n@param InObject\t\t\tThe object whose binding ID is to be find\n@param Player\t\t\tThe movie scene player that is playing back the sequence\n@return The object's spawnable or possessable GUID, or a zero GUID if it was not found"
+    },
+    {
+      "id": "find-cached-object-id-fdbaa4",
+      "name": "FindCachedObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindCachedObjectId(Target, Object, In Sequence ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Attempt deduce the posessable or spawnable that relates to the specified object\n@note Does not clear the existing cache\n@param InObject\t\t\tThe object whose binding ID is to be find\n@param Player\t\t\tThe movie scene player that is playing back the sequence\n@return The object's spawnable or possessable GUID, or a zero GUID if it was not found"
+    },
+    {
+      "id": "filter-object-bindings-592e00",
+      "name": "FilterObjectBindings",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FilterObjectBindings(Target, Predicate Object, Shared Playback State, Out Bindings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Predicate Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        },
+        {
+          "name": "Out Bindings",
+          "type": "TArray<FMovieSceneObjectBindingID>*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Filter all the object bindings in this object cache that contain the specified predicate object\n@param PredicateObject\t\tThe object to filter by. Any bindings referencing this object will be added to the output array.\n@param Player\t\t\t\tThe movie scene player that is playing back the sequence\n@param OutBindings\t\t\t(mandatory) Array to populate with bindings that relate to the object"
+    },
+    {
+      "id": "get-binding-activation-2b4b05",
+      "name": "GetBindingActivation",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetBindingActivation(Target, In Guid, In Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the current activation on the provided binding. If no binding lifetime track is present, true will be returned.\n@param InGuid\t\t\tThe object binding ID\n@param InSequenceID\t\tThe sequence ID to which the object binding belongs"
+    },
+    {
+      "id": "set-binding-activation-c2ee40",
+      "name": "SetBindingActivation",
+      "category": "MovieSceneEvaluationState",
+      "signature": "SetBindingActivation(Target, In Guid, In Sequence ID, Active)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "In Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Active",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the binding to either active or inactive. Inactive bindings will invalidate and not resolve while inactive.\n@param InGuid\t\t\tThe object binding ID\n@param InSequenceID\t\tThe sequence ID to which the object binding belongs\n@param bActive\t\t    Where to activate or deactivate the binding."
+    },
+    {
+      "id": "clear-object-caches-a72227",
+      "name": "ClearObjectCaches",
+      "category": "MovieSceneEvaluationState",
+      "signature": "ClearObjectCaches(Target, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forcably clear all object caches"
+    },
+    {
+      "id": "get-serial-number",
+      "name": "GetSerialNumber",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetSerialNumber(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the current serial number of this cache"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "MovieSceneEvaluationState",
+      "signature": "Initialize(Target, Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Owner",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "A map of persistent evaluation data mapped by movie scene evaluation entity (i.e, a given track or section)"
+    },
+    {
+      "id": "on-sub-instance-created",
+      "name": "OnSubInstanceCreated",
+      "category": "MovieSceneEvaluationState",
+      "signature": "OnSubInstanceCreated(Target, Owner, Instance Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Owner",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        },
+        {
+          "name": "Instance Handle",
+          "type": "UE::MovieScene::FInstanceHandle"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "assign-sequence-c7bb7b",
+      "name": "AssignSequence",
+      "category": "MovieSceneEvaluationState",
+      "signature": "AssignSequence(Target, In Sequence ID, In Sequence, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "In Sequence",
+          "type": "UMovieSceneSequence&"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "find-object-id-b476c0",
+      "name": "FindObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindObjectId(Target, Object, In Sequence ID, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "FGuid"
+    },
+    {
+      "id": "find-cached-object-id-91eae1",
+      "name": "FindCachedObjectId",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindCachedObjectId(Target, Object, In Sequence ID, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "FGuid"
+    },
+    {
+      "id": "clear-object-caches-d0863b",
+      "name": "ClearObjectCaches",
+      "category": "MovieSceneEvaluationState",
+      "signature": "ClearObjectCaches(Target, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

@@ -1,0 +1,589 @@
+{
+  "id": "cook-dependency",
+  "label": "CookDependency",
+  "includepath": "Cooker/CookDependency.h",
+  "includes": [
+    "StringView",
+    "UnrealString",
+    "PreprocessorHelpers",
+    "LogVerbosity",
+    "CompactBinary",
+    "Function",
+    "UniquePtr",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "update",
+      "name": "Update",
+      "category": "CookDependency",
+      "signature": "Update(Target, Data, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependencyContext*"
+        },
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the hashbuilder for the key being constructed (e.g. TargetDomainKey for cooked packages)\nwith the given Data of Size bytes."
+    },
+    {
+      "id": "report-invalidated",
+      "name": "ReportInvalidated",
+      "category": "CookDependency",
+      "signature": "ReportInvalidated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependencyContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reports that current evaluation of the function is different from all previous evaluations for a reason that\ncannot be reported as data passed into Update. When called while calculating the initial hash this call is\nignored. When called while testing incrementally skippable the package is marked modified and recooked."
+    },
+    {
+      "id": "report-error",
+      "name": "ReportError",
+      "category": "CookDependency",
+      "signature": "ReportError(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependencyContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reports failure to compute the hash (e.g. because a file cannot be read).\nWhen called while calculating the initial hash the storage of the key fails and the package will be recooked on\nthe next cook. When called while testing incrementally skippable the package is marked modified and recooked."
+    },
+    {
+      "id": "log",
+      "name": "Log",
+      "category": "CookDependency",
+      "signature": "Log(Target, Type, Message)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependencyContext*"
+        },
+        {
+          "name": "Type",
+          "type": "ELogVerbosity::"
+        },
+        {
+          "name": "Message",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Send a message to the cook dependency context with the given severity. The message may be suppressed or\nreduced in verbosity based on the calling context."
+    },
+    {
+      "id": "f-error-handler-scope-b2298c",
+      "name": "FErrorHandlerScope",
+      "category": "CookDependency",
+      "signature": "FErrorHandlerScope()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Private implementation struct used for AddErrorHandlerScope. Should only be used via\nFCookDependencyContext::FErrorHandlerScope& Scope = Context.ErrorHandlerScope(<Function>);"
+    },
+    {
+      "id": "f-error-handler-scope-c20b90",
+      "name": "FErrorHandlerScope",
+      "category": "CookDependency",
+      "signature": "FErrorHandlerScope(In Context)",
+      "params": [
+        {
+          "name": "In Context",
+          "type": "FCookDependencyContext&"
+        }
+      ],
+      "returnType": "private :"
+    },
+    {
+      "id": "error-handler-scope",
+      "name": "ErrorHandlerScope",
+      "category": "CookDependency",
+      "signature": "ErrorHandlerScope(Target, Error Handler)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependencyContext*"
+        },
+        {
+          "name": "Error Handler",
+          "type": "TUniqueFunction<FString ( FString&& )>&&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FErrorHandlerScope",
+      "docs": "Add a function that will be removed when the return value goes out of scope, to modify error strings reported\ninside the scope before passing them on to higher scopes or the error consumer.\ne.g.\nFCookDependencyContext::FErrorHandlerScope Scope = Context.ErrorHandlerScope([](FString&& Inner)\n{ return FString::Printf(TEXT(\"OuterClass for %s: %s\"), *Name, *Inner);});"
+    },
+    {
+      "id": "file",
+      "name": "File",
+      "category": "CookDependency",
+      "signature": "File(In File Name)",
+      "params": [
+        {
+          "name": "In File Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "public : FCookDependency",
+      "docs": "TypeSelector enum for the FCookDependency variable type. Values are serialized into the oplog as integers,\nso do not change them without changing oplog version."
+    },
+    {
+      "id": "function",
+      "name": "Function",
+      "category": "CookDependency",
+      "signature": "Function(In Function Name, In Args)",
+      "params": [
+        {
+          "name": "In Function Name",
+          "type": "Name"
+        },
+        {
+          "name": "In Args",
+          "type": "FCbFieldIterator&&"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Create a dependency on a call to the specified function with the given arguments. Arguments should be\ncreated using FCbWriter Writer; ... <append arbitrary number of fields to Writer> ...; Writer.Save().\nThe function should read the arguments using the corresponding FCbFieldIteratorView methods and\nLoadFromCompactBinary calls.\nThe function must be registered during editor startup for use with FCookDependency via\nUE_COOK_DEPENDENCY_FUNCTION(CppTokenUsedAsName, CppNameOfFunctionToCall).\nThe name to pass to FCookDependency::Function can be retrieved via\nUE_COOK_DEPENDENCY_FUNCTION_CALL(CppTokenUsedAsName)."
+    },
+    {
+      "id": "transitive-build",
+      "name": "TransitiveBuild",
+      "category": "CookDependency",
+      "signature": "TransitiveBuild(Package Name)",
+      "params": [
+        {
+          "name": "Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Create a transitive build dependency on another package. In an incremental cook if the other package was not\ncooked in a previous cook session, or its previous cook result was invalidated, the current package will also\nhave its cook result invalidated."
+    },
+    {
+      "id": "transitive-build-and-runtime",
+      "name": "TransitiveBuildAndRuntime",
+      "category": "CookDependency",
+      "signature": "TransitiveBuildAndRuntime(Package Name)",
+      "params": [
+        {
+          "name": "Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FCookDependency"
+    },
+    {
+      "id": "package",
+      "name": "Package",
+      "category": "CookDependency",
+      "signature": "Package(Package Name)",
+      "params": [
+        {
+          "name": "Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Create a build dependency on the contents of a package.\nOnly the bytes of the .uasset/.umap file are considered."
+    },
+    {
+      "id": "console-variable",
+      "name": "ConsoleVariable",
+      "category": "CookDependency",
+      "signature": "ConsoleVariable(Variable Name)",
+      "params": [
+        {
+          "name": "Variable Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Create a dependency on the value of a cvar. The cvar will be read and its value (as a string) will be hashed into the oplog data\nIf the cvar value is changed, the packages that depend on it will be invalidated"
+    },
+    {
+      "id": "config-29c6b9",
+      "name": "Config",
+      "category": "CookDependency",
+      "signature": "Config(Access Data)",
+      "params": [
+        {
+          "name": "Access Data",
+          "type": "UE::ConfigAccessTracking::FConfigAccessData"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Create a dependency on the value of a config variable."
+    },
+    {
+      "id": "config-b32e3a",
+      "name": "Config",
+      "category": "CookDependency",
+      "signature": "Config(Load Type, Platform, File Name, Section Name, Value Name)",
+      "params": [
+        {
+          "name": "Load Type",
+          "type": "UE::ConfigAccessTracking::ELoadType"
+        },
+        {
+          "name": "Platform",
+          "type": "Name"
+        },
+        {
+          "name": "File Name",
+          "type": "Name"
+        },
+        {
+          "name": "Section Name",
+          "type": "Name"
+        },
+        {
+          "name": "Value Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FCookDependency"
+    },
+    {
+      "id": "config-1f0ffc",
+      "name": "Config",
+      "category": "CookDependency",
+      "signature": "Config(File Name, Section Name, Value Name)",
+      "params": [
+        {
+          "name": "File Name",
+          "type": "Name"
+        },
+        {
+          "name": "Section Name",
+          "type": "Name"
+        },
+        {
+          "name": "Value Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Create a dependency on the value of a config variable, with LoadType=ConfigSystem and Platform=NAME_None."
+    },
+    {
+      "id": "settings-object",
+      "name": "SettingsObject",
+      "category": "CookDependency",
+      "signature": "SettingsObject(In Object)",
+      "params": [
+        {
+          "name": "In Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Adds a dependency on the config values and class schema of a settings object. Gives an error and ignores the object\nif the object is not a config-driven settings object, such as the CDO of a config UClass or a perObjectConfig\nobject.\nSettingsObject dependencies are not directly persistable; all of the dependencies reported by the SettingsObject are\ncopied onto the dependencies of the package declaring the SettingsObject dependency."
+    },
+    {
+      "id": "native-class-e5ec1b",
+      "name": "NativeClass",
+      "category": "CookDependency",
+      "signature": "NativeClass(In Class)",
+      "params": [
+        {
+          "name": "In Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Adds a dependency on the class schema of a nativeclass."
+    },
+    {
+      "id": "native-class-f4ef0a",
+      "name": "NativeClass",
+      "category": "CookDependency",
+      "signature": "NativeClass(Class Path)",
+      "params": [
+        {
+          "name": "Class Path",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "FCookDependency"
+    },
+    {
+      "id": "redirection-target",
+      "name": "RedirectionTarget",
+      "category": "CookDependency",
+      "signature": "RedirectionTarget(Package Name)",
+      "params": [
+        {
+          "name": "Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Adds a dependency on the ObjectRedirectors and CoreRedirects that affect the given PackageName."
+    },
+    {
+      "id": "asset-registry-query",
+      "name": "AssetRegistryQuery",
+      "category": "CookDependency",
+      "signature": "AssetRegistryQuery(Filter)",
+      "params": [
+        {
+          "name": "Filter",
+          "type": "FARFilter"
+        }
+      ],
+      "returnType": "FCookDependency",
+      "docs": "Adds a dependency on the results reported by an AssetRegistry query."
+    },
+    {
+      "id": "f-cook-dependency-9d8240",
+      "name": "FCookDependency",
+      "category": "CookDependency",
+      "signature": "FCookDependency()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Construct an empty dependency; it will never be invalidated."
+    },
+    {
+      "id": "f-cook-dependency-00d106",
+      "name": "FCookDependency",
+      "category": "CookDependency",
+      "signature": "FCookDependency(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FCookDependency&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-config-access-data",
+      "name": "GetConfigAccessData",
+      "category": "CookDependency",
+      "signature": "GetConfigAccessData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        }
+      ],
+      "returnType": "UE::ConfigAccessTracking::FConfigAccessData",
+      "docs": "Returns the ConfigAccess in its struct form (File,Section,Key) if GetType() == Config, else empty."
+    },
+    {
+      "id": "get-config-path",
+      "name": "GetConfigPath",
+      "category": "CookDependency",
+      "signature": "GetConfigPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the full path of the config access (e.g. Platform.Filename.Section.ValueName)\nif GetType() == Config, else empty."
+    },
+    {
+      "id": "get-raw-value",
+      "name": "GetRawValue",
+      "category": "CookDependency",
+      "signature": "GetRawValue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        }
+      ],
+      "returnType": "Byte*",
+      "docs": "Returns the value of the dependency. It's an array of size FCookDependency::VALUE_MAX_BYTES_SIZE"
+    },
+    {
+      "id": "update-hash",
+      "name": "UpdateHash",
+      "category": "CookDependency",
+      "signature": "UpdateHash(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        },
+        {
+          "name": "Context",
+          "type": "FCookDependencyContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calculate the current hash of this CookDependency, and add it into Context."
+    },
+    {
+      "id": "set-value-97da04",
+      "name": "SetValue",
+      "category": "CookDependency",
+      "signature": "SetValue(Target, Hash)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        },
+        {
+          "name": "Hash",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-value-24f804",
+      "name": "SetValue",
+      "category": "CookDependency",
+      "signature": "SetValue(Target, String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        },
+        {
+          "name": "String",
+          "type": "FUtf8String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "save",
+      "name": "Save",
+      "category": "CookDependency",
+      "signature": "Save(Target, Writer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        },
+        {
+          "name": "Writer",
+          "type": "FCbWriter&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "load",
+      "name": "Load",
+      "category": "CookDependency",
+      "signature": "Load(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependency*"
+        },
+        {
+          "name": "Value",
+          "type": "FCbFieldView"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "config-access-data-less-than",
+      "name": "ConfigAccessDataLessThan",
+      "category": "CookDependency",
+      "signature": "ConfigAccessDataLessThan(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "UE::ConfigAccessTracking::FConfigAccessData&"
+        },
+        {
+          "name": "B",
+          "type": "UE::ConfigAccessTracking::FConfigAccessData&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "config-access-data-equal",
+      "name": "ConfigAccessDataEqual",
+      "category": "CookDependency",
+      "signature": "ConfigAccessDataEqual(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "UE::ConfigAccessTracking::FConfigAccessData&"
+        },
+        {
+          "name": "B",
+          "type": "UE::ConfigAccessTracking::FConfigAccessData&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "ar-filter-less-than",
+      "name": "ARFilterLessThan",
+      "category": "CookDependency",
+      "signature": "ARFilterLessThan(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FARFilter&"
+        },
+        {
+          "name": "B",
+          "type": "FARFilter&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "ar-filter-equal",
+      "name": "ARFilterEqual",
+      "category": "CookDependency",
+      "signature": "ARFilterEqual(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FARFilter&"
+        },
+        {
+          "name": "B",
+          "type": "FARFilter&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-cook-dependency-function-registration",
+      "name": "FCookDependencyFunctionRegistration",
+      "category": "CookDependency",
+      "signature": "FCookDependencyFunctionRegistration()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "construct",
+      "name": "Construct",
+      "category": "CookDependency",
+      "signature": "Construct(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookDependencyFunctionRegistration*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

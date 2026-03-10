@@ -21,7 +21,7 @@
           "type": "UProjectileMovementComponent*"
         }
       ],
-      "returnType": "float InitialSpeed",
+      "returnType": "Bool",
       "docs": "Returns true if velocity magnitude is less than BounceVelocityStopSimulatingThreshold."
     },
     {
@@ -39,8 +39,108 @@
           "type": "FVector"
         }
       ],
-      "returnType": "FOnProjectileBounceDelegate OnProjectileBounce",
+      "returnType": "Void",
       "docs": "Sets the velocity to the new value, rotated into Actor space."
+    },
+    {
+      "id": "tick-component",
+      "name": "TickComponent",
+      "category": "ProjectileMovementComponent",
+      "signature": "TickComponent(Target, Delta Time, Tick Type, This Tick Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Tick Type",
+          "type": "ELevelTick"
+        },
+        {
+          "name": "This Tick Function",
+          "type": "FActorComponentTickFunction*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-load",
+      "name": "PostLoad",
+      "category": "ProjectileMovementComponent",
+      "signature": "PostLoad(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize-component",
+      "name": "InitializeComponent",
+      "category": "ProjectileMovementComponent",
+      "signature": "InitializeComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-tick-registration",
+      "name": "UpdateTickRegistration",
+      "category": "ProjectileMovementComponent",
+      "signature": "UpdateTickRegistration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "check-still-in-world",
+      "name": "CheckStillInWorld",
+      "category": "ProjectileMovementComponent",
+      "signature": "CheckStillInWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This will check to see if the projectile is still in the world.  It will check things like\nthe KillZ, outside world bounds, etc. and handle the situation."
+    },
+    {
+      "id": "compute-velocity",
+      "name": "ComputeVelocity",
+      "category": "ProjectileMovementComponent",
+      "signature": "ComputeVelocity(Target, Initial Velocity, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Initial Velocity",
+          "type": "FVector"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Given an initial velocity and a time step, compute a new velocity.\nDefault implementation applies the result of ComputeAcceleration() to velocity.\n@param  InitialVelocity Initial velocity.\n@param  DeltaTime Time step of the update.\n@return Velocity after DeltaTime time step."
     },
     {
       "id": "stop-simulating",
@@ -61,6 +161,42 @@
       "docs": "Clears the reference to UpdatedComponent, fires stop event (OnProjectileStop), and stops ticking (if bAutoUpdateTickRegistration is true)."
     },
     {
+      "id": "get-simulation-time-step",
+      "name": "GetSimulationTimeStep",
+      "category": "ProjectileMovementComponent",
+      "signature": "GetSimulationTimeStep(Target, Remaining Time, Iterations)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Remaining Time",
+          "type": "Float"
+        },
+        {
+          "name": "Iterations",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Compute remaining time step given remaining time and current iterations.\nThe last iteration (limited by MaxSimulationIterations) always returns the remaining time, which may violate MaxSimulationTimeStep.\n@param RemainingTime\t\tRemaining time in the tick.\n@param Iterations\t\tCurrent iteration of the tick (starting at 1).\n@return The remaining time step to use for the next sub-step of iteration.\n@see MaxSimulationTimeStep, MaxSimulationIterations\n@see ShouldUseSubStepping()"
+    },
+    {
+      "id": "should-use-sub-stepping",
+      "name": "ShouldUseSubStepping",
+      "category": "ProjectileMovementComponent",
+      "signature": "ShouldUseSubStepping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine whether or not to use substepping in the projectile motion update.\nIf true, GetSimulationTimeStep() will be used to time-slice the update. If false, all remaining time will be used during the tick.\n@return Whether or not to use substepping in the projectile motion update.\n@see GetSimulationTimeStep()"
+    },
+    {
       "id": "set-interpolated-component",
       "name": "SetInterpolatedComponent",
       "category": "Game",
@@ -75,8 +211,22 @@
           "type": "USceneComponent*"
         }
       ],
-      "returnType": "float MaxSimulationTimeStep",
+      "returnType": "Void",
       "docs": "Assigns the component that will be used for network interpolation/smoothing. It is expected that this is a component attached somewhere below the UpdatedComponent.\nWhen network updates use MoveInterpolationTarget() to move the UpdatedComponent, the interpolated component's relative offset will be maintained and smoothed over\nthe course of future component ticks. The current relative location and rotation of the component is saved as the target offset for future interpolation.\n@see MoveInterpolationTarget(), bInterpMovement, bInterpRotation"
+    },
+    {
+      "id": "get-interpolated-component",
+      "name": "GetInterpolatedComponent",
+      "category": "ProjectileMovementComponent",
+      "signature": "GetInterpolatedComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "USceneComponent*",
+      "docs": "Returns the component used for network interpolation."
     },
     {
       "id": "move-interpolation-target",
@@ -125,8 +275,206 @@
           "type": "UProjectileMovementComponent*"
         }
       ],
-      "returnType": "float InterpLocationTime",
+      "returnType": "Bool",
       "docs": "Returns whether interpolation is complete because the target has been reached. True when interpolation is disabled."
+    },
+    {
+      "id": "update-throttle-interpolation",
+      "name": "UpdateThrottleInterpolation",
+      "category": "ProjectileMovementComponent",
+      "signature": "UpdateThrottleInterpolation(Target, Delta Time, Interp Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Interp Component",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "protected : bool",
+      "docs": "Update interpolation throttling for this frame. Uses ComputeThrottleInterpolationMaxFrames() to determine the number of frames to allow to be skipped.\n@return true if throttled this frame, false if there should be an update."
+    },
+    {
+      "id": "compute-throttle-interpolation-max-frames",
+      "name": "ComputeThrottleInterpolationMaxFrames",
+      "category": "ProjectileMovementComponent",
+      "signature": "ComputeThrottleInterpolationMaxFrames(Target, Delta Time, Interp Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Interp Component",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Determine the number of frames to allow to skip when interpolating. Returning 0 means not to allow throttling.\nDefault implementation chooses between ThrottleInterpolationThresholdNotRenderedShortTime and ThrottleInterpolationThresholdNotRenderedLongTime based on WasRecentlyRendered(),\nextend or override this for custom behavior."
+    },
+    {
+      "id": "reset-throttle-interpolation",
+      "name": "ResetThrottleInterpolation",
+      "category": "ProjectileMovementComponent",
+      "signature": "ResetThrottleInterpolation(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Custom hook to reset throttle interpolation tracking when it was throttling previously."
+    },
+    {
+      "id": "handle-blocking-hit",
+      "name": "HandleBlockingHit",
+      "category": "ProjectileMovementComponent",
+      "signature": "HandleBlockingHit(Target, Hit, Time Tick, Move Delta, Sub Tick Time Remaining)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "Time Tick",
+          "type": "Float"
+        },
+        {
+          "name": "Move Delta",
+          "type": "FVector&"
+        },
+        {
+          "name": "Sub Tick Time Remaining",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "EHandleBlockingHitResult",
+      "docs": "Assume velocity has been deflected, and trigger HandleDeflection(). This is the default return value of HandleBlockingHit()."
+    },
+    {
+      "id": "handle-impact",
+      "name": "HandleImpact",
+      "category": "ProjectileMovementComponent",
+      "signature": "HandleImpact(Target, Hit, Time Slice, Move Delta)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "Time Slice",
+          "type": "Float",
+          "default": "0.f"
+        },
+        {
+          "name": "Move Delta",
+          "type": "FVector&",
+          "default": "FVector::ZeroVector"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Applies bounce logic if enabled to affect velocity upon impact (using ComputeBounceResult()),\nor stops the projectile if bounces are not enabled or velocity is below BounceVelocityStopSimulatingThreshold.\nTriggers applicable events (OnProjectileBounce)."
+    },
+    {
+      "id": "handle-deflection",
+      "name": "HandleDeflection",
+      "category": "ProjectileMovementComponent",
+      "signature": "HandleDeflection(Target, Hit, Old Velocity, Num Bounces, Sub Tick Time Remaining)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "Old Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Num Bounces",
+          "type": "UInt"
+        },
+        {
+          "name": "Sub Tick Time Remaining",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handle a blocking hit after HandleBlockingHit() returns a result indicating that deflection occured.\nDefault implementation increments NumBounces, checks conditions that could indicate a slide, and calls HandleSliding() if necessary.\n@param  Hit\t\t\t\t\tBlocking hit that occurred. May be changed to indicate the last hit result of further movement.\n@param  OldVelocity\t\t\tVelocity at the start of the simulation update sub-step. Current Velocity may differ (as a result of a bounce).\n@param  NumBounces\t\t\tNumber of bounces that have occurred thus far in the tick.\n@param  SubTickTimeRemaining\tTime remaining in the simulation sub-step. May be changed to indicate change to remaining time.\n@return True if simulation of the projectile should continue, false otherwise.\n@see HandleSliding()"
+    },
+    {
+      "id": "handle-sliding",
+      "name": "HandleSliding",
+      "category": "ProjectileMovementComponent",
+      "signature": "HandleSliding(Target, Hit, Sub Tick Time Remaining)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "Sub Tick Time Remaining",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handle case where projectile is sliding along a surface.\nVelocity will be parallel to the impact surface upon entry to this method.\n@param  InitialHit\t\t\t\tHit result of impact causing slide. May be modified by this function to reflect any subsequent movement.\n@param  SubTickTimeRemaining\t\tTime remaining in the tick. This function may update this time with any reduction to the simulation time requested.\n@return True if simulation of the projectile should continue, false otherwise."
+    },
+    {
+      "id": "compute-bounce-result",
+      "name": "ComputeBounceResult",
+      "category": "ProjectileMovementComponent",
+      "signature": "ComputeBounceResult(Target, Hit, Time Slice, Move Delta)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "Time Slice",
+          "type": "Float"
+        },
+        {
+          "name": "Move Delta",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Computes result of a bounce and returns the new velocity."
     },
     {
       "id": "limit-velocity",
@@ -145,6 +493,140 @@
       ],
       "returnType": "public : FVector",
       "docs": "Don't allow velocity magnitude to exceed MaxSpeed, if MaxSpeed is non-zero."
+    },
+    {
+      "id": "compute-move-delta",
+      "name": "ComputeMoveDelta",
+      "category": "ProjectileMovementComponent",
+      "signature": "ComputeMoveDelta(Target, In Velocity, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "In Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Compute the distance we should move in the given time, at a given a velocity."
+    },
+    {
+      "id": "compute-acceleration",
+      "name": "ComputeAcceleration",
+      "category": "ProjectileMovementComponent",
+      "signature": "ComputeAcceleration(Target, In Velocity, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "In Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Compute the acceleration that will be applied"
+    },
+    {
+      "id": "compute-homing-acceleration",
+      "name": "ComputeHomingAcceleration",
+      "category": "ProjectileMovementComponent",
+      "signature": "ComputeHomingAcceleration(Target, In Velocity, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "In Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Allow the projectile to track towards its homing target."
+    },
+    {
+      "id": "add-force",
+      "name": "AddForce",
+      "category": "ProjectileMovementComponent",
+      "signature": "AddForce(Target, Force)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Force",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a force which is accumulated until next tick, used by ComputeAcceleration() to affect Velocity."
+    },
+    {
+      "id": "clear-pending-force",
+      "name": "ClearPendingForce",
+      "category": "ProjectileMovementComponent",
+      "signature": "ClearPendingForce(Target, Clear Immediate Force)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Clear Immediate Force",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears any pending forces from AddForce(). If bClearImmediateForce is true, clears any force being processed during this update as well."
+    },
+    {
+      "id": "tick-interpolation",
+      "name": "TickInterpolation",
+      "category": "ProjectileMovementComponent",
+      "signature": "TickInterpolation(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-gravity-z",
+      "name": "GetGravityZ",
+      "category": "ProjectileMovementComponent",
+      "signature": "GetGravityZ(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProjectileMovementComponent*"
+        }
+      ],
+      "returnType": "public : float",
+      "docs": "Compute gravity effect given current physics volume, projectile gravity scale, etc."
     }
   ]
 }

@@ -1,0 +1,1443 @@
+{
+  "id": "shader-compiler",
+  "label": "ShaderCompiler",
+  "includepath": "ShaderCompiler.h",
+  "includes": [
+    "RefCounting",
+    "PlatformProcess",
+    "ShaderCore",
+    "ShaderCompilerCore",
+    "ShaderCompilerJobTypes",
+    "Shader",
+    "RunnableThread",
+    "Runnable",
+    "Atomic",
+    "UniquePtr",
+    "ThreadSafeCounter",
+    "RHIDefinitions",
+    "GBufferInfo",
+    "ShaderMaterial",
+    "ScopeRWLock",
+    "IAssetCompilingManager",
+    "HashTable",
+    "List",
+    "Deque",
+    "Blake3",
+    "CityHash",
+    "SceneTypes",
+    "StrongObjectPtr",
+    "ShaderCompiler.generated"
+  ],
+  "functions": [
+    {
+      "id": "is-shader-job-cache-ddc-enabled",
+      "name": "IsShaderJobCacheDDCEnabled",
+      "category": "ShaderCompiler",
+      "signature": "IsShaderJobCacheDDCEnabled()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-material-map-ddc-enabled",
+      "name": "IsMaterialMapDDCEnabled",
+      "category": "ShaderCompiler",
+      "signature": "IsMaterialMapDDCEnabled()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-compile-odsc-only-shaders",
+      "name": "ShouldCompileODSCOnlyShaders",
+      "category": "ShaderCompiler",
+      "signature": "ShouldCompileODSCOnlyShaders()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true if we should compile shaders that are only compiled in on demand shader compilation\nmodes and not stored in cooked shader maps. This can be useful for debug shaders."
+    },
+    {
+      "id": "begin-compile-shader",
+      "name": "BeginCompileShader",
+      "category": "ShaderCompiler",
+      "signature": "BeginCompileShader(Shader Type, Permutation Id, Platform, Permutation Flags, New Jobs)",
+      "params": [
+        {
+          "name": "Shader Type",
+          "type": "FGlobalShaderType*"
+        },
+        {
+          "name": "Permutation Id",
+          "type": "Int"
+        },
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Permutation Flags",
+          "type": "EShaderPermutationFlags"
+        },
+        {
+          "name": "New Jobs",
+          "type": "TArray<FShaderCommonCompileJobPtr>&"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Cache for in flight and completed jobs."
+    },
+    {
+      "id": "begin-compile-shader-pipeline",
+      "name": "BeginCompileShaderPipeline",
+      "category": "ShaderCompiler",
+      "signature": "BeginCompileShaderPipeline(Platform, Permutation Flags, Shader Pipeline, New Jobs)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Permutation Flags",
+          "type": "EShaderPermutationFlags"
+        },
+        {
+          "name": "Shader Pipeline",
+          "type": "FShaderPipelineType*"
+        },
+        {
+          "name": "New Jobs",
+          "type": "TArray<FShaderCommonCompileJobPtr>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enqueues compilation of a shader pipeline of this type."
+    },
+    {
+      "id": "generate-brdf-headers-8e134f",
+      "name": "GenerateBrdfHeaders",
+      "category": "ShaderCompiler",
+      "signature": "GenerateBrdfHeaders(Platform)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-brdf-headers-9e4114",
+      "name": "GenerateBrdfHeaders",
+      "category": "ShaderCompiler",
+      "signature": "GenerateBrdfHeaders(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "write-g-buffer-info-autogen",
+      "name": "WriteGBufferInfoAutogen",
+      "category": "ShaderCompiler",
+      "signature": "WriteGBufferInfoAutogen(Target Platform, Feature Level)",
+      "params": [
+        {
+          "name": "Target Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fetch-g-buffer-layout",
+      "name": "FetchGBufferLayout",
+      "category": "ShaderCompiler",
+      "signature": "FetchGBufferLayout(Environment)",
+      "params": [
+        {
+          "name": "Environment",
+          "type": "FShaderCompilerEnvironment&"
+        }
+      ],
+      "returnType": "EGBufferLayout"
+    },
+    {
+      "id": "fetch-g-buffer-params-runtime",
+      "name": "FetchGBufferParamsRuntime",
+      "category": "ShaderCompiler",
+      "signature": "FetchGBufferParamsRuntime(Platform, Layout)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Layout",
+          "type": "EGBufferLayout"
+        }
+      ],
+      "returnType": "FGBufferParams"
+    },
+    {
+      "id": "register-cooked-shaders",
+      "name": "RegisterCookedShaders",
+      "category": "ShaderCompiler",
+      "signature": "RegisterCookedShaders(Target, Num Cooked, Compile Time, Platform, Material Path, Permutation String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Num Cooked",
+          "type": "UInt"
+        },
+        {
+          "name": "Compile Time",
+          "type": "Float"
+        },
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Material Path",
+          "type": "String"
+        },
+        {
+          "name": "Permutation String",
+          "type": "String",
+          "default": "FString(\"\")"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "register-compiled-shaders",
+      "name": "RegisterCompiledShaders",
+      "category": "ShaderCompiler",
+      "signature": "RegisterCompiledShaders(Target, Num Permutations, Platform, Material Path, Permutation String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Num Permutations",
+          "type": "UInt"
+        },
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Material Path",
+          "type": "String"
+        },
+        {
+          "name": "Permutation String",
+          "type": "String",
+          "default": "FString(\"\")"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "write-stats",
+      "name": "WriteStats",
+      "category": "ShaderCompiler",
+      "signature": "WriteStats(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "write-stat-summary",
+      "name": "WriteStatSummary",
+      "category": "ShaderCompiler",
+      "signature": "WriteStatSummary(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-total-shaders-compiled",
+      "name": "GetTotalShadersCompiled",
+      "category": "ShaderCompiler",
+      "signature": "GetTotalShadersCompiled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "aggregate",
+      "name": "Aggregate",
+      "category": "ShaderCompiler",
+      "signature": "Aggregate(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Other",
+          "type": "FShaderCompilerStats&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "write-to-compact-binary",
+      "name": "WriteToCompactBinary",
+      "category": "ShaderCompiler",
+      "signature": "WriteToCompactBinary(Target, Writer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Writer",
+          "type": "FCbWriter&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "read-from-compact-binary",
+      "name": "ReadFromCompactBinary",
+      "category": "ShaderCompiler",
+      "signature": "ReadFromCompactBinary(Target, Reader)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Reader",
+          "type": "FCbObjectView&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-json",
+      "name": "ToJson",
+      "category": "ShaderCompiler",
+      "signature": "ToJson(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        }
+      ],
+      "returnType": "TSharedPtr<FJsonObject>"
+    },
+    {
+      "id": "gather-analytics",
+      "name": "GatherAnalytics",
+      "category": "ShaderCompiler",
+      "signature": "GatherAnalytics(Target, Base Name, Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerStats*"
+        },
+        {
+          "name": "Base Name",
+          "type": "String&"
+        },
+        {
+          "name": "Attributes",
+          "type": "TArray<FAnalyticsEventAttribute>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-static-asset-type-name",
+      "name": "GetStaticAssetTypeName",
+      "category": "ShaderCompiler",
+      "signature": "GetStaticAssetTypeName()",
+      "params": [],
+      "returnType": "public : FName",
+      "docs": "Accumulates the job lifetimes without overlaps"
+    },
+    {
+      "id": "f-shader-compiling-manager",
+      "name": "FShaderCompilingManager",
+      "category": "ShaderCompiler",
+      "signature": "FShaderCompilingManager()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "on-machine-resources-changed",
+      "name": "OnMachineResourcesChanged",
+      "category": "ShaderCompiler",
+      "signature": "OnMachineResourcesChanged(Target, Number Of Cores, Number Of Cores Including Hyperthreads)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Number Of Cores",
+          "type": "Int"
+        },
+        {
+          "name": "Number Of Cores Including Hyperthreads",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by external systems that have updated the number of worker threads available."
+    },
+    {
+      "id": "on-distributed-shader-compiling-changed",
+      "name": "OnDistributedShaderCompilingChanged",
+      "category": "ShaderCompiler",
+      "signature": "OnDistributedShaderCompilingChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when CVars are changed at runtime that determine whether or not the distributed shader compiler supports local workers (e.g. 'r.XGEController.AvoidUsingLocalMachine' can be changed at runtime)."
+    },
+    {
+      "id": "get-num-pending-jobs",
+      "name": "GetNumPendingJobs",
+      "category": "ShaderCompiler",
+      "signature": "GetNumPendingJobs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-outstanding-jobs",
+      "name": "GetNumOutstandingJobs",
+      "category": "ShaderCompiler",
+      "signature": "GetNumOutstandingJobs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-dump-shader-debug-info",
+      "name": "GetDumpShaderDebugInfo",
+      "category": "ShaderCompiler",
+      "signature": "GetDumpShaderDebugInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "EDumpShaderDebugInfo"
+    },
+    {
+      "id": "get-dump-shader-debug-info-flags",
+      "name": "GetDumpShaderDebugInfoFlags",
+      "category": "ShaderCompiler",
+      "signature": "GetDumpShaderDebugInfoFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "EShaderDebugInfoFlags"
+    },
+    {
+      "id": "create-shader-debug-info-path",
+      "name": "CreateShaderDebugInfoPath",
+      "category": "ShaderCompiler",
+      "signature": "CreateShaderDebugInfoPath(Target, Shader Compiler Input)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Shader Compiler Input",
+          "type": "FShaderCompilerInput&"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "should-recompile-to-dump-shader-debug-info-9556d7",
+      "name": "ShouldRecompileToDumpShaderDebugInfo",
+      "category": "ShaderCompiler",
+      "signature": "ShouldRecompileToDumpShaderDebugInfo(Target, Job)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Job",
+          "type": "FShaderCompileJob&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-recompile-to-dump-shader-debug-info-32a9c6",
+      "name": "ShouldRecompileToDumpShaderDebugInfo",
+      "category": "ShaderCompiler",
+      "signature": "ShouldRecompileToDumpShaderDebugInfo(Target, Input, Output, Succeeded)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Input",
+          "type": "FShaderCompilerInput&"
+        },
+        {
+          "name": "Output",
+          "type": "FShaderCompilerOutput&"
+        },
+        {
+          "name": "Succeeded",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-compiling-shader-map",
+      "name": "IsCompilingShaderMap",
+      "category": "ShaderCompiler",
+      "signature": "IsCompilingShaderMap(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "prepare-shader-compile-job",
+      "name": "PrepareShaderCompileJob",
+      "category": "ShaderCompiler",
+      "signature": "PrepareShaderCompileJob(Target, Id, Key, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Key",
+          "type": "FShaderCompileJobKey&"
+        },
+        {
+          "name": "Priority",
+          "type": "EShaderCompileJobPriority"
+        }
+      ],
+      "returnType": "FShaderCompileJob*",
+      "docs": "Prepares a job of the given type for compilation.  If a job with the given Id/Key already exists, it will attempt to adjust to the higher priority if possible, and nullptr will be returned.\nIf a non-nullptr is returned, the given job should be filled out with relevant information, then passed to SubmitJobs() when ready"
+    },
+    {
+      "id": "prepare-pipeline-compile-job",
+      "name": "PreparePipelineCompileJob",
+      "category": "ShaderCompiler",
+      "signature": "PreparePipelineCompileJob(Target, Id, Key, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Key",
+          "type": "FShaderPipelineCompileJobKey&"
+        },
+        {
+          "name": "Priority",
+          "type": "EShaderCompileJobPriority"
+        }
+      ],
+      "returnType": "FShaderPipelineCompileJob*"
+    },
+    {
+      "id": "process-finished-job",
+      "name": "ProcessFinishedJob",
+      "category": "ShaderCompiler",
+      "signature": "ProcessFinishedJob(Target, Finished Job, Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Finished Job",
+          "type": "FShaderCommonCompileJob*"
+        },
+        {
+          "name": "Status",
+          "type": "EShaderCompileJobStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called for all completed jobs, including those that were cache hits, duplicates of other in flight jobs, or skipped due to failed preprocessing.\nCan be called from multiple threads."
+    },
+    {
+      "id": "submit-jobs",
+      "name": "SubmitJobs",
+      "category": "ShaderCompiler",
+      "signature": "SubmitJobs(Target, New Jobs, Material Base Path, Permutation String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "New Jobs",
+          "type": "TArray<FShaderCommonCompileJobPtr>&"
+        },
+        {
+          "name": "Material Base Path",
+          "type": "String"
+        },
+        {
+          "name": "Permutation String",
+          "type": "String",
+          "default": "FString(\"\")"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds shader jobs to be asynchronously compiled.\nFinishCompilation or ProcessAsyncResults must be used to get the results."
+    },
+    {
+      "id": "cancel-compilation",
+      "name": "CancelCompilation",
+      "category": "ShaderCompiler",
+      "signature": "CancelCompilation(Target, Material Name, Shader Map Ids To Cancel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Material Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Shader Map Ids To Cancel",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes all outstanding compile jobs for the passed shader maps."
+    },
+    {
+      "id": "finish-compilation",
+      "name": "FinishCompilation",
+      "category": "ShaderCompiler",
+      "signature": "FinishCompilation(Target, Material Name, Shader Map Ids To Finish Compiling)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Material Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Shader Map Ids To Finish Compiling",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Blocks until completion of the requested shader maps.\nThis will not assign the shader map to any materials, the caller is responsible for that."
+    },
+    {
+      "id": "finish-all-compilation",
+      "name": "FinishAllCompilation",
+      "category": "ShaderCompiler",
+      "signature": "FinishAllCompilation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Blocks until completion of all async shader compiling, and assigns shader maps to relevant materials.\nThis should be called before exit if the DDC needs to be made up to date."
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "ShaderCompiler",
+      "signature": "Shutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shutdown the shader compiler manager, this will shutdown immediately and not process any more shader compile requests."
+    },
+    {
+      "id": "print-stats",
+      "name": "PrintStats",
+      "category": "ShaderCompiler",
+      "signature": "PrintStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Prints stats related to shader compilation to the log."
+    },
+    {
+      "id": "get-local-stats",
+      "name": "GetLocalStats",
+      "category": "ShaderCompiler",
+      "signature": "GetLocalStats(Target, Out Stats)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Out Stats",
+          "type": "FShaderCompilerStats&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieve compiler statistics for all compilation done in this process.\nNote that this will not include stats for any compilation that occurs in worker processes in a multiprocess cook."
+    },
+    {
+      "id": "get-external-memory-usage",
+      "name": "GetExternalMemoryUsage",
+      "category": "ShaderCompiler",
+      "signature": "GetExternalMemoryUsage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        }
+      ],
+      "returnType": "FShaderCompileMemoryUsage",
+      "docs": "Returns the current memory usage of external local compilation processes in bytes."
+    },
+    {
+      "id": "process-async-results-3e9219",
+      "name": "ProcessAsyncResults",
+      "category": "ShaderCompiler",
+      "signature": "ProcessAsyncResults(Target, Time Slice, Block On Global Shader Completion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Time Slice",
+          "type": "Float"
+        },
+        {
+          "name": "Block On Global Shader Completion",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Processes completed asynchronous shader maps, and assigns them to relevant materials.\n@param TimeSlice - When more than 0, ProcessAsyncResults will be bandwidth throttled by the given timeslice, to limit hitching.\nProcessAsyncResults will then have to be called often to finish all shader maps (eg from Tick).  Otherwise, all compiled shader maps will be processed.\n@param bBlockOnGlobalShaderCompletion - When enabled, ProcessAsyncResults will block until global shader maps are complete.\nThis must be done before using global shaders for rendering."
+    },
+    {
+      "id": "process-async-results-0c6d54",
+      "name": "ProcessAsyncResults",
+      "category": "ShaderCompiler",
+      "signature": "ProcessAsyncResults(Target, Limit Execution Time, Block On Global Shader Completion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilingManager*"
+        },
+        {
+          "name": "Limit Execution Time",
+          "type": "Bool"
+        },
+        {
+          "name": "Block On Global Shader Completion",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Version of ProcessAsyncResults that specifies use of ProcessGameThreadTargetTime for the timeslice."
+    },
+    {
+      "id": "global-begin-compile-shader",
+      "name": "GlobalBeginCompileShader",
+      "category": "ShaderCompiler",
+      "signature": "GlobalBeginCompileShader(Debug Group Name, VF Type, Shader Type, Shader Pipeline Type, Permutation Id, Source Filename, Function Name, Target, Input, Allow Development Shader Compile, Debug Description, Debug Extension)",
+      "params": [
+        {
+          "name": "Debug Group Name",
+          "type": "String&"
+        },
+        {
+          "name": "VF Type",
+          "type": "FVertexFactoryType*"
+        },
+        {
+          "name": "Shader Type",
+          "type": "FShaderType*"
+        },
+        {
+          "name": "Shader Pipeline Type",
+          "type": "FShaderPipelineType*"
+        },
+        {
+          "name": "Permutation Id",
+          "type": "Int"
+        },
+        {
+          "name": "Source Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Function Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Target",
+          "type": "FShaderTarget"
+        },
+        {
+          "name": "Input",
+          "type": "FShaderCompilerInput&"
+        },
+        {
+          "name": "Allow Development Shader Compile",
+          "type": "Bool"
+        },
+        {
+          "name": "Debug Description",
+          "type": "String&"
+        },
+        {
+          "name": "Debug Extension",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The global shader compiling thread manager."
+    },
+    {
+      "id": "is-global-shader-map-complete",
+      "name": "IsGlobalShaderMapComplete",
+      "category": "ShaderCompiler",
+      "signature": "IsGlobalShaderMapComplete(Type Name Substring)",
+      "params": [
+        {
+          "name": "Type Name Substring",
+          "type": "TCHAR*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether all global shader types containing the substring are complete and ready for rendering. if type name is null, check everything"
+    },
+    {
+      "id": "get-on-global-shader-compilation",
+      "name": "GetOnGlobalShaderCompilation",
+      "category": "ShaderCompiler",
+      "signature": "GetOnGlobalShaderCompilation()",
+      "params": [],
+      "returnType": "FOnGlobalShadersCompilation&"
+    },
+    {
+      "id": "verify-global-shaders-58ae63",
+      "name": "VerifyGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "VerifyGlobalShaders(Platform, Loaded From Cache File, Outdated Shader Types, Outdated Shader Pipeline Types)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Loaded From Cache File",
+          "type": "Bool"
+        },
+        {
+          "name": "Outdated Shader Types",
+          "type": "TArray<FShaderType*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Outdated Shader Pipeline Types",
+          "type": "TArray<FShaderPipelineType*>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Makes sure all global shaders are loaded and/or compiled for the passed in platform.\nNote: if compilation is needed, this only kicks off the compile.\n@param\tPlatform\t\t\t\t\t\tPlatform to verify global shaders for\n@param\tbLoadedFromCacheFile\t\t\tLoad the shaders from cache, will error out and not compile shaders if missing\n@param\tOutdatedShaderTypes\t\t\t\tOptional list of shader types, will trigger compilation job for shader types found in this list even if the map already has the shader.\n@param\tOutdatedShaderPipelineTypes\t\tOptional list of shader pipeline types, will trigger compilation job for shader pipeline types found in this list even if the map already has the pipeline."
+    },
+    {
+      "id": "verify-global-shaders-f08499",
+      "name": "VerifyGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "VerifyGlobalShaders(Platform, Target Platform, Loaded From Cache File, Outdated Shader Types, Outdated Shader Pipeline Types, In Extra Compiler Flags)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        },
+        {
+          "name": "Loaded From Cache File",
+          "type": "Bool"
+        },
+        {
+          "name": "Outdated Shader Types",
+          "type": "TArray<FShaderType*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Outdated Shader Pipeline Types",
+          "type": "TArray<FShaderPipelineType*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Extra Compiler Flags",
+          "type": "FShaderCompilerFlags&",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "precache-compute-pipeline-states-for-global-shaders",
+      "name": "PrecacheComputePipelineStatesForGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "PrecacheComputePipelineStatesForGlobalShaders(Feature Level, Target Platform)",
+      "params": [
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Precreates compute PSOs for global shaders. Separate from Compile/VerifyGlobalShaders to avoid blocking loads."
+    },
+    {
+      "id": "recompile-global-shaders",
+      "name": "RecompileGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "RecompileGlobalShaders()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Forces a recompile of the global shaders."
+    },
+    {
+      "id": "recompile-changed-shaders-for-platform",
+      "name": "RecompileChangedShadersForPlatform",
+      "category": "ShaderCompiler",
+      "signature": "RecompileChangedShadersForPlatform(Platform Name)",
+      "params": [
+        {
+          "name": "Platform Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Recompiles global shaders and material shaders\nrebuilds global shaders and also\nclears the cooked platform data for all materials if there is a global shader change detected\ncan be slow"
+    },
+    {
+      "id": "begin-recompile-global-shaders",
+      "name": "BeginRecompileGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "BeginRecompileGlobalShaders(Outdated Shader Types, Outdated Shader Pipeline Types, Shader Platform, Target Platform, In Extra Compiler Flags)",
+      "params": [
+        {
+          "name": "Outdated Shader Types",
+          "type": "TArray<FShaderType*>&"
+        },
+        {
+          "name": "Outdated Shader Pipeline Types",
+          "type": "TArray<FShaderPipelineType*>&"
+        },
+        {
+          "name": "Shader Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Extra Compiler Flags",
+          "type": "FShaderCompilerFlags&",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Begins recompiling the specified global shader types, and flushes their bound shader states.\nFinishRecompileGlobalShaders must be called after this and before using the global shaders for anything."
+    },
+    {
+      "id": "finish-recompile-global-shaders",
+      "name": "FinishRecompileGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "FinishRecompileGlobalShaders()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Finishes recompiling global shaders.  Must be called after BeginRecompileGlobalShaders."
+    },
+    {
+      "id": "process-compiled-global-shaders",
+      "name": "ProcessCompiledGlobalShaders",
+      "category": "ShaderCompiler",
+      "signature": "ProcessCompiledGlobalShaders(Compilation Results)",
+      "params": [
+        {
+          "name": "Compilation Results",
+          "type": "TArray<FShaderCommonCompileJobPtr>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by the shader compiler to process completed global shader jobs."
+    },
+    {
+      "id": "save-global-shaders-for-remote-recompile",
+      "name": "SaveGlobalShadersForRemoteRecompile",
+      "category": "ShaderCompiler",
+      "signature": "SaveGlobalShadersForRemoteRecompile(Ar, Shader Platform)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Shader Platform",
+          "type": "EShaderPlatform"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes a global shader map to an archive (used with recompiling shaders for a remote console)"
+    },
+    {
+      "id": "load-global-shaders-for-remote-recompile",
+      "name": "LoadGlobalShadersForRemoteRecompile",
+      "category": "ShaderCompiler",
+      "signature": "LoadGlobalShadersForRemoteRecompile(Ar, Shader Platform)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Shader Platform",
+          "type": "EShaderPlatform"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes a global shader map to an archive (used with recompiling shaders for a remote console)"
+    },
+    {
+      "id": "save-global-shader-file",
+      "name": "SaveGlobalShaderFile",
+      "category": "ShaderCompiler",
+      "signature": "SaveGlobalShaderFile(Platform, Save Path, Target Platform)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Save Path",
+          "type": "String"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Saves the global shader map as a file for the target platform.\n@return the name of the file written"
+    },
+    {
+      "id": "fodsc-request-payload",
+      "name": "FODSCRequestPayload",
+      "category": "ShaderCompiler",
+      "signature": "FODSCRequestPayload(In Shader Platform, In Feature Level, In Quality Level, In Material Name, In Vertex Factory Name, In Pipeline Name, In Shader Type Names, In Permutation Id, In Request Hash)",
+      "params": [
+        {
+          "name": "In Shader Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "In Quality Level",
+          "type": "EMaterialQualityLevel::Type"
+        },
+        {
+          "name": "In Material Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Vertex Factory Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Pipeline Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Shader Type Names",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "In Permutation Id",
+          "type": "Int"
+        },
+        {
+          "name": "In Request Hash",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "odsc-cmd-enum-to-string",
+      "name": "ODSCCmdEnumToString",
+      "category": "ShaderCompiler",
+      "signature": "ODSCCmdEnumToString(Cmd)",
+      "params": [
+        {
+          "name": "Cmd",
+          "type": "ODSCRecompileCommand"
+        }
+      ],
+      "returnType": "TCHAR*"
+    },
+    {
+      "id": "f-shader-recompile-data-d4225a",
+      "name": "FShaderRecompileData",
+      "category": "ShaderCompiler",
+      "signature": "FShaderRecompileData(In Platform Name, Out Modified Files, Out Mesh Material Maps, Out Global Shader Map)",
+      "params": [
+        {
+          "name": "In Platform Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Modified Files",
+          "type": "TArray<FString>*"
+        },
+        {
+          "name": "Out Mesh Material Maps",
+          "type": "TArray<uint8>*"
+        },
+        {
+          "name": "Out Global Shader Map",
+          "type": "TArray<uint8>*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recompile all the changed shaders for the current platform."
+    },
+    {
+      "id": "f-shader-recompile-data-d4516c",
+      "name": "FShaderRecompileData",
+      "category": "ShaderCompiler",
+      "signature": "FShaderRecompileData(In Platform Name, In Shader Platform, In Command Type, Out Modified Files, Out Mesh Material Maps, Out Global Shader Map)",
+      "params": [
+        {
+          "name": "In Platform Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Shader Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "In Command Type",
+          "type": "ODSCRecompileCommand"
+        },
+        {
+          "name": "Out Modified Files",
+          "type": "TArray<FString>*"
+        },
+        {
+          "name": "Out Mesh Material Maps",
+          "type": "TArray<uint8>*"
+        },
+        {
+          "name": "Out Global Shader Map",
+          "type": "TArray<uint8>*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For recompiling just global shaders."
+    },
+    {
+      "id": "recompile-shaders-for-remote",
+      "name": "RecompileShadersForRemote",
+      "category": "ShaderCompiler",
+      "signature": "RecompileShadersForRemote(Args, Output Directory)",
+      "params": [
+        {
+          "name": "Args",
+          "type": "FShaderRecompileData&"
+        },
+        {
+          "name": "Output Directory",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recompiles global shaders\n@param Args\t\t\t\t\tArguments and configuration for issuing recompiles.\n@param OutputDirectory\t\tThe directory the compiled data will be stored to"
+    },
+    {
+      "id": "shutdown-shader-compilers",
+      "name": "ShutdownShaderCompilers",
+      "category": "ShaderCompiler",
+      "signature": "ShutdownShaderCompilers(Target Platforms)",
+      "params": [
+        {
+          "name": "Target Platforms",
+          "type": "TConstArrayView<ITargetPlatform*>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Frees resources and finalizes artifacts created during the cook of the given platforms."
+    },
+    {
+      "id": "compile-global-shader-map-152502",
+      "name": "CompileGlobalShaderMap",
+      "category": "ShaderCompiler",
+      "signature": "CompileGlobalShaderMap(Refresh Shader Map)",
+      "params": [
+        {
+          "name": "Refresh Shader Map",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compile-global-shader-map-1cddec",
+      "name": "CompileGlobalShaderMap",
+      "category": "ShaderCompiler",
+      "signature": "CompileGlobalShaderMap(In Feature Level, Refresh Shader Map)",
+      "params": [
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "Refresh Shader Map",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compile-global-shader-map-b37768",
+      "name": "CompileGlobalShaderMap",
+      "category": "ShaderCompiler",
+      "signature": "CompileGlobalShaderMap(Platform, Refresh Shader Map)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Refresh Shader Map",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compile-global-shader-map-92138d",
+      "name": "CompileGlobalShaderMap",
+      "category": "ShaderCompiler",
+      "signature": "CompileGlobalShaderMap(Platform, Target Platform, Refresh Shader Map)",
+      "params": [
+        {
+          "name": "Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        },
+        {
+          "name": "Refresh Shader Map",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "shutdown-global-shader-map",
+      "name": "ShutdownGlobalShaderMap",
+      "category": "ShaderCompiler",
+      "signature": "ShutdownGlobalShaderMap()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-global-shader-map-ddc-key",
+      "name": "GetGlobalShaderMapDDCKey",
+      "category": "ShaderCompiler",
+      "signature": "GetGlobalShaderMapDDCKey()",
+      "params": [],
+      "returnType": "String&"
+    },
+    {
+      "id": "get-global-shader-map-ddc-guid",
+      "name": "GetGlobalShaderMapDDCGuid",
+      "category": "ShaderCompiler",
+      "signature": "GetGlobalShaderMapDDCGuid()",
+      "params": [],
+      "returnType": "FGuid&"
+    },
+    {
+      "id": "get-material-shader-map-ddc-key",
+      "name": "GetMaterialShaderMapDDCKey",
+      "category": "ShaderCompiler",
+      "signature": "GetMaterialShaderMapDDCKey()",
+      "params": [],
+      "returnType": "String&"
+    },
+    {
+      "id": "get-material-shader-map-ddc-guid",
+      "name": "GetMaterialShaderMapDDCGuid",
+      "category": "ShaderCompiler",
+      "signature": "GetMaterialShaderMapDDCGuid()",
+      "params": [],
+      "returnType": "FGuid&"
+    },
+    {
+      "id": "should-dump-shader-ddc-keys",
+      "name": "ShouldDumpShaderDDCKeys",
+      "category": "ShaderCompiler",
+      "signature": "ShouldDumpShaderDDCKeys()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "dump-shader-ddc-key-to-file",
+      "name": "DumpShaderDDCKeyToFile",
+      "category": "ShaderCompiler",
+      "signature": "DumpShaderDDCKeyToFile(In Platform, With Editor, Debug Group Name, DDC Key)",
+      "params": [
+        {
+          "name": "In Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "With Editor",
+          "type": "Bool"
+        },
+        {
+          "name": "Debug Group Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "DDC Key",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-cook-on-the-fly-shaders",
+      "name": "ProcessCookOnTheFlyShaders",
+      "category": "ShaderCompiler",
+      "signature": "ProcessCookOnTheFlyShaders(Reload Global Shaders, Mesh Material Maps, Materials To Load, Global Shader Map)",
+      "params": [
+        {
+          "name": "Reload Global Shaders",
+          "type": "Bool"
+        },
+        {
+          "name": "Mesh Material Maps",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Materials To Load",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Global Shader Map",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles serializing in MeshMaterialMaps or GlobalShaderMap from a CookOnTheFly command and applying them to the in-memory shadermaps.\n@param MeshMaterialMaps\t\t\t\tByte array that contains the serialized material shadermap from across the network.\n@param MaterialsToLoad\t\t\t\tThe materials contained in the MeshMaterialMaps\n@param GlobalShaderMap\t\t\t\tByte array that contains the serialized global shadermap from across the network."
+    }
+  ]
+}

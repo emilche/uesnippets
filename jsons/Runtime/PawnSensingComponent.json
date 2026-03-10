@@ -25,7 +25,7 @@
           "type": "Float"
         }
       ],
-      "returnType": "float HearingThreshold",
+      "returnType": "public : void",
       "docs": "Changes the SensingInterval.\nIf we are currently waiting for an interval, this can either extend or shorten that interval.\nA value <= 0 prevents any updates."
     },
     {
@@ -89,6 +89,365 @@
         }
       ],
       "returnType": "Float"
+    },
+    {
+      "id": "is-sensor-actor",
+      "name": "IsSensorActor",
+      "category": "PawnSensingComponent",
+      "signature": "IsSensorActor(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the given actor our owner? Used to ensure that we are not trying to sense our self / our owner."
+    },
+    {
+      "id": "can-sense-anything",
+      "name": "CanSenseAnything",
+      "category": "PawnSensingComponent",
+      "signature": "CanSenseAnything(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Are we capable of sensing anything (and do we have any callbacks that care about sensing)? If so UpdateAISensing() will be called every sensing interval."
+    },
+    {
+      "id": "should-check-visibility-of",
+      "name": "ShouldCheckVisibilityOf",
+      "category": "PawnSensingComponent",
+      "signature": "ShouldCheckVisibilityOf(Target, Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Pawn",
+          "type": "APawn*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we should check whether the given Pawn is visible (because we can see things, the Pawn is not hidden, and if the Pawn is a player and we only see players)"
+    },
+    {
+      "id": "could-see-pawn",
+      "name": "CouldSeePawn",
+      "category": "PawnSensingComponent",
+      "signature": "CouldSeePawn(Target, Other, May Skip Checks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Other",
+          "type": "APawn*"
+        },
+        {
+          "name": "May Skip Checks",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Chance of seeing other pawn decreases with increasing distance or angle in peripheral vision\n@param bMaySkipChecks if true allows checks to be sometimes skipped if target is far away (used by periodic automatic visibility checks)\n@return true if the specified pawn Other is potentially visible (within peripheral vision, etc.) - still need to do LineOfSightTo() check to see if actually visible."
+    },
+    {
+      "id": "should-check-audibility-of",
+      "name": "ShouldCheckAudibilityOf",
+      "category": "PawnSensingComponent",
+      "signature": "ShouldCheckAudibilityOf(Target, Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Pawn",
+          "type": "APawn*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we should check whether we can hear the given Pawn (because we are able to hear, and the Pawn has the correct team relationship to us)"
+    },
+    {
+      "id": "has-line-of-sight-to",
+      "name": "HasLineOfSightTo",
+      "category": "PawnSensingComponent",
+      "signature": "HasLineOfSightTo(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Other",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check line to other actor.\n@param Other is the actor whose visibility is being checked.\n@param ViewPoint is eye position visibility is being checked from.\n@return true if controller's pawn can see Other actor."
+    },
+    {
+      "id": "is-noise-relevant",
+      "name": "IsNoiseRelevant",
+      "category": "PawnSensingComponent",
+      "signature": "IsNoiseRelevant(Target, Pawn, Noise Emitter Component, Source Within Noise Emitter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Pawn",
+          "type": "APawn&"
+        },
+        {
+          "name": "Noise Emitter Component",
+          "type": "UPawnNoiseEmitterComponent&"
+        },
+        {
+          "name": "Source Within Noise Emitter",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test whether the noise is loud enough and recent enough to care about.  bSourceWithinNoiseEmitter is true iff the\nnoise was made by the pawn itself or within close proximity (its collision volume).  Otherwise the noise was made\nat significant distance from the pawn."
+    },
+    {
+      "id": "can-hear",
+      "name": "CanHear",
+      "category": "PawnSensingComponent",
+      "signature": "CanHear(Target, Noise Loc, Loudness, Failed LOS)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Noise Loc",
+          "type": "FVector&"
+        },
+        {
+          "name": "Loudness",
+          "type": "Float"
+        },
+        {
+          "name": "Failed LOS",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@Returns true if sensor can hear this noise. Only executed if the noise has been determined to be relevant (via IsNoiseRelevant)"
+    },
+    {
+      "id": "initialize-component",
+      "name": "InitializeComponent",
+      "category": "PawnSensingComponent",
+      "signature": "InitializeComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-sensor-location",
+      "name": "GetSensorLocation",
+      "category": "PawnSensingComponent",
+      "signature": "GetSensorLocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Get position where hearing/seeing occurs (i.e. ear/eye position).  If we ever need different positions for hearing/seeing, we'll deal with that then!"
+    },
+    {
+      "id": "get-sensor-rotation",
+      "name": "GetSensorRotation",
+      "category": "PawnSensingComponent",
+      "signature": "GetSensorRotation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "FRotator",
+      "docs": "Get the rotation of this sensor. We need this for the sight component"
+    },
+    {
+      "id": "sense-pawn",
+      "name": "SensePawn",
+      "category": "PawnSensingComponent",
+      "signature": "SensePawn(Target, Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Pawn",
+          "type": "APawn&"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "See if there are interesting sounds and sights that we want to detect, and respond to them if so."
+    },
+    {
+      "id": "on-timer",
+      "name": "OnTimer",
+      "category": "PawnSensingComponent",
+      "signature": "OnTimer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update function called on timer intervals."
+    },
+    {
+      "id": "set-timer",
+      "name": "SetTimer",
+      "category": "PawnSensingComponent",
+      "signature": "SetTimer(Target, Time Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Time Delay",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handle for efficient management of OnTimer timer"
+    },
+    {
+      "id": "update-ai-sensing",
+      "name": "UpdateAISensing",
+      "category": "PawnSensingComponent",
+      "signature": "UpdateAISensing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calls SensePawn on any Pawns that we are allowed to sense."
+    },
+    {
+      "id": "get-sensor-actor",
+      "name": "GetSensorActor",
+      "category": "PawnSensingComponent",
+      "signature": "GetSensorActor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "AActor*"
+    },
+    {
+      "id": "get-sensor-controller",
+      "name": "GetSensorController",
+      "category": "PawnSensingComponent",
+      "signature": "GetSensorController(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        }
+      ],
+      "returnType": "AController*"
+    },
+    {
+      "id": "broadcast-on-see-pawn",
+      "name": "BroadcastOnSeePawn",
+      "category": "PawnSensingComponent",
+      "signature": "BroadcastOnSeePawn(Target, Pawn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Pawn",
+          "type": "APawn&"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "broadcast-on-hear-local-noise",
+      "name": "BroadcastOnHearLocalNoise",
+      "category": "PawnSensingComponent",
+      "signature": "BroadcastOnHearLocalNoise(Target, Instigator, Location, Volume)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Instigator",
+          "type": "APawn&"
+        },
+        {
+          "name": "Location",
+          "type": "FVector&"
+        },
+        {
+          "name": "Volume",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "broadcast-on-hear-remote-noise",
+      "name": "BroadcastOnHearRemoteNoise",
+      "category": "PawnSensingComponent",
+      "signature": "BroadcastOnHearRemoteNoise(Target, Instigator, Location, Volume)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPawnSensingComponent*"
+        },
+        {
+          "name": "Instigator",
+          "type": "APawn&"
+        },
+        {
+          "name": "Location",
+          "type": "FVector&"
+        },
+        {
+          "name": "Volume",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

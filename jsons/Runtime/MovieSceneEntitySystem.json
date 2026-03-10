@@ -1,0 +1,462 @@
+{
+  "id": "movie-scene-entity-system",
+  "label": "MovieSceneEntitySystem",
+  "includepath": "EntitySystem/MovieSceneEntitySystem.h",
+  "includes": [
+    "TaskGraphInterfaces",
+    "MovieSceneEntityIDs",
+    "MovieSceneEntityManager",
+    "MovieSceneEntitySystemTypes",
+    "MovieSceneSequenceInstanceHandle",
+    "Platform",
+    "EnumClassFlags",
+    "Stats",
+    "SubclassOf",
+    "Object",
+    "ObjectMacros",
+    "ObjectPtr",
+    "UObjectGlobals",
+    "MovieSceneEntitySystem.generated"
+  ],
+  "functions": [
+    {
+      "id": "u-movie-scene-entity-system-ebdb86",
+      "name": "UMovieSceneEntitySystem",
+      "category": "MovieSceneEntitySystem",
+      "signature": "UMovieSceneEntitySystem(Obj Init)",
+      "params": [
+        {
+          "name": "Obj Init",
+          "type": "FObjectInitializer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "u-movie-scene-entity-system-9e49be",
+      "name": "UMovieSceneEntitySystem",
+      "category": "MovieSceneEntitySystem",
+      "signature": "UMovieSceneEntitySystem()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "define-implicit-prerequisite",
+      "name": "DefineImplicitPrerequisite",
+      "category": "MovieSceneEntitySystem",
+      "signature": "DefineImplicitPrerequisite(Upstream System Type, Downstream System Type)",
+      "params": [
+        {
+          "name": "Upstream System Type",
+          "type": "TSubclassOf<UMovieSceneEntitySystem>"
+        },
+        {
+          "name": "Downstream System Type",
+          "type": "TSubclassOf<UMovieSceneEntitySystem>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a relationship between the two system types that ensures any systems of type UpstreamSystemType always execute before DownstreamSystemType if they are both present\n@param UpstreamSystemType     The UClass of the system that should always be a prerequisite of DownstreamSystemType (ie, runs first)\n@param DownstreamSystemType   The UClass of the system that should always run after UpstreamSystemType"
+    },
+    {
+      "id": "define-component-producer",
+      "name": "DefineComponentProducer",
+      "category": "MovieSceneEntitySystem",
+      "signature": "DefineComponentProducer(Class Type, Component Type)",
+      "params": [
+        {
+          "name": "Class Type",
+          "type": "TSubclassOf<UMovieSceneEntitySystem>"
+        },
+        {
+          "name": "Component Type",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Informs the dependency graph that the specified class type produces components of the specified type.\nAny systems set up as consumers of this component type will always be run after\n@param ClassType         The UClass of the system that produces the component type\n@param ComponentType     The type of the component produced by the system"
+    },
+    {
+      "id": "define-component-consumer",
+      "name": "DefineComponentConsumer",
+      "category": "MovieSceneEntitySystem",
+      "signature": "DefineComponentConsumer(Class Type, Component Type)",
+      "params": [
+        {
+          "name": "Class Type",
+          "type": "TSubclassOf<UMovieSceneEntitySystem>"
+        },
+        {
+          "name": "Component Type",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Informs the dependency graph that the specified class type consumes components of the specified type, and as such should always execute after any producers of that component type.\n@param ClassType         The UClass of the system that consumes the component type\n@param ComponentType     The type of the component consumed by the system"
+    },
+    {
+      "id": "link-relevant-systems",
+      "name": "LinkRelevantSystems",
+      "category": "MovieSceneEntitySystem",
+      "signature": "LinkRelevantSystems(In Linker)",
+      "params": [
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensure that any systems relevant to the specified linker's entity manager are linked"
+    },
+    {
+      "id": "link-category-systems",
+      "name": "LinkCategorySystems",
+      "category": "MovieSceneEntitySystem",
+      "signature": "LinkCategorySystems(In Linker, In Category)",
+      "params": [
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        },
+        {
+          "name": "In Category",
+          "type": "UE::MovieScene::EEntitySystemCategory"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Link all systems in a given category"
+    },
+    {
+      "id": "link-all-systems",
+      "name": "LinkAllSystems",
+      "category": "MovieSceneEntitySystem",
+      "signature": "LinkAllSystems(In Linker)",
+      "params": [
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Link all systems that pass the given linker's filter"
+    },
+    {
+      "id": "register-custom-system-category",
+      "name": "RegisterCustomSystemCategory",
+      "category": "MovieSceneEntitySystem",
+      "signature": "RegisterCustomSystemCategory()",
+      "params": [],
+      "returnType": "UE::MovieScene::EEntitySystemCategory",
+      "docs": "Create a new system category"
+    },
+    {
+      "id": "sort-by-flow-order",
+      "name": "SortByFlowOrder",
+      "category": "MovieSceneEntitySystem",
+      "signature": "SortByFlowOrder(In Out Global Node I Ds)",
+      "params": [
+        {
+          "name": "In Out Global Node I Ds",
+          "type": "TArray<uint16>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sort the given systems by their flow order, suitable for execution"
+    },
+    {
+      "id": "get-subsequent-systems",
+      "name": "GetSubsequentSystems",
+      "category": "MovieSceneEntitySystem",
+      "signature": "GetSubsequentSystems(From Global Node ID, Out Subsequent Global Node I Ds)",
+      "params": [
+        {
+          "name": "From Global Node ID",
+          "type": "UInt16"
+        },
+        {
+          "name": "Out Subsequent Global Node I Ds",
+          "type": "TArray<uint16>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the global IDs of all subsequent systems of the given system"
+    },
+    {
+      "id": "print-filtered-flow-graph",
+      "name": "PrintFilteredFlowGraph",
+      "category": "MovieSceneEntitySystem",
+      "signature": "PrintFilteredFlowGraph(Group Filters, Out String)",
+      "params": [
+        {
+          "name": "Group Filters",
+          "type": "TArrayView<TBitArray<>>"
+        },
+        {
+          "name": "Out String",
+          "type": "FStringBuilderBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Print the global system graph in graphviz format filtered by the specified global system IDs, one filter per phase\n*\n@param GroupFilters  Array of bit filters, one per phase, defining which systems to include in the output string\n@param OutString     String builder to add the output graph to"
+    },
+    {
+      "id": "debug-print-global-dependency-graph",
+      "name": "DebugPrintGlobalDependencyGraph",
+      "category": "MovieSceneEntitySystem",
+      "signature": "DebugPrintGlobalDependencyGraph(Update Cache)",
+      "params": [
+        {
+          "name": "Update Cache",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Prints a graphviz markup for the global system dependency graph"
+    },
+    {
+      "id": "unlink",
+      "name": "Unlink",
+      "category": "MovieSceneEntitySystem",
+      "signature": "Unlink(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the system is removed from the linker"
+    },
+    {
+      "id": "abandon",
+      "name": "Abandon",
+      "category": "MovieSceneEntitySystem",
+      "signature": "Abandon(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the linker is being destroyed"
+    },
+    {
+      "id": "link",
+      "name": "Link",
+      "category": "MovieSceneEntitySystem",
+      "signature": "Link(Target, In Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the system is added to a linker"
+    },
+    {
+      "id": "schedule-persistent-tasks",
+      "name": "SchedulePersistentTasks",
+      "category": "MovieSceneEntitySystem",
+      "signature": "SchedulePersistentTasks(Target, Scheduler)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "Scheduler",
+          "type": "UE::MovieScene::IEntitySystemScheduler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to schedule work"
+    },
+    {
+      "id": "run",
+      "name": "Run",
+      "category": "MovieSceneEntitySystem",
+      "signature": "Run(Target, In Prerequisites, Subsequents)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "In Prerequisites",
+          "type": "FSystemTaskPrerequisites&"
+        },
+        {
+          "name": "Subsequents",
+          "type": "FSystemSubsequentTasks&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the system should run its logic"
+    },
+    {
+      "id": "is-relevant",
+      "name": "IsRelevant",
+      "category": "MovieSceneEntitySystem",
+      "signature": "IsRelevant(Target, In Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Called to know if the system is still relevant and should be kept around"
+    },
+    {
+      "id": "conditional-link-system",
+      "name": "ConditionalLinkSystem",
+      "category": "MovieSceneEntitySystem",
+      "signature": "ConditionalLinkSystem(Target, In Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tag-garbage",
+      "name": "TagGarbage",
+      "category": "MovieSceneEntitySystem",
+      "signature": "TagGarbage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clean-tagged-garbage",
+      "name": "CleanTaggedGarbage",
+      "category": "MovieSceneEntitySystem",
+      "signature": "CleanTaggedGarbage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable",
+      "name": "Enable",
+      "category": "MovieSceneEntitySystem",
+      "signature": "Enable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable this system if it is not already."
+    },
+    {
+      "id": "disable",
+      "name": "Disable",
+      "category": "MovieSceneEntitySystem",
+      "signature": "Disable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disable this system if it is not already.\nDisabled systems will remain in the system graph, and will stay alive as long as they are relevant, but will not be Run."
+    },
+    {
+      "id": "is-custom-scheduling-enabled",
+      "name": "IsCustomSchedulingEnabled",
+      "category": "MovieSceneEntitySystem",
+      "signature": "IsCustomSchedulingEnabled()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Checks whether custom task sheduling is enabled or not\n@see FEntitySystemScheduler"
+    },
+    {
+      "id": "is-ready-for-finish-destroy",
+      "name": "IsReadyForFinishDestroy",
+      "category": "MovieSceneEntitySystem",
+      "signature": "IsReadyForFinishDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "protected : bool"
+    },
+    {
+      "id": "finish-destroy",
+      "name": "FinishDestroy",
+      "category": "MovieSceneEntitySystem",
+      "signature": "FinishDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-relevant-impl",
+      "name": "IsRelevantImpl",
+      "category": "MovieSceneEntitySystem",
+      "signature": "IsRelevantImpl(Target, In Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "conditional-link-system-impl",
+      "name": "ConditionalLinkSystemImpl",
+      "category": "MovieSceneEntitySystem",
+      "signature": "ConditionalLinkSystemImpl(Target, In Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovieSceneEntitySystem*"
+        },
+        {
+          "name": "In Linker",
+          "type": "UMovieSceneEntitySystemLinker*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

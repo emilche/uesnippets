@@ -21,6 +21,14 @@
   ],
   "functions": [
     {
+      "id": "u-interchange-base-node-container",
+      "name": "UInterchangeBaseNodeContainer",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "UInterchangeBaseNodeContainer()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
       "id": "reset",
       "name": "Reset",
       "category": "Interchange ",
@@ -31,7 +39,7 @@
           "type": "UInterchangeBaseNodeContainer*"
         }
       ],
-      "returnType": "Nodes .",
+      "returnType": "Void",
       "docs": "Empty the container."
     },
     {
@@ -132,17 +140,40 @@
       "docs": "Set a namespace to all node of the target class in this container. A valid node namespace is prefix to the unique ID in UInterchangeBaseNode::GetUniqueId().\nAfter adding the namespace this function will find any string attribute in all the node that reference the node unique ID and replace the attribute value with the new unique id.\nThe last step is to remap the node container with the new Ids.\n@Param Namespace - Is the new namespace you want to set. Pass an empty string to remove an existing namespace.\n@Param TargetClass - Optional, this parameter represent the node class we want to apply the namespace on. If null all node will be tagged with the namespace\n@Note - Changing all node namespace wont work since some node class use a combinaison of the unique ID in there attributes and we cannot change those attribute\nin a generic way."
     },
     {
-      "id": "get-node-children-uids-e1c5b6",
-      "name": "GetNodeChildrenUids",
-      "category": "Interchange ",
-      "signature": "GetNodeChildrenUids(Target)",
+      "id": "iterate-nodes",
+      "name": "IterateNodes",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "IterateNodes(Target, Iteration Lambda)",
       "params": [
         {
           "name": "Target",
           "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "Iteration Lambda",
+          "type": "TFunctionRef<void ( FString&,UInterchangeBaseNode* )>"
         }
       ],
-      "returnType": "TArray<FString> ChildrenIds ="
+      "returnType": "Void",
+      "docs": "Unordered iteration of the all nodes."
+    },
+    {
+      "id": "breakable-iterate-nodes",
+      "name": "BreakableIterateNodes",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "BreakableIterateNodes(Target, Iteration Lambda)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "Iteration Lambda",
+          "type": "TFunctionRef<bool ( FString&,UInterchangeBaseNode* )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unordered iteration of the all nodes, but can be stopped early by returning true."
     },
     {
       "id": "get-roots",
@@ -159,7 +190,7 @@
           "type": "TArray<FString>&"
         }
       ],
-      "returnType": "break",
+      "returnType": "Void",
       "docs": "Return all nodes that do not have any parent."
     },
     {
@@ -301,7 +332,7 @@
       "docs": "Get the number of children the node has."
     },
     {
-      "id": "get-node-children-uids-7ed822",
+      "id": "get-node-children-uids",
       "name": "GetNodeChildrenUids",
       "category": "Interchange ",
       "signature": "GetNodeChildrenUids(Target, Node Unique ID)",
@@ -317,6 +348,23 @@
       ],
       "returnType": "TArray<FString>",
       "docs": "Get the UIDs of all the node's children."
+    },
+    {
+      "id": "get-cached-node-children-uids",
+      "name": "GetCachedNodeChildrenUids",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "GetCachedNodeChildrenUids(Target, Node Unique ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "Node Unique ID",
+          "type": "String&"
+        }
+      ],
+      "returnType": "TArray<FString>*"
     },
     {
       "id": "get-node-children",
@@ -339,6 +387,24 @@
       ],
       "returnType": "UInterchangeBaseNode*",
       "docs": "Get the nth const child of the node"
+    },
+    {
+      "id": "serialize-node-container-data",
+      "name": "SerializeNodeContainerData",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "SerializeNodeContainerData(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This function serializes the node container and all node sub-objects it points .\nOut-of-process translators like FBX will dump a file containing this data, and the editor\nwill read the file and regenerate the container from the saved data."
     },
     {
       "id": "save-to-file",
@@ -391,6 +457,38 @@
       "docs": "Fill the cache of children UIDs to optimize the GetNodeChildrenUids call."
     },
     {
+      "id": "set-children-cache",
+      "name": "SetChildrenCache",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "SetChildrenCache(Target, In Children Cache)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "In Children Cache",
+          "type": "TMap<FString,TArray<FString>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the children cache from an incoming data set."
+    },
+    {
+      "id": "get-children-cache",
+      "name": "GetChildrenCache",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "GetChildrenCache(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        }
+      ],
+      "returnType": "TMap<FString,TArray<FString>>&",
+      "docs": "Gets the children cache."
+    },
+    {
       "id": "reset-children-cache",
       "name": "ResetChildrenCache",
       "category": "Interchange ",
@@ -425,6 +523,78 @@
       ],
       "returnType": "Bool",
       "docs": "Checks if ParentNodeUID is an ancestor."
+    },
+    {
+      "id": "setup-node",
+      "name": "SetupNode",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "SetupNode(Target, Node, Node UID, Display Label, Container Type, Parent Node UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "Node",
+          "type": "UInterchangeBaseNode*"
+        },
+        {
+          "name": "Node UID",
+          "type": "String&"
+        },
+        {
+          "name": "Display Label",
+          "type": "String&"
+        },
+        {
+          "name": "Container Type",
+          "type": "EInterchangeNodeContainerType"
+        },
+        {
+          "name": "Parent Node UID",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "setup-and-replace-factory-node",
+      "name": "SetupAndReplaceFactoryNode",
+      "category": "InterchangeBaseNodeContainer",
+      "signature": "SetupAndReplaceFactoryNode(Target, Node, Node UID, Display Label, Container Type, Old Node UID, Parent Node UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterchangeBaseNodeContainer*"
+        },
+        {
+          "name": "Node",
+          "type": "UInterchangeFactoryBaseNode*"
+        },
+        {
+          "name": "Node UID",
+          "type": "String&"
+        },
+        {
+          "name": "Display Label",
+          "type": "String&"
+        },
+        {
+          "name": "Container Type",
+          "type": "EInterchangeNodeContainerType"
+        },
+        {
+          "name": "Old Node UID",
+          "type": "String&"
+        },
+        {
+          "name": "Parent Node UID",
+          "type": "String&",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

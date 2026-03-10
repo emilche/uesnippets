@@ -1,0 +1,926 @@
+{
+  "id": "image-core",
+  "label": "ImageCore",
+  "includepath": "ImageCore.h",
+  "includes": [
+    "ContainersFwd",
+    "CoreMinimal",
+    "CoreTypes",
+    "Color",
+    "Float16",
+    "Float16Color",
+    "Vector2D",
+    "AssertionMacros"
+  ],
+  "functions": [
+    {
+      "id": "get-bytes-per-pixel",
+      "name": "GetBytesPerPixel",
+      "category": "ImageCore",
+      "signature": "GetBytesPerPixel(Format)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Type"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "**\nImageCore : low level pixel surface types\nFImage owns an array of pixels\nFImageView can point at an array of pixels (FImage or otherwise)\nboth have an FImageInfo\nERawImageFormat::Type is a pixel format that can be used in FImage (or TextureSource)\nhelpers to load/save/convert FImage are in Engine in FImageUtils\nImageCore does not use Engine, only Core\nit can be used in standalone apps that don't have Engine\nnote to authors: as much as possible, write functions that act on FImageView\nfor example reading and modifying pixels? use FImageView\nuse FImage when you may need to change the format or allocate a new image.\nprefer using FImage/FImageView instead of TextureSourceFormat or raw arrays or bytes\nTry not to write code that switches on pixel format, as formats may be added and it creates a fragile maintenance problem."
+    },
+    {
+      "id": "get-name",
+      "name": "GetName",
+      "category": "ImageCore",
+      "signature": "GetName(Format)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Type"
+        }
+      ],
+      "returnType": "TCHAR*"
+    },
+    {
+      "id": "get-name-view",
+      "name": "GetNameView",
+      "category": "ImageCore",
+      "signature": "GetNameView(Format)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Type"
+        }
+      ],
+      "returnType": "FUtf8StringView"
+    },
+    {
+      "id": "get-format-from-string",
+      "name": "GetFormatFromString",
+      "category": "ImageCore",
+      "signature": "GetFormatFromString(In String, Out Format)",
+      "params": [
+        {
+          "name": "In String",
+          "type": "FUtf8StringView"
+        },
+        {
+          "name": "Out Format",
+          "type": "Type&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-hdr",
+      "name": "IsHDR",
+      "category": "ImageCore",
+      "signature": "IsHDR(Format)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Type"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-alpha-channel",
+      "name": "HasAlphaChannel",
+      "category": "ImageCore",
+      "signature": "HasAlphaChannel(Format)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Type"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-one-pixel-linear",
+      "name": "GetOnePixelLinear",
+      "category": "ImageCore",
+      "signature": "GetOnePixelLinear(Pixel Data, Format, Gamma)",
+      "params": [
+        {
+          "name": "Pixel Data",
+          "type": "void*"
+        },
+        {
+          "name": "Format",
+          "type": "Type"
+        },
+        {
+          "name": "Gamma",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "FLinearColor"
+    },
+    {
+      "id": "image-info-to-compact-binary",
+      "name": "ImageInfoToCompactBinary",
+      "category": "ImageCore",
+      "signature": "ImageInfoToCompactBinary(Target, Out Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImageInfo*"
+        },
+        {
+          "name": "Out Object",
+          "type": "FCbObject&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "image-info-from-compact-binary",
+      "name": "ImageInfoFromCompactBinary",
+      "category": "ImageCore",
+      "signature": "ImageInfoFromCompactBinary(Target, In Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImageInfo*"
+        },
+        {
+          "name": "In Object",
+          "type": "FCbObject&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-slice",
+      "name": "GetSlice",
+      "category": "ImageCore",
+      "signature": "GetSlice(Target, Slice Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImageView*"
+        },
+        {
+          "name": "Slice Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FImageView"
+    },
+    {
+      "id": "copy-to",
+      "name": "CopyTo",
+      "category": "ImageCore",
+      "signature": "CopyTo(Target, Dest Image, Dest Format, Dest Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImageView*"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "Dest Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies the image to a destination image with the specified format.\n@param DestImage - The destination image.\n@param DestFormat - The destination image format.\n@param DestSRGB - Whether the destination image is in SRGB format."
+    },
+    {
+      "id": "f-image",
+      "name": "FImage",
+      "category": "ImageCore",
+      "signature": "FImage(In Size X, In Size Y, In Num Slices, In Format, In Gamma Space)",
+      "params": [
+        {
+          "name": "In Size X",
+          "type": "Int"
+        },
+        {
+          "name": "In Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Slices",
+          "type": "Int"
+        },
+        {
+          "name": "In Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "In Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates and initializes a new image with the specified number of slices.\n@param InSizeX - The image width.\n@param InSizeY - The image height.\n@param InNumSlices - The number of slices.\n@param InFormat - The image format.\n@param InGammaSpace - (optional) Image Gamma Space.  GetDefaultGammaSpace() if not provided."
+    },
+    {
+      "id": "free-data",
+      "name": "FreeData",
+      "category": "ImageCore",
+      "signature": "FreeData(Target, Async Detached)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Async Detached",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "change-format",
+      "name": "ChangeFormat",
+      "category": "ImageCore",
+      "signature": "ChangeFormat(Target, Dest Format, Dest Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Dest Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "Dest Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "In - place format change\ndoes nothing if already in the desired format"
+    },
+    {
+      "id": "resize-to-6b9259",
+      "name": "ResizeTo",
+      "category": "ImageCore",
+      "signature": "ResizeTo(Target, Dest Image, Dest Size X, Dest Size Y, Dest Format, Dest Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Size X",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "Dest Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies and resizes the image to a destination image with the specified size and format.\nResize is done using bilinear filtering; gamma correct (light linear) by converting through RGBA32F.\nlegacy API, prefer ResizeImage\n@param DestImage - The destination image.\n@param DestSizeX - Width of the resized image\n@param DestSizeY - Height of the resized image\n@param DestFormat - The destination image format.\n@param DestSRGB - Whether the destination image is in SRGB format."
+    },
+    {
+      "id": "linearize",
+      "name": "Linearize",
+      "category": "ImageCore",
+      "signature": "Linearize(Target, Source Encoding, Dest Image)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Source Encoding",
+          "type": "Byte"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImage&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Linearize to a RGBA32F destination image by applying the decoding function that corresponds to the specified source encoding.\nIf None, this call will be equivalent to CopyTo(DestImage, ERawImageFormat::RGBA32F, EGammaSpace::Linear).\n@param SourceEncoding - Opaque source encoding (matching UE::Color::EEncoding).\n@param DestImage - The destination image.\nSourceEncoding = None (0) to Linearize using the GammaSpace in this FImage"
+    },
+    {
+      "id": "transform-to-working-color-space-05555b",
+      "name": "TransformToWorkingColorSpace",
+      "category": "ImageCore",
+      "signature": "TransformToWorkingColorSpace(Target, Source Red Chromaticity, Source Green Chromaticity, Source Blue Chromaticity, Source White Chromaticity, Method, Equality Tolerance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Source Red Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Source Green Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Source Blue Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Source White Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Method",
+          "type": "UE::Color::EChromaticAdaptationMethod"
+        },
+        {
+          "name": "Equality Tolerance",
+          "type": "Double",
+          "default": "1.e-7"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "init-eddc33",
+      "name": "Init",
+      "category": "ImageCore",
+      "signature": "Init(Target, In Size X, In Size Y, In Num Slices, In Format, In Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "In Size X",
+          "type": "Int"
+        },
+        {
+          "name": "In Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Slices",
+          "type": "Int"
+        },
+        {
+          "name": "In Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "In Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes this image with the specified number of slices.\nAllocates RawData.\n@param InSizeX - The image width.\n@param InSizeY - The image height.\n@param InNumSlices - The number of slices.\n@param InFormat - The image format.\n@param bInSRGB - Whether the color values are in SRGB format."
+    },
+    {
+      "id": "init-3b41a8",
+      "name": "Init",
+      "category": "ImageCore",
+      "signature": "Init(Target, In Size X, In Size Y, In Format, In Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "In Size X",
+          "type": "Int"
+        },
+        {
+          "name": "In Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "In Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "In Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes this image with a single slice.\nAllocates RawData.\n@param InSizeX - The image width.\n@param InSizeY - The image height.\n@param InFormat - The image format.\n@param bInSRGB - Whether the color values are in SRGB format."
+    },
+    {
+      "id": "init-ddc526",
+      "name": "Init",
+      "category": "ImageCore",
+      "signature": "Init(Target, Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Info",
+          "type": "FImageInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes this image with specified Info.\nAllocates RawData.\n@param Info - The image description.  Can also pass an FImage or FImageView to this function."
+    },
+    {
+      "id": "init-5a5b03",
+      "name": "Init",
+      "category": "ImageCore",
+      "signature": "Init(Target, In Format, In Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipMapImage*"
+        },
+        {
+          "name": "In Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "In Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Structure for raw image data used for Image formats that support Mip Maps."
+    },
+    {
+      "id": "init-121024",
+      "name": "Init",
+      "category": "ImageCore",
+      "signature": "Init(Target, Mip Zero Width, Mip Zero Height, Num Mips, In Format, In Gamma Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipMapImage*"
+        },
+        {
+          "name": "Mip Zero Width",
+          "type": "Int"
+        },
+        {
+          "name": "Mip Zero Height",
+          "type": "Int"
+        },
+        {
+          "name": "Num Mips",
+          "type": "Int"
+        },
+        {
+          "name": "In Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "In Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes the Mip Map Image with reserving space for mip maps.\n@param InFormat Raw Image Format\n@param InGammaSpace Gamma Space"
+    },
+    {
+      "id": "image-parallel-for-compute-num-jobs-for-pixels",
+      "name": "ImageParallelForComputeNumJobsForPixels",
+      "category": "ImageCore",
+      "signature": "ImageParallelForComputeNumJobsForPixels(Out Num Pixels Per Job, Num Pixels)",
+      "params": [
+        {
+          "name": "Out Num Pixels Per Job",
+          "type": "Int64&"
+        },
+        {
+          "name": "Num Pixels",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Functions\n***************************************************************************"
+    },
+    {
+      "id": "image-parallel-for-compute-num-jobs-for-rows",
+      "name": "ImageParallelForComputeNumJobsForRows",
+      "category": "ImageCore",
+      "signature": "ImageParallelForComputeNumJobsForRows(Out Num Items Per Job, Size X, Size Y)",
+      "params": [
+        {
+          "name": "Out Num Items Per Job",
+          "type": "Int&"
+        },
+        {
+          "name": "Size X",
+          "type": "Int64"
+        },
+        {
+          "name": "Size Y",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "copy-image",
+      "name": "CopyImage",
+      "category": "ImageCore",
+      "signature": "CopyImage(Src Image, Dest Image)",
+      "params": [
+        {
+          "name": "Src Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy FImageView data, converting pixels if necessary.\nSizes must match. Dest must already be allocated.\nFor a function that allocates Dest, use CopyTo().\nBecause FImage implicitly convers to FImageView, these functions can be used on FImage types as well.\n@param SrcImage - The source image to copy from.\n@param DestImage - The destination image to copy to. (the FImageView is const but what it points at is not)"
+    },
+    {
+      "id": "copy-image-rgbabgra",
+      "name": "CopyImageRGBABGRA",
+      "category": "ImageCore",
+      "signature": "CopyImageRGBABGRA(Src Image, Dest Image)",
+      "params": [
+        {
+          "name": "Src Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy Image, swapping RB, SrcImage must be BGRA8 or RGBA16.\nSizes must match. Dest must already be allocated.\nSrc == Dest is okay for in-place transpose.\n@param SrcImage - The source image to copy from.\n@param DestImage - The destination image to copy to. (the FImageView is const but what it points at is not)"
+    },
+    {
+      "id": "copy-image-to-2-u-16",
+      "name": "CopyImageTo2U16",
+      "category": "ImageCore",
+      "signature": "CopyImageTo2U16(Src Image, Dest Image)",
+      "params": [
+        {
+          "name": "Src Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy Image to 2xU16 ; Dest Image should be allocated as BGRA8 but is actually 2xU16\nSizes must match. Dest must already be allocated.\n@param SrcImage - The source image to copy from.\n@param DestImage - The destination image to copy to. (the FImageView is const but what it points at is not)"
+    },
+    {
+      "id": "transpose-image-rgbabgra",
+      "name": "TransposeImageRGBABGRA",
+      "category": "ImageCore",
+      "signature": "TransposeImageRGBABGRA(Image)",
+      "params": [
+        {
+          "name": "Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Swap RB channels on Image.  Image must be BGRA8 or RGBA16.\n@param  Image is modified (the FImageView is const but what it points at is not)"
+    },
+    {
+      "id": "sanitize-float-16-and-set-alpha-opaque-for-bc-6-h",
+      "name": "SanitizeFloat16AndSetAlphaOpaqueForBC6H",
+      "category": "ImageCore",
+      "signature": "SanitizeFloat16AndSetAlphaOpaqueForBC6H(In Out Image)",
+      "params": [
+        {
+          "name": "In Out Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clamp Float16 colors which aren't encodable in the BC6H format\nRGB is clamped to non-negative and finite\nA is set to 1.0\n@param  InOutImage is modified.  Must be RGBA16F. (the FImageView is const but what it points at is not)"
+    },
+    {
+      "id": "detect-alpha-channel",
+      "name": "DetectAlphaChannel",
+      "category": "ImageCore",
+      "signature": "DetectAlphaChannel(In Image)",
+      "params": [
+        {
+          "name": "In Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Detects whether or not the image contains an alpha channel where at least one texel is != 255.\n@param InImage - The image to look for alpha in.\n@return True if the image both supports and uses the alpha channel. False otherwise."
+    },
+    {
+      "id": "set-alpha-opaque",
+      "name": "SetAlphaOpaque",
+      "category": "ImageCore",
+      "signature": "SetAlphaOpaque(In Image)",
+      "params": [
+        {
+          "name": "In Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Change alpha channel to opaque, if present\n@param InImage - The image to look for alpha in."
+    },
+    {
+      "id": "resize-to-a71647",
+      "name": "ResizeTo",
+      "category": "ImageCore",
+      "signature": "ResizeTo(Source Image, Dest Image, Dest Size X, Dest Size Y, Dest Format, Dest Gamma Space)",
+      "params": [
+        {
+          "name": "Source Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Size X",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "Dest Gamma Space",
+          "type": "EGammaSpace"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies and resizes the image to a destination image with the specified size and format.\nResize is done using bilinear filtering; gamma correct (light linear) by converting through RGBA32F.\nlegacy API, prefer ResizeImage\n@param DestImage - The destination image.\n@param DestSizeX - Width of the resized image\n@param DestSizeY - Height of the resized image\n@param DestFormat - The destination image format.\n@param DestSRGB - Whether the destination image is in SRGB format."
+    },
+    {
+      "id": "compute-channel-linear-min-max",
+      "name": "ComputeChannelLinearMinMax",
+      "category": "ImageCore",
+      "signature": "ComputeChannelLinearMinMax(In Image, Out Min, Out Max)",
+      "params": [
+        {
+          "name": "In Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Out Min",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "Out Max",
+          "type": "FLinearColor&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute the min/max of each channel to get value ranges\nColors are converted to float Linear Gamma\n@param InImage - The image to scan\n@param OutMin - filled with the minimum of the color channels\n@param OutMax - filled with the maximum of the color channels"
+    },
+    {
+      "id": "scale-channels-so-min-max-is-in-zero-to-one",
+      "name": "ScaleChannelsSoMinMaxIsInZeroToOne",
+      "category": "ImageCore",
+      "signature": "ScaleChannelsSoMinMaxIsInZeroToOne(Image To Modify)",
+      "params": [
+        {
+          "name": "Image To Modify",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If the image has any values outside the [0,1] range, rescale that edge of the domain so that it is in [0,1]\ndoes not affect images that were previously in [0,1]\nalso does not change the side of the domain that is not out of bounds\neg. values in [0.25,200.0] will be rescaled to [0.25,1.0]\nreturns bool if any change was made\nIf the input format is U8 or U16, no change will ever be made and this will return false.\nThis can be useful if you want to save an HDR/float image to a U8 image format for visualization.\nThis is equivalent to what's called the \"UNorm\" transformation by the RenderTarget ReadPixels functions."
+    },
+    {
+      "id": "compute-image-linear-average",
+      "name": "ComputeImageLinearAverage",
+      "category": "ImageCore",
+      "signature": "ComputeImageLinearAverage(Image)",
+      "params": [
+        {
+          "name": "Image",
+          "type": "FImageView&"
+        }
+      ],
+      "returnType": "FLinearColor",
+      "docs": "ComputeImageLinearAverage\ncompute the average linear color of the image\nimage can be any pixel format\nparallel processing is used, but the result is not machine-dependent"
+    },
+    {
+      "id": "transform-to-working-color-space-399fd7",
+      "name": "TransformToWorkingColorSpace",
+      "category": "ImageCore",
+      "signature": "TransformToWorkingColorSpace(In Linear Image, Source Red Chromaticity, Source Green Chromaticity, Source Blue Chromaticity, Source White Chromaticity, Method, Equality Tolerance)",
+      "params": [
+        {
+          "name": "In Linear Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Source Red Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Source Green Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Source Blue Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Source White Chromaticity",
+          "type": "FVector2d&"
+        },
+        {
+          "name": "Method",
+          "type": "UE::Color::EChromaticAdaptationMethod"
+        },
+        {
+          "name": "Equality Tolerance",
+          "type": "Double",
+          "default": "1.e-7"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply a color space transformation from the source chromaticities to the engine's working color space.\n@param InLinearImage - The image to convert, which must be linear.\n@param SourceRedChromaticity - The red chromaticity coordinate of the source color space.\n@param SourceGreenChromaticity - The green chromaticity coordinate of the source color space.\n@param SourceBlueChromaticity - The blue chromaticity coordinate of the source color space.\n@param SourceWhiteChromaticity - The white chromaticity coordinate of the source color space.\n@param Method - The chromatic adapation method.\n@param EqualityTolerance - The tolerance for the source and working color space chromaticities to be considered equal, bypassing the transform."
+    },
+    {
+      "id": "resize-image",
+      "name": "ResizeImage",
+      "category": "ImageCore",
+      "signature": "ResizeImage(Source Image, Dest Image, Filter)",
+      "params": [
+        {
+          "name": "Source Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Filter",
+          "type": "EResizeImageFilter",
+          "default": "EResizeImageFilter::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ResizeImage :\nDestImage should be already allocated; DestImage will be filled in specified format\nfilter is always computed in floating point, gamma correct linear light, but no intermediate conversion is done\nnote: some filters (the three \"Cubic\" options) will change the image even if Source.Size == Dest.Size\nthis function can be used to apply filters on same-size image with the Cubic set\nthe \"Adaptive\" (and Default) filters automatically change depending on if the resize is an upsample or downsample, and are nops for same size\n@param SourceImage - Source Image to resize from\n@param DestImage - Dest Image to resize to; specifies output size and format.  Note the FImageView itself is const but the Dest pixels are written.  Dest should be already allocated.  Source == Dest in-place resizing not allowed.\n@param Filter - EResizeImageFilter filter choice, or Default if none"
+    },
+    {
+      "id": "resize-image-alloc-dest-56461a",
+      "name": "ResizeImageAllocDest",
+      "category": "ImageCore",
+      "signature": "ResizeImageAllocDest(Source Image, Dest Image, Dest Size X, Dest Size Y, Dest Format, Dest Gamma Space, Filter)",
+      "params": [
+        {
+          "name": "Source Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Size X",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "Dest Gamma Space",
+          "type": "EGammaSpace"
+        },
+        {
+          "name": "Filter",
+          "type": "EResizeImageFilter",
+          "default": "EResizeImageFilter::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ResizeImage variant.  See main ResizeImage function for notes.\nAllocate DestImage (if needed) to specified size and Resize from SourceImage into it\ndo not use this with Source == Dest (call ResizeImageInPlace)\n@param SourceImage - Source Image to resize from\n@param DestImage - Dest to allocated and write to.  Will not be allocated if it is already the right size.  DestImage size/format is replaced.\n@param DestSizeX - Specifies output of resize.  DestImage will be changed to this.\n@param DestSizeY - Specifies output of resize.  DestImage will be changed to this.\n@param DestFormat - Specifies output of resize.  DestImage will be changed to this.\n@param DestGammaSpace - Specifies output of resize.  DestImage will be changed to this.\n@param Filter - EResizeImageFilter filter choice, or Default if none"
+    },
+    {
+      "id": "resize-image-alloc-dest-a65632",
+      "name": "ResizeImageAllocDest",
+      "category": "ImageCore",
+      "signature": "ResizeImageAllocDest(Source Image, Dest Image, Dest Size X, Dest Size Y, Filter)",
+      "params": [
+        {
+          "name": "Source Image",
+          "type": "FImageView&"
+        },
+        {
+          "name": "Dest Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Size X",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "Filter",
+          "type": "EResizeImageFilter",
+          "default": "EResizeImageFilter::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ResizeImage variant.  See main ResizeImage function for notes.\nAllocate DestImage (if needed) to specified size and Resize from SourceImage into it\ndo not use this with Source == Dest (call ResizeImageInPlace)\nDestImage will have same format as Source\n@param SourceImage - Source Image to resize from\n@param DestImage - Dest to allocated and write to.  Will not be allocated if it is already the right size.  DestImage size/format is replaced.\n@param DestSizeX - Specifies output of resize.  DestImage will be changed to this.\n@param DestSizeY - Specifies output of resize.  DestImage will be changed to this.\n@param Filter - EResizeImageFilter filter choice, or Default if none"
+    },
+    {
+      "id": "resize-image-in-place-2e6b89",
+      "name": "ResizeImageInPlace",
+      "category": "ImageCore",
+      "signature": "ResizeImageInPlace(Image, Dest Size X, Dest Size Y, Dest Format, Dest Gamma Space, Filter)",
+      "params": [
+        {
+          "name": "Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Size X",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Format",
+          "type": "ERawImageFormat::Type"
+        },
+        {
+          "name": "Dest Gamma Space",
+          "type": "EGammaSpace"
+        },
+        {
+          "name": "Filter",
+          "type": "EResizeImageFilter",
+          "default": "EResizeImageFilter::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ResizeImage variant.  See main ResizeImage function for notes.\nResize from Image and write the result into Image.\nImage may be reallocated to fit the destination size/format requested.\nOther ResizeImage functions do not work in-place.\n@param Image - Source Image to resize from, will be changed to hold the destination image and reallocated if needed.\n@param DestSizeX - Specifies output of resize.  DestImage will be changed to this.\n@param DestSizeY - Specifies output of resize.  DestImage will be changed to this.\n@param DestFormat - Specifies output of resize.  DestImage will be changed to this.\n@param DestGammaSpace - Specifies output of resize.  DestImage will be changed to this.\n@param Filter - EResizeImageFilter filter choice, or Default if none"
+    },
+    {
+      "id": "resize-image-in-place-9e8f23",
+      "name": "ResizeImageInPlace",
+      "category": "ImageCore",
+      "signature": "ResizeImageInPlace(Image, Dest Size X, Dest Size Y, Filter)",
+      "params": [
+        {
+          "name": "Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Dest Size X",
+          "type": "Int"
+        },
+        {
+          "name": "Dest Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "Filter",
+          "type": "EResizeImageFilter",
+          "default": "EResizeImageFilter::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ResizeImage variant.  See main ResizeImage function for notes.\nResize from Image and write the result into Image.\nImage may be reallocated to fit the destination size/format requested.\nOther ResizeImage functions do not work in-place.\nFormat of image will not be changed.\n@param Image - Source Image to resize from, will be changed to hold the destination image and reallocated if needed.\n@param DestSizeX - Specifies output of resize.  DestImage will be changed to this.\n@param DestSizeY - Specifies output of resize.  DestImage will be changed to this.\n@param Filter - EResizeImageFilter filter choice, or Default if none"
+    }
+  ]
+}

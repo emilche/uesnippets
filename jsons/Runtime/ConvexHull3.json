@@ -1,0 +1,185 @@
+{
+  "id": "convex-hull-3",
+  "label": "ConvexHull3",
+  "includepath": "CompGeom/ConvexHull3.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "Set",
+    "CoreMinimal",
+    "HalfspaceTypes",
+    "IndexTypes",
+    "LineTypes",
+    "UnrealMathSSE",
+    "Vector",
+    "MathUtil",
+    "PlaneTypes",
+    "Function",
+    "UnrealTemplate",
+    "ProgressCancel",
+    "VectorTypes"
+  ],
+  "functions": [
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "ConvexHull3",
+      "signature": "Init(Target, Num Points, Get Point Func, Filter Func, Epsilon)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TExtremePoints3*"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
+        },
+        {
+          "name": "Filter Func",
+          "type": "TFunctionRef<bool ( int32 )>"
+        },
+        {
+          "name": "Epsilon",
+          "type": "RealType",
+          "default": "TMathUtil<RealType>::Epsilon"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "compute-volume",
+      "name": "ComputeVolume",
+      "category": "ConvexHull3",
+      "signature": "ComputeVolume(Vertices)",
+      "params": [
+        {
+          "name": "Vertices",
+          "type": "TArrayView<TVector<RealType>>"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Calculate the Convex Hull of a 3D point set as a Triangle Mesh"
+    },
+    {
+      "id": "solve",
+      "name": "Solve",
+      "category": "ConvexHull3",
+      "signature": "Solve(Target, Num Points, Get Point Func, Filter Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
+        },
+        {
+          "name": "Filter Func",
+          "type": "TFunctionRef<bool ( int32 )>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Generate convex hull as long as input is not degenerate\nIf input is degenerate, this will return false, and caller can call GetDimension()\nto determine whether the points were coplanar, collinear, or all the same point\n@param NumPoints Number of points to consider\n@param GetPointFunc Function providing array-style access into points\n@param FilterFunc Optional filter to include only a subset of the points in the output hull\n@return true if hull was generated, false if points span < 2 dimensions"
+    },
+    {
+      "id": "get-faces",
+      "name": "GetFaces",
+      "category": "ConvexHull3",
+      "signature": "GetFaces(Target, Polygon Func, Get Point Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Polygon Func",
+          "type": "TFunctionRef<void ( TArray<int32>&,TVector<RealType> )>"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get faces of the convex hull as convex polygons, merging faces that are exactly coplanar\n@param PolygonFunc\tCallback to be called for each polygon, with the array of vertex indices and the face normal\n@param GetPointFunc\tFunction providing array-style access into points"
+    },
+    {
+      "id": "get-simplified-faces-cd4e8f",
+      "name": "GetSimplifiedFaces",
+      "category": "ConvexHull3",
+      "signature": "GetSimplifiedFaces(Target, Polygon Func, Get Point Func, Face Angle Tolerance In Degrees, Plane Distance Tolerance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Polygon Func",
+          "type": "TFunctionRef<void ( TArray<int32>&,TVector<RealType> )>"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
+        },
+        {
+          "name": "Face Angle Tolerance In Degrees",
+          "type": "RealType",
+          "default": "(RealType)1.0"
+        },
+        {
+          "name": "Plane Distance Tolerance",
+          "type": "RealType",
+          "default": "(RealType)1.0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get faces of the convex hull as convex polygons, simplifying the hull by merging near-coplanar faces and only keeping vertices that are on the corner of at least three merged faces\n@param PolygonFunc\t\t\t\t\tCallback to be called for each polygon, with the array of vertex indices and the face normal\n@param GetPointFunc\t\t\t\t\tFunction providing array-style access into points\n@param FaceAngleToleranceInDegrees\tThe hull will be simplified by merging faces with less than this dihedral angle between them\n@param PlaneDistanceTolerance\t\tFaces will not merge unless all points on the face are within this distance of the combined (average) face plane"
+    },
+    {
+      "id": "get-simplified-faces-c9b301",
+      "name": "GetSimplifiedFaces",
+      "category": "ConvexHull3",
+      "signature": "GetSimplifiedFaces(Target, Out Polygons, Get Point Func, Face Angle Tolerance In Degrees, Plane Distance Tolerance, Out Polygon Normals)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Out Polygons",
+          "type": "TArray<FPolygonFace>&"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
+        },
+        {
+          "name": "Face Angle Tolerance In Degrees",
+          "type": "RealType",
+          "default": "(RealType)1.0"
+        },
+        {
+          "name": "Plane Distance Tolerance",
+          "type": "RealType",
+          "default": "(RealType)1.0"
+        },
+        {
+          "name": "Out Polygon Normals",
+          "type": "TArray<TVector<RealType>>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get faces of the convex hull as convex polygons, simplifying the hull by merging near-coplanar faces and only keeping vertices that are on the corner of at least three merged faces\n@param OutPolygons\t\t\t\t\tPolygons of the convex hull faces, as arrays of indices into the original points\n@param GetPointFunc\t\t\t\t\tFunction providing array-style access into points\n@param FaceAngleToleranceInDegrees\tThe hull will be simplified by merging faces with less than this dihedral angle between them\n@param PlaneDistanceTolerance\t\tFaces will not merge unless all points on the face are within this distance of the combined (average) face plane\n@param OutPolygonNormals\t\t\t\tOptional array of normals for each polygon"
+    }
+  ]
+}

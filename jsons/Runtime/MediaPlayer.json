@@ -26,6 +26,54 @@
   ],
   "functions": [
     {
+      "id": "f-media-player-proxy-8a3eea",
+      "name": "FMediaPlayerProxy",
+      "category": "MediaPlayer",
+      "signature": "FMediaPlayerProxy(Player)",
+      "params": [
+        {
+          "name": "Player",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-media-player-proxy-91b45a",
+      "name": "FMediaPlayerProxy",
+      "category": "MediaPlayer",
+      "signature": "FMediaPlayerProxy(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FMediaPlayerProxy&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-media-player-proxy-5521dc",
+      "name": "FMediaPlayerProxy",
+      "category": "MediaPlayer",
+      "signature": "FMediaPlayerProxy()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "can-pause",
+      "name": "CanPause",
+      "category": "Media",
+      "signature": "CanPause(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Check whether media playback can be paused right now.\nPlayback can be paused if the media supports pausing and if it is currently playing.\n@return true if pausing playback can be paused, false otherwise.\n@see CanPlay, Pause"
+    },
+    {
       "id": "can-play-source",
       "name": "CanPlaySource",
       "category": "Media",
@@ -266,6 +314,34 @@
       "docs": "Get the current play list.\nMedia players always have a valid play list. In C++ code you can use\nthe GetPlaylistRef to get a reference instead of a pointer to it.\n@return The play list.\n@see GetPlaylistIndex, GetPlaylistRef"
     },
     {
+      "id": "get-playlist-index",
+      "name": "GetPlaylistIndex",
+      "category": "Media",
+      "signature": "GetPlaylistIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the current play list index.\n@return Play list index.\n@see GetPlaylist"
+    },
+    {
+      "id": "get-rate",
+      "name": "GetRate",
+      "category": "Media",
+      "signature": "GetRate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get the media's current playback rate.\n@return The playback rate.\n@see SetRate, SupportsRate"
+    },
+    {
       "id": "get-selected-track",
       "name": "GetSelectedTrack",
       "category": "Media",
@@ -360,6 +436,20 @@
       ],
       "returnType": "UMediaTimeStampInfo*",
       "docs": "Get the media's current playback timestamp as appropriate for display.\n@return Playback timestamp.\n@see GetDuration, Seek"
+    },
+    {
+      "id": "get-video-timecode",
+      "name": "GetVideoTimecode",
+      "category": "MediaPlayer",
+      "signature": "GetVideoTimecode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "TOptional<FTimecode>",
+      "docs": "Get the timecode from the video track, if one is available.\nIf available, the returned value will be the timecode of the sample most recently\nsent into the video sink.\n@return Most recently delivered video timecode from the video track.\n@note Even if timecode is available, the value returned reflects the timecode\nthat most recently delivered to the video sink. During a seek operation\nthe timecode will be unset."
     },
     {
       "id": "get-track-display-name",
@@ -1044,6 +1134,24 @@
       "docs": "Set the time on which to block.\nIf set, this player will block in TickInput or TickFetch until the video sample\nfor the specified time are actually available.\n@param Time The time to block on, or FTimespan::MinValue to disable."
     },
     {
+      "id": "set-block-on-time-range",
+      "name": "SetBlockOnTimeRange",
+      "category": "MediaPlayer",
+      "signature": "SetBlockOnTimeRange(Target, Time Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FTimespan>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the time range on which to block.\nIf set, this player will block in TickInput or TickFetch until the video sample\nfor the specified time are actually available.\n@param TimeRange The time range to block on, or empty range to disable."
+    },
+    {
       "id": "set-desired-player-name",
       "name": "SetDesiredPlayerName",
       "category": "Media",
@@ -1312,7 +1420,7 @@
           "type": "UMediaPlayer*"
         }
       ],
-      "returnType": "public : FOnMediaPlayerMediaEvent OnEndReached",
+      "returnType": "public : bool",
       "docs": "Check whether the player supports playing back of range within the media.\n@return true if playing back a range is supported, false otherwise.\n@see GetPlaybackTimeRange, SetPlaybackTimeRange"
     },
     {
@@ -1352,6 +1460,52 @@
       "docs": "Sets a new media playback range.\nHas an effect only if SupportsPlaybackTimeRange() returns true and the media supports it.\nA live stream cannot be constrained to a range.\nThe range will be clamped if necessary to be within the media's absolute time range.\nChanging the time range may trigger an implicit Seek() depending on where the current\nplayback position is located with regard to the new range.\nUnless prevented by the media a playback range can be cleared by passing an empty range.\n@param InTimeRange The new playback range to set.\n@return true if successful, false otherwise.\n@see SupportsPlaybackTimeRange, GetPlaybackTimeRange"
     },
     {
+      "id": "clean-up-before-destroy",
+      "name": "CleanUpBeforeDestroy",
+      "category": "MediaPlayer",
+      "signature": "CleanUpBeforeDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clean up before this object is destroyed. Normally you would not need to call this,\nbut if you want to clean up resources before garbage collection (e.g. you are in the editor)\nthen this could be helpful."
+    },
+    {
+      "id": "get-media-info",
+      "name": "GetMediaInfo",
+      "category": "MediaPlayer",
+      "signature": "GetMediaInfo(Target, Info Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Info Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FVariant",
+      "docs": "Get information about the media that is playing.\nNot all formats support all information.\nSome possible common information is in this file,\nlook for MediaInfoNameSourceNumMips for example.\n@param\tInfoName\t\tName of the information we want.\n@returns\t\t\t\t\tRequested information, or empty if not available."
+    },
+    {
+      "id": "get-media-metadata",
+      "name": "GetMediaMetadata",
+      "category": "MediaPlayer",
+      "signature": "GetMediaMetadata(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "TSharedPtr<TMap<FString,TArray<TUniquePtr<IMediaMetadataItem>>>,ESPMode::ThreadSafe>",
+      "docs": "Get meta data contained in the current stream\n@return Map with arrays of IMediaMetaDataItem entries describing any metadata found in the current stream\n@note Listen to EMediaEvent::MetadataChanged to catch updates to this data"
+    },
+    {
       "id": "get-media-metadata-items",
       "name": "GetMediaMetadataItems",
       "category": "Media",
@@ -1364,6 +1518,251 @@
       ],
       "returnType": "TMap<FString,FMediaMetadataItemsBPT>",
       "docs": "This is the blueprint accessible version of the GetMediaMetadata.\n@return Map with arrays of FMediaMetaDataItem entries describing any metadata found in the current stream\n@note Listen to EMediaEvent::MetadataChanged to catch updates to this data"
+    },
+    {
+      "id": "get-player-facade",
+      "name": "GetPlayerFacade",
+      "category": "MediaPlayer",
+      "signature": "GetPlayerFacade(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "TSharedRef<FMediaPlayerFacade,ESPMode::ThreadSafe>",
+      "docs": "Get the media player facade that manages low-level media players\n@return The media player facade."
+    },
+    {
+      "id": "register-with-media-module",
+      "name": "RegisterWithMediaModule",
+      "category": "MediaPlayer",
+      "signature": "RegisterWithMediaModule(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Register player with media module to be ticked"
+    },
+    {
+      "id": "unregister-with-media-module",
+      "name": "UnregisterWithMediaModule",
+      "category": "MediaPlayer",
+      "signature": "UnregisterWithMediaModule(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When the player goes out of scope, make sure to clean up the clock sink"
+    },
+    {
+      "id": "pause-pie",
+      "name": "PausePIE",
+      "category": "MediaPlayer",
+      "signature": "PausePIE(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when PIE has been paused.\n@see ResumePIE"
+    },
+    {
+      "id": "resume-pie",
+      "name": "ResumePIE",
+      "category": "MediaPlayer",
+      "signature": "ResumePIE(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when PIE has been resumed.\n@see PausePIE"
+    },
+    {
+      "id": "begin-destroy",
+      "name": "BeginDestroy",
+      "category": "MediaPlayer",
+      "signature": "BeginDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "get-desc",
+      "name": "GetDesc",
+      "category": "MediaPlayer",
+      "signature": "GetDesc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "post-duplicate",
+      "name": "PostDuplicate",
+      "category": "MediaPlayer",
+      "signature": "PostDuplicate(Target, Duplicate For PIE)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Duplicate For PIE",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-init-properties",
+      "name": "PostInitProperties",
+      "category": "MediaPlayer",
+      "signature": "PostInitProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-load",
+      "name": "PostLoad",
+      "category": "MediaPlayer",
+      "signature": "PostLoad(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-edit-change-property",
+      "name": "PostEditChangeProperty",
+      "category": "MediaPlayer",
+      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Property Changed Event",
+          "type": "FPropertyChangedEvent&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-proxy-data",
+      "name": "CreateProxyData",
+      "category": "MediaPlayer",
+      "signature": "CreateProxyData(Target, Init Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Init Params",
+          "type": "Audio::FProxyDataInitParams&"
+        }
+      ],
+      "returnType": "public : TSharedPtr<Audio::IProxyData>"
+    },
+    {
+      "id": "handle-player-media-event",
+      "name": "HandlePlayerMediaEvent",
+      "category": "MediaPlayer",
+      "signature": "HandlePlayerMediaEvent(Target, Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Event",
+          "type": "EMediaEvent"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Callback for when a media event occurred in the player."
+    },
+    {
+      "id": "set-playlist-internal",
+      "name": "SetPlaylistInternal",
+      "category": "MediaPlayer",
+      "signature": "SetPlaylistInternal(Target, In Playlist)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "In Playlist",
+          "type": "UMediaPlaylist*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the playlist and properly handles cases when this MediaPlayer object is in disregard for GC set"
+    },
+    {
+      "id": "open-source-internal",
+      "name": "OpenSourceInternal",
+      "category": "MediaPlayer",
+      "signature": "OpenSourceInternal(Target, Media Source, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        },
+        {
+          "name": "Media Source",
+          "type": "UMediaSource*"
+        },
+        {
+          "name": "Options",
+          "type": "FMediaPlayerOptions*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Open media source with the given options."
+    },
+    {
+      "id": "ensure-playlist",
+      "name": "EnsurePlaylist",
+      "category": "MediaPlayer",
+      "signature": "EnsurePlaylist(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensure internal playlist is created"
     }
   ]
 }

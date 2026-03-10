@@ -1,0 +1,817 @@
+{
+  "id": "archive-stack-trace",
+  "label": "ArchiveStackTrace",
+  "includepath": "Serialization/ArchiveStackTrace.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "Map",
+    "UnrealString",
+    "Platform",
+    "PlatformCrt",
+    "Archive",
+    "LargeMemoryReader",
+    "LargeMemoryWriter",
+    "PackageWriter",
+    "RefCounting",
+    "UniquePtr",
+    "NameTypes",
+    "UnrealNames"
+  ],
+  "functions": [
+    {
+      "id": "f-archive-stack-trace-ignore-scope-e962d5",
+      "name": "FArchiveStackTraceIgnoreScope",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceIgnoreScope(In Ignore)",
+      "params": [
+        {
+          "name": "In Ignore",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Ignores saving the stack trace when collecting serialize offsets ."
+    },
+    {
+      "id": "f-archive-stack-trace-ignore-scope-4b6b77",
+      "name": "FArchiveStackTraceIgnoreScope",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceIgnoreScope()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-archive-stack-trace-disabled-scope",
+      "name": "FArchiveStackTraceDisabledScope",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceDisabledScope()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Disables collecting both offsets and stack traces when collecting serialize callstacks.\nTypically used when appending data from one stack tracing archive to another."
+    },
+    {
+      "id": "load-package-into-memory-6a46ff",
+      "name": "LoadPackageIntoMemory",
+      "category": "ArchiveStackTrace",
+      "signature": "LoadPackageIntoMemory(Target, In Filename, Out Package Data, Out Loaded Bytes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        },
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Package Data",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Out Loaded Bytes",
+          "type": "TUniquePtr<uint8,FDeleteByFree>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to load package contents into memory. Supports EDL packages."
+    },
+    {
+      "id": "force-kill-package-and-linker",
+      "name": "ForceKillPackageAndLinker",
+      "category": "ArchiveStackTrace",
+      "signature": "ForceKillPackageAndLinker(Target, Linker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        },
+        {
+          "name": "Linker",
+          "type": "FLinkerLoad*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "should-ignore-diff",
+      "name": "ShouldIgnoreDiff",
+      "category": "ArchiveStackTrace",
+      "signature": "ShouldIgnoreDiff(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-bypass-diff",
+      "name": "ShouldBypassDiff",
+      "category": "ArchiveStackTrace",
+      "signature": "ShouldBypassDiff(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-archive-callstacks",
+      "name": "FArchiveCallstacks",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveCallstacks(In Asset)",
+      "params": [
+        {
+          "name": "In Asset",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-asset-class",
+      "name": "GetAssetClass",
+      "category": "ArchiveStackTrace",
+      "signature": "GetAssetClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveCallstacks*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Returns the asset class name."
+    },
+    {
+      "id": "add",
+      "name": "Add",
+      "category": "ArchiveStackTrace",
+      "signature": "Add(Target, Offset, Length, Serialized Object, Serialized Property, Debug Data Stack, Is Collecting Callstacks, Collect Current Callstack, Stack Ignore Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveCallstacks*"
+        },
+        {
+          "name": "Offset",
+          "type": "Int64"
+        },
+        {
+          "name": "Length",
+          "type": "Int64"
+        },
+        {
+          "name": "Serialized Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Serialized Property",
+          "type": "FProperty*"
+        },
+        {
+          "name": "Debug Data Stack",
+          "type": "TArrayView<FName>"
+        },
+        {
+          "name": "Is Collecting Callstacks",
+          "type": "Bool"
+        },
+        {
+          "name": "Collect Current Callstack",
+          "type": "Bool"
+        },
+        {
+          "name": "Stack Ignore Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Capture and append the current callstack."
+    },
+    {
+      "id": "append",
+      "name": "Append",
+      "category": "ArchiveStackTrace",
+      "signature": "Append(Target, Other, Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveCallstacks*"
+        },
+        {
+          "name": "Other",
+          "type": "FArchiveCallstacks&"
+        },
+        {
+          "name": "Offset",
+          "type": "Int64",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append other callstacks."
+    },
+    {
+      "id": "get-callstack-index-at-offset",
+      "name": "GetCallstackIndexAtOffset",
+      "category": "ArchiveStackTrace",
+      "signature": "GetCallstackIndexAtOffset(Target, Offset, Min Offset Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveCallstacks*"
+        },
+        {
+          "name": "Offset",
+          "type": "Int64"
+        },
+        {
+          "name": "Min Offset Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Finds a callstack associated with data at the specified offset"
+    },
+    {
+      "id": "add-unique-callstack",
+      "name": "AddUniqueCallstack",
+      "category": "ArchiveStackTrace",
+      "signature": "AddUniqueCallstack(Target, Is Collecting Callstacks, Serialized Object, Serialized Property, Out Callstack CRC)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveCallstacks*"
+        },
+        {
+          "name": "Is Collecting Callstacks",
+          "type": "Bool"
+        },
+        {
+          "name": "Serialized Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Serialized Property",
+          "type": "FProperty*"
+        },
+        {
+          "name": "Out Callstack CRC",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "private : ANSICHAR*",
+      "docs": "Adds a unique callstack to UniqueCallstacks map"
+    },
+    {
+      "id": "f-archive-stack-trace-writer-ce16ef",
+      "name": "FArchiveStackTraceWriter",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceWriter(In Inner, In Callstacks, In Diff Map, In Diff Map Start Offset)",
+      "params": [
+        {
+          "name": "In Inner",
+          "type": "FArchive&"
+        },
+        {
+          "name": "In Callstacks",
+          "type": "FArchiveCallstacks&"
+        },
+        {
+          "name": "In Diff Map",
+          "type": "FArchiveDiffMap*",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Diff Map Start Offset",
+          "type": "Int64",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-archive-stack-trace-writer-e9f73a",
+      "name": "FArchiveStackTraceWriter",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceWriter()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize-8fa6e7",
+      "name": "Serialize",
+      "category": "ArchiveStackTrace",
+      "signature": "Serialize(Target, Data, Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTraceWriter*"
+        },
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Length",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "FORCENOINLINE void"
+    },
+    {
+      "id": "compare",
+      "name": "Compare",
+      "category": "ArchiveStackTrace",
+      "signature": "Compare(Source Package, Dest Package, Callstacks, Diff Map, Asset Filename, Callstack Cutoff Text, Max Diffs To Log, In Out Diffs Logged, Out Stats, Suppress Logging)",
+      "params": [
+        {
+          "name": "Source Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Dest Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Callstacks",
+          "type": "FArchiveCallstacks&"
+        },
+        {
+          "name": "Diff Map",
+          "type": "FArchiveDiffMap&"
+        },
+        {
+          "name": "Asset Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Callstack Cutoff Text",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Max Diffs To Log",
+          "type": "Int64"
+        },
+        {
+          "name": "In Out Diffs Logged",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Stats",
+          "type": "TMap<FName,FArchiveDiffStats>&"
+        },
+        {
+          "name": "Suppress Logging",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compares two packages and logs the differences and calltacks."
+    },
+    {
+      "id": "generate-diff-map-948992",
+      "name": "GenerateDiffMap",
+      "category": "ArchiveStackTrace",
+      "signature": "GenerateDiffMap(Source Package, Dest Package, Callstacks, Max Diffs To Find, Out Diff Map)",
+      "params": [
+        {
+          "name": "Source Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Dest Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Callstacks",
+          "type": "FArchiveCallstacks&"
+        },
+        {
+          "name": "Max Diffs To Find",
+          "type": "Int"
+        },
+        {
+          "name": "Out Diff Map",
+          "type": "FArchiveDiffMap&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Creates map with mismatching callstacks."
+    },
+    {
+      "id": "dump-package-header-diffs",
+      "name": "DumpPackageHeaderDiffs",
+      "category": "ArchiveStackTrace",
+      "signature": "DumpPackageHeaderDiffs(Source Package, Dest Package, Asset Filename, Max Diffs To Log, Package Header Format)",
+      "params": [
+        {
+          "name": "Source Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Dest Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Asset Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Max Diffs To Log",
+          "type": "Int"
+        },
+        {
+          "name": "Package Header Format",
+          "type": "EPackageHeaderFormat",
+          "default": "EPackageHeaderFormat::PackageFileSummary"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Logs any mismatching header data."
+    },
+    {
+      "id": "create-linker-for-package",
+      "name": "CreateLinkerForPackage",
+      "category": "ArchiveStackTrace",
+      "signature": "CreateLinkerForPackage(Load Context, In Package Name, In Filename, Package Data)",
+      "params": [
+        {
+          "name": "Load Context",
+          "type": "FUObjectSerializeContext*"
+        },
+        {
+          "name": "In Package Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Package Data",
+          "type": "FPackageData&"
+        }
+      ],
+      "returnType": "FLinkerLoad*",
+      "docs": "Returns a new linker for loading the specified package."
+    },
+    {
+      "id": "f-archive-stack-trace-memory-writer",
+      "name": "FArchiveStackTraceMemoryWriter",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceMemoryWriter(Callstacks, Diff Map, Diff Map Offset, Pre Allocate Bytes, Is Persistent, Filename)",
+      "params": [
+        {
+          "name": "Callstacks",
+          "type": "FArchiveCallstacks&"
+        },
+        {
+          "name": "Diff Map",
+          "type": "FArchiveDiffMap*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Diff Map Offset",
+          "type": "Int64",
+          "default": "0"
+        },
+        {
+          "name": "Pre Allocate Bytes",
+          "type": "Int64",
+          "default": "0"
+        },
+        {
+          "name": "Is Persistent",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize-20ce40",
+      "name": "Serialize",
+      "category": "ArchiveStackTrace",
+      "signature": "Serialize(Target, Memory, Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTraceMemoryWriter*"
+        },
+        {
+          "name": "Memory",
+          "type": "void*"
+        },
+        {
+          "name": "Length",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "FORCENOINLINE void"
+    },
+    {
+      "id": "f-archive-stack-trace-f90a5a",
+      "name": "FArchiveStackTrace",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTrace(In Asset, In Filename, In Collect Callstacks, In Diff Map)",
+      "params": [
+        {
+          "name": "In Asset",
+          "type": "UObject*"
+        },
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Collect Callstacks",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "In Diff Map",
+          "type": "FArchiveDiffMap*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-archive-stack-trace-4baacc",
+      "name": "FArchiveStackTrace",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTrace()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "compare-with-893d7b",
+      "name": "CompareWith",
+      "category": "ArchiveStackTrace",
+      "signature": "CompareWith(Target, In Filename, Total Header Size, Callstack Cutoff Text, Max Diffs To Log, Out Stats)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        },
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Total Header Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Callstack Cutoff Text",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Max Diffs To Log",
+          "type": "Int"
+        },
+        {
+          "name": "Out Stats",
+          "type": "TMap<FName,FArchiveDiffStats>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compares this archive with the given bytes from disk or FPackageData. Dumps all differences to log."
+    },
+    {
+      "id": "compare-with-ecaf3d",
+      "name": "CompareWith",
+      "category": "ArchiveStackTrace",
+      "signature": "CompareWith(Target, Source Package, File Display Name, Total Header Size, Callstack Cutoff Text, Max Diffs To Log, Out Stats, Package Header Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        },
+        {
+          "name": "Source Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "File Display Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Total Header Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Callstack Cutoff Text",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Max Diffs To Log",
+          "type": "Int"
+        },
+        {
+          "name": "Out Stats",
+          "type": "TMap<FName,FArchiveDiffStats>&"
+        },
+        {
+          "name": "Package Header Format",
+          "type": "FArchiveStackTraceWriter::EPackageHeaderFormat",
+          "default": "FArchiveStackTraceWriter::EPackageHeaderFormat::PackageFileSummary"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-diff-map-a58346",
+      "name": "GenerateDiffMap",
+      "category": "ArchiveStackTrace",
+      "signature": "GenerateDiffMap(Target, In Filename, Total Header Size, Max Diffs To Find, Out Diff Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        },
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Total Header Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Max Diffs To Find",
+          "type": "Int"
+        },
+        {
+          "name": "Out Diff Map",
+          "type": "FArchiveDiffMap&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Generates a map of all differences between this archive and the given bytes from disk or FPackageData."
+    },
+    {
+      "id": "generate-diff-map-4d0544",
+      "name": "GenerateDiffMap",
+      "category": "ArchiveStackTrace",
+      "signature": "GenerateDiffMap(Target, Source Package, Total Header Size, Max Diffs To Find, Out Diff Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTrace*"
+        },
+        {
+          "name": "Source Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Total Header Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Max Diffs To Find",
+          "type": "Int"
+        },
+        {
+          "name": "Out Diff Map",
+          "type": "FArchiveDiffMap&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-identical-8f950c",
+      "name": "IsIdentical",
+      "category": "ArchiveStackTrace",
+      "signature": "IsIdentical(In Filename, Buffer Size, Buffer Data)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Buffer Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Buffer Data",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compares the provided buffer with the given bytes from disk or FPackageData."
+    },
+    {
+      "id": "is-identical-134510",
+      "name": "IsIdentical",
+      "category": "ArchiveStackTrace",
+      "signature": "IsIdentical(Source Package, Buffer Size, Buffer Data)",
+      "params": [
+        {
+          "name": "Source Package",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Buffer Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Buffer Data",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "load-package-into-memory-9e1326",
+      "name": "LoadPackageIntoMemory",
+      "category": "ArchiveStackTrace",
+      "signature": "LoadPackageIntoMemory(In Filename, Out Package Data, Out Loaded Bytes)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Package Data",
+          "type": "FPackageData&"
+        },
+        {
+          "name": "Out Loaded Bytes",
+          "type": "TUniquePtr<uint8,UE::ArchiveStackTrace::FDeleteByFree>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to load package contents into memory. Supports EDL packages."
+    },
+    {
+      "id": "f-archive-stack-trace-reader",
+      "name": "FArchiveStackTraceReader",
+      "category": "ArchiveStackTrace",
+      "signature": "FArchiveStackTraceReader(In Filename, In Data, Num)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Data",
+          "type": "Byte*"
+        },
+        {
+          "name": "Num",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Cached thread context"
+    },
+    {
+      "id": "serialize-96ad56",
+      "name": "Serialize",
+      "category": "ArchiveStackTrace",
+      "signature": "Serialize(Target, Out Data, Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveStackTraceReader*"
+        },
+        {
+          "name": "Out Data",
+          "type": "void*"
+        },
+        {
+          "name": "Num",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-from-file",
+      "name": "CreateFromFile",
+      "category": "ArchiveStackTrace",
+      "signature": "CreateFromFile(In Filename)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "FArchiveStackTraceReader*"
+    }
+  ]
+}

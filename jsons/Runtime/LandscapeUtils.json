@@ -1,0 +1,484 @@
+{
+  "id": "landscape-utils",
+  "label": "LandscapeUtils",
+  "includepath": "LandscapeUtils.h",
+  "includes": [
+    "UnrealString",
+    "CoreMinimal",
+    "NameTypes",
+    "AssetData",
+    "LandscapeTextureHash",
+    "Material",
+    "RenderGraphDefinitions",
+    "RenderGraphEvent",
+    "RenderGraphBuilder"
+  ],
+  "functions": [
+    {
+      "id": "does-platform-support-edit-layers",
+      "name": "DoesPlatformSupportEditLayers",
+      "category": "LandscapeUtils",
+      "signature": "DoesPlatformSupportEditLayers(In Shader Platform)",
+      "params": [
+        {
+          "name": "In Shader Platform",
+          "type": "EShaderPlatform"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if edit layers (GPU landscape tools) are enabled on this platform :\nNote: this is intended for the editor but is in runtime code since global shaders need to exist in runtime modules"
+    },
+    {
+      "id": "get-landscape-tool-target-type-as-flags",
+      "name": "GetLandscapeToolTargetTypeAsFlags",
+      "category": "LandscapeUtils",
+      "signature": "GetLandscapeToolTargetTypeAsFlags(In Target Type)",
+      "params": [
+        {
+          "name": "In Target Type",
+          "type": "ELandscapeToolTargetType"
+        }
+      ],
+      "returnType": "ELandscapeToolTargetTypeFlags"
+    },
+    {
+      "id": "get-landscape-tool-target-type-single-flag-as-type",
+      "name": "GetLandscapeToolTargetTypeSingleFlagAsType",
+      "category": "LandscapeUtils",
+      "signature": "GetLandscapeToolTargetTypeSingleFlagAsType(In Single Flag)",
+      "params": [
+        {
+          "name": "In Single Flag",
+          "type": "ELandscapeToolTargetTypeFlags"
+        }
+      ],
+      "returnType": "ELandscapeToolTargetType"
+    },
+    {
+      "id": "get-landscape-tool-target-type-flags-as-string",
+      "name": "GetLandscapeToolTargetTypeFlagsAsString",
+      "category": "LandscapeUtils",
+      "signature": "GetLandscapeToolTargetTypeFlagsAsString(In Target Type Flags)",
+      "params": [
+        {
+          "name": "In Target Type Flags",
+          "type": "ELandscapeToolTargetTypeFlags"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "frdg-builder-recorder",
+      "name": "FRDGBuilderRecorder",
+      "category": "LandscapeUtils",
+      "signature": "FRDGBuilderRecorder()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "InRHICmdList"
+    },
+    {
+      "id": "start-recording",
+      "name": "StartRecording",
+      "category": "LandscapeUtils",
+      "signature": "StartRecording(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts recording commands"
+    },
+    {
+      "id": "stop-recording",
+      "name": "StopRecording",
+      "category": "LandscapeUtils",
+      "signature": "StopRecording(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops recording commands. A call to Flush is needed to ensure any pending command is flushed to the render thread (use StopRecordingAndFlush to do both)"
+    },
+    {
+      "id": "stop-recording-and-flush",
+      "name": "StopRecordingAndFlush",
+      "category": "LandscapeUtils",
+      "signature": "StopRecordingAndFlush(Target, Event Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        },
+        {
+          "name": "Event Name",
+          "type": "FRDGEventName&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops recording commands and flushes them to the render thread. Expects the recorder to be in Recording mode and changes it to Immediate mode.\n@param EventName RDG event name to use on the render command's FRDGBuilder"
+    },
+    {
+      "id": "flush",
+      "name": "Flush",
+      "category": "LandscapeUtils",
+      "signature": "Flush(Target, Event Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        },
+        {
+          "name": "Event Name",
+          "type": "FRDGEventName&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flushes any pending command to the render thread\n@param EventName RDG event name to use on the render command's FRDGBuilder"
+    },
+    {
+      "id": "enqueue-rdg-command",
+      "name": "EnqueueRDGCommand",
+      "category": "LandscapeUtils",
+      "signature": "EnqueueRDGCommand(Target, In RDG Command, In RDG External Texture Access Final List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        },
+        {
+          "name": "In RDG Command",
+          "type": "FRDGRecorderRDGCommand"
+        },
+        {
+          "name": "In RDG External Texture Access Final List",
+          "type": "TConstArrayView<FRDGExternalTextureAccessFinal>",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Records a FRDGRecorderRDGCommand to execute when registering passes to the single FRDGBuilder when in Recording mode or pushes it immediately to the render thread when in Immediate mode\n@param InRDGCommand Lambda to execute on the render thread\n@param InRDGTextureAccessFinalList (optional) : list of external texture with the RHIAccess they should have when executing the FRDGBuilder. This is to prevent the RDG from auto-transitioning to SRVMask at the end"
+    },
+    {
+      "id": "enqueue-render-command",
+      "name": "EnqueueRenderCommand",
+      "category": "LandscapeUtils",
+      "signature": "EnqueueRenderCommand(Target, In Render Command)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        },
+        {
+          "name": "In Render Command",
+          "type": "FRDGRecorderRenderCommand"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Records a FRDGRecorderRenderCommand to execute when registering passes to the single FRDGBuilder when in Recording mode or pushes it immediately to the render thread when in Immediate mode\n@param InRenderCommand Lambda to execute on the render thread"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "LandscapeUtils",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if there's no command currently recorded"
+    },
+    {
+      "id": "clear",
+      "name": "Clear",
+      "category": "LandscapeUtils",
+      "signature": "Clear(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGBuilderRecorder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cancels all recorder operations. This must be used if the FRDGEventRenderRecorder is \"cancelled\" (i.e. its sequence of operations is not flushed to a render command).\nOtherwise, there will be an assert in ~FRDGBuilderRecorder()."
+    },
+    {
+      "id": "add-weightmap-copy",
+      "name": "AddWeightmapCopy",
+      "category": "LandscapeUtils",
+      "signature": "AddWeightmapCopy(Target, In Destination, In Destination Slice, In Destination Channel, In Component, In Layer Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchTextureCopy*"
+        },
+        {
+          "name": "In Destination",
+          "type": "UTexture*"
+        },
+        {
+          "name": "In Destination Slice",
+          "type": "Int8"
+        },
+        {
+          "name": "In Destination Channel",
+          "type": "Int8"
+        },
+        {
+          "name": "In Component",
+          "type": "ULandscapeComponent*"
+        },
+        {
+          "name": "In Layer Info",
+          "type": "ULandscapeLayerInfoObject*"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Uses the provided arguments to add proper source/destination entries to internal copy requests.\n@param\tInDestination\tThe texture used as a destination for the copy.\n@param\tInDestinationSlice\tThe Texture array slice to write to (use 0 for a Texture2D)\n@param\tInDestinationChannel\tThe channel used as a destination for the copy.\n@param\tInComponent\t\tThe component containing the wanted source weightmap.\n@param\tInLayerInfo\t\tThe layer info used to retrieve the proper source weightmap and channel.\n@return True if the copy has been successfully added."
+    },
+    {
+      "id": "process-texture-copies",
+      "name": "ProcessTextureCopies",
+      "category": "LandscapeUtils",
+      "signature": "ProcessTextureCopies(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBatchTextureCopy*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Process pending internal copy requests."
+    },
+    {
+      "id": "get-shared-assets-path-fa203a",
+      "name": "GetSharedAssetsPath",
+      "category": "LandscapeUtils",
+      "signature": "GetSharedAssetsPath(In Path)",
+      "params": [
+        {
+          "name": "In Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a generated path used for Landscape Shared Assets\n@param\tInPath\tPath used as a basis to generate shared assets path. If /Temp/, it will be replaced by the last valid path used for level.\n@return Path used for Landscape Shared Assets"
+    },
+    {
+      "id": "get-shared-assets-path-2dfb7d",
+      "name": "GetSharedAssetsPath",
+      "category": "LandscapeUtils",
+      "signature": "GetSharedAssetsPath(In Level)",
+      "params": [
+        {
+          "name": "In Level",
+          "type": "ULevel*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a generated path used for Landscape Shared Assets\n@param\tInLevel\t\tLevel's Path will be used as a basis to generate shared assets path. If /Temp/, it will be replaced by the last valid path used for level.\n@return Path used for Landscape Shared Assets"
+    },
+    {
+      "id": "get-layer-info-object-package-name-53d9ab",
+      "name": "GetLayerInfoObjectPackageName",
+      "category": "LandscapeUtils",
+      "signature": "GetLayerInfoObjectPackageName(In Layer Name, In Package Path, Out Layer Object Name)",
+      "params": [
+        {
+          "name": "In Layer Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Package Path",
+          "type": "String&"
+        },
+        {
+          "name": "Out Layer Object Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a generated package name for a Layer Info Object\n@param\tInLayerName\tThe LayerName of the Layer Info Object\n@param\tInPackagePath\tBase package path that will be used, should be Current Level SharedAssetPath or the LandscapeEditorObject->TargetLayerAssetFilePath\n@param\tOutLayerObjectName\tThe generated object name for Layer Info Object"
+    },
+    {
+      "id": "get-layer-info-object-package-name-f21db7",
+      "name": "GetLayerInfoObjectPackageName",
+      "category": "LandscapeUtils",
+      "signature": "GetLayerInfoObjectPackageName(In Level, In Layer Name, Out Layer Object Name)",
+      "params": [
+        {
+          "name": "In Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "In Layer Name",
+          "type": "Name&"
+        },
+        {
+          "name": "Out Layer Object Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a generated package name for a Layer Info Object\n@param\tInLevel\t\tLevel's Path will be used as a basis to generate package's path. If /Temp/, it will be replaced by the last valid path used for level.\n@param\tInLayerName\t\tThe LayerName of the Layer Info Object\n@param\tOutLayerObjectName\tThe generated object name for Layer Info Object\n@return"
+    },
+    {
+      "id": "create-target-layer-info-ff0bbb",
+      "name": "CreateTargetLayerInfo",
+      "category": "LandscapeUtils",
+      "signature": "CreateTargetLayerInfo(In Layer Name, In File Path)",
+      "params": [
+        {
+          "name": "In Layer Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In File Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "ULandscapeLayerInfoObject*",
+      "docs": "Creates a new layer info object, using the default template if available, or a new empty one. Sets asset file name as LayerName_LayerInfo_%d\n@param\tInLayerName\tThe layer name of the created asset info\n@param\tInFilePath\tNew asset file path, typically is CurrentLevel/SharedAssetPath or the LandscapeEditorObject->TargetLayerAssetFilePath->DirectoryPath\n@return a new LandscapeLayerInfoObject."
+    },
+    {
+      "id": "create-target-layer-info-e1aca6",
+      "name": "CreateTargetLayerInfo",
+      "category": "LandscapeUtils",
+      "signature": "CreateTargetLayerInfo(In Layer Name, In File Path, In File Name)",
+      "params": [
+        {
+          "name": "In Layer Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In File Path",
+          "type": "String&"
+        },
+        {
+          "name": "In File Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "ULandscapeLayerInfoObject*",
+      "docs": "Creates a new layer info object, using the default template if available, or a new empty one at the path: InFilePath/InFilename\n@param\tInLayerName\tThe layer name of the created asset info\n@param\tInFilePath\tNew asset file path, typically is CurrentLevel/SharedAssetPath or the LandscapeEditorObject->TargetLayerAssetFilePath->DirectoryPath\n@param\tInFileName \tThe unique file name of the created asset\n@return a new LandscapeLayerInfoObject."
+    },
+    {
+      "id": "is-visibility-layer",
+      "name": "IsVisibilityLayer",
+      "category": "LandscapeUtils",
+      "signature": "IsVisibilityLayer(In Layer Info Object)",
+      "params": [
+        {
+          "name": "In Layer Info Object",
+          "type": "ULandscapeLayerInfoObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the provided layer info object is the current visibility layer."
+    },
+    {
+      "id": "f-layer-info-finder",
+      "name": "FLayerInfoFinder",
+      "category": "LandscapeUtils",
+      "signature": "FLayerInfoFinder()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "category": "LandscapeUtils",
+      "signature": "Find(Target, Layer Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLayerInfoFinder*"
+        },
+        {
+          "name": "Layer Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "ULandscapeLayerInfoObject*"
+    },
+    {
+      "id": "create-tool-landscape-material-instance-constant",
+      "name": "CreateToolLandscapeMaterialInstanceConstant",
+      "category": "LandscapeUtils",
+      "signature": "CreateToolLandscapeMaterialInstanceConstant(Base Material)",
+      "params": [
+        {
+          "name": "Base Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "UMaterialInstance*",
+      "docs": "Returns a pointer to a newly created ULandscapeMaterialInstanceConstant\n@param\tBaseMaterial\tThe base material appended to the debug name and set as parent of MaterialInstance\n@return  Pointer to ULandscapeMaterialInstanceConstant"
+    },
+    {
+      "id": "create-landscape-layer-thumbnail-mic",
+      "name": "CreateLandscapeLayerThumbnailMIC",
+      "category": "LandscapeUtils",
+      "signature": "CreateLandscapeLayerThumbnailMIC(Material Update Context, Landscape Material, Layer Name)",
+      "params": [
+        {
+          "name": "Material Update Context",
+          "type": "FMaterialUpdateContext&"
+        },
+        {
+          "name": "Landscape Material",
+          "type": "UMaterialInterface*"
+        },
+        {
+          "name": "Layer Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ULandscapeMaterialInstanceConstant*",
+      "docs": "Create a thumbnail material for a given layer. Can return nullptr if the option to disable landscape thumbnails has been turned on"
+    },
+    {
+      "id": "convert-target-layer-names-to-string",
+      "name": "ConvertTargetLayerNamesToString",
+      "category": "LandscapeUtils",
+      "signature": "ConvertTargetLayerNamesToString(In Target Layer Names)",
+      "params": [
+        {
+          "name": "In Target Layer Names",
+          "type": "TArrayView<FName>&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Concatenates the target layer names in parameter into a string"
+    },
+    {
+      "id": "delete-actors",
+      "name": "DeleteActors",
+      "category": "LandscapeUtils",
+      "signature": "DeleteActors(In Actors To Delete, In World, In Allow UI)",
+      "params": [
+        {
+          "name": "In Actors To Delete",
+          "type": "TArray<AActor*>&"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "In Allow UI",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper to delete one or multiple actors.\n@param InActorsToDelete the list of actors to delete. Cannot contain null entries and all actors should be part of the world passed in InWorld\n@param InWorld world to which all actors to be deleted belong\n@param bInAllowUI allows the standard delete actors UX to be displayed, allowing the user to remove lingering reference to these actors, etc.\n@return true if all actors could be properly deleted"
+    }
+  ]
+}

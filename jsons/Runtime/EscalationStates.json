@@ -1,0 +1,356 @@
+{
+  "id": "escalation-states",
+  "label": "EscalationStates",
+  "includepath": "Net/Core/Connection/EscalationStates.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "ContainerAllocationPolicies",
+    "UnrealString",
+    "CoreMinimal",
+    "UnrealMathSSE",
+    "AssertionMacros",
+    "StateStruct",
+    "EnableIf",
+    "Function",
+    "IsEnum",
+    "Models",
+    "UnrealTemplate",
+    "UnrealTypeTraits",
+    "Class",
+    "Object",
+    "ObjectMacros",
+    "StructOnScope",
+    "UObjectGlobals",
+    "EscalationStates.generated"
+  ],
+  "functions": [
+    {
+      "id": "is-dormant",
+      "name": "IsDormant",
+      "category": "EscalationStates",
+      "signature": "IsDormant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationState*"
+        }
+      ],
+      "returnType": "public : bool",
+      "docs": "Whether or not this escalation state is a 'dormant' state, which allows the escalation manager to disable ticking"
+    },
+    {
+      "id": "get-highest-time-period",
+      "name": "GetHighestTimePeriod",
+      "category": "EscalationStates",
+      "signature": "GetHighestTimePeriod(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationState*"
+        }
+      ],
+      "returnType": "Int8",
+      "docs": "Gets the highest counter time period specified by escalation state settings (used for limiting 'CountersPerPeriodHistory' size)\n@return\t\tThe highest counter time period in the state config settings"
+    },
+    {
+      "id": "get-all-time-periods",
+      "name": "GetAllTimePeriods",
+      "category": "EscalationStates",
+      "signature": "GetAllTimePeriods(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationState*"
+        }
+      ],
+      "returnType": "TArray<int8>&",
+      "docs": "Gets all counter time periods specified by the escalation state settings\n@return\t\tAll of the time periods in the state config settings"
+    },
+    {
+      "id": "validate-config-internal",
+      "name": "ValidateConfigInternal",
+      "category": "EscalationStates",
+      "signature": "ValidateConfigInternal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationState*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "validate-time-period",
+      "name": "ValidateTimePeriod",
+      "category": "EscalationStates",
+      "signature": "ValidateTimePeriod(Target, Value, Property Name, Requirement)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationState*"
+        },
+        {
+          "name": "Value",
+          "type": "Int8&"
+        },
+        {
+          "name": "Property Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Requirement",
+          "type": "EValidateTime",
+          "default": "EValidateTime::Optional"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Validate that the specified escalation time period is within thresholds, and clamp it if necessary\n@param Value\t\t\tThe time period value to validate\n@param PropertyName\tThe name of the property, for logging\n@param Requirement\tWhether the time period value must be set, or is optional"
+    },
+    {
+      "id": "f-escalation-manager",
+      "name": "FEscalationManager",
+      "category": "EscalationStates",
+      "signature": "FEscalationManager(Parms)",
+      "params": [
+        {
+          "name": "Parms",
+          "type": "FEscalationManagerParms"
+        }
+      ],
+      "returnType": "private :"
+    },
+    {
+      "id": "init-parms",
+      "name": "InitParms",
+      "category": "EscalationStates",
+      "signature": "InitParms(Target, Parms)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "Parms",
+          "type": "FEscalationManagerInitParms"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "init-config",
+      "name": "InitConfig",
+      "category": "EscalationStates",
+      "signature": "InitConfig(Target, Config Parms)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "Config Parms",
+          "type": "FStateConfigParms"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Loads configuration settings using the specified parameters, and initializes severity states\n@param ConfigParms\tSpecifies the parameters for the config section/object"
+    },
+    {
+      "id": "update-severity",
+      "name": "UpdateSeverity",
+      "category": "EscalationStates",
+      "signature": "UpdateSeverity(Target, Update, Reason, Reason Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "Update",
+          "type": "ESeverityUpdate"
+        },
+        {
+          "name": "Reason",
+          "type": "EEscalateReason"
+        },
+        {
+          "name": "Reason Context",
+          "type": "String",
+          "default": "TEXT(\"\")"
+        }
+      ],
+      "returnType": "EEscalateResult",
+      "docs": "Updates the current escalation manager severity state\n@param Update\t\t\tWhether or not we are escalating or de-escalating the severity state\n@param Reason\t\t\tThe reason for the escalation change\n@param ReasonContext\t\tAdditional customizable context for the escalation change\n@return\t\t\t\t\tThe result of the severity update. Escalation/Deescalation, or NoChange"
+    },
+    {
+      "id": "recalculate-period-history",
+      "name": "RecalculatePeriodHistory",
+      "category": "EscalationStates",
+      "signature": "RecalculatePeriodHistory(Target, In Time Periods, Out Per Period History, Start Per Sec History Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "In Time Periods",
+          "type": "TArray<int8>&"
+        },
+        {
+          "name": "Out Per Period History",
+          "type": "TArrayView<FEscalationCounter> (&"
+        },
+        {
+          "name": "Start Per Sec History Idx",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recalculates cached counter history information, after an interval or state change which affects time period tracking.\n@param InTimePeriods\t\t\t\tThe time period values which need caching (e.g. a period of 2 seconds, and a period of 8 seconds).\n@param OutPerPeriodHistory\t\tOutputs the recalculated counter cache, for the specified time periods (e.g. elements 1 and 7 only).\n@param StartPerSecHistoryIdx\t\tThe index in CounterPerSecHistory to start calculating from"
+    },
+    {
+      "id": "get-highest-history-requirement",
+      "name": "GetHighestHistoryRequirement",
+      "category": "EscalationStates",
+      "signature": "GetHighestHistoryRequirement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "reset-all-counters",
+      "name": "ResetAllCounters",
+      "category": "EscalationStates",
+      "signature": "ResetAllCounters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets all counters - typically when entering dormancy"
+    },
+    {
+      "id": "add-new-counter-internal",
+      "name": "AddNewCounter_Internal",
+      "category": "EscalationStates",
+      "signature": "AddNewCounter_Internal(Target, Count, Counters Per Period Alloc)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "Count",
+          "type": "Int"
+        },
+        {
+          "name": "Counters Per Period Alloc",
+          "type": "TArrayView<FEscalationCounter>&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "check-quotas",
+      "name": "CheckQuotas",
+      "category": "EscalationStates",
+      "signature": "CheckQuotas(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Checks if any escalation quota's have been hit, and if so, updates/escalates the severity state"
+    },
+    {
+      "id": "tick-realtime",
+      "name": "TickRealtime",
+      "category": "EscalationStates",
+      "signature": "TickRealtime(Target, Time Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "Time Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ticks the escalation manager\nNOTE: This takes the current time, in seconds, rather than DeltaTime.\n@param TimeSeconds\tThe (can be approximate) current time"
+    },
+    {
+      "id": "get-base-config",
+      "name": "GetBaseConfig",
+      "category": "EscalationStates",
+      "signature": "GetBaseConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        }
+      ],
+      "returnType": "UEscalationManagerConfig*",
+      "docs": "Returns a reference to the BaseConfig object"
+    },
+    {
+      "id": "set-manager-context",
+      "name": "SetManagerContext",
+      "category": "EscalationStates",
+      "signature": "SetManagerContext(Target, In Manager Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "In Manager Context",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a new ManagerContext value"
+    },
+    {
+      "id": "set-notify-severity-update",
+      "name": "SetNotifySeverityUpdate",
+      "category": "EscalationStates",
+      "signature": "SetNotifySeverityUpdate(Target, In Notify Severity Update)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        },
+        {
+          "name": "In Notify Severity Update",
+          "type": "FNotifySeverityUpdate&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a new NotifySeverityUpdate value"
+    },
+    {
+      "id": "load-state-config",
+      "name": "LoadStateConfig",
+      "category": "EscalationStates",
+      "signature": "LoadStateConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEscalationManagerConfig*"
+        }
+      ],
+      "returnType": "private : void"
+    }
+  ]
+}

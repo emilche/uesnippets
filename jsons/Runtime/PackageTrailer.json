@@ -1,0 +1,771 @@
+{
+  "id": "package-trailer",
+  "label": "PackageTrailer",
+  "includepath": "UObject/PackageTrailer.h",
+  "includes": [
+    "CompressedBuffer",
+    "Array",
+    "Map",
+    "UnrealString",
+    "CoreTypes",
+    "IoHash",
+    "EnumClassFlags",
+    "Function",
+    "UniquePtr",
+    "NameTypes",
+    "VirtualizationTypes"
+  ],
+  "functions": [
+    {
+      "id": "create-from-trailer",
+      "name": "CreateFromTrailer",
+      "category": "PackageTrailer",
+      "signature": "CreateFromTrailer(Trailer, Ar, Debug Context)",
+      "params": [
+        {
+          "name": "Trailer",
+          "type": "FPackageTrailer&"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Debug Context",
+          "type": "String"
+        }
+      ],
+      "returnType": "nodiscard ] ] FPackageTrailerBuilder",
+      "docs": "Creates a builder from a pre-existing FPackageTrailer.\nPayloads stored locally in the source trailer will be loaded from disk via the provided archive so that the\nbuilder can write them to any future trailer that it creates.\n@param Trailer\t\tThe trailer to create the builder from\n@param Ar\t\t\tAn archive that the trailer can use to load payloads from\n@param DebugContext\tThe name or path of the of the file that owns the trailer. Used for error messages."
+    },
+    {
+      "id": "create-reference-to-trailer",
+      "name": "CreateReferenceToTrailer",
+      "category": "PackageTrailer",
+      "signature": "CreateReferenceToTrailer(Trailer, Debug Context)",
+      "params": [
+        {
+          "name": "Trailer",
+          "type": "FPackageTrailer&"
+        },
+        {
+          "name": "Debug Context",
+          "type": "String"
+        }
+      ],
+      "returnType": "nodiscard ] ] TUniquePtr<UE::FPackageTrailerBuilder>",
+      "docs": "Creates a builder from a pre-existing FPackageTrailer that will will reference the local payloads of the\nsource trailer.\nThis means that there is no need to load the payloads.\n@param Trailer\t\tThe trailer to create the reference from.\n@param DebugContext\tThe name or path of the of the file that owns the trailer. Used for error messages."
+    },
+    {
+      "id": "f-package-trailer-builder-9eeb51",
+      "name": "FPackageTrailerBuilder",
+      "category": "PackageTrailer",
+      "signature": "FPackageTrailerBuilder(In Package Name)",
+      "params": [
+        {
+          "name": "In Package Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-package-trailer-builder-675f1b",
+      "name": "FPackageTrailerBuilder",
+      "category": "PackageTrailer",
+      "signature": "FPackageTrailerBuilder(Debug Context)",
+      "params": [
+        {
+          "name": "Debug Context",
+          "type": "String&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-payload-52f251",
+      "name": "AddPayload",
+      "category": "PackageTrailer",
+      "signature": "AddPayload(Target, Identifier, Payload, Filter, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        },
+        {
+          "name": "Payload",
+          "type": "FCompressedBuffer"
+        },
+        {
+          "name": "Filter",
+          "type": "UE::Virtualization::EPayloadFilterReason"
+        },
+        {
+          "name": "Callback",
+          "type": "AdditionalDataCallback&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a payload to the builder to be written to the trailer. Duplicate payloads will be discarded and only a\nsingle instance stored in the trailer.\n@param Identifier\tThe identifier of the payload\n@param Payload\t\tThe payload data\n@param Flags\t\t\tThe custom flags to be applied to the payload\n@param Callback\t\tThis callback will be invoked once the FPackageTrailer has been built and appended to disk."
+    },
+    {
+      "id": "add-payload-b9977a",
+      "name": "AddPayload",
+      "category": "PackageTrailer",
+      "signature": "AddPayload(Target, Identifier, Payload, Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        },
+        {
+          "name": "Payload",
+          "type": "FCompressedBuffer"
+        },
+        {
+          "name": "Filter",
+          "type": "UE::Virtualization::EPayloadFilterReason"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-virtualized-payload",
+      "name": "AddVirtualizedPayload",
+      "category": "PackageTrailer",
+      "signature": "AddVirtualizedPayload(Target, Identifier, Raw Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        },
+        {
+          "name": "Raw Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an already virtualized payload to the builder to be written to the trailer. When the trailer is written\nthe payload will have EPayloadAccessMode::Virtualized set as it's access mode. It is assumed that the payload\nis already stored in the virtualization backends and it is up to the calling code to confirm this.\nDuplicate payloads will be discarded and only a single instance stored in the trailer.\n@param Identifier\tThe identifier of the payload\n@param RawSize\t\tThe size of the payload (in bytes) when uncompressed"
+    },
+    {
+      "id": "update-payload-as-local",
+      "name": "UpdatePayloadAsLocal",
+      "category": "PackageTrailer",
+      "signature": "UpdatePayloadAsLocal(Target, Identifier, Payload)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        },
+        {
+          "name": "Payload",
+          "type": "FCompressedBuffer"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Allows the caller to replace a payload in the builder that is already marked as virtualized and replace it\nwith one that will be stored locally.\n@param Identifier\tThe identifier of the payload\n@param Payload\t\tThe content of the payload\n@return true if a virtualized payload was replaced, false if the payload was not in the builder at all"
+    },
+    {
+      "id": "build-and-append-trailer-3f8de7",
+      "name": "BuildAndAppendTrailer",
+      "category": "PackageTrailer",
+      "signature": "BuildAndAppendTrailer(Target, Linker, Data Archive)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Linker",
+          "type": "FLinkerSave*"
+        },
+        {
+          "name": "Data Archive",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "@param ExportsArchive\tThe linker associated with the package being written to disk.\n@param DataArchive\t\tThe archive where the package data has been written to. This is where the FPackageTrailer will be written to\n@return True if the builder was created and appended successfully and false if any error was encountered"
+    },
+    {
+      "id": "build-and-append-trailer-3f99d6",
+      "name": "BuildAndAppendTrailer",
+      "category": "PackageTrailer",
+      "signature": "BuildAndAppendTrailer(Target, Linker, Data Archive, In Out Package File Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Linker",
+          "type": "FLinkerSave*"
+        },
+        {
+          "name": "Data Archive",
+          "type": "FArchive&"
+        },
+        {
+          "name": "In Out Package File Offset",
+          "type": "Int64&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "@param ExportsArchive\tThe linker associated with the package being written to disk.\n@param DataArchive\t\tThe archive where the package data has been written to. This is where the FPackageTrailer will be written to\n@param InOutPackageFileOffset The offset at which the trailer is written in the package file. In this function version,\nDataArchive might be an archive for the entire package file, or it might be a separate archive solely for the package trailer.\nThe caller must provide the initial value with the accumulated offset, and the function will increment this value by how many\nbytes are written to DataArchive.\n@return True if the builder was created and appended successfully and false if any error was encountered"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "PackageTrailer",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Returns if the builder has any payload entries or not"
+    },
+    {
+      "id": "is-local-payload-entry",
+      "name": "IsLocalPayloadEntry",
+      "category": "PackageTrailer",
+      "signature": "IsLocalPayloadEntry(Target, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool"
+    },
+    {
+      "id": "is-referenced-payload-entry",
+      "name": "IsReferencedPayloadEntry",
+      "category": "PackageTrailer",
+      "signature": "IsReferencedPayloadEntry(Target, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool"
+    },
+    {
+      "id": "is-virtualized-payload-entry",
+      "name": "IsVirtualizedPayloadEntry",
+      "category": "PackageTrailer",
+      "signature": "IsVirtualizedPayloadEntry(Target, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool"
+    },
+    {
+      "id": "calculate-trailer-length",
+      "name": "CalculateTrailerLength",
+      "category": "PackageTrailer",
+      "signature": "CalculateTrailerLength(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint64",
+      "docs": "Returns the length of the trailer (in bytes) that the builder would currently create.\nNOTE: At the moment this is not const as we need to check for and remove duplicate\npayload entries as we do this before building the trailer not when gathering the entry info."
+    },
+    {
+      "id": "get-num-payloads-120439",
+      "name": "GetNumPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetNumPayloads(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Returns the total number of payload entries in the builder"
+    },
+    {
+      "id": "get-num-local-payloads",
+      "name": "GetNumLocalPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetNumLocalPayloads(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Returns the number of payload entries in the builder with the access mode EPayloadAccessMode::Local"
+    },
+    {
+      "id": "get-num-referenced-payloads",
+      "name": "GetNumReferencedPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetNumReferencedPayloads(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Returns the number of payload entries in the builder with the access mode EPayloadAccessMode::Referenced"
+    },
+    {
+      "id": "get-num-virtualized-payloads",
+      "name": "GetNumVirtualizedPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetNumVirtualizedPayloads(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Returns the number of payload entries in the builder with the access mode EPayloadAccessMode::Virtualized"
+    },
+    {
+      "id": "calculate-potential-header-size",
+      "name": "CalculatePotentialHeaderSize",
+      "category": "PackageTrailer",
+      "signature": "CalculatePotentialHeaderSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Returns the total length of the header if we were to build a trailer right now"
+    },
+    {
+      "id": "calculate-potential-payload-size",
+      "name": "CalculatePotentialPayloadSize",
+      "category": "PackageTrailer",
+      "signature": "CalculatePotentialPayloadSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Returns the total length of all payloads combined if we were to build a trailer right now"
+    },
+    {
+      "id": "remove-duplicate-entries",
+      "name": "RemoveDuplicateEntries",
+      "category": "PackageTrailer",
+      "signature": "RemoveDuplicateEntries(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailerBuilder*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "try-load-from-package",
+      "name": "TryLoadFromPackage",
+      "category": "PackageTrailer",
+      "signature": "TryLoadFromPackage(Package Path, Out Trailer)",
+      "params": [
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Out Trailer",
+          "type": "FPackageTrailer&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Try to load a trailer from a given package path. Note that it will always try to load the trailer from the workspace domain"
+    },
+    {
+      "id": "try-load-from-file",
+      "name": "TryLoadFromFile",
+      "category": "PackageTrailer",
+      "signature": "TryLoadFromFile(Path, Out Trailer)",
+      "params": [
+        {
+          "name": "Path",
+          "type": "String&"
+        },
+        {
+          "name": "Out Trailer",
+          "type": "FPackageTrailer&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Try to load a trailer from a given file path."
+    },
+    {
+      "id": "try-load-from-archive",
+      "name": "TryLoadFromArchive",
+      "category": "PackageTrailer",
+      "signature": "TryLoadFromArchive(Ar, Out Trailer)",
+      "params": [
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        },
+        {
+          "name": "Out Trailer",
+          "type": "FPackageTrailer&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Try to load a trailer from a given archive. Assumes that the trailer is at the end of the archive"
+    },
+    {
+      "id": "try-load",
+      "name": "TryLoad",
+      "category": "PackageTrailer",
+      "signature": "TryLoad(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Serializes the trailer from the given archive assuming that the seek position of the archive is already at the correct position\nfor the trailer.\n@param Ar\tThe archive to load the trailer from\n@return\t\tTrue if a valid trailer was found and was able to be loaded, otherwise false. If the trailer was found but failed\nto load then the archive will be set to the error state."
+    },
+    {
+      "id": "try-load-backwards",
+      "name": "TryLoadBackwards",
+      "category": "PackageTrailer",
+      "signature": "TryLoadBackwards(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Serializes the trailer from the given archive BUT assumes that the seek position of the archive is at the end of the trailer\nand so will attempt to read the footer first and use that to find the start of the trailer in order to read the header.\n@param Ar\tThe archive to load the trailer from\n@return\t\tTrue if a valid trailer was found and was able to be loaded, otherwise false. If the trailer was found but failed\nto load then the archive will be set to the error state."
+    },
+    {
+      "id": "load-local-payload",
+      "name": "LoadLocalPayload",
+      "category": "PackageTrailer",
+      "signature": "LoadLocalPayload(Target, Id, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Id",
+          "type": "FIoHash&"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FCompressedBuffer",
+      "docs": "Loads a payload that is stored locally within the package trailer. Payloads stored externally (either referenced\nor virtualized) will not load.\n@param Id The payload to load\n@param Ar The archive from which the payload trailer was also loaded from\n@return\tThe payload in the form of a FCompressedBuffer. If the payload does not exist in the trailer or is not\nstored locally in the trailer then the FCompressedBuffer will be null."
+    },
+    {
+      "id": "update-payload-as-virtualized",
+      "name": "UpdatePayloadAsVirtualized",
+      "category": "PackageTrailer",
+      "signature": "UpdatePayloadAsVirtualized(Target, Identifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Identifier",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Calling this indicates that the payload has been virtualized and will no longer be stored on disk.\n@param Identifier The payload that has been virtualized\n@return True if the payload was in the trailer, otherwise false"
+    },
+    {
+      "id": "for-each-payload",
+      "name": "ForEachPayload",
+      "category": "PackageTrailer",
+      "signature": "ForEachPayload(Target, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Callback",
+          "type": "TFunctionRef<void ( FIoHash&,uint64,uint64,EPayloadAccessMode,UE::Virtualization::EPayloadFilterReason )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Iterates over all payloads in the trailer and invokes the provoided callback on them"
+    },
+    {
+      "id": "find-payload-status",
+      "name": "FindPayloadStatus",
+      "category": "PackageTrailer",
+      "signature": "FindPayloadStatus(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Id",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] EPayloadStatus",
+      "docs": "Attempt to find the status of the given payload. @See EPayloadStatus"
+    },
+    {
+      "id": "find-payload-offset-in-file",
+      "name": "FindPayloadOffsetInFile",
+      "category": "PackageTrailer",
+      "signature": "FindPayloadOffsetInFile(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Id",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] int64",
+      "docs": "Returns the absolute offset of the payload in the package file, invalid and virtualized payloads will return INDEX_NONE"
+    },
+    {
+      "id": "find-payload-size-on-disk",
+      "name": "FindPayloadSizeOnDisk",
+      "category": "PackageTrailer",
+      "signature": "FindPayloadSizeOnDisk(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Id",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] int64",
+      "docs": "Returns the size of the payload on as stored on disk, invalid and virtualized payloads will return INDEX_NONE"
+    },
+    {
+      "id": "get-trailer-length",
+      "name": "GetTrailerLength",
+      "category": "PackageTrailer",
+      "signature": "GetTrailerLength(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int64",
+      "docs": "Returns the total size of the of the trailer on disk in bytes"
+    },
+    {
+      "id": "get-payload-info",
+      "name": "GetPayloadInfo",
+      "category": "PackageTrailer",
+      "signature": "GetPayloadInfo(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Id",
+          "type": "FIoHash&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FPayloadInfo"
+    },
+    {
+      "id": "get-payloads-e79fc3",
+      "name": "GetPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetPayloads(Target, Storage Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Storage Type",
+          "type": "EPayloadStorageType"
+        }
+      ],
+      "returnType": "nodiscard ] ] TArray<FIoHash>",
+      "docs": "Returns an array of the payloads with the given storage type. @See EPayloadStoragetype"
+    },
+    {
+      "id": "get-num-payloads-0724e4",
+      "name": "GetNumPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetNumPayloads(Target, Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Type",
+          "type": "EPayloadStorageType"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Returns the number of payloads that the trailer owns with the given storage type. @See EPayloadStoragetype"
+    },
+    {
+      "id": "get-payloads-0293b7",
+      "name": "GetPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetPayloads(Target, Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Filter",
+          "type": "EPayloadFilter"
+        }
+      ],
+      "returnType": "nodiscard ] ] TArray<FIoHash>",
+      "docs": "Returns an array of the payloads that match the given filter type. @See EPayloadFilter"
+    },
+    {
+      "id": "get-num-payloads-a50849",
+      "name": "GetNumPayloads",
+      "category": "PackageTrailer",
+      "signature": "GetNumPayloads(Target, Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Filter",
+          "type": "EPayloadFilter"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Returns the number of payloads that the trailer owns that match the given filter type. @See EPayloadFilter"
+    },
+    {
+      "id": "create-footer",
+      "name": "CreateFooter",
+      "category": "PackageTrailer",
+      "signature": "CreateFooter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        }
+      ],
+      "returnType": "FFooter",
+      "docs": "Create a valid footer for the current trailer"
+    },
+    {
+      "id": "find-payloads-in-package-file",
+      "name": "FindPayloadsInPackageFile",
+      "category": "PackageTrailer",
+      "signature": "FindPayloadsInPackageFile(Target, Package Path, Filter, Out Payload Ids)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Filter",
+          "type": "EPayloadStorageType"
+        },
+        {
+          "name": "Out Payload Ids",
+          "type": "TArray<FIoHash>&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Where in the workspace domain package file the trailer is located"
+    },
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "PackageTrailer",
+      "signature": "LexToString(Target, Filter Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageTrailer*"
+        },
+        {
+          "name": "Filter Flags",
+          "type": "UE::Virtualization::EPayloadFilterReason"
+        }
+      ],
+      "returnType": "nodiscard ] ] FString"
+    }
+  ]
+}

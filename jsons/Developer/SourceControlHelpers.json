@@ -26,7 +26,7 @@
       "category": "Editor Scripting ",
       "signature": "CurrentProvider()",
       "params": [],
-      "returnType": "typedef class USourceControlHelpers SourceControlHelpers",
+      "returnType": "public : FString",
       "docs": "Determine the name of the current source control provider.\n@return\tthe name of the current source control provider. If one is not set then \"None\" is returned."
     },
     {
@@ -171,6 +171,32 @@
       "docs": "Use currently set source control provider to check out files or mark them for add.\n@note\tBlocks until action is complete.\n@param\tInFiles\t\tThe files to check out/add - can be either fully qualified path, relative path, long package name, asset path or export text path (often stored on clipboard)\n@param\tbSilent\t\tif false (default) then write out any error info to the Log. Any error text can be retrieved by LastErrorMsg() regardless.\n@return\ttrue if succeeded, false if failed and can call LastErrorMsg() for more info."
     },
     {
+      "id": "checkout-or-mark-for-add",
+      "name": "CheckoutOrMarkForAdd",
+      "category": "SourceControlHelpers",
+      "signature": "CheckoutOrMarkForAdd(In Dest File, In File Description, On Post Check Out, Out Fail Reason)",
+      "params": [
+        {
+          "name": "In Dest File",
+          "type": "String&"
+        },
+        {
+          "name": "In File Description",
+          "type": "Text&"
+        },
+        {
+          "name": "On Post Check Out",
+          "type": "FOnPostCheckOut&"
+        },
+        {
+          "name": "Out Fail Reason",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function perform an operation on files in our 'source controlled' directories, handling checkout/add etc.\n@note\tBlocks until action is complete. Older C++ only version of CheckOutOrAddFile().\n@param\tInDestFile\t\t\tThe path to the destination file\n@param\tInFileDescription\tDescription of the file to display to the user, e.g. \"Text\" or \"Image\"\n@param\tOnPostCheckOut\t\tDelegate used for performing operation on files that may need a checkout, but before they are added to source control\n@param\tOutFailReason\t\tText describing why the operation failed\n@return\tSuccess or failure of the operation\n@see     CheckOutOrAddFile()"
+    },
+    {
       "id": "mark-file-for-add",
       "name": "MarkFileForAdd",
       "category": "Editor Scripting ",
@@ -266,6 +292,34 @@
       "docs": "Use currently set source control provider to revert a file regardless whether any changes will be lost or not.\n@note\tBlocks until action is complete.\n@param\tInFile\tThe file to revert - can be either fully qualified path, relative path, long package name, asset path or export text path (often stored on clipboard)\n@param\tbSilent\tif false (default) then write out any error info to the Log. Any error text can be retrieved by LastErrorMsg() regardless.\n@return\ttrue if succeeded, false if failed and can call LastErrorMsg() for more info."
     },
     {
+      "id": "apply-operation-and-reload-packages",
+      "name": "ApplyOperationAndReloadPackages",
+      "category": "SourceControlHelpers",
+      "signature": "ApplyOperationAndReloadPackages(In Packages To Apply Operation, In Operation, Reload World, Interactive)",
+      "params": [
+        {
+          "name": "In Packages To Apply Operation",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "In Operation",
+          "type": "TFunctionRef<bool ( TArray<FString>& )>&"
+        },
+        {
+          "name": "Reload World",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Interactive",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Applies the provided function and optionally reloads the world\n@param\tInPackagesToApplyOperation\t\t\tThe files/packages to apply the operation\n@param\tInOperation\t\t\t\t\t\t\tThe function to apply\n@param\tbReloadWorld\t\t\t\t\t\tReload the world\n@param\tbInteractive\t\t\t\t\t\tWhether to prompt user when discarding changes\n@return true if succeeded."
+    },
+    {
       "id": "revert-and-reload-packages",
       "name": "RevertAndReloadPackages",
       "category": "Editor Scripting ",
@@ -288,6 +342,15 @@
       ],
       "returnType": "Bool",
       "docs": "Reverts the provided files then reloads packages.\n@param\tInPackagesToRevert\t\t\t\t\tThe packages to revert\n@param\tbRevertAll\t\t\t\t\t\t\tWhether to revert all files\n@param\tbReloadWorld\t\t\t\t\t\tReload the world\n@return true if succeeded."
+    },
+    {
+      "id": "revert-all-changes-and-reload-world",
+      "name": "RevertAllChangesAndReloadWorld",
+      "category": "SourceControlHelpers",
+      "signature": "RevertAllChangesAndReloadWorld()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Reverts all changes and then reloads the world.\n@return true if succeeded."
     },
     {
       "id": "revert-files",
@@ -444,6 +507,32 @@
       "docs": "Use currently set source control provider to copy a file.\n@note\tBlocks until action is complete.\n@param\tInSourceFile\tSource file string to copy from - can be either fully qualified path, relative path, long package name, asset path or export text path (often stored on clipboard)\n@param\tInDestFile\t\tSource file string to copy to - can be either fully qualified path, relative path, long package name, asset path or export text path (often stored on clipboard). If package, then uses same extension as source file.\n@param\tbSilent\t\t\tif false (default) then write out any error info to the Log. Any error text can be retrieved by LastErrorMsg() regardless.\n@return\ttrue if succeeded, false if failed and can call LastErrorMsg() for more info."
     },
     {
+      "id": "copy-file-under-source-control",
+      "name": "CopyFileUnderSourceControl",
+      "category": "SourceControlHelpers",
+      "signature": "CopyFileUnderSourceControl(In Dest File, In Source File, In File Description, Out Fail Reason)",
+      "params": [
+        {
+          "name": "In Dest File",
+          "type": "String&"
+        },
+        {
+          "name": "In Source File",
+          "type": "String&"
+        },
+        {
+          "name": "In File Description",
+          "type": "Text&"
+        },
+        {
+          "name": "Out Fail Reason",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to copy a file into our 'source controlled' directories, handling checkout/add etc.\n@note\tBlocks until action is complete. Older C++ only version of CopyFile().\n@param\tInDestFile\t\t\tThe path to the destination file\n@param\tInSourceFile\t\tThe path to the source file\n@param\tInFileDescription\tDescription of the file to display to the user, e.g. \"Text\" or \"Image\"\n@param\tOutFailReason\t\tText describing why the operation failed\n@return\tSuccess or failure of the operation"
+    },
+    {
       "id": "query-file-state",
       "name": "QueryFileState",
       "category": "Editor Scripting ",
@@ -524,6 +613,439 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-files-in-depot-at-path",
+      "name": "GetFilesInDepotAtPath",
+      "category": "SourceControlHelpers",
+      "signature": "GetFilesInDepotAtPath(Path, Out Files List, Include Deleted, Silent, Is File Regex Search)",
+      "params": [
+        {
+          "name": "Path",
+          "type": "String&"
+        },
+        {
+          "name": "Out Files List",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Include Deleted",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Silent",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Is File Regex Search",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Use currently set source control provider to query the list of files in the depot under a certain path.\n@note\tBlocks until action is complete.\n@param\tPath\t\t\t\tThe path which we want to query the list of files from.\n@param\tOutFilesList\t\tAn array containing the list of files under the queried path.\n@param\tbIncludeDeleted\t\tInclude files that have been deleted from the depot.\n@param\tbSilent\t\t\t\tIf false (default) then write out any error info to the Log. Any error text can be retrieved by LastErrorMsg() regardless.\n@param\tbIsFileRegexSearch\tIf false, it is a folder search. If true, it is a file regex search\n@return\tSuccess or failure of the operation"
+    },
+    {
+      "id": "get-files-in-depot-at-paths",
+      "name": "GetFilesInDepotAtPaths",
+      "category": "SourceControlHelpers",
+      "signature": "GetFilesInDepotAtPaths(Paths, Out Files List, Include Deleted, Silent, Is File Regex Search)",
+      "params": [
+        {
+          "name": "Paths",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Out Files List",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "Include Deleted",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Silent",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Is File Regex Search",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Use currently set source control provider to query the list of files in the depot under a list of paths.\n@note\tBlocks until action is complete.\n@param\tPaths\t\t\t\tThe paths which we want to query the list of files from.\n@param\tOutFilesList\t\tAn array containing the list of files under the queried path.\n@param\tbIncludeDeleted\t\tInclude files that have been deleted from the depot.\n@param\tbSilent\t\t\t\tIf false (default) then write out any error info to the Log. Any error text can be retrieved by LastErrorMsg() regardless.\n@param\tbIsFileRegexSearch\tIf false, it is a folder search. If true, it is a file regex search\n@return\tSuccess or failure of the operation"
+    },
+    {
+      "id": "package-filename-3ff8c5",
+      "name": "PackageFilename",
+      "category": "SourceControlHelpers",
+      "signature": "PackageFilename(In Package Name)",
+      "params": [
+        {
+          "name": "In Package Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Helper function to get a filename for a package name.\n@param\tInPackageName\tThe package name to get the filename for\n@return the filename"
+    },
+    {
+      "id": "package-filename-8c864e",
+      "name": "PackageFilename",
+      "category": "SourceControlHelpers",
+      "signature": "PackageFilename(In Package)",
+      "params": [
+        {
+          "name": "In Package",
+          "type": "UPackage*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Helper function to get a filename for a package.\n@param\tInPackage\tThe package to get the filename for\n@return the filename"
+    },
+    {
+      "id": "package-filenames-9cad04",
+      "name": "PackageFilenames",
+      "category": "SourceControlHelpers",
+      "signature": "PackageFilenames(In Package Names)",
+      "params": [
+        {
+          "name": "In Package Names",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "TArray<FString>",
+      "docs": "Helper function to convert package name array into a filename array.\n@param\tInPackageNames\tThe package name array\n@return an array of filenames"
+    },
+    {
+      "id": "package-filenames-9e72e1",
+      "name": "PackageFilenames",
+      "category": "SourceControlHelpers",
+      "signature": "PackageFilenames(In Packages)",
+      "params": [
+        {
+          "name": "In Packages",
+          "type": "TArray<UPackage*>&"
+        }
+      ],
+      "returnType": "TArray<FString>",
+      "docs": "Helper function to convert package array into filename array.\n@param\tInPackages\tThe package array\n@return an array of filenames"
+    },
+    {
+      "id": "absolute-filenames",
+      "name": "AbsoluteFilenames",
+      "category": "SourceControlHelpers",
+      "signature": "AbsoluteFilenames(In File Names)",
+      "params": [
+        {
+          "name": "In File Names",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "TArray<FString>",
+      "docs": "Helper function to convert a filename array to absolute paths.\n@param\tInFileNames\tThe filename array\n@return an array of filenames, transformed into absolute paths"
+    },
+    {
+      "id": "annotate-file-a0bd76",
+      "name": "AnnotateFile",
+      "category": "SourceControlHelpers",
+      "signature": "AnnotateFile(In Provider, In Label, In File, Out Lines)",
+      "params": [
+        {
+          "name": "In Provider",
+          "type": "ISourceControlProvider&"
+        },
+        {
+          "name": "In Label",
+          "type": "String&"
+        },
+        {
+          "name": "In File",
+          "type": "String&"
+        },
+        {
+          "name": "Out Lines",
+          "type": "TArray<FAnnotationLine>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to annotate a file using a label\n@param\tInProvider\tThe provider to use\n@param\tInLabel\t\tThe label to use to retrieve the file\n@param\tInFile\t\tThe file to annotate\n@param\tOutLines\tOutput array of annotated lines\n@returns true if successful"
+    },
+    {
+      "id": "annotate-file-0330a2",
+      "name": "AnnotateFile",
+      "category": "SourceControlHelpers",
+      "signature": "AnnotateFile(In Provider, In Check In Identifier, In File, Out Lines)",
+      "params": [
+        {
+          "name": "In Provider",
+          "type": "ISourceControlProvider&"
+        },
+        {
+          "name": "In Check In Identifier",
+          "type": "Int"
+        },
+        {
+          "name": "In File",
+          "type": "String&"
+        },
+        {
+          "name": "Out Lines",
+          "type": "TArray<FAnnotationLine>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to annotate a file using a changelist/checkin identifier\n@param\tInProvider\t\t\t\tThe provider to use\n@param\tInCheckInIdentifier\t\tThe changelist/checkin identifier to use to retrieve the file\n@param\tInFile\t\t\t\t\tThe file to annotate\n@param\tOutLines\t\t\t\tOutput array of annotated lines\n@returns true if successful"
+    },
+    {
+      "id": "branch-package",
+      "name": "BranchPackage",
+      "category": "SourceControlHelpers",
+      "signature": "BranchPackage(Dest Package, Source Package, State Cache Usage)",
+      "params": [
+        {
+          "name": "Dest Package",
+          "type": "UPackage*"
+        },
+        {
+          "name": "Source Package",
+          "type": "UPackage*"
+        },
+        {
+          "name": "State Cache Usage",
+          "type": "EStateCacheUsage::Type",
+          "default": "EStateCacheUsage::ForceUpdate"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to branch/integrate packages from one location to another maintaining\na relationship between the files in source control (when possible)\n@param\tDestPackage\t\t\tThe destination package\n@param\tSourcePackage\t\tThe source package\n@Param\tStateCacheUsage\t\tWhether to use the source control state cache\n@return true if the file packages were successfully branched."
+    },
+    {
+      "id": "copy-package",
+      "name": "CopyPackage",
+      "category": "SourceControlHelpers",
+      "signature": "CopyPackage(Dest Package, Source Package, State Cache Usage)",
+      "params": [
+        {
+          "name": "Dest Package",
+          "type": "UPackage*"
+        },
+        {
+          "name": "Source Package",
+          "type": "UPackage*"
+        },
+        {
+          "name": "State Cache Usage",
+          "type": "EStateCacheUsage::Type",
+          "default": "EStateCacheUsage::ForceUpdate"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to copy a package from one location to another\n@param\tDestPackage             The destination package\n@param\tSourcePackage           The source package\n@Param\tStateCacheUsage         Whether to use the source control state cache\n@return true if the file packages were successfully branched."
+    },
+    {
+      "id": "get-settings-ini",
+      "name": "GetSettingsIni",
+      "category": "SourceControlHelpers",
+      "signature": "GetSettingsIni()",
+      "params": [],
+      "returnType": "String&",
+      "docs": "Helper function to get the ini filename for storing source control settings\n@return the filename"
+    },
+    {
+      "id": "get-global-settings-ini",
+      "name": "GetGlobalSettingsIni",
+      "category": "SourceControlHelpers",
+      "signature": "GetGlobalSettingsIni()",
+      "params": [],
+      "returnType": "String&",
+      "docs": "Helper function to get the ini filename for storing global source control settings\n@return the filename"
+    },
+    {
+      "id": "get-asset-data-2f6dee",
+      "name": "GetAssetData",
+      "category": "SourceControlHelpers",
+      "signature": "GetAssetData(In File Name, In Package Name, Out Assets, Out Dependencies)",
+      "params": [
+        {
+          "name": "In File Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Package Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Assets",
+          "type": "TArray<FAssetData>&"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to retrieve the FAssetData associated with a given file\n@return Whether the asset data could be retrieved or not"
+    },
+    {
+      "id": "get-asset-data-9fb21f",
+      "name": "GetAssetData",
+      "category": "SourceControlHelpers",
+      "signature": "GetAssetData(In File Name, Out Assets, Out Dependencies)",
+      "params": [
+        {
+          "name": "In File Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Assets",
+          "type": "TArray<FAssetData>&"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to retrieve the FAssetData associated with a given file\n@return Whether the asset data could be retrieved or not"
+    },
+    {
+      "id": "get-asset-data-from-package",
+      "name": "GetAssetDataFromPackage",
+      "category": "SourceControlHelpers",
+      "signature": "GetAssetDataFromPackage(In Package Name, Out Assets, Out Dependencies)",
+      "params": [
+        {
+          "name": "In Package Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Assets",
+          "type": "TArray<FAssetData>&"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to retrieve the FAssetData associated with a given package name\n@return Whether the asset data could be retrieved or not"
+    },
+    {
+      "id": "get-asset-data-from-file-history-00515e",
+      "name": "GetAssetDataFromFileHistory",
+      "category": "SourceControlHelpers",
+      "signature": "GetAssetDataFromFileHistory(In File Name, Out Assets, Out Dependencies, Max Fetch Size)",
+      "params": [
+        {
+          "name": "In File Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Assets",
+          "type": "TArray<FAssetData>&"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Max Fetch Size",
+          "type": "Int64",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to get the asset data from a file's history\nNote: will not query history to prevent recursion"
+    },
+    {
+      "id": "get-asset-data-from-file-history-f60bd8",
+      "name": "GetAssetDataFromFileHistory",
+      "category": "SourceControlHelpers",
+      "signature": "GetAssetDataFromFileHistory(In Source Control State, Out Assets, Out Dependencies, Max Fetch Size)",
+      "params": [
+        {
+          "name": "In Source Control State",
+          "type": "FSourceControlStatePtr"
+        },
+        {
+          "name": "Out Assets",
+          "type": "TArray<FAssetData>&"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Max Fetch Size",
+          "type": "Int64",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Helper function to get the asset data from a file's history\nNote: will not query history to prevent recursion"
+    },
+    {
+      "id": "list-revertable-packages",
+      "name": "ListRevertablePackages",
+      "category": "SourceControlHelpers",
+      "signature": "ListRevertablePackages(Out Revertable Package Names)",
+      "params": [
+        {
+          "name": "Out Revertable Package Names",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Find packages that can be reverted in Source Control locations"
+    },
+    {
+      "id": "get-source-control-locations",
+      "name": "GetSourceControlLocations",
+      "category": "SourceControlHelpers",
+      "signature": "GetSourceControlLocations(Content Only)",
+      "params": [
+        {
+          "name": "Content Only",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "TArray<FString>",
+      "docs": "Get the list of files and directories that source control should check when looking for changes.\n@param\tbContentOnly\tTrue to only include content directories."
+    },
+    {
+      "id": "f-scoped-source-control",
+      "name": "FScopedSourceControl",
+      "category": "SourceControlHelpers",
+      "signature": "FScopedSourceControl()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Helper class that ensures FSourceControl is properly initialized and shutdown by calling Init/Close in\nits constructor/destructor respectively."
+    },
+    {
+      "id": "get-provider",
+      "name": "GetProvider",
+      "category": "SourceControlHelpers",
+      "signature": "GetProvider(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedSourceControl*"
+        }
+      ],
+      "returnType": "ISourceControlProvider&",
+      "docs": "Get the provider we are using"
     }
   ]
 }

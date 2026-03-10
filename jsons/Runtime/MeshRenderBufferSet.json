@@ -1,0 +1,171 @@
+{
+  "id": "mesh-render-buffer-set",
+  "label": "MeshRenderBufferSet",
+  "includepath": "Components/MeshRenderBufferSet.h",
+  "includes": [
+    "CoreMinimal",
+    "ParallelFor",
+    "BaseDynamicMeshComponent",
+    "DynamicMeshComponent",
+    "DynamicMeshBuilder",
+    "DynamicMesh3",
+    "DynamicMeshAttributeSet",
+    "LocalVertexFactory",
+    "StaticMeshVertexBuffer",
+    "PositionVertexBuffer",
+    "ColorVertexBuffer",
+    "RHICommandList",
+    "RayTracingGeometry",
+    "VertexFactory"
+  ],
+  "functions": [
+    {
+      "id": "upload",
+      "name": "Upload",
+      "category": "MeshRenderBufferSet",
+      "signature": "Upload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Upload initialized mesh buffers.\n@warning This can only be called on the Rendering Thread."
+    },
+    {
+      "id": "upload-vertex-update",
+      "name": "UploadVertexUpdate",
+      "category": "MeshRenderBufferSet",
+      "signature": "UploadVertexUpdate(Target, Positions, Mesh Attribs, Colors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Positions",
+          "type": "Bool"
+        },
+        {
+          "name": "Mesh Attribs",
+          "type": "Bool"
+        },
+        {
+          "name": "Colors",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fast path to only update vertex buffers. This path rebuilds all the\nresources and reconfigures the vertex factory, so the counts/etc could be modified.\n@warning This can only be called on the Rendering Thread."
+    },
+    {
+      "id": "transfer-vertex-update-to-gpu",
+      "name": "TransferVertexUpdateToGPU",
+      "category": "MeshRenderBufferSet",
+      "signature": "TransferVertexUpdateToGPU(Target, RHI Cmd List, Positions, Normals, Tex Coords, Colors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Positions",
+          "type": "Bool"
+        },
+        {
+          "name": "Normals",
+          "type": "Bool"
+        },
+        {
+          "name": "Tex Coords",
+          "type": "Bool"
+        },
+        {
+          "name": "Colors",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fast path to update various vertex buffers. This path does not support changing the\nsize/counts of any of the sub-buffers, a direct memcopy from the CPU-side buffer to the RHI buffer is used.\n@warning This can only be called on the Rendering Thread."
+    },
+    {
+      "id": "update-secondary-triangle-buffer",
+      "name": "UpdateSecondaryTriangleBuffer",
+      "category": "MeshRenderBufferSet",
+      "signature": "UpdateSecondaryTriangleBuffer(Target, Render Buffers, Mesh, Duplicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Render Buffers",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Duplicate",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Filter the triangles in a FMeshRenderBufferSet into the SecondaryIndexBuffer.\nRequires that RenderBuffers->Triangles has been initialized.\n@param bDuplicate if set, then primary IndexBuffer is unmodified and SecondaryIndexBuffer contains duplicates. Otherwise triangles are sorted via predicate into either primary or secondary."
+    },
+    {
+      "id": "recompute-render-buffer-triangle-index-sets",
+      "name": "RecomputeRenderBufferTriangleIndexSets",
+      "category": "MeshRenderBufferSet",
+      "signature": "RecomputeRenderBufferTriangleIndexSets(Target, Render Buffers, Mesh)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Render Buffers",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "RecomputeRenderBufferTriangleIndexSets re-sorts the existing set of triangles in a FMeshRenderBufferSet\ninto primary and secondary index buffers. Note that UploadIndexBufferUpdate() must be called\nafter this function!"
+    },
+    {
+      "id": "convert",
+      "name": "Convert",
+      "category": "MeshRenderBufferSet",
+      "signature": "Convert(Target, Dynamic Mesh Component, Mesh Render Buffer Set, Use Component Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshComponentToMeshRenderBufferSet*"
+        },
+        {
+          "name": "Dynamic Mesh Component",
+          "type": "UDynamicMeshComponent&"
+        },
+        {
+          "name": "Mesh Render Buffer Set",
+          "type": "FMeshRenderBufferSet&"
+        },
+        {
+          "name": "Use Component Settings",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

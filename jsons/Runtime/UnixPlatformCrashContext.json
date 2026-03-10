@@ -1,0 +1,193 @@
+{
+  "id": "unix-platform-crash-context",
+  "label": "UnixPlatformCrashContext",
+  "includepath": "Unix/UnixPlatformCrashContext.h",
+  "includes": [
+    "Array",
+    "UnrealString",
+    "CoreTypes",
+    "GenericPlatformCrashContext",
+    "UnixSystemIncludes",
+    "Atomic",
+    "ucontext"
+  ],
+  "functions": [
+    {
+      "id": "f-unix-crash-context",
+      "name": "FUnixCrashContext",
+      "category": "UnixPlatformCrashContext",
+      "signature": "FUnixCrashContext()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "init-from-signal",
+      "name": "InitFromSignal",
+      "category": "UnixPlatformCrashContext",
+      "signature": "InitFromSignal(Target, In Signal, In Info, In Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "In Signal",
+          "type": "Int"
+        },
+        {
+          "name": "In Info",
+          "type": "siginfo_t*"
+        },
+        {
+          "name": "In Context",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inits the crash context from data provided by a signal handler.\n@param InSignal number (SIGSEGV, etc)\n@param InInfo additional info (e.g. address we tried to read, etc)\n@param InContext thread context"
+    },
+    {
+      "id": "init-from-diagnostics",
+      "name": "InitFromDiagnostics",
+      "category": "UnixPlatformCrashContext",
+      "signature": "InitFromDiagnostics(Target, In Address)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "In Address",
+          "type": "void*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inits the crash context from some diagnostic handler (ensure, stall, etc...)\n@param InAddress address where the event happened, for optional callstack trimming"
+    },
+    {
+      "id": "capture-stack-trace",
+      "name": "CaptureStackTrace",
+      "category": "UnixPlatformCrashContext",
+      "signature": "CaptureStackTrace(Target, Error Program Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "Error Program Counter",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Populates crash context stack trace and a few related fields for the calling thread"
+    },
+    {
+      "id": "capture-thread-stack-trace",
+      "name": "CaptureThreadStackTrace",
+      "category": "UnixPlatformCrashContext",
+      "signature": "CaptureThreadStackTrace(Target, Thread Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "Thread Id",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Populates crash context stack trace and a few related fields for another thread\n@param ThreadId The thread to capture the stack trace from"
+    },
+    {
+      "id": "generate-crash-info-and-launch-reporter",
+      "name": "GenerateCrashInfoAndLaunchReporter",
+      "category": "UnixPlatformCrashContext",
+      "signature": "GenerateCrashInfoAndLaunchReporter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Generates a new crash report containing information needed for the crash reporter and launches it; may not return.\n@return If the crash type is not continuable, the function will not return"
+    },
+    {
+      "id": "set-first-crash-handler-frame",
+      "name": "SetFirstCrashHandlerFrame",
+      "category": "UnixPlatformCrashContext",
+      "signature": "SetFirstCrashHandlerFrame(Target, Program Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "Program Counter",
+          "type": "UInt64*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the FirstCrashHandlerFrame only if it has not been set before"
+    },
+    {
+      "id": "get-portable-call-stack",
+      "name": "GetPortableCallStack",
+      "category": "UnixPlatformCrashContext",
+      "signature": "GetPortableCallStack(Target, Stack Frames, Num Stack Frames, Out Call Stack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "Stack Frames",
+          "type": "UInt64*"
+        },
+        {
+          "name": "Num Stack Frames",
+          "type": "Int"
+        },
+        {
+          "name": "Out Call Stack",
+          "type": "TArray<FCrashStackFrame>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-platform-specific-properties",
+      "name": "AddPlatformSpecificProperties",
+      "category": "UnixPlatformCrashContext",
+      "signature": "AddPlatformSpecificProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-report",
+      "name": "GenerateReport",
+      "category": "UnixPlatformCrashContext",
+      "signature": "GenerateReport(Target, Diagnostics Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUnixCrashContext*"
+        },
+        {
+          "name": "Diagnostics Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Dumps all the data from crash context to the \"minidump\" report.\n@param DiagnosticsPath Path to put the file to"
+    }
+  ]
+}

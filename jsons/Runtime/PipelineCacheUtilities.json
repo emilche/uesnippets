@@ -1,0 +1,201 @@
+{
+  "id": "pipeline-cache-utilities",
+  "label": "PipelineCacheUtilities",
+  "includepath": "PipelineCacheUtilities.h",
+  "includes": [
+    "Build",
+    "Array",
+    "Map",
+    "Set",
+    "StringFwd",
+    "UnrealString",
+    "CoreMinimal",
+    "Platform",
+    "RHIDefinitions",
+    "ShaderCodeLibrary"
+  ],
+  "functions": [
+    {
+      "id": "load-stable-keys-file",
+      "name": "LoadStableKeysFile",
+      "category": "PipelineCacheUtilities",
+      "signature": "LoadStableKeysFile(Filename, In Out Array)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "FStringView&"
+        },
+        {
+          "name": "In Out Array",
+          "type": "TArray<FStableShaderKeyAndValue>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads stable shader keys file (using a proprietary format). Stable key is a way to identify a shader independently of its output hash\n@param Filename filename (with path if needed)\n@param InOutArray array to put the file contents. Existing array contents will be preserved and appended to\n@return true if successful"
+    },
+    {
+      "id": "save-stable-keys-file",
+      "name": "SaveStableKeysFile",
+      "category": "PipelineCacheUtilities",
+      "signature": "SaveStableKeysFile(Filename, Values)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "FStringView&"
+        },
+        {
+          "name": "Values",
+          "type": "TSet<FStableShaderKeyAndValue>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Saves stable shader keys file (using a proprietary format). Stable key is a way to identify a shader independently of its output hash\n@param Filename filename (with path if needed)\n@param Values values to be saved\n@return true if successful"
+    },
+    {
+      "id": "save-stable-pipeline-cache-file",
+      "name": "SaveStablePipelineCacheFile",
+      "category": "PipelineCacheUtilities",
+      "signature": "SaveStablePipelineCacheFile(Output Filename, Stable Results, Stable Shader Key Index Table)",
+      "params": [
+        {
+          "name": "Output Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Stable Results",
+          "type": "TArray<FPermsPerPSO>&"
+        },
+        {
+          "name": "Stable Shader Key Index Table",
+          "type": "TArray<FStableShaderKeyAndValue>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Saves stable pipeline cache file.\nThe cache file is saved together with the stable shader keys file that were used to map its hashes to the build-agnostic (\"stable\") shader identifier.\n@param OutputFilename file name for the binary file\n@param StableResults an array of PSOs together with all permutations allowed for it\n@param StableShaderKeyIndexTable the table of build-agnostic shader keys"
+    },
+    {
+      "id": "load-stable-pipeline-cache-file",
+      "name": "LoadStablePipelineCacheFile",
+      "category": "PipelineCacheUtilities",
+      "signature": "LoadStablePipelineCacheFile(Filename, Stable Map, Out PS Os, Out Target Platform, Out PS Os Rejected, Out PS Os Merged)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Stable Map",
+          "type": "TMultiMap<FStableShaderKeyAndValue,FSHAHash>&"
+        },
+        {
+          "name": "Out PS Os",
+          "type": "TSet<FPipelineCacheFileFormatPSO>&"
+        },
+        {
+          "name": "Out Target Platform",
+          "type": "Name&"
+        },
+        {
+          "name": "Out PS Os Rejected",
+          "type": "Int&"
+        },
+        {
+          "name": "Out PS Os Merged",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads stable pipeline cache file.\n@param Filename file to be loaded\n@param StableMap Mapping of the stable (build-agnostic) shader keys to the shader code hashes as of the current moment\n@param OutPSOs the PSOs loaded from that file\n@param OutTargetPlatform target platform for this file\n@param OutPSOsRejected number of PSOs that were rejected during loading (usually because the stable key it used is no longer present in StableMap)\n@param OutPSOsMerged number of PSOs that mapped to the same shader code hashes despite using different build-agnostic (\"stable\") shader keys."
+    },
+    {
+      "id": "save-chunk-info",
+      "name": "SaveChunkInfo",
+      "category": "PipelineCacheUtilities",
+      "signature": "SaveChunkInfo(Shader Library Name, In Chunk Id, In Packages In Chunk, Target Platform, Path To Save To, Out Chunk Filenames)",
+      "params": [
+        {
+          "name": "Shader Library Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Chunk Id",
+          "type": "Int"
+        },
+        {
+          "name": "In Packages In Chunk",
+          "type": "TSet<FName>&"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        },
+        {
+          "name": "Path To Save To",
+          "type": "String&"
+        },
+        {
+          "name": "Out Chunk Filenames",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Saves description of assets in the chunk.\nThis file is later used to split the cache into several files.\nNote that it is assumed that all possible shader format of the target platform share the same subdivision into chunks (which is the current behavior of other code, too).\n@param ShaderLibraryName shader library this info is associated with (usually either a project name or a DLC name)\n@param InChunkId chunk id\n@param InPackagesInChunk list of package names in chunk\n@param TargetPlatform target platform for which we're cooking\n@param PathToSaveTo directory where to save the info\n@param OutChunkFilenames files that we need to include in this chunk\n@return true if successfully saved"
+    },
+    {
+      "id": "find-all-chunk-infos",
+      "name": "FindAllChunkInfos",
+      "category": "PipelineCacheUtilities",
+      "signature": "FindAllChunkInfos(Shader Library Name, Target Platform Name, Path To Search In, Out Info Filenames)",
+      "params": [
+        {
+          "name": "Shader Library Name",
+          "type": "String&"
+        },
+        {
+          "name": "Target Platform Name",
+          "type": "String&"
+        },
+        {
+          "name": "Path To Search In",
+          "type": "String&"
+        },
+        {
+          "name": "Out Info Filenames",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finds all saved chunk info files for the given shaderlibrary and targetplatform.\nNote that it is assumed that all possible shader format of the target platform share the same subdivision into chunks (which is the current behavior of other code, too).\n@param ShaderLibraryName shader library that we chose to associate the info with (usually either a project name or a DLC name)\n@param TargetPlatformName target platform name (ITargetPlatform::PlatformName()) of our target. Game and Client could have different packages\n@param PathToSearchIn path where the search needs to be done (perhaps the same as where they were saved by SaveChunkInfo).\n@param OutInfoFilenames found filenames, which can be loaded by LoadChunkInfo function when passed as is"
+    },
+    {
+      "id": "load-chunk-info",
+      "name": "LoadChunkInfo",
+      "category": "PipelineCacheUtilities",
+      "signature": "LoadChunkInfo(Filename, In Shader Format, Out Chunk Id, Out Chunked Cache Filename, Out Packages)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "String&"
+        },
+        {
+          "name": "In Shader Format",
+          "type": "String&"
+        },
+        {
+          "name": "Out Chunk Id",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Chunked Cache Filename",
+          "type": "String&"
+        },
+        {
+          "name": "Out Packages",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads description of assets in the chunk\nNote that it is assumed that all possible shader format of the target platform share the same subdivision into chunks (which is the current behavior of other code, too).\n@param Filename file to be loaded\n@param InShaderFormat shader format we're interested in (info file may have several, even if its contents aren't dependent on that)\n@param OutChunkId chunk id this info is describing\n@param OutPSOs the PSOs loaded from that file\n@param OutChunkedCacheFilename filename of the PSO cache file that needs to be produced for this chunk.\n@param OutPackages packages in this chunk"
+    }
+  ]
+}

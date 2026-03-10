@@ -1,0 +1,416 @@
+{
+  "id": "compression",
+  "label": "Compression",
+  "includepath": "Misc/Compression.h",
+  "includes": [
+    "Map",
+    "UnrealString",
+    "CoreTypes",
+    "CriticalSection",
+    "CompressionFlags",
+    "Atomic",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "get-compressor-version",
+      "name": "GetCompressorVersion",
+      "category": "Compression",
+      "signature": "GetCompressorVersion(Format Name)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Chunk size serialization code splits data into. The loading value CANNOT be changed without resaving all\ncompressed data which is why they are split into two separate defines."
+    },
+    {
+      "id": "compress-memory-bound-7d8efe",
+      "name": "CompressMemoryBound",
+      "category": "Compression",
+      "signature": "CompressMemoryBound(In Format Name, Out Buffer Size Required, In Uncompressed Size Bytes, In Compression Data)",
+      "params": [
+        {
+          "name": "In Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Buffer Size Required",
+          "type": "Int64&"
+        },
+        {
+          "name": "In Uncompressed Size Bytes",
+          "type": "Int64"
+        },
+        {
+          "name": "In Compression Data",
+          "type": "uintptr_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Thread-safe abstract compression routine to query buffer requirements for a compression operation.\nThis is the minimize size to allocate the buffer for CompressMemory (encoding).\nUse GetMaximumCompressedSize at decode to know how large a compressed buffer may be.\nDespite the name, this has nothing to do with how much memory will be allocated during compression.\n@param\tFormatName\t\t\t\t\tName of the compression format\n@param\tUncompressedSize\t\t\tSize of uncompressed data in bytes\n@param\tCompressionData\t\t\t\tAdditional compression parameter - see comments a top of FCompression struct.\n@param\tOutBufferSizeRequired\t\tThe maximum possible bytes needed for compression of a data buffer of the given size.\n@return  false if the bounds couldn't be determined - e.g. the format is unknown or the size isn't supported by the format."
+    },
+    {
+      "id": "compress-memory-bound-7c11e4",
+      "name": "CompressMemoryBound",
+      "category": "Compression",
+      "signature": "CompressMemoryBound(Format Name, Uncompressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-maximum-compressed-size-dcb556",
+      "name": "GetMaximumCompressedSize",
+      "category": "Compression",
+      "signature": "GetMaximumCompressedSize(In Format Name, Out Max Compressed Size, In Uncompressed Size Bytes, In Compression Data)",
+      "params": [
+        {
+          "name": "In Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Max Compressed Size",
+          "type": "Int64&"
+        },
+        {
+          "name": "In Uncompressed Size Bytes",
+          "type": "Int64"
+        },
+        {
+          "name": "In Compression Data",
+          "type": "uintptr_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Thread-safe abstract compression routine to query maximum compressed size that could be made. This is used for making buffers that could hold\nany compressed buffer that started uncompressed with the given size. It's distinct from the buffer needed to compress! If you are calling CompressMemory then\nyou need to pass a buffer sized based on CompressMemoryBound!\nCompressMemoryBound is strictly greater equal GetMaximumCompressedSize.\n@param\tFormatName\t\t\t\t\tName of the compression format\n@param\tOutMaxCompressedSize\t\tThe maximum possible size of valid compressed data made by this format\n@param\tInUncompressedSizeBytes\t\tSize of uncompressed data in bytes\n@param\tCompressionData\t\t\t\tAdditional compression parameter - see comments a top of FCompression struct.\n@return success"
+    },
+    {
+      "id": "get-maximum-compressed-size-81ed44",
+      "name": "GetMaximumCompressedSize",
+      "category": "Compression",
+      "signature": "GetMaximumCompressedSize(Format Name, Uncompressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "compress-memory",
+      "name": "CompressMemory",
+      "category": "Compression",
+      "signature": "CompressMemory(Format Name, Compressed Buffer, Compressed Size, Uncompressed Buffer, Uncompressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Compressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Compressed Size",
+          "type": "Int64&"
+        },
+        {
+          "name": "Uncompressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "uintptr_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Thread-safe abstract compression routine. Compresses memory from uncompressed buffer and writes it to compressed\nbuffer. Updates CompressedSize with size of compressed data. Compression controlled by the passed in flags.\nCompressMemory is expected to return true and write valid data even if it expanded bytes.\nAlways check CompressedSize >= UncompressedSize and fall back to uncompressed, or use CompressMemoryIfWorthDecompressing\n@param\tFormatName\t\t\t\t\tName of the compression format\n@param\tCompressedBuffer\t\t\tBuffer compressed data is going to be written to\n@param\tCompressedSize\t[in/out]\tSize of CompressedBuffer, at exit will be size of compressed data\n@param\tUncompressedBuffer\t\t\tBuffer containing uncompressed data\n@param\tUncompressedSize\t\t\tSize of uncompressed data in bytes\n@param\tFlags\t\t\t\t\t\tFlags to control what method to use and optionally control memory vs speed\n@param\tCompressionData\t\t\t\tAdditional compression parameter - see comments a top of FCompression struct.\n@return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons"
+    },
+    {
+      "id": "compress-memory-if-worth-decompressing-9b1b41",
+      "name": "CompressMemoryIfWorthDecompressing",
+      "category": "Compression",
+      "signature": "CompressMemoryIfWorthDecompressing(Format Name, Out Was Compressed, Min Bytes Saved, Min Percent Saved, Compressed Buffer, Compressed Size, Uncompressed Buffer, Uncompressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Was Compressed",
+          "type": "Bool&"
+        },
+        {
+          "name": "Min Bytes Saved",
+          "type": "Int64"
+        },
+        {
+          "name": "Min Percent Saved",
+          "type": "Int"
+        },
+        {
+          "name": "Compressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Compressed Size",
+          "type": "Int64&"
+        },
+        {
+          "name": "Uncompressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "uintptr_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Same as CompressMemory but evaluates if the compression gain is worth the runtime decode time.\n@param\tFormatName\t\t\t\t\tName of the compression format\n@param\tbOutWasCompressed [out]\t\tWhether the compression was worth it. The data is still compressed.\n@param\tMinBytesSaved\t\t\t\tMinimum amount of bytes which should be saved when performing compression, otherwise false is returned\n@param\tMinPercentSaved\t\t\t\tMinimum percentage of the buffer which should be saved when performing compression, otherwise false is returned\n@param\tCompressedBuffer\t\t\tBuffer compressed data is going to be written to\n@param\tCompressedSize\t[in/out]\tSize of CompressedBuffer, at exit will be size of compressed data\n@param\tUncompressedBuffer\t\t\tBuffer containing uncompressed data\n@param\tUncompressedSize\t\t\tSize of uncompressed data in bytes\n@param\tFlags\t\t\t\t\t\tFlags to control what method to use and optionally control memory vs speed\n@param\tCompressionData\t\t\t\tAdditional compression parameter - see comments a top of FCompression struct.\n@return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons"
+    },
+    {
+      "id": "compress-memory-if-worth-decompressing-1f0da0",
+      "name": "CompressMemoryIfWorthDecompressing",
+      "category": "Compression",
+      "signature": "CompressMemoryIfWorthDecompressing(Format Name, Min Bytes Saved, Min Percent Saved, Compressed Buffer, Compressed Size, Uncompressed Buffer, Uncompressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Min Bytes Saved",
+          "type": "Int"
+        },
+        {
+          "name": "Min Percent Saved",
+          "type": "Int"
+        },
+        {
+          "name": "Compressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Compressed Size",
+          "type": "Int&"
+        },
+        {
+          "name": "Uncompressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "uncompress-memory",
+      "name": "UncompressMemory",
+      "category": "Compression",
+      "signature": "UncompressMemory(Format Name, Uncompressed Buffer, Uncompressed Size, Compressed Buffer, Compressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Uncompressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Compressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Compressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "uintptr_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Thread-safe abstract decompression routine. Uncompresses memory from compressed buffer and writes it to uncompressed\nbuffer. UncompressedSize is expected to be the exact size of the data after decompression.\n@param\tFormatName\t\t\t\t\tName of the compression format\n@param\tUncompressedBuffer\t\t\tBuffer containing uncompressed data\n@param\tUncompressedSize\t\t\tSize of uncompressed data in bytes\n@param\tCompressedBuffer\t\t\tBuffer compressed data is going to be read from\n@param\tCompressedSize\t\t\t\tSize of CompressedBuffer data in bytes\n@param\tFlags\t\t\t\t\t\tFlags to control what method to use to decompress\n@param\tCompressionData\t\t\t\tAdditional decompression parameter (specifies BitWindow value for ZLIB compression format)\n@return true if compression succeeds, false if it fails because CompressedBuffer was too small or other reasons"
+    },
+    {
+      "id": "uncompress-memory-stream",
+      "name": "UncompressMemoryStream",
+      "category": "Compression",
+      "signature": "UncompressMemoryStream(Format Name, Uncompressed Buffer, Uncompressed Size, Stream, Stream Offset, Compressed Size, Flags, Compression Data)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        },
+        {
+          "name": "Uncompressed Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Uncompressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Stream",
+          "type": "IMemoryReadStream*"
+        },
+        {
+          "name": "Stream Offset",
+          "type": "Int64"
+        },
+        {
+          "name": "Compressed Size",
+          "type": "Int64"
+        },
+        {
+          "name": "Flags",
+          "type": "ECompressionFlags",
+          "default": "COMPRESS_NoFlags"
+        },
+        {
+          "name": "Compression Data",
+          "type": "uintptr_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Wraps UncompressMemory to provide access with a IMemoryReadStream interface, attempting to avoid copying in to a contiguous buffer doe decompression\nif the format supports it. **If not, a CompressedSize temp buffer will be allocated.**"
+    },
+    {
+      "id": "get-compressor-ddc-suffix",
+      "name": "GetCompressorDDCSuffix",
+      "category": "Compression",
+      "signature": "GetCompressorDDCSuffix(Format Name)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a string which can be used to identify if a format has become out of date\n@param\tFormatName\t\t\t\t\tname of the format to retrieve the DDC suffix for\n@return\tunique DDC key string which will be different when the format is changed / updated"
+    },
+    {
+      "id": "is-format-valid",
+      "name": "IsFormatValid",
+      "category": "Compression",
+      "signature": "IsFormatValid(Format Name)",
+      "params": [
+        {
+          "name": "Format Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks to see if a format will be usable, so that a fallback can be used\n@param FormatName The name of the format to test"
+    },
+    {
+      "id": "verify-compression-flags-valid",
+      "name": "VerifyCompressionFlagsValid",
+      "category": "Compression",
+      "signature": "VerifyCompressionFlagsValid(In Compression Flags)",
+      "params": [
+        {
+          "name": "In Compression Flags",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Verifies if the passed in value represents valid compression flags\n@param InCompressionFlags Value to test"
+    },
+    {
+      "id": "get-compression-format-from-deprecated-flags",
+      "name": "GetCompressionFormatFromDeprecatedFlags",
+      "category": "Compression",
+      "signature": "GetCompressionFormatFromDeprecatedFlags(Deprecated Flags)",
+      "params": [
+        {
+          "name": "Deprecated Flags",
+          "type": "ECompressionFlags"
+        }
+      ],
+      "returnType": "Name"
+    }
+  ]
+}

@@ -1,0 +1,579 @@
+{
+  "id": "mesh-normals",
+  "label": "MeshNormals",
+  "includepath": "DynamicMesh/MeshNormals.h",
+  "includes": [
+    "Array",
+    "DynamicMesh3",
+    "DynamicMeshAttributeSet",
+    "UnrealMathSSE",
+    "Vector"
+  ],
+  "functions": [
+    {
+      "id": "set-count",
+      "name": "SetCount",
+      "category": "MeshNormals",
+      "signature": "SetCount(Target, Count, Clear To Zero)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        },
+        {
+          "name": "Count",
+          "type": "Int"
+        },
+        {
+          "name": "Clear To Zero",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the size of the Normals array to Count, and optionally clear all values to (0,0,0)"
+    },
+    {
+      "id": "set-degenerate-triangle-normals-to-neighbor-normal",
+      "name": "SetDegenerateTriangleNormalsToNeighborNormal",
+      "category": "MeshNormals",
+      "signature": "SetDegenerateTriangleNormalsToNeighborNormal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assumes that ComputeTriangleNormals() has already been run.\nLooks through the normals for any that are zero, and tries to set them to the normal of\nsome neighboring triangle, preferring the triangle on its longer side if possible. This is\nuseful for finding connected components based on normals, as it prevents degenerate triangles\nwith 0 normals from connecting otherwise disconnected components.\nThis won't help if a whole mesh componenent is entirely made of such degenerate triangles\n(which is usually ok)."
+    },
+    {
+      "id": "copy-to-vertex-normals",
+      "name": "CopyToVertexNormals",
+      "category": "MeshNormals",
+      "signature": "CopyToVertexNormals(Target, Set Mesh, Invert)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        },
+        {
+          "name": "Set Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Invert",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the current set of normals to the vertex normals of SetMesh\n@warning assumes that the computed normals are vertex normals\n@param bInvert if true, normals are flipped"
+    },
+    {
+      "id": "copy-to-overlay",
+      "name": "CopyToOverlay",
+      "category": "MeshNormals",
+      "signature": "CopyToOverlay(Target, Normal Overlay, Invert)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Invert",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the current set of normals to the NormalOverlay attribute layer\n@warning assumes that the computed normals are attribute normals\n@param bInvert if true, normals are flipped"
+    },
+    {
+      "id": "quick-compute-vertex-normals",
+      "name": "QuickComputeVertexNormals",
+      "category": "MeshNormals",
+      "signature": "QuickComputeVertexNormals(Mesh, Invert)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Invert",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute per-vertex normals for the given Mesh\n@param bInvert if true, normals are flipped"
+    },
+    {
+      "id": "smooth-vertex-normals",
+      "name": "SmoothVertexNormals",
+      "category": "MeshNormals",
+      "signature": "SmoothVertexNormals(Mesh, Smoothing Rounds, Smoothing Alpha)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Smoothing Rounds",
+          "type": "Int"
+        },
+        {
+          "name": "Smoothing Alpha",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply rounds of explicit uniform-weighted normal smoothing to the VertexNormals attribute of the given Mesh."
+    },
+    {
+      "id": "quick-compute-vertex-normals-for-triangles",
+      "name": "QuickComputeVertexNormalsForTriangles",
+      "category": "MeshNormals",
+      "signature": "QuickComputeVertexNormalsForTriangles(Mesh, Triangles, Weight By Area, Weight By Angle, Invert)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Invert",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute per-vertex normals for the vertices of a set of triangles of a Mesh\n@param bWeightByArea weight neighbor triangles by area\n@param bWeightByAngle weight neighbor triangles by angle\n@param bInvert if true, normals are flipped"
+    },
+    {
+      "id": "compute-vertex-normal-167666",
+      "name": "ComputeVertexNormal",
+      "category": "MeshNormals",
+      "signature": "ComputeVertexNormal(Mesh, Vert Idx, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Vert Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Compute normal at mesh vertex by weighted sum of one-ring triangle normals. Can optionally weight by area, angle, or both (averaged)\n@param bWeightByArea weight neighbor triangles by area\n@param bWeightByAngle weight neighbor triangles by angle\n@return the vertex normal at vertex VertIdx of Mesh."
+    },
+    {
+      "id": "compute-vertex-normal-869c80",
+      "name": "ComputeVertexNormal",
+      "category": "MeshNormals",
+      "signature": "ComputeVertexNormal(Mesh, Vert Idx, Triangle Filter Func, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Vert Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Triangle Filter Func",
+          "type": "TFunctionRef<bool ( int32 )>"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Compute normal at mesh vertex by weighted sum of subset of one-ring triangle normals. Can optionally weight by area, angle, or both (averaged)\n@param TriangleFilterFunc Only one-ring triangles for which this function returns true will be included\n@param bWeightByArea weight neighbor triangles by area\n@param bWeightByAngle weight neighbor triangles by angle\n@return the vertex normal at vertex VertIdx of Mesh."
+    },
+    {
+      "id": "compute-overlay-normal",
+      "name": "ComputeOverlayNormal",
+      "category": "MeshNormals",
+      "signature": "ComputeOverlayNormal(Mesh, Normal Overlay, Elem Idx, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Elem Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "@return the computed overlay normal at an element of the overlay (ie based on normals of triangles connected to this element)\n@param bWeightByArea weight neighbor triangles by area\n@param bWeightByAngle weight neighbor triangles by angle"
+    },
+    {
+      "id": "initialize-overlay-to-per-vertex-normals",
+      "name": "InitializeOverlayToPerVertexNormals",
+      "category": "MeshNormals",
+      "signature": "InitializeOverlayToPerVertexNormals(Normal Overlay, Use Mesh Vertex Normals If Available)",
+      "params": [
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Use Mesh Vertex Normals If Available",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the given NormalOverlay with per-vertex normals, ie single overlay element for each mesh vertex.\n@param bUseMeshVertexNormalsIfAvailable if true and the parent mesh has per-vertex normals, use them instead of calculating new ones"
+    },
+    {
+      "id": "initialize-overlay-to-per-triangle-normals",
+      "name": "InitializeOverlayToPerTriangleNormals",
+      "category": "MeshNormals",
+      "signature": "InitializeOverlayToPerTriangleNormals(Normal Overlay)",
+      "params": [
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the given NormalOverlay with per-face normals, ie separate overlay element for each vertex of each triangle."
+    },
+    {
+      "id": "initialize-overlay-topology-from-opening-angle",
+      "name": "InitializeOverlayTopologyFromOpeningAngle",
+      "category": "MeshNormals",
+      "signature": "InitializeOverlayTopologyFromOpeningAngle(Mesh, Normal Overlay, Angle Threshold Deg)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Angle Threshold Deg",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize-overlay-topology-from-face-groups",
+      "name": "InitializeOverlayTopologyFromFaceGroups",
+      "category": "MeshNormals",
+      "signature": "InitializeOverlayTopologyFromFaceGroups(Mesh, Normal Overlay)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize-mesh-to-per-triangle-normals",
+      "name": "InitializeMeshToPerTriangleNormals",
+      "category": "MeshNormals",
+      "signature": "InitializeMeshToPerTriangleNormals(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the given Mesh with per-face normals, ie separate overlay element for each vertex of each triangle."
+    },
+    {
+      "id": "initialize-overlay-region-to-per-vertex-normals",
+      "name": "InitializeOverlayRegionToPerVertexNormals",
+      "category": "MeshNormals",
+      "signature": "InitializeOverlayRegionToPerVertexNormals(Normal Overlay, Triangles)",
+      "params": [
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the given triangles of NormalOverlay with per-vertex normals, ie single overlay element for each mesh vertex.\nOnly the triangles included in the region are considered when calculating per-vertex normals."
+    },
+    {
+      "id": "quick-recompute-overlay-normals",
+      "name": "QuickRecomputeOverlayNormals",
+      "category": "MeshNormals",
+      "signature": "QuickRecomputeOverlayNormals(Mesh, Invert, Weight By Area, Weight By Angle, Parallel Compute)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Invert",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Parallel Compute",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute overlay normals for the given mesh\n@param bInvert if true, normals are flipped"
+    },
+    {
+      "id": "recompute-overlay-tri-normals",
+      "name": "RecomputeOverlayTriNormals",
+      "category": "MeshNormals",
+      "signature": "RecomputeOverlayTriNormals(Mesh, Triangles, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute overlay normals for the given mesh, for the given set of triangles"
+    },
+    {
+      "id": "recompute-overlay-element-normals",
+      "name": "RecomputeOverlayElementNormals",
+      "category": "MeshNormals",
+      "signature": "RecomputeOverlayElementNormals(Mesh, Element I Ds, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Element I Ds",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute overlay normals for the given mesh, for the given set of element IDs"
+    },
+    {
+      "id": "get-vertex-weights-on-triangle",
+      "name": "GetVertexWeightsOnTriangle",
+      "category": "MeshNormals",
+      "signature": "GetVertexWeightsOnTriangle(Mesh, Tri ID, Tri Area, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Tri ID",
+          "type": "Int"
+        },
+        {
+          "name": "Tri Area",
+          "type": "Double"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Retrieve the area and/or angle weights for each vertex of a triangle\n@param Mesh the mesh to query\n@param TriID the triangle index of the mesh to query\n@param TriArea the area of the triangle\n@param bWeightByArea if true, include weighting by the area of the triangle\n@param bWeightByAngle if true, include weighting by the interior angles of the triangle"
+    },
+    {
+      "id": "compute-face-avg-area-weighted",
+      "name": "Compute_FaceAvg_AreaWeighted",
+      "category": "MeshNormals",
+      "signature": "Compute_FaceAvg_AreaWeighted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Compute per-vertex normals using area-weighted averaging of one-ring triangle normals"
+    },
+    {
+      "id": "compute-face-avg",
+      "name": "Compute_FaceAvg",
+      "category": "MeshNormals",
+      "signature": "Compute_FaceAvg(Target, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute per-vertex normals using a custom combination of area-weighted and angle-weighted averaging of one-ring triangle normals"
+    },
+    {
+      "id": "compute-triangle",
+      "name": "Compute_Triangle",
+      "category": "MeshNormals",
+      "signature": "Compute_Triangle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute per-triangle normals"
+    },
+    {
+      "id": "compute-overlay-face-avg-area-weighted",
+      "name": "Compute_Overlay_FaceAvg_AreaWeighted",
+      "category": "MeshNormals",
+      "signature": "Compute_Overlay_FaceAvg_AreaWeighted(Target, Normal Overlay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recompute the element Normals of the given attribute overlay using area-weighted averaging of one-ring triangle normals"
+    },
+    {
+      "id": "compute-overlay-face-avg",
+      "name": "Compute_Overlay_FaceAvg",
+      "category": "MeshNormals",
+      "signature": "Compute_Overlay_FaceAvg(Target, Normal Overlay, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshNormals*"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recompute the element Normals of the given attribute overlay using a custom combination of area-weighted and angle-weighted averaging of one-ring triangle normals"
+    }
+  ]
+}

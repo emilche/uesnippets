@@ -1,0 +1,184 @@
+{
+  "id": "net-analytics",
+  "label": "NetAnalytics",
+  "includepath": "Net/Core/Analytics/NetAnalytics.h",
+  "includes": [
+    "Map",
+    "UnrealString",
+    "CoreMinimal",
+    "Platform",
+    "Atomic",
+    "SharedPointer",
+    "UnrealTypeTraits",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-net-analytics-data",
+      "name": "FNetAnalyticsData",
+      "category": "NetAnalytics",
+      "signature": "FNetAnalyticsData()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Counter used to detect when a new FNetAnalyticsAggregator (i.e. new NetDriver) has been created - to trigger cleanup of TLS data"
+    },
+    {
+      "id": "internal-send-analytics",
+      "name": "InternalSendAnalytics",
+      "category": "NetAnalytics",
+      "signature": "InternalSendAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsData*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Called by the Net Analytics Aggregator, when ready to send analytics - some implementations don't send immediately"
+    },
+    {
+      "id": "f-threaded-net-analytics-data",
+      "name": "FThreadedNetAnalyticsData",
+      "category": "NetAnalytics",
+      "signature": "FThreadedNetAnalyticsData()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Special subclass of FNetAnalyticsData that is designed for thread-safety and infrequent access (e.g. at NetConnection Close only).\nThis is to future-proof for netcode multithreading, where PacketHandler level code is expected to run outside of the Game Thread.\nThe last thread to release this analytics data, triggers SendAnalytics - thread safety is partially provided by shared pointer atomics."
+    },
+    {
+      "id": "notify-final-release",
+      "name": "NotifyFinalRelease",
+      "category": "NetAnalytics",
+      "signature": "NotifyFinalRelease(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FThreadedNetAnalyticsData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called just before the last shared reference to this data is released - used to trigger analytics send in threadsafe version"
+    },
+    {
+      "id": "f-net-analytics-aggregator",
+      "name": "FNetAnalyticsAggregator",
+      "category": "NetAnalytics",
+      "signature": "FNetAnalyticsAggregator(In Provider, In Net Driver Name)",
+      "params": [
+        {
+          "name": "In Provider",
+          "type": "TSharedPtr<IAnalyticsProvider>"
+        },
+        {
+          "name": "In Net Driver Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Central object (usually within NetDriver) which handles registration/retrieval/type-checking of net analytics data holders."
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "NetAnalytics",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsAggregator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the net analytics aggregator"
+    },
+    {
+      "id": "init-config",
+      "name": "InitConfig",
+      "category": "NetAnalytics",
+      "signature": "InitConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsAggregator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the net analytics aggregator config - must support hotfixing"
+    },
+    {
+      "id": "append-game-instance-attributes",
+      "name": "AppendGameInstanceAttributes",
+      "category": "NetAnalytics",
+      "signature": "AppendGameInstanceAttributes(Target, Out Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsAggregator*"
+        },
+        {
+          "name": "Out Attributes",
+          "type": "TArray<FAnalyticsEventAttribute>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds game and engine specific attributes to the passed in array."
+    },
+    {
+      "id": "send-analytics",
+      "name": "SendAnalytics",
+      "category": "NetAnalytics",
+      "signature": "SendAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsAggregator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dispatches the aggregated analytics data - no further data should be added"
+    },
+    {
+      "id": "register-analytics-data-internal",
+      "name": "RegisterAnalyticsData_Internal",
+      "category": "NetAnalytics",
+      "signature": "RegisterAnalyticsData_Internal(Target, In Data, In Data Name, In Type Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsAggregator*"
+        },
+        {
+          "name": "In Data",
+          "type": "TNetAnalyticsDataRef<>"
+        },
+        {
+          "name": "In Data Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Type Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "TNetAnalyticsDataPtr<>",
+      "docs": "Use REGISTER_NET_ANALYTICS instead. Internal function, which registers a net analytics data holder, with an associated key name,\nand does type checking to ensure there have been no mixups with the data holder type.\nNOTE: May return nullptr! Analytics can be selectively enabled/disabled, based on the specified analytics data name.\n@param InData\t\tThe analytics data shared reference to be registered\n@param InDataName\tThe name given for referencing the analytics data\n@param InTypeName\tCompile-time derived type name for the analytics data - for type checking\n@return\t\t\t\tReturns the newly added analytics data shared reference"
+    },
+    {
+      "id": "set-analytics-appender",
+      "name": "SetAnalyticsAppender",
+      "category": "NetAnalytics",
+      "signature": "SetAnalyticsAppender(Target, Appender Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetAnalyticsAggregator*"
+        },
+        {
+          "name": "Appender Function",
+          "type": "FAnalyticsAppender"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

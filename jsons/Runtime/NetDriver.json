@@ -1,0 +1,2798 @@
+{
+  "id": "net-driver",
+  "label": "NetDriver",
+  "includepath": "Engine/NetDriver.h",
+  "includes": [
+    "CoreMinimal",
+    "EngineBaseTypes",
+    "EngineTypes",
+    "NetworkMetricsDatabase",
+    "IConsoleManager",
+    "RandomStream",
+    "ObjectMacros",
+    "UObjectGlobals",
+    "Object",
+    "ObjectKey",
+    "NetworkGuid",
+    "CoreNet",
+    "Channel",
+    "ConnectionHandle",
+    "DDoSDetection",
+    "IPAddress",
+    "NetAnalyticsTypes",
+    "NetConnectionIdHandler",
+    "LowLevelMemTracker",
+    "PimplPtr",
+    "NetDriver.generated"
+  ],
+  "functions": [
+    {
+      "id": "count-replicated-sub-objects-of-actor",
+      "name": "CountReplicatedSubObjectsOfActor",
+      "category": "NetDriver",
+      "signature": "CountReplicatedSubObjectsOfActor(Target, Replicated Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Replicated Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Utility function that counts the number of replicated subobjects owned by a given actor. Be aware that this function is not cheap because it needs to iterate and count all replicated components and their subobjects too."
+    },
+    {
+      "id": "load-config",
+      "name": "LoadConfig",
+      "category": "NetDriver",
+      "signature": "LoadConfig(Target, Optional Qualifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "Optional Qualifier",
+          "type": "TCHAR*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "reads in settings from the .ini file\n@note: overwrites all previous settings"
+    },
+    {
+      "id": "load-emulation-profile",
+      "name": "LoadEmulationProfile",
+      "category": "NetDriver",
+      "signature": "LoadEmulationProfile(Target, Profile Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "Profile Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load a preconfigured emulation profile from the .ini\nReturns true if the given profile existed"
+    },
+    {
+      "id": "apply-settings",
+      "name": "ApplySettings",
+      "category": "NetDriver",
+      "signature": "ApplySettings(Target, New Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "New Settings",
+          "type": "FPacketSimulationSettings&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force new emulation settings and ignore config or cmdline values"
+    },
+    {
+      "id": "validate-settings",
+      "name": "ValidateSettings",
+      "category": "NetDriver",
+      "signature": "ValidateSettings(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ensure that settings have proper values"
+    },
+    {
+      "id": "reset-settings",
+      "name": "ResetSettings",
+      "category": "NetDriver",
+      "signature": "ResetSettings(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "parse-settings",
+      "name": "ParseSettings",
+      "category": "NetDriver",
+      "signature": "ParseSettings(Target, Stream, Optional Qualifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "Stream",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Optional Qualifier",
+          "type": "TCHAR*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the settings from a string: command line or an exec\n@param Stream the string to read the settings from\n@Param OptionalQualifier: optional string to prepend to Pkt* settings. E.g, \"GameNetDriverPktLoss=50\""
+    },
+    {
+      "id": "parse-helper",
+      "name": "ParseHelper",
+      "category": "NetDriver",
+      "signature": "ParseHelper(Target, Cmd, Name, Value, Optional Qualifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Value",
+          "type": "Int&"
+        },
+        {
+          "name": "Optional Qualifier",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "config-helper-int",
+      "name": "ConfigHelperInt",
+      "category": "NetDriver",
+      "signature": "ConfigHelperInt(Target, Name, Value, Optional Qualifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Value",
+          "type": "Int&"
+        },
+        {
+          "name": "Optional Qualifier",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "config-helper-bool",
+      "name": "ConfigHelperBool",
+      "category": "NetDriver",
+      "signature": "ConfigHelperBool(Target, Name, Value, Optional Qualifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPacketSimulationSettings*"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool&"
+        },
+        {
+          "name": "Optional Qualifier",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-actor-priority-7ccf9d",
+      "name": "FActorPriority",
+      "category": "NetDriver",
+      "signature": "FActorPriority(In Connection, In Channel, In Actor Info, Viewers, Low Bandwidth)",
+      "params": [
+        {
+          "name": "In Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "In Channel",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "In Actor Info",
+          "type": "FNetworkObjectInfo*"
+        },
+        {
+          "name": "Viewers",
+          "type": "TArray<FNetViewer>&"
+        },
+        {
+          "name": "Low Bandwidth",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-actor-priority-b3019a",
+      "name": "FActorPriority",
+      "category": "NetDriver",
+      "signature": "FActorPriority(In Connection, Destruct Info, Viewers)",
+      "params": [
+        {
+          "name": "In Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Destruct Info",
+          "type": "FActorDestructionInfo*"
+        },
+        {
+          "name": "Viewers",
+          "type": "TArray<FNetViewer>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "internal-process-remote-function",
+      "name": "InternalProcessRemoteFunction",
+      "category": "NetDriver",
+      "signature": "InternalProcessRemoteFunction(Target, Actor, Sub Object, Connection, Function, Parms, Out Parms, Stack, Is Server)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parms",
+          "type": "void*"
+        },
+        {
+          "name": "Out Parms",
+          "type": "FOutParmRec*"
+        },
+        {
+          "name": "Stack",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Is Server",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "u-net-driver-68351c",
+      "name": "UNetDriver",
+      "category": "NetDriver",
+      "signature": "UNetDriver()",
+      "params": [],
+      "returnType": "public : ~",
+      "docs": "Destructor"
+    },
+    {
+      "id": "set-net-server-max-tick-rate",
+      "name": "SetNetServerMaxTickRate",
+      "category": "NetDriver",
+      "signature": "SetNetServerMaxTickRate(Target, In Server Max Tick Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Server Max Tick Rate",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Override the configured server tick rate. Value is in ticks per second."
+    },
+    {
+      "id": "create-initial-client-channels",
+      "name": "CreateInitialClientChannels",
+      "category": "NetDriver",
+      "signature": "CreateInitialClientChannels(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a channel of each type that is set as bInitialClient."
+    },
+    {
+      "id": "create-initial-server-channels",
+      "name": "CreateInitialServerChannels",
+      "category": "NetDriver",
+      "signature": "CreateInitialServerChannels(Target, Client Connection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Client Connection",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a channel of each type that is set as bIniitalServer for the given connection."
+    },
+    {
+      "id": "post-creation",
+      "name": "PostCreation",
+      "category": "NetDriver",
+      "signature": "PostCreation(Target, Initialize With Iris)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Initialize With Iris",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Callback after the engine created the NetDriver and set our name for the first time"
+    },
+    {
+      "id": "reinit-base",
+      "name": "ReinitBase",
+      "category": "NetDriver",
+      "signature": "ReinitBase(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset some NetDriver settings after destroying and recreating a replication system or replication driver"
+    },
+    {
+      "id": "request-net-driver-destruction",
+      "name": "RequestNetDriverDestruction",
+      "category": "NetDriver",
+      "signature": "RequestNetDriverDestruction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Trigger the destruction of this NetDriver. If called while the NetDriver is ticking it will queue the destruction request and execute it after all the NetDriver work is finished."
+    },
+    {
+      "id": "set-pending-destruction",
+      "name": "SetPendingDestruction",
+      "category": "NetDriver",
+      "signature": "SetPendingDestruction(Target, Destroy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Destroy",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-function-rep-layout",
+      "name": "GetFunctionRepLayout",
+      "category": "NetDriver",
+      "signature": "GetFunctionRepLayout(Target, Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        }
+      ],
+      "returnType": "TSharedPtr<FRepLayout>",
+      "docs": "Creates if necessary, and returns a FRepLayout that maps to the passed in UFunction"
+    },
+    {
+      "id": "get-struct-rep-layout",
+      "name": "GetStructRepLayout",
+      "category": "NetDriver",
+      "signature": "GetStructRepLayout(Target, Struct)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Struct",
+          "type": "UStruct*"
+        }
+      ],
+      "returnType": "TSharedPtr<FRepLayout>",
+      "docs": "Creates if necessary, and returns a FRepLayout that maps to the passed in UStruct"
+    },
+    {
+      "id": "set-analytics-provider",
+      "name": "SetAnalyticsProvider",
+      "category": "NetDriver",
+      "signature": "SetAnalyticsProvider(Target, In Provider)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Provider",
+          "type": "TSharedPtr<IAnalyticsProvider>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the analytics provider"
+    },
+    {
+      "id": "set-packet-simulation-settings",
+      "name": "SetPacketSimulationSettings",
+      "category": "NetDriver",
+      "signature": "SetPacketSimulationSettings(Target, New Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "New Settings",
+          "type": "FPacketSimulationSettings&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Modify the current emulation settings"
+    },
+    {
+      "id": "on-packet-simulation-settings-changed",
+      "name": "OnPacketSimulationSettingsChanged",
+      "category": "NetDriver",
+      "signature": "OnPacketSimulationSettingsChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "u-net-driver-71aba0",
+      "name": "UNetDriver",
+      "category": "NetDriver",
+      "signature": "UNetDriver(Object Initializer)",
+      "params": [
+        {
+          "name": "Object Initializer",
+          "type": "FObjectInitializer&",
+          "default": "FObjectInitializer::Get()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "u-net-driver-7735b6",
+      "name": "UNetDriver",
+      "category": "NetDriver",
+      "signature": "UNetDriver(Helper)",
+      "params": [
+        {
+          "name": "Helper",
+          "type": "FVTableHelper&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-init-properties",
+      "name": "PostInitProperties",
+      "category": "NetDriver",
+      "signature": "PostInitProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-reload-config",
+      "name": "PostReloadConfig",
+      "category": "NetDriver",
+      "signature": "PostReloadConfig(Target, Property To Load)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Property To Load",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "finish-destroy",
+      "name": "FinishDestroy",
+      "category": "NetDriver",
+      "signature": "FinishDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "NetDriver",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "NetDriver",
+      "signature": "AddReferencedObjects(In This, Collector)",
+      "params": [
+        {
+          "name": "In This",
+          "type": "UObject*"
+        },
+        {
+          "name": "Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "exec-dev",
+      "name": "Exec_Dev",
+      "category": "NetDriver",
+      "signature": "Exec_Dev(Target, In World, Cmd, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&",
+          "default": "*GLog"
+        }
+      ],
+      "returnType": "protected : bool",
+      "docs": "Handle exec commands\n@param InWorld\tthe world context\n@param Cmd\t\tthe exec command being executed\n@param Ar\t\tthe archive to log results to\n@return true if the handler consumed the input, false to continue searching handlers"
+    },
+    {
+      "id": "enable-execute-rpc-functions",
+      "name": "EnableExecuteRPCFunctions",
+      "category": "NetDriver",
+      "signature": "EnableExecuteRPCFunctions(Target, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "(Generic Replicaton Only) Enable/disable the execution of received RPC functions."
+    },
+    {
+      "id": "is-execute-rpc-functions-enabled",
+      "name": "IsExecuteRPCFunctionsEnabled",
+      "category": "NetDriver",
+      "signature": "IsExecuteRPCFunctionsEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "enable-pre-replication",
+      "name": "EnablePreReplication",
+      "category": "NetDriver",
+      "signature": "EnablePreReplication(Target, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "(Generic Replication Only) Enable/disable calls to AActor::PreReplication()."
+    },
+    {
+      "id": "is-pre-replication-enabled",
+      "name": "IsPreReplicationEnabled",
+      "category": "NetDriver",
+      "signature": "IsPreReplicationEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "replicate-autonomous-as-simulated",
+      "name": "ReplicateAutonomousAsSimulated",
+      "category": "NetDriver",
+      "signature": "ReplicateAutonomousAsSimulated(Target, Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "(Generic Replicaton Only) Treat actors with ROLE_AutonomousProxy as ROLE_SimulatedProxy when replicating state (applies to all client connections)."
+    },
+    {
+      "id": "is-replicating-autonomous-as-simulated",
+      "name": "IsReplicatingAutonomousAsSimulated",
+      "category": "NetDriver",
+      "signature": "IsReplicatingAutonomousAsSimulated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-net-mode",
+      "name": "GetNetMode",
+      "category": "NetDriver",
+      "signature": "GetNetMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "public : ENetMode"
+    },
+    {
+      "id": "is-available",
+      "name": "IsAvailable",
+      "category": "NetDriver",
+      "signature": "IsAvailable(Target, Error)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Error",
+          "type": ") PURE_VIRTUAL ( UNetDriver::IsAvailable,return false ; ) virtual bool InitBase ( bool bInitAsClient,FNetworkNotify* InNotify,FURL& URL,bool bReuseAddressAndPort,FString&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this net driver is valid for the current configuration.\nSafe to call on a CDO if necessary\n@return true if available, false otherwise"
+    },
+    {
+      "id": "init-connect",
+      "name": "InitConnect",
+      "category": "NetDriver",
+      "signature": "InitConnect(Target, In Notify, Connect URL, True)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Notify",
+          "type": "FNetworkNotify*"
+        },
+        {
+          "name": "Connect URL",
+          "type": "FURL&"
+        },
+        {
+          "name": "True",
+          "type": "FString& Error ) PURE_VIRTUAL ( UNetDriver::InitConnect,return"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initialize the net driver in client mode\n@param InNotify notification object to associate with the net driver\n@param ConnectURL remote ip:port of host to connect to\n@param Error resulting error string from connection attempt\n@return true if successful, false otherwise (check Error parameter)"
+    },
+    {
+      "id": "init-listen",
+      "name": "InitListen",
+      "category": "NetDriver",
+      "signature": "InitListen(Target, In Notify, Listen URL, Reuse Address And Port, True)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Notify",
+          "type": "FNetworkNotify*"
+        },
+        {
+          "name": "Listen URL",
+          "type": "FURL&"
+        },
+        {
+          "name": "Reuse Address And Port",
+          "type": "Bool"
+        },
+        {
+          "name": "True",
+          "type": "FString& Error ) PURE_VIRTUAL ( UNetDriver::InitListen,return"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initialize the network driver in server mode (listener)\n@param InNotify notification object to associate with the net driver\n@param ListenURL the connection URL for this listener\n@param bReuseAddressAndPort whether to allow multiple sockets to be bound to the same address/port\n@param Error out param with any error messages generated\n@return true if successful, false otherwise (check Error parameter)"
+    },
+    {
+      "id": "init-destroyed-startup-actors",
+      "name": "InitDestroyedStartupActors",
+      "category": "NetDriver",
+      "signature": "InitDestroyedStartupActors(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the list of destroyed net startup actors from the current World"
+    },
+    {
+      "id": "init-connectionless-handler",
+      "name": "InitConnectionlessHandler",
+      "category": "NetDriver",
+      "signature": "InitConnectionlessHandler(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize a PacketHandler for serverside net drivers, for handling connectionless packets\nNOTE: Only triggered by net driver subclasses that support it - from within InitListen."
+    },
+    {
+      "id": "flush-handler",
+      "name": "FlushHandler",
+      "category": "NetDriver",
+      "signature": "FlushHandler(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flushes all packets queued by the connectionless PacketHandler\nNOTE: This should be called shortly after all calls to PacketHandler::IncomingConnectionless, to minimize packet buffer buildup."
+    },
+    {
+      "id": "init-connection-class",
+      "name": "InitConnectionClass",
+      "category": "NetDriver",
+      "signature": "InitConnectionClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initializes the net connection class to use for new connections"
+    },
+    {
+      "id": "init-replication-driver-class",
+      "name": "InitReplicationDriverClass",
+      "category": "NetDriver",
+      "signature": "InitReplicationDriverClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initialized the replication driver class to use for this driver"
+    },
+    {
+      "id": "init-replication-bridge-class",
+      "name": "InitReplicationBridgeClass",
+      "category": "NetDriver",
+      "signature": "InitReplicationBridgeClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Initialized the replication bridge class to use for this driver if using iris replication"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "NetDriver",
+      "signature": "Shutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shutdown all connections managed by this net driver"
+    },
+    {
+      "id": "low-level-destroy",
+      "name": "LowLevelDestroy",
+      "category": "NetDriver",
+      "signature": "LowLevelDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Close socket and Free the memory the OS allocated for this socket"
+    },
+    {
+      "id": "low-level-get-network-number",
+      "name": "LowLevelGetNetworkNumber",
+      "category": "NetDriver",
+      "signature": "LowLevelGetNetworkNumber(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "@return network number"
+    },
+    {
+      "id": "assert-valid",
+      "name": "AssertValid",
+      "category": "NetDriver",
+      "signature": "AssertValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Make sure this connection is in a reasonable state."
+    },
+    {
+      "id": "server-replicate-actors",
+      "name": "ServerReplicateActors",
+      "category": "NetDriver",
+      "signature": "ServerReplicateActors(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Called to replicate any relevant actors to the connections contained within this net driver\nProcess as many clients as allowed given Engine.NetClientTicksPerSecond, first building a list of actors to consider for relevancy checking,\nand then attempting to replicate each actor for each connection that it is relevant to until the connection becomes saturated.\nNetClientTicksPerSecond is used to throttle how many clients are updated each frame, hoping to avoid saturating the server's upstream bandwidth, although\nthe current solution is far from optimal.  Ideally the throttling could be based upon the server connection becoming saturated, at which point each\nconnection is reduced to priority only updates, and spread out amongst several ticks.  Also might want to investigate eliminating the redundant consider/relevancy\nchecks for Actors that were successfully replicated for some channels but not all, since that would make a decent CPU optimization.\n@param DeltaSeconds elapsed time since last call\n@return the number of actors that were replicated"
+    },
+    {
+      "id": "process-remote-function",
+      "name": "ProcessRemoteFunction",
+      "category": "NetDriver",
+      "signature": "ProcessRemoteFunction(Target, Actor, Function, Parms, Out Parms, Stack, Sub Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parms",
+          "type": "void*"
+        },
+        {
+          "name": "Out Parms",
+          "type": "FOutParmRec*"
+        },
+        {
+          "name": "Stack",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process a remote function call on some actor destined for a remote location\n@param Actor actor making the function call\n@param Function function definition called\n@param Parms parameters in a UObject memory layout\n@param OutParms out parameter information (irrelevant for RPC's)\n@param Stack stack frame the UFunction is called in\n@param SubObject optional: sub object to actually call function on"
+    },
+    {
+      "id": "process-remote-function-for-channel-bf835a",
+      "name": "ProcessRemoteFunctionForChannel",
+      "category": "NetDriver",
+      "signature": "ProcessRemoteFunctionForChannel(Target, Ch, Class Cache, Field Cache, Target Obj, Connection, Function, Parms, Out Parms, Stack, Is Server, Send Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Ch",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Class Cache",
+          "type": "FClassNetCache*"
+        },
+        {
+          "name": "Field Cache",
+          "type": "FFieldNetCache*"
+        },
+        {
+          "name": "Target Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parms",
+          "type": "void*"
+        },
+        {
+          "name": "Out Parms",
+          "type": "FOutParmRec*"
+        },
+        {
+          "name": "Stack",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Is Server",
+          "type": "Bool"
+        },
+        {
+          "name": "Send Policy",
+          "type": "ERemoteFunctionSendPolicy",
+          "default": "ERemoteFunctionSendPolicy::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process a remote function on given actor channel. This is called by ::ProcessRemoteFunction."
+    },
+    {
+      "id": "process-remote-function-for-channel-1bc332",
+      "name": "ProcessRemoteFunctionForChannel",
+      "category": "NetDriver",
+      "signature": "ProcessRemoteFunctionForChannel(Target, Ch, Class Cache, Field Cache, Target Obj, Connection, Function, Parms, Out Parms, Stack, Is Server, Send Policy, Remote Function Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Ch",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Class Cache",
+          "type": "FClassNetCache*"
+        },
+        {
+          "name": "Field Cache",
+          "type": "FFieldNetCache*"
+        },
+        {
+          "name": "Target Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parms",
+          "type": "void*"
+        },
+        {
+          "name": "Out Parms",
+          "type": "FOutParmRec*"
+        },
+        {
+          "name": "Stack",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Is Server",
+          "type": "Bool"
+        },
+        {
+          "name": "Send Policy",
+          "type": "ERemoteFunctionSendPolicy"
+        },
+        {
+          "name": "Remote Function Flags",
+          "type": "EProcessRemoteFunctionFlags&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tick-dispatch",
+      "name": "TickDispatch",
+      "category": "NetDriver",
+      "signature": "TickDispatch(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "handle time update: read and process packets"
+    },
+    {
+      "id": "post-tick-dispatch",
+      "name": "PostTickDispatch",
+      "category": "NetDriver",
+      "signature": "PostTickDispatch(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "PostTickDispatch actions"
+    },
+    {
+      "id": "tick-flush",
+      "name": "TickFlush",
+      "category": "NetDriver",
+      "signature": "TickFlush(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ReplicateActors and Flush"
+    },
+    {
+      "id": "post-tick-flush",
+      "name": "PostTickFlush",
+      "category": "NetDriver",
+      "signature": "PostTickFlush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "PostTick actions"
+    },
+    {
+      "id": "low-level-send",
+      "name": "LowLevelSend",
+      "category": "NetDriver",
+      "signature": "LowLevelSend(Target, Address, Data, Count Bits, Low Level Send)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Address",
+          "type": "TSharedPtr<FInternetAddr>"
+        },
+        {
+          "name": "Data",
+          "type": "void*"
+        },
+        {
+          "name": "Count Bits",
+          "type": "Int"
+        },
+        {
+          "name": "Low Level Send",
+          "type": "FOutPacketTraits& Traits ) PURE_VIRTUAL ( UNetDriver::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends a 'connectionless' (not associated with a UNetConection) packet, to the specified address.\nNOTE: Address is an abstract format defined by subclasses. Anything calling this, must use an address supplied by the net driver.\n@param Address\t\tThe address the packet should be sent to (format is abstract, determined by net driver subclasses)\n@param Data\t\t\tThe packet data\n@param CountBits\t\tThe size of the packet data, in bits\n@param Traits\t\tTraits for the packet, if applicable"
+    },
+    {
+      "id": "process-local-server-packets",
+      "name": "ProcessLocalServerPackets",
+      "category": "NetDriver",
+      "signature": "ProcessLocalServerPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process any local talker packets that need to be sent to clients"
+    },
+    {
+      "id": "process-local-client-packets",
+      "name": "ProcessLocalClientPackets",
+      "category": "NetDriver",
+      "signature": "ProcessLocalClientPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Process any local talker packets that need to be sent to the server"
+    },
+    {
+      "id": "update-network-lag-state",
+      "name": "UpdateNetworkLagState",
+      "category": "NetDriver",
+      "signature": "UpdateNetworkLagState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the LagState based on a heuristic to determine if we are network lagging"
+    },
+    {
+      "id": "replicate-voice-packet",
+      "name": "ReplicateVoicePacket",
+      "category": "NetDriver",
+      "signature": "ReplicateVoicePacket(Target, Voice Packet, Came From Conn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Voice Packet",
+          "type": "TSharedPtr<FVoicePacket>"
+        },
+        {
+          "name": "Came From Conn",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Determines which other connections should receive the voice packet and\nqueues the packet for those connections. Used for sending both local/remote voice packets.\n@param VoicePacket the packet to be queued\n@param CameFromConn the connection this packet came from (NULL if local)"
+    },
+    {
+      "id": "handle-packet-loss-burst-command",
+      "name": "HandlePacketLossBurstCommand",
+      "category": "NetDriver",
+      "signature": "HandlePacketLossBurstCommand(Target, Duration In Milliseconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Duration In Milliseconds",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "force-net-update",
+      "name": "ForceNetUpdate",
+      "category": "NetDriver",
+      "signature": "ForceNetUpdate(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "force-all-actors-net-update-time",
+      "name": "ForceAllActorsNetUpdateTime",
+      "category": "NetDriver",
+      "signature": "ForceAllActorsNetUpdateTime(Target, Net Update Time Offset, Valid Actor Test Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Net Update Time Offset",
+          "type": "Float"
+        },
+        {
+          "name": "Valid Actor Test Func",
+          "type": "TFunctionRef<bool ( AActor* )>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "flush-actor-dormancy",
+      "name": "FlushActorDormancy",
+      "category": "NetDriver",
+      "signature": "FlushActorDormancy(Target, Actor, Was Dorm Initial)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Was Dorm Initial",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flushes actor from NetDriver's dormancy list, but does not change any state on the Actor itself"
+    },
+    {
+      "id": "notify-actor-dormancy-change",
+      "name": "NotifyActorDormancyChange",
+      "category": "NetDriver",
+      "signature": "NotifyActorDormancyChange(Target, Actor, Old Dormancy State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Old Dormancy State",
+          "type": "ENetDormancy"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notifies the NetDriver that the desired Dormancy state for this Actor has changed."
+    },
+    {
+      "id": "notify-actor-client-dormancy-changed",
+      "name": "NotifyActorClientDormancyChanged",
+      "category": "NetDriver",
+      "signature": "NotifyActorClientDormancyChanged(Target, Actor, Old Dormancy State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Old Dormancy State",
+          "type": "ENetDormancy"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after an actor channel is opened on a client when the actor was previously dormant."
+    },
+    {
+      "id": "force-property-compare",
+      "name": "ForcePropertyCompare",
+      "category": "NetDriver",
+      "signature": "ForcePropertyCompare(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forces properties on this actor to do a compare for one frame (rather than share shadow state)"
+    },
+    {
+      "id": "force-actor-relevant-next-update",
+      "name": "ForceActorRelevantNextUpdate",
+      "category": "NetDriver",
+      "signature": "ForceActorRelevantNextUpdate(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force this actor to be relevant for at least one update"
+    },
+    {
+      "id": "add-network-actor",
+      "name": "AddNetworkActor",
+      "category": "NetDriver",
+      "signature": "AddNetworkActor(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tells the net driver about a networked actor that was spawned"
+    },
+    {
+      "id": "notify-actor-destroyed",
+      "name": "NotifyActorDestroyed",
+      "category": "NetDriver",
+      "signature": "NotifyActorDestroyed(Target, Actor, Is Seamless Travel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Is Seamless Travel",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a spawned actor is destroyed."
+    },
+    {
+      "id": "notify-actor-renamed-15ef38",
+      "name": "NotifyActorRenamed",
+      "category": "NetDriver",
+      "signature": "NotifyActorRenamed(Target, Actor, Previous Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Previous Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an actor is renamed."
+    },
+    {
+      "id": "notify-actor-renamed-08c890",
+      "name": "NotifyActorRenamed",
+      "category": "NetDriver",
+      "signature": "NotifyActorRenamed(Target, Actor, Previous Outer, Previous Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Previous Outer",
+          "type": "UObject*"
+        },
+        {
+          "name": "Previous Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an actor is renamed."
+    },
+    {
+      "id": "remove-network-actor",
+      "name": "RemoveNetworkActor",
+      "category": "NetDriver",
+      "signature": "RemoveNetworkActor(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "notify-actor-level-unloaded",
+      "name": "NotifyActorLevelUnloaded",
+      "category": "NetDriver",
+      "signature": "NotifyActorLevelUnloaded(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "notify-actor-tear-off",
+      "name": "NotifyActorTearOff",
+      "category": "NetDriver",
+      "signature": "NotifyActorTearOff(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "notify-actor-is-traveling",
+      "name": "NotifyActorIsTraveling",
+      "category": "NetDriver",
+      "signature": "NotifyActorIsTraveling(Target, Traveling Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Traveling Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an actor is about to be carried during a seamless travel"
+    },
+    {
+      "id": "set-role-swap-on-replicate",
+      "name": "SetRoleSwapOnReplicate",
+      "category": "NetDriver",
+      "signature": "SetRoleSwapOnReplicate(Target, Actor, Swap Roles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Swap Roles",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set whether this actor should swap roles before replicating properties."
+    },
+    {
+      "id": "notify-streaming-level-unload",
+      "name": "NotifyStreamingLevelUnload",
+      "category": "NetDriver",
+      "signature": "NotifyStreamingLevelUnload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-child",
+      "name": "CreateChild",
+      "category": "NetDriver",
+      "signature": "CreateChild(Target, Parent)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Parent",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "class UChildConnection*",
+      "docs": "creates a child connection and adds it to the given parent connection"
+    },
+    {
+      "id": "is-server",
+      "name": "IsServer",
+      "category": "NetDriver",
+      "signature": "IsServer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this netdriver is handling accepting connections"
+    },
+    {
+      "id": "clean-package-maps",
+      "name": "CleanPackageMaps",
+      "category": "NetDriver",
+      "signature": "CleanPackageMaps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cleanup-world-for-seamless-travel",
+      "name": "CleanupWorldForSeamlessTravel",
+      "category": "NetDriver",
+      "signature": "CleanupWorldForSeamlessTravel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pre-seamless-travel-garbage-collect",
+      "name": "PreSeamlessTravelGarbageCollect",
+      "category": "NetDriver",
+      "signature": "PreSeamlessTravelGarbageCollect(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-seamless-travel-garbage-collect",
+      "name": "PostSeamlessTravelGarbageCollect",
+      "category": "NetDriver",
+      "signature": "PostSeamlessTravelGarbageCollect(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-socket-subsystem",
+      "name": "GetSocketSubsystem",
+      "category": "NetDriver",
+      "signature": "GetSocketSubsystem(Target, NULL)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "NULL",
+          "type": ") PURE_VIRTUAL ( UNetDriver::GetSocketSubsystem,return"
+        }
+      ],
+      "returnType": "class ISocketSubsystem*",
+      "docs": "Get the socket subsytem appropriate for this net driver"
+    },
+    {
+      "id": "set-world",
+      "name": "SetWorld",
+      "category": "NetDriver",
+      "signature": "SetWorld(Target, In World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Associate a world with this net driver.\nDisassociates any previous world first.\n@param InWorld the world to associate with this netdriver"
+    },
+    {
+      "id": "reset-game-world-state",
+      "name": "ResetGameWorldState",
+      "category": "NetDriver",
+      "signature": "ResetGameWorldState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPackage*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called during seamless travel to clear all state that was tied to the previous game world (actor lists, etc)"
+    },
+    {
+      "id": "is-net-resource-valid",
+      "name": "IsNetResourceValid",
+      "category": "NetDriver",
+      "signature": "IsNetResourceValid(Target, False)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "False",
+          "type": "void ) PURE_VIRTUAL ( UNetDriver::IsNetResourceValid,return"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the net resource is valid or false if it should not be used"
+    },
+    {
+      "id": "should-skip-rep-notifies",
+      "name": "ShouldSkipRepNotifies",
+      "category": "NetDriver",
+      "signature": "ShouldSkipRepNotifies(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether or not properties that are replicating using this driver should not call RepNotify functions."
+    },
+    {
+      "id": "find-or-add-network-object-info",
+      "name": "FindOrAddNetworkObjectInfo",
+      "category": "NetDriver",
+      "signature": "FindOrAddNetworkObjectInfo(Target, In Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "FNetworkObjectInfo*",
+      "docs": "Get the network object matching the given Actor.\nIf the Actor is not present in the NetworkObjectInfo list, it will be added."
+    },
+    {
+      "id": "find-network-object-info",
+      "name": "FindNetworkObjectInfo",
+      "category": "NetDriver",
+      "signature": "FindNetworkObjectInfo(Target, In Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "FNetworkObjectInfo*",
+      "docs": "Get the network object matching the given Actor."
+    },
+    {
+      "id": "is-adaptive-net-update-frequency-enabled",
+      "name": "IsAdaptiveNetUpdateFrequencyEnabled",
+      "category": "NetDriver",
+      "signature": "IsAdaptiveNetUpdateFrequencyEnabled()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns whether adaptive net frequency is enabled. If enabled, update frequency is allowed to ramp down to MinNetUpdateFrequency for an actor when no replicated properties have changed.\nThis is currently controlled by the CVar \"net.UseAdaptiveNetUpdateFrequency\"."
+    },
+    {
+      "id": "is-network-actor-update-frequency-throttled-f464e8",
+      "name": "IsNetworkActorUpdateFrequencyThrottled",
+      "category": "NetDriver",
+      "signature": "IsNetworkActorUpdateFrequencyThrottled(Target, In Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if adaptive net update frequency is enabled and the given actor is having its update rate lowered from its standard rate."
+    },
+    {
+      "id": "is-network-actor-update-frequency-throttled-84d052",
+      "name": "IsNetworkActorUpdateFrequencyThrottled",
+      "category": "NetDriver",
+      "signature": "IsNetworkActorUpdateFrequencyThrottled(Target, In Network Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Network Actor",
+          "type": "FNetworkObjectInfo&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if adaptive net update frequency is enabled and the given actor is having its update rate lowered from its standard rate."
+    },
+    {
+      "id": "cancel-adaptive-replication-0cdc07",
+      "name": "CancelAdaptiveReplication",
+      "category": "NetDriver",
+      "signature": "CancelAdaptiveReplication(Target, In Network Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Network Actor",
+          "type": "FNetworkObjectInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stop adaptive replication for the given actor if it's currently throttled. It maybe be allowed to throttle again later."
+    },
+    {
+      "id": "cancel-adaptive-replication-66110c",
+      "name": "CancelAdaptiveReplication",
+      "category": "NetDriver",
+      "signature": "CancelAdaptiveReplication(Target, In Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-pending-net-update",
+      "name": "IsPendingNetUpdate",
+      "category": "NetDriver",
+      "signature": "IsPendingNetUpdate(Target, In Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the driver's world time has exceeded the next replication update time for this actor, or if it is pending replication from a previous frame."
+    },
+    {
+      "id": "set-replication-driver",
+      "name": "SetReplicationDriver",
+      "category": "NetDriver",
+      "signature": "SetReplicationDriver(Target, New Replication Manager)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "New Replication Manager",
+          "type": "UReplicationDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Explicitly sets the ReplicationDriver instance (you instantiate it and initialize it). Shouldn't be done during gameplay: ok to do in GameMode startup or via console commands for testing. Existing ReplicationDriver (if set) is destroyed when this is called."
+    },
+    {
+      "id": "get-network-runtime-features",
+      "name": "GetNetworkRuntimeFeatures",
+      "category": "NetDriver",
+      "signature": "GetNetworkRuntimeFeatures(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "EEngineNetworkRuntimeFeatures",
+      "docs": "Returns the bitflag telling which network features are activated for this NetDriver."
+    },
+    {
+      "id": "restart-iris-system",
+      "name": "RestartIrisSystem",
+      "category": "NetDriver",
+      "signature": "RestartIrisSystem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy and recreate the iris replication system for an active netdriver.\nThis will re-add all existing replicated actors back in the system.\nUseful if you need to reapply hotfix configs downloaded post-initialization."
+    },
+    {
+      "id": "destroy-iris-system",
+      "name": "DestroyIrisSystem",
+      "category": "NetDriver",
+      "signature": "DestroyIrisSystem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy the Iris replication system before it gets recreated."
+    },
+    {
+      "id": "recreate-iris-system",
+      "name": "RecreateIrisSystem",
+      "category": "NetDriver",
+      "signature": "RecreateIrisSystem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create the Iris replication system after it got destroyed."
+    },
+    {
+      "id": "remove-client-connection",
+      "name": "RemoveClientConnection",
+      "category": "NetDriver",
+      "signature": "RemoveClientConnection(Target, Client Connection To Remove)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Client Connection To Remove",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-client-connection",
+      "name": "AddClientConnection",
+      "category": "NetDriver",
+      "signature": "AddClientConnection(Target, New Connection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "New Connection",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds (fully initialized, ready to go) client connection to the ClientConnections list + any other game related setup"
+    },
+    {
+      "id": "for-each-client-connection",
+      "name": "ForEachClientConnection",
+      "category": "NetDriver",
+      "signature": "ForEachClientConnection(Target, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Func",
+          "type": "TFunction<bool ( TObjectPtr<UNetConnection> )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enumerate through each client connection (including any child connections).\nFunc is a function that is called with the current instance of UNetConnection in the enumeration, and\nshould return true if the enumeration must stop (i.e. no more calls to Func) or false for the enumeration\nto continue."
+    },
+    {
+      "id": "notify-actor-fully-dormant-for-connection",
+      "name": "NotifyActorFullyDormantForConnection",
+      "category": "NetDriver",
+      "signature": "NotifyActorFullyDormantForConnection(Target, Actor, Connection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-level-initialized-for-actor",
+      "name": "IsLevelInitializedForActor",
+      "category": "NetDriver",
+      "signature": "IsLevelInitializedForActor(Target, In Actor, In Connection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "In Connection",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this actor is considered to be in a loaded level"
+    },
+    {
+      "id": "should-replicate-function",
+      "name": "ShouldReplicateFunction",
+      "category": "NetDriver",
+      "signature": "ShouldReplicateFunction(Target, Actor, Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this network driver will handle the remote function call for the given actor."
+    },
+    {
+      "id": "should-forward-function",
+      "name": "ShouldForwardFunction",
+      "category": "NetDriver",
+      "signature": "ShouldForwardFunction(Target, Actor, Function, Parms)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parms",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this network driver will forward a received remote function call to other active net drivers."
+    },
+    {
+      "id": "should-replicate-actor",
+      "name": "ShouldReplicateActor",
+      "category": "NetDriver",
+      "signature": "ShouldReplicateActor(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this network driver will replicate the given actor."
+    },
+    {
+      "id": "should-call-remote-function",
+      "name": "ShouldCallRemoteFunction",
+      "category": "NetDriver",
+      "signature": "ShouldCallRemoteFunction(Target, Object, Function, Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this network driver should execute this remote call locally."
+    },
+    {
+      "id": "should-client-destroy-actor",
+      "name": "ShouldClientDestroyActor",
+      "category": "NetDriver",
+      "signature": "ShouldClientDestroyActor(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if clients should destroy the actor when the channel is closed."
+    },
+    {
+      "id": "notify-actor-channel-open",
+      "name": "NotifyActorChannelOpen",
+      "category": "NetDriver",
+      "signature": "NotifyActorChannelOpen(Target, Channel, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Channel",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an actor channel is remotely opened for an actor."
+    },
+    {
+      "id": "notify-actor-channel-cleaned-up",
+      "name": "NotifyActorChannelCleanedUp",
+      "category": "NetDriver",
+      "signature": "NotifyActorChannelCleanedUp(Target, Channel, Close Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Channel",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Close Reason",
+          "type": "EChannelCloseReason"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an actor channel is cleaned up for an actor."
+    },
+    {
+      "id": "notify-actor-torn-off",
+      "name": "NotifyActorTornOff",
+      "category": "NetDriver",
+      "signature": "NotifyActorTornOff(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "client-set-actor-dormant",
+      "name": "ClientSetActorDormant",
+      "category": "NetDriver",
+      "signature": "ClientSetActorDormant(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on clients when an actor channel is closed because it went dormant."
+    },
+    {
+      "id": "client-set-actor-torn-off",
+      "name": "ClientSetActorTornOff",
+      "category": "NetDriver",
+      "signature": "ClientSetActorTornOff(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on clients when an actor is torn off."
+    },
+    {
+      "id": "consume-async-load-delinquency-analytics",
+      "name": "ConsumeAsyncLoadDelinquencyAnalytics",
+      "category": "NetDriver",
+      "signature": "ConsumeAsyncLoadDelinquencyAnalytics(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Out",
+          "type": "FNetAsyncLoadDelinquencyAnalytics&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the current delinquency analytics and resets them.\nThis would be similar to calls to Get and Reset separately, except that the caller\nwill assume ownership of data in this case."
+    },
+    {
+      "id": "get-async-load-delinquency-analytics",
+      "name": "GetAsyncLoadDelinquencyAnalytics",
+      "category": "NetDriver",
+      "signature": "GetAsyncLoadDelinquencyAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "FNetAsyncLoadDelinquencyAnalytics&",
+      "docs": "Returns the current delinquency analytics."
+    },
+    {
+      "id": "reset-async-load-delinquency-analytics",
+      "name": "ResetAsyncLoadDelinquencyAnalytics",
+      "category": "NetDriver",
+      "signature": "ResetAsyncLoadDelinquencyAnalytics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the current delinquency analytics."
+    },
+    {
+      "id": "get-connection-by-id",
+      "name": "GetConnectionById",
+      "category": "NetDriver",
+      "signature": "GetConnectionById(Target, Parent Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Parent Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UNetConnection*",
+      "docs": "Returns the NetConnection associated with the ParentConnectionId. Slow."
+    },
+    {
+      "id": "get-connection-by-handle",
+      "name": "GetConnectionByHandle",
+      "category": "NetDriver",
+      "signature": "GetConnectionByHandle(Target, Connection Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Connection Handle",
+          "type": "UE::Net::FConnectionHandle"
+        }
+      ],
+      "returnType": "UNetConnection*",
+      "docs": "Returns the NetConnection associated with the ConnectionHandle. Slow as it iterates over all connections to find one with matching handle."
+    },
+    {
+      "id": "can-create-destruction-info",
+      "name": "CanCreateDestructionInfo",
+      "category": "NetDriver",
+      "signature": "CanCreateDestructionInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the netdriver allowed to create destruction infos"
+    },
+    {
+      "id": "send-destruction-info",
+      "name": "SendDestructionInfo",
+      "category": "NetDriver",
+      "signature": "SendDestructionInfo(Target, Connection, Destruction Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Destruction Info",
+          "type": "FActorDestructionInfo*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Sends a message to a client to destroy an actor to the client.  The actor may already be destroyed locally."
+    },
+    {
+      "id": "create-net-id-for-object",
+      "name": "CreateNetIDForObject",
+      "category": "NetDriver",
+      "signature": "CreateNetIDForObject(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "UE::Net::FNetIDVariant",
+      "docs": "Explicitly generates and assigns a new network ID (FNetRefHandle if using Iris, FNetworkGUID if using generic replication)\nto Object and returns it. This can be used in combination with AssignNetIDToObject to associate actor instances\nthat are spawned manually for replication, as opposed to the default behavior of letting the engine spawn\nthe client's instance of a replicated actor automatically.\nThis function would typically be called on a server, and the caller is responsible for communicating\nthe returned ID to the remote/client side and calling AssignNetIDToObject to associate the ID with\nthe client instance of the object.\nOnly actors or Iris root objects are supported.\n@see UNetDriver::AssignNetIDToObject"
+    },
+    {
+      "id": "assign-net-id-to-object",
+      "name": "AssignNetIDToObject",
+      "category": "NetDriver",
+      "signature": "AssignNetIDToObject(Target, Net ID, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Net ID",
+          "type": "UE::Net::FNetIDVariant"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Explicitly assigns NetID to Object. Can be called on clients that have received a NetID generated on\nthe server by a call to CreateNetIDForObject. These functions can be used to associate actor instances\nthat are spawned manually for replication, as opposed to the default behavior of letting the engine spawn\nthe client's instance of a replicated actor automatically.\nOnly actors or Iris root objects are supported.\n@see UNetDriver::CreateNetIDForObject"
+    },
+    {
+      "id": "register-tick-events",
+      "name": "RegisterTickEvents",
+      "category": "NetDriver",
+      "signature": "RegisterTickEvents(Target, In World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Register all TickDispatch, TickFlush, PostTickFlush to tick in World"
+    },
+    {
+      "id": "unregister-tick-events",
+      "name": "UnregisterTickEvents",
+      "category": "NetDriver",
+      "signature": "UnregisterTickEvents(Target, In World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unregister all TickDispatch, TickFlush, PostTickFlush to tick in World"
+    },
+    {
+      "id": "internal-create-channel-by-name",
+      "name": "InternalCreateChannelByName",
+      "category": "NetDriver",
+      "signature": "InternalCreateChannelByName(Target, Ch Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Ch Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "protected : UChannel*",
+      "docs": "Subclasses may override this to customize channel creation. Called by GetOrCreateChannel if the pool is exhausted and a new channel must be allocated."
+    },
+    {
+      "id": "server-replicate-actors-prioritize-actors",
+      "name": "ServerReplicateActors_PrioritizeActors",
+      "category": "NetDriver",
+      "signature": "ServerReplicateActors_PrioritizeActors(Target, Connection, Connection Viewers, Consider List, CPU Saturated, Out Priority List, Out Priority Actors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Connection Viewers",
+          "type": "TArray<FNetViewer>&"
+        },
+        {
+          "name": "Consider List",
+          "type": "TArray<FNetworkObjectInfo*>&"
+        },
+        {
+          "name": "CPU Saturated",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Priority List",
+          "type": "FActorPriority*&"
+        },
+        {
+          "name": "Out Priority Actors",
+          "type": "FActorPriority**&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "server-replicate-actors-process-prioritized-actors-range",
+      "name": "ServerReplicateActors_ProcessPrioritizedActorsRange",
+      "category": "NetDriver",
+      "signature": "ServerReplicateActors_ProcessPrioritizedActorsRange(Target, Connection, Connection Viewers, Priority Actors, Actors Index Range, Out Updated, Ignore Saturation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Connection Viewers",
+          "type": "TArray<FNetViewer>&"
+        },
+        {
+          "name": "Priority Actors",
+          "type": "FActorPriority**"
+        },
+        {
+          "name": "Actors Index Range",
+          "type": "TInterval<int32>&"
+        },
+        {
+          "name": "Out Updated",
+          "type": "Int&"
+        },
+        {
+          "name": "Ignore Saturation",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "server-replicate-actors-mark-relevant-actors",
+      "name": "ServerReplicateActors_MarkRelevantActors",
+      "category": "NetDriver",
+      "signature": "ServerReplicateActors_MarkRelevantActors(Target, Connection, Connection Viewers, Start Actor Index, End Actor Index, Priority Actors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Connection Viewers",
+          "type": "TArray<FNetViewer>&"
+        },
+        {
+          "name": "Start Actor Index",
+          "type": "Int"
+        },
+        {
+          "name": "End Actor Index",
+          "type": "Int"
+        },
+        {
+          "name": "Priority Actors",
+          "type": "FActorPriority**"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-level-removed-from-world",
+      "name": "OnLevelRemovedFromWorld",
+      "category": "NetDriver",
+      "signature": "OnLevelRemovedFromWorld(Target, Level, World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Delegate for overriding the method ServerReplicateActors\nin the part that prepares prioritized actors list of\nclient connections"
+    },
+    {
+      "id": "on-level-added-to-world",
+      "name": "OnLevelAddedToWorld",
+      "category": "NetDriver",
+      "signature": "OnLevelAddedToWorld(Target, Level, World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to handle any NetDriver specific setup when a level has been added to the world."
+    },
+    {
+      "id": "is-encryption-required",
+      "name": "IsEncryptionRequired",
+      "category": "NetDriver",
+      "signature": "IsEncryptionRequired(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not this NetDriver requires encryption. Does signify that encryption is enabled, but does not signify that it's setup properly.\n@return\t\tWhether or not encryption is presently required for connections."
+    },
+    {
+      "id": "get-incoming-bunch-frame-processing-time-limit",
+      "name": "GetIncomingBunchFrameProcessingTimeLimit",
+      "category": "NetDriver",
+      "signature": "GetIncomingBunchFrameProcessingTimeLimit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Returns the value of cvar net.ClientIncomingBunchFrameTimeLimitMS on clients, or 0 otherwise. 0 = no limit."
+    },
+    {
+      "id": "has-exceeded-incoming-bunch-frame-processing-time",
+      "name": "HasExceededIncomingBunchFrameProcessingTime",
+      "category": "NetDriver",
+      "signature": "HasExceededIncomingBunchFrameProcessingTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the cvar net.ClientIncomingBunchFrameTimeLimitMS is set and the limit was exceeded"
+    },
+    {
+      "id": "get-create-replication-changelist-mgr-flags",
+      "name": "GetCreateReplicationChangelistMgrFlags",
+      "category": "NetDriver",
+      "signature": "GetCreateReplicationChangelistMgrFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "ECreateReplicationChangelistMgrFlags",
+      "docs": "Indicates whether ticking throttle is enabled for this instance of NetDriver"
+    },
+    {
+      "id": "forward-remote-function",
+      "name": "ForwardRemoteFunction",
+      "category": "NetDriver",
+      "signature": "ForwardRemoteFunction(Target, Root Object, Sub Object, Function, Parms)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Root Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parms",
+          "type": "void*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Called from RPC processing code to forward RPC to other NetDrivers if ShouldForwardFunction returns true."
+    }
+  ]
+}

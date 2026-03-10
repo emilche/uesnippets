@@ -1,0 +1,212 @@
+{
+  "id": "gpu-sort-manager",
+  "label": "GPUSortManager",
+  "includepath": "GPUSortManager.h",
+  "includes": [
+    "CoreMinimal",
+    "RefCounting",
+    "RHI",
+    "RenderResource"
+  ],
+  "functions": [
+    {
+      "id": "copy-u-int-buffer-to-targets",
+      "name": "CopyUIntBufferToTargets",
+      "category": "GPUSortManager",
+      "signature": "CopyUIntBufferToTargets(Target, RHI Cmd List, Feature Level, Source SRV, Target UA Vs, Target Sizes, Starting Offset, Num Targets)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUSortManager*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandList&"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "Source SRV",
+          "type": "FRHIShaderResourceView*"
+        },
+        {
+          "name": "Target UA Vs",
+          "type": "FRHIUnorderedAccessView**"
+        },
+        {
+          "name": "Target Sizes",
+          "type": "Int*"
+        },
+        {
+          "name": "Starting Offset",
+          "type": "Int"
+        },
+        {
+          "name": "Num Targets",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "=============================================================================\nGPUSortManager.h: Interface manage sorting between different FXSystemInterface\n============================================================================="
+    },
+    {
+      "id": "f-key-gen-info",
+      "name": "FKeyGenInfo",
+      "category": "GPUSortManager",
+      "signature": "FKeyGenInfo(Num Elements, High Precision Keys)",
+      "params": [
+        {
+          "name": "Num Elements",
+          "type": "UInt"
+        },
+        {
+          "name": "High Precision Keys",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A manager that handles different GPU sort tasks.\nEach task has different constraints about when the data can be generated and when the sorted results need to be available.\nThe usecase involes registering a sort task through AddTask() and then initializing the sort data through the KeyGen callback.\nThe sort manager can be enabled or disabled through \"fx.AllowGPUSorting\""
+    },
+    {
+      "id": "fgpu-sort-manager-4d2d05",
+      "name": "FGPUSortManager",
+      "category": "GPUSortManager",
+      "signature": "FGPUSortManager(In Feature Level)",
+      "params": [
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Expected that few will be enough, since we only need severals batches when ESortBatchProcessingOrder::KeyGenAfterPreRenderAndSortAfterPostRenderOpaque."
+    },
+    {
+      "id": "fgpu-sort-manager-610acb",
+      "name": "FGPUSortManager",
+      "category": "GPUSortManager",
+      "signature": "FGPUSortManager()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "register",
+      "name": "Register",
+      "category": "GPUSortManager",
+      "signature": "Register(Target, Callback Delegate, Used Flags, In Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUSortManager*"
+        },
+        {
+          "name": "Callback Delegate",
+          "type": "FGPUSortKeyGenDelegate&"
+        },
+        {
+          "name": "Used Flags",
+          "type": "EGPUSortFlags"
+        },
+        {
+          "name": "In Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Register a client system into the sort manager. Client systems are systems that will call AddTask().\nThose systems need to register a callback, the possible used flags for their tasks and a name.\nThe callback is required because the initial content to perform GPU sorts is only configured long after\nAddTask() gets called in the rendering loop.\n@param CallbackDelegate - The callback that will be used to set the initial keys and values for each batch elements.\n@param UsedFlags - The possibly used flags for each of the client system tasks, used to perform some optimizations.\n@param InName - A name defining this client system, used for GPU markers."
+    },
+    {
+      "id": "add-task-7d6eb0",
+      "name": "AddTask",
+      "category": "GPUSortManager",
+      "signature": "AddTask(Target, RHI Cmd List, Out Info, Value Count, Task Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUSortManager*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Out Info",
+          "type": "FAllocationInfo&"
+        },
+        {
+          "name": "Value Count",
+          "type": "Int"
+        },
+        {
+          "name": "Task Flags",
+          "type": "EGPUSortFlags"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Add a GPU sort task to process this frame. Tasks are expected to be created before OnPreRender() gets called.\n@param OutInfo - The details about the allocation bindings, if success.\n@param IndexCount - The number of values that need to be sorted by this task.\n@param SortFlags - The sort task requirements.\nReturn true if the task was added to a batch, false otherwise, could be because GPU sorting is disabled."
+    },
+    {
+      "id": "add-task-4c0e37",
+      "name": "AddTask",
+      "category": "GPUSortManager",
+      "signature": "AddTask(Target, Out Info, Value Count, Task Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUSortManager*"
+        },
+        {
+          "name": "Out Info",
+          "type": "FAllocationInfo&"
+        },
+        {
+          "name": "Value Count",
+          "type": "Int"
+        },
+        {
+          "name": "Task Flags",
+          "type": "EGPUSortFlags"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "on-pre-render",
+      "name": "OnPreRender",
+      "category": "GPUSortManager",
+      "signature": "OnPreRender(Target, Graph Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUSortManager*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Callback that needs to be called in the rendering loop, after calls to FFXSystemInterface::PreRender() are issued.\nAt this point, no other GPU sort tasks are allowed to be created through AddTask() as the sort batches\nget finalized. At this point, any task with the EGPUSortFlags::SortAfterPreRender will possibly be done,\nunless it also had the EGPUSortFlags::SortAfterPostRenderOpaque flag.\nTasks with EGPUSortFlags::KeyGenAfterPreRender get their client callbacks issued to set the initial keys and values.\n@param RHICmdList - The command list to be used."
+    },
+    {
+      "id": "on-post-render-opaque",
+      "name": "OnPostRenderOpaque",
+      "category": "GPUSortManager",
+      "signature": "OnPostRenderOpaque(Target, Graph Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUSortManager*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Callback that needs to be called in the rendering loop, after calls to FFXSystemInterface::PostRenderOpaque() are issued.\nTasks with EGPUSortFlags::KeyGenAfterPostRenderOpaque get their client callbacks issued to set the initial keys and values.\nAfter this any sort task that hasn't been processed yet, in OnPreRender(), gets processed now.\n@param RHICmdList - The command list to be used."
+    }
+  ]
+}

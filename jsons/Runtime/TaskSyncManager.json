@@ -1,0 +1,695 @@
+{
+  "id": "task-sync-manager",
+  "label": "TaskSyncManager",
+  "includepath": "TaskSyncManager.h",
+  "includes": [
+    "EngineBaseTypes",
+    "TransactionallySafeCriticalSection",
+    "DeveloperSettings",
+    "TaskGraphFwd",
+    "Delegate",
+    "TaskSyncManager.generated"
+  ],
+  "functions": [
+    {
+      "id": "get-context-id-for-world",
+      "name": "GetContextIdForWorld",
+      "category": "TaskSyncManager",
+      "signature": "GetContextIdForWorld(World)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "FWorldContextId",
+      "docs": "Identifies a specific WorldContext that has objects which are allowed to tick and run tasks"
+    },
+    {
+      "id": "f-active-sync-work-handle",
+      "name": "FActiveSyncWorkHandle",
+      "category": "TaskSyncManager",
+      "signature": "FActiveSyncWorkHandle()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Used to specify how many times work should be executed as part of a sync point"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "TaskSyncManager",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True if this valid and has a name"
+    },
+    {
+      "id": "get-dependency-tick-function",
+      "name": "GetDependencyTickFunction",
+      "category": "TaskSyncManager",
+      "signature": "GetDependencyTickFunction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        }
+      ],
+      "returnType": "FTickFunction*",
+      "docs": "Returns a raw pointer to the tick function that implements this handle which can be passed into AddPrerequisite.\nThis is only valid to call on the game thread and should not be cached."
+    },
+    {
+      "id": "has-reserved-work",
+      "name": "HasReservedWork",
+      "category": "TaskSyncManager",
+      "signature": "HasReservedWork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True if this handle has been used to reserve work. This will still be true until work is abandoned"
+    },
+    {
+      "id": "has-requested-work",
+      "name": "HasRequestedWork",
+      "category": "TaskSyncManager",
+      "signature": "HasRequestedWork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True if this handle has been used to request work. This will still be true until work is abandoned"
+    },
+    {
+      "id": "reserve-future-work-753c4f",
+      "name": "ReserveFutureWork",
+      "category": "TaskSyncManager",
+      "signature": "ReserveFutureWork(Target, Repeat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        },
+        {
+          "name": "Repeat",
+          "type": "ESyncWorkRepetition"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Request to reserve work using this handle, which must be filled to complete the frame's tasks.\nIf EveryFrame is passed in, it will reserve work at the start of every frame that must be requested or abandoned."
+    },
+    {
+      "id": "request-work-9bf80a",
+      "name": "RequestWork",
+      "category": "TaskSyncManager",
+      "signature": "RequestWork(Target, Function To Execute, Repeat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        },
+        {
+          "name": "Function To Execute",
+          "type": "FTickFunction*"
+        },
+        {
+          "name": "Repeat",
+          "type": "ESyncWorkRepetition"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Requests that a tick function be executed by the sync point, this fills any reservations and may trigger tasks.\nIf EveryFrame is passed in, it will request the same function every frame until it is abandoned."
+    },
+    {
+      "id": "abandon-work-f85950",
+      "name": "AbandonWork",
+      "category": "TaskSyncManager",
+      "signature": "AbandonWork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Abandon any requested or reserved work and return to how it was at initial registration.\nThis clears HasReserved/HasRequested, but does not invalidate the handle.\nReturn true if there was any requested/reserved work to abandon."
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "TaskSyncManager",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncWorkHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Completely reset this handle, which will abandon work and prevent any future use. This returns true if it was valid before"
+    },
+    {
+      "id": "f-active-sync-point",
+      "name": "FActiveSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "FActiveSyncPoint()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Struct defining an active sync point inside a specific world context, implemented as a tick function that may not be registered"
+    },
+    {
+      "id": "register-work-handle-2b279f",
+      "name": "RegisterWorkHandle",
+      "category": "TaskSyncManager",
+      "signature": "RegisterWorkHandle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncPoint*"
+        }
+      ],
+      "returnType": "FActiveSyncWorkHandle",
+      "docs": "Registers a new work handle that can be used to reserve and request work"
+    },
+    {
+      "id": "reserve-future-work-53a004",
+      "name": "ReserveFutureWork",
+      "category": "TaskSyncManager",
+      "signature": "ReserveFutureWork(Target, Handle, Repeat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncPoint*"
+        },
+        {
+          "name": "Handle",
+          "type": "FActiveSyncWorkHandle&"
+        },
+        {
+          "name": "Repeat",
+          "type": "ESyncWorkRepetition"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Uses handle to reserve work for later, that can be requested when ready"
+    },
+    {
+      "id": "request-work-3a968a",
+      "name": "RequestWork",
+      "category": "TaskSyncManager",
+      "signature": "RequestWork(Target, Handle, Work Function, Repeat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncPoint*"
+        },
+        {
+          "name": "Handle",
+          "type": "FActiveSyncWorkHandle&"
+        },
+        {
+          "name": "Work Function",
+          "type": "FTickFunction*"
+        },
+        {
+          "name": "Repeat",
+          "type": "ESyncWorkRepetition"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Creates a new item of work bound to a specific function"
+    },
+    {
+      "id": "abandon-work-767d6a",
+      "name": "AbandonWork",
+      "category": "TaskSyncManager",
+      "signature": "AbandonWork(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncPoint*"
+        },
+        {
+          "name": "Handle",
+          "type": "FActiveSyncWorkHandle&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Abandons requested or reserved work, which could trigger other work to start"
+    },
+    {
+      "id": "reset-work-handle",
+      "name": "ResetWorkHandle",
+      "category": "TaskSyncManager",
+      "signature": "ResetWorkHandle(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActiveSyncPoint*"
+        },
+        {
+          "name": "Handle",
+          "type": "FActiveSyncWorkHandle&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Resets a handle"
+    },
+    {
+      "id": "f-task-sync-manager",
+      "name": "FTaskSyncManager",
+      "category": "TaskSyncManager",
+      "signature": "FTaskSyncManager()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Registered sync point that created this"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "TaskSyncManager",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "FTaskSyncManager*",
+      "docs": "Return the global singleton if it exists"
+    },
+    {
+      "id": "find-default-batch",
+      "name": "FindDefaultBatch",
+      "category": "TaskSyncManager",
+      "signature": "FindDefaultBatch(Target, World Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "World Context",
+          "type": "FWorldContextId"
+        }
+      ],
+      "returnType": "FBatchContextId",
+      "docs": "Gets the default batch for a world context. This will return an invalid id if the world context is not set up for ticking"
+    },
+    {
+      "id": "find-sync-point-d5669d",
+      "name": "FindSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "FindSyncPoint(Target, Batch, Registered Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Batch",
+          "type": "FBatchContextId"
+        },
+        {
+          "name": "Registered Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FSyncPointId",
+      "docs": "Initializes a sync point id that can be passed between threads and used in the functions below.\nThis will return an invalid id if the name is not currently registered.\nThis function does not check that the sync point is enabled for the specific batch, that is handled in the other functions below."
+    },
+    {
+      "id": "find-sync-point-0d8a17",
+      "name": "FindSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "FindSyncPoint(Target, World Context, Registered Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "World Context",
+          "type": "FWorldContextId"
+        },
+        {
+          "name": "Registered Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FSyncPointId",
+      "docs": "Same as above, but using the default batch for the world context"
+    },
+    {
+      "id": "get-task-graph-event",
+      "name": "GetTaskGraphEvent",
+      "category": "TaskSyncManager",
+      "signature": "GetTaskGraphEvent(Target, Sync Point, Out Event Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Sync Point",
+          "type": "FSyncPointId"
+        },
+        {
+          "name": "Out Event Ref",
+          "type": "FGraphEventRef&"
+        }
+      ],
+      "returnType": "FTaskSyncResult",
+      "docs": "Attempts to return the current frame's task graph event for this sync point, to pass as a dependency to other tasks.\nThis will fail if the task has not yet been created this frame or it has finished executing."
+    },
+    {
+      "id": "trigger-sync-point",
+      "name": "TriggerSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "TriggerSyncPoint(Target, Sync Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Sync Point",
+          "type": "FSyncPointId"
+        }
+      ],
+      "returnType": "FTaskSyncResult",
+      "docs": "Manually triggers a sync point, this can only be called once per frame"
+    },
+    {
+      "id": "trigger-sync-point-after-event",
+      "name": "TriggerSyncPointAfterEvent",
+      "category": "TaskSyncManager",
+      "signature": "TriggerSyncPointAfterEvent(Target, Sync Point, Event To Wair For)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Sync Point",
+          "type": "FSyncPointId"
+        },
+        {
+          "name": "Event To Wair For",
+          "type": "FGraphEventRef"
+        }
+      ],
+      "returnType": "FTaskSyncResult",
+      "docs": "Tells the sync point to trigger at the completion of the passed in event/task, this is only possible if it hasn't already been triggered"
+    },
+    {
+      "id": "register-work-handle-6122ba",
+      "name": "RegisterWorkHandle",
+      "category": "TaskSyncManager",
+      "signature": "RegisterWorkHandle(Target, Sync Point, Out Work Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Sync Point",
+          "type": "FSyncPointId"
+        },
+        {
+          "name": "Out Work Handle",
+          "type": "FActiveSyncWorkHandle&"
+        }
+      ],
+      "returnType": "FTaskSyncResult",
+      "docs": "Tries to creates a new sync work handle that can be used to reserve or request work to happen as part of a sync point.\nIf it was successful, OutWorkHandle will be set to a handle you can pass between threads and later fulfill or abandon."
+    },
+    {
+      "id": "register-tick-group-work-handle",
+      "name": "RegisterTickGroupWorkHandle",
+      "category": "TaskSyncManager",
+      "signature": "RegisterTickGroupWorkHandle(Target, World Context, Tick Group, Out Work Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "World Context",
+          "type": "FWorldContextId"
+        },
+        {
+          "name": "Tick Group",
+          "type": "ETickingGroup"
+        },
+        {
+          "name": "Out Work Handle",
+          "type": "FActiveSyncWorkHandle&"
+        }
+      ],
+      "returnType": "FTaskSyncResult",
+      "docs": "Tries to creates a new sync work handle that can be used to reserve or request work to happen on the game thread during a tick group.\nIf it was successful, OutWorkHandle will be set to a handle you can use to request work for this frame or every frame (but not reserve)."
+    },
+    {
+      "id": "reload-registered-data",
+      "name": "ReloadRegisteredData",
+      "category": "TaskSyncManager",
+      "signature": "ReloadRegisteredData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Refresh the registered data from settings"
+    },
+    {
+      "id": "get-sync-point-description",
+      "name": "GetSyncPointDescription",
+      "category": "TaskSyncManager",
+      "signature": "GetSyncPointDescription(Target, Registered Name, Out Description)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Registered Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Description",
+          "type": "FSyncPointDescription&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Searches for a registered sync point, if ones is foundw ith that name it will return true and fill in OutDescription"
+    },
+    {
+      "id": "register-new-sync-point",
+      "name": "RegisterNewSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "RegisterNewSyncPoint(Target, New Description)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "New Description",
+          "type": "FSyncPointDescription&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Registers a new sync point at runtime. RegisteredName and SourceName must be filled out"
+    },
+    {
+      "id": "unregister-sync-point",
+      "name": "UnregisterSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "UnregisterSyncPoint(Target, Registered Name, Source Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Registered Name",
+          "type": "Name"
+        },
+        {
+          "name": "Source Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Unregisters a sync point, this will only delete if if both the registered and source names match"
+    },
+    {
+      "id": "create-new-batch",
+      "name": "CreateNewBatch",
+      "category": "TaskSyncManager",
+      "signature": "CreateNewBatch(Target, World Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "World Context",
+          "type": "FWorldContextId"
+        }
+      ],
+      "returnType": "FBatchContextId",
+      "docs": "Allocates a new batch for the specified world, this will duplicate the events"
+    },
+    {
+      "id": "get-current-world-context",
+      "name": "GetCurrentWorldContext",
+      "category": "TaskSyncManager",
+      "signature": "GetCurrentWorldContext(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        }
+      ],
+      "returnType": "FWorldContextId",
+      "docs": "Gets the correct task world context for the current thread context. This will return an invalid context if called on worker threads"
+    },
+    {
+      "id": "get-tick-function-for-sync-point",
+      "name": "GetTickFunctionForSyncPoint",
+      "category": "TaskSyncManager",
+      "signature": "GetTickFunctionForSyncPoint(Target, Sync Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "Sync Point",
+          "type": "FSyncPointId"
+        }
+      ],
+      "returnType": "FTickFunction*",
+      "docs": "Returns the tick function representing the specified event, if this returns a valid pointer you can use it for setting dependencies but it should not be modified or stored"
+    },
+    {
+      "id": "start-frame",
+      "name": "StartFrame",
+      "category": "TaskSyncManager",
+      "signature": "StartFrame(Target, In World, In Delta Seconds, In Tick Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "In Delta Seconds",
+          "type": "Float"
+        },
+        {
+          "name": "In Tick Type",
+          "type": "ELevelTick"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tells the manager that it is the start of a frame, which will register the appropriate events"
+    },
+    {
+      "id": "start-tick-group",
+      "name": "StartTickGroup",
+      "category": "TaskSyncManager",
+      "signature": "StartTickGroup(Target, In World, Tick Group, Ticks To Manual Dispatch)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Tick Group",
+          "type": "ETickingGroup"
+        },
+        {
+          "name": "Ticks To Manual Dispatch",
+          "type": "TArray<FTickFunction*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tells the manager that a tick group is starting for a specific world"
+    },
+    {
+      "id": "end-tick-group",
+      "name": "EndTickGroup",
+      "category": "TaskSyncManager",
+      "signature": "EndTickGroup(Target, In World, Tick Group)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Tick Group",
+          "type": "ETickingGroup"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tells the manager that a tick group is complete for a specific world, which could trigger events"
+    },
+    {
+      "id": "end-frame",
+      "name": "EndFrame",
+      "category": "TaskSyncManager",
+      "signature": "EndFrame(Target, In World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tells the manager that it is the end of a frame and it will not start/end any more tick groups"
+    },
+    {
+      "id": "release-world-context",
+      "name": "ReleaseWorldContext",
+      "category": "TaskSyncManager",
+      "signature": "ReleaseWorldContext(Target, World Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskSyncManager*"
+        },
+        {
+          "name": "World Context",
+          "type": "FWorldContextId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tells the manager that it should destroy all tracking info for a world context. This only needs to be called when destroying a test or preview world"
+    }
+  ]
+}

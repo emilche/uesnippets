@@ -1,0 +1,717 @@
+{
+  "id": "audio-mixer-clock",
+  "label": "AudioMixerClock",
+  "includepath": "Quartz/AudioMixerClock.h",
+  "includes": [
+    "CoreMinimal",
+    "ThreadSafeBool",
+    "QuartzQuantizationUtilities",
+    "QuartzMetronome",
+    "QuartzSubscription",
+    "QuartzInterfaces",
+    "QuartzCommandQueue"
+  ],
+  "functions": [
+    {
+      "id": "f-quartz-clock-proxy",
+      "name": "FQuartzClockProxy",
+      "category": "AudioMixerClock",
+      "signature": "FQuartzClockProxy(In Clock)",
+      "params": [
+        {
+          "name": "In Clock",
+          "type": "TSharedPtr<FQuartzClock,ESPMode::ThreadSafe>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "AudioMixerClock",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "does-clock-exist",
+      "name": "DoesClockExist",
+      "category": "AudioMixerClock",
+      "signature": "DoesClockExist(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-clock-running",
+      "name": "IsClockRunning",
+      "category": "AudioMixerClock",
+      "signature": "IsClockRunning(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-tick-rate",
+      "name": "GetTickRate",
+      "category": "AudioMixerClock",
+      "signature": "GetTickRate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        }
+      ],
+      "returnType": "Audio::FQuartzClockTickRate"
+    },
+    {
+      "id": "get-estimated-clock-run-time-seconds",
+      "name": "GetEstimatedClockRunTimeSeconds",
+      "category": "AudioMixerClock",
+      "signature": "GetEstimatedClockRunTimeSeconds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-current-clock-timestamp",
+      "name": "GetCurrentClockTimestamp",
+      "category": "AudioMixerClock",
+      "signature": "GetCurrentClockTimestamp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        }
+      ],
+      "returnType": "FQuartzTransportTimeStamp"
+    },
+    {
+      "id": "get-duration-of-quantization-type-in-seconds",
+      "name": "GetDurationOfQuantizationTypeInSeconds",
+      "category": "AudioMixerClock",
+      "signature": "GetDurationOfQuantizationTypeInSeconds(Target, Quantization Type, Multiplier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        },
+        {
+          "name": "Quantization Type",
+          "type": "EQuartzCommandQuantization&"
+        },
+        {
+          "name": "Multiplier",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-beat-progress-percent",
+      "name": "GetBeatProgressPercent",
+      "category": "AudioMixerClock",
+      "signature": "GetBeatProgressPercent(Target, Quantization Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        },
+        {
+          "name": "Quantization Type",
+          "type": "EQuartzCommandQuantization&"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "send-command-to-clock",
+      "name": "SendCommandToClock",
+      "category": "AudioMixerClock",
+      "signature": "SendCommandToClock(Target, In Command)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClockProxy*"
+        },
+        {
+          "name": "In Command",
+          "type": "TFunction<void ( FQuartzClock* )>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-quartz-clock-cd3cb7",
+      "name": "FQuartzClock",
+      "category": "AudioMixerClock",
+      "signature": "FQuartzClock(In Name, In Clock Settings, In Owning Clock Manager Ptr)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Clock Settings",
+          "type": "FQuartzClockSettings&"
+        },
+        {
+          "name": "In Owning Clock Manager Ptr",
+          "type": "FQuartzClockManager*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "FQuartzClock:\nThis class receives, schedules, and fires quantized commands.\nThe underlying FQuartzMetronome handles all counting / timing logic.\nThis class gets ticked externally (i.e. by some Clock Manager)\nand counts down the time-to-fire the commands in audio frames.\nUpdateCachedState() updates a game-thread copy of data accessed via FQuartzClockProxy\n(see FQuartzClockState)"
+    },
+    {
+      "id": "f-quartz-clock-c5750a",
+      "name": "FQuartzClock",
+      "category": "AudioMixerClock",
+      "signature": "FQuartzClock()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "change-tick-rate",
+      "name": "ChangeTickRate",
+      "category": "AudioMixerClock",
+      "signature": "ChangeTickRate(Target, In New Tick Rate, Num Frames Left)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In New Tick Rate",
+          "type": "FQuartzClockTickRate"
+        },
+        {
+          "name": "Num Frames Left",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "change-time-signature",
+      "name": "ChangeTimeSignature",
+      "category": "AudioMixerClock",
+      "signature": "ChangeTimeSignature(Target, In New Time Signature)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In New Time Signature",
+          "type": "FQuartzTimeSignature&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "resume",
+      "name": "Resume",
+      "category": "AudioMixerClock",
+      "signature": "Resume(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pause",
+      "name": "Pause",
+      "category": "AudioMixerClock",
+      "signature": "Pause(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "restart",
+      "name": "Restart",
+      "category": "AudioMixerClock",
+      "signature": "Restart(Target, Pause)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "Pause",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "stop",
+      "name": "Stop",
+      "category": "AudioMixerClock",
+      "signature": "Stop(Target, Cancel Pending Events)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "Cancel Pending Events",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-sample-rate",
+      "name": "SetSampleRate",
+      "category": "AudioMixerClock",
+      "signature": "SetSampleRate(Target, In New Sample Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In New Sample Rate",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-transport",
+      "name": "ResetTransport",
+      "category": "AudioMixerClock",
+      "signature": "ResetTransport(Target, Num Frames To Tick Before Reset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "Num Frames To Tick Before Reset",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-to-tick-delay",
+      "name": "AddToTickDelay",
+      "category": "AudioMixerClock",
+      "signature": "AddToTickDelay(Target, Num Frames Of Delay To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "Num Frames Of Delay To Add",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-tick-delay",
+      "name": "SetTickDelay",
+      "category": "AudioMixerClock",
+      "signature": "SetTickDelay(Target, Num Frames Of Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "Num Frames Of Delay",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "AudioMixerClock",
+      "signature": "Shutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-name",
+      "name": "GetName",
+      "category": "AudioMixerClock",
+      "signature": "GetName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "ignores-flush",
+      "name": "IgnoresFlush",
+      "category": "AudioMixerClock",
+      "signature": "IgnoresFlush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "does-match-settings",
+      "name": "DoesMatchSettings",
+      "category": "AudioMixerClock",
+      "signature": "DoesMatchSettings(Target, In Clock Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Clock Settings",
+          "type": "FQuartzClockSettings&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-pending-events",
+      "name": "HasPendingEvents",
+      "category": "AudioMixerClock",
+      "signature": "HasPendingEvents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "num-pending-events",
+      "name": "NumPendingEvents",
+      "category": "AudioMixerClock",
+      "signature": "NumPendingEvents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "is-running",
+      "name": "IsRunning",
+      "category": "AudioMixerClock",
+      "signature": "IsRunning(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-current-timestamp",
+      "name": "GetCurrentTimestamp",
+      "category": "AudioMixerClock",
+      "signature": "GetCurrentTimestamp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "FQuartzTransportTimeStamp"
+    },
+    {
+      "id": "get-estimated-run-time",
+      "name": "GetEstimatedRunTime",
+      "category": "AudioMixerClock",
+      "signature": "GetEstimatedRunTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-mixer-device",
+      "name": "GetMixerDevice",
+      "category": "AudioMixerClock",
+      "signature": "GetMixerDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "FMixerDevice*"
+    },
+    {
+      "id": "get-source-manager",
+      "name": "GetSourceManager",
+      "category": "AudioMixerClock",
+      "signature": "GetSourceManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "FMixerSourceManager*"
+    },
+    {
+      "id": "get-clock-manager",
+      "name": "GetClockManager",
+      "category": "AudioMixerClock",
+      "signature": "GetClockManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "FQuartzClockManager*"
+    },
+    {
+      "id": "get-command-queue",
+      "name": "GetCommandQueue",
+      "category": "AudioMixerClock",
+      "signature": "GetCommandQueue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        }
+      ],
+      "returnType": "FQuartzClockCommandQueueWeakPtr"
+    },
+    {
+      "id": "subscribe-to-time-division",
+      "name": "SubscribeToTimeDivision",
+      "category": "AudioMixerClock",
+      "signature": "SubscribeToTimeDivision(Target, In Subscriber, In Quantization Boundary)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Subscriber",
+          "type": "FQuartzGameThreadSubscriber"
+        },
+        {
+          "name": "In Quantization Boundary",
+          "type": "EQuartzCommandQuantization"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "subscribe-to-all-time-divisions",
+      "name": "SubscribeToAllTimeDivisions",
+      "category": "AudioMixerClock",
+      "signature": "SubscribeToAllTimeDivisions(Target, In Subscriber)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Subscriber",
+          "type": "FQuartzGameThreadSubscriber"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unsubscribe-from-time-division",
+      "name": "UnsubscribeFromTimeDivision",
+      "category": "AudioMixerClock",
+      "signature": "UnsubscribeFromTimeDivision(Target, In Subscriber, In Quantization Boundary)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Subscriber",
+          "type": "FQuartzGameThreadSubscriber"
+        },
+        {
+          "name": "In Quantization Boundary",
+          "type": "EQuartzCommandQuantization"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unsubscribe-from-all-time-divisions",
+      "name": "UnsubscribeFromAllTimeDivisions",
+      "category": "AudioMixerClock",
+      "signature": "UnsubscribeFromAllTimeDivisions(Target, In Subscriber)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Subscriber",
+          "type": "FQuartzGameThreadSubscriber"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-quantized-command-e62177",
+      "name": "AddQuantizedCommand",
+      "category": "AudioMixerClock",
+      "signature": "AddQuantizedCommand(Target, In Quantized Request Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Quantized Request Data",
+          "type": "FQuartzQuantizedRequestData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-quantized-command-2c771c",
+      "name": "AddQuantizedCommand",
+      "category": "AudioMixerClock",
+      "signature": "AddQuantizedCommand(Target, In Quantization Command Init Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Quantization Command Init Info",
+          "type": "FQuartzQuantizedCommandInitInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-quantized-command-3a8e3a",
+      "name": "AddQuantizedCommand",
+      "category": "AudioMixerClock",
+      "signature": "AddQuantizedCommand(Target, In Quantization Boundary, In New Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Quantization Boundary",
+          "type": "FQuartzQuantizationBoundary"
+        },
+        {
+          "name": "In New Event",
+          "type": "TSharedPtr<IQuartzQuantizedCommand>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cancel-quantized-command",
+      "name": "CancelQuantizedCommand",
+      "category": "AudioMixerClock",
+      "signature": "CancelQuantizedCommand(Target, In Command Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Command Ptr",
+          "type": "TSharedPtr<IQuartzQuantizedCommand>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "low-resolution-tick",
+      "name": "LowResolutionTick",
+      "category": "AudioMixerClock",
+      "signature": "LowResolutionTick(Target, In Delta Time Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Delta Time Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "AudioMixerClock",
+      "signature": "Tick(Target, In Num Frames Until Next Tick)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuartzClock*"
+        },
+        {
+          "name": "In Num Frames Until Next Tick",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

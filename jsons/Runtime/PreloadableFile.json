@@ -1,0 +1,602 @@
+{
+  "id": "preloadable-file",
+  "label": "PreloadableFile",
+  "includepath": "Misc/PreloadableFile.h",
+  "includes": [
+    "Array",
+    "Map",
+    "StringFwd",
+    "StringView",
+    "UnrealString",
+    "CoreTypes",
+    "CriticalSection",
+    "AssertionMacros",
+    "Archive",
+    "Atomic",
+    "Function",
+    "SharedPointer",
+    "UniquePtr"
+  ],
+  "functions": [
+    {
+      "id": "f-preloadable-archive-aba1e2",
+      "name": "FPreloadableArchive",
+      "category": "PreloadableFile",
+      "signature": "FPreloadableArchive(Archive Name)",
+      "params": [
+        {
+          "name": "Archive Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-preloadable-archive-03269a",
+      "name": "FPreloadableArchive",
+      "category": "PreloadableFile",
+      "signature": "FPreloadableArchive()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-page-size",
+      "name": "SetPageSize",
+      "category": "PreloadableFile",
+      "signature": "SetPageSize(Target, Page Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "Page Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the PageSize used read requests made to the LowerLevel Archive in PreloadBytes mode when reading bytes into the In-Memory cache. Invalid to set after Initialization; PageSize must be constant during use."
+    },
+    {
+      "id": "initialize-async-b0c3b3",
+      "name": "InitializeAsync",
+      "category": "PreloadableFile",
+      "signature": "InitializeAsync(Target, In Create Archive Function, In Flags, Prime Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "In Create Archive Function",
+          "type": "FCreateArchive&&"
+        },
+        {
+          "name": "In Flags",
+          "type": "UInt",
+          "default": "Flags::None"
+        },
+        {
+          "name": "Prime Size",
+          "type": "Int64",
+          "default": "DefaultPrimeSize"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the FPreloadableFile asynchronously, performing FileOpen operations on another thread. Use IsInitialized or WaitForInitialization to check progress."
+    },
+    {
+      "id": "initialize-async-fc00fe",
+      "name": "InitializeAsync",
+      "category": "PreloadableFile",
+      "signature": "InitializeAsync(Target, In Create Async Archive Function, In Flags, Prime Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "In Create Async Archive Function",
+          "type": "FCreateAsyncArchive&&"
+        },
+        {
+          "name": "In Flags",
+          "type": "UInt",
+          "default": "Flags::None"
+        },
+        {
+          "name": "Prime Size",
+          "type": "Int64",
+          "default": "DefaultPrimeSize"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-initialized",
+      "name": "IsInitialized",
+      "category": "PreloadableFile",
+      "signature": "IsInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether InitializeAsync has completed. If Close is called, state returns to false until the next call to InitializeAsync."
+    },
+    {
+      "id": "wait-for-initialization",
+      "name": "WaitForInitialization",
+      "category": "PreloadableFile",
+      "signature": "WaitForInitialization(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Wait for InitializeAsync to complete if it is running, otherwise return immediately."
+    },
+    {
+      "id": "start-preload",
+      "name": "StartPreload",
+      "category": "PreloadableFile",
+      "signature": "StartPreload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "When in PreloadBytes mode, if not already preloading, allocate if necessary the memory for the preloaded bytes and start the chain of asynchronous ReadRequests for the bytes. Returns whether preloading is now active."
+    },
+    {
+      "id": "stop-preload",
+      "name": "StopPreload",
+      "category": "PreloadableFile",
+      "signature": "StopPreload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cancel any current asynchronous ReadRequests and wait for the asynchronous work to exit."
+    },
+    {
+      "id": "is-preloading",
+      "name": "IsPreloading",
+      "category": "PreloadableFile",
+      "signature": "IsPreloading(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether preloading is in progress. Value may not be up to date since asynchronous work might complete in a race condition."
+    },
+    {
+      "id": "allocate-cache",
+      "name": "AllocateCache",
+      "category": "PreloadableFile",
+      "signature": "AllocateCache(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "When in PreloadBytes mode, allocate if necessary the memory for the preloaded bytes. Return whether the memory is now allocated."
+    },
+    {
+      "id": "release-cache",
+      "name": "ReleaseCache",
+      "category": "PreloadableFile",
+      "signature": "ReleaseCache(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Free all memory used by the cache or for preloading (calling StopPreload if necessary)."
+    },
+    {
+      "id": "is-cache-allocated",
+      "name": "IsCacheAllocated",
+      "category": "PreloadableFile",
+      "signature": "IsCacheAllocated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether the cache is currently allocated."
+    },
+    {
+      "id": "detach-lower-level",
+      "name": "DetachLowerLevel",
+      "category": "PreloadableFile",
+      "signature": "DetachLowerLevel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "FArchive*",
+      "docs": "Return the LowerLevel FArchive if it has been allocated. May return null, even if the FPreloadableFile is currently active. If return value is non-null, caller is responsible for deleting it."
+    },
+    {
+      "id": "has-valid-data",
+      "name": "HasValidData",
+      "category": "PreloadableFile",
+      "signature": "HasValidData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether this archive has an inner archive it can provide data out of. Serialize will fail if this returns false."
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "PreloadableFile",
+      "signature": "Serialize(Target, V, Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "V",
+          "type": "void*"
+        },
+        {
+          "name": "Length",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "seek",
+      "name": "Seek",
+      "category": "PreloadableFile",
+      "signature": "Seek(Target, In Pos)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "In Pos",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tell",
+      "name": "Tell",
+      "category": "PreloadableFile",
+      "signature": "Tell(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Int64"
+    },
+    {
+      "id": "total-size",
+      "name": "TotalSize",
+      "category": "PreloadableFile",
+      "signature": "TotalSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Return the size of the file, or -1 if the file does not exist. This is also the amount of memory that will be allocated by AllocateCache."
+    },
+    {
+      "id": "close",
+      "name": "Close",
+      "category": "PreloadableFile",
+      "signature": "Close(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-archive-name",
+      "name": "GetArchiveName",
+      "category": "PreloadableFile",
+      "signature": "GetArchiveName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "initialize-internal-async",
+      "name": "InitializeInternalAsync",
+      "category": "PreloadableFile",
+      "signature": "InitializeInternalAsync(Target, In Create Archive Function, In Create Async Archive Function, In Flags, Prime Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "In Create Archive Function",
+          "type": "FCreateArchive&&"
+        },
+        {
+          "name": "In Create Async Archive Function",
+          "type": "FCreateAsyncArchive&&"
+        },
+        {
+          "name": "In Flags",
+          "type": "UInt"
+        },
+        {
+          "name": "Prime Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Helper function for InitializeAsync, sets up the asynchronous call to InitializeInternal"
+    },
+    {
+      "id": "initialize-internal",
+      "name": "InitializeInternal",
+      "category": "PreloadableFile",
+      "signature": "InitializeInternal(Target, In Create Archive Function, In Create Async Archive Function, Flags, Prime Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "In Create Archive Function",
+          "type": "FCreateArchive&&"
+        },
+        {
+          "name": "In Create Async Archive Function",
+          "type": "FCreateAsyncArchive&&"
+        },
+        {
+          "name": "Flags",
+          "type": "UInt"
+        },
+        {
+          "name": "Prime Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function for InitializeAsync, called from a TaskGraph thread."
+    },
+    {
+      "id": "serialize-internal",
+      "name": "SerializeInternal",
+      "category": "PreloadableFile",
+      "signature": "SerializeInternal(Target, V, Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "V",
+          "type": "void*"
+        },
+        {
+          "name": "Length",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pause-preload",
+      "name": "PausePreload",
+      "category": "PreloadableFile",
+      "signature": "PausePreload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "resume-preload",
+      "name": "ResumePreload",
+      "category": "PreloadableFile",
+      "signature": "ResumePreload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "resume-preload-non-recursive",
+      "name": "ResumePreloadNonRecursive",
+      "category": "PreloadableFile",
+      "signature": "ResumePreloadNonRecursive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "on-read-complete",
+      "name": "OnReadComplete",
+      "category": "PreloadableFile",
+      "signature": "OnReadComplete(Target, Canceled, Read Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "Canceled",
+          "type": "Bool"
+        },
+        {
+          "name": "Read Request",
+          "type": "IAsyncReadRequest*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "free-retired-requests",
+      "name": "FreeRetiredRequests",
+      "category": "PreloadableFile",
+      "signature": "FreeRetiredRequests(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "serialize-synchronously",
+      "name": "SerializeSynchronously",
+      "category": "PreloadableFile",
+      "signature": "SerializeSynchronously(Target, V, Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableArchive*"
+        },
+        {
+          "name": "V",
+          "type": "void*"
+        },
+        {
+          "name": "Length",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-preloadable-file",
+      "name": "FPreloadableFile",
+      "category": "PreloadableFile",
+      "signature": "FPreloadableFile(File Name)",
+      "params": [
+        {
+          "name": "File Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "An FPreloadableArchive that is customized for reading files from IFileManager.\nThis class also supports registration of instances of this class by filename, which other systems in the engine can use to request\nan FArchive for the preload file, if it exists, replacing a call they would otherwise make to IFileManager::Get().CreateFileReader.\nAs with the base class, the preloading can work in either PreloadBytes or PreloadHandle mode.\nActivate PreloadBytes mode by passing Flags::PreloadBytes to InitializeAsync.\nActivate PreloadHandle mode by passing Flags::PreloadHandle to InitializeAsync, optionally or'd with Flags::Prime."
+    },
+    {
+      "id": "initialize-async-429dc7",
+      "name": "InitializeAsync",
+      "category": "PreloadableFile",
+      "signature": "InitializeAsync(Target, In Flags, Prime Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPreloadableFile*"
+        },
+        {
+          "name": "In Flags",
+          "type": "UInt",
+          "default": "Flags::None"
+        },
+        {
+          "name": "Prime Size",
+          "type": "Int64",
+          "default": "DefaultPrimeSize"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the FPreloadableFile asynchronously, performing FileOpen operations on another thread. Use IsInitialized or WaitForInitialization to check progress."
+    },
+    {
+      "id": "try-register",
+      "name": "TryRegister",
+      "category": "PreloadableFile",
+      "signature": "TryRegister(Preloadable File)",
+      "params": [
+        {
+          "name": "Preloadable File",
+          "type": "TSharedPtr<FPreloadableFile>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Try to register the given FPreloadableFile instance to handle the next call to TryTakeArchive for its FileName.\nWill fail if the instance has not been initialized or if another instance has already registered for the Filename.\nReturn whether the instance is currently registered. Returns true if the instance was already registered.\nRegistered files are referenced-counted, and the reference will not be dropped until (1) (TryTakeArchive or UnRegister is called) and (2) (PreloadBytes mode only) the archive returned from TryTakeArchive is deleted."
+    },
+    {
+      "id": "try-take-archive",
+      "name": "TryTakeArchive",
+      "category": "PreloadableFile",
+      "signature": "TryTakeArchive(File Name)",
+      "params": [
+        {
+          "name": "File Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "FArchive*",
+      "docs": "Look up an FPreloadableFile instance registered for the given FileName, and return an FArchive from it.\nIf found, removes the registration so no future call to TryTakeArchive can sue the same FArchive.\nIf the instance is in PreloadHandle mode, the Lower-Level FArchive will be detached from the FPreloadableFile and returned using DetachLowerLevel.\nIf the instance is in PreloadBytes mode, a ProxyArchive will be returned that forwards call to the FPreloadableFile instance."
+    },
+    {
+      "id": "un-register",
+      "name": "UnRegister",
+      "category": "PreloadableFile",
+      "signature": "UnRegister(Preloadable File)",
+      "params": [
+        {
+          "name": "Preloadable File",
+          "type": "TSharedPtr<FPreloadableFile>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove the FPreloadableFile instance if it is registered for its FileName. Returns whether the instance was registered."
+    }
+  ]
+}

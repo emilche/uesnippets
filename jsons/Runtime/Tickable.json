@@ -1,0 +1,162 @@
+{
+  "id": "tickable",
+  "label": "Tickable",
+  "includepath": "Tickable.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "ScopeLock",
+    "TransactionallySafeCriticalSection",
+    "EngineBaseTypes"
+  ],
+  "functions": [
+    {
+      "id": "queue-tickable-object-for-add",
+      "name": "QueueTickableObjectForAdd",
+      "category": "Tickable",
+      "signature": "QueueTickableObjectForAdd(Target, In Tickable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickableStatics*"
+        },
+        {
+          "name": "In Tickable",
+          "type": "FTickableObjectBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Implementation struct for internals of ticking, there should be one instance of this for each direct subclass"
+    },
+    {
+      "id": "set-tick-type-for-tickable-object",
+      "name": "SetTickTypeForTickableObject",
+      "category": "Tickable",
+      "signature": "SetTickTypeForTickableObject(Target, Tickable Object, New Tick Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickableStatics*"
+        },
+        {
+          "name": "Tickable Object",
+          "type": "FTickableObjectBase*"
+        },
+        {
+          "name": "New Tick Type",
+          "type": "ETickableTickType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call from anywhere to lock critical sections and set the tick type for an object which could modify both arrays"
+    },
+    {
+      "id": "start-ticking",
+      "name": "StartTicking",
+      "category": "Tickable",
+      "signature": "StartTicking(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickableStatics*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call after locking TickableObjectsCritical to process the NewTickableObjects array and prepare for tick"
+    },
+    {
+      "id": "finish-ticking",
+      "name": "FinishTicking",
+      "category": "Tickable",
+      "signature": "FinishTicking(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickableStatics*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Finishes ticking and handle cleanup for entries that were invalidated"
+    },
+    {
+      "id": "simple-tick-objects",
+      "name": "SimpleTickObjects",
+      "category": "Tickable",
+      "signature": "SimpleTickObjects(Statics, Tick Func)",
+      "params": [
+        {
+          "name": "Statics",
+          "type": "FTickableStatics&"
+        },
+        {
+          "name": "Tick Func",
+          "type": "TFunctionRef<void ( FTickableObjectBase* )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform a simple tick using a class-specific statics struct and a function ref"
+    },
+    {
+      "id": "get-statics",
+      "name": "GetStatics",
+      "category": "Tickable",
+      "signature": "GetStatics()",
+      "params": [],
+      "returnType": "FTickableStatics&",
+      "docs": "This class provides common registration for gamethread tickable objects. It is an\nabstract base class requiring you to implement the Tick() and GetStatId() methods.\nCan optionally also be ticked in the Editor, allowing for an object that both ticks\nduring edit time and at runtime."
+    },
+    {
+      "id": "f-tickable-game-object",
+      "name": "FTickableGameObject",
+      "category": "Tickable",
+      "signature": "FTickableGameObject()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Registers this instance with the static array of tickable objects."
+    },
+    {
+      "id": "set-tickable-tick-type",
+      "name": "SetTickableTickType",
+      "category": "Tickable",
+      "signature": "SetTickableTickType(Target, New Tick Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickableGameObject*"
+        },
+        {
+          "name": "New Tick Type",
+          "type": "ETickableTickType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to modify the tickable type of this instance.\nThis can be used to enable or disable tick even if GetTickableTickType has already been called.\n@param NewTickType\tThe new tick type of this instance"
+    },
+    {
+      "id": "tick-objects",
+      "name": "TickObjects",
+      "category": "Tickable",
+      "signature": "TickObjects(World, Level Tick Type, Is Paused, Delta Seconds)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Level Tick Type",
+          "type": "ELevelTick"
+        },
+        {
+          "name": "Is Paused",
+          "type": "Bool"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick all FTickableGameObject instances that match the parameters.\n@param World\t\t\tSpecific world that is ticking, must match GetTickableGameObjectWorld to tick.\n@param LevelTickType\tThe type of tick where LEVELTICK_All is treated like a gameplay tick.\n@param bIsPaused\t\tTrue if the gameplay world is paused, if this is false IsTickableWhenPaused must return true to tick.\n@param DeltaTime\t\tGame time passed since the last call."
+    }
+  ]
+}

@@ -1,0 +1,783 @@
+{
+  "id": "network-object-list",
+  "label": "NetworkObjectList",
+  "includepath": "Engine/NetworkObjectList.h",
+  "includes": [
+    "CoreMinimal",
+    "NetConnection"
+  ],
+  "functions": [
+    {
+      "id": "add-initial-objects",
+      "name": "AddInitialObjects",
+      "category": "NetworkObjectList",
+      "signature": "AddInitialObjects(Target, World, Net Driver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stores the list of replicated actors for a given UNetDriver."
+    },
+    {
+      "id": "find-or-add",
+      "name": "FindOrAdd",
+      "category": "NetworkObjectList",
+      "signature": "FindOrAdd(Target, Actor, Net Driver, Out Was Added)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        },
+        {
+          "name": "Out Was Added",
+          "type": "Bool*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "TSharedPtr<FNetworkObjectInfo>*",
+      "docs": "Attempts to find the Actor's FNetworkObjectInfo.\nIf no info is found, then the Actor will be added to the list, and will assumed to be active.\nIf the Actor is dormant when this is called, it is the responsibility of the caller to call\nMarkDormant immediately.\nIf info cannot be found or created, nullptr will be returned."
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "category": "NetworkObjectList",
+      "signature": "Find(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "TSharedPtr<FNetworkObjectInfo>",
+      "docs": "Attempts to find the Actor's FNetworkObjectInfo.\nIf info is not found (or the Actor is in an invalid state) an invalid TSharedPtr is returned."
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "category": "NetworkObjectList",
+      "signature": "Remove(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes actor from the internal list, and any cleanup that is necessary (i.e. resetting dormancy state)"
+    },
+    {
+      "id": "mark-dormant",
+      "name": "MarkDormant",
+      "category": "NetworkObjectList",
+      "signature": "MarkDormant(Target, Actor, Connection, Num Connections, Net Driver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Num Connections",
+          "type": "Int"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks this object as dormant for the passed in connection"
+    },
+    {
+      "id": "mark-active",
+      "name": "MarkActive",
+      "category": "NetworkObjectList",
+      "signature": "MarkActive(Target, Actor, Connection, Net Driver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Marks this object as active for the passed in connection"
+    },
+    {
+      "id": "mark-dirty-for-replay",
+      "name": "MarkDirtyForReplay",
+      "category": "NetworkObjectList",
+      "signature": "MarkDirtyForReplay(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks this object dirty for replays using delta checkpoints"
+    },
+    {
+      "id": "reset-replay-dirty-tracking",
+      "name": "ResetReplayDirtyTracking",
+      "category": "NetworkObjectList",
+      "signature": "ResetReplayDirtyTracking(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-recently-dormant-connection",
+      "name": "ClearRecentlyDormantConnection",
+      "category": "NetworkObjectList",
+      "signature": "ClearRecentlyDormantConnection(Target, Actor, Connection, Net Driver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes the recently dormant status from the passed in connection"
+    },
+    {
+      "id": "on-actor-is-traveling",
+      "name": "OnActorIsTraveling",
+      "category": "NetworkObjectList",
+      "signature": "OnActorIsTraveling(Target, Traveling Ator)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Traveling Ator",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a replicated actor is about to be carried from one world to another"
+    },
+    {
+      "id": "on-post-seamless-travel",
+      "name": "OnPostSeamlessTravel",
+      "category": "NetworkObjectList",
+      "signature": "OnPostSeamlessTravel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when seamless traveling is almost done just before we initialize the new world"
+    },
+    {
+      "id": "handle-connection-added",
+      "name": "HandleConnectionAdded",
+      "category": "NetworkObjectList",
+      "signature": "HandleConnectionAdded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Does the necessary house keeping when a new connection is added\nWhen a new connection is added, we must add all objects back to the active list so the new connection will process it\nOnce the objects is dormant on that connection, it will then be removed from the active list again"
+    },
+    {
+      "id": "reset-dormancy-state",
+      "name": "ResetDormancyState",
+      "category": "NetworkObjectList",
+      "signature": "ResetDormancyState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears all state related to dormancy"
+    },
+    {
+      "id": "get-num-dormant-actors-for-connection",
+      "name": "GetNumDormantActorsForConnection",
+      "category": "NetworkObjectList",
+      "signature": "GetNumDormantActorsForConnection(Target, Connection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "force-actor-relevant-next-update",
+      "name": "ForceActorRelevantNextUpdate",
+      "category": "NetworkObjectList",
+      "signature": "ForceActorRelevantNextUpdate(Target, Actor, Net Driver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force this actor to be relevant for at least one update"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "NetworkObjectList",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "count-bytes",
+      "name": "CountBytes",
+      "category": "NetworkObjectList",
+      "signature": "CountBytes(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "flush-dormant-actors",
+      "name": "FlushDormantActors",
+      "category": "NetworkObjectList",
+      "signature": "FlushDormantActors(Target, Connection, Package Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Package Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks any actors in the given package/level active if they were fully dormant or dormant for the passed in connection"
+    },
+    {
+      "id": "on-actor-destroyed",
+      "name": "OnActorDestroyed",
+      "category": "NetworkObjectList",
+      "signature": "OnActorDestroyed(Target, Destroyed Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Destroyed Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the netdriver gets notified that an actor is destroyed"
+    },
+    {
+      "id": "set-sub-object-for-deletion",
+      "name": "SetSubObjectForDeletion",
+      "category": "NetworkObjectList",
+      "signature": "SetSubObjectForDeletion(Target, Actor, Sub Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the subobject to be flagged for deletion"
+    },
+    {
+      "id": "set-sub-object-for-tear-off",
+      "name": "SetSubObjectForTearOff",
+      "category": "NetworkObjectList",
+      "signature": "SetSubObjectForTearOff(Target, Actor, Sub Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the subobject to be flagged for tear off"
+    },
+    {
+      "id": "add-sub-object-channel-reference",
+      "name": "AddSubObjectChannelReference",
+      "category": "NetworkObjectList",
+      "signature": "AddSubObjectChannelReference(Target, Owner Actor, Replicated Sub Object, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Replicated Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a channel starts replicating a subobject for the first time.\nUsed to keep track of the number of channels having an active reference to a specific subobject"
+    },
+    {
+      "id": "remove-sub-object-channel-reference",
+      "name": "RemoveSubObjectChannelReference",
+      "category": "NetworkObjectList",
+      "signature": "RemoveSubObjectChannelReference(Target, Owner Actor, Replicated Sub Object, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Replicated Sub Object",
+          "type": "TWeakObjectPtr<UObject>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a channel stops replicating a subobject."
+    },
+    {
+      "id": "remove-multiple-sub-object-channel-reference",
+      "name": "RemoveMultipleSubObjectChannelReference",
+      "category": "NetworkObjectList",
+      "signature": "RemoveMultipleSubObjectChannelReference(Target, Owner Actor Key, Sub Objects To Remove, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor Key",
+          "type": "FObjectKey"
+        },
+        {
+          "name": "Sub Objects To Remove",
+          "type": "TArrayView<TWeakObjectPtr<UObject>>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when multiple subobjects need to remove their reference from either the active or inactive list"
+    },
+    {
+      "id": "remove-multiple-invalid-sub-object-channel-reference",
+      "name": "RemoveMultipleInvalidSubObjectChannelReference",
+      "category": "NetworkObjectList",
+      "signature": "RemoveMultipleInvalidSubObjectChannelReference(Target, Owner Actor Key, Sub Objects To Remove, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor Key",
+          "type": "FObjectKey"
+        },
+        {
+          "name": "Sub Objects To Remove",
+          "type": "TArrayView<TWeakObjectPtr<UObject>>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when multiple subobjects that were flagged torn off or delete have removed their channel reference"
+    },
+    {
+      "id": "remove-multiple-active-sub-object-channel-reference",
+      "name": "RemoveMultipleActiveSubObjectChannelReference",
+      "category": "NetworkObjectList",
+      "signature": "RemoveMultipleActiveSubObjectChannelReference(Target, Owner Actor Key, Sub Objects To Remove, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor Key",
+          "type": "FObjectKey"
+        },
+        {
+          "name": "Sub Objects To Remove",
+          "type": "TArrayView<TWeakObjectPtr<UObject>>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when multiple subobjects that were still considered active have removed their channel reference"
+    },
+    {
+      "id": "find-actor-invalid-sub-objects",
+      "name": "FindActorInvalidSubObjects",
+      "category": "NetworkObjectList",
+      "signature": "FindActorInvalidSubObjects(Target, Owner Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "FNetworkObjectList::FActorInvalidSubObjectView",
+      "docs": "Returns a struct holding the dirty count and a possible list of invalid subobjects who still have references to specific connections."
+    },
+    {
+      "id": "swap-multiple-references-for-dormancy",
+      "name": "SwapMultipleReferencesForDormancy",
+      "category": "NetworkObjectList",
+      "signature": "SwapMultipleReferencesForDormancy(Target, Owner Actor, Sub Objects To Swap, Previous Channel Ref Owner, New Connection Ref Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Sub Objects To Swap",
+          "type": "TArrayView<TWeakObjectPtr<UObject>>&"
+        },
+        {
+          "name": "Previous Channel Ref Owner",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "New Connection Ref Owner",
+          "type": "UNetConnection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Keep track of the transfer of ownership from the channel to the connection when the actor becomes dormant.\nThis is only needed to ensure the debug reference tracking is up to date.\nNo actual logic is modified here."
+    },
+    {
+      "id": "swap-reference-for-dormancy",
+      "name": "SwapReferenceForDormancy",
+      "category": "NetworkObjectList",
+      "signature": "SwapReferenceForDormancy(Target, Owner Actor, Replicated Sub Object, Previous Connection Ref Owner, New Channel Ref Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Owner Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Replicated Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Previous Connection Ref Owner",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "New Channel Ref Owner",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-active-internal",
+      "name": "MarkActiveInternal",
+      "category": "NetworkObjectList",
+      "signature": "MarkActiveInternal(Target, Object Info, Connection, Net Driver)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Object Info",
+          "type": "TSharedPtr<FNetworkObjectInfo>&"
+        },
+        {
+          "name": "Connection",
+          "type": "UNetConnection*"
+        },
+        {
+          "name": "Net Driver",
+          "type": "UNetDriver*"
+        }
+      ],
+      "returnType": "private : bool"
+    },
+    {
+      "id": "invalidate-sub-object",
+      "name": "InvalidateSubObject",
+      "category": "NetworkObjectList",
+      "signature": "InvalidateSubObject(Target, Actor, Sub Object, Invalid Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Invalid Status",
+          "type": "ENetSubObjectStatus"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "handle-remove-any-sub-object-channel-ref",
+      "name": "HandleRemoveAnySubObjectChannelRef",
+      "category": "NetworkObjectList",
+      "signature": "HandleRemoveAnySubObjectChannelRef(Target, Sub Objects Ref Info, Replicated Sub Object, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Sub Objects Ref Info",
+          "type": "FActorSubObjectReferences&"
+        },
+        {
+          "name": "Replicated Sub Object",
+          "type": "TWeakObjectPtr<UObject>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "handle-remove-active-sub-object-ref",
+      "name": "HandleRemoveActiveSubObjectRef",
+      "category": "NetworkObjectList",
+      "signature": "HandleRemoveActiveSubObjectRef(Target, Sub Objects Ref Info, Replicated Sub Object, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Sub Objects Ref Info",
+          "type": "FActorSubObjectReferences&"
+        },
+        {
+          "name": "Replicated Sub Object",
+          "type": "TWeakObjectPtr<UObject>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "handle-remove-invalid-sub-object-ref",
+      "name": "HandleRemoveInvalidSubObjectRef",
+      "category": "NetworkObjectList",
+      "signature": "HandleRemoveInvalidSubObjectRef(Target, Sub Objects Ref Info, Replicated Sub Object, Reference Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Sub Objects Ref Info",
+          "type": "FActorSubObjectReferences&"
+        },
+        {
+          "name": "Replicated Sub Object",
+          "type": "TWeakObjectPtr<UObject>&"
+        },
+        {
+          "name": "Reference Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "handle-swap-reference-for-dormancy",
+      "name": "HandleSwapReferenceForDormancy",
+      "category": "NetworkObjectList",
+      "signature": "HandleSwapReferenceForDormancy(Target, Actor Net Info, Sub Object Ptr, Previous Ref Owner, New Ref Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetworkObjectList*"
+        },
+        {
+          "name": "Actor Net Info",
+          "type": "FActorSubObjectReferences*"
+        },
+        {
+          "name": "Sub Object Ptr",
+          "type": "TWeakObjectPtr<UObject>&"
+        },
+        {
+          "name": "Previous Ref Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "New Ref Owner",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

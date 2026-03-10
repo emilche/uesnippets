@@ -1,0 +1,187 @@
+{
+  "id": "bit-packing",
+  "label": "BitPacking",
+  "includepath": "Iris/Serialization/BitPacking.h",
+  "includes": [
+    "type_traits",
+    "NetBitStreamReader",
+    "NetBitStreamWriter",
+    "EnableIf",
+    "IsIntegral",
+    "IsSigned"
+  ],
+  "functions": [
+    {
+      "id": "serialize-int-delta",
+      "name": "SerializeIntDelta",
+      "category": "BitPacking",
+      "signature": "SerializeIntDelta(Writer, Value, Prev Value, Small Bit Count Table, Small Bit Count Table Entry Count, Large Bit Count)",
+      "params": [
+        {
+          "name": "Writer",
+          "type": "FNetBitStreamWriter&"
+        },
+        {
+          "name": "Value",
+          "type": "Int"
+        },
+        {
+          "name": "Prev Value",
+          "type": "Int"
+        },
+        {
+          "name": "Small Bit Count Table",
+          "type": "Byte*"
+        },
+        {
+          "name": "Small Bit Count Table Entry Count",
+          "type": "UInt"
+        },
+        {
+          "name": "Large Bit Count",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "All the SerializeIntDelta functions assume that the Value and PrevValue are representable using LargeBitCount. Negative values are expected to be properly represented\nwith set bits from LargeBitCount and up. The SmallBitCountTable should be kept relatively small as the index into it must be replicated. The SmallBitCountTableEntryCount\nneeds to be a power of two minus one, i.e. of the form (2^N) - 1. The LargeBitCount is treated as the last entry in the table and is used when the delta between the\nValue and PrevValue cannot be represented with any of the bit counts in the table. 0 is a valid bit count in the first entry but is only used when the Value and PrevValue\nare equal."
+    },
+    {
+      "id": "deserialize-int-delta",
+      "name": "DeserializeIntDelta",
+      "category": "BitPacking",
+      "signature": "DeserializeIntDelta(Reader, Out Value, Prev Value, Small Bit Count Table, Small Bit Count Table Entry Count, Large Bit Count)",
+      "params": [
+        {
+          "name": "Reader",
+          "type": "FNetBitStreamReader&"
+        },
+        {
+          "name": "Out Value",
+          "type": "Int&"
+        },
+        {
+          "name": "Prev Value",
+          "type": "Int"
+        },
+        {
+          "name": "Small Bit Count Table",
+          "type": "Byte*"
+        },
+        {
+          "name": "Small Bit Count Table Entry Count",
+          "type": "UInt"
+        },
+        {
+          "name": "Large Bit Count",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "All the DeserializeIntDelta functions assume that the PrevValue is representable using LargeBitCount. Negative values are expected to be properly represented with set bits from LargeBitCount and up.\nThe OutValue is guaranteed to also be representable using LargeBitCount. An incorrectly replicated delta will never be able to cause on overflow on the receiving side.\nThis is ensured via masking and sign-bit propagation."
+    },
+    {
+      "id": "serialize-uint-delta",
+      "name": "SerializeUintDelta",
+      "category": "BitPacking",
+      "signature": "SerializeUintDelta(Writer, Value, Prev Value, Small Bit Count Table, Small Bit Count Table Entry Count, Large Bit Count)",
+      "params": [
+        {
+          "name": "Writer",
+          "type": "FNetBitStreamWriter&"
+        },
+        {
+          "name": "Value",
+          "type": "UInt"
+        },
+        {
+          "name": "Prev Value",
+          "type": "UInt"
+        },
+        {
+          "name": "Small Bit Count Table",
+          "type": "Byte*"
+        },
+        {
+          "name": "Small Bit Count Table Entry Count",
+          "type": "UInt"
+        },
+        {
+          "name": "Large Bit Count",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "All the SerializeUintDelta functions assume that the Value and PrevValue are representable using LargeBitCount. For SmallBitCountTable information see SerializeIntDelta.\n@see SerializeIntDelta"
+    },
+    {
+      "id": "deserialize-uint-delta",
+      "name": "DeserializeUintDelta",
+      "category": "BitPacking",
+      "signature": "DeserializeUintDelta(Reader, Out Value, Prev Value, Small Bit Count Table, Small Bit Count Table Entry Count, Large Bit Count)",
+      "params": [
+        {
+          "name": "Reader",
+          "type": "FNetBitStreamReader&"
+        },
+        {
+          "name": "Out Value",
+          "type": "UInt&"
+        },
+        {
+          "name": "Prev Value",
+          "type": "UInt"
+        },
+        {
+          "name": "Small Bit Count Table",
+          "type": "Byte*"
+        },
+        {
+          "name": "Small Bit Count Table Entry Count",
+          "type": "UInt"
+        },
+        {
+          "name": "Large Bit Count",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "All the DeserializeIntDelta functions assume that the PrevValue is representable using LargeBitCount. The OutValue is guaranteed to also be representable using LargeBitCount.\nAn incorrectly replicated delta will never be able to cause on overflow on the receiving side. This is ensured via masking."
+    },
+    {
+      "id": "quantize-signed-unit-float",
+      "name": "QuantizeSignedUnitFloat",
+      "category": "BitPacking",
+      "signature": "QuantizeSignedUnitFloat(Value, Bit Count)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "Float"
+        },
+        {
+          "name": "Bit Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Converts a unit float to a quantized representation using a specified bit count.\n@param Value A float in range [-1.0f, 1.0f]. No clamping is performed.\n@param BitCount The desired bit count of the quantized value.\n@return The quantized representation. Unused top bits will be zero.\n@note For bit counts > 23 the return value will use 25 bits, otherwise exactly as many bits as requested."
+    },
+    {
+      "id": "dequantize-signed-unit-float",
+      "name": "DequantizeSignedUnitFloat",
+      "category": "BitPacking",
+      "signature": "DequantizeSignedUnitFloat(Value, Bit Count)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "UInt"
+        },
+        {
+          "name": "Bit Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Dequantizes the value returned from QuantizeSignedUnitFloat or DeserializeSignedUnitFloat called with the same BitCount.\n@param Value The quantized value, as returned by QuantizeSignedUnitFloat.\n@return The float in range [-1.0f, 1.0f] corresponding to the quantized value.\n@see QuantizeSignedUnitFloat"
+    }
+  ]
+}

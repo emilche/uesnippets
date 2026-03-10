@@ -1,0 +1,250 @@
+{
+  "id": "local-planar-simplify",
+  "label": "LocalPlanarSimplify",
+  "includepath": "Operations/LocalPlanarSimplify.h",
+  "includes": [
+    "MathUtil",
+    "VectorTypes",
+    "GeometryTypes",
+    "InfoTypes"
+  ],
+  "functions": [
+    {
+      "id": "simplify-along-edges",
+      "name": "SimplifyAlongEdges",
+      "category": "LocalPlanarSimplify",
+      "signature": "SimplifyAlongEdges(Target, Mesh, In Out Edges, Process Collapse)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLocalPlanarSimplify*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "In Out Edges",
+          "type": "TSet<int32>&"
+        },
+        {
+          "name": "Process Collapse",
+          "type": "TUniqueFunction<void ( DynamicMeshInfo::FEdgeCollapseInfo& )>",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Prevent simplification from distorting triangle groups"
+    },
+    {
+      "id": "collapse-degenerate-edges",
+      "name": "CollapseDegenerateEdges",
+      "category": "LocalPlanarSimplify",
+      "signature": "CollapseDegenerateEdges(Mesh, In Out Edges, Remove All Degenerate From Input Set, Degenerate Edge Len Tol, Triangle Selection)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "In Out Edges",
+          "type": "TSet<int32>&"
+        },
+        {
+          "name": "Remove All Degenerate From Input Set",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Degenerate Edge Len Tol",
+          "type": "Double",
+          "default": "UE_DOUBLE_SMALL_NUMBER"
+        },
+        {
+          "name": "Triangle Selection",
+          "type": "TSet<int>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collapse degenerate edges. Note that SimplifyAlongEdges currently assumes that this (or a similar pass) is run beforehand\n@param Mesh Mesh to repair\n@param InOutEdges Set of edges to consider for collapse; optionally updated by removing edges at they are collapsed\n@param bRemoveAllDegenerateFromInputSet Whether we should also check whether the neighbor edges removed by collapse were also in the set. Note: Often not needed, and has additional processing cost.\n@param DegenerateEdgeLenTol Tolerance length at which we collapse edges\n@param TriangleSelection\tOptional set tracking an active selection. Any triangles removed by collapse will also be removed from the set."
+    },
+    {
+      "id": "is-flat",
+      "name": "IsFlat",
+      "category": "LocalPlanarSimplify",
+      "signature": "IsFlat(Mesh, VID, Dot Tolerance, Out First Normal)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "VID",
+          "type": "Int"
+        },
+        {
+          "name": "Dot Tolerance",
+          "type": "Double"
+        },
+        {
+          "name": "Out First Normal",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test if the triangles connected to a vertex are all coplanar\n@param Mesh The mesh to query\n@param VID The vertex to query\n@param DotTolerance If the dot product of two normals are >= this tolerance, the normals are considered equivalent\n@param The normal of the first triangle attached to the vertex.\n@return Whether all the triangles were coplanar"
+    },
+    {
+      "id": "is-developable-along-edge",
+      "name": "IsDevelopableAlongEdge",
+      "category": "LocalPlanarSimplify",
+      "signature": "IsDevelopableAlongEdge(Mesh, EID, VID, Dot Tolerance, Normal A, Is Flat)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "EID",
+          "type": "Int"
+        },
+        {
+          "name": "VID",
+          "type": "Int"
+        },
+        {
+          "name": "Dot Tolerance",
+          "type": "Double"
+        },
+        {
+          "name": "Normal A",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Is Flat",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test if the triangles connected to a vertex could be flattened by folding along the given edge\n@param Mesh The mesh to query\n@param EID The edge around which the triangles are allowed to fold\n@param VID The vertex to query\n@param DotTolerance If the dot product of two normals are >= this tolerance, the normals are considered equivalent\n@param The normal of the first triangle attached to the vertex.\n@return Whether all the triangles were coplanar"
+    },
+    {
+      "id": "collapse-would-hurt-triangle-quality",
+      "name": "CollapseWouldHurtTriangleQuality",
+      "category": "LocalPlanarSimplify",
+      "signature": "CollapseWouldHurtTriangleQuality(Mesh, Remove V Normal, Remove V, Remove V Pos, Keep V, Keep V Pos, Try To Improve Tri Quality Threshold, Has Multiple Normals)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Remove V Normal",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Remove V",
+          "type": "Int"
+        },
+        {
+          "name": "Remove V Pos",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Keep V",
+          "type": "Int"
+        },
+        {
+          "name": "Keep V Pos",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Try To Improve Tri Quality Threshold",
+          "type": "Double"
+        },
+        {
+          "name": "Has Multiple Normals",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test if a given edge collapse would cause a triangle flip or other unacceptable decrease in mesh quality\nSpecialized for collapsing at flat triangles\n@param Mesh The mesh to query\n@param RemoveVNormal Only used if bHasMultipleNormals==false, i.e. if the surface is locally flat, to avoid recomputing the normal. The normal for all triangles surrounding RemoveV.\n@param RemoveV The vertex to consider removing by an edge collapse\n@param RemoveVPos The position of the vertex RemoveV\n@param KeepV The vertex that is not being removed in the edge collapse\n@param KeepVPos The position of vertex KeepV\n@param TryToImproveTriQualityThreshold Threshold for triangle quality (see comment for class member, above)\n@param bHasMultipleNormals If false, assume the triangulation is locally flat, so we can use ExpectNormal instead of recomputing the expected normal"
+    },
+    {
+      "id": "collapse-would-change-shape-or-u-vs",
+      "name": "CollapseWouldChangeShapeOrUVs",
+      "category": "LocalPlanarSimplify",
+      "signature": "CollapseWouldChangeShapeOrUVs(Mesh, Path Edge Set, Dot Tolerance, Source EID, Remove V, Remove V Pos, Keep V, Keep V Pos, Edge Dir, Preserve Triangle Groups, Preserve U Vs For Mesh, Preserve Vertex U Vs, Preserve Overlay U Vs, UV Tolerance Sq, Preserve Vertex Normals, Normal Equal Cos Threshold)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Path Edge Set",
+          "type": "TSet<int>&"
+        },
+        {
+          "name": "Dot Tolerance",
+          "type": "Double"
+        },
+        {
+          "name": "Source EID",
+          "type": "Int"
+        },
+        {
+          "name": "Remove V",
+          "type": "Int"
+        },
+        {
+          "name": "Remove V Pos",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Keep V",
+          "type": "Int"
+        },
+        {
+          "name": "Keep V Pos",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Edge Dir",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Preserve Triangle Groups",
+          "type": "Bool"
+        },
+        {
+          "name": "Preserve U Vs For Mesh",
+          "type": "Bool"
+        },
+        {
+          "name": "Preserve Vertex U Vs",
+          "type": "Bool"
+        },
+        {
+          "name": "Preserve Overlay U Vs",
+          "type": "Bool"
+        },
+        {
+          "name": "UV Tolerance Sq",
+          "type": "Float"
+        },
+        {
+          "name": "Preserve Vertex Normals",
+          "type": "Bool"
+        },
+        {
+          "name": "Normal Equal Cos Threshold",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test if a given edge collapse would change the mesh shape, mesh triangle group shape, or UVs unacceptably"
+    }
+  ]
+}

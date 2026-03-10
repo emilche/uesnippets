@@ -1,0 +1,502 @@
+{
+  "id": "socket-subsystem",
+  "label": "SocketSubsystem",
+  "includepath": "SocketSubsystem.h",
+  "includes": [
+    "AddressInfoTypes",
+    "Array",
+    "Map",
+    "StringConv",
+    "UnrealString",
+    "CoreMinimal",
+    "CoreTypes",
+    "CriticalSection",
+    "IPAddress",
+    "LogMacros",
+    "SocketErrors",
+    "SocketTypes",
+    "SharedPointer",
+    "UniquePtr",
+    "NameTypes",
+    "UnrealNames"
+  ],
+  "functions": [
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "SocketSubsystem",
+      "signature": "Get(Subsystem Name)",
+      "params": [
+        {
+          "name": "Subsystem Name",
+          "type": "Name&",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "public : ISocketSubsystem*",
+      "docs": "A unique pointer that will automatically call ISocketSubsystem::DestroySocket on its owned socket."
+    },
+    {
+      "id": "shutdown-all-systems",
+      "name": "ShutdownAllSystems",
+      "category": "SocketSubsystem",
+      "signature": "ShutdownAllSystems()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Shutdown all registered subsystems"
+    },
+    {
+      "id": "i-socket-subsystem",
+      "name": "ISocketSubsystem",
+      "category": "SocketSubsystem",
+      "signature": "ISocketSubsystem()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-unique-socket-429cd2",
+      "name": "CreateUniqueSocket",
+      "category": "SocketSubsystem",
+      "signature": "CreateUniqueSocket(Target, Socket Type, Socket Description, Force UDP)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Socket Type",
+          "type": "Name&"
+        },
+        {
+          "name": "Socket Description",
+          "type": "String&"
+        },
+        {
+          "name": "Force UDP",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "FUniqueSocket",
+      "docs": "Creates a socket wrapped in a unique pointer that will call DestroySocket automatically - do not call it explicitly!\nThis SocketSubsystem must also outlive the sockets it creates.\n@Param SocketType type of socket to create (DGram, Stream, etc)\n@param SocketDescription debug description\n@param bForceUDP overrides any platform specific protocol with UDP instead\n@return the new socket or NULL if failed"
+    },
+    {
+      "id": "create-unique-socket-61e05d",
+      "name": "CreateUniqueSocket",
+      "category": "SocketSubsystem",
+      "signature": "CreateUniqueSocket(Target, Socket Type, Socket Description, Protocol Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Socket Type",
+          "type": "Name&"
+        },
+        {
+          "name": "Socket Description",
+          "type": "String&"
+        },
+        {
+          "name": "Protocol Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "FUniqueSocket",
+      "docs": "Creates a socket using the given protocol name,  wrapped in a unique pointer that will call DestroySocket automatically - do not call it explicitly!\nThis SocketSubsystem must also outlive the sockets it creates.\n@Param SocketType type of socket to create (DGram, Stream, etc)\n@param SocketDescription debug description\n@param ProtocolName the name of the internet protocol to use for this socket. None should be handled.\n@return the new socket or NULL if failed"
+    },
+    {
+      "id": "create-resolve-info-cached",
+      "name": "CreateResolveInfoCached",
+      "category": "SocketSubsystem",
+      "signature": "CreateResolveInfoCached(Target, Addr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Addr",
+          "type": "TSharedPtr<FInternetAddr>"
+        }
+      ],
+      "returnType": "class FResolveInfoCached*",
+      "docs": "Creates a resolve info cached struct to hold the resolved address\n@Param Addr address to resolve for the socket subsystem\n@return the new resolved address or NULL if failed"
+    },
+    {
+      "id": "get-address-info-async",
+      "name": "GetAddressInfoAsync",
+      "category": "SocketSubsystem",
+      "signature": "GetAddressInfoAsync(Target, Callback, Host Name, Service Name, Query Flags, Protocol Type Name, Socket Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Callback",
+          "type": "FAsyncGetAddressInfoCallback"
+        },
+        {
+          "name": "Host Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Service Name",
+          "type": "TCHAR*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Query Flags",
+          "type": "EAddressInfoFlags",
+          "default": "EAddressInfoFlags::Default"
+        },
+        {
+          "name": "Protocol Type Name",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "Socket Type",
+          "type": "ESocketType",
+          "default": "ESocketType::SOCKTYPE_Unknown"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Async variant of GetAddressInfo that fetches the data from the above function in an\nasynchronous task executed on an available background thread.\nOn Completion, this fires a callback function that will be executed on the same thread as\nthe task's execution. The caller is responsible for either dispatching the result to the thread of their choosing\nor to allow the result callback execute on the task's thread.\nThis function allows for specifying FNames for the protocol type, allowing for support of other\nplatform protocols\n@param Callback the callback function to fire when this query completes. Contains the FAddressInfoResult structure.\n@param HostName string version of the queryable hostname or ip address\n@param ServiceName string version of a service name (\"http\") or a port number (\"80\")\n@param QueryFlags What flags are used in making the getaddrinfo call. Several flags can be used at once by\nbitwise OR-ing the flags together.\nPlatforms are required to translate this value into a the correct flag representation.\n@param ProtocolTypeName Used to limit results from the call. Specifying None will search all valid protocols.\nCallers will find they rarely have to specify this flag.\n@param SocketType What socket type should the results be formatted for. This typically does not change any\nformatting results and can be safely left to the default value."
+    },
+    {
+      "id": "get-host-by-name",
+      "name": "GetHostByName",
+      "category": "SocketSubsystem",
+      "signature": "GetHostByName(Target, Host Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Host Name",
+          "type": "ANSICHAR*"
+        }
+      ],
+      "returnType": "class FResolveInfo*",
+      "docs": "Creates a platform specific async hostname resolution object\n@param HostName the name of the host to look up\n@return the resolve info to query for the address"
+    },
+    {
+      "id": "create-recv-multi",
+      "name": "CreateRecvMulti",
+      "category": "SocketSubsystem",
+      "signature": "CreateRecvMulti(Target, Max Num Packets, Max Packet Size, Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Max Num Packets",
+          "type": "Int"
+        },
+        {
+          "name": "Max Packet Size",
+          "type": "Int"
+        },
+        {
+          "name": "Flags",
+          "type": "ERecvMultiFlags",
+          "default": "ERecvMultiFlags::None"
+        }
+      ],
+      "returnType": "TUniquePtr<FRecvMulti>",
+      "docs": "Create a platform specific FRecvMulti representation\n@param MaxNumPackets\t\t\tThe maximum number of packet receives supported\n@param MaxPacketSize\t\t\tThe maximum supported packet size\n@param Flags\t\t\t\t\tFlags for specifying how FRecvMulti should be initialized (for e.g. retrieving timestamps)\n@return\t\t\t\t\t\tReturns the platform specific FRecvMulti instance"
+    },
+    {
+      "id": "get-socket-error",
+      "name": "GetSocketError",
+      "category": "SocketSubsystem",
+      "signature": "GetSocketError(Target, Code)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Code",
+          "type": "ESocketErrors",
+          "default": "SE_GET_LAST_ERROR_CODE"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Returns a human readable string from an error code\n@param Code the error code to check"
+    },
+    {
+      "id": "get-local-adapter-addresses",
+      "name": "GetLocalAdapterAddresses",
+      "category": "SocketSubsystem",
+      "signature": "GetLocalAdapterAddresses(Target, Out Addresses)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Out Addresses",
+          "type": "TArray<TSharedPtr<FInternetAddr>>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the list of addresses associated with the adapters on the local computer.\nUnlike GetLocalHostAddr, this function does not give preferential treatment to multihome options in results.\nIt's encouraged that users check for multihome before using the results of this function.\n@param OutAddresses - Will hold the address list.\n@return true on success, false otherwise."
+    },
+    {
+      "id": "get-local-bind-addr",
+      "name": "GetLocalBindAddr",
+      "category": "SocketSubsystem",
+      "signature": "GetLocalBindAddr(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Out",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "TSharedRef<FInternetAddr>",
+      "docs": "Get a local IP to bind to.\nTypically, it is better to use GetLocalBindAddresses as it better supports hybrid network functionality\nand less chances for connections to fail due to mismatched protocols."
+    },
+    {
+      "id": "get-local-bind-addresses",
+      "name": "GetLocalBindAddresses",
+      "category": "SocketSubsystem",
+      "signature": "GetLocalBindAddresses(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        }
+      ],
+      "returnType": "TArray<TSharedRef<FInternetAddr>>",
+      "docs": "Get bindable addresses that this machine can use as reported by GetAddressInfo with the BindableAddress flag.\nThis will return the various any address for usage. If multihome has been specified, only the multihome address\nwill be returned in the array.\n@return If GetAddressInfo succeeded or multihome is specified, an array of addresses that can be binded on. Failure returns an empty array."
+    },
+    {
+      "id": "bind-next-port",
+      "name": "BindNextPort",
+      "category": "SocketSubsystem",
+      "signature": "BindNextPort(Target, Socket, Addr, Port Count, Port Increment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Socket",
+          "type": "FSocket*"
+        },
+        {
+          "name": "Addr",
+          "type": "FInternetAddr&"
+        },
+        {
+          "name": "Port Count",
+          "type": "Int"
+        },
+        {
+          "name": "Port Increment",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Bind to next available port.\n@param Socket The socket that that will bind to the port\n@param Addr The local address and port that is being bound to (usually the result of GetLocalBindAddr()). This addresses port number will be modified in place\n@param PortCount How many ports to try\n@param PortIncrement The amount to increase the port number by on each attempt\n@return The bound port number, or 0 on failure"
+    },
+    {
+      "id": "get-local-host-addr",
+      "name": "GetLocalHostAddr",
+      "category": "SocketSubsystem",
+      "signature": "GetLocalHostAddr(Target, Out, Can Bind All)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Out",
+          "type": "FOutputDevice&"
+        },
+        {
+          "name": "Can Bind All",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "TSharedRef<FInternetAddr>",
+      "docs": "Uses the platform specific look up to determine the host address\nTo better support multiple network interfaces and remove ambiguity between address protocols,\nit is encouraged to use GetLocalAdapterAddresses to determine machine addresses.\nBe sure to check GetMultihomeAddress ahead of time.\n@param Out the output device to log messages to\n@param bCanBindAll true if all can be bound (no primarynet), false otherwise\n@return The local host address"
+    },
+    {
+      "id": "get-multihome-address",
+      "name": "GetMultihomeAddress",
+      "category": "SocketSubsystem",
+      "signature": "GetMultihomeAddress(Target, Addr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Addr",
+          "type": "TSharedRef<FInternetAddr>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns the multihome address if the flag is present and valid. For ease of use,\nthis function will check validity of the address for the caller.\n@param Addr the address structure which will have the Multihome address in it if set.\n@return If the multihome address was set and valid"
+    },
+    {
+      "id": "get-host-by-name-from-cache",
+      "name": "GetHostByNameFromCache",
+      "category": "SocketSubsystem",
+      "signature": "GetHostByNameFromCache(Target, Host Name, Addr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Host Name",
+          "type": "ANSICHAR*"
+        },
+        {
+          "name": "Addr",
+          "type": "TSharedPtr<FInternetAddr>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks the host name cache for an existing entry (faster than resolving again)\n@param HostName the host name to search for\n@param Addr the out param that the IP will be copied to\n@return true if the host was found, false otherwise"
+    },
+    {
+      "id": "add-host-name-to-cache",
+      "name": "AddHostNameToCache",
+      "category": "SocketSubsystem",
+      "signature": "AddHostNameToCache(Target, Host Name, Addr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Host Name",
+          "type": "ANSICHAR*"
+        },
+        {
+          "name": "Addr",
+          "type": "TSharedPtr<FInternetAddr>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stores the ip address with the matching host name\n@param HostName the host name to search for\n@param Addr the IP that will be copied from"
+    },
+    {
+      "id": "remove-host-name-from-cache",
+      "name": "RemoveHostNameFromCache",
+      "category": "SocketSubsystem",
+      "signature": "RemoveHostNameFromCache(Target, Host Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Host Name",
+          "type": "ANSICHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes the host name to ip mapping from the cache\n@param HostName the host name to search for"
+    },
+    {
+      "id": "is-socket-recv-multi-supported",
+      "name": "IsSocketRecvMultiSupported",
+      "category": "SocketSubsystem",
+      "signature": "IsSocketRecvMultiSupported(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if FSocket::RecvMulti is supported by this socket subsystem"
+    },
+    {
+      "id": "translate-packet-timestamp",
+      "name": "TranslatePacketTimestamp",
+      "category": "SocketSubsystem",
+      "signature": "TranslatePacketTimestamp(Target, Timestamp, Translation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "Timestamp",
+          "type": "FPacketTimestamp&"
+        },
+        {
+          "name": "Translation",
+          "type": "ETimestampTranslation",
+          "default": "ETimestampTranslation::LocalTimestamp"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Converts a platform packet timestamp, into a local timestamp, or into a time delta etc.\n@param Timestamp\t\tThe timestamp to translate\n@param Translation\tThe type of translation to perform on the timestamp (time delta is usually faster than local timestamp)\n@return\t\t\t\tReturns the translated timestamp or delta"
+    },
+    {
+      "id": "is-recv-from-with-pkt-info-supported",
+      "name": "IsRecvFromWithPktInfoSupported",
+      "category": "SocketSubsystem",
+      "signature": "IsRecvFromWithPktInfoSupported(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if FSocket::RecvFromWithPktInfo is supported by this socket subsystem."
+    },
+    {
+      "id": "get-protocol-family-from-name",
+      "name": "GetProtocolFamilyFromName",
+      "category": "SocketSubsystem",
+      "signature": "GetProtocolFamilyFromName(Target, In Protocol Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "In Protocol Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "protected : ESocketProtocolFamily",
+      "docs": "Conversion functions from the SocketProtocolFamily enum to the new FName system.\nFor now, both are supported, but it's better to use the FName when possible."
+    },
+    {
+      "id": "get-protocol-name-from-family",
+      "name": "GetProtocolNameFromFamily",
+      "category": "SocketSubsystem",
+      "signature": "GetProtocolNameFromFamily(Target, In Protocol Family)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISocketSubsystem*"
+        },
+        {
+          "name": "In Protocol Family",
+          "type": "ESocketProtocolFamily"
+        }
+      ],
+      "returnType": "Name"
+    }
+  ]
+}

@@ -1,0 +1,374 @@
+{
+  "id": "skeletal-mesh-operations",
+  "label": "SkeletalMeshOperations",
+  "includepath": "SkeletalMeshOperations.h",
+  "includes": [
+    "BoneIndices",
+    "Array",
+    "CoreMinimal",
+    "Platform",
+    "LogMacros",
+    "MeshTypes",
+    "StaticMeshOperations"
+  ],
+  "functions": [
+    {
+      "id": "append-skin-weight",
+      "name": "AppendSkinWeight",
+      "category": "SkeletalMeshOperations",
+      "signature": "AppendSkinWeight(Source Mesh, Target Mesh, Append Settings)",
+      "params": [
+        {
+          "name": "Source Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Target Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Append Settings",
+          "type": "FSkeletalMeshAppendSettings&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "copy-skin-weight-attribute-from-mesh",
+      "name": "CopySkinWeightAttributeFromMesh",
+      "category": "SkeletalMeshOperations",
+      "signature": "CopySkinWeightAttributeFromMesh(In Source Mesh, In Target Mesh, In Source Profile, In Target Profile, Source Bone Index To Target Bone Index Map)",
+      "params": [
+        {
+          "name": "In Source Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Target Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Source Profile",
+          "type": "Name"
+        },
+        {
+          "name": "In Target Profile",
+          "type": "Name"
+        },
+        {
+          "name": "Source Bone Index To Target Bone Index Map",
+          "type": "TMap<int32,int32>*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Copies skin weight attribute from one mesh to another. Assumes the two geometries are identical or near-identical.\nUses closest triangle on the target mesh to interpolate skin weights to each of the points on the target mesh.\nAttributes for the given profiles on both meshes should exist in order for this function to succeed.\n@param InSourceMesh The mesh to copy skin weights from.\n@param InTargetMesh The mesh to copy skin weights to.\n@param InSourceProfile The name of the skin weight profile on the source mesh to read from.\n@param InTargetProfile The name of the skin weight profile on the target mesh to write to.\n@param SourceBoneIndexToTargetBoneIndexMap An optional mapping table to map bone indexes on the source mesh to the target mesh.\nThe table needs to be complete for all the source bone indexes to valid target bone indexes, otherwise the behavior\nis undefined. If the table is not given, the bone indexes on the source and target meshes are assumed to be the same."
+    },
+    {
+      "id": "remap-bone-indices-on-skin-weight-attribute",
+      "name": "RemapBoneIndicesOnSkinWeightAttribute",
+      "category": "SkeletalMeshOperations",
+      "signature": "RemapBoneIndicesOnSkinWeightAttribute(In Mesh, In Bone Index Mapping)",
+      "params": [
+        {
+          "name": "In Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Bone Index Mapping",
+          "type": "TConstArrayView<int32>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remaps the bone indices on all skin weight attributes from one index to another. The array view should contain a full mapping of all the\nbone indices contained in the skin weights. The array is indexed by the current bone index and the value at that index is the new bone index.\nIf the mapping is incomplete or if two entries map to the same bone, the result is undefined. No prior checking is performed.\n@param InMesh The mesh on which to modify all skin weight attributes to remap their bone indices.\n@param InBoneIndexMapping The mapping from one bone index to another. The old bone index is used to index into the array, the value at that\nposition is the new bone index.\n@return true if the operation was successful. If the mapping array was incomplete then this will return false. If there are no skin weight\nattributes on the mesh, then the operation is still deemed successful."
+    },
+    {
+      "id": "get-posed-mesh-5f2313",
+      "name": "GetPosedMesh",
+      "category": "SkeletalMeshOperations",
+      "signature": "GetPosedMesh(In Source Mesh, Out Target Mesh, In Component Space Transforms, In Skin Weight Profile, In Morph Target Weights)",
+      "params": [
+        {
+          "name": "In Source Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Out Target Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Component Space Transforms",
+          "type": "TConstArrayView<FTransform>"
+        },
+        {
+          "name": "In Skin Weight Profile",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "In Morph Target Weights",
+          "type": "TMap<FName,float>&",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns a mesh in the pose given by the component-space transforms passed in. The list of transforms should match exactly\nthe list of bones stored on the mesh. If not, the function fails and returns \\c false.\nIf there are no skin weights on the mesh, or the named skin weight profile doesn't exist, the function also returns \\c false.\nThe resulting bones on the mesh will have their bone-space transforms updated so that the same mesh can be re-posed as needed.\n@param InSourceMesh The mesh to deform.\n@param OutTargetMesh The deformed mesh result.\n@param InComponentSpaceTransforms The component space transforms used to move the mesh joints for deforming, using linear-blend skinning.\n@param InSkinWeightProfile The skin weight profile to use as the source of skin weights for the deformation.\n@param InMorphTargetWeights Optional morph target weights to apply. Any morph target that doesn't exist is ignored.\n@return \\c true if the operation succeeded."
+    },
+    {
+      "id": "get-posed-mesh-d9a5e2",
+      "name": "GetPosedMesh",
+      "category": "SkeletalMeshOperations",
+      "signature": "GetPosedMesh(In Source Mesh, Out Target Mesh, In Bone Space Transforms, In Skin Weight Profile, In Morph Target Weights)",
+      "params": [
+        {
+          "name": "In Source Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Out Target Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Bone Space Transforms",
+          "type": "TMap<FName,FTransform>&"
+        },
+        {
+          "name": "In Skin Weight Profile",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "In Morph Target Weights",
+          "type": "TMap<FName,float>&",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns a mesh in the pose given by the bone-space transforms passed in. The transforms simply replace the matching ref pose transforms\nstored in the bone data on the mesh. Any named transform, that does not match a bone on the mesh, is ignored.\nIf there are no skin weights on the mesh, or the named skin weight profile doesn't exist, the function also returns \\c false.\nThe resulting bones on the mesh will have their bone-space transforms updated so that the same mesh can be re-posed as needed.\n@param InSourceMesh The mesh to deform.\n@param OutTargetMesh The deformed mesh result.\n@param InBoneSpaceTransforms A map of named bone-space transforms.\n@param InSkinWeightProfile The skin weight profile to use as the source of skin weights for the deformation.\n@param InMorphTargetWeights Optional morph target weights to apply. Any morph target that doesn't exist is ignored.\n@return \\c true if the operation succeeded."
+    },
+    {
+      "id": "get-posed-mesh-in-place",
+      "name": "GetPosedMeshInPlace",
+      "category": "SkeletalMeshOperations",
+      "signature": "GetPosedMeshInPlace(In Out Target Mesh, In Component Space Transforms, In Skin Weight Profile, In Morph Target Weights, In Skip Recompute Normals Tangents, In Write Bone Pose)",
+      "params": [
+        {
+          "name": "In Out Target Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Component Space Transforms",
+          "type": "TConstArrayView<FTransform>"
+        },
+        {
+          "name": "In Skin Weight Profile",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "In Morph Target Weights",
+          "type": "TMap<FName,float>&",
+          "default": "{}"
+        },
+        {
+          "name": "In Skip Recompute Normals Tangents",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "In Write Bone Pose",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns a mesh in the pose given by the component-space transforms passed in. The list of transforms should match exactly\nthe list of bones stored on the mesh. If not, the function fails and returns \\c false.\nIf there are no skin weights on the mesh, or the named skin weight profile doesn't exist, the function also returns \\c false.\nif bInWriteBonePose is true, the resulting bones on the mesh will have their bone-space transforms updated so that the same mesh can be re-posed as needed.\n@param InOutTargetMesh rest pose mesh to be deformed in place\n@param InComponentSpaceTransforms The component space transforms used to move the mesh joints for deforming, using linear-blend skinning.\n@param InSkinWeightProfile The skin weight profile to use as the source of skin weights for the deformation.\n@param InMorphTargetWeights Optional morph target weights to apply. Any morph target that doesn't exist is ignored.\n@param bInSkipRecomputeNormalsTangents skip recompute normals and tangents to improve performance\n@param bInWriteBonePose whether to write the current bone pose into the mesh description.\n@return \\c true if the operation succeeded."
+    },
+    {
+      "id": "get-unposed-mesh",
+      "name": "GetUnposedMesh",
+      "category": "SkeletalMeshOperations",
+      "signature": "GetUnposedMesh(In Posed Mesh, In Ref Mesh, Ref Bone Transforms, Out Unposed Mesh, In Component Space Transforms, In Skin Weight Profile, In Morph Target Weights)",
+      "params": [
+        {
+          "name": "In Posed Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Ref Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Ref Bone Transforms",
+          "type": "TArray<FTransform>&"
+        },
+        {
+          "name": "Out Unposed Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Component Space Transforms",
+          "type": "TConstArrayView<FTransform>"
+        },
+        {
+          "name": "In Skin Weight Profile",
+          "type": "Name"
+        },
+        {
+          "name": "In Morph Target Weights",
+          "type": "TMap<FName,float>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns the unposed version of the provided posed mesh\n@param InPosedMesh The posed mesh,\n@param InRefMesh Ref mesh containing morph target deltas of existing morphs\n@param RefBoneTransforms Ref component space bone transforms\n@param OutUnposedMesh The mesh with pose reset to reference\n@param InComponentSpaceTransforms Current component space bone transforms\n@param InSkinWeightProfile The skin weight profile to use as the source of skin weights for the deformation.\n@param InMorphTargetWeights Active morph target weights producing the fully deformed mesh. Don't include the weight of the morph target you want to extract\n@return \\c true if the operation succeeded."
+    },
+    {
+      "id": "get-unposed-mesh-in-place",
+      "name": "GetUnposedMeshInPlace",
+      "category": "SkeletalMeshOperations",
+      "signature": "GetUnposedMeshInPlace(In Out Target Mesh, In Ref Mesh, Ref Bone Transforms, In Component Space Transforms, In Skin Weight Profile, In Morph Target Weights, In Write Bone Pose)",
+      "params": [
+        {
+          "name": "In Out Target Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "In Ref Mesh",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Ref Bone Transforms",
+          "type": "TArray<FTransform>&"
+        },
+        {
+          "name": "In Component Space Transforms",
+          "type": "TConstArrayView<FTransform>"
+        },
+        {
+          "name": "In Skin Weight Profile",
+          "type": "Name"
+        },
+        {
+          "name": "In Morph Target Weights",
+          "type": "TMap<FName,float>&"
+        },
+        {
+          "name": "In Write Bone Pose",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns the unposed version of the provided posed mesh\n@param InOutTargetMesh input is the posed mesh, output is the mesh reset to ref pose\n@param InRefMesh Ref mesh containing morph target deltas of existing morphs\n@param RefBoneTransforms Ref component space bone transforms\n@param InComponentSpaceTransforms Current component space bone transforms\n@param InSkinWeightProfile The skin weight profile to use as the source of skin weights for the deformation.\n@param InMorphTargetWeights Active morph target weights producing the fully deformed mesh. Don't include the weight of the morph target you want to extract\n@return \\c true if the operation succeeded."
+    },
+    {
+      "id": "convert-hard-edges-to-smooth-masks",
+      "name": "ConvertHardEdgesToSmoothMasks",
+      "category": "SkeletalMeshOperations",
+      "signature": "ConvertHardEdgesToSmoothMasks(In Mesh Description, Out Smooth Masks)",
+      "params": [
+        {
+          "name": "In Mesh Description",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Out Smooth Masks",
+          "type": "TArray<uint32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A simpler variant of FStaticMeshOperations::ConvertHardEdgesToSmoothGroup that assumes that hard edges always form closed regions."
+    },
+    {
+      "id": "fix-vertex-instance-structure",
+      "name": "FixVertexInstanceStructure",
+      "category": "SkeletalMeshOperations",
+      "signature": "FixVertexInstanceStructure(Source Mesh Description, Target Mesh Description, Source Smoothing Masks, Target Face Smoothing Masks)",
+      "params": [
+        {
+          "name": "Source Mesh Description",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Target Mesh Description",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Source Smoothing Masks",
+          "type": "TArray<uint32>&"
+        },
+        {
+          "name": "Target Face Smoothing Masks",
+          "type": "TArray<uint32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to follow behavior generated in FSkeletalMeshImportData::GetMeshDescription, just straight on FMeshDescriptions.\nFSkeletalMeshImportData::GetMeshDescription makes the VertexInstances a single usage semantics.\nIt also re-orders the vertexInstances to be in a straight increasing sequence, which seems to affect the normal and tangent (FSkeletalMeshOperations::Compute..) generation.\n(Which means, we can't do the restructuring in place.)\nFor that reason we re-create the MeshDescription into the TargetMeshDescription which is expected to be empty."
+    },
+    {
+      "id": "validate-fix-compute-mesh-description-data",
+      "name": "ValidateFixComputeMeshDescriptionData",
+      "category": "SkeletalMeshOperations",
+      "signature": "ValidateFixComputeMeshDescriptionData(Mesh Description, Face Smoothing Masks, LOD Index, Compute Weighted Normals, Skeletal Mesh Path)",
+      "params": [
+        {
+          "name": "Mesh Description",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Face Smoothing Masks",
+          "type": "TArray<uint32>&"
+        },
+        {
+          "name": "LOD Index",
+          "type": "Int"
+        },
+        {
+          "name": "Compute Weighted Normals",
+          "type": "Bool"
+        },
+        {
+          "name": "Skeletal Mesh Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Expected to be empty"
+    },
+    {
+      "id": "validate-and-fix-influences",
+      "name": "ValidateAndFixInfluences",
+      "category": "SkeletalMeshOperations",
+      "signature": "ValidateAndFixInfluences(Mesh Description, Out Influence Count Limit Hit)",
+      "params": [
+        {
+          "name": "Mesh Description",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Out Influence Count Limit Hit",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Function will do the following steps on the MeshDescription (SkeletalMeshDescription) :\n- Sort influences by weight and BoneIndex.\n- Normalize influence weights.\n- provide flag if InfluenceCount exceeds MAX_TOTAL_INFLUENCES\n- Make sure all verts have influences set (if none exist bone 0 with weight 1)"
+    },
+    {
+      "id": "apply-rig-to-geo",
+      "name": "ApplyRigToGeo",
+      "category": "SkeletalMeshOperations",
+      "signature": "ApplyRigToGeo(Rig Mesh Description, Geo Mesh Description)",
+      "params": [
+        {
+          "name": "Rig Mesh Description",
+          "type": "FMeshDescription&"
+        },
+        {
+          "name": "Geo Mesh Description",
+          "type": "FMeshDescription&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Applies the Rig / Skinning found in RigMeshDescription to the Geometry found in GeomeshDescription\nDesired behavior of this function was targeting FSkeletalMeshImportData::ApplyRigToGeo.\nImportant distinction however: FSkeletalMeshImportData::ApplyRigToGeo seem to work based on VertexInstances,\nit also checks the VertexCandidate Normal and UVs and only finds the candidate legitimate if they match between Rig and Geo)\nAs Influences (BoneIndex and BoneWeights) are Vertex (NOT VertexInstance) dependent.\nWhilst original implementation in FSkeletalMeshImportData::ApplyRigToGeo was checking and validating against normals and UVs for NearestWedges,\nwith current implementation we try the NearestVertices with the same principle as the FindMatchingPositionVertexIndexes. (aka based on GetSmallestDeltaBetweenTriangleLists)"
+    }
+  ]
+}

@@ -1,0 +1,402 @@
+{
+  "id": "pbd-collision-constraints",
+  "label": "PBDCollisionConstraints",
+  "includepath": "Chaos/PBDCollisionConstraints.h",
+  "includes": [
+    "CollisionResolutionTypes",
+    "CollisionApplyType",
+    "CollisionConstraintAllocator",
+    "CollisionContext",
+    "PBDCollisionConstraint",
+    "PBDCollisionConstraintHandle",
+    "PBDCollisionSolverSettings",
+    "PBDConstraintContainer",
+    "BufferedData",
+    "memory",
+    "queue",
+    "sstream",
+    "BoundingVolume",
+    "AABBTree"
+  ],
+  "functions": [
+    {
+      "id": "fpbd-collision-constraints-772d0c",
+      "name": "FPBDCollisionConstraints",
+      "category": "PBDCollisionConstraints",
+      "signature": "FPBDCollisionConstraints(In Particles, Collided, Physics Materials, Per Particle Physics Materials, Sim Materials, Num Collisions Per Block, Restitution Threshold)",
+      "params": [
+        {
+          "name": "In Particles",
+          "type": "FPBDRigidsSOAs&"
+        },
+        {
+          "name": "Collided",
+          "type": "TArrayCollectionArray<bool>&"
+        },
+        {
+          "name": "Physics Materials",
+          "type": "TArrayCollectionArray<TSerializablePtr<FChaosPhysicsMaterial>>&"
+        },
+        {
+          "name": "Per Particle Physics Materials",
+          "type": "TArrayCollectionArray<TUniquePtr<FChaosPhysicsMaterial>>&"
+        },
+        {
+          "name": "Sim Materials",
+          "type": "THandleArray<FChaosPhysicsMaterial>*"
+        },
+        {
+          "name": "Num Collisions Per Block",
+          "type": "Int",
+          "default": "1000"
+        },
+        {
+          "name": "Restitution Threshold",
+          "type": "FReal",
+          "default": "FReal(2000)"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A container and solver for collision constraints.\n@todo(chaos): remove handles array"
+    },
+    {
+      "id": "fpbd-collision-constraints-8bd11a",
+      "name": "FPBDCollisionConstraints",
+      "category": "PBDCollisionConstraints",
+      "signature": "FPBDCollisionConstraints()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "disable-handles",
+      "name": "DisableHandles",
+      "category": "PBDCollisionConstraints",
+      "signature": "DisableHandles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Put the container in \"no handles\" mode for use with simple solver. Must be called when empty of constraints (ideally right after creation)."
+    },
+    {
+      "id": "begin-frame",
+      "name": "BeginFrame",
+      "category": "PBDCollisionConstraints",
+      "signature": "BeginFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the list of active constraints.\n@todo(chaos): This is only required because of the way events work (see AdvanceOneTimeStepTask::DoWork)"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "PBDCollisionConstraints",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy all constraints"
+    },
+    {
+      "id": "begin-detect-collisions",
+      "name": "BeginDetectCollisions",
+      "category": "PBDCollisionConstraints",
+      "signature": "BeginDetectCollisions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Called before collision detection to reset contacts"
+    },
+    {
+      "id": "end-detect-collisions",
+      "name": "EndDetectCollisions",
+      "category": "PBDCollisionConstraints",
+      "signature": "EndDetectCollisions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Called after collision detection to finalize the contacts"
+    },
+    {
+      "id": "detect-probe-collisions",
+      "name": "DetectProbeCollisions",
+      "category": "PBDCollisionConstraints",
+      "signature": "DetectProbeCollisions(Target, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Called after collision resolution in order to detect probes"
+    },
+    {
+      "id": "apply-mid-phase-modifier",
+      "name": "ApplyMidPhaseModifier",
+      "category": "PBDCollisionConstraints",
+      "signature": "ApplyMidPhaseModifier(Target, Mid Phase Modifiers, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Mid Phase Modifiers",
+          "type": "TArray<ISimCallbackObject*>&"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply modifiers to particle pair midphases"
+    },
+    {
+      "id": "apply-ccd-modifier",
+      "name": "ApplyCCDModifier",
+      "category": "PBDCollisionConstraints",
+      "signature": "ApplyCCDModifier(Target, CCD Modifiers, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "CCD Modifiers",
+          "type": "TArray<ISimCallbackObject*>&"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply modifiers to CCD results"
+    },
+    {
+      "id": "apply-collision-modifier",
+      "name": "ApplyCollisionModifier",
+      "category": "PBDCollisionConstraints",
+      "signature": "ApplyCollisionModifier(Target, Collision Modifiers, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Collision Modifiers",
+          "type": "TArray<ISimCallbackObject*>&"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply modifiers to the constraints and specify which constraints should be disabled.\nYou would probably call this in the PostComputeCallback. Prefer this to calling RemoveConstraints in a loop,\nso you don't have to worry about constraint iterator/indices changing."
+    },
+    {
+      "id": "remove-constraints",
+      "name": "RemoveConstraints",
+      "category": "PBDCollisionConstraints",
+      "signature": "RemoveConstraints(Target, Particle Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Particle Handle",
+          "type": "TSet<FGeometryParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove the constraints associated with the ParticleHandle."
+    },
+    {
+      "id": "disconnect-constraints",
+      "name": "DisconnectConstraints",
+      "category": "PBDCollisionConstraints",
+      "signature": "DisconnectConstraints(Target, Particle Handles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Particle Handles",
+          "type": "TSet<FGeometryParticleHandle*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Remove all constraints associated with the particles - called when particles are destroyed"
+    },
+    {
+      "id": "add-constraints-to-graph",
+      "name": "AddConstraintsToGraph",
+      "category": "PBDCollisionConstraints",
+      "signature": "AddConstraintsToGraph(Target, Island Manager)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Island Manager",
+          "type": "Private::FPBDIslandManager&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-scene-solver",
+      "name": "CreateSceneSolver",
+      "category": "PBDCollisionConstraints",
+      "signature": "CreateSceneSolver(Target, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Priority",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TUniquePtr<FConstraintContainerSolver>"
+    },
+    {
+      "id": "create-group-solver",
+      "name": "CreateGroupSolver",
+      "category": "PBDCollisionConstraints",
+      "signature": "CreateGroupSolver(Target, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Priority",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TUniquePtr<FConstraintContainerSolver>"
+    },
+    {
+      "id": "get-constraint-handles",
+      "name": "GetConstraintHandles",
+      "category": "PBDCollisionConstraints",
+      "signature": "GetConstraintHandles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "FHandles"
+    },
+    {
+      "id": "get-const-constraint-handles",
+      "name": "GetConstConstraintHandles",
+      "category": "PBDCollisionConstraints",
+      "signature": "GetConstConstraintHandles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "FConstHandles"
+    },
+    {
+      "id": "get-constraint",
+      "name": "GetConstraint",
+      "category": "PBDCollisionConstraints",
+      "signature": "GetConstraint(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FPBDCollisionConstraint&"
+    },
+    {
+      "id": "get-const-constraint",
+      "name": "GetConstConstraint",
+      "category": "PBDCollisionConstraints",
+      "signature": "GetConstConstraint(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FPBDCollisionConstraint&"
+    },
+    {
+      "id": "update-constraint-material-properties",
+      "name": "UpdateConstraintMaterialProperties",
+      "category": "PBDCollisionConstraints",
+      "signature": "UpdateConstraintMaterialProperties(Target, Contact)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        },
+        {
+          "name": "Contact",
+          "type": "FPBDCollisionConstraint&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prune-edge-collisions",
+      "name": "PruneEdgeCollisions",
+      "category": "PBDCollisionConstraints",
+      "signature": "PruneEdgeCollisions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

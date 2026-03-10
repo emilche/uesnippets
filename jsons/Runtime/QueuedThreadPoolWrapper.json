@@ -1,0 +1,314 @@
+{
+  "id": "queued-thread-pool-wrapper",
+  "label": "QueuedThreadPoolWrapper",
+  "includepath": "Misc/QueuedThreadPoolWrapper.h",
+  "includes": [
+    "Scheduler",
+    "Task",
+    "ManualResetEvent",
+    "TaskGraphInterfaces",
+    "Array",
+    "Map",
+    "CoreMinimal",
+    "ConcurrentLinearAllocator",
+    "FAAArrayQueue",
+    "ExecutionResource",
+    "GenericPlatformAffinity",
+    "CriticalSection",
+    "Platform",
+    "PlatformAffinity",
+    "PlatformCrt",
+    "PlatformProcess",
+    "ThreadSafeCounter",
+    "UnrealMemory",
+    "AssertionMacros",
+    "IQueuedWork",
+    "MemStack",
+    "ScopeLock",
+    "QueuedThreadPool",
+    "ScopeRWLock",
+    "Stats",
+    "Atomic",
+    "Function",
+    "RefCounting",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "f-queued-thread-pool-wrapper-e5ebc6",
+      "name": "FQueuedThreadPoolWrapper",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "FQueuedThreadPoolWrapper(In Wrapped Queued Thread Pool, In Max Concurrency, In Priority Mapper)",
+      "params": [
+        {
+          "name": "In Wrapped Queued Thread Pool",
+          "type": "FQueuedThreadPool*"
+        },
+        {
+          "name": "In Max Concurrency",
+          "type": "Int",
+          "default": "-1"
+        },
+        {
+          "name": "In Priority Mapper",
+          "type": "TFunction<EQueuedWorkPriority ( EQueuedWorkPriority )>",
+          "default": "DefaultQueuedWorkPriorityWrapper"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "ThreadPool wrapper implementation allowing to schedule\nup to MaxConcurrency tasks at a time making sub-partitioning\nanother thread-pool a breeze and allowing more fine-grained control\nover scheduling by effectively giving another set of priorities."
+    },
+    {
+      "id": "f-queued-thread-pool-wrapper-14e7e1",
+      "name": "FQueuedThreadPoolWrapper",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "FQueuedThreadPoolWrapper()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "pause",
+      "name": "Pause",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "Pause(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Queued task are not scheduled against the wrapped thread-pool until resumed"
+    },
+    {
+      "id": "resume",
+      "name": "Resume",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "Resume(Target, In Num Queued Work)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "In Num Queued Work",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resume a specified amount of queued work, or -1 to unpause."
+    },
+    {
+      "id": "set-max-concurrency",
+      "name": "SetMaxConcurrency",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "SetMaxConcurrency(Target, Max Concurrency)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "Max Concurrency",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dynamically adjust the maximum number of concurrent tasks, -1 for unlimited."
+    },
+    {
+      "id": "add-queued-work",
+      "name": "AddQueuedWork",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "AddQueuedWork(Target, In Queued Work, In Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "In Queued Work",
+          "type": "IQueuedWork*"
+        },
+        {
+          "name": "In Priority",
+          "type": "EQueuedWorkPriority",
+          "default": "EQueuedWorkPriority::Normal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "retract-queued-work",
+      "name": "RetractQueuedWork",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "RetractQueuedWork(Target, In Queued Work)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "In Queued Work",
+          "type": "IQueuedWork*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-num-threads",
+      "name": "GetNumThreads",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "GetNumThreads(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "f-scheduled-work",
+      "name": "FScheduledWork",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "FScheduledWork()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "allocate-work",
+      "name": "AllocateWork",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "AllocateWork(Target, Inner Work, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "Inner Work",
+          "type": "IQueuedWork*"
+        },
+        {
+          "name": "Priority",
+          "type": "EQueuedWorkPriority"
+        }
+      ],
+      "returnType": "private : FScheduledWork*"
+    },
+    {
+      "id": "can-schedule",
+      "name": "CanSchedule",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "CanSchedule(Target, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "Priority",
+          "type": "EQueuedWorkPriority"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create",
+      "name": "Create",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "Create(Target, In Num Queued Threads, Stack Size, Thread Priority, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "In Num Queued Threads",
+          "type": "UInt"
+        },
+        {
+          "name": "Stack Size",
+          "type": "UInt"
+        },
+        {
+          "name": "Thread Priority",
+          "type": "EThreadPriority"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "destroy",
+      "name": "Destroy",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "Destroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "schedule",
+      "name": "Schedule",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "Schedule(Target, Work)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "Work",
+          "type": "FScheduledWork*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release-work-no-lock",
+      "name": "ReleaseWorkNoLock",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "ReleaseWorkNoLock(Target, Work)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "Work",
+          "type": "FScheduledWork*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "try-retract-work-no-lock",
+      "name": "TryRetractWorkNoLock",
+      "category": "QueuedThreadPoolWrapper",
+      "signature": "TryRetractWorkNoLock(Target, In Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQueuedThreadPoolWrapper*"
+        },
+        {
+          "name": "In Priority",
+          "type": "EQueuedWorkPriority"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

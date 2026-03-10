@@ -29,7 +29,7 @@
           "type": "String&"
         }
       ],
-      "returnType": "class ULocalPlayerSaveGame : public USaveGame",
+      "returnType": "public : ULocalPlayerSaveGame*",
       "docs": "Synchronously loads a save game object in the specified slot for the local player, stalling the main thread until it completes.\nThis will return null for invalid parameters, but will create a new instance if the parameters are valid but loading fails."
     },
     {
@@ -107,6 +107,28 @@
       "docs": "Native version of above function, this takes a ULocalPlayer and calls a native delegate.\nFalse means the load was never scheduled, otherwise it will create and initialize a new instance before calling the delegate if loading failed."
     },
     {
+      "id": "create-new-save-game-for-local-player",
+      "name": "CreateNewSaveGameForLocalPlayer",
+      "category": "SaveGame",
+      "signature": "CreateNewSaveGameForLocalPlayer(Save Game Class, Local Player, Slot Name)",
+      "params": [
+        {
+          "name": "Save Game Class",
+          "type": "TSubclassOf<ULocalPlayerSaveGame>"
+        },
+        {
+          "name": "Local Player",
+          "type": "ULocalPlayer*"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "ULocalPlayerSaveGame*",
+      "docs": "Create a brand new save game, possibly ready for saving but without trying to load from disk. This will always succeed."
+    },
+    {
       "id": "save-game-to-slot-for-local-player",
       "name": "SaveGameToSlotForLocalPlayer",
       "category": "SaveGame",
@@ -149,6 +171,38 @@
       "docs": "Returns the local player controller this is associated with, this will be valid if it is ready to save"
     },
     {
+      "id": "get-local-player",
+      "name": "GetLocalPlayer",
+      "category": "SaveGame",
+      "signature": "GetLocalPlayer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        }
+      ],
+      "returnType": "ULocalPlayer*",
+      "docs": "Returns the local player this is associated with, this will be valid if it is ready to save"
+    },
+    {
+      "id": "set-local-player",
+      "name": "SetLocalPlayer",
+      "category": "SaveGame",
+      "signature": "SetLocalPlayer(Target, Local Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        },
+        {
+          "name": "Local Player",
+          "type": "ULocalPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Associates this save game with a local player, this is called automatically during load/create"
+    },
+    {
       "id": "get-platform-user-id",
       "name": "GetPlatformUserId",
       "category": "SaveGame",
@@ -189,6 +243,24 @@
       ],
       "returnType": "String",
       "docs": "Returns the save slot name to use"
+    },
+    {
+      "id": "set-save-slot-name",
+      "name": "SetSaveSlotName",
+      "category": "SaveGame",
+      "signature": "SetSaveSlotName(Target, Slot Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the save slot name for any future saves"
     },
     {
       "id": "get-saved-data-version",
@@ -289,6 +361,32 @@
       "docs": "Returns true if a save was ever requested, may still be in progress"
     },
     {
+      "id": "initialize-save-game",
+      "name": "InitializeSaveGame",
+      "category": "SaveGame",
+      "signature": "InitializeSaveGame(Target, Local Player, In Slot Name, Was Loaded)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        },
+        {
+          "name": "Local Player",
+          "type": "ULocalPlayer*"
+        },
+        {
+          "name": "In Slot Name",
+          "type": "String"
+        },
+        {
+          "name": "Was Loaded",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes this save after either loading or initial creation, automatically called by load/create functions above"
+    },
+    {
       "id": "reset-to-default",
       "name": "ResetToDefault",
       "category": "SaveGame",
@@ -317,6 +415,20 @@
       "docs": "Blueprint event called to reset all saved data to default, called when the load fails or manually"
     },
     {
+      "id": "handle-post-load",
+      "name": "HandlePostLoad",
+      "category": "SaveGame",
+      "signature": "HandlePostLoad(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after loading, this is not called for newly created saves"
+    },
+    {
       "id": "on-post-load",
       "name": "OnPostLoad",
       "category": "SaveGame",
@@ -331,6 +443,20 @@
       "docs": "Blueprint event called after loading, is not called for newly created saves"
     },
     {
+      "id": "handle-pre-save",
+      "name": "HandlePreSave",
+      "category": "SaveGame",
+      "signature": "HandlePreSave(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called before saving, do any game-specific fixup here"
+    },
+    {
       "id": "on-pre-save",
       "name": "OnPreSave",
       "category": "SaveGame",
@@ -343,6 +469,24 @@
       ],
       "returnType": "Void",
       "docs": "Blueprint event called before saving, do any game-specific fixup here"
+    },
+    {
+      "id": "handle-post-save",
+      "name": "HandlePostSave",
+      "category": "SaveGame",
+      "signature": "HandlePostSave(Target, Success)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        },
+        {
+          "name": "Success",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after saving finishes with success/failure result"
     },
     {
       "id": "on-post-save",
@@ -361,6 +505,66 @@
       ],
       "returnType": "Void",
       "docs": "Blueprint event called after saving finishes with success/failure result"
+    },
+    {
+      "id": "process-save-complete",
+      "name": "ProcessSaveComplete",
+      "category": "SaveGame",
+      "signature": "ProcessSaveComplete(Target, Slot Name, User Index, Success, Save Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULocalPlayerSaveGame*"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        },
+        {
+          "name": "Success",
+          "type": "Bool"
+        },
+        {
+          "name": "Save Request",
+          "type": "Int"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "Internal callback that will call HandlePostSave"
+    },
+    {
+      "id": "process-loaded-save",
+      "name": "ProcessLoadedSave",
+      "category": "SaveGame",
+      "signature": "ProcessLoadedSave(Base Save, Slot Name, User Index, Save Game Class, Local Player)",
+      "params": [
+        {
+          "name": "Base Save",
+          "type": "USaveGame*"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        },
+        {
+          "name": "Save Game Class",
+          "type": "TSubclassOf<ULocalPlayerSaveGame>"
+        },
+        {
+          "name": "Local Player",
+          "type": "ULocalPlayer*"
+        }
+      ],
+      "returnType": "ULocalPlayerSaveGame*",
+      "docs": "Internal helper function used by both the sync and async save"
     }
   ]
 }

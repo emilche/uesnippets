@@ -36,7 +36,7 @@
           "type": "UObject*"
         }
       ],
-      "returnType": "class UGameplayStatics : public UBlueprintFunctionLibrary"
+      "returnType": "UObject*"
     },
     {
       "id": "begin-spawning-actor-from-blueprint",
@@ -1428,6 +1428,49 @@
       "docs": "Plays the specified effect at the given location and rotation, fire and forget. The system will go away when the effect is complete. Does not replicate.\n@param World - The World to spawn in\n@param EmitterTemplate - particle system to create\n@param SpawnTransform - transform with which to place the effect in world space\n@param bAutoDestroy - Whether the component will automatically be destroyed when the particle system completes playing or whether it can be reactivated\n@param PoolingMethod - Method used for pooling this component. Defaults to none.\n@param bAutoActivate - Whether the component will be automatically activated on creation."
     },
     {
+      "id": "internal-spawn-emitter-at-location",
+      "name": "InternalSpawnEmitterAtLocation",
+      "category": "GameplayStatics",
+      "signature": "InternalSpawnEmitterAtLocation(World, Emitter Template, Location, Rotation, Scale, Auto Destroy, Pooling Method, Auto Activate)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Emitter Template",
+          "type": "UParticleSystem*"
+        },
+        {
+          "name": "Location",
+          "type": "FVector"
+        },
+        {
+          "name": "Rotation",
+          "type": "FRotator"
+        },
+        {
+          "name": "Scale",
+          "type": "FVector"
+        },
+        {
+          "name": "Auto Destroy",
+          "type": "Bool"
+        },
+        {
+          "name": "Pooling Method",
+          "type": "EPSCPoolMethod",
+          "default": "EPSCPoolMethod::None"
+        },
+        {
+          "name": "Auto Activate",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "private : UParticleSystemComponent*"
+    },
+    {
       "id": "spawn-emitter-attached-e64d12",
       "name": "SpawnEmitterAttached",
       "category": "Effects",
@@ -1482,7 +1525,7 @@
           "default": "true"
         }
       ],
-      "returnType": "World",
+      "returnType": "UParticleSystemComponent*",
       "docs": "Plays the specified effect attached to and following the specified component. The system will go away when the effect is complete. Does not replicate.\n@param EmitterTemplate - particle system to create\n@param AttachComponent - Component to attach to.\n@param AttachPointName - Optional named point within the AttachComponent to spawn the emitter at\n@param Location - Depending on the value of LocationType this is either a relative offset from the attach component/point or an absolute world location that will be translated to a relative offset (if LocationType is KeepWorldPosition).\n@param Rotation - Depending on the value of LocationType this is either a relative offset from the attach component/point or an absolute world rotation that will be translated to a relative offset (if LocationType is KeepWorldPosition).\n@param Scale - Depending on the value of LocationType this is either a relative scale from the attach component or an absolute world scale that will be translated to a relative scale (if LocationType is KeepWorldPosition).\n@param LocationType - Specifies whether Location is a relative offset or an absolute world position\n@param bAutoDestroy - Whether the component will automatically be destroyed when the particle system completes playing or whether it can be reactivated\n@param PoolingMethod - Method used for pooling this component. Defaults to none.\n@param bAutoActivate - Whether the component will be automatically activated on creation."
     },
     {
@@ -1945,23 +1988,6 @@
       "returnType": "Void"
     },
     {
-      "id": "play-sound-at-location-ea8966",
-      "name": "PlaySoundAtLocation",
-      "category": "Audio",
-      "signature": "PlaySoundAtLocation(Target, Zero Rotator)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USoundAttenuation*"
-        },
-        {
-          "name": "Zero Rotator",
-          "type": "FRotator::"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "spawn-sound-at-location",
       "name": "SpawnSoundAtLocation",
       "category": "Audio",
@@ -2326,23 +2352,6 @@
           "name": "Attenuation Settings",
           "type": "USoundAttenuation*",
           "default": "nullptr"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "play-dialogue-at-location-d1b07e",
-      "name": "PlayDialogueAtLocation",
-      "category": "Audio",
-      "signature": "PlayDialogueAtLocation(Target, Zero Rotator)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UGameplayStatics*"
-        },
-        {
-          "name": "Zero Rotator",
-          "type": "FRotator::"
         }
       ],
       "returnType": "Void"
@@ -3310,6 +3319,73 @@
       "docs": "Create a new, empty SaveGame object to set data on and then pass to SaveGameToSlot.\n@param\tSaveGameClass\tClass of SaveGame to create\n@return\t\t\t\t\tNew SaveGame object to write data to"
     },
     {
+      "id": "save-game-to-memory",
+      "name": "SaveGameToMemory",
+      "category": "GameplayStatics",
+      "signature": "SaveGameToMemory(Save Game Object, Out Save Data)",
+      "params": [
+        {
+          "name": "Save Game Object",
+          "type": "USaveGame*"
+        },
+        {
+          "name": "Out Save Data",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Serialize our USaveGame object into a given array of bytes\n@note This will write out all non-transient properties, the SaveGame property flag is not checked\n@param SaveGameObject\tObject that contains data about the save game that we want to write out\n@param OutSaveData\t\tByte array that is written into\n@return\t\t\t\t\tWhether we successfully wrote data"
+    },
+    {
+      "id": "save-data-to-slot",
+      "name": "SaveDataToSlot",
+      "category": "GameplayStatics",
+      "signature": "SaveDataToSlot(In Save Data, Slot Name, User Index)",
+      "params": [
+        {
+          "name": "In Save Data",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Save the contents of the buffer to a platform-specific save slot/file\n@param InSaveData\t\tData to save\n@param SlotName\t\t\tName of save game slot to save to.\n@param UserIndex\t\t\tThe platform user index that identifies the user doing the saving, ignored on some platforms.\n@return\t\t\t\t\tWhether we successfully saved this information"
+    },
+    {
+      "id": "async-save-game-to-slot",
+      "name": "AsyncSaveGameToSlot",
+      "category": "GameplayStatics",
+      "signature": "AsyncSaveGameToSlot(Save Game Object, Slot Name, User Index, Saved Delegate)",
+      "params": [
+        {
+          "name": "Save Game Object",
+          "type": "USaveGame*"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        },
+        {
+          "name": "Saved Delegate",
+          "type": "FAsyncSaveGameToSlotDelegate",
+          "default": "FAsyncSaveGameToSlotDelegate()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Schedule an async save to a specific slot. UAsyncActionHandleSaveGame::AsyncSaveGameToSlot is the blueprint version of this.\nThis will do the serialize on the game thread, the platform-specific write on a worker thread, then call the complete delegate on the game thread.\nThe passed in delegate will be copied to a worker thread so make sure any payload is thread safe to copy by value.\n@param SaveGameObject\tObject that contains data about the save game that we want to write out.\n@param SlotName\t\t\tName of the save game slot to load from.\n@param UserIndex\t\t\tThe platform user index that identifies the user doing the saving, ignored on some platforms.\n@param SavedDelegate\t\tDelegate that will be called on game thread when save succeeds or fails."
+    },
+    {
       "id": "save-game-to-slot",
       "name": "SaveGameToSlot",
       "category": "SaveGame",
@@ -3350,6 +3426,64 @@
       "docs": "See if a save game exists with the specified name.\n@param SlotName\t\t\tName of save game slot.\n@param UserIndex\t\t\tThe platform user index that identifies the user doing the saving, ignored on some platforms."
     },
     {
+      "id": "load-game-from-memory",
+      "name": "LoadGameFromMemory",
+      "category": "GameplayStatics",
+      "signature": "LoadGameFromMemory(In Save Data)",
+      "params": [
+        {
+          "name": "In Save Data",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "USaveGame*",
+      "docs": "Tries to load a SaveGame object from a given array of bytes.\n@param InSaveData\t\tThe array containing the serialized USaveGame data to load\n@return\t\t\t\t\tObject containing loaded game state (nullptr if load fails)"
+    },
+    {
+      "id": "load-data-from-slot",
+      "name": "LoadDataFromSlot",
+      "category": "GameplayStatics",
+      "signature": "LoadDataFromSlot(Out Save Data, Slot Name, User Index)",
+      "params": [
+        {
+          "name": "Out Save Data",
+          "type": "TArray<uint8>&"
+        },
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Load contents from a slot/file into a buffer of save data.\n@param OutSaveData\t\tData buffer to load into\n@param SlotName\t\t\tName of save game slot to save to.\n@param UserIndex\t\t\tThe platform user index that identifies the user doing the saving, ignored on some platforms.\n@return\t\t\t\t\tWhether valid save data was found and loaded."
+    },
+    {
+      "id": "async-load-game-from-slot",
+      "name": "AsyncLoadGameFromSlot",
+      "category": "GameplayStatics",
+      "signature": "AsyncLoadGameFromSlot(Slot Name, User Index, Loaded Delegate)",
+      "params": [
+        {
+          "name": "Slot Name",
+          "type": "String&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        },
+        {
+          "name": "Loaded Delegate",
+          "type": "FAsyncLoadGameFromSlotDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Schedule an async load of a specific slot. UAsyncActionHandleSaveGame::AsyncLoadGameFromSlot is the blueprint version of this.\nThis will do the platform-specific read on a worker thread, the serialize and creation on the game thread, and then will call the passed in delegate\nThe passed in delegate will be copied to a worker thread so make sure any payload is thread safe to copy by value\n@param SlotName\t\t\tName of the save game slot to load from.\n@param UserIndex\t\t\tThe platform user index that identifies the user doing the saving, ignored on some platforms.\n@param LoadedDelegate\tDelegate that will be called on game thread when load succeeds or fails."
+    },
+    {
       "id": "load-game-from-slot",
       "name": "LoadGameFromSlot",
       "category": "SaveGame",
@@ -3366,6 +3500,20 @@
       ],
       "returnType": "USaveGame*",
       "docs": "Load the contents from a given slot.\n@param SlotName\t\t\tName of the save game slot to load from.\n@param UserIndex\t\t\tThe platform user index that identifies the user doing the saving, ignored on some platforms.\n@return\t\t\t\t\tObject containing loaded game state (nullptr if load fails)"
+    },
+    {
+      "id": "strip-save-game-header",
+      "name": "StripSaveGameHeader",
+      "category": "GameplayStatics",
+      "signature": "StripSaveGameHeader(Save Data)",
+      "params": [
+        {
+          "name": "Save Data",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "FMemoryReader",
+      "docs": "Takes the provided buffer and consumes it, parsing past the internal header data, returning a MemoryReader\nthat has: 1) been set up with all the related header information, and 2) offset to where tagged USaveGame object\nserialization begins. NOTE: that the returned object has a reference to the supplied data - scope them\naccordingly.\n@param SaveData\t\t\tA byte array, presumably produced by one of the SaveGame functions here.\n@return\t\t\t\t\tA memory reader, wrapping SaveData, offset to the point past the header data."
     },
     {
       "id": "delete-game-in-slot",
@@ -3551,6 +3699,148 @@
       "docs": "Calculates an launch velocity for a projectile to hit a specified point.\n@param TossVelocity\t\t\t\t\t(output) Result launch velocity.\n@param StartLocation\t\t\t\t\tIntended launch location\n@param EndLocation\t\t\t\t\tDesired landing location\n@param LaunchSpeed\t\t\t\t\tDesired launch speed\n@param OverrideGravityZ\t\t\t\tOptional gravity override.  0 means \"do not override\".\n@param TraceOption\t\t\t\t\tControls whether or not to validate a clear path by tracing along the calculated arc\n@param CollisionRadius\t\t\t\tRadius of the projectile (assumed spherical), used when tracing\n@param bFavorHighArc\t\t\t\t\tIf true and there are 2 valid solutions, will return the higher arc.  If false, will favor the lower arc.\n@param bDrawDebug\t\t\t\t\tWhen true, a debug arc is drawn (red for an invalid arc, green for a valid arc)\n@param bAcceptClosestOnNoSolutions\tIf target is unreachable and no solutions are possible, provide a velocity that gets as close to the target as possible given this launch speed\n@return\t\t\t\t\t\t\t\tReturns false if there is no valid solution or the valid solutions are blocked.  Returns true otherwise."
     },
     {
+      "id": "suggest-projectile-velocity-765745",
+      "name": "SuggestProjectileVelocity",
+      "category": "GameplayStatics",
+      "signature": "SuggestProjectileVelocity(World Context Object, Toss Velocity, Start Location, End Location, Toss Speed, High Arc, Collision Radius, Override Gravity Z, Trace Option, Response Param, Actors To Ignore, Draw Debug, Accept Closest On No Solutions)",
+      "params": [
+        {
+          "name": "World Context Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Toss Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Start Location",
+          "type": "FVector"
+        },
+        {
+          "name": "End Location",
+          "type": "FVector"
+        },
+        {
+          "name": "Toss Speed",
+          "type": "Float"
+        },
+        {
+          "name": "High Arc",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Collision Radius",
+          "type": "Float",
+          "default": "0.f"
+        },
+        {
+          "name": "Override Gravity Z",
+          "type": "Float",
+          "default": "0"
+        },
+        {
+          "name": "Trace Option",
+          "type": "ESuggestProjVelocityTraceOption::Type",
+          "default": "ESuggestProjVelocityTraceOption::TraceFullPath"
+        },
+        {
+          "name": "Response Param",
+          "type": "FCollisionResponseParams&",
+          "default": "FCollisionResponseParams::DefaultResponseParam"
+        },
+        {
+          "name": "Actors To Ignore",
+          "type": "TArray<AActor*>",
+          "default": "TArray<AActor*>()"
+        },
+        {
+          "name": "Draw Debug",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Accept Closest On No Solutions",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "suggest-projectile-velocity-6ebb19",
+      "name": "SuggestProjectileVelocity",
+      "category": "GameplayStatics",
+      "signature": "SuggestProjectileVelocity(Projectile Params, Out Toss Velocity)",
+      "params": [
+        {
+          "name": "Projectile Params",
+          "type": "FSuggestProjectileVelocityParameters&"
+        },
+        {
+          "name": "Out Toss Velocity",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Native version, has more options than the Blueprint version."
+    },
+    {
+      "id": "is-projectile-trajectory-blocked",
+      "name": "IsProjectileTrajectoryBlocked",
+      "category": "GameplayStatics",
+      "signature": "IsProjectileTrajectoryBlocked(World, Start Location, Projectile Velocity, Target Delta XY, Gravity Z, Collision Radius, Trace Option, Response Param, Actors To Ignore, Draw Debug)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Start Location",
+          "type": "FVector"
+        },
+        {
+          "name": "Projectile Velocity",
+          "type": "FVector&"
+        },
+        {
+          "name": "Target Delta XY",
+          "type": "Float"
+        },
+        {
+          "name": "Gravity Z",
+          "type": "Float"
+        },
+        {
+          "name": "Collision Radius",
+          "type": "Float",
+          "default": "0.f"
+        },
+        {
+          "name": "Trace Option",
+          "type": "ESuggestProjVelocityTraceOption::Type",
+          "default": "ESuggestProjVelocityTraceOption::TraceFullPath"
+        },
+        {
+          "name": "Response Param",
+          "type": "FCollisionResponseParams&",
+          "default": "FCollisionResponseParams::DefaultResponseParam"
+        },
+        {
+          "name": "Actors To Ignore",
+          "type": "TArray<AActor*>&",
+          "default": "TArray<AActor*>()"
+        },
+        {
+          "name": "Draw Debug",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Stepwise trace along the path of a given velocity"
+    },
+    {
       "id": "blueprint-predict-projectile-path-by-object-type",
       "name": "Blueprint_PredictProjectilePath_ByObjectType",
       "category": "Game",
@@ -3703,6 +3993,28 @@
       ],
       "returnType": "Bool",
       "docs": "Predict the arc of a virtual projectile affected by gravity with collision checks along the arc. Returns a list of positions of the simulated arc and the destination reached by the simulation.\nReturns true if it hit something (if tracing with collision).\n@param OutPathPositions\t\t\tPredicted projectile path. Ordered series of positions from StartPos to the end. Includes location at point of impact if it hit something.\n@param OutHit\t\t\t\t\t\tPredicted hit result, if the projectile will hit something\n@param OutLastTraceDestination\tGoal position of the final trace it did. Will not be in the path if there is a hit.\n@param StartPos\t\t\t\t\tFirst start trace location\n@param LaunchVelocity\t\t\t\tVelocity the \"virtual projectile\" is launched at\n@param bTracePath\t\t\t\t\tTrace along the entire path to look for blocking hits\n@param ProjectileRadius\t\t\tRadius of the virtual projectile to sweep against the environment\n@param TraceChannel\t\t\t\tTraceChannel to trace against, if bTracePath is true.\n@param bTraceComplex\t\t\t\tUse TraceComplex (trace against triangles not primitives)\n@param ActorsToIgnore\t\t\t\tActors to exclude from the traces\n@param DrawDebugType\t\t\t\tDebug type (one-frame, duration, persistent)\n@param DrawDebugTime\t\t\t\tDuration of debug lines (only relevant for DrawDebugType::Duration)\n@param SimFrequency\t\t\t\tDetermines size of each sub-step in the simulation (chopping up MaxSimTime)\n@param MaxSimTime\t\t\t\t\tMaximum simulation time for the virtual projectile.\n@param OverrideGravityZ\t\t\tOptional override of Gravity (if 0, uses WorldGravityZ)\n@return\t\t\t\t\t\t\tTrue if hit something along the path (if tracing with collision)."
+    },
+    {
+      "id": "predict-projectile-path",
+      "name": "PredictProjectilePath",
+      "category": "GameplayStatics",
+      "signature": "PredictProjectilePath(World Context Object, Predict Params, Predict Result)",
+      "params": [
+        {
+          "name": "World Context Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Predict Params",
+          "type": "FPredictProjectilePathParams&"
+        },
+        {
+          "name": "Predict Result",
+          "type": "FPredictProjectilePathResult&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Predict the arc of a virtual projectile affected by gravity with collision checks along the arc.\nReturns true if it hit something.\n@param PredictParams\t\t\t\tInput params to the trace (start location, velocity, time to simulate, etc).\n@param PredictResult\t\t\t\tOutput result of the trace (Hit result, array of location/velocity/times for each trace step, etc).\n@return\t\t\t\t\t\t\tTrue if hit something along the path (if tracing with collision)."
     },
     {
       "id": "blueprint-predict-projectile-path-advanced",
@@ -4064,6 +4376,79 @@
       ],
       "returnType": "Void",
       "docs": "Returns the View Matrix, Projection Matrix and the View x Projection Matrix for a given view\n@param DesiredView\t\t\tFMinimalViewInfo struct for a camera.\n@param ViewMatrix\t\t\t(out) Corresponding View Matrix\n@param ProjectionMatrix\t\t(out) Corresponding Projection Matrix\n@param ViewProjectionMatrix\t(out) Corresponding View x Projection Matrix"
+    },
+    {
+      "id": "calculate-view-projection-matrices-from-view-target",
+      "name": "CalculateViewProjectionMatricesFromViewTarget",
+      "category": "GameplayStatics",
+      "signature": "CalculateViewProjectionMatricesFromViewTarget(In View Target, Out View Matrix, Out Projection Matrix, Out View Projection Matrix)",
+      "params": [
+        {
+          "name": "In View Target",
+          "type": "AActor*"
+        },
+        {
+          "name": "Out View Matrix",
+          "type": "FMatrix&"
+        },
+        {
+          "name": "Out Projection Matrix",
+          "type": "FMatrix&"
+        },
+        {
+          "name": "Out View Projection Matrix",
+          "type": "FMatrix&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calculate view-projection matrices from a specified view target"
+    },
+    {
+      "id": "calculate-view-projection-matrices-from-minimal-view",
+      "name": "CalculateViewProjectionMatricesFromMinimalView",
+      "category": "GameplayStatics",
+      "signature": "CalculateViewProjectionMatricesFromMinimalView(Minimal View Info, Custom Projection Matrix, Out View Matrix, Out Projection Matrix, Out View Projection Matrix)",
+      "params": [
+        {
+          "name": "Minimal View Info",
+          "type": "FMinimalViewInfo&"
+        },
+        {
+          "name": "Custom Projection Matrix",
+          "type": "TOptional<FMatrix>&"
+        },
+        {
+          "name": "Out View Matrix",
+          "type": "FMatrix&"
+        },
+        {
+          "name": "Out Projection Matrix",
+          "type": "FMatrix&"
+        },
+        {
+          "name": "Out View Projection Matrix",
+          "type": "FMatrix&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calculate view-projection matrices from a specified MinimalViewInfo and optional custom projection matrix"
+    },
+    {
+      "id": "grab-option",
+      "name": "GrabOption",
+      "category": "GameplayStatics",
+      "signature": "GrabOption(Options, Result String)",
+      "params": [
+        {
+          "name": "Options",
+          "type": "String&"
+        },
+        {
+          "name": "Result String",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "get-key-value",

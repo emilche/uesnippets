@@ -1,0 +1,297 @@
+{
+  "id": "render-target-pool",
+  "label": "RenderTargetPool",
+  "includepath": "RenderTargetPool.h",
+  "includes": [
+    "Array",
+    "CoreMinimal",
+    "CoreTypes",
+    "PlatformAtomics",
+    "RHI",
+    "RenderGraphDefinitions",
+    "RenderGraphResources",
+    "RenderResource",
+    "RendererInterface",
+    "RefCounting",
+    "RecursiveMutex"
+  ],
+  "functions": [
+    {
+      "id": "is-free",
+      "name": "IsFree",
+      "category": "RenderTargetPool",
+      "signature": "IsFree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPooledRenderTarget*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "compute-memory-size",
+      "name": "ComputeMemorySize",
+      "category": "RenderTargetPool",
+      "signature": "ComputeMemorySize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPooledRenderTarget*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "set-debug-label-name",
+      "name": "SetDebugLabelName",
+      "category": "RenderTargetPool",
+      "signature": "SetDebugLabelName(Target, RHI Cmd List, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPooledRenderTarget*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "on-frame-start",
+      "name": "OnFrameStart",
+      "category": "RenderTargetPool",
+      "signature": "OnFrameStart(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPooledRenderTarget*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Pointer back to the pool for render targets which are actually pooled, otherwise NULL."
+    },
+    {
+      "id": "find-free-element-978d3c",
+      "name": "FindFreeElement",
+      "category": "RenderTargetPool",
+      "signature": "FindFreeElement(Target, RHI Cmd List, Desc, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Desc",
+          "type": "FRHITextureCreateInfo"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "TRefCountPtr<IPooledRenderTarget>"
+    },
+    {
+      "id": "find-free-element-45219e",
+      "name": "FindFreeElement",
+      "category": "RenderTargetPool",
+      "signature": "FindFreeElement(Target, RHI Cmd List, Desc, Out, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Desc",
+          "type": "FRHITextureCreateInfo&"
+        },
+        {
+          "name": "Out",
+          "type": "TRefCountPtr<IPooledRenderTarget>&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-untracked-element",
+      "name": "CreateUntrackedElement",
+      "category": "RenderTargetPool",
+      "signature": "CreateUntrackedElement(Target, Desc, Out, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "Desc",
+          "type": "FPooledRenderTargetDesc&"
+        },
+        {
+          "name": "Out",
+          "type": "TRefCountPtr<IPooledRenderTarget>&"
+        },
+        {
+          "name": "Item",
+          "type": "FSceneRenderTargetItem&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-stats",
+      "name": "GetStats",
+      "category": "RenderTargetPool",
+      "signature": "GetStats(Target, Out Whole Count, Out Whole Pool In KB, Out Used In KB)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "Out Whole Count",
+          "type": "UInt&"
+        },
+        {
+          "name": "Out Whole Pool In KB",
+          "type": "UInt&"
+        },
+        {
+          "name": "Out Used In KB",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Only to get statistics on usage and free elements. Normally only called in renderthread or if FlushRenderingCommands was called()"
+    },
+    {
+      "id": "tick-pool-elements",
+      "name": "TickPoolElements",
+      "category": "RenderTargetPool",
+      "signature": "TickPoolElements(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Can release RT, should be called once per frame.\ncall from RenderThread only"
+    },
+    {
+      "id": "release-rhi",
+      "name": "ReleaseRHI",
+      "category": "RenderTargetPool",
+      "signature": "ReleaseRHI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Free renderer resources"
+    },
+    {
+      "id": "free-unused-resource",
+      "name": "FreeUnusedResource",
+      "category": "RenderTargetPool",
+      "signature": "FreeUnusedResource(Target, In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "In",
+          "type": "TRefCountPtr<IPooledRenderTarget>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows to remove a resource so it cannot be shared and gets released immediately instead a/some frame[s] later."
+    },
+    {
+      "id": "free-unused-resources",
+      "name": "FreeUnusedResources",
+      "category": "RenderTargetPool",
+      "signature": "FreeUnusedResources(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Good to call between levels or before memory intense operations."
+    },
+    {
+      "id": "get-element-by-id",
+      "name": "GetElementById",
+      "category": "RenderTargetPool",
+      "signature": "GetElementById(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FPooledRenderTarget*"
+    },
+    {
+      "id": "find-index",
+      "name": "FindIndex",
+      "category": "RenderTargetPool",
+      "signature": "FindIndex(Target, In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "In",
+          "type": "IPooledRenderTarget*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "dump-memory-usage",
+      "name": "DumpMemoryUsage",
+      "category": "RenderTargetPool",
+      "signature": "DumpMemoryUsage(Target, Output Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTargetPool*"
+        },
+        {
+          "name": "Output Device",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

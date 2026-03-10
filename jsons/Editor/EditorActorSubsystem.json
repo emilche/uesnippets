@@ -11,6 +11,36 @@
   ],
   "functions": [
     {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "EditorActorSubsystem",
+      "signature": "Initialize(Target, Collection)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorActorSubsystem*"
+        },
+        {
+          "name": "Collection",
+          "type": "FSubsystemCollectionBase&"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "deinitialize",
+      "name": "Deinitialize",
+      "category": "EditorActorSubsystem",
+      "signature": "Deinitialize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorActorSubsystem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "duplicate-actor-2899c9",
       "name": "DuplicateActor",
       "category": "Editor Scripting ",
@@ -35,7 +65,7 @@
           "default": "FVector::ZeroVector"
         }
       ],
-      "returnType": "FOnEditNewActorsDropped OnNewActorsDropped",
+      "returnType": "AActor*",
       "docs": "Duplicate an actor from the world editor.\n@param\tActorToDuplicate\tActor to duplicate.\n@param\tToWorld\t\t\t\tWorld to place the duplicated actor in.\n@param\tOffset\t\t\t\tTranslation to offset duplicated actor by.\n@return\tThe duplicated actor, or none if it didn't succeed"
     },
     {
@@ -466,6 +496,72 @@
       "docs": "Replace in the level all Actors provided with a new actor of type ActorClass. Destroy all Actors provided.\n@param\tActors\t\t\t\t\tList of Actors to replace.\n@param\tActorClass\t\t\t\tClass/Blueprint of the new actor that will be spawn.\n@param\tStaticMeshPackagePath\tIf the list contains Brushes and it is requested to change them to StaticMesh, StaticMeshPackagePath is the package path to where the StaticMesh will be created. ie. /Game/MyFolder/"
     },
     {
+      "id": "convert-light-actors",
+      "name": "ConvertLightActors",
+      "category": "EditorActorSubsystem",
+      "signature": "ConvertLightActors(In Convert To Class)",
+      "params": [
+        {
+          "name": "In Convert To Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts passed in light actors into new actors of another type.\nNote: This replaces the old actor with the new actor.\nMost properties of the old actor that can be copied are copied to the new actor during this process.\nProperties that can be copied are ones found in a common superclass between the actor to convert and the new\nclass. Common light component properties between the two classes are also copied\n@param\tInConvertToClass\tThe light class we are going to convert to."
+    },
+    {
+      "id": "convert-brushes-to-static-mesh",
+      "name": "ConvertBrushesToStaticMesh",
+      "category": "EditorActorSubsystem",
+      "signature": "ConvertBrushesToStaticMesh(In Static Mesh Package Name, In Brushes To Convert, In Pivot Location)",
+      "params": [
+        {
+          "name": "In Static Mesh Package Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Brushes To Convert",
+          "type": "TArray<ABrush*>&"
+        },
+        {
+          "name": "In Pivot Location",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "AActor*",
+      "docs": "Converts passed in brushes into a single static mesh actor.\nNote: This replaces all the brushes with a single actor. This actor will not be attached to anything unless a single brush was converted.\n@param\tInStaticMeshPackageName\t\tThe name to save the brushes to.\n@param\tInBrushesToConvert\t\t\tA list of brushes being converted.\n@return\t\t\t\t\t\t\tReturns the newly created actor with the newly created static mesh."
+    },
+    {
+      "id": "do-convert-actors",
+      "name": "DoConvertActors",
+      "category": "EditorActorSubsystem",
+      "signature": "DoConvertActors(In Actors To Convert, In Convert To Class, In Components To Consider, In Use Special Cases, In Static Mesh Package Name)",
+      "params": [
+        {
+          "name": "In Actors To Convert",
+          "type": "TArray<AActor*>&"
+        },
+        {
+          "name": "In Convert To Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "In Components To Consider",
+          "type": "TSet<FString>&"
+        },
+        {
+          "name": "In Use Special Cases",
+          "type": "Bool"
+        },
+        {
+          "name": "In Static Mesh Package Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts passed in actors into new actors of the specified type.\nNote: This replaces the old actors with brand new actors while attempting to preserve as many properties as\npossible. Properties of the actors components are also attempted to be copied for any component names supplied in\nthe third parameter. If a component name is specified, it is only copied if a component of the specified name\nexists in the source and destination actors, as well as in the class default object of the class of the source\nactor, and that all three of those components share a common base class. This approach is used instead of simply\naccepting component classes to copy because some actors could potentially have multiple of the same component\ntype.\n@param\tInActorsToConvert\t\t\t\tArray of actors which should be converted to the new class type\n@param\tInConvertToClass\t\t\t\tClass to convert the provided actors to\n@param\tInComponentsToConsider\t\tNames of components to consider for property copying as well\n@param\tbInUseSpecialCases\t\t\tIf true, looks for classes that can be handled by hardcoded conversions\n@param\tInStaticMeshPackageName\t\tThe name to save the brushes to."
+    },
+    {
       "id": "convert-actors-820b7b",
       "name": "ConvertActors",
       "category": "Editor Scripting ",
@@ -491,6 +587,93 @@
       ],
       "returnType": "Void",
       "docs": "Sets up for a potentially deferred ConvertActors call, based on if any brushes are being converted to a static\nmesh. If one (or more) are being converted, the user will need to put in a package before the process continues.\n@param\tInActorsToConvert\t\t\tArray of actors which should be converted to the new class type\n@param\tInConvertToClass\t\t\tClass to convert the provided actors to\n@param\tInComponentsToConsider\tNames of components to consider for property copying as well\n@param\tbInUseSpecialCases\t\tIf true, looks for classes that can be handled by hardcoded conversions"
+    },
+    {
+      "id": "convert-selected-brushes-to-volumes",
+      "name": "ConvertSelectedBrushesToVolumes",
+      "category": "EditorActorSubsystem",
+      "signature": "ConvertSelectedBrushesToVolumes(In Volume Class)",
+      "params": [
+        {
+          "name": "In Volume Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Function to convert selected brushes into volumes of the provided class.\n@param\tInVolumeClass\tClass of volume that selected brushes should be converted into"
+    },
+    {
+      "id": "convert-actors-from-class",
+      "name": "ConvertActorsFromClass",
+      "category": "EditorActorSubsystem",
+      "signature": "ConvertActorsFromClass(In From Class, In To Class)",
+      "params": [
+        {
+          "name": "In From Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "In To Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to convert actors of one class type to another\n@param InFromClass The class converting from\n@param InToClass\tThe class converting to"
+    },
+    {
+      "id": "replace-selected-actors",
+      "name": "ReplaceSelectedActors",
+      "category": "EditorActorSubsystem",
+      "signature": "ReplaceSelectedActors(In Factory, In Asset Data, In Copy Source Properties)",
+      "params": [
+        {
+          "name": "In Factory",
+          "type": "UActorFactory*"
+        },
+        {
+          "name": "In Asset Data",
+          "type": "FAssetData&"
+        },
+        {
+          "name": "In Copy Source Properties",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Replaces the selected Actors with the same number of a different kind of Actor using the specified factory to spawn the new Actors\nnote that only Location, Rotation, Drawscale, Drawscale3D, Tag, and Group are copied from the old Actors\n@param InFactory - the Factory to use to create Actors"
+    },
+    {
+      "id": "replace-actors",
+      "name": "ReplaceActors",
+      "category": "EditorActorSubsystem",
+      "signature": "ReplaceActors(In Factory, In Asset Data, In Actors To Replace, In Out New Actors, In Copy Source Properties)",
+      "params": [
+        {
+          "name": "In Factory",
+          "type": "UActorFactory*"
+        },
+        {
+          "name": "In Asset Data",
+          "type": "FAssetData&"
+        },
+        {
+          "name": "In Actors To Replace",
+          "type": "TArray<AActor*>&"
+        },
+        {
+          "name": "In Out New Actors",
+          "type": "TArray<AActor*>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Copy Source Properties",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Replaces specified Actors with the same number of a different kind of Actor using the specified factory to spawn the new Actors\nnote that only Location, Rotation, Drawscale, Drawscale3D, Tag, and Group are copied from the old Actors\n@param InFactory - the Factory to use to create Actors\n@param InAssetData - the asset to feed the Factory\n@param InActorsToReplace - Actors to replace\n@param InOutNewActors - Actors that were created"
     },
     {
       "id": "set-actor-transform",

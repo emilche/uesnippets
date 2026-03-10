@@ -1,0 +1,122 @@
+{
+  "id": "net-serializer-array-storage",
+  "label": "NetSerializerArrayStorage",
+  "includepath": "Iris/Serialization/NetSerializerArrayStorage.h",
+  "includes": [
+    "Platform",
+    "IrisConfig",
+    "NetSerializationContext",
+    "AlignmentTemplates",
+    "IsPODType"
+  ],
+  "functions": [
+    {
+      "id": "free-97ffe2",
+      "name": "Free",
+      "category": "NetSerializerArrayStorage",
+      "signature": "Free(Context, Ptr)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "realloc",
+      "name": "Realloc",
+      "category": "NetSerializerArrayStorage",
+      "signature": "Realloc(Context, Original, Size, Alignment)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Original",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "SIZE_T"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "adjust-size",
+      "name": "AdjustSize",
+      "category": "NetSerializerArrayStorage",
+      "signature": "AdjustSize(Target, Context, In Num, In Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetSerializerAlignedStorage*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "In Num",
+          "type": "SizeType"
+        },
+        {
+          "name": "In Alignment",
+          "type": "SizeType"
+        }
+      ],
+      "returnType": "public : void",
+      "docs": "Helper class to manage storage of untyped dynamic storage with arbitrary alignment in quantized data.\nIf storage is used to store elements that themselves uses dynamic allocations the user must take care to properly free and clone such elements properly prior to and/or after changing sizes.\nFNetSerializerAlignedStorage is only intended to be used from within Quantized replication states that requires dynamic storage as it has very specific expectations and limitations.\nNOTE: A NetSerializer using FNetSerializerAlignedStorage MUST specify the trait bHasDynamicState and forward appropriate calls to Clone and Free to this class.\nA zero constructed state is considered valid."
+    },
+    {
+      "id": "free-36166d",
+      "name": "Free",
+      "category": "NetSerializerArrayStorage",
+      "signature": "Free(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetSerializerAlignedStorage*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Free - Free allocated memory and reset state. it is valid to pass in a zero-initialized state\nThe state storage in which the storage is located is expected to be in a valid state which can either be zero initialized or a previous valid state.\nShould typically only be called from within a the implemntation of NetSerializer::FreeDynamicState()"
+    },
+    {
+      "id": "clone",
+      "name": "Clone",
+      "category": "NetSerializerArrayStorage",
+      "signature": "Clone(Target, Context, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetSerializerAlignedStorage*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Source",
+          "type": "FNetSerializerAlignedStorage&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clone - Clone dynamic storage from Source\nNo assumptions of the validity of the target is made, as this is typically called AFTER a memcopy is made to the target state\nwhich invalidates all dynamic data\nShould typically only be called from within a the implemntation of NetSerializer::CloneDynamicState()"
+    }
+  ]
+}

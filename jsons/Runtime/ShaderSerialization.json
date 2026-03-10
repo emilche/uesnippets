@@ -1,0 +1,195 @@
+{
+  "id": "shader-serialization",
+  "label": "ShaderSerialization",
+  "includepath": "ShaderSerialization.h",
+  "includes": [
+    "CompressedBuffer",
+    "CompositeBuffer",
+    "SharedBuffer",
+    "Function",
+    "UniquePtr",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "f-shader-cache-save-context",
+      "name": "FShaderCacheSaveContext",
+      "category": "ShaderSerialization",
+      "signature": "FShaderCacheSaveContext()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Implementation of FShaderCacheSerializeContext used for saving data to caches."
+    },
+    {
+      "id": "finalize",
+      "name": "Finalize",
+      "category": "ShaderSerialization",
+      "signature": "Finalize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSaveContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts the raw serialized object data into the ShaderObjectData FSharedBuffer.\nNote that this is called by BuildCacheRecord as well, calls subsequent to the first will have no effect."
+    },
+    {
+      "id": "serialize-code",
+      "name": "SerializeCode",
+      "category": "ShaderSerialization",
+      "signature": "SerializeCode(Target, Resource, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSaveContext*"
+        },
+        {
+          "name": "Resource",
+          "type": "FShaderCodeResource&"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Optional function which must be implemented if EnableCustomCodeSerialize returns true; use to serialize shader code separately from the main object"
+    },
+    {
+      "id": "reserve-code",
+      "name": "ReserveCode",
+      "category": "ShaderSerialization",
+      "signature": "ReserveCode(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSaveContext*"
+        },
+        {
+          "name": "Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Optional function that can be used to reserve space for the given number of code objects by derived classes."
+    },
+    {
+      "id": "build-cache-record",
+      "name": "BuildCacheRecord",
+      "category": "ShaderSerialization",
+      "signature": "BuildCacheRecord(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSaveContext*"
+        },
+        {
+          "name": "Key",
+          "type": "UE::DerivedData::FCacheKey&"
+        }
+      ],
+      "returnType": "UE::DerivedData::FCacheRecord",
+      "docs": "Helper function to generate a DDC record from the data serialized using this context. Serialization must\nbe executed prior to calling this function."
+    },
+    {
+      "id": "reset-ac99fb",
+      "name": "Reset",
+      "category": "ShaderSerialization",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSaveContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to reset internal state, this allows re-using internal allocations to store other objects (as an optimization)."
+    },
+    {
+      "id": "f-shader-cache-load-context",
+      "name": "FShaderCacheLoadContext",
+      "category": "ShaderSerialization",
+      "signature": "FShaderCacheLoadContext(Shader Object Data, Code Buffers, Symbol Buffers)",
+      "params": [
+        {
+          "name": "Shader Object Data",
+          "type": "FSharedBuffer"
+        },
+        {
+          "name": "Code Buffers",
+          "type": "TArrayView<FCompositeBuffer>"
+        },
+        {
+          "name": "Symbol Buffers",
+          "type": "TArrayView<FCompressedBuffer>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Constructor which references buffers (and an array of code buffers) owned elsewhere, does not allocate the OwnedShaderCode array"
+    },
+    {
+      "id": "reset-bd6177",
+      "name": "Reset",
+      "category": "ShaderSerialization",
+      "signature": "Reset(Target, Shader Object Data, Code Buffers, Symbol Buffers)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheLoadContext*"
+        },
+        {
+          "name": "Shader Object Data",
+          "type": "FSharedBuffer"
+        },
+        {
+          "name": "Code Buffers",
+          "type": "TArrayView<FCompositeBuffer>"
+        },
+        {
+          "name": "Symbol Buffers",
+          "type": "TArrayView<FCompressedBuffer>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets internal state to point to the given buffers and recreates the owned memoryreader"
+    },
+    {
+      "id": "reuse",
+      "name": "Reuse",
+      "category": "ShaderSerialization",
+      "signature": "Reuse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheLoadContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to reset reader to start position so the same load context can be used to populate multiple objects."
+    },
+    {
+      "id": "read-from-record",
+      "name": "ReadFromRecord",
+      "category": "ShaderSerialization",
+      "signature": "ReadFromRecord(Target, Cache Record, Is Persistent)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheLoadContext*"
+        },
+        {
+          "name": "Cache Record",
+          "type": "UE::DerivedData::FCacheRecord&"
+        },
+        {
+          "name": "Is Persistent",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to populate the internal state (FSharedBuffers defined on FShaderCacheSerializeContext) from a DDC record."
+    }
+  ]
+}

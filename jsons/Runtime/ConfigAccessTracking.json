@@ -1,0 +1,153 @@
+{
+  "id": "config-access-tracking",
+  "label": "ConfigAccessTracking",
+  "includepath": "Misc/ConfigAccessTracking.h",
+  "includes": [
+    "Platform",
+    "NameTypes",
+    "atomic",
+    "StringView",
+    "Function",
+    "RefCounting"
+  ],
+  "functions": [
+    {
+      "id": "f-file",
+      "name": "FFile",
+      "category": "ConfigAccessTracking",
+      "signature": "FFile(In Config File)",
+      "params": [
+        {
+          "name": "In Config File",
+          "type": "FConfigFile*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The manner in which the FConfigFile was loaded, so that subscribers can record\nhow to reload it in another process and reread the values."
+    },
+    {
+      "id": "get-filename-to-load",
+      "name": "GetFilenameToLoad",
+      "category": "ConfigAccessTracking",
+      "signature": "GetFilenameToLoad(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFile*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "get-platform-name",
+      "name": "GetPlatformName",
+      "category": "ConfigAccessTracking",
+      "signature": "GetPlatformName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFile*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-as-load-type-config-system",
+      "name": "SetAsLoadTypeConfigSystem",
+      "category": "ConfigAccessTracking",
+      "signature": "SetAsLoadTypeConfigSystem(Target, Config System, Config File)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFile*"
+        },
+        {
+          "name": "Config System",
+          "type": "FConfigCacheIni&"
+        },
+        {
+          "name": "Config File",
+          "type": "FConfigFile&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-section",
+      "name": "FSection",
+      "category": "ConfigAccessTracking",
+      "signature": "FSection(In File Access, In Section Name)",
+      "params": [
+        {
+          "name": "In File Access",
+          "type": "FFile&"
+        },
+        {
+          "name": "In Section Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A refcounted struct of data about an FConfigSection, including a backpointer to the UE::ConfigAccessTracking::FFile\nthat holds data about the section's FConfigFile. It does not hold a backpointer to the FConfigSection itself because\nFConfigSections are value types in a TMap owned by the FConfigFIle and their address frequently changes.\nReferences to this data are held by all FConfigValues in the FConfigSection. Due to FConfigSection being movable out\nof FConfigFiles, this struct might outlive the existence of its FConfigSection in the FConfigFile, or even outlive\nthe FConfigFile."
+    },
+    {
+      "id": "add-config-value-read-callback",
+      "name": "AddConfigValueReadCallback",
+      "category": "ConfigAccessTracking",
+      "signature": "AddConfigValueReadCallback(Callback)",
+      "params": [
+        {
+          "name": "Callback",
+          "type": "FConfigValueReadCallbackFunc"
+        }
+      ],
+      "returnType": "FConfigValueReadCallbackId",
+      "docs": "Subscribe to events sent whenever any FConfigValue is read."
+    },
+    {
+      "id": "remove-config-value-read-callback",
+      "name": "RemoveConfigValueReadCallback",
+      "category": "ConfigAccessTracking",
+      "signature": "RemoveConfigValueReadCallback(Delegate Handle)",
+      "params": [
+        {
+          "name": "Delegate Handle",
+          "type": "FConfigValueReadCallbackId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove a subscriber that was added via FConfigValue."
+    },
+    {
+      "id": "f-ignore-scope",
+      "name": "FIgnoreScope",
+      "category": "ConfigAccessTracking",
+      "signature": "FIgnoreScope()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Disables recording of ConfigValues read on the current thread while in scope."
+    },
+    {
+      "id": "on-config-value-read-internal",
+      "name": "OnConfigValueReadInternal",
+      "category": "ConfigAccessTracking",
+      "signature": "OnConfigValueReadInternal(Section, Value Name, Config Value)",
+      "params": [
+        {
+          "name": "Section",
+          "type": "UE::ConfigAccessTracking::FSection*"
+        },
+        {
+          "name": "Value Name",
+          "type": "FMinimalName"
+        },
+        {
+          "name": "Config Value",
+          "type": "FConfigValue&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stores the number of existing AddConfigValueReadCallback subscribers. We use it to avoid the cost\nof a function call when no subscribers are registered."
+    }
+  ]
+}

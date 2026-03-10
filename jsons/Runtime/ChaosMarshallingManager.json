@@ -1,0 +1,209 @@
+{
+  "id": "chaos-marshalling-manager",
+  "label": "ChaosMarshallingManager",
+  "includepath": "Chaos/ChaosMarshallingManager.h",
+  "includes": [
+    "SpscQueue",
+    "Defines",
+    "ParticleDirtyFlags",
+    "PhysicsProxyBase",
+    "ParallelFor",
+    "SingleParticlePhysicsProxyFwd",
+    "SimCallbackObject",
+    "AsyncInitBodyHelper"
+  ],
+  "functions": [
+    {
+      "id": "f-chaos-marshalling-manager",
+      "name": "FChaosMarshallingManager",
+      "category": "ChaosMarshallingManager",
+      "signature": "FChaosMarshallingManager()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Manages data that gets marshaled from GT to PT using a timestamp"
+    },
+    {
+      "id": "step-external",
+      "name": "Step_External",
+      "category": "ChaosMarshallingManager",
+      "signature": "Step_External(Target, External DT, Num Steps, Solver Substepped)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "External DT",
+          "type": "FReal"
+        },
+        {
+          "name": "Num Steps",
+          "type": "Int",
+          "default": "1"
+        },
+        {
+          "name": "Solver Substepped",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Step forward using the external delta time. Should only be called by external thread"
+    },
+    {
+      "id": "step-internal-time-external",
+      "name": "StepInternalTime_External",
+      "category": "ChaosMarshallingManager",
+      "signature": "StepInternalTime_External(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        }
+      ],
+      "returnType": "FPushPhysicsData*",
+      "docs": "Step the internal time forward if possible"
+    },
+    {
+      "id": "free-data-internal",
+      "name": "FreeData_Internal",
+      "category": "ChaosMarshallingManager",
+      "signature": "FreeData_Internal(Target, Push Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "Push Data",
+          "type": "FPushPhysicsData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Frees the push data back into the pool. Internal thread should call this when finished processing data"
+    },
+    {
+      "id": "free-data-to-history-internal",
+      "name": "FreeDataToHistory_Internal",
+      "category": "ChaosMarshallingManager",
+      "signature": "FreeDataToHistory_Internal(Target, Push Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "Push Data",
+          "type": "FPushPhysicsData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "May record data to history, or may free immediately depending on rewind needs. Either way you should assume data is gone after calling this"
+    },
+    {
+      "id": "free-pull-data-external",
+      "name": "FreePullData_External",
+      "category": "ChaosMarshallingManager",
+      "signature": "FreePullData_External(Target, Pull Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "Pull Data",
+          "type": "FPullPhysicsData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Frees the pull data back into the pool. External thread should call this when finished processing data"
+    },
+    {
+      "id": "finalize-pull-data-internal",
+      "name": "FinalizePullData_Internal",
+      "category": "ChaosMarshallingManager",
+      "signature": "FinalizePullData_Internal(Target, Latest External Timestamp Consumed, Sim Start Time, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "Latest External Timestamp Consumed",
+          "type": "Int"
+        },
+        {
+          "name": "Sim Start Time",
+          "type": "FReal"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Hands pull data off to external thread"
+    },
+    {
+      "id": "set-history-length-internal",
+      "name": "SetHistoryLength_Internal",
+      "category": "ChaosMarshallingManager",
+      "signature": "SetHistoryLength_Internal(Target, In History Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "In History Length",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "steal-history-internal",
+      "name": "StealHistory_Internal",
+      "category": "ChaosMarshallingManager",
+      "signature": "StealHistory_Internal(Target, Num Frames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        },
+        {
+          "name": "Num Frames",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FPushPhysicsData*>",
+      "docs": "Returns the history buffer of the latest NumFrames. The history that comes before these frames is discarded"
+    },
+    {
+      "id": "prepare-external-queue-external",
+      "name": "PrepareExternalQueue_External",
+      "category": "ChaosMarshallingManager",
+      "signature": "PrepareExternalQueue_External(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prepare-pull-data",
+      "name": "PreparePullData",
+      "category": "ChaosMarshallingManager",
+      "signature": "PreparePullData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FChaosMarshallingManager*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

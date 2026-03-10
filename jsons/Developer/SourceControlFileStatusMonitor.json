@@ -1,0 +1,280 @@
+{
+  "id": "source-control-file-status-monitor",
+  "label": "SourceControlFileStatusMonitor",
+  "includepath": "SourceControlFileStatusMonitor.h",
+  "includes": [
+    "CoreMinimal",
+    "Ticker",
+    "DelegateCombinations",
+    "ISourceControlOperation",
+    "ISourceControlProvider",
+    "ISourceControlState",
+    "Timespan",
+    "SharedPointer"
+  ],
+  "functions": [
+    {
+      "id": "f-source-control-file-status-monitor",
+      "name": "FSourceControlFileStatusMonitor",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "FSourceControlFileStatusMonitor()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "AbsPathname"
+    },
+    {
+      "id": "start-monitoring-file",
+      "name": "StartMonitoringFile",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "StartMonitoringFile(Target, Owner Id, Abs Pathname, On Source Controlled File Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        },
+        {
+          "name": "Abs Pathname",
+          "type": "String&"
+        },
+        {
+          "name": "On Source Controlled File Status",
+          "type": "FOnSourceControlFileStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts monitoring the source control status of the specified file. If the status is already known (the file is already monitored\nby another party), the know status is returned right away, otherwise a request is sent to the source control provider to get the\nstatus. The request is subject to the probation period policy to allow batching requests. The file status is refreshed according to\nthe refresh period policy.\nThe caller must be sure to call StopMonitoringFile() when the files status is not desired anymore. It is ok to call StopMonitoringFile()\nwithin the callback OnSourceControlledFileStatus().\n@param Owner The unique Id of the caller, typically the caller memory address.\n@param AbsPathname The absolute path and filname of the file to monitor.\n@param OnSourceControlledFileStatus Delegate invoked whe the status of the file is updated.\n@see SetNewRequestProbationPeriod()\n@see SetUpdateStatusPeriod()\n@see SetSuspendMonitoringPolicy()\n@see GetStatusAge()"
+    },
+    {
+      "id": "start-monitoring-files",
+      "name": "StartMonitoringFiles",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "StartMonitoringFiles(Target, Owner Id, Abs Pathnames, On Source Controlled File Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        },
+        {
+          "name": "Abs Pathnames",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "On Source Controlled File Status",
+          "type": "FOnSourceControlFileStatus"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "stop-monitoring-file",
+      "name": "StopMonitoringFile",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "StopMonitoringFile(Target, Owner Id, Abs Pathname)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        },
+        {
+          "name": "Abs Pathname",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops monitoring the source control status of the specified file. If the specified file is not monitored, the function\nreturns successfully.\n@param OwnerId The unique Id of the caller, typically the caller memory address.\n@param AbsPathname The absolute path and filname of the file to stop monitoring.\n@note This can be called fron the FOnSourceControlFileStatus callback passed to StartMonitoringFile()."
+    },
+    {
+      "id": "stop-monitoring-files-426d92",
+      "name": "StopMonitoringFiles",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "StopMonitoringFiles(Target, Owner Id, Abs Pathnames)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        },
+        {
+          "name": "Abs Pathnames",
+          "type": "TArray<FString>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "stop-monitoring-files-7e0367",
+      "name": "StopMonitoringFiles",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "StopMonitoringFiles(Target, Owner Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stops monitoring all the files that were registered by the specified owner Id."
+    },
+    {
+      "id": "set-monitoring-files",
+      "name": "SetMonitoringFiles",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "SetMonitoringFiles(Target, Owner Id, Abs Pathnames, On Source Controlled File Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        },
+        {
+          "name": "Abs Pathnames",
+          "type": "TSet<FString>&&"
+        },
+        {
+          "name": "On Source Controlled File Status",
+          "type": "FOnSourceControlFileStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts monitoring files that weren't monitored yet by the specified owner, stops monitoring those that were monitored by the owner but are not in the\nupdated list and keep monitoring files that were monitored before and still in the updated list.\n@param OwnerId The unique Id of the caller, typically the caller memory address.\n@param AbsPathnames The list of absolute file pathnames that must be monitored. (The set is modified during the operation)\n@param OnSourceControlledFileStatus Delegate invoked whe the status of the file is updated."
+    },
+    {
+      "id": "get-monitored-files",
+      "name": "GetMonitoredFiles",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "GetMonitoredFiles(Target, Owner Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Owner Id",
+          "type": "uintptr_t"
+        }
+      ],
+      "returnType": "TSet<FString>",
+      "docs": "Returns the set of files being monitored by the specifed owner."
+    },
+    {
+      "id": "get-status-age",
+      "name": "GetStatusAge",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "GetStatusAge(Target, Abs Pathname)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Abs Pathname",
+          "type": "String&"
+        }
+      ],
+      "returnType": "TOptional<FTimespan>",
+      "docs": "Returns the file status age, i.e. (now - last_status_update) if the file is\nmonitored. If the initial status request hasn't been received yet, returns\nzero."
+    },
+    {
+      "id": "on-source-control-status-update",
+      "name": "OnSourceControlStatusUpdate",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "OnSourceControlStatusUpdate(Target, In Operation, In Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "In Operation",
+          "type": "TSharedRef<ISourceControlOperation>&"
+        },
+        {
+          "name": "In Type",
+          "type": "ECommandResult::Type"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Invoked when the source control has updated the status for the requested files."
+    },
+    {
+      "id": "on-source-control-provider-changed",
+      "name": "OnSourceControlProviderChanged",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "OnSourceControlProviderChanged(Target, Old Provider, New Provider)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Old Provider",
+          "type": "ISourceControlProvider&"
+        },
+        {
+          "name": "New Provider",
+          "type": "ISourceControlProvider&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invoked when the source control provider changes."
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "Tick(Target, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Invoked by the main loop ticker to fire source control requests."
+    },
+    {
+      "id": "find-file-status",
+      "name": "FindFileStatus",
+      "category": "SourceControlFileStatusMonitor",
+      "signature": "FindFileStatus(Target, Pathname)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSourceControlFileStatusMonitor*"
+        },
+        {
+          "name": "Pathname",
+          "type": "String&"
+        }
+      ],
+      "returnType": "TSharedPtr<FSourceControlFileStatus>",
+      "docs": "Returns the specified files status or null if not found."
+    }
+  ]
+}

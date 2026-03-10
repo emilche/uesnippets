@@ -1,0 +1,694 @@
+{
+  "id": "shader-compiler-core",
+  "label": "ShaderCompilerCore",
+  "includepath": "ShaderCompilerCore.h",
+  "includes": [
+    "CoreMinimal",
+    "FileManager",
+    "Blake3",
+    "xxhash",
+    "Stats",
+    "RefCounting",
+    "EnumClassFlags",
+    "SecureHash",
+    "Paths",
+    "PathViews",
+    "CoreStats",
+    "ShaderCore",
+    "ShaderParameterMetadata",
+    "ShaderCompilerFlags"
+  ],
+  "functions": [
+    {
+      "id": "get-bindless-resources-configuration",
+      "name": "GetBindlessResourcesConfiguration",
+      "category": "ShaderCompilerCore",
+      "signature": "GetBindlessResourcesConfiguration(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ERHIBindlessConfiguration"
+    },
+    {
+      "id": "get-bindless-samplers-configuration",
+      "name": "GetBindlessSamplersConfiguration",
+      "category": "ShaderCompilerCore",
+      "signature": "GetBindlessSamplersConfiguration(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ERHIBindlessConfiguration"
+    },
+    {
+      "id": "get-build-machine-artifact-base-path",
+      "name": "GetBuildMachineArtifactBasePath",
+      "category": "ShaderCompilerCore",
+      "signature": "GetBuildMachineArtifactBasePath()",
+      "params": [],
+      "returnType": "String&",
+      "docs": "Returns the path where shader compilation related artifacts should be stored when running on a build machine"
+    },
+    {
+      "id": "get-shader-debug-info-path",
+      "name": "GetShaderDebugInfoPath",
+      "category": "ShaderCompilerCore",
+      "signature": "GetShaderDebugInfoPath()",
+      "params": [],
+      "returnType": "String&",
+      "docs": "Returns the base path where any shader debug information should be written to"
+    },
+    {
+      "id": "should-generate-shader-symbols",
+      "name": "ShouldGenerateShaderSymbols",
+      "category": "ShaderCompilerCore",
+      "signature": "ShouldGenerateShaderSymbols(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if shader symbols should be kept for a given platform."
+    },
+    {
+      "id": "should-generate-shader-symbols-info",
+      "name": "ShouldGenerateShaderSymbolsInfo",
+      "category": "ShaderCompilerCore",
+      "signature": "ShouldGenerateShaderSymbolsInfo(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if shader symbol minimal info files should be generated for a given platform."
+    },
+    {
+      "id": "should-write-shader-symbols",
+      "name": "ShouldWriteShaderSymbols",
+      "category": "ShaderCompilerCore",
+      "signature": "ShouldWriteShaderSymbols(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if shader symbols should be exported to separate files for a given platform."
+    },
+    {
+      "id": "get-shader-symbol-path-override",
+      "name": "GetShaderSymbolPathOverride",
+      "category": "ShaderCompilerCore",
+      "signature": "GetShaderSymbolPathOverride(Out Path Override, Shader Format)",
+      "params": [
+        {
+          "name": "Out Path Override",
+          "type": "String&"
+        },
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the shader symbol path is overridden and OutPathOverride contains the override path."
+    },
+    {
+      "id": "should-allow-unique-shader-symbols",
+      "name": "ShouldAllowUniqueShaderSymbols",
+      "category": "ShaderCompilerCore",
+      "signature": "ShouldAllowUniqueShaderSymbols(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if (external) shader symbols should be specific to each shader rather than be de-duplicated."
+    },
+    {
+      "id": "get-write-shader-symbols-options",
+      "name": "GetWriteShaderSymbolsOptions",
+      "category": "ShaderCompilerCore",
+      "signature": "GetWriteShaderSymbolsOptions(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "EWriteShaderSymbols",
+      "docs": "Returns true if shaders should be combined into a single zip file instead of individual files."
+    },
+    {
+      "id": "should-enable-extra-shader-data",
+      "name": "ShouldEnableExtraShaderData",
+      "category": "ShaderCompilerCore",
+      "signature": "ShouldEnableExtraShaderData(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the user wants more runtime shader data (names, extra info)"
+    },
+    {
+      "id": "should-optimize-shaders",
+      "name": "ShouldOptimizeShaders",
+      "category": "ShaderCompilerCore",
+      "signature": "ShouldOptimizeShaders(Shader Format)",
+      "params": [
+        {
+          "name": "Shader Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "allow-shader-compiling",
+      "name": "AllowShaderCompiling",
+      "category": "ShaderCompilerCore",
+      "signature": "AllowShaderCompiling()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true is shader compiling is allowed"
+    },
+    {
+      "id": "allow-global-shader-load",
+      "name": "AllowGlobalShaderLoad",
+      "category": "ShaderCompilerCore",
+      "signature": "AllowGlobalShaderLoad()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true if the global shader cache should be loaded (and potentially compiled if allowed/needed"
+    },
+    {
+      "id": "lex-from-string",
+      "name": "LexFromString",
+      "category": "ShaderCompilerCore",
+      "signature": "LexFromString(Out Value, In String)",
+      "params": [
+        {
+          "name": "Out Value",
+          "type": "ECompilerFlags&"
+        },
+        {
+          "name": "In String",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "ShaderCompilerCore",
+      "signature": "LexToString(In Value)",
+      "params": [
+        {
+          "name": "In Value",
+          "type": "ECompilerFlags"
+        }
+      ],
+      "returnType": "TCHAR*"
+    },
+    {
+      "id": "get-or-create-shader-debug-info-path",
+      "name": "GetOrCreateShaderDebugInfoPath",
+      "category": "ShaderCompilerCore",
+      "signature": "GetOrCreateShaderDebugInfoPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerInput*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the shader debug info path for this shader compiler input and create the directory if it doesn't exist yet."
+    },
+    {
+      "id": "get-error-string-with-source-location",
+      "name": "GetErrorStringWithSourceLocation",
+      "category": "ShaderCompilerCore",
+      "signature": "GetErrorStringWithSourceLocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerError*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the error message with source file and source line (if present), as well as a line marker separated with a LINE_TERMINATOR."
+    },
+    {
+      "id": "get-error-string-with-line-marker",
+      "name": "GetErrorStringWithLineMarker",
+      "category": "ShaderCompilerCore",
+      "signature": "GetErrorStringWithLineMarker(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerError*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the error message with source file and source line (if present), as well as a line marker separated with a LINE_TERMINATOR."
+    },
+    {
+      "id": "get-error-string",
+      "name": "GetErrorString",
+      "category": "ShaderCompilerCore",
+      "signature": "GetErrorString(Target, Omit Line Marker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerError*"
+        },
+        {
+          "name": "Omit Line Marker",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the error message with source file and source line (if present)."
+    },
+    {
+      "id": "extract-source-location",
+      "name": "ExtractSourceLocation",
+      "category": "ShaderCompilerCore",
+      "signature": "ExtractSourceLocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerError*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Extracts the file path and source line from StrippedErrorMessage to ErrorVirtualFilePath and ErrorLineString."
+    },
+    {
+      "id": "extract-source-locations",
+      "name": "ExtractSourceLocations",
+      "category": "ShaderCompilerCore",
+      "signature": "ExtractSourceLocations(In Out Errors)",
+      "params": [
+        {
+          "name": "In Out Errors",
+          "type": "TArray<FShaderCompilerError>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Extracts the file path and source line for each error from the error message. Propagates highlighted line and marker to\nall errors pertaining to the same source location."
+    },
+    {
+      "id": "get-shader-source-file-path",
+      "name": "GetShaderSourceFilePath",
+      "category": "ShaderCompilerCore",
+      "signature": "GetShaderSourceFilePath(Target, In Out Errors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerError*"
+        },
+        {
+          "name": "In Out Errors",
+          "type": "TArray<FShaderCompilerError>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the path of the underlying source file relative to the process base dir."
+    },
+    {
+      "id": "generate-output-hash",
+      "name": "GenerateOutputHash",
+      "category": "ShaderCompilerCore",
+      "signature": "GenerateOutputHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerOutput*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Generates OutputHash from the compiler output."
+    },
+    {
+      "id": "compress-output",
+      "name": "CompressOutput",
+      "category": "ShaderCompilerCore",
+      "signature": "CompressOutput(Target, Shader Compression Format, Oodle Compressor, Oodle Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerOutput*"
+        },
+        {
+          "name": "Shader Compression Format",
+          "type": "Name"
+        },
+        {
+          "name": "Oodle Compressor",
+          "type": "FOodleDataCompression::ECompressor"
+        },
+        {
+          "name": "Oodle Level",
+          "type": "FOodleDataCompression::ECompressionLevel"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calls GenerateOutputHash() before the compression, replaces FShaderCode with the compressed data (if compression result was smaller)."
+    },
+    {
+      "id": "serialize-shader-code-validation",
+      "name": "SerializeShaderCodeValidation",
+      "category": "ShaderCompilerCore",
+      "signature": "SerializeShaderCodeValidation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerOutput*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add optional data in ShaderCode to perform additional shader input validation at runtime"
+    },
+    {
+      "id": "serialize-shader-diagnostic-data",
+      "name": "SerializeShaderDiagnosticData",
+      "category": "ShaderCompilerCore",
+      "signature": "SerializeShaderDiagnosticData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCompilerOutput*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add optional diagnostic data in ShaderCode to perform assert translation at runtime"
+    },
+    {
+      "id": "report",
+      "name": "Report",
+      "category": "ShaderCompilerCore",
+      "signature": "Report(Code, Info)",
+      "params": [
+        {
+          "name": "Code",
+          "type": "ECode"
+        },
+        {
+          "name": "Info",
+          "type": "FStringView&",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the global SCW error code if it hasn't been set before.\nCall Reset first before setting a new value.\nReturns true on success, otherwise the error code has already been set."
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "ShaderCompilerCore",
+      "signature": "Reset()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Resets the global SCW error code to NotSet."
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "ShaderCompilerCore",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "ECode",
+      "docs": "Returns the global SCW error code."
+    },
+    {
+      "id": "get-info",
+      "name": "GetInfo",
+      "category": "ShaderCompilerCore",
+      "signature": "GetInfo()",
+      "params": [],
+      "returnType": "String&",
+      "docs": "Returns the global SCW error code information string. Empty string if not set."
+    },
+    {
+      "id": "is-set",
+      "name": "IsSet",
+      "category": "ShaderCompilerCore",
+      "signature": "IsSet()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true if the SCW global error code has been set. Equivalent to 'Get() != NotSet'."
+    },
+    {
+      "id": "handle-shader-compile-exception",
+      "name": "HandleShaderCompileException",
+      "category": "ShaderCompilerCore",
+      "signature": "HandleShaderCompileException(Info, Out Ex Msg, Out Call Stack)",
+      "params": [
+        {
+          "name": "Info",
+          "type": "Windows::LPEXCEPTION_POINTERS"
+        },
+        {
+          "name": "Out Ex Msg",
+          "type": "String&"
+        },
+        {
+          "name": "Out Call Stack",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-shader-format",
+      "name": "FindShaderFormat",
+      "category": "ShaderCompilerCore",
+      "signature": "FindShaderFormat(Format, Shader Formats)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Name"
+        },
+        {
+          "name": "Shader Formats",
+          "type": "TArray<IShaderFormat*>&"
+        }
+      ],
+      "returnType": "IShaderFormat*"
+    },
+    {
+      "id": "conditional-preprocess-shader",
+      "name": "ConditionalPreprocessShader",
+      "category": "ShaderCompilerCore",
+      "signature": "ConditionalPreprocessShader(Job)",
+      "params": [
+        {
+          "name": "Job",
+          "type": "FShaderCommonCompileJob*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "preprocess-shader",
+      "name": "PreprocessShader",
+      "category": "ShaderCompilerCore",
+      "signature": "PreprocessShader(Job)",
+      "params": [
+        {
+          "name": "Job",
+          "type": "FShaderCommonCompileJob*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "compile-shader",
+      "name": "CompileShader",
+      "category": "ShaderCompilerCore",
+      "signature": "CompileShader(Shader Formats, Job, Working Directory, Compile Count)",
+      "params": [
+        {
+          "name": "Shader Formats",
+          "type": "TArray<IShaderFormat*>&"
+        },
+        {
+          "name": "Job",
+          "type": "FShaderCompileJob&"
+        },
+        {
+          "name": "Working Directory",
+          "type": "String&"
+        },
+        {
+          "name": "Compile Count",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compile-shader-pipeline",
+      "name": "CompileShaderPipeline",
+      "category": "ShaderCompilerCore",
+      "signature": "CompileShaderPipeline(Shader Formats, Pipeline Job, Working Directory, Compile Count)",
+      "params": [
+        {
+          "name": "Shader Formats",
+          "type": "TArray<IShaderFormat*>&"
+        },
+        {
+          "name": "Pipeline Job",
+          "type": "FShaderPipelineCompileJob*"
+        },
+        {
+          "name": "Working Directory",
+          "type": "String&"
+        },
+        {
+          "name": "Compile Count",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "check-virtual-shader-file-path",
+      "name": "CheckVirtualShaderFilePath",
+      "category": "ShaderCompilerCore",
+      "signature": "CheckVirtualShaderFilePath(Virtual Path, Compile Errors)",
+      "params": [
+        {
+          "name": "Virtual Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "Compile Errors",
+          "type": "TArray<FShaderCompilerError>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Validates the format of a virtual shader file path.\nMeant to be use as such: check(CheckVirtualShaderFilePath(VirtualFilePath));\nCompileErrors output array is optional. If this is non-null, all validation errors are returned to this array instead of logging them to LogShaders."
+    },
+    {
+      "id": "fixup-shader-file-path",
+      "name": "FixupShaderFilePath",
+      "category": "ShaderCompilerCore",
+      "signature": "FixupShaderFilePath(Virtual File Path, Shader Platform, Shader Platform Name)",
+      "params": [
+        {
+          "name": "Virtual File Path",
+          "type": "String&"
+        },
+        {
+          "name": "Shader Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Shader Platform Name",
+          "type": "Name*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fixes up the given virtual file path (substituting virtual platform path/autogen path for the given platform)"
+    },
+    {
+      "id": "shader-convert-and-strip-comments",
+      "name": "ShaderConvertAndStripComments",
+      "category": "ShaderCompilerCore",
+      "signature": "ShaderConvertAndStripComments(Shader Source, Out Stripped)",
+      "params": [
+        {
+          "name": "Shader Source",
+          "type": "String&"
+        },
+        {
+          "name": "Out Stripped",
+          "type": "TArray<ANSICHAR>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Utility function to strip comments and convert source to ANSI, useful for preprocessing"
+    },
+    {
+      "id": "load-shader-source-file",
+      "name": "LoadShaderSourceFile",
+      "category": "ShaderCompilerCore",
+      "signature": "LoadShaderSourceFile(Virtual File Path, Shader Platform, Out File Contents, Out Compile Errors, Shader Platform Name, Out Stripped Contents)",
+      "params": [
+        {
+          "name": "Virtual File Path",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Shader Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Out File Contents",
+          "type": "String*"
+        },
+        {
+          "name": "Out Compile Errors",
+          "type": "TArray<FShaderCompilerError>*"
+        },
+        {
+          "name": "Shader Platform Name",
+          "type": "Name*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Out Stripped Contents",
+          "type": "FShaderSharedAnsiStringPtr*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads the shader file with the given name.\n@param VirtualFilePath - The virtual path of shader file to load.\n@param OutFileContents - If true is returned, will contain the contents of the shader file. Can be null.\n@return True if the file was successfully loaded."
+    },
+    {
+      "id": "get-shader-preprocess-dependencies",
+      "name": "GetShaderPreprocessDependencies",
+      "category": "ShaderCompilerCore",
+      "signature": "GetShaderPreprocessDependencies(Virtual File Path, Shader Platform, Out Dependencies)",
+      "params": [
+        {
+          "name": "Virtual File Path",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Shader Platform",
+          "type": "EShaderPlatform"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "FShaderPreprocessDependenciesShared&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Utility function that returns a root shader file plus all non-platform include dependencies in a single batch call, useful for preprocessing."
+    }
+  ]
+}

@@ -1,0 +1,585 @@
+{
+  "id": "ed-graph-utilities",
+  "label": "EdGraphUtilities",
+  "includepath": "EdGraphUtilities.h",
+  "includes": [
+    "Array",
+    "Map",
+    "Set",
+    "UnrealString",
+    "CoreMinimal",
+    "EdGraphNode",
+    "EdGraphPin",
+    "UnrealMathSSE",
+    "SharedPointer",
+    "NameTypes",
+    "WeakObjectPtr",
+    "WeakObjectPtrTemplates"
+  ],
+  "functions": [
+    {
+      "id": "register-visual-node-factory",
+      "name": "RegisterVisualNodeFactory",
+      "category": "EdGraphUtilities",
+      "signature": "RegisterVisualNodeFactory(New Factory)",
+      "params": [
+        {
+          "name": "New Factory",
+          "type": "TSharedPtr<FGraphPanelNodeFactory>"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "unregister-visual-node-factory",
+      "name": "UnregisterVisualNodeFactory",
+      "category": "EdGraphUtilities",
+      "signature": "UnregisterVisualNodeFactory(Old Factory)",
+      "params": [
+        {
+          "name": "Old Factory",
+          "type": "TSharedPtr<FGraphPanelNodeFactory>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "register-visual-pin-factory",
+      "name": "RegisterVisualPinFactory",
+      "category": "EdGraphUtilities",
+      "signature": "RegisterVisualPinFactory(New Factory)",
+      "params": [
+        {
+          "name": "New Factory",
+          "type": "TSharedPtr<FGraphPanelPinFactory>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unregister-visual-pin-factory",
+      "name": "UnregisterVisualPinFactory",
+      "category": "EdGraphUtilities",
+      "signature": "UnregisterVisualPinFactory(Old Factory)",
+      "params": [
+        {
+          "name": "Old Factory",
+          "type": "TSharedPtr<FGraphPanelPinFactory>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "register-visual-pin-connection-factory",
+      "name": "RegisterVisualPinConnectionFactory",
+      "category": "EdGraphUtilities",
+      "signature": "RegisterVisualPinConnectionFactory(New Factory)",
+      "params": [
+        {
+          "name": "New Factory",
+          "type": "TSharedPtr<FGraphPanelPinConnectionFactory>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unregister-visual-pin-connection-factory",
+      "name": "UnregisterVisualPinConnectionFactory",
+      "category": "EdGraphUtilities",
+      "signature": "UnregisterVisualPinConnectionFactory(Old Factory)",
+      "params": [
+        {
+          "name": "Old Factory",
+          "type": "TSharedPtr<FGraphPanelPinConnectionFactory>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "post-process-pasted-nodes",
+      "name": "PostProcessPastedNodes",
+      "category": "EdGraphUtilities",
+      "signature": "PostProcessPastedNodes(Spawned Nodes)",
+      "params": [
+        {
+          "name": "Spawned Nodes",
+          "type": "TSet<UEdGraphNode*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "After pasting nodes, need to perform some fixup for pins etc."
+    },
+    {
+      "id": "get-net-from-pin",
+      "name": "GetNetFromPin",
+      "category": "EdGraphUtilities",
+      "signature": "GetNetFromPin(Pin)",
+      "params": [
+        {
+          "name": "Pin",
+          "type": "UEdGraphPin*"
+        }
+      ],
+      "returnType": "UEdGraphPin*",
+      "docs": "Finds the net associated with a particular pin"
+    },
+    {
+      "id": "clone-graph",
+      "name": "CloneGraph",
+      "category": "EdGraphUtilities",
+      "signature": "CloneGraph(Source, New Outer, Message Log, Cloning For Compile)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "New Outer",
+          "type": "UObject*"
+        },
+        {
+          "name": "Message Log",
+          "type": "FCompilerResultsLog*",
+          "default": "NULL"
+        },
+        {
+          "name": "Cloning For Compile",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "UEdGraph*",
+      "docs": "Clones (deep copies) a UEdGraph, including all of it's nodes and pins and their links, maintaining a mapping from the clone to the source nodes (even across multiple clonings)\nA NewOuter of NULL indicates the transient package"
+    },
+    {
+      "id": "clone-and-merge-graph-in",
+      "name": "CloneAndMergeGraphIn",
+      "category": "EdGraphUtilities",
+      "signature": "CloneAndMergeGraphIn(Merge Target, Source Graph, Message Log, Require Schema Match, In Is Compiling, Out Cloned Nodes)",
+      "params": [
+        {
+          "name": "Merge Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Source Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Message Log",
+          "type": "FCompilerResultsLog&"
+        },
+        {
+          "name": "Require Schema Match",
+          "type": "Bool"
+        },
+        {
+          "name": "In Is Compiling",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Out Cloned Nodes",
+          "type": "TArray<UEdGraphNode*>*",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clones the content from SourceGraph and merges it into MergeTarget;\nincluding merging/flattening all of the children from the SourceGraph into MergeTarget\nAlso optionally populates *OutClonedNodes with the list of cloned objects.\n@param MergeTarget\t\t\t\tThe graph to merge the source graph into\n@param SourceGraph\t\t\t\tGraph to merge from\n@param MessageLog\t\t\t\tMessageLog to report errors and warnings to\n@param bRequireSchemaMatch\t\tTRUE if the graphs must have the same schema for the merge to occur\n@param OutClonedNodes\t\t\tWill populate with a full list of cloned nodes if provided\n@param bInIsCompiling\t\t\tTRUE if the function is being called during compilation, this will eliminate some nodes that will not be compiled"
+    },
+    {
+      "id": "merge-children-graphs-in",
+      "name": "MergeChildrenGraphsIn",
+      "category": "EdGraphUtilities",
+      "signature": "MergeChildrenGraphsIn(Merge Target, Parent Graph, Require Schema Match, In Is Compiling, Message Log)",
+      "params": [
+        {
+          "name": "Merge Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Parent Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Require Schema Match",
+          "type": "Bool"
+        },
+        {
+          "name": "In Is Compiling",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Message Log",
+          "type": "FCompilerResultsLog*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Moves the contents of all of the children graphs of ParentGraph (recursively) into the MergeTarget graph.\nThis does not clone, it's destructive to the ParentGraph"
+    },
+    {
+      "id": "rename-graph-close-to-name",
+      "name": "RenameGraphCloseToName",
+      "category": "EdGraphUtilities",
+      "signature": "RenameGraphCloseToName(Graph, Base Name, Start Index)",
+      "params": [
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Base Name",
+          "type": "String&"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tries to rename the graph to have a name similar to BaseName"
+    },
+    {
+      "id": "rename-graph-to-name-or-close-to-name",
+      "name": "RenameGraphToNameOrCloseToName",
+      "category": "EdGraphUtilities",
+      "signature": "RenameGraphToNameOrCloseToName(Graph, Desired Name)",
+      "params": [
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Desired Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-nodes-to-text",
+      "name": "ExportNodesToText",
+      "category": "EdGraphUtilities",
+      "signature": "ExportNodesToText(Nodes To Export, Exported Text)",
+      "params": [
+        {
+          "name": "Nodes To Export",
+          "type": "TSet<UObject*>"
+        },
+        {
+          "name": "Exported Text",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Exports a set of nodes to text\n@param\tNodesToExport\t\tSet of nodes to export, all nodes must be in the same graph\n@param\t[out] ExportedText\tThe text representation will be stored here"
+    },
+    {
+      "id": "import-nodes-from-text",
+      "name": "ImportNodesFromText",
+      "category": "EdGraphUtilities",
+      "signature": "ImportNodesFromText(Destination Graph, Text To Import, Imported Node Set)",
+      "params": [
+        {
+          "name": "Destination Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Text To Import",
+          "type": "String&"
+        },
+        {
+          "name": "Imported Node Set",
+          "type": "TSet<UEdGraphNode*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "out"
+    },
+    {
+      "id": "can-import-nodes-from-text",
+      "name": "CanImportNodesFromText",
+      "category": "EdGraphUtilities",
+      "signature": "CanImportNodesFromText(Destination Graph, Text To Import)",
+      "params": [
+        {
+          "name": "Destination Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Text To Import",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "out"
+    },
+    {
+      "id": "calculate-approximate-node-boundaries",
+      "name": "CalculateApproximateNodeBoundaries",
+      "category": "EdGraphUtilities",
+      "signature": "CalculateApproximateNodeBoundaries(Nodes)",
+      "params": [
+        {
+          "name": "Nodes",
+          "type": "TArray<UEdGraphNode*>&"
+        }
+      ],
+      "returnType": "FIntRect"
+    },
+    {
+      "id": "copy-common-state",
+      "name": "CopyCommonState",
+      "category": "EdGraphUtilities",
+      "signature": "CopyCommonState(Old Node, New Node)",
+      "params": [
+        {
+          "name": "Old Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "New Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy Common State of data from OldNode to NewNode *"
+    },
+    {
+      "id": "traverse-nodes",
+      "name": "TraverseNodes",
+      "category": "EdGraphUtilities",
+      "signature": "TraverseNodes(Target, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNodeVisitor*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-set-param",
+      "name": "IsSetParam",
+      "category": "EdGraphUtilities",
+      "signature": "IsSetParam(Function, Parameter Name)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns true if the ParameterName is marked as a SetParam in the relevant Function"
+    },
+    {
+      "id": "is-map-param",
+      "name": "IsMapParam",
+      "category": "EdGraphUtilities",
+      "signature": "IsMapParam(Function, Parameter Name)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns true if the ParameterName is marked as a MapParam, MapKeyParam, or MapValueParam in the relevant Function"
+    },
+    {
+      "id": "is-array-dependent-param",
+      "name": "IsArrayDependentParam",
+      "category": "EdGraphUtilities",
+      "signature": "IsArrayDependentParam(Function, Parameter Name)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns true if the ParameterName is marked as ArrayTypeDependentParams"
+    },
+    {
+      "id": "is-dynamic-container-param",
+      "name": "IsDynamicContainerParam",
+      "category": "EdGraphUtilities",
+      "signature": "IsDynamicContainerParam(Function, Parameter Name)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns true if the ParamaterName is marked as a Set, Map, or array param in the relevant function"
+    },
+    {
+      "id": "find-array-param-pin",
+      "name": "FindArrayParamPin",
+      "category": "EdGraphUtilities",
+      "signature": "FindArrayParamPin(Function, Node)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "UEdGraphPin*",
+      "docs": "returns the first pin marked as an ArrayParam, usually returning nullptr"
+    },
+    {
+      "id": "find-set-param-pin",
+      "name": "FindSetParamPin",
+      "category": "EdGraphUtilities",
+      "signature": "FindSetParamPin(Function, Node)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "UEdGraphPin*",
+      "docs": "returns the first pin marked as an SetParam, usually returning nullptr"
+    },
+    {
+      "id": "find-map-param-pin",
+      "name": "FindMapParamPin",
+      "category": "EdGraphUtilities",
+      "signature": "FindMapParamPin(Function, Node)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "UEdGraphPin*",
+      "docs": "returns the first pin marked as an MapParam, usually returning nullptr"
+    },
+    {
+      "id": "find-pin-from-meta-data",
+      "name": "FindPinFromMetaData",
+      "category": "EdGraphUtilities",
+      "signature": "FindPinFromMetaData(Function, Node, Meta Data)",
+      "params": [
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Meta Data",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UEdGraphPin*",
+      "docs": "returns the first pin referred to in a , and | delineated list of pin names"
+    },
+    {
+      "id": "get-pin-connection-map",
+      "name": "GetPinConnectionMap",
+      "category": "EdGraphUtilities",
+      "signature": "GetPinConnectionMap(Node, Out Pin Connections)",
+      "params": [
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Out Pin Connections",
+          "type": "TMap<FString,TSet<UEdGraphPin*>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Output a map of pin names to a set of connections given a function entry pin\n@param Node\t\t\t\tThe entry pin to gather connections from\n@param OutPinConnections\tOutput map of connection data"
+    },
+    {
+      "id": "reconnect-pin-map",
+      "name": "ReconnectPinMap",
+      "category": "EdGraphUtilities",
+      "signature": "ReconnectPinMap(Node, Pin Connections)",
+      "params": [
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Pin Connections",
+          "type": "TMap<FString,TSet<UEdGraphPin*>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reconnect the pin map to the given node\n@param Node\t\t\t\tThe node to connect pins to\n@param PinConnections\t\tMap of pin connections to set"
+    },
+    {
+      "id": "copy-pin-defaults",
+      "name": "CopyPinDefaults",
+      "category": "EdGraphUtilities",
+      "signature": "CopyPinDefaults(Node From, Node To)",
+      "params": [
+        {
+          "name": "Node From",
+          "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Node To",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy pin default values between nodes for any pins with matching names"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "EdGraphUtilities",
+      "signature": "Get(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FWeakGraphPinPtr*"
+        }
+      ],
+      "returnType": "class UEdGraphPin*",
+      "docs": "Method to obtain the actual object reference from the weak pointer. Will attempt to fix up the pin object reference if it's no longer valid, otherwise returns NULL"
+    }
+  ]
+}

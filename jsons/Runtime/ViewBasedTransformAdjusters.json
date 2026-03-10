@@ -1,0 +1,139 @@
+{
+  "id": "view-based-transform-adjusters",
+  "label": "ViewBasedTransformAdjusters",
+  "includepath": "BaseGizmos/ViewBasedTransformAdjusters.h",
+  "includes": [
+    "BoxSphereBounds",
+    "Transform",
+    "SharedPointer"
+  ],
+  "functions": [
+    {
+      "id": "get-adjusted-component-to-world",
+      "name": "GetAdjustedComponentToWorld",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "GetAdjustedComponentToWorld(Target, View, Current Component To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSimpleConstantViewScaleAdjuster*"
+        },
+        {
+          "name": "View",
+          "type": "ISceneViewInterface&"
+        },
+        {
+          "name": "Current Component To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "public : FTransform",
+      "docs": "Given the component location and the view information, gives the desired transform of the component."
+    },
+    {
+      "id": "get-view-independent-bounds",
+      "name": "GetViewIndependentBounds",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "GetViewIndependentBounds(Target, Local To World, Original Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSimpleConstantViewScaleAdjuster*"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Original Bounds",
+          "type": "FBoxSphereBounds&"
+        }
+      ],
+      "returnType": "FBoxSphereBounds",
+      "docs": "Returns the transform that should be returned by a USceneComponent CalcBounds method, which\ncan't know about the view. Although the default is to return the original bounds, any adjuster\nthat scales the mesh arbitrarily large will probably need to return infinite bounds, whereas\nan adjuster that only changes orienation must account for any possible orientation.\nNote that returning infinite bounds causes the relevant components to no longer be frustum-culled,\nbut this is acceptible for gizmos, which are typically few and on-screen."
+    },
+    {
+      "id": "set-gizmo-origin-transform",
+      "name": "SetGizmoOriginTransform",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "SetGizmoOriginTransform(Target, Gizmo Origin To Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSubGizmoTransformAdjuster*"
+        },
+        {
+          "name": "Gizmo Origin To Component",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the transform of the gizmo origin relative to this component. This is safe to do even if the\nadjuster is used by the render thread (the render-side update gets queued properly)."
+    },
+    {
+      "id": "add-transform-adjuster-642765",
+      "name": "AddTransformAdjuster",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "AddTransformAdjuster(Component In, Gizmo Root Component, Mirror Based On Octant)",
+      "params": [
+        {
+          "name": "Component In",
+          "type": "UViewAdjustedStaticMeshGizmoComponent*"
+        },
+        {
+          "name": "Gizmo Root Component",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Mirror Based On Octant",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TSharedPtr<FSubGizmoTransformAdjuster>",
+      "docs": "Static helper method to create and add this adjuster to a gizmo component for the common case of keeping a\nconstant size gizmo.\n@param GizmoRootComponent The distance relative to this component is kept constant, and this is the component whose rotation\nis considered to be 0 when using global mode.\n@param bMirrorBasedOnOctant If true, mirrors the component around the ComponentToKeepDistanceConstantTo\ndepending on which octant of that component the view is located in."
+    },
+    {
+      "id": "add-transform-adjuster-5f168a",
+      "name": "AddTransformAdjuster",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "AddTransformAdjuster(Component In, Gizmo Root Component, Should Mirror Based On Octant)",
+      "params": [
+        {
+          "name": "Component In",
+          "type": "UViewAdjustedStaticMeshGizmoComponent*"
+        },
+        {
+          "name": "Gizmo Root Component",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Should Mirror Based On Octant",
+          "type": "TFunction<bool ( )>"
+        }
+      ],
+      "returnType": "TSharedPtr<FSubGizmoTransformAdjuster>"
+    },
+    {
+      "id": "get-adjusted-component-to-world-render-thread",
+      "name": "GetAdjustedComponentToWorld_RenderThread",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "GetAdjustedComponentToWorld_RenderThread(Target, View, Current Component To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSubGizmoTransformAdjuster*"
+        },
+        {
+          "name": "View",
+          "type": "ISceneViewInterface&"
+        },
+        {
+          "name": "Current Component To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "FTransform",
+      "docs": "If an adjuster is used by a render proxy, it will use this endpoint for getting the transform.\nThis allows an adjuster to be potentially shared between game and render threads. Of course,\na component might instead choose to create a new adjuster whenever the render proxy is recreated,\nand recreate the proxy whenever any relevant parameters change."
+    }
+  ]
+}

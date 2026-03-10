@@ -1,0 +1,1102 @@
+{
+  "id": "mesh-pass-processor",
+  "label": "MeshPassProcessor",
+  "includepath": "MeshPassProcessor.h",
+  "includes": [
+    "DebugViewModeHelpers",
+    "MeshDrawShaderBindings",
+    "MeshMaterialShader",
+    "RendererInterface",
+    "GBufferInfo",
+    "SceneUtils",
+    "MeshBatch",
+    "MeshDrawCommandStatsDefines",
+    "PSOPrecacheMaterial",
+    "CityHash",
+    "RobinHoodHashTable",
+    "RHIImmutableSamplerState",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "allow-skip-unloaded-shaders",
+      "name": "AllowSkipUnloadedShaders",
+      "category": "MeshPassProcessor",
+      "signature": "AllowSkipUnloadedShaders(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMinimalBoundShaderStateInput*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "setup-bound-shader-state",
+      "name": "SetupBoundShaderState",
+      "category": "MeshPassProcessor",
+      "signature": "SetupBoundShaderState(Target, Vertex Declaration, Shaders)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGraphicsMinimalPipelineStateInitializer*"
+        },
+        {
+          "name": "Vertex Declaration",
+          "type": "FRHIVertexDeclaration*"
+        },
+        {
+          "name": "Shaders",
+          "type": "FMeshProcessorShaders&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-state-precache-pso-hash",
+      "name": "ComputeStatePrecachePSOHash",
+      "category": "MeshPassProcessor",
+      "signature": "ComputeStatePrecachePSOHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGraphicsMinimalPipelineStateInitializer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-pipeline-state-id",
+      "name": "GetPipelineStateId",
+      "category": "MeshPassProcessor",
+      "signature": "GetPipelineStateId(In Pipeline State, In Out Pass Set, Needs Shader Initialisation)",
+      "params": [
+        {
+          "name": "In Pipeline State",
+          "type": "FGraphicsMinimalPipelineStateInitializer&"
+        },
+        {
+          "name": "In Out Pass Set",
+          "type": "FGraphicsMinimalPipelineStateSet&"
+        },
+        {
+          "name": "Needs Shader Initialisation",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "FGraphicsMinimalPipelineStateId",
+      "docs": "Get a pipeline state id in this order: global persistent Id table. If not found, will lookup in PassSet argument. If not found in PassSet argument, create a blank pipeline set id and add it PassSet argument"
+    },
+    {
+      "id": "f-mesh-draw-shader-bindings",
+      "name": "FMeshDrawShaderBindings",
+      "category": "MeshPassProcessor",
+      "signature": "FMeshDrawShaderBindings()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Encapsulates shader bindings for a single FMeshDrawCommand."
+    },
+    {
+      "id": "initialize-01eae5",
+      "name": "Initialize",
+      "category": "MeshPassProcessor",
+      "signature": "Initialize(Target, Shaders)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Shaders",
+          "type": "FMeshProcessorShaders&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allocates space for the bindings of all shaders."
+    },
+    {
+      "id": "initialize-b78fed",
+      "name": "Initialize",
+      "category": "MeshPassProcessor",
+      "signature": "Initialize(Target, Shader)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Shader",
+          "type": "TShaderRef<FShader>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "finalize",
+      "name": "Finalize",
+      "category": "MeshPassProcessor",
+      "signature": "Finalize(Target, Shaders For Debugging)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Shaders For Debugging",
+          "type": "FMeshProcessorShaders*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called once binding setup is complete."
+    },
+    {
+      "id": "set-on-command-list-f1b45a",
+      "name": "SetOnCommandList",
+      "category": "MeshPassProcessor",
+      "signature": "SetOnCommandList(Target, RHI Cmd List, Shaders, State Cache Shader Bindings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandList&"
+        },
+        {
+          "name": "Shaders",
+          "type": "FBoundShaderStateInput&"
+        },
+        {
+          "name": "State Cache Shader Bindings",
+          "type": "FShaderBindingState*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set shader bindings on the commandlist, filtered by state cache."
+    },
+    {
+      "id": "set-parameters",
+      "name": "SetParameters",
+      "category": "MeshPassProcessor",
+      "signature": "SetParameters(Target, Batched Parameters, State Cache Shader Bindings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Batched Parameters",
+          "type": "FRHIBatchedShaderParameters&"
+        },
+        {
+          "name": "State Cache Shader Bindings",
+          "type": "FShaderBindingState*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-on-command-list-245d60",
+      "name": "SetOnCommandList",
+      "category": "MeshPassProcessor",
+      "signature": "SetOnCommandList(Target, RHI Cmd List, Shader, State Cache Shader Bindings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHIComputeCommandList&"
+        },
+        {
+          "name": "Shader",
+          "type": "FRHIComputeShader*"
+        },
+        {
+          "name": "State Cache Shader Bindings",
+          "type": "FShaderBindingState*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-ray-tracing-shader-bindings",
+      "name": "SetRayTracingShaderBindings",
+      "category": "MeshPassProcessor",
+      "signature": "SetRayTracingShaderBindings(Target, Binding Writer, Shader Index In Pipeline, Record Index, User Data, Binding Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderBindingState*"
+        },
+        {
+          "name": "Binding Writer",
+          "type": "FRayTracingLocalShaderBindingWriter*"
+        },
+        {
+          "name": "Shader Index In Pipeline",
+          "type": "UInt"
+        },
+        {
+          "name": "Record Index",
+          "type": "UInt"
+        },
+        {
+          "name": "User Data",
+          "type": "UInt"
+        },
+        {
+          "name": "Binding Type",
+          "type": "ERayTracingLocalShaderBindingType"
+        }
+      ],
+      "returnType": "FRayTracingLocalShaderBindings*"
+    },
+    {
+      "id": "set-ray-tracing-shader-bindings-for-hit-group-852318",
+      "name": "SetRayTracingShaderBindingsForHitGroup",
+      "category": "MeshPassProcessor",
+      "signature": "SetRayTracingShaderBindingsForHitGroup(Target, Binding Writer, Instance Index, Segment Index, Hit Group Index In Pipeline, Shader Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Binding Writer",
+          "type": "FRayTracingLocalShaderBindingWriter*"
+        },
+        {
+          "name": "Instance Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Segment Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Hit Group Index In Pipeline",
+          "type": "UInt"
+        },
+        {
+          "name": "Shader Slot",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FRayTracingLocalShaderBindings*"
+    },
+    {
+      "id": "set-ray-tracing-shader-bindings-for-hit-group-fdf615",
+      "name": "SetRayTracingShaderBindingsForHitGroup",
+      "category": "MeshPassProcessor",
+      "signature": "SetRayTracingShaderBindingsForHitGroup(Target, Binding Writer, Record Index, Geometry, Geometry Segment Index, Hit Group Index In Pipeline, Binding Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Binding Writer",
+          "type": "FRayTracingLocalShaderBindingWriter*"
+        },
+        {
+          "name": "Record Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Geometry",
+          "type": "FRHIRayTracingGeometry*"
+        },
+        {
+          "name": "Geometry Segment Index",
+          "type": "UInt"
+        },
+        {
+          "name": "Hit Group Index In Pipeline",
+          "type": "UInt"
+        },
+        {
+          "name": "Binding Type",
+          "type": "ERayTracingLocalShaderBindingType"
+        }
+      ],
+      "returnType": "FRayTracingLocalShaderBindings*"
+    },
+    {
+      "id": "matches-for-dynamic-instancing",
+      "name": "MatchesForDynamicInstancing",
+      "category": "MeshPassProcessor",
+      "signature": "MatchesForDynamicInstancing(Target, Rhs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Rhs",
+          "type": "FMeshDrawShaderBindings&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this set of shader bindings can be merged into an instanced draw call with another."
+    },
+    {
+      "id": "get-dynamic-instancing-hash",
+      "name": "GetDynamicInstancingHash",
+      "category": "MeshPassProcessor",
+      "signature": "GetDynamicInstancingHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "copy-from",
+      "name": "CopyFrom",
+      "category": "MeshPassProcessor",
+      "signature": "CopyFrom(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        },
+        {
+          "name": "Other",
+          "type": "FMeshDrawShaderBindings&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "category": "MeshPassProcessor",
+      "signature": "Release(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawShaderBindings*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-shader-bindings-44e6db",
+      "name": "SetShaderBindings",
+      "category": "MeshPassProcessor",
+      "signature": "SetShaderBindings(Batched Parameters, Single Shader Bindings, Shader Binding State)",
+      "params": [
+        {
+          "name": "Batched Parameters",
+          "type": "FRHIBatchedShaderParameters&"
+        },
+        {
+          "name": "Single Shader Bindings",
+          "type": "FReadOnlyMeshDrawSingleShaderBindings& RESTRICT"
+        },
+        {
+          "name": "Shader Binding State",
+          "type": "FShaderBindingState& RESTRICT"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "set-shader-bindings-ea1b6b",
+      "name": "SetShaderBindings",
+      "category": "MeshPassProcessor",
+      "signature": "SetShaderBindings(Batched Parameters, Single Shader Bindings)",
+      "params": [
+        {
+          "name": "Batched Parameters",
+          "type": "FRHIBatchedShaderParameters&"
+        },
+        {
+          "name": "Single Shader Bindings",
+          "type": "FReadOnlyMeshDrawSingleShaderBindings& RESTRICT"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-draw-parameters-and-finalize",
+      "name": "SetDrawParametersAndFinalize",
+      "category": "MeshPassProcessor",
+      "signature": "SetDrawParametersAndFinalize(Target, Mesh Batch, Batch Element Index, Pipeline Id, Shaders For Debugging)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawCommand*"
+        },
+        {
+          "name": "Mesh Batch",
+          "type": "FMeshBatch&"
+        },
+        {
+          "name": "Batch Element Index",
+          "type": "Int"
+        },
+        {
+          "name": "Pipeline Id",
+          "type": "FGraphicsMinimalPipelineStateId"
+        },
+        {
+          "name": "Shaders For Debugging",
+          "type": "FMeshProcessorShaders*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the mesh draw command is complete."
+    },
+    {
+      "id": "set-debug-data",
+      "name": "SetDebugData",
+      "category": "MeshPassProcessor",
+      "signature": "SetDebugData(Target, Primitive Scene Proxy, Material, Material Render Proxy, Untyped Shaders, Vertex Factory, Mesh Batch, PSO Collector Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawCommand*"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "Material",
+          "type": "FMaterial*"
+        },
+        {
+          "name": "Material Render Proxy",
+          "type": "FMaterialRenderProxy*"
+        },
+        {
+          "name": "Untyped Shaders",
+          "type": "FMeshProcessorShaders&"
+        },
+        {
+          "name": "Vertex Factory",
+          "type": "FVertexFactory*"
+        },
+        {
+          "name": "Mesh Batch",
+          "type": "FMeshBatch&"
+        },
+        {
+          "name": "PSO Collector Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-stats-data",
+      "name": "SetStatsData",
+      "category": "MeshPassProcessor",
+      "signature": "SetStatsData(Target, Primitive Scene Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshDrawCommand*"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy*"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "f-mesh-pass-processor-f4da18",
+      "name": "FMeshPassProcessor",
+      "category": "MeshPassProcessor",
+      "signature": "FMeshPassProcessor(In Mesh Pass Type, In Scene, In Feature Level, In View If Dynamic Mesh Command, In Draw List Context)",
+      "params": [
+        {
+          "name": "In Mesh Pass Type",
+          "type": "EMeshPass::Type"
+        },
+        {
+          "name": "In Scene",
+          "type": "FScene*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "In View If Dynamic Mesh Command",
+          "type": "FSceneView*"
+        },
+        {
+          "name": "In Draw List Context",
+          "type": "FMeshPassDrawListContext*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-mesh-pass-processor-3a9a11",
+      "name": "FMeshPassProcessor",
+      "category": "MeshPassProcessor",
+      "signature": "FMeshPassProcessor(In Mesh Pass Name, In Scene, In Feature Level, In View If Dynamic Mesh Command, In Draw List Context)",
+      "params": [
+        {
+          "name": "In Mesh Pass Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "In Scene",
+          "type": "FScene*"
+        },
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "In View If Dynamic Mesh Command",
+          "type": "FSceneView*"
+        },
+        {
+          "name": "In Draw List Context",
+          "type": "FMeshPassDrawListContext*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-mesh-override-settings-03343c",
+      "name": "ComputeMeshOverrideSettings",
+      "category": "MeshPassProcessor",
+      "signature": "ComputeMeshOverrideSettings(Precache PSO Params)",
+      "params": [
+        {
+          "name": "Precache PSO Params",
+          "type": "FPSOPrecacheParams&"
+        }
+      ],
+      "returnType": "FMeshDrawingPolicyOverrideSettings"
+    },
+    {
+      "id": "compute-mesh-override-settings-a52aa4",
+      "name": "ComputeMeshOverrideSettings",
+      "category": "MeshPassProcessor",
+      "signature": "ComputeMeshOverrideSettings(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FMeshBatch&"
+        }
+      ],
+      "returnType": "FMeshDrawingPolicyOverrideSettings"
+    },
+    {
+      "id": "compute-mesh-fill-mode",
+      "name": "ComputeMeshFillMode",
+      "category": "MeshPassProcessor",
+      "signature": "ComputeMeshFillMode(In Material Resource, In Override Settings)",
+      "params": [
+        {
+          "name": "In Material Resource",
+          "type": "FMaterial&"
+        },
+        {
+          "name": "In Override Settings",
+          "type": "FMeshDrawingPolicyOverrideSettings&"
+        }
+      ],
+      "returnType": "ERasterizerFillMode"
+    },
+    {
+      "id": "compute-mesh-cull-mode",
+      "name": "ComputeMeshCullMode",
+      "category": "MeshPassProcessor",
+      "signature": "ComputeMeshCullMode(In Material Resource, In Override Settings)",
+      "params": [
+        {
+          "name": "In Material Resource",
+          "type": "FMaterial&"
+        },
+        {
+          "name": "In Override Settings",
+          "type": "FMeshDrawingPolicyOverrideSettings&"
+        }
+      ],
+      "returnType": "ERasterizerCullMode"
+    },
+    {
+      "id": "get-draw-command-primitive-id",
+      "name": "GetDrawCommandPrimitiveId",
+      "category": "MeshPassProcessor",
+      "signature": "GetDrawCommandPrimitiveId(Target, Primitive Scene Info, Batch Element)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Primitive Scene Info",
+          "type": "FPrimitiveSceneInfo* RESTRICT"
+        },
+        {
+          "name": "Batch Element",
+          "type": "FMeshBatchElement&"
+        }
+      ],
+      "returnType": "protected : FMeshDrawCommandPrimitiveIdInfo"
+    },
+    {
+      "id": "should-skip-mesh-draw-command",
+      "name": "ShouldSkipMeshDrawCommand",
+      "category": "MeshPassProcessor",
+      "signature": "ShouldSkipMeshDrawCommand(Target, Mesh Batch, Primitive Scene Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Mesh Batch",
+          "type": "FMeshBatch& RESTRICT"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy* RESTRICT"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "pipeline-variable-rate-shading-enabled",
+      "name": "PipelineVariableRateShadingEnabled",
+      "category": "MeshPassProcessor",
+      "signature": "PipelineVariableRateShadingEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "hardware-variable-rate-shading-supported-by-scene",
+      "name": "HardwareVariableRateShadingSupportedByScene",
+      "category": "MeshPassProcessor",
+      "signature": "HardwareVariableRateShadingSupportedByScene(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-shaders-only-initializer",
+      "name": "GetShadersOnlyInitializer",
+      "category": "MeshPassProcessor",
+      "signature": "GetShadersOnlyInitializer(Target, Initializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Initializer",
+          "type": "FGraphicsMinimalPipelineStateInitializer&"
+        }
+      ],
+      "returnType": "FGraphicsMinimalPipelineStateInitializer",
+      "docs": "Create a shaders-only initializer where all state except for shaders is removed from the given initializer."
+    },
+    {
+      "id": "patch-minimal-pipeline-state-to-check",
+      "name": "PatchMinimalPipelineStateToCheck",
+      "category": "MeshPassProcessor",
+      "signature": "PatchMinimalPipelineStateToCheck(Target, Initializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Initializer",
+          "type": "FGraphicsMinimalPipelineStateInitializer&"
+        }
+      ],
+      "returnType": "FGraphicsMinimalPipelineStateInitializer",
+      "docs": "Apply a custom mask to the given initializer removing some state."
+    },
+    {
+      "id": "get-pso-precache-hash",
+      "name": "GetPSOPrecacheHash",
+      "category": "MeshPassProcessor",
+      "signature": "GetPSOPrecacheHash(Target, Initializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Initializer",
+          "type": "FGraphicsMinimalPipelineStateInitializer&"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Compute the hash of a minimal graphics PSO initializer to be used by PSO precaching validation."
+    },
+    {
+      "id": "check-shader-only-state-in-cache",
+      "name": "CheckShaderOnlyStateInCache",
+      "category": "MeshPassProcessor",
+      "signature": "CheckShaderOnlyStateInCache(Target, Initializer, Material, VF Type, Primitive Scene Proxy, PSO Collector Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Initializer",
+          "type": "FGraphicsMinimalPipelineStateInitializer&"
+        },
+        {
+          "name": "Material",
+          "type": "FMaterial&"
+        },
+        {
+          "name": "VF Type",
+          "type": "FVertexFactoryType*"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "PSO Collector Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Check if ShaderOnly PSO is precached and if not log information"
+    },
+    {
+      "id": "check-minimal-pipeline-state-in-cache",
+      "name": "CheckMinimalPipelineStateInCache",
+      "category": "MeshPassProcessor",
+      "signature": "CheckMinimalPipelineStateInCache(Target, Initializer, Material, VF Type, Primitive Scene Proxy, PSO Collector Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Initializer",
+          "type": "FGraphicsMinimalPipelineStateInitializer&"
+        },
+        {
+          "name": "Material",
+          "type": "FMaterial&"
+        },
+        {
+          "name": "VF Type",
+          "type": "FVertexFactoryType*"
+        },
+        {
+          "name": "Primitive Scene Proxy",
+          "type": "FPrimitiveSceneProxy*"
+        },
+        {
+          "name": "PSO Collector Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Check if minimal graphics PSO is precached and if not log information"
+    },
+    {
+      "id": "jump-table",
+      "name": "JumpTable",
+      "category": "MeshPassProcessor",
+      "signature": "JumpTable()",
+      "params": [],
+      "returnType": "private : PassProcessorCreateFunction"
+    },
+    {
+      "id": "deprecated-jump-table",
+      "name": "DeprecatedJumpTable",
+      "category": "MeshPassProcessor",
+      "signature": "DeprecatedJumpTable()",
+      "params": [],
+      "returnType": "DeprecatedPassProcessorCreateFunction"
+    },
+    {
+      "id": "flags",
+      "name": "Flags",
+      "category": "MeshPassProcessor",
+      "signature": "Flags()",
+      "params": [],
+      "returnType": "EMeshPassFlags"
+    },
+    {
+      "id": "pso-collector-index",
+      "name": "PSOCollectorIndex",
+      "category": "MeshPassProcessor",
+      "signature": "PSOCollectorIndex()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "submit-mesh-draw-commands",
+      "name": "SubmitMeshDrawCommands",
+      "category": "MeshPassProcessor",
+      "signature": "SubmitMeshDrawCommands(Target, Visible Mesh Draw Commands, Graphics Minimal Pipeline State Set, Scene Args, Primitive Id Buffer Stride, Dynamic Instancing, Instance Factor, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Visible Mesh Draw Commands",
+          "type": "FMeshCommandOneFrameArray&"
+        },
+        {
+          "name": "Graphics Minimal Pipeline State Set",
+          "type": "FGraphicsMinimalPipelineStateSet&"
+        },
+        {
+          "name": "Scene Args",
+          "type": "FMeshDrawCommandSceneArgs&"
+        },
+        {
+          "name": "Primitive Id Buffer Stride",
+          "type": "UInt"
+        },
+        {
+          "name": "Dynamic Instancing",
+          "type": "Bool"
+        },
+        {
+          "name": "Instance Factor",
+          "type": "UInt"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandList&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "draw-dynamic-mesh-pass-private",
+      "name": "DrawDynamicMeshPassPrivate",
+      "category": "MeshPassProcessor",
+      "signature": "DrawDynamicMeshPassPrivate(Target, View, RHI Cmd List, Visible Mesh Draw Commands, Dynamic Mesh Draw Command Storage, Graphics Minimal Pipeline State Set, In Needs Shader Initialisation, Instance Factor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "View",
+          "type": "FSceneView&"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandList&"
+        },
+        {
+          "name": "Visible Mesh Draw Commands",
+          "type": "FMeshCommandOneFrameArray&"
+        },
+        {
+          "name": "Dynamic Mesh Draw Command Storage",
+          "type": "FDynamicMeshDrawCommandStorage&"
+        },
+        {
+          "name": "Graphics Minimal Pipeline State Set",
+          "type": "FGraphicsMinimalPipelineStateSet&"
+        },
+        {
+          "name": "In Needs Shader Initialisation",
+          "type": "Bool&"
+        },
+        {
+          "name": "Instance Factor",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "calculate-mesh-static-sort-key",
+      "name": "CalculateMeshStaticSortKey",
+      "category": "MeshPassProcessor",
+      "signature": "CalculateMeshStaticSortKey(Target, Vertex Shader, Pixel Shader)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Vertex Shader",
+          "type": "FMeshMaterialShader*"
+        },
+        {
+          "name": "Pixel Shader",
+          "type": "FMeshMaterialShader*"
+        }
+      ],
+      "returnType": "FMeshDrawCommandSortKey"
+    },
+    {
+      "id": "add-render-target-info",
+      "name": "AddRenderTargetInfo",
+      "category": "MeshPassProcessor",
+      "signature": "AddRenderTargetInfo(Target, Pixel Format, Create Flags, Render Targets Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Pixel Format",
+          "type": "EPixelFormat"
+        },
+        {
+          "name": "Create Flags",
+          "type": "ETextureCreateFlags"
+        },
+        {
+          "name": "Render Targets Info",
+          "type": "FGraphicsPipelineRenderTargetsInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "setup-depth-stencil-info",
+      "name": "SetupDepthStencilInfo",
+      "category": "MeshPassProcessor",
+      "signature": "SetupDepthStencilInfo(Target, Depth Stencil Format, Depth Stencil Create Flags, Depth Target Load Action, Stencil Target Load Action, Depth Stencil Access, Render Targets Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Depth Stencil Format",
+          "type": "EPixelFormat"
+        },
+        {
+          "name": "Depth Stencil Create Flags",
+          "type": "ETextureCreateFlags"
+        },
+        {
+          "name": "Depth Target Load Action",
+          "type": "ERenderTargetLoadAction"
+        },
+        {
+          "name": "Stencil Target Load Action",
+          "type": "ERenderTargetLoadAction"
+        },
+        {
+          "name": "Depth Stencil Access",
+          "type": "FExclusiveDepthStencil"
+        },
+        {
+          "name": "Render Targets Info",
+          "type": "FGraphicsPipelineRenderTargetsInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "setup-g-buffer-render-target-info",
+      "name": "SetupGBufferRenderTargetInfo",
+      "category": "MeshPassProcessor",
+      "signature": "SetupGBufferRenderTargetInfo(Target, Scene Textures Config, Render Targets Info, Setup Depth Stencil, Layout)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Scene Textures Config",
+          "type": "FSceneTexturesConfig&"
+        },
+        {
+          "name": "Render Targets Info",
+          "type": "FGraphicsPipelineRenderTargetsInfo&"
+        },
+        {
+          "name": "Setup Depth Stencil",
+          "type": "Bool"
+        },
+        {
+          "name": "Layout",
+          "type": "EGBufferLayout",
+          "default": "GBL_Default"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-targets-info",
+      "name": "ApplyTargetsInfo",
+      "category": "MeshPassProcessor",
+      "signature": "ApplyTargetsInfo(Target, Graphics PSO Init, Render Targets Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Graphics PSO Init",
+          "type": "FGraphicsPipelineStateInitializer&"
+        },
+        {
+          "name": "Render Targets Info",
+          "type": "FGraphicsPipelineRenderTargetsInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-subpass-hint",
+      "name": "GetSubpassHint",
+      "category": "MeshPassProcessor",
+      "signature": "GetSubpassHint(Target, Platform, Is Using G Buffers, Multi View Rendering, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshPassProcessor*"
+        },
+        {
+          "name": "Platform",
+          "type": "FStaticShaderPlatform"
+        },
+        {
+          "name": "Is Using G Buffers",
+          "type": "Bool"
+        },
+        {
+          "name": "Multi View Rendering",
+          "type": "Bool"
+        },
+        {
+          "name": "Num Samples",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "ESubpassHint"
+    }
+  ]
+}

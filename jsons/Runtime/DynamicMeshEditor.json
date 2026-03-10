@@ -1,0 +1,1401 @@
+{
+  "id": "dynamic-mesh-editor",
+  "label": "DynamicMeshEditor",
+  "includepath": "DynamicMeshEditor.h",
+  "includes": [
+    "DynamicMesh3",
+    "DynamicMeshAttributeSet",
+    "EdgeLoop",
+    "SparseIndexCollectionTypes",
+    "MeshIndexMappings",
+    "MeshAdapter"
+  ],
+  "functions": [
+    {
+      "id": "get-all-triangles",
+      "name": "GetAllTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "GetAllTriangles(Target, Triangles Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditResult*"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flatten the triangle/quad/polygon lists into a single list of all triangles"
+    },
+    {
+      "id": "remove-isolated-vertices",
+      "name": "RemoveIsolatedVertices",
+      "category": "DynamicMeshEditor",
+      "signature": "RemoveIsolatedVertices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove any vertices that are not used by any triangles"
+    },
+    {
+      "id": "stitch-vertex-loops-minimal",
+      "name": "StitchVertexLoopsMinimal",
+      "category": "DynamicMeshEditor",
+      "signature": "StitchVertexLoopsMinimal(Target, Vertex Loop 1, Vertex Loop 2, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Vertex Loop 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Vertex Loop 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Stitch together two loops of vertices with a quad-strip of triangles.\nLoops must be oriented (ordered) correctly for your use case.\nIf loop edges are [a,b] and [c,d], then tris added are [b,a,d] and [a,c,d]\n@param Loop1 first loop of sequential vertices\n@param Loop2 second loop of sequential vertices\n@param ResultOut lists of newly created triangles/vertices/etc\n@return true if operation succeeded. If a failure occurs, any added triangles are removed via RemoveTriangles"
+    },
+    {
+      "id": "stitch-vertex-loop-to-tri-vid-pair-sequence",
+      "name": "StitchVertexLoopToTriVidPairSequence",
+      "category": "DynamicMeshEditor",
+      "signature": "StitchVertexLoopToTriVidPairSequence(Target, Tri Vid Pairs 1, Vertex Loop 2, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Tri Vid Pairs 1",
+          "type": "TArray<TPair<int32,TPair<int8,int8>>>&"
+        },
+        {
+          "name": "Vertex Loop 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Given a sequence of edges in the form given by ConvertLoopToTriVidPairSequence and a loop of vertices,\nstitch the two together. Edges are identified as (TriangleID, (0-2 subindex of vert1, 0-2 subindex of vert2)),\nand should match the number of vertex ids in the corresponding vertex loop (each i corresponds to the edge\nbetween vert i and i+1 in the vertex loop).\nThis works much like StitchVertexLoopsMinimal, but it can be used after one of the loops undergoes\nvertex splits (to remove bowties) as long as the \"loop\" (which may now be broken) can still be\nidentified by the composing triangles. In particular, this is used in extrude and inset where the\nbase loop needs to remain as a sequence of Vids (since some of these may be free vertices, unattached\nto a triangle) but the offset/inset loop is guaranteed to be attached to triangles yet may have its\nVids change due to bowtie splits.\nIf an entry of TriVidPairs1 resolves to verts [a,b] and the corresponding pair of verts in VertexLoop2\nare [c,d], then tris added are [b,a,d] and [a,c,d].\n@param TriVidPairs1 First loop, given as output of ConvertLoopToTriVidPairSequence()\n@param VertexLoop2 Second loop, given as vertex IDs\n@param ResultOut lists of newly created triangles/vertices/etc\n@return true if operation succeeded. If a failure occurs, any added triangles are removed via RemoveTriangles"
+    },
+    {
+      "id": "convert-loop-to-tri-vid-pair-sequence",
+      "name": "ConvertLoopToTriVidPairSequence",
+      "category": "DynamicMeshEditor",
+      "signature": "ConvertLoopToTriVidPairSequence(Mesh, Vid Loop, Edge Loop, Tri Vert Pairs Out)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Vid Loop",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Edge Loop",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Tri Vert Pairs Out",
+          "type": "TArray<TPair<int32,TPair<int8,int8>>>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Converts a loop to a sequence of edge identifiers that are both Vid and Eid independent. The identifiers are\nof the form (TriangleID, ([0,2] vert sub index, [0,2] vert sub index)), and they are used in some cases\n(extrude, inset) where we want to perform vertex splits along a region boundary (to remove bowties) but\nneed to maintain a record of the original loop path. We don't use (TriangleID, Eid sub index) because that\nmakes it harder to keep track of individual edge directionality.\n@param VidLoop Vertex IDs of loop to convert.\n@param EdgeLoop Edge IDs of loop to convert, must match VidLoop.\n@param TriVertPairsOut Output\n@return false if not successful (usually due to a mismatch between VidLoop and EdgeLoop)."
+    },
+    {
+      "id": "stitch-sparsely-corresponded-vertex-loops",
+      "name": "StitchSparselyCorrespondedVertexLoops",
+      "category": "DynamicMeshEditor",
+      "signature": "StitchSparselyCorrespondedVertexLoops(Target, Vertex I Ds 1, Matched Indices 1, Vertex I Ds 2, Matched Indices 2, Result Out, Reverse Orientation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Vertex I Ds 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Matched Indices 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Vertex I Ds 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Matched Indices 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        },
+        {
+          "name": "Reverse Orientation",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Stitch together two loops of vertices where vertices are only sparsely corresponded\n@param VertexIDs1 first array of sequential vertices\n@param MatchedIndices1 indices into the VertexIDs1 array of vertices that have a corresponding match in the VertexIDs2 array; Must be ordered\n@param VertexIDs2 second array of sequential vertices\n@param MatchedIndices2 indices into the VertexIDs2 array of vertices that have a corresponding match in the VertexIDs1 array; Must be ordered\n@param ResultOut lists of newly created triangles/vertices/etc\n@return true if operation succeeded.  If a failure occurs, any added triangles are removed via RemoveTriangles"
+    },
+    {
+      "id": "weld-vertex-loops",
+      "name": "WeldVertexLoops",
+      "category": "DynamicMeshEditor",
+      "signature": "WeldVertexLoops(Target, Vertex Loop 1, Vertex Loop 2)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Vertex Loop 1",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Vertex Loop 2",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Weld together two loops of vertices. Loops must be oriented (ordered) correctly for your use case.\n@param Loop1 first loop of sequential vertices\n@param Loop2 second loop of sequential vertices. These vertices and their edges will not exist after the operation.\n@return true if operation succeeded, false if any errors ocurred"
+    },
+    {
+      "id": "add-triangle-fan-ordered-vertex-loop",
+      "name": "AddTriangleFan_OrderedVertexLoop",
+      "category": "DynamicMeshEditor",
+      "signature": "AddTriangleFan_OrderedVertexLoop(Target, Center Vertex, Vertex Loop, Group ID, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Center Vertex",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex Loop",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Group ID",
+          "type": "Int"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Fill hole with a triangle fan given an existing (unconnected) center vertex and\nan ordered loop of boundary vertices on the hole border.\n@param CenterVertex Index of floating vertex in the center of the hole\n@param VertexLoop Indices of vertices on the boundary of the hole, in order\n@param ResultOut lists of newly created triangles\n@return true if operation succeeded.  If a failure occurs, any added triangles are removed via RemoveTriangles."
+    },
+    {
+      "id": "duplicate-triangles",
+      "name": "DuplicateTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "DuplicateTriangles(Target, Triangles, Index Maps, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Duplicate triangles of a mesh. This duplicates the current groups and also any attributes existing on the triangles.\n@param Triangles the triangles to duplicate\n@param IndexMaps returned mappings from old to new triangles/vertices/etc (you may initialize to optimize memory usage, etc)\n@param ResultOut lists of newly created triangles/vertices/etc"
+    },
+    {
+      "id": "disconnect-triangles-cb5309",
+      "name": "DisconnectTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "DisconnectTriangles(Target, Triangles, Loop Set Out, Handle Boundary Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Loop Set Out",
+          "type": "TArray<FLoopPairSet>&"
+        },
+        {
+          "name": "Handle Boundary Vertices",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Pair of associated vertex and edge loops. Assumption is that loop sizes are the same and have a 1-1 correspondence.\nOuterVertices may include unreferenced vertices, and OuterEdges may include InvalidID edges in that case."
+    },
+    {
+      "id": "disconnect-triangles-af0810",
+      "name": "DisconnectTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "DisconnectTriangles(Target, Triangle Set, Boundary Loops, Loop Set Out, Allow Boundary Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangle Set",
+          "type": "TSet<int>&"
+        },
+        {
+          "name": "Boundary Loops",
+          "type": "TArray<FEdgeLoop>&"
+        },
+        {
+          "name": "Loop Set Out",
+          "type": "TArray<FLoopPairSet>&"
+        },
+        {
+          "name": "Allow Boundary Vertices",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Variant of DisconnectTriangles that takes a precomputed set of BoundaryLoops of the triangles, and a TSet of Triangles.\nThese are both computed internally by the version that only takes a TArray of Triangles.\n@warning If the BoundaryLoops are not correct for the provided TriangleSet, this version will likely crash.\n@param Triangles set of triangles\n@param BoundaryLoops precomputed set of boundary EdgeLoops of TriangleSet\n@param LoopSetOut returned set of boundary loops. LoopA is original loop which remains with \"outer\" triangles previously connected to TriangleSet, and LoopB is new boundary loop of TriangleSet\n@param bAllowBoundaryVertices if true, mesh boundary vertices are duplicated and left on the 'outer' loop, otherwise function aborts and returns false if a boundary vertex is encountered"
+    },
+    {
+      "id": "disconnect-triangles-along-edges",
+      "name": "DisconnectTrianglesAlongEdges",
+      "category": "DynamicMeshEditor",
+      "signature": "DisconnectTrianglesAlongEdges(Target, Edges, Added Vertex I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Edges",
+          "type": "TSet<int32>&"
+        },
+        {
+          "name": "Added Vertex I Ds",
+          "type": "TArray<int32>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Disconnect triangles along the given Edges, so that all input edges become boundary edges.\n@param Edges IDs of edges to disconnect\n@param AddedVertexIDs Optional array of vertices added by this operation"
+    },
+    {
+      "id": "disconnect-triangles-1e6c27",
+      "name": "DisconnectTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "DisconnectTriangles(Target, Triangles, Prevent Bowties)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Prevent Bowties",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disconnects triangles (without constructing boundary loops) such that the input Triangles are not connected to any other triangles in the mesh\n@param Triangles set of triangles\n@param bPreventBowties do some additional processing and vertex splitting as needed to prevent the creation of any new bowties"
+    },
+    {
+      "id": "split-bowties",
+      "name": "SplitBowties",
+      "category": "DynamicMeshEditor",
+      "signature": "SplitBowties(Target, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Splits all bowties across the whole mesh"
+    },
+    {
+      "id": "split-bowties-internal",
+      "name": "SplitBowtiesInternal",
+      "category": "DynamicMeshEditor",
+      "signature": "SplitBowtiesInternal(Target, Vertex ID, Triangles, Contiguous Group Lengths, Group Is Loop, New Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Contiguous Group Lengths",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Group Is Loop",
+          "type": "TArray<bool>&"
+        },
+        {
+          "name": "New Vertices",
+          "type": "TArray<int32>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "private : void"
+    },
+    {
+      "id": "split-bowties-at-triangles",
+      "name": "SplitBowtiesAtTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "SplitBowtiesAtTriangles(Target, Triangle I Ds, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangle I Ds",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Splits bowties attached to any of the given triangles, and updates (does not reset!) ResultOut with any added vertices"
+    },
+    {
+      "id": "reinsert-submesh",
+      "name": "ReinsertSubmesh",
+      "category": "DynamicMeshEditor",
+      "signature": "ReinsertSubmesh(Target, Submesh, Sub To New V, New Tris, Duplicate Behavior)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Submesh",
+          "type": "FDynamicSubmesh3&"
+        },
+        {
+          "name": "Sub To New V",
+          "type": "FOptionallySparseIndexMap&"
+        },
+        {
+          "name": "New Tris",
+          "type": "TArray<int>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Duplicate Behavior",
+          "type": "EDuplicateTriBehavior",
+          "default": "EDuplicateTriBehavior::EnsureAbort"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "In ReinsertSubmesh, a problem can arise where the mesh we are\ninserting has duplicate triangles of the base mesh.\nThis can lead to problematic behavior later. We can do various things,\nlike delete and replace that existing triangle, or just use it instead\nof adding a new one. Or fail, or ignore it.\nThis enum/argument controls the behavior.\nHowever, fundamentally this kind of problem should be handled upstream!!\nFor example by not trying to remesh areas that contain nonmanifold geometry..."
+    },
+    {
+      "id": "remove-triangles-57855b",
+      "name": "RemoveTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "RemoveTriangles(Target, Triangles, Remove Isolated Verts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Remove Isolated Verts",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove a list of triangles from the mesh, and optionally any vertices that are now orphaned\n@param Triangles the triangles to remove\n@param bRemoveIsolatedVerts if true, remove vertices that end up with no triangles\n@return true if all removes succeeded"
+    },
+    {
+      "id": "remove-small-components",
+      "name": "RemoveSmallComponents",
+      "category": "DynamicMeshEditor",
+      "signature": "RemoveSmallComponents(Target, Min Volume, Min Area, Min Triangle Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Min Volume",
+          "type": "Double"
+        },
+        {
+          "name": "Min Area",
+          "type": "Double",
+          "default": "0.0"
+        },
+        {
+          "name": "Min Triangle Count",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Remove any connected components with volume or  area below the given thresholds\n@param MinVolume Remove components with less volume than this\n@param MinArea Remove components with less area than this\n@return number of components removed"
+    },
+    {
+      "id": "remove-triangles-870626",
+      "name": "RemoveTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "RemoveTriangles(Target, Triangles, Remove Isolated Verts, On Remove Tri Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Remove Isolated Verts",
+          "type": "Bool"
+        },
+        {
+          "name": "On Remove Tri Func",
+          "type": "TFunctionRef<void ( int )>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove a list of triangles from the mesh, and optionally any vertices that are now orphaned\n@param Triangles the triangles to remove\n@param bRemoveIsolatedVerts if true, remove vertices that end up with no triangles\n@param OnRemoveTriFunc called for each triangle to be removed\n@return true if all removes succeeded"
+    },
+    {
+      "id": "reverse-triangle-orientations",
+      "name": "ReverseTriangleOrientations",
+      "category": "DynamicMeshEditor",
+      "signature": "ReverseTriangleOrientations(Target, Triangles, Invert Normals)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Invert Normals",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reverse the orientation of the given triangles, and optionally flip relevant normals\n@param Triangles the triangles to modify\n@param bInvertNormals if ture we call InvertTriangleNormals()"
+    },
+    {
+      "id": "invert-triangle-normals",
+      "name": "InvertTriangleNormals",
+      "category": "DynamicMeshEditor",
+      "signature": "InvertTriangleNormals(Target, Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Flip the normals of the given triangles. This includes their vertex normals, if they\nexist, as well as any per-triangle attribute normals. @todo currently creates full-mesh bit arrays, could be more efficient on subsets\n@param Triangles the triangles to modify"
+    },
+    {
+      "id": "compute-and-set-quad-normal",
+      "name": "ComputeAndSetQuadNormal",
+      "category": "DynamicMeshEditor",
+      "signature": "ComputeAndSetQuadNormal(Target, Quad Tris, Is Planar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Quad Tris",
+          "type": "FIndex2i&"
+        },
+        {
+          "name": "Is Planar",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "FVector3f",
+      "docs": "Calculate and set the per-triangle normals of the two input quads.\nAverage of the two face normals is used unless the quad is planar\n@param QuadTris pair of triangle IDs. If second ID is invalid, it is ignored\n@param bIsPlanar if the quad is known to be planar, operation is more efficient\n@return the normal vector that was set"
+    },
+    {
+      "id": "set-quad-normals",
+      "name": "SetQuadNormals",
+      "category": "DynamicMeshEditor",
+      "signature": "SetQuadNormals(Target, Quad Tris, Normal)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Quad Tris",
+          "type": "FIndex2i&"
+        },
+        {
+          "name": "Normal",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create and set new shared per-triangle normals for a pair of triangles that share one edge (ie a quad)\n@param QuadTris pair of triangle IDs. If second ID is invalid, it is ignored\n@param Normal normal vector to set"
+    },
+    {
+      "id": "set-triangle-normals-286ebb",
+      "name": "SetTriangleNormals",
+      "category": "DynamicMeshEditor",
+      "signature": "SetTriangleNormals(Target, Triangles, Normal)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Normal",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create and set new shared per-triangle normals for a list of triangles\n@param Triangles list of triangle IDs\n@param Normal normal vector to set"
+    },
+    {
+      "id": "set-triangle-normals-e1f596",
+      "name": "SetTriangleNormals",
+      "category": "DynamicMeshEditor",
+      "signature": "SetTriangleNormals(Target, Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create and set new shared per-triangle normals for a list of triangles.\nNormal at each vertex is calculated based only on average of triangles in set\n@param Triangles list of triangle IDs"
+    },
+    {
+      "id": "set-tube-normals",
+      "name": "SetTubeNormals",
+      "category": "DynamicMeshEditor",
+      "signature": "SetTubeNormals(Target, Triangles, Vertex I Ds 1, Matched Indices 1, Vertex I Ds 2, Matched Indices 2, Reverse Normals)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Vertex I Ds 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Matched Indices 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Vertex I Ds 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Matched Indices 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Reverse Normals",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For a 'tube' of triangles connecting loops of corresponded vertices, set smooth normals such that corresponding vertices have corresponding normals"
+    },
+    {
+      "id": "set-quad-u-vs-from-projection",
+      "name": "SetQuadUVsFromProjection",
+      "category": "DynamicMeshEditor",
+      "signature": "SetQuadUVsFromProjection(Target, Quad Tris, Projection Frame, UV Scale Factor, UV Translation, UV Layer Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Quad Tris",
+          "type": "FIndex2i&"
+        },
+        {
+          "name": "Projection Frame",
+          "type": "FFrame3d&"
+        },
+        {
+          "name": "UV Scale Factor",
+          "type": "Float",
+          "default": "1.0f"
+        },
+        {
+          "name": "UV Translation",
+          "type": "FVector2f&",
+          "default": "FVector2f::Zero()"
+        },
+        {
+          "name": "UV Layer Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Project the two triangles of the quad onto a plane defined by the ProjectionFrame and use that to create/set new shared per-triangle UVs.\nUVs are translated so that their bbox min-corner is at origin, and scaled by given scale factor\n@param QuadTris pair of triangle IDs. If second ID is invalid, it is ignored\n@param ProjectFrame vertices are projected into XY axes of this frame\n@param UVScaleFactor UVs are scaled by this uniform scale factor\n@param UVTranslation UVs are translated after scaling\n@param UVLayerIndex which UV layer to operate on (must exist)"
+    },
+    {
+      "id": "set-triangle-u-vs-from-projection-25f0f0",
+      "name": "SetTriangleUVsFromProjection",
+      "category": "DynamicMeshEditor",
+      "signature": "SetTriangleUVsFromProjection(Target, Triangles, Projection Frame, UV Scale Factor, UV Translation, Shift To Origin, UV Layer Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Projection Frame",
+          "type": "FFrame3d&"
+        },
+        {
+          "name": "UV Scale Factor",
+          "type": "Float",
+          "default": "1.0f"
+        },
+        {
+          "name": "UV Translation",
+          "type": "FVector2f&",
+          "default": "FVector2f::Zero()"
+        },
+        {
+          "name": "Shift To Origin",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "UV Layer Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Project triangles onto a plane defined by the ProjectionFrame and use that to create/set new shared per-triangle UVs.\nUVs can be translated so that their bbox min-corner is at origin, and scaled by given scale factor\nThis is an older function signature that forwards to the more specific one.\n@param Triangles TArray of triangle IDs\n@param ProjectFrame vertices are projected into XY axes of this frame\n@param UVScaleFactor UVs are scaled by this uniform scale factor\n@param UVTranslation UVs are translated after scaling\n@param bShiftToOrigin Whether to translate the UV coordinates to make their bounding box min corner be (0,0) before applying UVTranslation\n@param UVLayerIndex which UV layer to operate on (must exist)"
+    },
+    {
+      "id": "set-triangle-u-vs-from-projection-d9ba92",
+      "name": "SetTriangleUVsFromProjection",
+      "category": "DynamicMeshEditor",
+      "signature": "SetTriangleUVsFromProjection(Target, Triangles, Projection Frame, UV Scale, UV Translation, UV Layer Index, Shift To Origin, Normalize Before Scaling)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Projection Frame",
+          "type": "FFrame3d&"
+        },
+        {
+          "name": "UV Scale",
+          "type": "FVector2f&",
+          "default": "FVector2f::One()"
+        },
+        {
+          "name": "UV Translation",
+          "type": "FVector2f&",
+          "default": "FVector2f::Zero()"
+        },
+        {
+          "name": "UV Layer Index",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Shift To Origin",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Normalize Before Scaling",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Project triangles onto a plane defined by the ProjectionFrame and use that to create/set new shared per-triangle UVs.\n@param Triangles TArray of triangle IDs\n@param ProjectFrame Vertices are projected into XY axes of this frame\n@param UVScaleFactor UVs are scaled by these factors\n@param UVTranslation UVs are translated after scaling by these amounts\n@param UVLayerIndex Which UV layer to operate on (must exist)\n@param bShiftToOrigin Whether to translate the UV coordinates to make their bounding box min corner be (0,0) before applying UVTranslation\n@param bNormalizeBeforeScaling Whether to place the UV coordinates into the range [0,1] before applying UVScaleFactor and UVTranslation"
+    },
+    {
+      "id": "set-general-tube-u-vs",
+      "name": "SetGeneralTubeUVs",
+      "category": "DynamicMeshEditor",
+      "signature": "SetGeneralTubeUVs(Target, Triangles, Vertex I Ds 1, Matched Indices 1, Vertex I Ds 2, Matched Indices 2, U Values, V Dir, UV Scale Factor, UV Translation, UV Layer Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Vertex I Ds 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Matched Indices 1",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Vertex I Ds 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Matched Indices 2",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "U Values",
+          "type": "TArray<float>&"
+        },
+        {
+          "name": "V Dir",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "UV Scale Factor",
+          "type": "Float",
+          "default": "1.0f"
+        },
+        {
+          "name": "UV Translation",
+          "type": "FVector2f&",
+          "default": "FVector2f::Zero()"
+        },
+        {
+          "name": "UV Layer Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For triangles connecting loops of corresponded vertices, set UVs in a cylindrical pattern so that the U coordinate starts at 0 for the first corresponded pair of vertices, and cycles around to 1\nAssumes Triangles array stores indices of triangles in progressively filling the tube, starting with VertexIDs*[0].  (This is used to set the UVs correctly at the seam joining the start & end of the loop)"
+    },
+    {
+      "id": "rescale-attribute-u-vs",
+      "name": "RescaleAttributeUVs",
+      "category": "DynamicMeshEditor",
+      "signature": "RescaleAttributeUVs(Target, UV Scale, World Space, UV Layer Index, To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "UV Scale",
+          "type": "Float",
+          "default": "1.0f"
+        },
+        {
+          "name": "World Space",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "UV Layer Index",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "To World",
+          "type": "TOptional<FTransformSRT3d>",
+          "default": "TOptional<FTransformSRT3d>()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Rescale UVs for the whole mesh, for the given UV attribute layer\n@param UVScale Scale factor to multiply into UVs.  If in world space, this is in centimeters relative to the average UV scale\n@param bWorldSpace If true, UVs are rescaled relative to an absolute world scale.\n@param UVLayerIndex which UV layer to operate on (must exist)\n@param ToWorld Optionally transform vertices for world space scaling"
+    },
+    {
+      "id": "find-or-create-duplicate-vertex",
+      "name": "FindOrCreateDuplicateVertex",
+      "category": "DynamicMeshEditor",
+      "signature": "FindOrCreateDuplicateVertex(Target, Vertex ID, Index Maps, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find \"new\" vertex for input vertex under Index mapping, or create new if missing\n@param VertexID the source vertex we want a copy of\n@param IndexMaps source/destination mapping of already-duplicated vertices\n@param ResultOut newly-created vertices are stored here\n@return index of duplicate vertex"
+    },
+    {
+      "id": "find-or-create-duplicate-group",
+      "name": "FindOrCreateDuplicateGroup",
+      "category": "DynamicMeshEditor",
+      "signature": "FindOrCreateDuplicateGroup(Target, Triangle ID, Index Maps, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find \"new\" group for input group under Index mapping, or create new if missing\n@param TriangleID the source triangle whose group we want a copy of\n@param IndexMaps source/destination mapping of already-duplicated groups\n@param ResultOut newly-created groups are stored here\n@return index of duplicate group"
+    },
+    {
+      "id": "find-or-create-duplicate-uv",
+      "name": "FindOrCreateDuplicateUV",
+      "category": "DynamicMeshEditor",
+      "signature": "FindOrCreateDuplicateUV(Target, Element ID, UV Layer Index, Index Maps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "UV Layer Index",
+          "type": "Int"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find \"new\" UV for input UV element under Index mapping, or create new if missing\n@param ElementID the source UV we want a duplicate of\n@param UVLayerIndex which UV layer to consider\n@param IndexMaps source/destination mapping of already-duplicated UVs\n@return index of duplicate UV in given UV layer"
+    },
+    {
+      "id": "find-or-create-duplicate-normal",
+      "name": "FindOrCreateDuplicateNormal",
+      "category": "DynamicMeshEditor",
+      "signature": "FindOrCreateDuplicateNormal(Target, Element ID, Normal Layer Index, Index Maps, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "Normal Layer Index",
+          "type": "Int"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find \"new\" normal for input normal element under Index mapping, or create new if missing\n@param ElementID the source normal we want a duplicate of\n@param NormalLayerIndex which normal layer to consider\n@param IndexMaps source/destination mapping of already-duplicated normals\n@param ResultOut any newly created element indices are stored in NewNormalOverlayElements here. Note that\nNewNormalOverlayElements must have size > NormalLayerIndex.\n@return index of duplicate normal in given normal layer"
+    },
+    {
+      "id": "find-or-create-duplicate-color",
+      "name": "FindOrCreateDuplicateColor",
+      "category": "DynamicMeshEditor",
+      "signature": "FindOrCreateDuplicateColor(Target, Element ID, Index Maps, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find \"new\" color for input color element under Index mapping, or create new if missing\n@param ElementID the source color we want a duplicate of\n@param IndexMaps source/destination mapping of already-duplicated colors\n@param ResultOut any newly created element indices are stored in NewColorOverlayElements here.\n@return index of duplicate color in given color layer"
+    },
+    {
+      "id": "copy-attributes",
+      "name": "CopyAttributes",
+      "category": "DynamicMeshEditor",
+      "signature": "CopyAttributes(Target, From Triangle ID, To Triangle ID, Index Maps, Result Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "From Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "To Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy all attribute-layer values from one triangle to another, using the IndexMaps to track and re-use shared attribute values.\n@param FromTriangleID source triangle\n@param ToTriangleID destination triangle\n@param IndexMaps mappings passed to FindOrCreateDuplicateX functions to track already-created attributes\n@param ResultOut information about new attributes is stored here (@todo finish populating this, at time of writing only normal overlay elements get tracked)"
+    },
+    {
+      "id": "append-mesh-e34971",
+      "name": "AppendMesh",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendMesh(Target, Append Mesh, Index Maps Out, Position Transform, Normal Transform, Reverse Orientation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Append Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Index Maps Out",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Position Transform",
+          "type": "TFunction<FVector3d ( int,FVector3d& )>",
+          "default": "nullptr"
+        },
+        {
+          "name": "Normal Transform",
+          "type": "TFunction<FVector3d ( int,FVector3d& )>",
+          "default": "nullptr"
+        },
+        {
+          "name": "Reverse Orientation",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append input mesh to our internal mesh\n@param AppendMesh mesh to append\n@param IndexMapsOut mesh element index mappings generated in this append operation\n@param PositionTransform optional transformation function applied to mesh vertex positions\n@param NormalTransform optional transformation function applied to mesh normals"
+    },
+    {
+      "id": "append-mesh-289e6d",
+      "name": "AppendMesh",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendMesh(Target, Append Mesh, Index Maps Out, Position Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Append Mesh",
+          "type": "TTriangleMeshAdapter<double>*"
+        },
+        {
+          "name": "Index Maps Out",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Position Transform",
+          "type": "TFunction<FVector3d ( int,FVector3d& )>",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append input mesh to our internal Mesh. If the internal Mesh has attributes enabled,\nper-triangle normals will be computed and set. No other attributes are initialized.\n@param AppendMesh mesh to append\n@param IndexMapsOut mesh element index mappings generated in this append operation\n@param PositionTransform optional transformation function applied to mesh vertex positions"
+    },
+    {
+      "id": "append-normals",
+      "name": "AppendNormals",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendNormals(Target, Append Mesh, From Normals, To Normals, Vertex Map, Triangle Map, Normal Transform, Normal Map Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Append Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "From Normals",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "To Normals",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Vertex Map",
+          "type": "FIndexMapi&"
+        },
+        {
+          "name": "Triangle Map",
+          "type": "FIndexMapi&"
+        },
+        {
+          "name": "Normal Transform",
+          "type": "TFunction<FVector3d ( int,FVector3d& )>"
+        },
+        {
+          "name": "Normal Map Out",
+          "type": "FIndexMapi&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append normals from one attribute overlay to another.\nAssumes that AppendMesh has already been appended to Mesh.\nNote that this function has no dependency on .Mesh, it could be static\n@param AppendMesh mesh that owns FromNormals attribute overlay\n@param FromNormals Normals overlay we want to append from (owned by AppendMesh)\n@param ToNormals Normals overlay we want to append to (owned by Mesh)\n@param VertexMap map from AppendMesh vertex IDs to vertex IDs applicable to ToNormals (ie of .Mesh)\n@param TriangleMap map from AppendMesh triangle IDs to triangle IDs applicable to ToNormals (ie of .Mesh)\n@param NormalTransform optional transformation function applied to mesh normals\n@param NormalMapOut Mapping from element IDs of FromNormals to new element IDs in ToNormals"
+    },
+    {
+      "id": "append-u-vs",
+      "name": "AppendUVs",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendUVs(Target, Append Mesh, From U Vs, To U Vs, Vertex Map, Triangle Map, UV Map Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Append Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "From U Vs",
+          "type": "FDynamicMeshUVOverlay*"
+        },
+        {
+          "name": "To U Vs",
+          "type": "FDynamicMeshUVOverlay*"
+        },
+        {
+          "name": "Vertex Map",
+          "type": "FIndexMapi&"
+        },
+        {
+          "name": "Triangle Map",
+          "type": "FIndexMapi&"
+        },
+        {
+          "name": "UV Map Out",
+          "type": "FIndexMapi&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append UVs from one attribute overlay to another.\nAssumes that AppendMesh has already been appended to Mesh.\nNote that this function has no dependency on .Mesh, it could be static\n@param AppendMesh mesh that owns FromUVs attribute overlay\n@param FromUVs UV overlay we want to append from (owned by AppendMesh)\n@param ToUVs UV overlay we want to append to (owned by Mesh)\n@param VertexMap map from AppendMesh vertex IDs to vertex IDs applicable to ToUVs (ie of .Mesh)\n@param TriangleMap map from AppendMesh triangle IDs to triangle IDs applicable to ToUVs (ie of .Mesh)\n@param UVMapOut Mapping from element IDs of FromUVs to new element IDs in ToUVs"
+    },
+    {
+      "id": "append-colors",
+      "name": "AppendColors",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendColors(Target, Append Mesh, From Overlay, To Overlay, Vertex Map, Triangle Map, Color Map Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Append Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "From Overlay",
+          "type": "FDynamicMeshColorOverlay*"
+        },
+        {
+          "name": "To Overlay",
+          "type": "FDynamicMeshColorOverlay*"
+        },
+        {
+          "name": "Vertex Map",
+          "type": "FIndexMapi&"
+        },
+        {
+          "name": "Triangle Map",
+          "type": "FIndexMapi&"
+        },
+        {
+          "name": "Color Map Out",
+          "type": "FIndexMapi&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append Colors from one attribute overlay to another.\nAssumes that AppendMesh has already been appended to Mesh.\nNote that this function has no dependency on .Mesh, it could be static\n@param AppendMesh mesh that owns FromOverlay attribute overlay\n@param FromOverlay Color overlay we want to append from (owned by AppendMesh)\n@param ToOverlay Color overlay we want to append to (owned by Mesh)\n@param VertexMap map from AppendMesh vertex IDs to vertex IDs applicable to ToOverlay (ie of .Mesh)\n@param TriangleMap map from AppendMesh triangle IDs to triangle IDs applicable to ToOverlay (ie of .Mesh)\n@param ColorMapOut Mapping from element IDs of FromUVs to new element IDs in ToOverlay"
+    },
+    {
+      "id": "append-element-subset",
+      "name": "AppendElementSubset",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendElementSubset(Target, From Mesh, Triangle ROI, Vertex ROI, From Overlay, To Overlay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "From Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Triangle ROI",
+          "type": "TSet<int>&"
+        },
+        {
+          "name": "Vertex ROI",
+          "type": "TSet<int>&"
+        },
+        {
+          "name": "From Overlay",
+          "type": "TDynamicMeshOverlay<RealType,ElementSize>*"
+        },
+        {
+          "name": "To Overlay",
+          "type": "TDynamicMeshOverlay<RealType,ElementSize>*"
+        }
+      ],
+      "returnType": "template<RealType,int ElementSize> void",
+      "docs": "Append overlay elements in both ROIs from one overlay to another\n@param FromMesh     Mesh that owns FromOverlay attribute overlay\n@param TriangleROI  Triangles containing the copied overlay elements\n@param VertexROI    Parent vertices of the copied overlay elements\n@param FromOverlay  Overlay we want to append from (owned by FromMesh)\n@param ToOverlay    Overlay we want to append into (owned by .Mesh)\n@note Required overloads should be declared in the .cpp file"
+    },
+    {
+      "id": "append-triangles",
+      "name": "AppendTriangles",
+      "category": "DynamicMeshEditor",
+      "signature": "AppendTriangles(Target, Source Mesh, Source Triangles, Index Maps, Result Out, Compute Triangle Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshEditor*"
+        },
+        {
+          "name": "Source Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Source Triangles",
+          "type": "TArrayView<int>&"
+        },
+        {
+          "name": "Index Maps",
+          "type": "FMeshIndexMappings&"
+        },
+        {
+          "name": "Result Out",
+          "type": "FDynamicMeshEditResult&"
+        },
+        {
+          "name": "Compute Triangle Map",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append triangles of an existing mesh. This duplicates the current groups and also any attributes existing on the triangles.\n@param SourceMesh the mesh to copy from\n@param SourceTriangles the triangles to copy\n@param IndexMaps returned mappings from old to new triangles/vertices/etc (you may initialize to optimize memory usage, etc)\n@param ResultOut lists of newly created triangles/vertices/etc\n@param bComputeTriangleMap if true, computes the triangle map section of IndexMaps (which is not needed for the append to work, so is optional)"
+    },
+    {
+      "id": "split-mesh",
+      "name": "SplitMesh",
+      "category": "DynamicMeshEditor",
+      "signature": "SplitMesh(Source Mesh, Split Meshes, Tri ID To Mesh ID, Delete Mesh ID, Mesh ID Per Split Mesh, Sort By Mesh ID)",
+      "params": [
+        {
+          "name": "Source Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Split Meshes",
+          "type": "TArray<FDynamicMesh3>&"
+        },
+        {
+          "name": "Tri ID To Mesh ID",
+          "type": "TFunctionRef<int ( int )>"
+        },
+        {
+          "name": "Delete Mesh ID",
+          "type": "Int",
+          "default": "-1"
+        },
+        {
+          "name": "Mesh ID Per Split Mesh",
+          "type": "TArray<int32>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Sort By Mesh ID",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Create multiple meshes out of the source mesh by splitting triangles out.\nStatic because it creates multiple output meshes, so doesn't quite fit in the FDynamicMeshEditor model of operating on a single mesh\n@param SourceMesh The mesh to split\n@param SplitMeshes An array with one mesh per unique Mesh ID found in SourceMesh (optionally excluding the DeleteMeshID)\n@param TriIDToMeshID A function mapping Triangle IDs to Mesh IDs\n@param DeleteMeshID If non-negative, triangles with this Mesh ID will be removed rather than being placed in a split mesh\n@param MeshIDPerSplitMesh If non-null, will be filled with the Mesh ID for each of the SplitMeshes generated\n@param bSortByMeshID If true, SplitMeshes will be sorted in order of increasing Mesh ID\n@return true if needed split, false if there were not multiple mesh ids so no split was needed"
+    },
+    {
+      "id": "remove-seams-at-edges",
+      "name": "RemoveSeamsAtEdges",
+      "category": "DynamicMeshEditor",
+      "signature": "RemoveSeamsAtEdges(Eids To Remove As Seams, Overlay)",
+      "params": [
+        {
+          "name": "Eids To Remove As Seams",
+          "type": "TSet<int32>&"
+        },
+        {
+          "name": "Overlay",
+          "type": "TDynamicMeshOverlay<float,2>*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Merge any seams in the given 2D attribute Overlay along the given mesh edge IDs\n@param EidsToRemoveAsSeams list of edges to remove seams from\n@return true on success"
+    },
+    {
+      "id": "create-seams-at-edges",
+      "name": "CreateSeamsAtEdges",
+      "category": "DynamicMeshEditor",
+      "signature": "CreateSeamsAtEdges(Eids To Make Into Seams, Overlay, Added Element I Ds)",
+      "params": [
+        {
+          "name": "Eids To Make Into Seams",
+          "type": "TSet<int32>&"
+        },
+        {
+          "name": "Overlay",
+          "type": "TDynamicMeshOverlay<float,2>*"
+        },
+        {
+          "name": "Added Element I Ds",
+          "type": "TArray<int32>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Cut existing 2D attribute overlay topology with a set of edges. This allows for creating partial seams/darts, interior cuts, etc.\nAvoids creating bowties in the overlay. In cases where an edge is not next to any present or future seams/borders, some\nadjacent edge will be picked to be made into a seam as well, since it's impossible to make the original\ninto a seam otherwise.\n@param EidsToMakeIntoSeams list of edges to turn into seams\n@param AddedElementIDs if non-null, list of new elements created along the path will be stored here (not ordered)\n@return true on success"
+    }
+  ]
+}

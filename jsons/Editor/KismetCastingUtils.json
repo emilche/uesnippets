@@ -1,0 +1,128 @@
+{
+  "id": "kismet-casting-utils",
+  "label": "KismetCastingUtils",
+  "includepath": "KismetCastingUtils.h",
+  "includes": [
+    "BlueprintCompiledStatement",
+    "CoreMinimal"
+  ],
+  "functions": [
+    {
+      "id": "make-implicit-cast-terminal",
+      "name": "MakeImplicitCastTerminal",
+      "category": "KismetCastingUtils",
+      "signature": "MakeImplicitCastTerminal(Context, Net, Source Node)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Net",
+          "type": "UEdGraphPin*"
+        },
+        {
+          "name": "Source Node",
+          "type": "UEdGraphNode*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "FBPTerminal*",
+      "docs": "Directly creates a new FBPTerminal that holds the result of an implicit cast.\nInternally, this is used by InsertImplicitCastStatement, but it can be used by any node\nthat has special semantics for handling implicit casts. The terminal is guaranteed to have\na unique name in the context.\n@param Context - Current function context to add the terminal to.\n@param Net - The corresponding pin that we'll copy type details from.\n@param SourceNode - The source node for the terminal. This is usually the Net's owner, but it can be different if necessary.\n@return A new FBPTerminal for the temporary variable that holds the casted result."
+    },
+    {
+      "id": "register-implicit-casts",
+      "name": "RegisterImplicitCasts",
+      "category": "KismetCastingUtils",
+      "signature": "RegisterImplicitCasts(Context)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Analyzes the NetMap of the current function context for potential implicit casts.\nIf any are found, they're added to ImplicitCastMap in the context.\nAfter function compilation, the Kismet compiler will validate that the map is empty.\nIt's up to the nodes to check the map and insert cast statements where necessary.\n@param Context - Current function context to analyze. Assumes the NetMap has been populated."
+    },
+    {
+      "id": "insert-implicit-cast-statement-d0dd21",
+      "name": "InsertImplicitCastStatement",
+      "category": "KismetCastingUtils",
+      "signature": "InsertImplicitCastStatement(Context, Cast Params, RHS Term)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Cast Params",
+          "type": "FImplicitCastParams&"
+        },
+        {
+          "name": "RHS Term",
+          "type": "FBPTerminal*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Utility function used by nodes for inserting implicit cast statements.\nA compiled cast statement is created on the target node with the given parameters.\n@param Context - Current function context to analyze. Assumes the ImplicitCastMap has been populated.\n@param CastParams - Parameters for the cast operation.\n@param RHSTerm - The current terminal that should have its data read from."
+    },
+    {
+      "id": "insert-implicit-cast-statement-047c87",
+      "name": "InsertImplicitCastStatement",
+      "category": "KismetCastingUtils",
+      "signature": "InsertImplicitCastStatement(Context, Destination Pin, RHS Term)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Destination Pin",
+          "type": "UEdGraphPin*"
+        },
+        {
+          "name": "RHS Term",
+          "type": "FBPTerminal*"
+        }
+      ],
+      "returnType": "FBPTerminal*",
+      "docs": "Utility function used by nodes for inserting implicit cast statements.\nSimilar to above, but the cast parameters are read from the context's cast map using\na destination pin as the key. If no entry exists in the map, null is returned.\n@param Context - Current function context to analyze. Assumes the ImplicitCastMap has been populated.\n@param DestinationPin - Used as a key in the ImplicitCastMap. These pins are always inputs.\n@param RHSTerm - The current terminal that should have its data read from.\n@return A new FBPTerminal for the temporary variable that holds the casted result (if one exists)."
+    },
+    {
+      "id": "remove-registered-implicit-cast",
+      "name": "RemoveRegisteredImplicitCast",
+      "category": "KismetCastingUtils",
+      "signature": "RemoveRegisteredImplicitCast(Context, Destination Pin)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Destination Pin",
+          "type": "UEdGraphPin*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Removes the specific UEdGraphPin from the context's implicit cast map.\nIn most cases, InsertImplicitCastStatement should be used to remove the cast map entry.\nHowever, some nodes need to implement custom behavior for casting.\n@param Context - Current function context to analyze. Assumes the ImplicitCastMap has been populated.\n@param DestinationPin - Used as a key in the ImplicitCastMap. These pins are always inputs.\n@return True if DestinationPin was found in the ImplicitCastMap."
+    },
+    {
+      "id": "get-floating-point-conversion",
+      "name": "GetFloatingPointConversion",
+      "category": "KismetCastingUtils",
+      "signature": "GetFloatingPointConversion(Source Pin, Destination Pin)",
+      "params": [
+        {
+          "name": "Source Pin",
+          "type": "UEdGraphPin&"
+        },
+        {
+          "name": "Destination Pin",
+          "type": "UEdGraphPin&"
+        }
+      ],
+      "returnType": "FConversion",
+      "docs": "Retrieves the conversion type needed between two arbitrary pins (if necessary). Specifically, this indicates if either\na narrowing or widening cast is needed between a float or a double type (including containers). In addition to the\ncorresponding FloatingPointCastType that represents the cast type, a UFunction* may be included for container and\nstruct conversions.\n@param SourcePin - The source pin to compare.\n@param DestinationPin - The destination pin to compare.\n@return A new FConversion containing the cast information."
+    }
+  ]
+}

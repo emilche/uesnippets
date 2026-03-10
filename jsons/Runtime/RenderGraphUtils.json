@@ -1,0 +1,1042 @@
+{
+  "id": "render-graph-utils",
+  "label": "RenderGraphUtils",
+  "includepath": "RenderGraphUtils.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "ContainersFwd",
+    "UnrealString",
+    "UnrealMemory",
+    "Color",
+    "IntPoint",
+    "IntRect",
+    "IntVector",
+    "UnrealMathSSE",
+    "Vector2D",
+    "Vector4",
+    "AssertionMacros",
+    "EnumClassFlags",
+    "Optional",
+    "RHI",
+    "RHICommandList",
+    "RHIDefinitions",
+    "RenderGraphAllocator",
+    "RenderGraphBuilder",
+    "RenderGraphDefinitions",
+    "RenderGraphEvent",
+    "RenderGraphResources",
+    "RendererInterface",
+    "Shader",
+    "ShaderParameterMacros",
+    "ShaderParameterStruct",
+    "Stats",
+    "Function",
+    "Invoke",
+    "RefCounting",
+    "UnrealTemplate",
+    "UnrealTypeTraits",
+    "PipelineStateCache",
+    "initializer_list"
+  ],
+  "functions": [
+    {
+      "id": "clear-unused-graph-resources-impl-f198fa",
+      "name": "ClearUnusedGraphResourcesImpl",
+      "category": "RenderGraphUtils",
+      "signature": "ClearUnusedGraphResourcesImpl(Shader Bindings, Parameters Metadata, Inout Parameters, Exclude List)",
+      "params": [
+        {
+          "name": "Shader Bindings",
+          "type": "FShaderParameterBindings&"
+        },
+        {
+          "name": "Parameters Metadata",
+          "type": "FShaderParametersMetadata*"
+        },
+        {
+          "name": "Inout Parameters",
+          "type": "void*"
+        },
+        {
+          "name": "Exclude List",
+          "type": "std::initializer_list<FRDGResourceRef>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears all render graph tracked resources that are not bound by a shader.\nExcludes any resources on the ExcludeList from being cleared regardless of whether the\nshader binds them or not. This is needed for resources that are used outside of shader\nbindings such as indirect arguments buffers."
+    },
+    {
+      "id": "clear-unused-graph-resources-impl-0182ce",
+      "name": "ClearUnusedGraphResourcesImpl",
+      "category": "RenderGraphUtils",
+      "signature": "ClearUnusedGraphResourcesImpl(Shader Bindings List, Parameters Metadata, Inout Parameters, Exclude List)",
+      "params": [
+        {
+          "name": "Shader Bindings List",
+          "type": "TArrayView<FShaderParameterBindings*>"
+        },
+        {
+          "name": "Parameters Metadata",
+          "type": "FShaderParametersMetadata*"
+        },
+        {
+          "name": "Inout Parameters",
+          "type": "void*"
+        },
+        {
+          "name": "Exclude List",
+          "type": "std::initializer_list<FRDGResourceRef>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Similar to the function above, but takes a list of shader bindings and only clears if none of the shaders contain the resource."
+    },
+    {
+      "id": "register-external-texture-with-fallback",
+      "name": "RegisterExternalTextureWithFallback",
+      "category": "RenderGraphUtils",
+      "signature": "RegisterExternalTextureWithFallback(Graph Builder, External Pooled Texture, Fallback Pooled Texture)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "External Pooled Texture",
+          "type": "TRefCountPtr<IPooledRenderTarget>&"
+        },
+        {
+          "name": "Fallback Pooled Texture",
+          "type": "TRefCountPtr<IPooledRenderTarget>&"
+        }
+      ],
+      "returnType": "FRDGTextureRef",
+      "docs": "Register external texture with fallback if the resource is invalid.\nCAUTION: use this function very wisely. It may actually remove shader parameter validation\nfailure when a pass is actually trying to access a resource not yet or no longer available."
+    },
+    {
+      "id": "create-texture-msaa",
+      "name": "CreateTextureMSAA",
+      "category": "RenderGraphUtils",
+      "signature": "CreateTextureMSAA(Graph Builder, Desc, Name Multisampled, Name Resolved, Resolve Flags To Add)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Desc",
+          "type": "FRDGTextureDesc"
+        },
+        {
+          "name": "Name Multisampled",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Name Resolved",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Resolve Flags To Add",
+          "type": "ETextureCreateFlags",
+          "default": "TexCreate_None"
+        }
+      ],
+      "returnType": "FRDGTextureMSAA"
+    },
+    {
+      "id": "add-indirect-args-setup-cs-pass-1-d",
+      "name": "AddIndirectArgsSetupCsPass1D",
+      "category": "RenderGraphUtils",
+      "signature": "AddIndirectArgsSetupCsPass1D(Graph Builder, Feature Level, Input Count Buffer, Output Buffer Name, Divisor, Input Count Offset, Multiplier)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "Input Count Buffer",
+          "type": "FRDGBuffer*"
+        },
+        {
+          "name": "Output Buffer Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Divisor",
+          "type": "UInt"
+        },
+        {
+          "name": "Input Count Offset",
+          "type": "UInt",
+          "default": "0U"
+        },
+        {
+          "name": "Multiplier",
+          "type": "UInt",
+          "default": "1U"
+        }
+      ],
+      "returnType": "FRDGBufferRef",
+      "docs": "Create and set up an 1D indirect dispatch argument from some GPU-side integer in a buffer (InputCountBuffer).\nSets up a group count as (InputCountBuffer[InputCountOffset] * Multiplier + Divisor - 1U) / Divisor;\nCommonly use Divisor <=> number of threads per group."
+    },
+    {
+      "id": "add-copy-texture-pass",
+      "name": "AddCopyTexturePass",
+      "category": "RenderGraphUtils",
+      "signature": "AddCopyTexturePass(Graph Builder, Input Texture, Output Texture, Copy Info)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Input Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Output Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Copy Info",
+          "type": "FRHICopyTextureInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to copy a region from one texture to another. Uses RHICopyTexture under the hood.\nFormats of the two textures must match. The output and output texture regions be within the respective extents."
+    },
+    {
+      "id": "add-draw-texture-pass",
+      "name": "AddDrawTexturePass",
+      "category": "RenderGraphUtils",
+      "signature": "AddDrawTexturePass(Graph Builder, Shader Map, Input Texture, Output Texture, Draw Info)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Shader Map",
+          "type": "FGlobalShaderMap*"
+        },
+        {
+          "name": "Input Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Output Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Draw Info",
+          "type": "FRDGDrawTextureInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-clear-uav-pass-acf730",
+      "name": "AddClearUAVPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearUAVPass(Graph Builder, Buffer UAV, Value, Compute Pass Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Buffer UAV",
+          "type": "FRDGBufferUAVRef"
+        },
+        {
+          "name": "Value",
+          "type": "UInt"
+        },
+        {
+          "name": "Compute Pass Flags",
+          "type": "ERDGPassFlags",
+          "default": "ERDGPassFlags::Compute"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a texture or buffer UAV with a single typed value."
+    },
+    {
+      "id": "add-clear-uav-float-pass",
+      "name": "AddClearUAVFloatPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearUAVFloatPass(Graph Builder, Buffer UAV, Value, Compute Pass Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Buffer UAV",
+          "type": "FRDGBufferUAVRef"
+        },
+        {
+          "name": "Value",
+          "type": "Float"
+        },
+        {
+          "name": "Compute Pass Flags",
+          "type": "ERDGPassFlags",
+          "default": "ERDGPassFlags::Compute"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-clear-uav-pass-fa33d3",
+      "name": "AddClearUAVPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearUAVPass(Graph Builder, Texture UAV, Clear Value, Compute Pass Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture UAV",
+          "type": "FRDGTextureUAVRef"
+        },
+        {
+          "name": "Clear Value",
+          "type": "Float"
+        },
+        {
+          "name": "Compute Pass Flags",
+          "type": "ERDGPassFlags",
+          "default": "ERDGPassFlags::Compute"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-clear-uav-pass-fa496a",
+      "name": "AddClearUAVPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearUAVPass(Graph Builder, Texture UAV, Clear Values, Compute Pass Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture UAV",
+          "type": "FRDGTextureUAVRef"
+        },
+        {
+          "name": "Clear Values",
+          "type": "FUintVector4&"
+        },
+        {
+          "name": "Compute Pass Flags",
+          "type": "ERDGPassFlags",
+          "default": "ERDGPassFlags::Compute"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-clear-uav-pass-eacf01",
+      "name": "AddClearUAVPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearUAVPass(Graph Builder, Texture UAV, Clear Color, Compute Pass Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture UAV",
+          "type": "FRDGTextureUAVRef"
+        },
+        {
+          "name": "Clear Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "Compute Pass Flags",
+          "type": "ERDGPassFlags",
+          "default": "ERDGPassFlags::Compute"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-clear-uav-pass-24c91a",
+      "name": "AddClearUAVPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearUAVPass(Graph Builder, Feature Level, Texture UAV, Clear Values, Rect Min Max Buffer SRV, Num Rects)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "Texture UAV",
+          "type": "FRDGTextureUAVRef"
+        },
+        {
+          "name": "Clear Values",
+          "type": "uint32 (&"
+        },
+        {
+          "name": "Rect Min Max Buffer SRV",
+          "type": "FRDGBufferSRVRef"
+        },
+        {
+          "name": "Num Rects",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears parts of UAV specified by an array of screen rects. If no rects are specific, then it falls back to a standard UAV clear."
+    },
+    {
+      "id": "add-clear-render-target-pass-794203",
+      "name": "AddClearRenderTargetPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearRenderTargetPass(Graph Builder, Texture)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a render target to its clear value (single mip, single slice)"
+    },
+    {
+      "id": "add-clear-render-target-pass-f7e053",
+      "name": "AddClearRenderTargetPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearRenderTargetPass(Graph Builder, Texture, Clear Color)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Clear Color",
+          "type": "FLinearColor&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a render target (single mip, single slice). Uses render pass clear actions if the clear color matches the fast clear color."
+    },
+    {
+      "id": "add-clear-render-target-pass-2abe45",
+      "name": "AddClearRenderTargetPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearRenderTargetPass(Graph Builder, Texture, Clear Color, Viewport)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Clear Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "Viewport",
+          "type": "FIntRect"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a part of a render target (single mip, single slice). Draws a quad to the requested viewport."
+    },
+    {
+      "id": "add-clear-render-target-pass-cfc9fe",
+      "name": "AddClearRenderTargetPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearRenderTargetPass(Graph Builder, Texture, Texture Clear Info)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Texture Clear Info",
+          "type": "FRDGTextureClearInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a render target to its clear value."
+    },
+    {
+      "id": "add-clear-depth-stencil-pass-923423",
+      "name": "AddClearDepthStencilPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearDepthStencilPass(Graph Builder, Texture, Clear Depth, Depth, Clear Stencil, Stencil)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Clear Depth",
+          "type": "Bool"
+        },
+        {
+          "name": "Depth",
+          "type": "Float"
+        },
+        {
+          "name": "Clear Stencil",
+          "type": "Bool"
+        },
+        {
+          "name": "Stencil",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a depth stencil target. Prefer to use clear actions if possible."
+    },
+    {
+      "id": "add-clear-depth-stencil-pass-e048ca",
+      "name": "AddClearDepthStencilPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearDepthStencilPass(Graph Builder, Texture, Depth Load Action, Stencil Load Action)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Depth Load Action",
+          "type": "ERenderTargetLoadAction",
+          "default": "ERenderTargetLoadAction::EClear"
+        },
+        {
+          "name": "Stencil Load Action",
+          "type": "ERenderTargetLoadAction",
+          "default": "ERenderTargetLoadAction::EClear"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear a depth stencil target to its optimized clear value using a raster pass."
+    },
+    {
+      "id": "add-clear-stencil-pass",
+      "name": "AddClearStencilPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddClearStencilPass(Graph Builder, Texture)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Texture",
+          "type": "FRDGTextureRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to clear the stencil portion of a depth / stencil target to its fast clear value."
+    },
+    {
+      "id": "add-resummarize-h-tile-pass",
+      "name": "AddResummarizeHTilePass",
+      "category": "RenderGraphUtils",
+      "signature": "AddResummarizeHTilePass(Graph Builder, Depth Texture)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Depth Texture",
+          "type": "FRDGTextureRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to resummarize the htile plane."
+    },
+    {
+      "id": "add-copy-buffer-pass-29aec3",
+      "name": "AddCopyBufferPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddCopyBufferPass(Graph Builder, Dst Buffer, Dst Offset, Src Buffer, Src Offset, Num Bytes)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Dst Buffer",
+          "type": "FRDGBufferRef"
+        },
+        {
+          "name": "Dst Offset",
+          "type": "UInt64"
+        },
+        {
+          "name": "Src Buffer",
+          "type": "FRDGBufferRef"
+        },
+        {
+          "name": "Src Offset",
+          "type": "UInt64"
+        },
+        {
+          "name": "Num Bytes",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a render graph pass to copy SrcBuffer content into DstBuffer."
+    },
+    {
+      "id": "add-copy-buffer-pass-e76951",
+      "name": "AddCopyBufferPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddCopyBufferPass(Graph Builder, Dst Buffer, Src Buffer)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Dst Buffer",
+          "type": "FRDGBufferRef"
+        },
+        {
+          "name": "Src Buffer",
+          "type": "FRDGBufferRef"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-enqueue-copy-pass-e10a58",
+      "name": "AddEnqueueCopyPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddEnqueueCopyPass(Graph Builder, Readback, Source Texture, Rect)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Readback",
+          "type": "FRHIGPUTextureReadback*"
+        },
+        {
+          "name": "Source Texture",
+          "type": "FRDGTextureRef"
+        },
+        {
+          "name": "Rect",
+          "type": "FResolveRect",
+          "default": "FResolveRect()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a pass to readback contents of an RDG texture."
+    },
+    {
+      "id": "add-enqueue-copy-pass-e6f528",
+      "name": "AddEnqueueCopyPass",
+      "category": "RenderGraphUtils",
+      "signature": "AddEnqueueCopyPass(Graph Builder, Readback, Source Buffer, Num Bytes)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Readback",
+          "type": "FRHIGPUBufferReadback*"
+        },
+        {
+          "name": "Source Buffer",
+          "type": "FRDGBufferRef"
+        },
+        {
+          "name": "Num Bytes",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a pass to readback contents of an RDG buffer."
+    },
+    {
+      "id": "create-structured-buffer-42c40a",
+      "name": "CreateStructuredBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "CreateStructuredBuffer(Graph Builder, Name, Bytes Per Element, Num Elements, Initial Data, Initial Data Size, Initial Data Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Bytes Per Element",
+          "type": "UInt"
+        },
+        {
+          "name": "Num Elements",
+          "type": "UInt"
+        },
+        {
+          "name": "Initial Data",
+          "type": "void*"
+        },
+        {
+          "name": "Initial Data Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Initial Data Flags",
+          "type": "ERDGInitialDataFlags",
+          "default": "ERDGInitialDataFlags::None"
+        }
+      ],
+      "returnType": "FRDGBufferRef",
+      "docs": "Creates a structured buffer with initial data by creating an upload pass."
+    },
+    {
+      "id": "create-structured-buffer-2cd810",
+      "name": "CreateStructuredBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "CreateStructuredBuffer(Graph Builder, Name, Bytes Per Element, Num Elements Callback, Initial Data Callback, Initial Data Size Callback)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Bytes Per Element",
+          "type": "UInt"
+        },
+        {
+          "name": "Num Elements Callback",
+          "type": "FRDGBufferNumElementsCallback&&"
+        },
+        {
+          "name": "Initial Data Callback",
+          "type": "FRDGBufferInitialDataCallback&&"
+        },
+        {
+          "name": "Initial Data Size Callback",
+          "type": "FRDGBufferInitialDataSizeCallback&&"
+        }
+      ],
+      "returnType": "FRDGBufferRef",
+      "docs": "A variant where NumElements, InitialData, and InitialDataSize are supplied through callbacks. This allows creating a buffer with\ninformation unknown at creation time. Though, data must be ready before the most recent RDG pass that references the buffer\nis executed."
+    },
+    {
+      "id": "create-byte-address-buffer-f87bb2",
+      "name": "CreateByteAddressBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "CreateByteAddressBuffer(Graph Builder, Name, Num Bytes, Initial Data, Initial Data Size, Initial Data Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Num Bytes",
+          "type": "UInt"
+        },
+        {
+          "name": "Initial Data",
+          "type": "void*"
+        },
+        {
+          "name": "Initial Data Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Initial Data Flags",
+          "type": "ERDGInitialDataFlags",
+          "default": "ERDGInitialDataFlags::None"
+        }
+      ],
+      "returnType": "FRDGBufferRef",
+      "docs": "Creates a byte address buffer with initial data by creating an upload pass."
+    },
+    {
+      "id": "create-byte-address-buffer-fc52bd",
+      "name": "CreateByteAddressBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "CreateByteAddressBuffer(Graph Builder, Name, Num Elements Callback, Initial Data Callback, Initial Data Size Callback)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Num Elements Callback",
+          "type": "FRDGBufferNumElementsCallback&&"
+        },
+        {
+          "name": "Initial Data Callback",
+          "type": "FRDGBufferInitialDataCallback&&"
+        },
+        {
+          "name": "Initial Data Size Callback",
+          "type": "FRDGBufferInitialDataSizeCallback&&"
+        }
+      ],
+      "returnType": "FRDGBufferRef",
+      "docs": "A variant where NumElements, InitialData, and InitialDataSize are supplied through callbacks. This allows creating a buffer with\ninformation unknown at creation time. Though, data must be ready before the most recent RDG pass that references the buffer\nis executed. For byte address buffers, NumElements must be Size / 4."
+    },
+    {
+      "id": "create-upload-buffer",
+      "name": "CreateUploadBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "CreateUploadBuffer(Graph Builder, Name, Bytes Per Element, Num Elements, Initial Data, Initial Data Size, Initial Data Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Bytes Per Element",
+          "type": "UInt"
+        },
+        {
+          "name": "Num Elements",
+          "type": "UInt"
+        },
+        {
+          "name": "Initial Data",
+          "type": "void*"
+        },
+        {
+          "name": "Initial Data Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Initial Data Flags",
+          "type": "ERDGInitialDataFlags",
+          "default": "ERDGInitialDataFlags::None"
+        }
+      ],
+      "returnType": "FRDGBufferRef"
+    },
+    {
+      "id": "create-vertex-buffer",
+      "name": "CreateVertexBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "CreateVertexBuffer(Graph Builder, Name, Desc, Initial Data, Initial Data Size, Initial Data Flags)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Desc",
+          "type": "FRDGBufferDesc&"
+        },
+        {
+          "name": "Initial Data",
+          "type": "void*"
+        },
+        {
+          "name": "Initial Data Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Initial Data Flags",
+          "type": "ERDGInitialDataFlags",
+          "default": "ERDGInitialDataFlags::None"
+        }
+      ],
+      "returnType": "FRDGBufferRef",
+      "docs": "Creates a vertex buffer with initial data by creating an upload pass."
+    },
+    {
+      "id": "submit",
+      "name": "Submit",
+      "category": "RenderGraphUtils",
+      "signature": "Submit(Target, Graph Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRDGExternalAccessQueue*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-pooled-buffer-223aa0",
+      "name": "AllocatePooledBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "AllocatePooledBuffer(Desc, Out, Name, Alignment)",
+      "params": [
+        {
+          "name": "Desc",
+          "type": "FRDGBufferDesc&"
+        },
+        {
+          "name": "Out",
+          "type": "TRefCountPtr<FRDGPooledBuffer>&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Alignment",
+          "type": "ERDGPooledBufferAlignment",
+          "default": "ERDGPooledBufferAlignment::Page"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "allocate-pooled-buffer-5ca30f",
+      "name": "AllocatePooledBuffer",
+      "category": "RenderGraphUtils",
+      "signature": "AllocatePooledBuffer(Desc, Name, Alignment)",
+      "params": [
+        {
+          "name": "Desc",
+          "type": "FRDGBufferDesc&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Alignment",
+          "type": "ERDGPooledBufferAlignment",
+          "default": "ERDGPooledBufferAlignment::Page"
+        }
+      ],
+      "returnType": "TRefCountPtr<FRDGPooledBuffer>"
+    },
+    {
+      "id": "allocate-pooled-buffer-current-llm-tag",
+      "name": "AllocatePooledBufferCurrentLLMTag",
+      "category": "RenderGraphUtils",
+      "signature": "AllocatePooledBufferCurrentLLMTag(RHI Cmd List, Desc, Name, Alignment)",
+      "params": [
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        },
+        {
+          "name": "Desc",
+          "type": "FRDGBufferDesc&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Alignment",
+          "type": "ERDGPooledBufferAlignment",
+          "default": "ERDGPooledBufferAlignment::Page"
+        }
+      ],
+      "returnType": "TRefCountPtr<FRDGPooledBuffer>"
+    },
+    {
+      "id": "allocate-pooled-texture-15e9b1",
+      "name": "AllocatePooledTexture",
+      "category": "RenderGraphUtils",
+      "signature": "AllocatePooledTexture(Desc, Out, Name)",
+      "params": [
+        {
+          "name": "Desc",
+          "type": "FRDGTextureDesc&"
+        },
+        {
+          "name": "Out",
+          "type": "TRefCountPtr<IPooledRenderTarget>&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "allocate-pooled-texture-d02b31",
+      "name": "AllocatePooledTexture",
+      "category": "RenderGraphUtils",
+      "signature": "AllocatePooledTexture(Desc, Name)",
+      "params": [
+        {
+          "name": "Desc",
+          "type": "FRDGTextureDesc&"
+        },
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "TRefCountPtr<IPooledRenderTarget>"
+    }
+  ]
+}

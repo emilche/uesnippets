@@ -10,6 +10,19 @@
   ],
   "functions": [
     {
+      "id": "update-cached-data",
+      "name": "UpdateCachedData",
+      "category": "MaterialInstanceDynamic",
+      "signature": "UpdateCachedData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "set-scalar-parameter-value",
       "name": "SetScalarParameterValue",
       "category": "Rendering",
@@ -95,6 +108,52 @@
         {
           "name": "Value",
           "type": "Float"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "initialize-vector-parameter-and-get-index",
+      "name": "InitializeVectorParameterAndGetIndex",
+      "category": "MaterialInstanceDynamic",
+      "signature": "InitializeVectorParameterAndGetIndex(Target, Parameter Name, Value, Out Parameter Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name&"
+        },
+        {
+          "name": "Value",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "Out Parameter Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-vector-parameter-by-index",
+      "name": "SetVectorParameterByIndex",
+      "category": "MaterialInstanceDynamic",
+      "signature": "SetVectorParameterByIndex(Target, Parameter Index, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Parameter Index",
+          "type": "Int"
+        },
+        {
+          "name": "Value",
+          "type": "FLinearColor&"
         }
       ],
       "returnType": "Bool"
@@ -362,7 +421,7 @@
       "docs": "Get the current MID texture collection parameter value"
     },
     {
-      "id": "set-vector-parameter-value-54ed70",
+      "id": "set-vector-parameter-value",
       "name": "SetVectorParameterValue",
       "category": "Rendering",
       "signature": "SetVectorParameterValue(Target, Parameter Name, Value)",
@@ -382,23 +441,6 @@
       ],
       "returnType": "Void",
       "docs": "Set an MID vector parameter value"
-    },
-    {
-      "id": "set-vector-parameter-value-de03a9",
-      "name": "SetVectorParameterValue",
-      "category": "Rendering",
-      "signature": "SetVectorParameterValue(Target, Value)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMaterialInstanceDynamic*"
-        },
-        {
-          "name": "Value",
-          "type": "FLinearColor ("
-        }
-      ],
-      "returnType": "Void"
     },
     {
       "id": "set-double-vector-parameter-value",
@@ -423,7 +465,7 @@
       "docs": "Set an MID vector parameter value"
     },
     {
-      "id": "set-vector-parameter-value-by-info-65a34b",
+      "id": "set-vector-parameter-value-by-info",
       "name": "SetVectorParameterValueByInfo",
       "category": "Rendering",
       "signature": "SetVectorParameterValueByInfo(Target, Parameter Info, Value)",
@@ -443,23 +485,6 @@
       ],
       "returnType": "Void",
       "docs": "Set an MID vector parameter value, using MPI (to allow access to layer parameters)"
-    },
-    {
-      "id": "set-vector-parameter-value-by-info-c89a18",
-      "name": "SetVectorParameterValueByInfo",
-      "category": "Rendering",
-      "signature": "SetVectorParameterValueByInfo(Target, Value)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMaterialInstanceDynamic*"
-        },
-        {
-          "name": "Value",
-          "type": "FLinearColor ("
-        }
-      ],
-      "returnType": "Void"
     },
     {
       "id": "get-vector-parameter-value",
@@ -547,6 +572,24 @@
       "docs": "Copies over parameters given a material interface (copy each instance following the hierarchy)\nVery slow implementation, avoid using at runtime. Hopefully we can replace it later with something like CopyInterpParameters()\nThe output is the object itself (this). Copying 'quick parameters only' will result in a much\nfaster copy process but will only copy dynamic scalar, vector and texture parameters on clients.\n@param bQuickParametersOnly Copy scalar, vector and texture parameters only. Much faster but may not include required data"
     },
     {
+      "id": "copy-material-uniform-parameters",
+      "name": "CopyMaterialUniformParameters",
+      "category": "MaterialInstanceDynamic",
+      "signature": "CopyMaterialUniformParameters(Target, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Source",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies the uniform parameters (scalar, vector and texture) from a material or instance hierarchy.\nThis will typically be faster than parsing all expressions but still slow as it must walk the full\nmaterial hierarchy as each parameter may be overridden at any level in the chain.\nNote: This will not copy static or font parameters"
+    },
+    {
       "id": "copy-interp-parameters",
       "name": "CopyInterpParameters",
       "category": "Rendering",
@@ -565,6 +608,69 @@
       "docs": "Copies over parameters given a material instance (only copy from the instance, not following the hierarchy)\nmuch faster than K2_CopyMaterialInstanceParameters(),\nThe output is the object itself (this).\n@param Source ignores the call if 0"
     },
     {
+      "id": "create",
+      "name": "Create",
+      "category": "MaterialInstanceDynamic",
+      "signature": "Create(Parent Material, In Outer, Name)",
+      "params": [
+        {
+          "name": "Parent Material",
+          "type": "UMaterialInterface*"
+        },
+        {
+          "name": "In Outer",
+          "type": "UObject*"
+        },
+        {
+          "name": "Name",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "UMaterialInstanceDynamic*",
+      "docs": "Create a material instance dynamic parented to the specified material. [Optional] Specify name."
+    },
+    {
+      "id": "set-font-parameter-value",
+      "name": "SetFontParameterValue",
+      "category": "MaterialInstanceDynamic",
+      "signature": "SetFontParameterValue(Target, Parameter Info, Font Value, Font Page)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Parameter Info",
+          "type": "FMaterialParameterInfo&"
+        },
+        {
+          "name": "Font Value",
+          "type": "UFont*"
+        },
+        {
+          "name": "Font Page",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the value of the given font parameter.\n@param ParameterName - The name of the font parameter\n@param OutFontValue - New font value to set for this MIC\n@param OutFontPage - New font page value to set for this MIC"
+    },
+    {
+      "id": "clear-parameter-values",
+      "name": "ClearParameterValues",
+      "category": "MaterialInstanceDynamic",
+      "signature": "ClearParameterValues(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove all parameter values"
+    },
+    {
       "id": "copy-parameter-overrides",
       "name": "CopyParameterOverrides",
       "category": "Rendering",
@@ -581,6 +687,292 @@
       ],
       "returnType": "Void",
       "docs": "Copy parameter values from another material instance. This will copy only\nparameters explicitly overridden in that material instance!!"
+    },
+    {
+      "id": "copy-scalar-and-vector-parameters",
+      "name": "CopyScalarAndVectorParameters",
+      "category": "MaterialInstanceDynamic",
+      "signature": "CopyScalarAndVectorParameters(Target, Source Material To Copy From, Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Source Material To Copy From",
+          "type": "UMaterialInterface&"
+        },
+        {
+          "name": "Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy all interpolatable (scalar/vector) parameters from *SourceMaterialToCopyFrom to *this, using the current QualityLevel and given FeatureLevel\nFor runtime use. More specialized and efficient than CopyMaterialInstanceParameters()."
+    },
+    {
+      "id": "set-nanite-override",
+      "name": "SetNaniteOverride",
+      "category": "MaterialInstanceDynamic",
+      "signature": "SetNaniteOverride(Target, In Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "In Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-opacity-mask-clip-value",
+      "name": "GetOpacityMaskClipValue",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetOpacityMaskClipValue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-cast-dynamic-shadow-as-masked",
+      "name": "GetCastDynamicShadowAsMasked",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetCastDynamicShadowAsMasked(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-shading-models",
+      "name": "GetShadingModels",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetShadingModels(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "FMaterialShadingModelField"
+    },
+    {
+      "id": "is-shading-model-from-material-expression",
+      "name": "IsShadingModelFromMaterialExpression",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsShadingModelFromMaterialExpression(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-blend-mode",
+      "name": "GetBlendMode",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetBlendMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "EBlendMode"
+    },
+    {
+      "id": "is-two-sided",
+      "name": "IsTwoSided",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsTwoSided(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-thin-surface",
+      "name": "IsThinSurface",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsThinSurface(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-translucency-writing-velocity",
+      "name": "IsTranslucencyWritingVelocity",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsTranslucencyWritingVelocity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-dithered-lod-transition",
+      "name": "IsDitheredLODTransition",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsDitheredLODTransition(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-masked",
+      "name": "IsMasked",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsMasked(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-displacement-scaling",
+      "name": "GetDisplacementScaling",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetDisplacementScaling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "FDisplacementScaling"
+    },
+    {
+      "id": "is-displacement-fade-enabled",
+      "name": "IsDisplacementFadeEnabled",
+      "category": "MaterialInstanceDynamic",
+      "signature": "IsDisplacementFadeEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-displacement-fade-range",
+      "name": "GetDisplacementFadeRange",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetDisplacementFadeRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "FDisplacementFadeRange"
+    },
+    {
+      "id": "get-max-world-position-offset-displacement",
+      "name": "GetMaxWorldPositionOffsetDisplacement",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetMaxWorldPositionOffsetDisplacement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "has-pixel-animation",
+      "name": "HasPixelAnimation",
+      "category": "MaterialInstanceDynamic",
+      "signature": "HasPixelAnimation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-texture-density",
+      "name": "GetTextureDensity",
+      "category": "MaterialInstanceDynamic",
+      "signature": "GetTextureDensity(Target, Texture Name, UV Channel Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Texture Name",
+          "type": "Name"
+        },
+        {
+          "name": "UV Channel Data",
+          "type": "FMeshUVChannelInfo&"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "In order to remap to the correct texture streaming data, we must keep track of each texture renamed.\nThe following map converts from a texture from the dynamic material to the texture from the static material.\nThe following map converts from a texture from the dynamic material to the texture from the static material."
+    },
+    {
+      "id": "initialize-mid",
+      "name": "InitializeMID",
+      "category": "MaterialInstanceDynamic",
+      "signature": "InitializeMID(Target, Parent Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        },
+        {
+          "name": "Parent Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "update-cached-data-dynamic",
+      "name": "UpdateCachedDataDynamic",
+      "category": "MaterialInstanceDynamic",
+      "signature": "UpdateCachedDataDynamic(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMaterialInstanceDynamic*"
+        }
+      ],
+      "returnType": "private : void"
     }
   ]
 }

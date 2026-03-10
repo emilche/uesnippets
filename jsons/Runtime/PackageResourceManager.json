@@ -1,0 +1,437 @@
+{
+  "id": "package-resource-manager",
+  "label": "PackageResourceManager",
+  "includepath": "UObject/PackageResourceManager.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "Map",
+    "StringFwd",
+    "StringView",
+    "Delegate",
+    "IModularFeature",
+    "CriticalSection",
+    "Platform",
+    "PlatformFile",
+    "LogMacros",
+    "PackageName",
+    "PackagePath",
+    "PackageSegment",
+    "ModuleInterface",
+    "Archive",
+    "BulkDataCookedIndex",
+    "Function",
+    "SharedPointer",
+    "UniquePtr"
+  ],
+  "functions": [
+    {
+      "id": "extension-to-package-format",
+      "name": "ExtensionToPackageFormat",
+      "category": "PackageResourceManager",
+      "signature": "ExtensionToPackageFormat(Target, Extension)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Extension",
+          "type": "EPackageExtension"
+        }
+      ],
+      "returnType": "EPackageFormat",
+      "docs": "Format for a package payload reported by the PackageResourceManager.\nThe appropriate ArchiveInputFormatter must be used for each format."
+    },
+    {
+      "id": "f-open-async-package-result-0db8a8",
+      "name": "FOpenAsyncPackageResult",
+      "category": "PackageResourceManager",
+      "signature": "FOpenAsyncPackageResult(In Handle, In Format, In Needs Engine Version Checks)",
+      "params": [
+        {
+          "name": "In Handle",
+          "type": "TUniquePtr<IAsyncReadFileHandle>&&"
+        },
+        {
+          "name": "In Format",
+          "type": "EPackageFormat"
+        },
+        {
+          "name": "In Needs Engine Version Checks",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-open-async-package-result-bc674b",
+      "name": "FOpenAsyncPackageResult",
+      "category": "PackageResourceManager",
+      "signature": "FOpenAsyncPackageResult()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "AsyncReadFileHandle for the requested Segment bytes, in canceled state if it does not exist."
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "PackageResourceManager",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "public : IPackageResourceManager&",
+      "docs": "Open a Package file from the Workspace Domain, even if the Manager is providing packages from a different domain.\nThe identifier is the PackageName to open."
+    },
+    {
+      "id": "does-package-exist",
+      "name": "DoesPackageExist",
+      "category": "PackageResourceManager",
+      "signature": "DoesPackageExist(Target, Package Path, Out Updated Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Out Updated Path",
+          "type": "FPackagePath*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Report whether the package exists\n@param PackagePath The package to look for\n@param OutUpdatedPath If non-null and the package is found, PackagePath is copied into this path (noop if\nOutUpdatedPath == &PackagePath), and if the package exists, the specific extension found is set\n@return true if the package exists, else false"
+    },
+    {
+      "id": "file-size",
+      "name": "FileSize",
+      "category": "PackageResourceManager",
+      "signature": "FileSize(Target, Package Path, Out Updated Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Out Updated Path",
+          "type": "FPackagePath*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Report the payload size of the package\n@param PackagePath The package to look for\n@param OutUpdatedPath If non-null and the package is found, PackagePath is copied into this path (noop if\nOutUpdatedPath == &PackagePath), and if the package exists, the specific extension found is set\n@return The size in bytes of the package, or INDEX_NONE if it isn't found"
+    },
+    {
+      "id": "open-read-package",
+      "name": "OpenReadPackage",
+      "category": "PackageResourceManager",
+      "signature": "OpenReadPackage(Target, Package Path, Out Updated Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Out Updated Path",
+          "type": "FPackagePath*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "FOpenPackageResult",
+      "docs": "Open an FArchive to read the bytes of the package\n@param PackagePath The package to look for\n@param OutUpdatedPath If non-null and the package is found, PackagePath is copied into this path (noop if\nOutUpdatedPath == &PackagePath), and if the package exists, the specific extension found is set\n@return An FOpenPackageResult, with Result.Archive == archive for the bytes of the package or nullptr\nif it isn't found, and with other data describing the returned archive (see FOpenPackageResult)"
+    },
+    {
+      "id": "open-async-read-package",
+      "name": "OpenAsyncReadPackage",
+      "category": "PackageResourceManager",
+      "signature": "OpenAsyncReadPackage(Target, Package Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        }
+      ],
+      "returnType": "FOpenAsyncPackageResult",
+      "docs": "Open an IAsyncReadFileHandle to asynchronously read the bytes of the package\nIf the PackagePath specifies the extension, this call does not hit the disk/network or block.\nOtherwise, this call will read from network/disk to find the extension\nThis call will always return a non-null handle, even if the package does not exist\n@param PackagePath The package to look for\n@return An FOpenAsyncPackageResult, with Handle that will read from the package if it exists,\nor will be in the canceled state if the package does not exist, and with other data\ndescribing the returned archive (see FOpenAsyncPackageResult)"
+    },
+    {
+      "id": "open-mapped-handle-to-package",
+      "name": "OpenMappedHandleToPackage",
+      "category": "PackageResourceManager",
+      "signature": "OpenMappedHandleToPackage(Target, Package Path, Out Updated Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Out Updated Path",
+          "type": "FPackagePath*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "IMappedFileHandle*",
+      "docs": "Open an IMappedFileHandle to the package, if the PackageResourceManager supports it\nWill return nullptr if the package does not exist or if the PackageResourceManager\ndoes not support MappedFilesHandles\n@param PackagePath The package to look for\n@param OutUpdatedPath If non-null and the package is found, PackagePath is copied into this path (noop if\nOutUpdatedPath == &PackagePath), and if the package exists, the specific extension found is set\n@return IMappedFileHandle* or nullptr"
+    },
+    {
+      "id": "find-packages-recursive",
+      "name": "FindPackagesRecursive",
+      "category": "PackageResourceManager",
+      "signature": "FindPackagesRecursive(Target, Out Packages, Package Mount, File Mount, Root Rel Path, Basename Wildcard)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Out Packages",
+          "type": "TArray<FPackagePath>&"
+        },
+        {
+          "name": "Package Mount",
+          "type": "FStringView"
+        },
+        {
+          "name": "File Mount",
+          "type": "FStringView"
+        },
+        {
+          "name": "Root Rel Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "Basename Wildcard",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Search the given subdirectory of a package mount for all packages with the given package basename in the\npackage repository\n@param OutPackages The list of packages found\n@param PackageMount The package name of the mount point to look under\n@param FileMount The local file path of the mount point to look under, must be the local file path that\ncorresponds to PackageMount\n@param RootRelPath A relative path from PackageMount that specifies the subdirectory of the mount point to use\nas the root of the search\n@param BasenameWildcard The basenamewithoutpath to look for\nBasenameWildcard can not include path or extension; / and . are invalid characters\nBasenameWildcard can include *?-type wildcards (FString::MatchesWildcard)"
+    },
+    {
+      "id": "iterate-packages-in-path",
+      "name": "IteratePackagesInPath",
+      "category": "PackageResourceManager",
+      "signature": "IteratePackagesInPath(Target, Package Mount, File Mount, Root Rel Path, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Mount",
+          "type": "FStringView"
+        },
+        {
+          "name": "File Mount",
+          "type": "FStringView"
+        },
+        {
+          "name": "Root Rel Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "Callback",
+          "type": "FPackagePathVisitor"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call the callback on all packages in the package repository that are in the given subdirectory of a package mount\n@param PackageMount The package name of the mount point's to look under\n@param FileMount The local file path of the mount point to look under,\nmust be the local file path that corresponds to PackageMount\n@param RootRelPath A relative path from PackageMount that specifies the subdirectory of the mount point to use\nas the root of the search\n@param Callback The callback called on each package"
+    },
+    {
+      "id": "iterate-packages-in-local-only-directory",
+      "name": "IteratePackagesInLocalOnlyDirectory",
+      "category": "PackageResourceManager",
+      "signature": "IteratePackagesInLocalOnlyDirectory(Target, Root Dir, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Root Dir",
+          "type": "FStringView"
+        },
+        {
+          "name": "Callback",
+          "type": "FPackagePathVisitor"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call the callback on all packages in the given local path\nPackageResourceManagers that do not support LocalOnly paths will return without calling the Callback\n@param RootDir The local path on disk to search\n@param Callback The callback called on each package"
+    },
+    {
+      "id": "iterate-packages-stat-in-path",
+      "name": "IteratePackagesStatInPath",
+      "category": "PackageResourceManager",
+      "signature": "IteratePackagesStatInPath(Target, Package Mount, File Mount, Root Rel Path, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Package Mount",
+          "type": "FStringView"
+        },
+        {
+          "name": "File Mount",
+          "type": "FStringView"
+        },
+        {
+          "name": "Root Rel Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "Callback",
+          "type": "FPackagePathStatVisitor"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call the callback - with stat data - on all packages in the package repository that are in the given\nsubdirectory of a package mount\n@param PackageMount The package name of the mount point's to look under\n@param FileMount The local file path of the mount point to look under, must be the local file path that\ncorresponds to PackageMount\n@param RootRelPath A relative path from PackageMount that specifies the subdirectory of the mount point to use\nas the root of the search\n@param Callback The callback called on each package"
+    },
+    {
+      "id": "iterate-packages-stat-in-local-only-directory",
+      "name": "IteratePackagesStatInLocalOnlyDirectory",
+      "category": "PackageResourceManager",
+      "signature": "IteratePackagesStatInLocalOnlyDirectory(Target, Root Dir, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        },
+        {
+          "name": "Root Dir",
+          "type": "FStringView"
+        },
+        {
+          "name": "Callback",
+          "type": "FPackagePathStatVisitor"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call the callback - with stat data - on all packages in the given local path\nPackageResourceManagers that do not support LocalOnly paths will return without calling the Callback\n@param RootDir The local path on disk to search\n@param Callback The callback called on each package\n@param bOutSupported If nonnull, receives a true or false value for whether this PackageResourceManager supports\nsearching LocalOnlyDirectories"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "PackageResourceManager",
+      "signature": "Initialize()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Call during engine startup to choose the appropriate PackageResourceManager for the current configuration and\nconstruct it and bind it to be returned from Get"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "PackageResourceManager",
+      "signature": "Shutdown()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Call during engine shutdown to free the PackageResourceManager that was created by Initialize; Get will\nand return nullptr from this point on"
+    },
+    {
+      "id": "get-set-package-resource-manager-delegate",
+      "name": "GetSetPackageResourceManagerDelegate",
+      "category": "PackageResourceManager",
+      "signature": "GetSetPackageResourceManagerDelegate()",
+      "params": [],
+      "returnType": "FSetPackageResourceManager&"
+    },
+    {
+      "id": "get-on-clear-package-resource-manager-delegate",
+      "name": "GetOnClearPackageResourceManagerDelegate",
+      "category": "PackageResourceManager",
+      "signature": "GetOnClearPackageResourceManagerDelegate()",
+      "params": [],
+      "returnType": "FOnClearPackageResourceManager&"
+    },
+    {
+      "id": "try-register-preloadable-archive",
+      "name": "TryRegisterPreloadableArchive",
+      "category": "PackageResourceManager",
+      "signature": "TryRegisterPreloadableArchive(Package Path, Preloadable Archive, Package Format)",
+      "params": [
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Preloadable Archive",
+          "type": "TSharedPtr<FPreloadableArchive>&"
+        },
+        {
+          "name": "Package Format",
+          "type": "FOpenPackageResult&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Try to register the given FPreloadableFile instance to handle the next call to TryTakePreloadableArchive for its PackagePath\nOnly works on PackagePaths with PackageName, will fail on unmounted LocalOnly paths.\nWill fail if the instance has not been initialized or if another instance has already registered for the PackagePath.\nReturn whether the instance is currently registered. Returns true if the instance was already registered.\nRegistered files are referenced-counted, and the reference will not be dropped until\nTryTakePreloadableArchive or UnRegister is called\n@param PackagePath The path to registry to return the Archive\n@param PreloadableArchive The archive to return from TryTakePreloadableArchive\n@param PackageFormat The format of the archive, as returned from OpenReadPackage\n@return True if and only if the archive is now registered for the packagepath, False if the packagepath could\nnot be registered or a different archive was already registered"
+    },
+    {
+      "id": "try-take-preloadable-archive",
+      "name": "TryTakePreloadableArchive",
+      "category": "PackageResourceManager",
+      "signature": "TryTakePreloadableArchive(Package Path, Out Result)",
+      "params": [
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "Out Result",
+          "type": "FOpenPackageResult&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Look up an FPreloadableFile instance registered for the given PackagePath, and return an FOpenPackageResult from it\nIf found, removes the registration so no future call to TryTakePreloadableArchive can use the same FArchive.\nIf the instance is in PreloadHandle mode, the Lower-Level FArchive will be detached from the FPreloadableFile\nand returned using DetachLowerLevel.\nIf the instance is in PreloadBytes mode, a ProxyArchive will be returned that forwards call to the FPreloadableFile\ninstance."
+    },
+    {
+      "id": "un-register-preloadable-archive",
+      "name": "UnRegisterPreloadableArchive",
+      "category": "PackageResourceManager",
+      "signature": "UnRegisterPreloadableArchive(Package Path)",
+      "params": [
+        {
+          "name": "Package Path",
+          "type": "FPackagePath&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove any FPreloadableArchive instance that is registered for the given PackagePath.\n@return True if there was an archive registered for the PackagePath"
+    },
+    {
+      "id": "is-editor-domain-enabled",
+      "name": "IsEditorDomainEnabled",
+      "category": "PackageResourceManager",
+      "signature": "IsEditorDomainEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IPackageResourceManager*"
+        }
+      ],
+      "returnType": "EEditorDomainEnabled",
+      "docs": "Report whether the EditorDomain is enabled by config, for systems that need to behave differently if editordomain\nwill be enabled and need to know before the PackageResourceManager is constructed."
+    }
+  ]
+}

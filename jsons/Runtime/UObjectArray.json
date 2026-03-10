@@ -1,0 +1,629 @@
+{
+  "id": "u-object-array",
+  "label": "UObjectArray",
+  "includepath": "UObject/UObjectArray.h",
+  "includes": [
+    "AutoRTFM",
+    "ThreadSafeCounter",
+    "LockFreeList",
+    "ScopeLock",
+    "TransactionallySafeCriticalSection",
+    "GarbageCollectionGlobals",
+    "UObjectBase"
+  ],
+  "functions": [
+    {
+      "id": "set-maybe-unreachable",
+      "name": "SetMaybeUnreachable",
+      "category": "UObjectArray",
+      "signature": "SetMaybeUnreachable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-maybe-unreachable",
+      "name": "IsMaybeUnreachable",
+      "category": "UObjectArray",
+      "signature": "IsMaybeUnreachable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-stat-id",
+      "name": "CreateStatID",
+      "category": "UObjectArray",
+      "signature": "CreateStatID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fast-mark-as-reachable-interlocked-for-gc",
+      "name": "FastMarkAsReachableInterlocked_ForGC",
+      "category": "UObjectArray",
+      "signature": "FastMarkAsReachableInterlocked_ForGC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fast-mark-as-reachable-and-clear-reachale-in-cluster-interlocked-for-gc",
+      "name": "FastMarkAsReachableAndClearReachaleInClusterInterlocked_ForGC",
+      "category": "UObjectArray",
+      "signature": "FastMarkAsReachableAndClearReachaleInClusterInterlocked_ForGC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-as-reachable-interlocked-for-gc",
+      "name": "MarkAsReachableInterlocked_ForGC",
+      "category": "UObjectArray",
+      "signature": "MarkAsReachableInterlocked_ForGC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Mark this object item as Reachable and clear MaybeUnreachable flag. Only thread-safe for concurrent clear, not concurrent set+clear. Don't use during mark phase. For GC use only.\n@return True if this call cleared MaybeUnreachable flag, false if it has been cleared by another thread."
+    },
+    {
+      "id": "set-root-flags",
+      "name": "SetRootFlags",
+      "category": "UObjectArray",
+      "signature": "SetRootFlags(Target, Flags To Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        },
+        {
+          "name": "Flags To Set",
+          "type": "EInternalObjectFlags"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "clear-root-flags",
+      "name": "ClearRootFlags",
+      "category": "UObjectArray",
+      "signature": "ClearRootFlags(Target, Flags To Clear)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectItem*"
+        },
+        {
+          "name": "Flags To Clear",
+          "type": "EInternalObjectFlags"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "fail-max-u-object-count-exceeded",
+      "name": "FailMaxUObjectCountExceeded",
+      "category": "UObjectArray",
+      "signature": "FailMaxUObjectCountExceeded(Target, Max U Objects, New U Object Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Max U Objects",
+          "type": "Int"
+        },
+        {
+          "name": "New U Object Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "static-allocate-object",
+      "name": "StaticAllocateObject",
+      "category": "UObjectArray",
+      "signature": "StaticAllocateObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "*\nFUObjectArray replaces the functionality of GObjObjects and UObject::Index\nNote the layout of this data structure is mostly to emulate the old behavior and minimize code rework during code restructure.\nBetter data structures could be used in the future, for example maybe all that is needed is a TSet<UObject *>\nOne has to be a little careful with this, especially with the GC optimization. I have seen spots that assume\nthat non-GC objects come before GC ones during iteration."
+    },
+    {
+      "id": "reset-serial-number",
+      "name": "ResetSerialNumber",
+      "category": "UObjectArray",
+      "signature": "ResetSerialNumber(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Object",
+          "type": "UObjectBase*"
+        }
+      ],
+      "returnType": "private : void",
+      "docs": "Reset the serial number from the game thread to invalidate all weak object pointers to it\n@param Object to reset"
+    },
+    {
+      "id": "fu-object-array",
+      "name": "FUObjectArray",
+      "category": "UObjectArray",
+      "signature": "FUObjectArray()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Constructor, initializes to no permanent object pool"
+    },
+    {
+      "id": "allocate-object-pool",
+      "name": "AllocateObjectPool",
+      "category": "UObjectArray",
+      "signature": "AllocateObjectPool(Target, Max U Objects, Max Objects Not Considered By GC, Pre Allocate Object Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Max U Objects",
+          "type": "Int"
+        },
+        {
+          "name": "Max Objects Not Considered By GC",
+          "type": "Int"
+        },
+        {
+          "name": "Pre Allocate Object Array",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allocates and initializes the permanent object pool\n@param MaxUObjects maximum number of UObjects that can ever exist in the array\n@param MaxObjectsNotConsideredByGC number of objects in the permanent object pool"
+    },
+    {
+      "id": "disable-disregard-for-gc",
+      "name": "DisableDisregardForGC",
+      "category": "UObjectArray",
+      "signature": "DisableDisregardForGC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disables the disregard for GC optimization."
+    },
+    {
+      "id": "open-disregard-for-gc",
+      "name": "OpenDisregardForGC",
+      "category": "UObjectArray",
+      "signature": "OpenDisregardForGC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If there's enough slack in the disregard pool, we can re-open it and keep adding objects to it"
+    },
+    {
+      "id": "close-disregard-for-gc",
+      "name": "CloseDisregardForGC",
+      "category": "UObjectArray",
+      "signature": "CloseDisregardForGC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "After the initial load, this closes the disregard pool so that new object are GC-able"
+    },
+    {
+      "id": "allocate-u-object-index",
+      "name": "AllocateUObjectIndex",
+      "category": "UObjectArray",
+      "signature": "AllocateUObjectIndex(Target, Object, Initial Flags, Already Allocated Index, Serial Number, Remote Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Object",
+          "type": "UObjectBase*"
+        },
+        {
+          "name": "Initial Flags",
+          "type": "EInternalObjectFlags"
+        },
+        {
+          "name": "Already Allocated Index",
+          "type": "Int",
+          "default": "-1"
+        },
+        {
+          "name": "Serial Number",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Remote Id",
+          "type": "FRemoteObjectId",
+          "default": "FRemoteObjectId()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a uobject to the global array which is used for uobject iteration\n@param\tObject Object to allocate an index for\n@param\tInitialFlags Flags to set in the object array before the object pointer becomes visible to other threads.\n@param\tAlreadyAllocatedIndex already allocated internal index to use, negative value means allocate a new index\n@param\tSerialNumber serial number to use"
+    },
+    {
+      "id": "free-u-object-index",
+      "name": "FreeUObjectIndex",
+      "category": "UObjectArray",
+      "signature": "FreeUObjectIndex(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Object",
+          "type": "UObjectBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns a UObject index top to the global uobject array\n@param Object object to free"
+    },
+    {
+      "id": "add-u-object-create-listener",
+      "name": "AddUObjectCreateListener",
+      "category": "UObjectArray",
+      "signature": "AddUObjectCreateListener(Target, Listener)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Listener",
+          "type": "FUObjectCreateListener*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new listener for object creation\n@param Listener listener to notify when an object is deleted"
+    },
+    {
+      "id": "remove-u-object-create-listener",
+      "name": "RemoveUObjectCreateListener",
+      "category": "UObjectArray",
+      "signature": "RemoveUObjectCreateListener(Target, Listener)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Listener",
+          "type": "FUObjectCreateListener*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes a listener for object creation\n@param Listener listener to remove"
+    },
+    {
+      "id": "add-u-object-delete-listener",
+      "name": "AddUObjectDeleteListener",
+      "category": "UObjectArray",
+      "signature": "AddUObjectDeleteListener(Target, Listener)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Listener",
+          "type": "FUObjectDeleteListener*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a new listener for object deletion\n@param Listener listener to notify when an object is deleted"
+    },
+    {
+      "id": "remove-u-object-delete-listener",
+      "name": "RemoveUObjectDeleteListener",
+      "category": "UObjectArray",
+      "signature": "RemoveUObjectDeleteListener(Target, Listener)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Listener",
+          "type": "FUObjectDeleteListener*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes a listener for object deletion\n@param Listener listener to remove"
+    },
+    {
+      "id": "remove-object-from-delete-listeners",
+      "name": "RemoveObjectFromDeleteListeners",
+      "category": "UObjectArray",
+      "signature": "RemoveObjectFromDeleteListeners(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Object",
+          "type": "UObjectBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an object from delete listeners\n@param Object to remove from delete listeners"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "UObjectArray",
+      "signature": "IsValid(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Object",
+          "type": "UObjectBase*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if a UObject pointer is valid\n@param\tObject object to test for validity\n@return\ttrue if this index is valid"
+    },
+    {
+      "id": "shutdown-u-object-array",
+      "name": "ShutdownUObjectArray",
+      "category": "UObjectArray",
+      "signature": "ShutdownUObjectArray(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears some internal arrays to get rid of false memory leaks"
+    },
+    {
+      "id": "allocate-serial-number",
+      "name": "AllocateSerialNumber",
+      "category": "UObjectArray",
+      "signature": "AllocateSerialNumber(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Given a UObject index return the serial number. If it doesn't have a serial number, give it one. Threadsafe.\n@param Index - UObject Index\n@return - the serial number for this UObject"
+    },
+    {
+      "id": "dump-u-object-counts-to-log",
+      "name": "DumpUObjectCountsToLog",
+      "category": "UObjectArray",
+      "signature": "DumpUObjectCountsToLog(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "dissolve-cluster-66ebee",
+      "name": "DissolveCluster",
+      "category": "UObjectArray",
+      "signature": "DissolveCluster(Target, Cluster)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "Cluster",
+          "type": "FUObjectCluster&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "All verse cells are considered mutable.  They will just be added directly to verse gc when the cluster is marked"
+    },
+    {
+      "id": "fu-object-cluster-container",
+      "name": "FUObjectClusterContainer",
+      "category": "UObjectArray",
+      "signature": "FUObjectClusterContainer()",
+      "params": [],
+      "returnType": "public :"
+    },
+    {
+      "id": "allocate-cluster",
+      "name": "AllocateCluster",
+      "category": "UObjectArray",
+      "signature": "AllocateCluster(Target, In Root Object Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "In Root Object Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns an index to a new cluster"
+    },
+    {
+      "id": "free-cluster",
+      "name": "FreeCluster",
+      "category": "UObjectArray",
+      "signature": "FreeCluster(Target, In Cluster Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "In Cluster Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Frees the cluster at the specified index"
+    },
+    {
+      "id": "get-object-cluster",
+      "name": "GetObjectCluster",
+      "category": "UObjectArray",
+      "signature": "GetObjectCluster(Target, Cluster Root Or Object From Cluster)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "Cluster Root Or Object From Cluster",
+          "type": "UObjectBaseUtility*"
+        }
+      ],
+      "returnType": "FUObjectCluster*",
+      "docs": "Gets the cluster the specified object is a root of or belongs to.\n@Param ClusterRootOrObjectFromCluster Root cluster object or object that belongs to a cluster"
+    },
+    {
+      "id": "dissolve-cluster-4b904b",
+      "name": "DissolveCluster",
+      "category": "UObjectArray",
+      "signature": "DissolveCluster(Target, Cluster Root Or Object From Cluster)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "Cluster Root Or Object From Cluster",
+          "type": "UObjectBaseUtility*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dissolves a cluster and all clusters that reference it\n@Param ClusterRootOrObjectFromCluster Root cluster object or object that belongs to a cluster"
+    },
+    {
+      "id": "dissolve-clusters",
+      "name": "DissolveClusters",
+      "category": "UObjectArray",
+      "signature": "DissolveClusters(Target, Force Dissolve All Clusters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "Force Dissolve All Clusters",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dissolve all clusters marked for dissolving\n@param bForceDissolveAllClusters if true, dissolves all clusters even if they're not marked for dissolving"
+    },
+    {
+      "id": "dissolve-cluster-and-mark-objects-as-unreachable",
+      "name": "DissolveClusterAndMarkObjectsAsUnreachable",
+      "category": "UObjectArray",
+      "signature": "DissolveClusterAndMarkObjectsAsUnreachable(Target, Root Object Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        },
+        {
+          "name": "Root Object Item",
+          "type": "FUObjectItem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dissolve the specified cluster and all clusters that reference it"
+    },
+    {
+      "id": "get-min-cluster-size",
+      "name": "GetMinClusterSize",
+      "category": "UObjectArray",
+      "signature": "GetMinClusterSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectClusterContainer*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "* Returns the minimum cluster size as specified in ini settings"
+    },
+    {
+      "id": "can-allocate-u-objects",
+      "name": "CanAllocateUObjects",
+      "category": "UObjectArray",
+      "signature": "CanAllocateUObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUObjectArray*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

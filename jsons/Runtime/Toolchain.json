@@ -1,0 +1,338 @@
+{
+  "id": "toolchain",
+  "label": "Toolchain",
+  "includepath": "uLang/Toolchain/Toolchain.h",
+  "includes": [
+    "SharedPointerArray",
+    "Optional",
+    "EnumUtils",
+    "IParserPass",
+    "IPostVstFilter",
+    "ISemanticAnalyzerPass",
+    "IPostSemanticAnalysisFilter",
+    "IPostIrFilter",
+    "IIRGeneratorPass",
+    "IAssemblerPass",
+    "ApiLayerInjections",
+    "SemanticProgram",
+    "VstNode",
+    "SourceProject",
+    "VerseVersion",
+    "VerseLocalizationGen"
+  ],
+  "functions": [
+    {
+      "id": "create-toolchain",
+      "name": "CreateToolchain",
+      "category": "Toolchain",
+      "signature": "CreateToolchain(Target, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Params",
+          "type": "SToolchainParams&"
+        }
+      ],
+      "returnType": "TSRef<CToolchain>",
+      "docs": "--- Parser --------------------------------\nThe parser is responsible for ingesting a source file, parsing and tokenizing it, and\ngenerating an abstract syntax tree (Vst) for the rest of the compiler to consume.  It\nshould not need to worry about semantics, just syntax"
+    },
+    {
+      "id": "has-failure",
+      "name": "HasFailure",
+      "category": "Toolchain",
+      "signature": "HasFailure(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SBuildResults*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "build-project",
+      "name": "BuildProject",
+      "category": "Toolchain",
+      "signature": "BuildProject(Target, Source Project, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Source Project",
+          "type": "CSourceProject&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "public : SBuildResults",
+      "docs": "Compiler+Linker toolchain\n************************************************************************"
+    },
+    {
+      "id": "parse-snippet",
+      "name": "ParseSnippet",
+      "category": "Toolchain",
+      "signature": "ParseSnippet(Target, Out Vst, Text Snippet, Build Context, Verse Version, Uploaded At FN Version)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Out Vst",
+          "type": "uLang::TSRef<Verse::Vst::Snippet>&"
+        },
+        {
+          "name": "Text Snippet",
+          "type": "CUTF8StringView&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Verse Version",
+          "type": "uint32_t",
+          "default": "Verse::Version::Default"
+        },
+        {
+          "name": "Uploaded At FN Version",
+          "type": "uint32_t",
+          "default": "VerseFN::UploadedAtFNVersion::Latest"
+        }
+      ],
+      "returnType": "ECompilerResult",
+      "docs": "Parse a snippet of text and return the resulting Vst snippet\nSteps:\n1. Pre parse injections (from both toolchain and build context)\n2. Parse\n3. Post Vst filters\n4. Post parse injections (from both toolchain and build context)"
+    },
+    {
+      "id": "compile-vst",
+      "name": "CompileVst",
+      "category": "Toolchain",
+      "signature": "CompileVst(Target, Vst, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Vst",
+          "type": "TSRef<Verse::Vst::Project>&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "ECompilerResult",
+      "docs": "Run SemanticAnalyzeVst and AssembleProgram on an Vst."
+    },
+    {
+      "id": "semantic-analyze-vst",
+      "name": "SemanticAnalyzeVst",
+      "category": "Toolchain",
+      "signature": "SemanticAnalyzeVst(Target, Out Program, Vst, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Out Program",
+          "type": "TOptional<TSRef<CSemanticProgram>>&"
+        },
+        {
+          "name": "Vst",
+          "type": "TSRef<Verse::Vst::Project>&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "ECompilerResult",
+      "docs": "Run semantic analysis on a given Vst snippet\nSteps:\n1. Pre semantic analysis injections (from both toolchain and build context)\n2. Semantic analysis\n3. Post expression filters\n4. Post semantic analysis injections (from both toolchain and build context)"
+    },
+    {
+      "id": "extract-localization",
+      "name": "ExtractLocalization",
+      "category": "Toolchain",
+      "signature": "ExtractLocalization(Target, Program, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Program",
+          "type": "TSRef<CSemanticProgram>&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "ECompilerResult",
+      "docs": "Extract localization information."
+    },
+    {
+      "id": "ir-generate-program",
+      "name": "IrGenerateProgram",
+      "category": "Toolchain",
+      "signature": "IrGenerateProgram(Target, Program, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Program",
+          "type": "TSRef<CSemanticProgram>&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "ECompilerResult",
+      "docs": "Run IR generation on a given Ast snippet.\nSteps:\n1. IR generation\n2. (future lenient analysis)"
+    },
+    {
+      "id": "assemble-program",
+      "name": "AssembleProgram",
+      "category": "Toolchain",
+      "signature": "AssembleProgram(Target, Program, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Program",
+          "type": "TSRef<CSemanticProgram>&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "ECompilerResult",
+      "docs": "Run semantic analysis and code generation on a given Vst snippet\nSteps:\n1. Pre translate injections\n2. Assembler (code generation)"
+    },
+    {
+      "id": "link",
+      "name": "Link",
+      "category": "Toolchain",
+      "signature": "Link(Target, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "ELinkerResult",
+      "docs": "Run linker (not currently used)"
+    },
+    {
+      "id": "take-localization-info",
+      "name": "TakeLocalizationInfo",
+      "category": "Toolchain",
+      "signature": "TakeLocalizationInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TArray<FSolLocalizationInfo>"
+    },
+    {
+      "id": "take-string-info",
+      "name": "TakeStringInfo",
+      "category": "Toolchain",
+      "signature": "TakeStringInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TArray<FSolLocalizationInfo>"
+    },
+    {
+      "id": "c-toolchain",
+      "name": "CToolchain",
+      "category": "Toolchain",
+      "signature": "CToolchain(Params)",
+      "params": [
+        {
+          "name": "Params",
+          "type": "SToolchainParams&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-ordered-package-list",
+      "name": "BuildOrderedPackageList",
+      "category": "Toolchain",
+      "signature": "BuildOrderedPackageList(Target, Source Project, Build Context, Out Ordered Package List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Source Project",
+          "type": "CSourceProject&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Out Ordered Package List",
+          "type": "TArray<SOrderedPackage>&"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

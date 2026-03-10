@@ -1,0 +1,749 @@
+{
+  "id": "http-manager",
+  "label": "HttpManager",
+  "includepath": "HttpManager.h",
+  "includes": [
+    "Array",
+    "Map",
+    "Queue",
+    "Ticker",
+    "UnrealString",
+    "CoreMinimal",
+    "CoreTypes",
+    "CriticalSection",
+    "HttpPackage",
+    "IHttpRequest",
+    "EnumRange",
+    "URLRequestFilter",
+    "Function",
+    "SharedPointer"
+  ],
+  "functions": [
+    {
+      "id": "f-http-manager",
+      "name": "FHttpManager",
+      "category": "HttpManager",
+      "signature": "FHttpManager()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "Manages Http request that are currently being processed"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "HttpManager",
+      "signature": "Initialize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "HttpManager",
+      "signature": "Shutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shutdown logic should be called before quiting"
+    },
+    {
+      "id": "set-request-added-delegate",
+      "name": "SetRequestAddedDelegate",
+      "category": "HttpManager",
+      "signature": "SetRequestAddedDelegate(Target, Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Delegate",
+          "type": "FHttpManagerRequestAddedDelegate&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a delegate to be triggered when an http request added to http manager.\nNOTE: The delegate can be triggered from different threads, depends on which\nthread the request created. So make sure the delegate set here is thread-safe."
+    },
+    {
+      "id": "set-request-completed-delegate",
+      "name": "SetRequestCompletedDelegate",
+      "category": "HttpManager",
+      "signature": "SetRequestCompletedDelegate(Target, Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Delegate",
+          "type": "FHttpManagerRequestCompletedDelegate&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a delegate to be triggered when an http request completed.\nNOTE: The delegate can be triggered from different threads, it depends on the delegate policy set\nto each http request. So make sure the delegate set here is thread-safe."
+    },
+    {
+      "id": "remove-request",
+      "name": "RemoveRequest",
+      "category": "HttpManager",
+      "signature": "RemoveRequest(Target, Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Request",
+          "type": "FHttpRequestRef&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an Http request instance from the manager\nPresumably it is done being processed\n@param Request - the request object to remove"
+    },
+    {
+      "id": "is-valid-request",
+      "name": "IsValidRequest",
+      "category": "HttpManager",
+      "signature": "IsValidRequest(Target, Request Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Request Ptr",
+          "type": "IHttpRequest*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Find an Http request in the lists of current valid requests\n@param RequestPtr - ptr to the http request object to find\n@return true if the request is being tracked, false if not"
+    },
+    {
+      "id": "flush",
+      "name": "Flush",
+      "category": "HttpManager",
+      "signature": "Flush(Target, Flush Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Flush Reason",
+          "type": "EHttpFlushReason"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Block until all pending requests are finished processing\n@param FlushReason the flush reason will influence times waited to cancel ongoing http requests"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "HttpManager",
+      "signature": "Tick(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "FTSTicker callback\n@param DeltaSeconds - time in seconds since the last tick\n@return false if no longer needs ticking"
+    },
+    {
+      "id": "flush-tick",
+      "name": "FlushTick",
+      "category": "HttpManager",
+      "signature": "FlushTick(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick called during Flush\n@param DeltaSeconds - time in seconds since the last tick"
+    },
+    {
+      "id": "add-threaded-request",
+      "name": "AddThreadedRequest",
+      "category": "HttpManager",
+      "signature": "AddThreadedRequest(Target, Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Request",
+          "type": "TSharedRef<FHttpRequestCommon,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add a http request to be executed on the http thread\n@param Request - the request object to add"
+    },
+    {
+      "id": "cancel-threaded-request",
+      "name": "CancelThreadedRequest",
+      "category": "HttpManager",
+      "signature": "CancelThreadedRequest(Target, Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Request",
+          "type": "TSharedRef<FHttpRequestCommon,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark a threaded http request as cancelled to be removed from the http thread\n@param Request - the request object to cancel"
+    },
+    {
+      "id": "dump-requests",
+      "name": "DumpRequests",
+      "category": "HttpManager",
+      "signature": "DumpRequests(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "List all of the Http requests currently being processed\n@param Ar - output device to log with"
+    },
+    {
+      "id": "supports-dynamic-proxy",
+      "name": "SupportsDynamicProxy",
+      "category": "HttpManager",
+      "signature": "SupportsDynamicProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Method to check dynamic proxy setting support.\n@returns Whether this http implementation supports dynamic proxy setting."
+    },
+    {
+      "id": "set-correlation-id-method",
+      "name": "SetCorrelationIdMethod",
+      "category": "HttpManager",
+      "signature": "SetCorrelationIdMethod(Target, In Correlation Id Method)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "In Correlation Id Method",
+          "type": "TFunction<FString ( )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the method used to set a Correlation id on each request, if one is not already specified.\nThis method allows you to override the Engine default method.\n@param InCorrelationIdMethod The method to use when sending a request, if no Correlation id is already set"
+    },
+    {
+      "id": "create-correlation-id",
+      "name": "CreateCorrelationId",
+      "category": "HttpManager",
+      "signature": "CreateCorrelationId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Create a new correlation id for a request\n@return The new correlationid string"
+    },
+    {
+      "id": "is-domain-allowed",
+      "name": "IsDomainAllowed",
+      "category": "HttpManager",
+      "signature": "IsDomainAllowed(Target, Url)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Url",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine if the domain is allowed to be accessed\n@param Url the path to check domain on\n@return true if domain is allowed"
+    },
+    {
+      "id": "f-string",
+      "name": "FString",
+      "category": "HttpManager",
+      "signature": "FString(Get Default Correlation Id Method)",
+      "params": [
+        {
+          "name": "Get Default Correlation Id Method",
+          "type": ")>"
+        }
+      ],
+      "returnType": "TFunction<",
+      "docs": "Get the default method for creating new correlation ids for a request\n@return The default correlationid creation method"
+    },
+    {
+      "id": "on-before-fork",
+      "name": "OnBeforeFork",
+      "category": "HttpManager",
+      "signature": "OnBeforeFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inform that HTTP Manager that we are about to fork(). Will block to flush all outstanding http requests"
+    },
+    {
+      "id": "on-after-fork",
+      "name": "OnAfterFork",
+      "category": "HttpManager",
+      "signature": "OnAfterFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inform that HTTP Manager that we have completed a fork(). Must be called in both the client and parent process"
+    },
+    {
+      "id": "on-end-frame-post-fork",
+      "name": "OnEndFramePostFork",
+      "category": "HttpManager",
+      "signature": "OnEndFramePostFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inform the HTTP Manager that we finished ticking right after forking. Only called on the forked process"
+    },
+    {
+      "id": "update-configs",
+      "name": "UpdateConfigs",
+      "category": "HttpManager",
+      "signature": "UpdateConfigs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update configuration. Called when config has been updated and we need to apply any changes."
+    },
+    {
+      "id": "add-game-thread-task",
+      "name": "AddGameThreadTask",
+      "category": "HttpManager",
+      "signature": "AddGameThreadTask(Target, Task, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Task",
+          "type": "TFunction<void ( )>&&"
+        },
+        {
+          "name": "Delay",
+          "type": "Float",
+          "default": "0.0f"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add task to be ran on the game thread next tick\n@param Task The task to be ran next tick"
+    },
+    {
+      "id": "add-http-thread-task",
+      "name": "AddHttpThreadTask",
+      "category": "HttpManager",
+      "signature": "AddHttpThreadTask(Target, Task, In Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Task",
+          "type": "TFunction<void ( )>&&"
+        },
+        {
+          "name": "In Delay",
+          "type": "Float",
+          "default": "0.0f"
+        }
+      ],
+      "returnType": "TSharedPtr<IHttpTaskTimerHandle>",
+      "docs": "Add task to be ran on the http thread\n@param Task The task to be ran\n@param InDelay The delay to wait before running the task\n@return The handle of the timer, which could be used to remove the task before it's triggered"
+    },
+    {
+      "id": "remove-http-thread-task",
+      "name": "RemoveHttpThreadTask",
+      "category": "HttpManager",
+      "signature": "RemoveHttpThreadTask(Target, Http Task Timer Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Http Task Timer Handle",
+          "type": "TSharedPtr<IHttpTaskTimerHandle>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove the task from the http thread before it's triggered\n@param HttpTaskTimerHandle The handle of the timer"
+    },
+    {
+      "id": "create-http-thread",
+      "name": "CreateHttpThread",
+      "category": "HttpManager",
+      "signature": "CreateHttpThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "protected : FHttpThreadBase*",
+      "docs": "Create HTTP thread object\n@return the HTTP thread object"
+    },
+    {
+      "id": "reload-flush-time-limits",
+      "name": "ReloadFlushTimeLimits",
+      "category": "HttpManager",
+      "signature": "ReloadFlushTimeLimits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-any-bound-delegate",
+      "name": "HasAnyBoundDelegate",
+      "category": "HttpManager",
+      "signature": "HasAnyBoundDelegate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "update-url-patterns-to-log-response",
+      "name": "UpdateUrlPatternsToLogResponse",
+      "category": "HttpManager",
+      "signature": "UpdateUrlPatternsToLogResponse(Target, C Var)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "C Var",
+          "type": "IConsoleVariable*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-url-patterns-to-disable-failed-log",
+      "name": "UpdateUrlPatternsToDisableFailedLog",
+      "category": "HttpManager",
+      "signature": "UpdateUrlPatternsToDisableFailedLog(Target, C Var)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "C Var",
+          "type": "IConsoleVariable*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-url-patterns-to-mock-failure",
+      "name": "UpdateUrlPatternsToMockFailure",
+      "category": "HttpManager",
+      "signature": "UpdateUrlPatternsToMockFailure(Target, C Var)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "C Var",
+          "type": "IConsoleVariable*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-request",
+      "name": "AddRequest",
+      "category": "HttpManager",
+      "signature": "AddRequest(Target, Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Request",
+          "type": "FHttpRequestRef&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "broadcast-http-request-completed",
+      "name": "BroadcastHttpRequestCompleted",
+      "category": "HttpManager",
+      "signature": "BroadcastHttpRequestCompleted(Target, Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Request",
+          "type": "FHttpRequestRef&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to lock access to add/remove/find requests"
+    },
+    {
+      "id": "get-thread",
+      "name": "GetThread",
+      "category": "HttpManager",
+      "signature": "GetThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "FHttpThreadBase*",
+      "docs": "Access http thread of http manager for internal usage"
+    },
+    {
+      "id": "record-stat-time-to-connect",
+      "name": "RecordStatTimeToConnect",
+      "category": "HttpManager",
+      "signature": "RecordStatTimeToConnect(Target, Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Duration",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record the time to connect, to have a general idea how long the client usually take to connect for success requests, to adjust the connection timeout"
+    },
+    {
+      "id": "record-stat-requests-in-flight",
+      "name": "RecordStatRequestsInFlight",
+      "category": "HttpManager",
+      "signature": "RecordStatRequestsInFlight(Target, Requests In Flight)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Requests In Flight",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record the requests waiting in flight, to have an idea if there are too many concurrent requests"
+    },
+    {
+      "id": "record-stat-requests-in-queue",
+      "name": "RecordStatRequestsInQueue",
+      "category": "HttpManager",
+      "signature": "RecordStatRequestsInQueue(Target, Requests In Queue)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Requests In Queue",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record the requests waiting in queue, to have an idea if there are too many requests or if request number limit is too small"
+    },
+    {
+      "id": "record-max-time-to-wait-in-queue",
+      "name": "RecordMaxTimeToWaitInQueue",
+      "category": "HttpManager",
+      "signature": "RecordMaxTimeToWaitInQueue(Target, Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Duration",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record the time to wait in queue, to have a general idea how long the client usually wait before actually starting, to adjust the requests"
+    },
+    {
+      "id": "record-platform-stats",
+      "name": "RecordPlatformStats",
+      "category": "HttpManager",
+      "signature": "RecordPlatformStats(Target, Platform Stats)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Platform Stats",
+          "type": "FHttpStatsPlatform&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Record platform specific stats"
+    },
+    {
+      "id": "should-log-response",
+      "name": "ShouldLogResponse",
+      "category": "HttpManager",
+      "signature": "ShouldLogResponse(Target, Url)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Url",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-disable-failed-log",
+      "name": "ShouldDisableFailedLog",
+      "category": "HttpManager",
+      "signature": "ShouldDisableFailedLog(Target, Url)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Url",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-mock-failure",
+      "name": "GetMockFailure",
+      "category": "HttpManager",
+      "signature": "GetMockFailure(Target, Url)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Url",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "TOptional<int32>"
+    },
+    {
+      "id": "mark-current-thread-completing-request",
+      "name": "MarkCurrentThreadCompletingRequest",
+      "category": "HttpManager",
+      "signature": "MarkCurrentThreadCompletingRequest(Target, Completing)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        },
+        {
+          "name": "Completing",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-current-thread-completing-request",
+      "name": "IsCurrentThreadCompletingRequest",
+      "category": "HttpManager",
+      "signature": "IsCurrentThreadCompletingRequest(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FHttpManager*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

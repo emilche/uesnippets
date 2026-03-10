@@ -1,0 +1,511 @@
+{
+  "id": "physics-solver-base",
+  "label": "PhysicsSolverBase",
+  "includepath": "Chaos/Framework/PhysicsSolverBase.h",
+  "includes": [
+    "MultiBufferResource",
+    "Matrix",
+    "ScopeLock",
+    "ChaosLog",
+    "PhysicsProxyBase",
+    "Threading",
+    "ParticleDirtyFlags",
+    "ParallelFor",
+    "Queue",
+    "ChaosMarshallingManager",
+    "AsyncInitBodyHelper",
+    "Stats",
+    "ChaosSolversModule",
+    "ChaosVDContextProvider",
+    "ChaosDDTypes"
+  ],
+  "functions": [
+    {
+      "id": "get-desired-thread",
+      "name": "GetDesiredThread",
+      "category": "PhysicsSolverBase",
+      "signature": "GetDesiredThread()",
+      "params": [],
+      "returnType": "ENamedThreads::Type"
+    },
+    {
+      "id": "process-push-data",
+      "name": "ProcessPushData",
+      "category": "PhysicsSolverBase",
+      "signature": "ProcessPushData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverProcessPushDataTask*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "gt-pre-sim-callbacks",
+      "name": "GTPreSimCallbacks",
+      "category": "PhysicsSolverBase",
+      "signature": "GTPreSimCallbacks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverFrozenGTPreSimCallbacks*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-physics-solver-advance-task",
+      "name": "FPhysicsSolverAdvanceTask",
+      "category": "PhysicsSolverBase",
+      "signature": "FPhysicsSolverAdvanceTask(In Solver, In Push Data)",
+      "params": [
+        {
+          "name": "In Solver",
+          "type": "FPhysicsSolverBase&"
+        },
+        {
+          "name": "In Push Data",
+          "type": "FPushPhysicsData*"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Task responsible for advancing the solver once data has been prepared and GT callbacks have fired"
+    },
+    {
+      "id": "do-task",
+      "name": "DoTask",
+      "category": "PhysicsSolverBase",
+      "signature": "DoTask(Target, Current Thread, My Completion Graph Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverAdvanceTask*"
+        },
+        {
+          "name": "Current Thread",
+          "type": "ENamedThreads::Type"
+        },
+        {
+          "name": "My Completion Graph Event",
+          "type": "FGraphEventRef&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "advance-solver",
+      "name": "AdvanceSolver",
+      "category": "PhysicsSolverBase",
+      "signature": "AdvanceSolver(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverAdvanceTask*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-pre-advance-callback",
+      "name": "AddPreAdvanceCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "AddPreAdvanceCallback(Target, In Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Delegate",
+          "type": "FSolverPreAdvance::FDelegate"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Events"
+    },
+    {
+      "id": "remove-pre-advance-callback",
+      "name": "RemovePreAdvanceCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "RemovePreAdvanceCallback(Target, In Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FDelegateHandle"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-pre-buffer-callback",
+      "name": "AddPreBufferCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "AddPreBufferCallback(Target, In Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Delegate",
+          "type": "FSolverPreAdvance::FDelegate"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Pre buffer happens after the simulation has been advanced (particle positions etc. will have been updated) but GT results haven't been prepared yet"
+    },
+    {
+      "id": "remove-pre-buffer-callback",
+      "name": "RemovePreBufferCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "RemovePreBufferCallback(Target, In Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FDelegateHandle"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-post-advance-callback",
+      "name": "AddPostAdvanceCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "AddPostAdvanceCallback(Target, In Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Delegate",
+          "type": "FSolverPostAdvance::FDelegate"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Post advance happens after all processing and results generation has been completed"
+    },
+    {
+      "id": "remove-post-advance-callback",
+      "name": "RemovePostAdvanceCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "RemovePostAdvanceCallback(Target, In Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FDelegateHandle"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-teardown-callback",
+      "name": "AddTeardownCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "AddTeardownCallback(Target, In Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Delegate",
+          "type": "FSolverTeardown::FDelegate"
+        }
+      ],
+      "returnType": "FDelegateHandle",
+      "docs": "Teardown happens as the solver is destroyed or streamed out"
+    },
+    {
+      "id": "remove-teardown-callback",
+      "name": "RemoveTeardownCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "RemoveTeardownCallback(Target, In Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverEvents*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FDelegateHandle"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "change-buffer-mode",
+      "name": "ChangeBufferMode",
+      "category": "PhysicsSolverBase",
+      "signature": "ChangeBufferMode(Target, In Buffer Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "In Buffer Mode",
+          "type": "EMultiBufferMode"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enqueue-simcallback-rewind-registeration",
+      "name": "EnqueueSimcallbackRewindRegisteration",
+      "category": "PhysicsSolverBase",
+      "signature": "EnqueueSimcallbackRewindRegisteration(Target, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Callback",
+          "type": "ISimCallbackObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-rewind-callback",
+      "name": "SetRewindCallback",
+      "category": "PhysicsSolverBase",
+      "signature": "SetRewindCallback(Target, Rewind Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Rewind Callback",
+          "type": "TUniquePtr<IRewindCallback>&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-async-mode",
+      "name": "EnableAsyncMode",
+      "category": "PhysicsSolverBase",
+      "signature": "EnableAsyncMode(Target, Fixed Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Fixed Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "disable-async-mode",
+      "name": "DisableAsyncMode",
+      "category": "PhysicsSolverBase",
+      "signature": "DisableAsyncMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "advance-and-dispatch-external",
+      "name": "AdvanceAndDispatch_External",
+      "category": "PhysicsSolverBase",
+      "signature": "AdvanceAndDispatch_External(Target, In Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "In Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "FGraphEventRef"
+    },
+    {
+      "id": "set-debug-name",
+      "name": "SetDebugName",
+      "category": "PhysicsSolverBase",
+      "signature": "SetDebugName(Target, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-debug-name",
+      "name": "GetDebugName",
+      "category": "PhysicsSolverBase",
+      "signature": "GetDebugName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "update-particle-in-acceleration-structure-external",
+      "name": "UpdateParticleInAccelerationStructure_External",
+      "category": "PhysicsSolverBase",
+      "signature": "UpdateParticleInAccelerationStructure_External(Target, Particle, In Operation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticle*"
+        },
+        {
+          "name": "In Operation",
+          "type": "EPendingSpatialDataOperation"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-physics-solver-base-6f2a65",
+      "name": "FPhysicsSolverBase",
+      "category": "PhysicsSolverBase",
+      "signature": "FPhysicsSolverBase(Buffering Mode In, In Threading Mode, In Owner, Async Dt)",
+      "params": [
+        {
+          "name": "Buffering Mode In",
+          "type": "EMultiBufferMode"
+        },
+        {
+          "name": "In Threading Mode",
+          "type": "EThreadingModeTemp"
+        },
+        {
+          "name": "In Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Async Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Boolean to check if the solver is a standalone solver responsible to spawn its own task"
+    },
+    {
+      "id": "f-physics-solver-base-0647fc",
+      "name": "FPhysicsSolverBase",
+      "category": "PhysicsSolverBase",
+      "signature": "FPhysicsSolverBase()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Only allow construction with valid parameters as well as restricting to module construction"
+    },
+    {
+      "id": "destroy-solver",
+      "name": "DestroySolver",
+      "category": "PhysicsSolverBase",
+      "signature": "DestroySolver(In Solver)",
+      "params": [
+        {
+          "name": "In Solver",
+          "type": "FPhysicsSolverBase&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "track-gt-particle-external",
+      "name": "TrackGTParticle_External",
+      "category": "PhysicsSolverBase",
+      "signature": "TrackGTParticle_External(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticle&"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "clear-gt-particle-external",
+      "name": "ClearGTParticle_External",
+      "category": "PhysicsSolverBase",
+      "signature": "ClearGTParticle_External(Target, Particle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "Particle",
+          "type": "FGeometryParticle&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-steal-advance-tasks-for-testing",
+      "name": "SetStealAdvanceTasks_ForTesting",
+      "category": "PhysicsSolverBase",
+      "signature": "SetStealAdvanceTasks_ForTesting(Target, In Steal Advance Tasks For Testing)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        },
+        {
+          "name": "In Steal Advance Tasks For Testing",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "public : void"
+    },
+    {
+      "id": "pop-and-execute-stolen-advance-task-for-testing",
+      "name": "PopAndExecuteStolenAdvanceTask_ForTesting",
+      "category": "PhysicsSolverBase",
+      "signature": "PopAndExecuteStolenAdvanceTask_ForTesting(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPhysicsSolverBase*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

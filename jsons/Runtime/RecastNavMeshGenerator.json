@@ -1,0 +1,3011 @@
+{
+  "id": "recast-nav-mesh-generator",
+  "label": "RecastNavMeshGenerator",
+  "includepath": "NavMesh/RecastNavMeshGenerator.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "NavDataGenerator",
+    "NavigationDirtyArea",
+    "NavigationInvokerPriority",
+    "NavigationRelevantData",
+    "NavigationTypes",
+    "NavigationModifier",
+    "NavigationSystemBase",
+    "AsyncWork",
+    "EngineDefines",
+    "NavDebugTypes",
+    "NavigationOctree",
+    "RecastHelpers",
+    "RecastNavMesh",
+    "GCObject",
+    "Recast",
+    "DetourNavMesh",
+    "DetourNavLinkBuilderConfig",
+    "RecastInternalDebugData"
+  ],
+  "functions": [
+    {
+      "id": "f-recast-geometry-cache",
+      "name": "FRecastGeometryCache",
+      "category": "RecastNavMeshGenerator",
+      "signature": "FRecastGeometryCache(Memory)",
+      "params": [
+        {
+          "name": "Memory",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-rasterization-flags",
+      "name": "GetRasterizationFlags",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetRasterizationFlags(In Modifier)",
+      "params": [
+        {
+          "name": "In Modifier",
+          "type": "FCompositeNavModifier&"
+        }
+      ],
+      "returnType": "rcRasterizationFlags"
+    },
+    {
+      "id": "f-recast-tile-generator-387f70",
+      "name": "FRecastTileGenerator",
+      "category": "RecastNavMeshGenerator",
+      "signature": "FRecastTileGenerator(Parent Generator, Location, Pending Tile Creation Time)",
+      "params": [
+        {
+          "name": "Parent Generator",
+          "type": "FRecastNavMeshGenerator&"
+        },
+        {
+          "name": "Location",
+          "type": "FIntPoint&"
+        },
+        {
+          "name": "Pending Tile Creation Time",
+          "type": "Double"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Class handling generation of a single tile, caching data that can speed up subsequent tile generations"
+    },
+    {
+      "id": "f-recast-tile-generator-47705a",
+      "name": "FRecastTileGenerator",
+      "category": "RecastNavMeshGenerator",
+      "signature": "FRecastTileGenerator()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "do-work-time-sliced",
+      "name": "DoWorkTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "DoWorkTimeSliced(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult",
+      "docs": "Does the work involved with regenerating this tile using time slicing.\nThe return value determines the result of the time slicing"
+    },
+    {
+      "id": "do-work",
+      "name": "DoWork",
+      "category": "RecastNavMeshGenerator",
+      "signature": "DoWork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Does the work involved with regenerating this tile"
+    },
+    {
+      "id": "has-data-to-build",
+      "name": "HasDataToBuild",
+      "category": "RecastNavMeshGenerator",
+      "signature": "HasDataToBuild(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether tile task has anything to build"
+    },
+    {
+      "id": "calculate-tile-bounds",
+      "name": "CalculateTileBounds",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CalculateTileBounds(X, Y, Rc Nav Mesh Origin, Total Nav Bounds, Tile Size In World Units)",
+      "params": [
+        {
+          "name": "X",
+          "type": "Int"
+        },
+        {
+          "name": "Y",
+          "type": "Int"
+        },
+        {
+          "name": "Rc Nav Mesh Origin",
+          "type": "FVector&"
+        },
+        {
+          "name": "Total Nav Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Tile Size In World Units",
+          "type": "FVector::FReal"
+        }
+      ],
+      "returnType": "FBox"
+    },
+    {
+      "id": "get-used-mem-count",
+      "name": "GetUsedMemCount",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetUsedMemCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "public : uint32"
+    },
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AddReferencedObjects(Target, Collector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-referencer-name",
+      "name": "GetReferencerName",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetReferencerName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "generate-tile-time-sliced",
+      "name": "GenerateTileTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateTileTimeSliced(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "protected : ETimeSliceWorkResult",
+      "docs": "Does the actual TimeSliced tile generation.\n@note always trigger tile generation only via DoWorkTimeSliced(). This is a worker function\nThe return value determines the result of the time slicing\n@return Suceeded if new tile navigation data has been generated and is ready to be added to navmesh instance,\n@return Failed if failed or no need to generate (still valid).\n@return CallAgainNextTimeSlice, time slice is finished this frame but we need to call this function again next frame"
+    },
+    {
+      "id": "generate-tile",
+      "name": "GenerateTile",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateTile(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Does the actual tile generation.\n@note always trigger tile generation only via DoWorkTime(). This is a worker function\nThe return value determines the result of the time slicing\n@return true if new tile navigation data has been generated and is ready to be added to navmesh instance,\n@return false if failed or no need to generate (still valid)."
+    },
+    {
+      "id": "setup",
+      "name": "Setup",
+      "category": "RecastNavMeshGenerator",
+      "signature": "Setup(Target, Parent Generator, Dirty Areas)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Parent Generator",
+          "type": "FRecastNavMeshGenerator&"
+        },
+        {
+          "name": "Dirty Areas",
+          "type": "TArray<FBox>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "gather-geometry",
+      "name": "GatherGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GatherGeometry(Target, Parent Generator, Geometry Changed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Parent Generator",
+          "type": "FRecastNavMeshGenerator&"
+        },
+        {
+          "name": "Geometry Changed",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gather geometry"
+    },
+    {
+      "id": "prepare-geometry-sources",
+      "name": "PrepareGeometrySources",
+      "category": "RecastNavMeshGenerator",
+      "signature": "PrepareGeometrySources(Target, Parent Generator, Geometry Changed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Parent Generator",
+          "type": "FRecastNavMeshGenerator&"
+        },
+        {
+          "name": "Geometry Changed",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gather geometry sources to be processed later by the GatherGeometryFromSources"
+    },
+    {
+      "id": "gather-geometry-from-sources",
+      "name": "GatherGeometryFromSources",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GatherGeometryFromSources(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gather geometry from the prefetched sources"
+    },
+    {
+      "id": "gather-geometry-from-sources-time-sliced",
+      "name": "GatherGeometryFromSourcesTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GatherGeometryFromSourcesTimeSliced(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult",
+      "docs": "Gather geometry from the prefetched sources time sliced version"
+    },
+    {
+      "id": "gather-navigation-data-geometry",
+      "name": "GatherNavigationDataGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GatherNavigationDataGeometry(Target, Element Data, Nav Sys, Owner Nav Data Config, Geometry Changed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Element Data",
+          "type": "TSharedRef<FNavigationRelevantData,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Nav Sys",
+          "type": "UNavigationSystemV1&"
+        },
+        {
+          "name": "Owner Nav Data Config",
+          "type": "FNavDataConfig&"
+        },
+        {
+          "name": "Geometry Changed",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gather geometry from a specified Navigation Data"
+    },
+    {
+      "id": "create-height-field-a93f72",
+      "name": "CreateHeightField",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CreateHeightField(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Start functions used by GenerateCompressedLayersTimeSliced / GenerateCompressedLayers"
+    },
+    {
+      "id": "rasterize-triangles-time-sliced",
+      "name": "RasterizeTrianglesTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeTrianglesTimeSliced(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "rasterize-triangles",
+      "name": "RasterizeTriangles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeTriangles(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rasterize-geometry-recast-time-sliced-7fd7d3",
+      "name": "RasterizeGeometryRecastTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryRecastTimeSliced(Target, Build Context, Coords, Indices, Coords Bounds, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Coords Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "rasterize-geometry-recast-09bcca",
+      "name": "RasterizeGeometryRecast",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryRecast(Target, Build Context, Coords, Indices, Coords Bounds, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Coords Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rasterize-geometry-transform-coords-and-flip-indices-17a633",
+      "name": "RasterizeGeometryTransformCoordsAndFlipIndices",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryTransformCoordsAndFlipIndices(Target, Coords, Indices, Coords Bounds, Local To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Coords Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rasterize-geometry-time-sliced-f06db5",
+      "name": "RasterizeGeometryTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryTimeSliced(Target, Build Context, Coords, Indices, Coords Bounds, Local To World, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Coords Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "rasterize-geometry-c3f904",
+      "name": "RasterizeGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometry(Target, Build Context, Coords, Indices, Coords Bounds, Local To World, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Coords Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-recast-filter-9f7ed6",
+      "name": "GenerateRecastFilter",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateRecastFilter(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-recast-filter-time-sliced-077f2b",
+      "name": "GenerateRecastFilterTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateRecastFilterTimeSliced(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "build-compact-height-field-cd6d6a",
+      "name": "BuildCompactHeightField",
+      "category": "RecastNavMeshGenerator",
+      "signature": "BuildCompactHeightField(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "recast-erode-walkable-683777",
+      "name": "RecastErodeWalkable",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RecastErodeWalkable(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "recast-build-layers",
+      "name": "RecastBuildLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RecastBuildLayers(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "recast-build-tile-cache",
+      "name": "RecastBuildTileCache",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RecastBuildTileCache(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "generate-compressed-layers-time-sliced",
+      "name": "GenerateCompressedLayersTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateCompressedLayersTimeSliced(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult",
+      "docs": "End functions used by GenerateCompressedLayersTimeSliced / GenerateCompressedLayers"
+    },
+    {
+      "id": "generate-compressed-layers-c148d7",
+      "name": "GenerateCompressedLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateCompressedLayers(Target, Build Context, In Link Builder Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "In Link Builder Data",
+          "type": "dtLinkBuilderData&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Builds CompressedLayers array (geometry + modifiers)"
+    },
+    {
+      "id": "generate-navigation-data-layer-8c8837",
+      "name": "GenerateNavigationDataLayer",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateNavigationDataLayer(Target, Build Context, Tile Compressor, Gen Nav Allocator, Generation Context, In Link Builder Data, Layer Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Tile Compressor",
+          "type": "FTileCacheCompressor&"
+        },
+        {
+          "name": "Gen Nav Allocator",
+          "type": "FTileCacheAllocator&"
+        },
+        {
+          "name": "Generation Context",
+          "type": "FTileGenerationContext&"
+        },
+        {
+          "name": "In Link Builder Data",
+          "type": "dtLinkBuilderData&"
+        },
+        {
+          "name": "Layer Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Builds a navigation data layer"
+    },
+    {
+      "id": "generate-navigation-data-time-sliced-731790",
+      "name": "GenerateNavigationDataTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateNavigationDataTimeSliced(Target, Build Context, In Link Builder Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "In Link Builder Data",
+          "type": "dtLinkBuilderData&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult",
+      "docs": "Builds NavigationData array (layers + obstacles) time sliced"
+    },
+    {
+      "id": "generate-navigation-data-ff6fb0",
+      "name": "GenerateNavigationData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateNavigationData(Target, Build Context, In Link Builder Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "In Link Builder Data",
+          "type": "dtLinkBuilderData&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Builds NavigationData array (layers + obstacles)"
+    },
+    {
+      "id": "apply-voxel-filter",
+      "name": "ApplyVoxelFilter",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ApplyVoxelFilter(Target, Solid HF, Walkable Radius)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Solid HF",
+          "type": "rcHeightfield*"
+        },
+        {
+          "name": "Walkable Radius",
+          "type": "FVector::FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "init-rasterization-mask-array",
+      "name": "InitRasterizationMaskArray",
+      "category": "RecastNavMeshGenerator",
+      "signature": "InitRasterizationMaskArray(Target, In Solid HF, Out Rasterization Masks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "In Solid HF",
+          "type": "rcHeightfield*"
+        },
+        {
+          "name": "Out Rasterization Masks",
+          "type": "TInlineMaskArray&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute rasterization mask"
+    },
+    {
+      "id": "compute-rasterization-masks",
+      "name": "ComputeRasterizationMasks",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ComputeRasterizationMasks(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-rasterization-mask",
+      "name": "MarkRasterizationMask",
+      "category": "RecastNavMeshGenerator",
+      "signature": "MarkRasterizationMask(Target, In Solid HF, Modifier, Local To World, Mask, Out Mask Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "In Solid HF",
+          "type": "rcHeightfield*"
+        },
+        {
+          "name": "Modifier",
+          "type": "FAreaNavModifier&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Mask",
+          "type": "Int"
+        },
+        {
+          "name": "Out Mask Array",
+          "type": "TInlineMaskArray&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-dynamic-areas",
+      "name": "MarkDynamicAreas",
+      "category": "RecastNavMeshGenerator",
+      "signature": "MarkDynamicAreas(Target, Layer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Layer",
+          "type": "dtTileCacheLayer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "BuildContext"
+    },
+    {
+      "id": "mark-dynamic-area-a01722",
+      "name": "MarkDynamicArea",
+      "category": "RecastNavMeshGenerator",
+      "signature": "MarkDynamicArea(Target, Modifier, Local To World, Layer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Modifier",
+          "type": "FAreaNavModifier&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Layer",
+          "type": "dtTileCacheLayer&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-dynamic-area-b9fe9e",
+      "name": "MarkDynamicArea",
+      "category": "RecastNavMeshGenerator",
+      "signature": "MarkDynamicArea(Target, Modifier, Local To World, Layer, Area Id, Replace Area Id Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Modifier",
+          "type": "FAreaNavModifier&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Layer",
+          "type": "dtTileCacheLayer&"
+        },
+        {
+          "name": "Area Id",
+          "type": "Int"
+        },
+        {
+          "name": "Replace Area Id Ptr",
+          "type": "Int*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "append-modifier",
+      "name": "AppendModifier",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AppendModifier(Target, Modifier, In Transforms Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Modifier",
+          "type": "FCompositeNavModifier&"
+        },
+        {
+          "name": "In Transforms Delegate",
+          "type": "FNavDataPerInstanceTransformDelegate&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "validate-and-append-geometry",
+      "name": "ValidateAndAppendGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ValidateAndAppendGeometry(Target, Element Data, In Modifier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Element Data",
+          "type": "FNavigationRelevantData&"
+        },
+        {
+          "name": "In Modifier",
+          "type": "FCompositeNavModifier&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Appends specified geometry to tile's geometry"
+    },
+    {
+      "id": "append-geometry",
+      "name": "AppendGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AppendGeometry(Target, Element Data, In Modifier, In Transforms Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Element Data",
+          "type": "FNavigationRelevantData&"
+        },
+        {
+          "name": "In Modifier",
+          "type": "FCompositeNavModifier&"
+        },
+        {
+          "name": "In Transforms Delegate",
+          "type": "FNavDataPerInstanceTransformDelegate&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prepare-voxel-cache-3180c8",
+      "name": "PrepareVoxelCache",
+      "category": "RecastNavMeshGenerator",
+      "signature": "PrepareVoxelCache(Target, Raw Collision Cache, Recast Bounds, In Modifier, Span Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Raw Collision Cache",
+          "type": "TNavStatArray<uint8>&"
+        },
+        {
+          "name": "Recast Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "In Modifier",
+          "type": "FCompositeNavModifier&"
+        },
+        {
+          "name": "Span Data",
+          "type": "TNavStatArray<rcSpanCache>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "prepare voxel cache from collision data"
+    },
+    {
+      "id": "has-voxel-cache",
+      "name": "HasVoxelCache",
+      "category": "RecastNavMeshGenerator",
+      "signature": "HasVoxelCache(Target, Raw Voxel Cache, Cached Voxels, Num Cached Voxels)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Raw Voxel Cache",
+          "type": "TNavStatArray<uint8>&"
+        },
+        {
+          "name": "Cached Voxels",
+          "type": "rcSpanCache*&"
+        },
+        {
+          "name": "Num Cached Voxels",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-voxel-cache",
+      "name": "AddVoxelCache",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AddVoxelCache(Target, Raw Voxel Cache, Cached Voxels, Num Cached Voxels)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Raw Voxel Cache",
+          "type": "TNavStatArray<uint8>&"
+        },
+        {
+          "name": "Cached Voxels",
+          "type": "rcSpanCache*"
+        },
+        {
+          "name": "Num Cached Voxels",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "dump-async-data",
+      "name": "DumpAsyncData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "DumpAsyncData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "dump-sync-data",
+      "name": "DumpSyncData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "DumpSyncData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-tile-debug-active",
+      "name": "IsTileDebugActive",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsTileDebugActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-tile-debug-allowing-generation",
+      "name": "IsTileDebugAllowingGeneration",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsTileDebugAllowingGeneration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-height-field-ad0a24",
+      "name": "CreateHeightField",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CreateHeightField(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Deprecated functions"
+    },
+    {
+      "id": "generate-recast-filter-7203a2",
+      "name": "GenerateRecastFilter",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateRecastFilter(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-recast-filter-time-sliced-ffdcbf",
+      "name": "GenerateRecastFilterTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateRecastFilterTimeSliced(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "build-compact-height-field-7f1714",
+      "name": "BuildCompactHeightField",
+      "category": "RecastNavMeshGenerator",
+      "signature": "BuildCompactHeightField(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "recast-erode-walkable-cecba4",
+      "name": "RecastErodeWalkable",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RecastErodeWalkable(Target, Build Context, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "rasterize-geometry-transform-coords",
+      "name": "RasterizeGeometryTransformCoords",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryTransformCoords(Target, Coords, Local To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "generate-compressed-layers-e4229d",
+      "name": "GenerateCompressedLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateCompressedLayers(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "generate-navigation-data-layer-9fcda3",
+      "name": "GenerateNavigationDataLayer",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateNavigationDataLayer(Target, Build Context, Tile Compressor, Gen Nav Allocator, Generation Context, Layer Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Tile Compressor",
+          "type": "FTileCacheCompressor&"
+        },
+        {
+          "name": "Gen Nav Allocator",
+          "type": "FTileCacheAllocator&"
+        },
+        {
+          "name": "Generation Context",
+          "type": "FTileGenerationContext&"
+        },
+        {
+          "name": "Layer Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "generate-navigation-data-time-sliced-0404ba",
+      "name": "GenerateNavigationDataTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateNavigationDataTimeSliced(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "generate-navigation-data-4c8df2",
+      "name": "GenerateNavigationData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GenerateNavigationData(Target, Build Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "rasterize-geometry-recast-time-sliced-e3ec9f",
+      "name": "RasterizeGeometryRecastTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryRecastTimeSliced(Target, Build Context, Coords, Indices, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "rasterize-geometry-recast-c1e08e",
+      "name": "RasterizeGeometryRecast",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryRecast(Target, Build Context, Coords, Indices, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rasterize-geometry-transform-coords-and-flip-indices-8667b3",
+      "name": "RasterizeGeometryTransformCoordsAndFlipIndices",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryTransformCoordsAndFlipIndices(Target, Coords, Indices, Local To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rasterize-geometry-time-sliced-0c0176",
+      "name": "RasterizeGeometryTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometryTimeSliced(Target, Build Context, Coords, Indices, Local To World, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "ETimeSliceWorkResult"
+    },
+    {
+      "id": "rasterize-geometry-8f4bcd",
+      "name": "RasterizeGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RasterizeGeometry(Target, Build Context, Coords, Indices, Local To World, Rasterization Flags, Raster Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Build Context",
+          "type": "FNavMeshBuildContext&"
+        },
+        {
+          "name": "Coords",
+          "type": "TArray<FVector::FReal>&"
+        },
+        {
+          "name": "Indices",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&"
+        },
+        {
+          "name": "Rasterization Flags",
+          "type": "rcRasterizationFlags"
+        },
+        {
+          "name": "Raster Context",
+          "type": "FTileRasterizationContext&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prepare-voxel-cache-dda7ce",
+      "name": "PrepareVoxelCache",
+      "category": "RecastNavMeshGenerator",
+      "signature": "PrepareVoxelCache(Target, Raw Collision Cache, In Modifier, Span Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastTileGenerator*"
+        },
+        {
+          "name": "Raw Collision Cache",
+          "type": "TNavStatArray<uint8>&"
+        },
+        {
+          "name": "In Modifier",
+          "type": "FCompositeNavModifier&"
+        },
+        {
+          "name": "Span Data",
+          "type": "TNavStatArray<rcSpanCache>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-recast-nav-mesh-generator-a757dd",
+      "name": "FRecastNavMeshGenerator",
+      "category": "RecastNavMeshGenerator",
+      "signature": "FRecastNavMeshGenerator(In Dest Nav Mesh)",
+      "params": [
+        {
+          "name": "In Dest Nav Mesh",
+          "type": "ARecastNavMesh&"
+        }
+      ],
+      "returnType": "public :",
+      "docs": "Class that handles generation of the whole Recast-based navmesh."
+    },
+    {
+      "id": "f-recast-nav-mesh-generator-86b60a",
+      "name": "FRecastNavMeshGenerator",
+      "category": "RecastNavMeshGenerator",
+      "signature": "FRecastNavMeshGenerator()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "rebuild-all",
+      "name": "RebuildAll",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RebuildAll(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "public : bool"
+    },
+    {
+      "id": "ensure-build-completion",
+      "name": "EnsureBuildCompletion",
+      "category": "RecastNavMeshGenerator",
+      "signature": "EnsureBuildCompletion(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cancel-build",
+      "name": "CancelBuild",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CancelBuild(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "tick-async-build",
+      "name": "TickAsyncBuild",
+      "category": "RecastNavMeshGenerator",
+      "signature": "TickAsyncBuild(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-navigation-bounds-changed",
+      "name": "OnNavigationBoundsChanged",
+      "category": "RecastNavMeshGenerator",
+      "signature": "OnNavigationBoundsChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rebuild-dirty-areas",
+      "name": "RebuildDirtyAreas",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RebuildDirtyAreas(Target, Dirty Areas)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Dirty Areas",
+          "type": "TArray<FNavigationDirtyArea>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Asks generator to update navigation affected by DirtyAreas"
+    },
+    {
+      "id": "is-build-in-progress-check-dirty",
+      "name": "IsBuildInProgressCheckDirty",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsBuildInProgressCheckDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "determines whether this generator is performing navigation building actions at the moment, dirty areas are also checked"
+    },
+    {
+      "id": "get-time-slice-data",
+      "name": "GetTimeSliceData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetTimeSliceData(Target, Out Num Remaining Build Tasks, Out Current Build Task Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Out Num Remaining Build Tasks",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Current Build Task Duration",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "returns true if we are time slicing and the data is valid to use false otherwise"
+    },
+    {
+      "id": "get-num-remaning-build-tasks",
+      "name": "GetNumRemaningBuildTasks",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetNumRemaningBuildTasks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-running-build-tasks",
+      "name": "GetNumRunningBuildTasks",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetNumRunningBuildTasks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "is-tile-changed",
+      "name": "IsTileChanged",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsTileChanged(Target, In Tile Ref)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "In Tile Ref",
+          "type": "FNavTileRef"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if a given tile is being build or has just finished building"
+    },
+    {
+      "id": "on-area-added",
+      "name": "OnAreaAdded",
+      "category": "RecastNavMeshGenerator",
+      "signature": "OnAreaAdded(Target, Area Class, Area ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Area Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Area ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "update area data"
+    },
+    {
+      "id": "on-area-removed",
+      "name": "OnAreaRemoved",
+      "category": "RecastNavMeshGenerator",
+      "signature": "OnAreaRemoved(Target, Area Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Area Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-inclusion-bound-encapsulating-box",
+      "name": "FindInclusionBoundEncapsulatingBox",
+      "category": "RecastNavMeshGenerator",
+      "signature": "FindInclusionBoundEncapsulatingBox(Target, Box)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Box",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "checks if any on InclusionBounds encapsulates given box.\n@return index to first item in InclusionBounds that meets expectations"
+    },
+    {
+      "id": "has-dirty-tiles-7aa49a",
+      "name": "HasDirtyTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "HasDirtyTiles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-dirty-tiles-999b29",
+      "name": "HasDirtyTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "HasDirtyTiles(Target, Area Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Area Bounds",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-dirty-tiles-count",
+      "name": "GetDirtyTilesCount",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetDirtyTilesCount(Target, Area Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Area Bounds",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "gather-geometry-on-game-thread",
+      "name": "GatherGeometryOnGameThread",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GatherGeometryOnGameThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-time-slice-regen-active",
+      "name": "IsTimeSliceRegenActive",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsTimeSliceRegenActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "grow-bounding-box",
+      "name": "GrowBoundingBox",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GrowBoundingBox(Target, B Box, Include Agent Height)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "B Box",
+          "type": "FBox&"
+        },
+        {
+          "name": "Include Agent Height",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "FBox"
+    },
+    {
+      "id": "should-generate-geometry-for-octree-element",
+      "name": "ShouldGenerateGeometryForOctreeElement",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ShouldGenerateGeometryForOctreeElement(Target, Element, Nav Data Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Element",
+          "type": "FNavigationOctreeElement&"
+        },
+        {
+          "name": "Nav Data Config",
+          "type": "FNavDataConfig&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the provided Octree Element should generate geometry on the provided NavDataConfig. Can be used to extend the logic to decide what geometry is generated on what Navmesh"
+    },
+    {
+      "id": "export-navigation-data",
+      "name": "ExportNavigationData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportNavigationData(Target, File Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "File Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "grab-debug-snapshot",
+      "name": "GrabDebugSnapshot",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GrabDebugSnapshot(Target, Snapshot, Bounding Box, Category Name, Verbosity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Snapshot",
+          "type": "FVisualLogEntry*"
+        },
+        {
+          "name": "Bounding Box",
+          "type": "FBox&"
+        },
+        {
+          "name": "Category Name",
+          "type": "Name&"
+        },
+        {
+          "name": "Verbosity",
+          "type": "ELogVerbosity::Type"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-component-geometry",
+      "name": "ExportComponentGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportComponentGeometry(In Out Component, Out Data)",
+      "params": [
+        {
+          "name": "In Out Component",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Out Data",
+          "type": "FNavigationRelevantData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-rigid-body-geometry-ab015f",
+      "name": "ExportRigidBodyGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportRigidBodyGeometry(In Out Body Setup, Out Vertex Buffer, Out Index Buffer, Local To World)",
+      "params": [
+        {
+          "name": "In Out Body Setup",
+          "type": "UBodySetup&"
+        },
+        {
+          "name": "Out Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-rigid-body-geometry-6a9489",
+      "name": "ExportRigidBodyGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportRigidBodyGeometry(In Out Body Setup, Out Tri Mesh Vertex Buffer, Out Tri Mesh Index Buffer, Out Convex Vertex Buffer, Out Convex Index Buffer, Out Shape Buffer, Local To World)",
+      "params": [
+        {
+          "name": "In Out Body Setup",
+          "type": "UBodySetup&"
+        },
+        {
+          "name": "Out Tri Mesh Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Tri Mesh Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Convex Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Convex Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Shape Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-aggregated-geometry-e675cb",
+      "name": "ExportAggregatedGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportAggregatedGeometry(Agg Geom, Out Convex Vertex Buffer, Out Convex Index Buffer, Out Shape Buffer, Local To World)",
+      "params": [
+        {
+          "name": "Agg Geom",
+          "type": "FKAggregateGeom&"
+        },
+        {
+          "name": "Out Convex Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Convex Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Shape Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-nav-relevant-object-geometry",
+      "name": "ExportNavRelevantObjectGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportNavRelevantObjectGeometry(In Out Nav Relevant Interface, Out Data)",
+      "params": [
+        {
+          "name": "In Out Nav Relevant Interface",
+          "type": "INavRelevantInterface&"
+        },
+        {
+          "name": "Out Data",
+          "type": "FNavigationRelevantData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-vertex-soup-geometry",
+      "name": "ExportVertexSoupGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportVertexSoupGeometry(In Verts, Out Data)",
+      "params": [
+        {
+          "name": "In Verts",
+          "type": "TArray<FVector>&"
+        },
+        {
+          "name": "Out Data",
+          "type": "FNavigationRelevantData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-rigid-body-geometry-921b02",
+      "name": "ExportRigidBodyGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportRigidBodyGeometry(In Out Body Setup, Out Vertex Buffer, Out Index Buffer, Out Bounds, Local To World)",
+      "params": [
+        {
+          "name": "In Out Body Setup",
+          "type": "UBodySetup&"
+        },
+        {
+          "name": "Out Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-rigid-body-geometry-d31a11",
+      "name": "ExportRigidBodyGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportRigidBodyGeometry(In Out Body Setup, Out Tri Mesh Vertex Buffer, Out Tri Mesh Index Buffer, Out Convex Vertex Buffer, Out Convex Index Buffer, Out Shape Buffer, Out Bounds, Local To World)",
+      "params": [
+        {
+          "name": "In Out Body Setup",
+          "type": "UBodySetup&"
+        },
+        {
+          "name": "Out Tri Mesh Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Tri Mesh Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Convex Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Convex Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Shape Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "export-aggregated-geometry-f6e629",
+      "name": "ExportAggregatedGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ExportAggregatedGeometry(Agg Geom, Out Convex Vertex Buffer, Out Convex Index Buffer, Out Shape Buffer, Out Bounds, Local To World)",
+      "params": [
+        {
+          "name": "Agg Geom",
+          "type": "FKAggregateGeom&"
+        },
+        {
+          "name": "Out Convex Vertex Buffer",
+          "type": "TNavStatArray<FVector>&"
+        },
+        {
+          "name": "Out Convex Index Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Shape Buffer",
+          "type": "TNavStatArray<int32>&"
+        },
+        {
+          "name": "Out Bounds",
+          "type": "FBox&"
+        },
+        {
+          "name": "Local To World",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-debug-geometry",
+      "name": "GetDebugGeometry",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetDebugGeometry(Encoded Data, Debug Mesh Data)",
+      "params": [
+        {
+          "name": "Encoded Data",
+          "type": "FNavigationRelevantData&"
+        },
+        {
+          "name": "Debug Mesh Data",
+          "type": "FNavDebugMeshData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts data encoded in EncodedData.CollisionData to FNavDebugMeshData format"
+    },
+    {
+      "id": "setup-tile-config",
+      "name": "SetupTileConfig",
+      "category": "RecastNavMeshGenerator",
+      "signature": "SetupTileConfig(Target, Tile Resolution, Out Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile Resolution",
+          "type": "ENavigationDataResolution"
+        },
+        {
+          "name": "Out Config",
+          "type": "FRecastBuildConfig&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the config according to the resolution"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "RecastNavMeshGenerator",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "protected : void"
+    },
+    {
+      "id": "configure-build-properties",
+      "name": "ConfigureBuildProperties",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ConfigureBuildProperties(Target, Out Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Out Config",
+          "type": "FRecastBuildConfig&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-navigation-bounds",
+      "name": "UpdateNavigationBounds",
+      "category": "RecastNavMeshGenerator",
+      "signature": "UpdateNavigationBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "sort-pending-build-tiles",
+      "name": "SortPendingBuildTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "SortPendingBuildTiles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-seed-locations",
+      "name": "GetSeedLocations",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetSeedLocations(Target, World, Out Seed Locations)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "World",
+          "type": "UWorld&"
+        },
+        {
+          "name": "Out Seed Locations",
+          "type": "TArray<FVector2D>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "construct-tiled-nav-mesh",
+      "name": "ConstructTiledNavMesh",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ConstructTiledNavMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Instantiates dtNavMesh and configures it for tiles generation. Returns false if failed"
+    },
+    {
+      "id": "calc-nav-mesh-properties",
+      "name": "CalcNavMeshProperties",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CalcNavMeshProperties(Target, Max Tiles, Max Polys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Max Tiles",
+          "type": "Int&"
+        },
+        {
+          "name": "Max Polys",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Determine bit masks for poly address"
+    },
+    {
+      "id": "mark-dirty-tiles",
+      "name": "MarkDirtyTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "MarkDirtyTiles(Target, Dirty Areas)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Dirty Areas",
+          "type": "TArray<FNavigationDirtyArea>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks grid tiles affected by specified areas as dirty"
+    },
+    {
+      "id": "should-dirty-tiles-requested-by-object",
+      "name": "ShouldDirtyTilesRequestedByObject",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ShouldDirtyTilesRequestedByObject(Target, Nav Sys, Nav Octree Instance, Source Object, Nav Data Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Nav Sys",
+          "type": "UNavigationSystemV1&"
+        },
+        {
+          "name": "Nav Octree Instance",
+          "type": "FNavigationOctree&"
+        },
+        {
+          "name": "Source Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "Nav Data Config",
+          "type": "FNavDataConfig&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-dirty-tiles-requested-by-element",
+      "name": "ShouldDirtyTilesRequestedByElement",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ShouldDirtyTilesRequestedByElement(Target, Nav Sys, Nav Octree Instance, Source Element, Nav Data Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Nav Sys",
+          "type": "UNavigationSystemV1&"
+        },
+        {
+          "name": "Nav Octree Instance",
+          "type": "FNavigationOctree&"
+        },
+        {
+          "name": "Source Element",
+          "type": "FNavigationElementHandle"
+        },
+        {
+          "name": "Nav Data Config",
+          "type": "FNavDataConfig&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the provided FNavigationElement that requested a navmesh dirtying should dirty this Navmesh. Useful to avoid tiles regeneration from elements that are excluded from the provided NavDataConfig"
+    },
+    {
+      "id": "mark-nav-bounds-dirty",
+      "name": "MarkNavBoundsDirty",
+      "category": "RecastNavMeshGenerator",
+      "signature": "MarkNavBoundsDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Marks all tiles overlapping with InclusionBounds dirty (via MarkDirtyTiles)."
+    },
+    {
+      "id": "remove-layers",
+      "name": "RemoveLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RemoveLayers(Target, Tile, Updated Tiles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile",
+          "type": "FIntPoint&"
+        },
+        {
+          "name": "Updated Tiles",
+          "type": "TArray<FNavTileRef>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "store-compressed-tile-cache-layers",
+      "name": "StoreCompressedTileCacheLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "StoreCompressedTileCacheLayers(Target, Tile Generator, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile Generator",
+          "type": "FRecastTileGenerator&"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "store-debug-data",
+      "name": "StoreDebugData",
+      "category": "RecastNavMeshGenerator",
+      "signature": "StoreDebugData(Target, Tile Generator, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile Generator",
+          "type": "FRecastTileGenerator&"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-tile-tasks-async-and-get-updated-tiles",
+      "name": "ProcessTileTasksAsyncAndGetUpdatedTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ProcessTileTasksAsyncAndGetUpdatedTiles(Target, Num Tasks To Process)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Num Tasks To Process",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FNavTileRef>",
+      "docs": "Processes pending tile generation tasks Async"
+    },
+    {
+      "id": "create-tile-generator-from-pending-element",
+      "name": "CreateTileGeneratorFromPendingElement",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CreateTileGeneratorFromPendingElement(Target, Out Tile Location, Forced Pending Tile Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Out Tile Location",
+          "type": "FIntPoint&"
+        },
+        {
+          "name": "Forced Pending Tile Idx",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "TSharedRef<FRecastTileGenerator>"
+    },
+    {
+      "id": "process-tile-tasks-sync-time-sliced-and-get-updated-tiles",
+      "name": "ProcessTileTasksSyncTimeSlicedAndGetUpdatedTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ProcessTileTasksSyncTimeSlicedAndGetUpdatedTiles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "TArray<FNavTileRef>",
+      "docs": "Processes pending tile generation tasks Sync with option for time slicing currently an experimental feature."
+    },
+    {
+      "id": "process-tile-tasks-sync-and-get-updated-tiles",
+      "name": "ProcessTileTasksSyncAndGetUpdatedTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ProcessTileTasksSyncAndGetUpdatedTiles(Target, Num Tasks To Process)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Num Tasks To Process",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FNavTileRef>"
+    },
+    {
+      "id": "get-next-pending-dirty-tile-to-build",
+      "name": "GetNextPendingDirtyTileToBuild",
+      "category": "RecastNavMeshGenerator",
+      "signature": "GetNextPendingDirtyTileToBuild(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "process-tile-tasks-and-get-updated-tiles",
+      "name": "ProcessTileTasksAndGetUpdatedTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ProcessTileTasksAndGetUpdatedTiles(Target, Num Tasks To Process)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Num Tasks To Process",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<FNavTileRef>",
+      "docs": "Processes pending tile generation tasks"
+    },
+    {
+      "id": "reset-time-sliced-tile-generator-sync",
+      "name": "ResetTimeSlicedTileGeneratorSync",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ResetTimeSlicedTileGeneratorSync(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-generated-tiles-time-sliced",
+      "name": "AddGeneratedTilesTimeSliced",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AddGeneratedTilesTimeSliced(Target, Tile Generator, Out Result Tile Refs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile Generator",
+          "type": "FRecastTileGenerator&"
+        },
+        {
+          "name": "Out Result Tile Refs",
+          "type": "TArray<FNavTileRef>&"
+        }
+      ],
+      "returnType": "public : ETimeSliceWorkResult",
+      "docs": "Adds generated tiles to NavMesh, replacing old ones, uses time slicing returns Failed if any layer failed"
+    },
+    {
+      "id": "add-generated-tiles-and-get-updated-tiles",
+      "name": "AddGeneratedTilesAndGetUpdatedTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AddGeneratedTilesAndGetUpdatedTiles(Target, Tile Generator)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile Generator",
+          "type": "FRecastTileGenerator&"
+        }
+      ],
+      "returnType": "TArray<FNavTileRef>",
+      "docs": "Adds generated tiles to NavMesh, replacing old ones"
+    },
+    {
+      "id": "remove-tile-layers-and-get-updated-tiles",
+      "name": "RemoveTileLayersAndGetUpdatedTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RemoveTileLayersAndGetUpdatedTiles(Target, Tile X, Tile Y, Old Layer Tile Id Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        },
+        {
+          "name": "Old Layer Tile Id Map",
+          "type": "TMap<int32,dtPolyRef>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "public : TArray<FNavTileRef>",
+      "docs": "Removes all tiles at specified grid location and returns the updated FNavTileRef"
+    },
+    {
+      "id": "remove-tile-layers",
+      "name": "RemoveTileLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RemoveTileLayers(Target, Detour Mesh, Tile X, Tile Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Detour Mesh",
+          "type": "dtNavMesh*"
+        },
+        {
+          "name": "Tile X",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes all tiles at specified grid location"
+    },
+    {
+      "id": "remove-tiles",
+      "name": "RemoveTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RemoveTiles(Target, Tiles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tiles",
+          "type": "TArray<FIntPoint>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "re-add-tiles",
+      "name": "ReAddTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "ReAddTiles(Target, Tiles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tiles",
+          "type": "TArray<FNavMeshDirtyTileElement>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-in-active-set",
+      "name": "IsInActiveSet",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsInActiveSet(Target, Tile)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile",
+          "type": "FIntPoint&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "calc-poly-ref-bits",
+      "name": "CalcPolyRefBits",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CalcPolyRefBits(Nav Mesh Owner, Max Tile Bits, Max Poly Bits)",
+      "params": [
+        {
+          "name": "Nav Mesh Owner",
+          "type": "ARecastNavMesh*"
+        },
+        {
+          "name": "Max Tile Bits",
+          "type": "Int&"
+        },
+        {
+          "name": "Max Poly Bits",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "restrict-building-to-active-tiles",
+      "name": "RestrictBuildingToActiveTiles",
+      "category": "RecastNavMeshGenerator",
+      "signature": "RestrictBuildingToActiveTiles(Target, In Restrict Building To Active Tiles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "In Restrict Building To Active Tiles",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "discard-current-building-tasks",
+      "name": "DiscardCurrentBuildingTasks",
+      "category": "RecastNavMeshGenerator",
+      "signature": "DiscardCurrentBuildingTasks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Blocks until build for specified list of tiles is complete and discard results"
+    },
+    {
+      "id": "create-tile-generator",
+      "name": "CreateTileGenerator",
+      "category": "RecastNavMeshGenerator",
+      "signature": "CreateTileGenerator(Target, Coord, Dirty Areas, Pending Tile Creation Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Coord",
+          "type": "FIntPoint&"
+        },
+        {
+          "name": "Dirty Areas",
+          "type": "TArray<FBox>&"
+        },
+        {
+          "name": "Pending Tile Creation Time",
+          "type": "Double",
+          "default": "0."
+        }
+      ],
+      "returnType": "TSharedRef<FRecastTileGenerator>"
+    },
+    {
+      "id": "log-mem-used",
+      "name": "LogMemUsed",
+      "category": "RecastNavMeshGenerator",
+      "signature": "LogMemUsed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "is-allowed-to-add-tile-layers",
+      "name": "IsAllowedToAddTileLayers",
+      "category": "RecastNavMeshGenerator",
+      "signature": "IsAllowedToAddTileLayers(Target, Tile)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Tile",
+          "type": "FIntPoint"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-generated-tile-layer",
+      "name": "AddGeneratedTileLayer",
+      "category": "RecastNavMeshGenerator",
+      "signature": "AddGeneratedTileLayer(Target, Layer Index, Tile Generator, Old Layer Tile Id Map, Out Result Tile Refs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Layer Index",
+          "type": "Int"
+        },
+        {
+          "name": "Tile Generator",
+          "type": "FRecastTileGenerator&"
+        },
+        {
+          "name": "Old Layer Tile Id Map",
+          "type": "TMap<int32,dtPolyRef>&"
+        },
+        {
+          "name": "Out Result Tile Refs",
+          "type": "TArray<FNavTileRef>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "log-dirty-areas-8171f0",
+      "name": "LogDirtyAreas",
+      "category": "RecastNavMeshGenerator",
+      "signature": "LogDirtyAreas(Target, Dirty Areas Debugging Information)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Dirty Areas Debugging Information",
+          "type": "TMap<FPendingTileElement,TArray<FNavigationDirtyAreaPerTileDebugInformation>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Data struct used by 'LogDirtyAreas' that contains all the information regarding the areas that are being dirtied, per dirtied tile."
+    },
+    {
+      "id": "log-dirty-areas-6d6479",
+      "name": "LogDirtyAreas",
+      "category": "RecastNavMeshGenerator",
+      "signature": "LogDirtyAreas(Target, Owner Nav, Dirty Areas Debugging Information)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRecastNavMeshGenerator*"
+        },
+        {
+          "name": "Owner Nav",
+          "type": "UObject&"
+        },
+        {
+          "name": "Dirty Areas Debugging Information",
+          "type": "TMap<FPendingTileElement,TArray<FNavigationDirtyAreaPerTileDebugInformation>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used internally, when LogNavigationDirtyArea is VeryVerbose, to log the number of tiles a dirty area is requesting."
+    }
+  ]
+}

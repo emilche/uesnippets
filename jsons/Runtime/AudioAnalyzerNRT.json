@@ -11,6 +11,139 @@
   ],
   "functions": [
     {
+      "id": "post-edit-change-property",
+      "name": "PostEditChangeProperty",
+      "category": "AudioAnalyzerNRT",
+      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRTSettings*"
+        },
+        {
+          "name": "Property Changed Event",
+          "type": "FPropertyChangedEvent&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a UPROPERTY of this class is edited. Triggers\nreanalysis of audio.\nThis determines whether to trigger analysis by calling ShouldEventTriggerAnalysis(...)"
+    },
+    {
+      "id": "should-event-trigger-analysis",
+      "name": "ShouldEventTriggerAnalysis",
+      "category": "AudioAnalyzerNRT",
+      "signature": "ShouldEventTriggerAnalysis(Target, Property Change Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRTSettings*"
+        },
+        {
+          "name": "Property Change Event",
+          "type": "FPropertyChangedEvent&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This returns true when the PropertyChangeEvent is due to update a setting property.\nOverride this method in order to customize this behavior."
+    },
+    {
+      "id": "get-settings",
+      "name": "GetSettings",
+      "category": "AudioAnalyzerNRT",
+      "signature": "GetSettings(Target, In Sample Rate, In Num Channels)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResultType*"
+        },
+        {
+          "name": "In Sample Rate",
+          "type": "Float"
+        },
+        {
+          "name": "In Num Channels",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TUniquePtr<Audio::IAnalyzerNRTSettings>",
+      "docs": "Implementations can override this method to create settings objects\nspecific for their analyzer."
+    },
+    {
+      "id": "serialize",
+      "name": "Serialize",
+      "category": "AudioAnalyzerNRT",
+      "signature": "Serialize(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Performs serialization of results."
+    },
+    {
+      "id": "set-result",
+      "name": "SetResult",
+      "category": "AudioAnalyzerNRT",
+      "signature": "SetResult(Target, New Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "New Result",
+          "type": "FResultSharedPtr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-result-if-latest",
+      "name": "SetResultIfLatest",
+      "category": "AudioAnalyzerNRT",
+      "signature": "SetResultIfLatest(Target, New Result, In Result Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "New Result",
+          "type": "FResultSharedPtr"
+        },
+        {
+          "name": "In Result Id",
+          "type": "FResultId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This will only store the result if the passed InResultId matches the CurrentResultId."
+    },
+    {
+      "id": "pre-edit-change",
+      "name": "PreEditChange",
+      "category": "AudioAnalyzerNRT",
+      "signature": "PreEditChange(Target, Property About To Change)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "Property About To Change",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called before a UPROPERTY of this class is edited. This checks to see\nif the UPROPERTY is a UAudioAnalyzerNRTSettings. If so, the previous settings'\nAnalyzeAudioDelegate will be unbound from this object's AnalyzeAudio()"
+    },
+    {
       "id": "analyze-audio",
       "name": "AnalyzeAudio",
       "category": "AudioAnalyzerNRT",
@@ -23,6 +156,77 @@
       ],
       "returnType": "Void",
       "docs": "Performs the analaysis of the audio"
+    },
+    {
+      "id": "set-settings-delegate",
+      "name": "SetSettingsDelegate",
+      "category": "AudioAnalyzerNRT",
+      "signature": "SetSettingsDelegate(Target, In Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "In Settings",
+          "type": "UAudioAnalyzerNRTSettings*"
+        }
+      ],
+      "returnType": "protected : void",
+      "docs": "This sets the AnalyzeAudio callback to the delegate in settings."
+    },
+    {
+      "id": "remove-settings-delegate",
+      "name": "RemoveSettingsDelegate",
+      "category": "AudioAnalyzerNRT",
+      "signature": "RemoveSettingsDelegate(Target, In Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "In Settings",
+          "type": "UAudioAnalyzerNRTSettings*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This removes the existing delegate handle from the current settings object"
+    },
+    {
+      "id": "get-analyzer-nrt-factory-name",
+      "name": "GetAnalyzerNRTFactoryName",
+      "category": "AudioAnalyzerNRT",
+      "signature": "GetAnalyzerNRTFactoryName(Target, F Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "F Name",
+          "type": ") PURE_VIRTUAL ( UAudioAnalyzerNRT::GetAnalyzerNRTFactoryName,return"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Subclasses must override this method in order to inform this object which AnalyzerNRTFactory to use for analysis"
+    },
+    {
+      "id": "get-settings-from-property",
+      "name": "GetSettingsFromProperty",
+      "category": "AudioAnalyzerNRT",
+      "signature": "GetSettingsFromProperty(Target, Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAudioAnalyzerNRT*"
+        },
+        {
+          "name": "Property",
+          "type": "FProperty*"
+        }
+      ],
+      "returnType": "private : UAudioAnalyzerNRTSettings*"
     }
   ]
 }

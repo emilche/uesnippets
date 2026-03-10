@@ -1,0 +1,1735 @@
+{
+  "id": "replication-system",
+  "label": "ReplicationSystem",
+  "includepath": "Iris/ReplicationSystem/ReplicationSystem.h",
+  "includes": [
+    "CoreTypes",
+    "Delegate",
+    "PimplPtr",
+    "RefCounting",
+    "IrisConfig",
+    "NetRefHandle",
+    "NetObjectGroupHandle",
+    "ReplicationSystemTypes",
+    "ConnectionHandle",
+    "NetHandle",
+    "ReplicationSystem.generated"
+  ],
+  "functions": [
+    {
+      "id": "get-max-connection-count",
+      "name": "GetMaxConnectionCount",
+      "category": "ReplicationSystem",
+      "signature": "GetMaxConnectionCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "@return The Max number of connections that is supported."
+    },
+    {
+      "id": "net-update",
+      "name": "NetUpdate",
+      "category": "ReplicationSystem",
+      "signature": "NetUpdate(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update all internal systems, such as filtering, dirty tracking, prioritization, etc.\nAlso copies all replicated data into the internal Iris protocols so they are ready to be sent to clients"
+    },
+    {
+      "id": "tick-post-receive",
+      "name": "TickPostReceive",
+      "category": "ReplicationSystem",
+      "signature": "TickPostReceive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick replication system after parsing all received data.\nUsed to check if immediate RPCs need to be sent before the rest of the engine is ticked"
+    },
+    {
+      "id": "pre-receive-update",
+      "name": "PreReceiveUpdate",
+      "category": "ReplicationSystem",
+      "signature": "PreReceiveUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Callback triggered before connections start processing their received data"
+    },
+    {
+      "id": "post-receive-update",
+      "name": "PostReceiveUpdate",
+      "category": "ReplicationSystem",
+      "signature": "PostReceiveUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Callback triggered after the connections processed all received data"
+    },
+    {
+      "id": "send-update",
+      "name": "SendUpdate",
+      "category": "ReplicationSystem",
+      "signature": "SendUpdate(Target, Send Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Send Function",
+          "type": "TFunctionRef<void ( TArrayView<uint32> )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "SendUpdate is currently more of a placeholder for a future where the ReplicationSystem itself is responsible for\nthe low level protocol and sending, rather than having the DataStreamChannel write data when ticked\n@see UDataStreamChannel.\n@param SendFunction, Function taking an array of ConnectionId`s that has data to send"
+    },
+    {
+      "id": "post-send-update",
+      "name": "PostSendUpdate",
+      "category": "ReplicationSystem",
+      "signature": "PostSendUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cleanup temporaries and prepare for the next send update."
+    },
+    {
+      "id": "add-connection",
+      "name": "AddConnection",
+      "category": "ReplicationSystem",
+      "signature": "AddConnection(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notify that a connection was added.\n@param ConnectionId The ID of the added connection. Must not collide with an existing ID. Must be <= the maximum number of connections."
+    },
+    {
+      "id": "remove-connection",
+      "name": "RemoveConnection",
+      "category": "ReplicationSystem",
+      "signature": "RemoveConnection(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notify that a connection was removed.\n@param ConnectionId The ID of the removed connection. Must have previously been added."
+    },
+    {
+      "id": "is-valid-connection",
+      "name": "IsValidConnection",
+      "category": "ReplicationSystem",
+      "signature": "IsValidConnection(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Verify if a connection is valid, that is has been added to the system.\n@param ConnectionId The ID of the connection to check for validness.\n@return Whether the connection is valid."
+    },
+    {
+      "id": "set-connection-gracefully-closing",
+      "name": "SetConnectionGracefullyClosing",
+      "category": "ReplicationSystem",
+      "signature": "SetConnectionGracefullyClosing(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a connection as gracefully closing, where it will flush all pending reliable data\nbefore completely shutting down.\n@param ConnectionId The ID of the connection that's closing."
+    },
+    {
+      "id": "set-replication-enabled-for-connection",
+      "name": "SetReplicationEnabledForConnection",
+      "category": "ReplicationSystem",
+      "signature": "SetReplicationEnabledForConnection(Target, Connection Id, Replication Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Replication Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable or disable the ReplicationDataStream to transmit data for a particular connection.\n@param ConnectionId The ID of the connection to enable or disable object replication for.\n@param bReplicationEnabled Whether to enable or disable object replication."
+    },
+    {
+      "id": "is-replication-enabled-for-connection",
+      "name": "IsReplicationEnabledForConnection",
+      "category": "ReplicationSystem",
+      "signature": "IsReplicationEnabledForConnection(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether object replication is enabled for a particular connection.\n@param ConnectionId The ID of the connection to check if object replication is enabled for.\n@return Whether object replication is enabled for the connection."
+    },
+    {
+      "id": "set-replication-view",
+      "name": "SetReplicationView",
+      "category": "ReplicationSystem",
+      "signature": "SetReplicationView(Target, Connection Id, View)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "View",
+          "type": "UE::Net::FReplicationView&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set view information for a connection. The views are used by some prioritizers, typically to make\nobjects closer to any of the view positions higher priority and thus more likely to replicate\non a given frame. The information will persist until the next call. This is normally handled by\na NetDriver.\n@param ConnectionId The ID of the connection to set the view information for.\n@param View The view information for the connection and its subconnections.\n@see UNetDriver::UpdateReplicationViews"
+    },
+    {
+      "id": "set-static-priority",
+      "name": "SetStaticPriority",
+      "category": "ReplicationSystem",
+      "signature": "SetStaticPriority(Target, Handle, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Priority",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a fixed priority for a replicated object which will be used until the next call to SetStaticPriority or SetPrioritizer.\nAn object which never gets a call to either SetPrioritizer or SetStaticPriority will have a priority of 1.0.\n@param Handle Which object to set the priority for.\n@param Priority A value >= 0. 1.0 means the object will be considered for replication every frame, if it has updated replicated properties.\n@see SetPrioritizer"
+    },
+    {
+      "id": "set-prioritizer",
+      "name": "SetPrioritizer",
+      "category": "ReplicationSystem",
+      "signature": "SetPrioritizer(Target, Handle, Prioritizer Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Prioritizer Handle",
+          "type": "UE::Net::FNetObjectPrioritizerHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Sets a prioritizer for a replicated object which will be used until the next call to SetPrioritizer or SetStaticPriority.\nAn object which never gets a call to either SetPrioritizer or SetStaticPriority will have a priority of 1.0.\n@param Handle A valid handle to an object.\n@param PrioritizerHandle A valid handle to a prioritizer, retrieved via a call to GetPrioritizer, or DefaultSpatialNetObjectPrioritizerHandle.\n@return true if the prioritizer was successfully set and false if it was not. It can fail for various reasons,\nsuch as the prioritizer not supporting the object in question for implementation defined reasons. If the function fails\nthe prioritization of the object is unspecified, it could be using a previous prioritizer or get a default static priority.\n@see GetPrioritizerHandle\n@see SetStaticPriority"
+    },
+    {
+      "id": "get-prioritizer-handle",
+      "name": "GetPrioritizerHandle",
+      "category": "ReplicationSystem",
+      "signature": "GetPrioritizerHandle(Target, Prioritizer Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Prioritizer Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UE::Net::FNetObjectPrioritizerHandle",
+      "docs": "Gets the handle for a prioritizer with a given name. The handle can be used in subsequent calls to SetPrioritizer.\n@param PrioritizerName The name of the prioritizer. Names of valid prioritizers are configured in UNetObjectPrioritizerDefinitions.\n@return A valid handle if a prioritizer with the given name has been successfully created in this system or InvalidNetObjectPrioritizerHandle\nif not.\n@see SetPrioritizer\n@see UNetObjectPrioritizerDefinitions"
+    },
+    {
+      "id": "get-prioritizer",
+      "name": "GetPrioritizer",
+      "category": "ReplicationSystem",
+      "signature": "GetPrioritizer(Target, Prioritizer Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Prioritizer Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UNetObjectPrioritizer*",
+      "docs": "Gets the prioritizer with a given name. Can be useful for special initialization for a custom prioritizer.\n@param PrioritizerName The name of the prioritizer. Names of valid filters are configured in UNetObjectPrioritizerDefinitions.\n@return A pointer to the filter if it exists, nullptr if not.\n@see UNetObjectPrioritizerDefinitions"
+    },
+    {
+      "id": "get-data-stream",
+      "name": "GetDataStream",
+      "category": "ReplicationSystem",
+      "signature": "GetDataStream(Target, Connection Id, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UDataStream*",
+      "docs": "Get DataStream with the provided Name\n@param Name The name of the DataStream. Names of valid DataStream are configured in UDataStreamDefinitions.\n@return A pointer to the DataStream if it exists\n@see UDataStreamDefinitions"
+    },
+    {
+      "id": "is-known-data-stream-definition",
+      "name": "IsKnownDataStreamDefinition",
+      "category": "ReplicationSystem",
+      "signature": "IsKnownDataStreamDefinition(Target, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if there exists a DataStreamDefinition for the provided Name"
+    },
+    {
+      "id": "open-data-stream",
+      "name": "OpenDataStream",
+      "category": "ReplicationSystem",
+      "signature": "OpenDataStream(Target, Connection Id, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UDataStream*",
+      "docs": "Request DataStream to be created/opened for the given ConnectionId. NOTE: This only applies to DataStreams that are flagged with bDynamicCreate in the DataStreamDefinition\n@param Name The name of the DataStream. Names of valid DataStream are configured in UDataStreamDefinitions.\n@return A pointer to the DataStream if successfully opened or already existed.\n@see UDataStreamDefinitions"
+    },
+    {
+      "id": "close-data-stream",
+      "name": "CloseDataStream",
+      "category": "ReplicationSystem",
+      "signature": "CloseDataStream(Target, Connection Id, Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initiate close of DataStream for the given ConnectionId. NOTE: This only applies to DataStreams that are flagged with bDynamicCreate in the DataStreamDefinition\n@param Name The name of the DataStream. Names of valid DataStream are configured in UDataStreamDefinitions.\n@see UDataStreamDefinitions"
+    },
+    {
+      "id": "register-net-blob-handler",
+      "name": "RegisterNetBlobHandler",
+      "category": "ReplicationSystem",
+      "signature": "RegisterNetBlobHandler(Target, Handler)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handler",
+          "type": "UNetBlobHandler*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Registers a NetBlobHandler so that its NetBlob type can be sent and received. The user must be sure to keep the handler valid\nfor the lifetime of the ReplicationSystem. The handler class must have been configured in UNetBlobHandlerDefinitions in order\nfor the call to succeed. Only one instance per class is allowed to be registered.\n@param Handler The UNetBlobHandler to register.\n@return Whether the handler was successfully registered or not."
+    },
+    {
+      "id": "queue-net-object-attachment",
+      "name": "QueueNetObjectAttachment",
+      "category": "ReplicationSystem",
+      "signature": "QueueNetObjectAttachment(Target, Connection Id, Target Ref, Attachment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Target Ref",
+          "type": "UE::Net::FNetObjectReference&"
+        },
+        {
+          "name": "Attachment",
+          "type": "TRefCountPtr<UE::Net::FNetObjectAttachment>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Queue an attachment for replication with an object. The attachment will be sent when the target is scheduled for replication.\n@param ConnectionId A valid connection ID. Only this connection will receive the attachment.\n@param TargetRef A valid FNetObjectReference representing object to replicate the attachment with.\n@param Attachment The attachment to replicate. Note that the attachment's NetObjectReference will be modified based on TargetRef.\n@return Whether the attachment was properly queued or not."
+    },
+    {
+      "id": "send-rpc-c439d2",
+      "name": "SendRPC",
+      "category": "ReplicationSystem",
+      "signature": "SendRPC(Target, Root Object, Sub Object, Function, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Root Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parameters",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Multicast an RPC targeting a object/subobject.\n@param RootObject A valid Owner/Actor. If no subobject is specified the function is called on the root object on the remote side.\n@param SubObject Optional subobject on whom the function is called on the remote side.\n@param Function The function to call.\n@param Parameters The function parameters.\n@return Whether the RPC was successfully queued for replication or not."
+    },
+    {
+      "id": "send-rpc-98cea3",
+      "name": "SendRPC",
+      "category": "ReplicationSystem",
+      "signature": "SendRPC(Target, Connection Id, Root Object, Sub Object, Function, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Root Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Sub Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Parameters",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Unicast an RPC targeting a object/subobject.\n@param ConnectionId A valid connection ID. Only this connection will receive the RPC.\n@param RootObject A valid Owner/Actor. If no subobject is specified the function is called on the root object on the remote side.\n@param SubObject Optional subobject on whom the function is called on the remote side.\n@param Function The function to call.\n@param Parameters The function parameters.\n@return Whether the RPC was successfully queued for replication or not."
+    },
+    {
+      "id": "set-rpc-send-policy-flags",
+      "name": "SetRPCSendPolicyFlags",
+      "category": "ReplicationSystem",
+      "signature": "SetRPCSendPolicyFlags(Target, Function, Send Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Send Flags",
+          "type": "UE::Net::ENetObjectAttachmentSendPolicyFlags"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the policy flags for an RPC identified by its function\n@param Function a pointer to a valid function identifying the RPC\n@param SendFlags the ENetObjectAttachmentSendPolicyFlags to set for the RPC\n@return Whether the specified SendFlags is valid for the specific RPC"
+    },
+    {
+      "id": "reset-rpc-send-policy-flags",
+      "name": "ResetRPCSendPolicyFlags",
+      "category": "ReplicationSystem",
+      "signature": "ResetRPCSendPolicyFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets all set RPCSendPolicy flags"
+    },
+    {
+      "id": "get-replication-bridge",
+      "name": "GetReplicationBridge",
+      "category": "ReplicationSystem",
+      "signature": "GetReplicationBridge(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "UReplicationBridge*",
+      "docs": "@return The UReplicationBridge that was passed with the system creation parameters."
+    },
+    {
+      "id": "get-net-token-store",
+      "name": "GetNetTokenStore",
+      "category": "ReplicationSystem",
+      "signature": "GetNetTokenStore(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "UE::Net::FNetTokenStore*",
+      "docs": "@return The Net token store.\n@see UE::Net::FNetTokenStore"
+    },
+    {
+      "id": "get-net-token-resolve-context",
+      "name": "GetNetTokenResolveContext",
+      "category": "ReplicationSystem",
+      "signature": "GetNetTokenResolveContext(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UE::Net::FNetTokenResolveContext",
+      "docs": "Get NetTokenResolveContext resolve NetTokens\n@see UE::Net::FNetTokenStore"
+    },
+    {
+      "id": "is-valid-handle",
+      "name": "IsValidHandle",
+      "category": "ReplicationSystem",
+      "signature": "IsValidHandle(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether a FNetRefHandle is still associated with a replicated object.\n@param Handle The handle check.\n@return true if the handle is still valid, false if not."
+    },
+    {
+      "id": "get-replication-protocol",
+      "name": "GetReplicationProtocol",
+      "category": "ReplicationSystem",
+      "signature": "GetReplicationProtocol(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "UE::Net::FReplicationProtocol*",
+      "docs": "Get the ReplicationProtocol for a handle.\n@param Handle The handle to retrieve the protocol for.\n@return A valid pointer to the protocol if the handle is valid, nullptr if not."
+    },
+    {
+      "id": "get-debug-name",
+      "name": "GetDebugName",
+      "category": "ReplicationSystem",
+      "signature": "GetDebugName(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "UE::Net::FNetDebugName*",
+      "docs": "Get the DebugName associated with a handle.\n@param Handle The handle to retrieve the DebugName for\n@return DebugName if the handle is valid, otherwise nullptr."
+    },
+    {
+      "id": "create-group",
+      "name": "CreateGroup",
+      "category": "ReplicationSystem",
+      "signature": "CreateGroup(Target, Group Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Create a group which can be used to logically group objects together. The group must be\ndestroyed when it's not needed anymore.\nGroups can be used to setup filtering rules on it's members.\n@param GroupName An unique name to identify the group. Passing NAME_None will assign it an autogenerated name\n@return A handle to the group, or InvalidNetObjectGroupHandle if no more groups could be created.\n@see DestroyGroup"
+    },
+    {
+      "id": "destroy-group",
+      "name": "DestroyGroup",
+      "category": "ReplicationSystem",
+      "signature": "DestroyGroup(Target, Group Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy a group.\n@see CreateGroup"
+    },
+    {
+      "id": "find-group",
+      "name": "FindGroup",
+      "category": "ReplicationSystem",
+      "signature": "FindGroup(Target, Group Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Return the handle to a group identified by the given name\n@return A valid handle if the name is used by an existing group or InvalidNetObjectGroupHandle if no groups is found"
+    },
+    {
+      "id": "add-to-group",
+      "name": "AddToGroup",
+      "category": "ReplicationSystem",
+      "signature": "AddToGroup(Target, Group Handle, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add an object to a group.\n@param GroupHandle A valid group handle.\n@param Handle A valid handle to an object."
+    },
+    {
+      "id": "remove-from-group",
+      "name": "RemoveFromGroup",
+      "category": "ReplicationSystem",
+      "signature": "RemoveFromGroup(Target, Group Handle, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an object from a group.\n@param GroupHandle A valid group handle.\n@param Handle A valid handle to an object."
+    },
+    {
+      "id": "remove-from-all-groups",
+      "name": "RemoveFromAllGroups",
+      "category": "ReplicationSystem",
+      "signature": "RemoveFromAllGroups(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an object from all groups it's part of.\n@param Handle A valid handle to an object."
+    },
+    {
+      "id": "is-in-group",
+      "name": "IsInGroup",
+      "category": "ReplicationSystem",
+      "signature": "IsInGroup(Target, Group Handle, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether an objects belongs to a particular group or not.\n@param GroupHandle A valid group handle.\n@param Handle A valid handle to an object.\n@return true if both handles are valid and the object belongs to the group, false otherwise."
+    },
+    {
+      "id": "is-valid-group",
+      "name": "IsValidGroup",
+      "category": "ReplicationSystem",
+      "signature": "IsValidGroup(Target, Group Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if a group handle is valid.\n@param GroupHandle A group handle.\n@return true if the group is valid, false if not."
+    },
+    {
+      "id": "get-not-replicated-net-object-group",
+      "name": "GetNotReplicatedNetObjectGroup",
+      "category": "ReplicationSystem",
+      "signature": "GetNotReplicatedNetObjectGroup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Special group, root objects assigned to this group will be filtered out for all connections"
+    },
+    {
+      "id": "get-net-group-owner-net-object-group",
+      "name": "GetNetGroupOwnerNetObjectGroup",
+      "category": "ReplicationSystem",
+      "signature": "GetNetGroupOwnerNetObjectGroup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Special group, SubObjects assigned to this group will replicate to owner of RootParent"
+    },
+    {
+      "id": "get-net-group-replay-net-object-group",
+      "name": "GetNetGroupReplayNetObjectGroup",
+      "category": "ReplicationSystem",
+      "signature": "GetNetGroupReplayNetObjectGroup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Special group, SubObjects assigned to this group will replicate if replay netconditions is met"
+    },
+    {
+      "id": "set-owning-net-connection",
+      "name": "SetOwningNetConnection",
+      "category": "ReplicationSystem",
+      "signature": "SetOwningNetConnection(Target, Handle, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the owning connection of an object. This can determine which properties are replicated\nto which connections or affect filtering such that the object is only replicated to the owning connection.\n@param Handle A valid handle to an object.\n@param ConnectionId A valid connection ID to be set as the owner."
+    },
+    {
+      "id": "get-owning-net-connection",
+      "name": "GetOwningNetConnection",
+      "category": "ReplicationSystem",
+      "signature": "GetOwningNetConnection(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the owning net connection for an object.\n@see SetOwningNetConnection"
+    },
+    {
+      "id": "set-filter",
+      "name": "SetFilter",
+      "category": "ReplicationSystem",
+      "signature": "SetFilter(Target, Handle, Filter Handle, Filter Config Profile)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Filter Handle",
+          "type": "UE::Net::FNetObjectFilterHandle"
+        },
+        {
+          "name": "Filter Config Profile",
+          "type": "Name",
+          "default": "NAME_None"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Sets a filter for a replicated object which will be used until the next call to SetFilter or SetConnectionFilter.\nFilters are used prevent objects from being replicated to certain connections. An object that is filtered\nout will cause the object to be destroyed on the remote side.\n@param Handle A valid handle to an object.\n@param FilterHandle A valid handle to a filter, retrieved via a call to GetFilter or one of the two special handles\nInvalidNetObjectFilterHandle to clear filtering or ToOwnerFilterHandle for owner filtering.\n@param FilterConfigProfile Optional name of a specialized profile to use as the object's configuration. When none filters are expected to use default settings.\n@return true if the filter was successfully set and false if it was not. It can fail for various reasons,\nsuch as the filter not supporting the object in question for implementation defined reasons. If the function fails\nthe filter of the object is unspecified, it could be using a previous filter or use no filtering.\n@see GetFilterHandle\n@see SetConnectionFilter"
+    },
+    {
+      "id": "get-filter-handle",
+      "name": "GetFilterHandle",
+      "category": "ReplicationSystem",
+      "signature": "GetFilterHandle(Target, Filter Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Filter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UE::Net::FNetObjectFilterHandle",
+      "docs": "Gets the handle for a filter with a given name. The handle can be used in subsequent calls to SetFilter.\n@param Handle A valid handle to an object.\n@param FilterName The name of the filter. Names of valid filters are configured in UNetObjectFilterDefinitions.\n@return A valid handle if a filter with the given name has been successfully created in this system or InvalidNetObjectFilterHandle if not.\n@see SetFilter\n@see UNetObjectFilterDefinitions"
+    },
+    {
+      "id": "get-filter",
+      "name": "GetFilter",
+      "category": "ReplicationSystem",
+      "signature": "GetFilter(Target, Filter Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Filter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "UNetObjectFilter*",
+      "docs": "Gets the filter with a given name.\n@param FilterName The name of the filter. Names of valid filters are configured in UNetObjectFilterDefinitions.\n@return A pointer to the filter if it exists, nullptr if not.\n@see UNetObjectFilterDefinitions"
+    },
+    {
+      "id": "get-filter-name",
+      "name": "GetFilterName",
+      "category": "ReplicationSystem",
+      "signature": "GetFilterName(Target, Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Filter",
+          "type": "UE::Net::FNetObjectFilterHandle"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Returns the name of the filter associated to this handle."
+    },
+    {
+      "id": "add-exclusion-filter-group",
+      "name": "AddExclusionFilterGroup",
+      "category": "ReplicationSystem",
+      "signature": "AddExclusionFilterGroup(Target, Group Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Add a group to the filtering system. This group is used only for filtering out objects. Exclusion groups are processed before dynamic filters, those implemented by UNetObjectFilter.\nBy default an exclusion group disallows replication for all objects in it. Use SetGroupFilterStatus to change the behavior.\n@note A group can only be either an exclusion group or an inclusion group, not both at the same time.\n@param GroupHandle A valid handle to a group.\n@see CreateGroup\n@see AddInclusionFilterGroup\n@see SetGroupFilterStatus\n@return true if the group was successfully added as an exclusion group, false in all other cases such as being an invalid group, reserved group or used as an inclusion filter."
+    },
+    {
+      "id": "add-inclusion-filter-group",
+      "name": "AddInclusionFilterGroup",
+      "category": "ReplicationSystem",
+      "signature": "AddInclusionFilterGroup(Target, Group Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Add a group to the filtering system. This group is used only for allowing replication of objects. Inclusion groups are processed after dynamic filters, those implemented by UNetObjectFilter.\nInclusion groups are used to allow overriding the effect of dynamic filtering which can be useful to always allow replication of team specific objects for example.\nBy default the group will not override the effects of dynamic filtering. Use SetGroupFilterStatus to set which connection the objects should be allowed to replicate to, overriding the dynamic filtering.\n@note A group can only be either an exclusion group or an inclusion group, not both at the same time.\n@note Subobjects added to inclusion groups will be ignored during processing. A subobject's filter status is determined by the root object. For subobject filtering one can use SubObjectFilters.\n@param GroupHandle A valid handle to a group.\n@see CreateGroup\n@see AddExclusionFilterGroup\n@see SetGroupFilterStatus\n@return true if the group was successfully added as an inclusion group, false in all other cases such as being an invalid group, reserved group or used as an exclusion filter."
+    },
+    {
+      "id": "remove-group-filter",
+      "name": "RemoveGroupFilter",
+      "category": "ReplicationSystem",
+      "signature": "RemoveGroupFilter(Target, Group Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove group from filtering system, canceling all effects of the group."
+    },
+    {
+      "id": "set-group-filter-status-1ff7b9",
+      "name": "SetGroupFilterStatus",
+      "category": "ReplicationSystem",
+      "signature": "SetGroupFilterStatus(Target, Group Handle, Connection Id, Replication Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Replication Status",
+          "type": "UE::Net::ENetFilterStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set status of GroupFilter for specific connection."
+    },
+    {
+      "id": "set-group-filter-status-1d5312",
+      "name": "SetGroupFilterStatus",
+      "category": "ReplicationSystem",
+      "signature": "SetGroupFilterStatus(Target, Group Handle, Connections, Replication Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        },
+        {
+          "name": "Connections",
+          "type": "UE::Net::FNetBitArray&"
+        },
+        {
+          "name": "Replication Status",
+          "type": "UE::Net::ENetFilterStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set status of GroupFilter for connection marked in the Connections BitArray to the passed ReplicationStatus,\nConnections not marked in the BitArray will be set to the opposite status."
+    },
+    {
+      "id": "set-group-filter-status-a89871",
+      "name": "SetGroupFilterStatus",
+      "category": "ReplicationSystem",
+      "signature": "SetGroupFilterStatus(Target, Group Handle, Replication Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Handle",
+          "type": "FNetObjectGroupHandle"
+        },
+        {
+          "name": "Replication Status",
+          "type": "UE::Net::ENetFilterStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set status of GroupFilter for all connections."
+    },
+    {
+      "id": "get-or-create-sub-object-filter",
+      "name": "GetOrCreateSubObjectFilter",
+      "category": "ReplicationSystem",
+      "signature": "GetOrCreateSubObjectFilter(Target, Group Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Add a group to the filtering system. By default the filter disallows replication for all objects in the group.\n@param GroupHandle A valid handle to a group.\n@see CreateGroup"
+    },
+    {
+      "id": "get-sub-object-filter-group-handle",
+      "name": "GetSubObjectFilterGroupHandle",
+      "category": "ReplicationSystem",
+      "signature": "GetSubObjectFilterGroupHandle(Target, Group Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FNetObjectGroupHandle",
+      "docs": "Returns the FNetObjectGroupHandle used by a named SubObjectFilter"
+    },
+    {
+      "id": "set-sub-object-filter-status",
+      "name": "SetSubObjectFilterStatus",
+      "category": "ReplicationSystem",
+      "signature": "SetSubObjectFilterStatus(Target, Group Name, Connection Handle, Replication Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Name",
+          "type": "Name"
+        },
+        {
+          "name": "Connection Handle",
+          "type": "UE::Net::FConnectionHandle"
+        },
+        {
+          "name": "Replication Status",
+          "type": "UE::Net::ENetFilterStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set status of GroupFilter for specific connection."
+    },
+    {
+      "id": "remove-sub-object-filter",
+      "name": "RemoveSubObjectFilter",
+      "category": "ReplicationSystem",
+      "signature": "RemoveSubObjectFilter(Target, Group Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Group Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove group from filtering system, will cancel effects of the group."
+    },
+    {
+      "id": "set-connection-filter",
+      "name": "SetConnectionFilter",
+      "category": "ReplicationSystem",
+      "signature": "SetConnectionFilter(Target, Handle, Connections, Replication Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Connections",
+          "type": "TBitArray<>&"
+        },
+        {
+          "name": "Replication Status",
+          "type": "UE::Net::ENetFilterStatus"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set which connections the object is allowed to be replicated to. This will cancel the effect\nof any previous SetFilter or SetConnectionFilter calls on the object.\nIt will also remove the object from any dynamic filters\n@param Handle A valid handle to a replicated object.\n@param Connections Set bits indicates the connection IDs that the object is allowed or not allowed to be replicated to depending on ReplicationStatus.\n@param ReplicationStatus Whether the set bits in Connections indicate if the object is allowed or not allowed to be replicated to those connections.\n@return true if the connection filter was properly set, false if not.\n@see SetFilter"
+    },
+    {
+      "id": "set-replication-condition-connection-filter",
+      "name": "SetReplicationConditionConnectionFilter",
+      "category": "ReplicationSystem",
+      "signature": "SetReplicationConditionConnectionFilter(Target, Handle, Condition, Connection Id, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Condition",
+          "type": "UE::Net::EReplicationCondition"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Enable or disable a replication condition for a single connection and do the inverse for all other connections. This will affect\nthe replication of properties with conditions that are dependent on this condition.\nCalling this function will cancel the effect of previous calls to this function with this condition, i.e. only a single\nconnection can have RoleAutonomous set.\n@param Handle A valid handle to a replicated object.\n@param Condition The ReplicationCondition to modify. Only EReplicationCondition::RoleAutonomous is supported.\n@param ConnectionId The ID of the connection to enable or disable the condition for or 0 to disable the condition.\n@param bEnable Whether the the condition should be enabled or disabled for the specified connection.\nIf ConnectionId is zero this parameter is ignored.\n@return true if the condition was successfully set, false if not.\n@see SetReplicationCondition"
+    },
+    {
+      "id": "set-replication-condition",
+      "name": "SetReplicationCondition",
+      "category": "ReplicationSystem",
+      "signature": "SetReplicationCondition(Target, Handle, Condition, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Condition",
+          "type": "UE::Net::EReplicationCondition"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Enable or disable a replication condition for all connections. This will affect the replication of properties with conditions.\n@param Handle A valid handle to a replicated object.\n@param Condition The ReplicationCondition to modify. Only EReplicationCondition::ReplicatePhysics is supported.\n@param bEnable Whether the the condition should be enabled or disabled.\n@return true if the condition was successfully set, false if not.\n@see SetReplicationCondition, SetReplicationConditionConnectionFilter"
+    },
+    {
+      "id": "set-delta-compression-status",
+      "name": "SetDeltaCompressionStatus",
+      "category": "ReplicationSystem",
+      "signature": "SetDeltaCompressionStatus(Target, Handle, Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Status",
+          "type": "UE::Net::ENetObjectDeltaCompressionStatus"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set whether the object allows delta compression when serializing. This does not guarantee that the object\nwill use delta compression depending on other factors, such as the maximum number of delta compressed objects,\nwhether the delta compression feature is enabled or not and other reasons.\n@param Handle A valid handle to a replicated object."
+    },
+    {
+      "id": "set-is-net-temporary",
+      "name": "SetIsNetTemporary",
+      "category": "ReplicationSystem",
+      "signature": "SetIsNetTemporary(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark an object as a net temporary. Such objects only replicate its\ninitial state and ignores future state changes."
+    },
+    {
+      "id": "tear-off-next-update",
+      "name": "TearOffNextUpdate",
+      "category": "ReplicationSystem",
+      "signature": "TearOffNextUpdate(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark an object to be torn off next update.\n@param Handle A valid handle to an object."
+    },
+    {
+      "id": "force-net-update",
+      "name": "ForceNetUpdate",
+      "category": "ReplicationSystem",
+      "signature": "ForceNetUpdate(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force the passed object to be considered for replication this frame.\nThis will also force it's sub objects, root object and any of it's dependents to also be considered for replication.\nNormally an object is checked for replication only when it's poll frequency is hit.\n@param Handle A valid handle to an object.\n@see FObjectReplicationBridgePollConfig"
+    },
+    {
+      "id": "mark-dirty",
+      "name": "MarkDirty",
+      "category": "ReplicationSystem",
+      "signature": "MarkDirty(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Explicitly mark object as having dirty properties.\n@param Handle A valid handle to an object.\n@see FObjectReplicationBridgePollConfig"
+    },
+    {
+      "id": "get-world-locations",
+      "name": "GetWorldLocations",
+      "category": "ReplicationSystem",
+      "signature": "GetWorldLocations(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "UE::Net::FWorldLocations&",
+      "docs": "Retrieve the WorldLocations instance which holds world locations for all objects that support it.\n@return The WorldLocations instance.\n@see UE::Net::FWorldLocations"
+    },
+    {
+      "id": "init-data-stream-manager",
+      "name": "InitDataStreamManager",
+      "category": "ReplicationSystem",
+      "signature": "InitDataStreamManager(Target, Connection Id, Data Stream Manager)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Data Stream Manager",
+          "type": "UDataStreamManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Init data streams for a connection. For internal use by UDataStreamChannel."
+    },
+    {
+      "id": "set-connection-user-data",
+      "name": "SetConnectionUserData",
+      "category": "ReplicationSystem",
+      "signature": "SetConnectionUserData(Target, Connection Id, User Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "User Data",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Associate data with a connection. Only a single piece of user data is supported per connection.\nThe last call determines which data is associated with the connection.\n@param ConnectionId A valid connection ID.\n@param UserData What data to associate with the connection.\n@see GetConnectionUserData"
+    },
+    {
+      "id": "get-connection-user-data",
+      "name": "GetConnectionUserData",
+      "category": "ReplicationSystem",
+      "signature": "GetConnectionUserData(Target, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Retrieve the user data associated with a connection.\n@param ConnectionId A valid connection ID.\n@return The user data associated with the connection.\n@see SetConnectionUserData"
+    },
+    {
+      "id": "set-cull-distance-override",
+      "name": "SetCullDistanceOverride",
+      "category": "ReplicationSystem",
+      "signature": "SetCullDistanceOverride(Target, Handle, Dist)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Dist",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the cull distance for an object temporarily instead of the default cull distance value associated with the object (ex: @see AActor::NetCullDistanceSquared)"
+    },
+    {
+      "id": "clear-cull-distance-override",
+      "name": "ClearCullDistanceOverride",
+      "category": "ReplicationSystem",
+      "signature": "ClearCullDistanceOverride(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears any previously set cull distance override for an object. This will cause the objects to revert to their internal cull distance property."
+    },
+    {
+      "id": "get-cull-distance",
+      "name": "GetCullDistance",
+      "category": "ReplicationSystem",
+      "signature": "GetCullDistance(Target, Handle, Default Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Handle",
+          "type": "FNetRefHandle"
+        },
+        {
+          "name": "Default Value",
+          "type": "Float",
+          "default": "-1.0f"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Returns the current cull distance for an object or DefaultValue if it doesn't have a cull distance or is not a replicated object."
+    },
+    {
+      "id": "report-protocol-mismatch",
+      "name": "ReportProtocolMismatch",
+      "category": "ReplicationSystem",
+      "signature": "ReportProtocolMismatch(Target, Net Ref Handle Id, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Net Ref Handle Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a connection finds a protocol divergence when instantiating a replicated object."
+    },
+    {
+      "id": "report-error-with-net-ref-handle-138400",
+      "name": "ReportErrorWithNetRefHandle",
+      "category": "ReplicationSystem",
+      "signature": "ReportErrorWithNetRefHandle(Target, Error Type, Net Ref Handle Id, Connection Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Error Type",
+          "type": "UE::Net::ENetRefHandleError"
+        },
+        {
+          "name": "Net Ref Handle Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a connection reports a critical error with a netrefhandle object"
+    },
+    {
+      "id": "report-error-with-net-ref-handle-4eb1d2",
+      "name": "ReportErrorWithNetRefHandle",
+      "category": "ReplicationSystem",
+      "signature": "ReportErrorWithNetRefHandle(Target, Error Type, Net Ref Handle Id, Connection Id, Extra Net Ref Handles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Error Type",
+          "type": "UE::Net::ENetRefHandleError"
+        },
+        {
+          "name": "Net Ref Handle Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Connection Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Extra Net Ref Handles",
+          "type": "TArray<uint64>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a connection reports a critical error with a netrefhandle object and extra handles"
+    },
+    {
+      "id": "collect-net-metrics",
+      "name": "CollectNetMetrics",
+      "category": "ReplicationSystem",
+      "signature": "CollectNetMetrics(Target, Out Net Metrics)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Out Net Metrics",
+          "type": "UE::Net::FNetMetrics&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect relevant metrics that could be sent to analytics"
+    },
+    {
+      "id": "reset-net-metrics",
+      "name": "ResetNetMetrics",
+      "category": "ReplicationSystem",
+      "signature": "ResetNetMetrics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset cached accumulated metrics"
+    },
+    {
+      "id": "get-delegates",
+      "name": "GetDelegates",
+      "category": "ReplicationSystem",
+      "signature": "GetDelegates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "UE::Net::FReplicationSystemDelegates&"
+    },
+    {
+      "id": "add-referenced-objects",
+      "name": "AddReferencedObjects",
+      "category": "ReplicationSystem",
+      "signature": "AddReferencedObjects(In This, Collector)",
+      "params": [
+        {
+          "name": "In This",
+          "type": "UObject*"
+        },
+        {
+          "name": "Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reset-game-world-state",
+      "name": "ResetGameWorldState",
+      "category": "ReplicationSystem",
+      "signature": "ResetGameWorldState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "notify-streaming-level-unload",
+      "name": "NotifyStreamingLevelUnload",
+      "category": "ReplicationSystem",
+      "signature": "NotifyStreamingLevelUnload(Target, Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UReplicationSystem*"
+        },
+        {
+          "name": "Level",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-replication-system",
+      "name": "CreateReplicationSystem",
+      "category": "ReplicationSystem",
+      "signature": "CreateReplicationSystem(Params)",
+      "params": [
+        {
+          "name": "Params",
+          "type": "UReplicationSystem::FReplicationSystemParams&"
+        }
+      ],
+      "returnType": "public : UReplicationSystem*",
+      "docs": "Creates a new ReplicationSystem.\n@param Params The settings for the ReplicationSystem.\n@return A pointer to the newly created ReplicationSystem if it was allowed to created, nullptr if not."
+    },
+    {
+      "id": "destroy-replication-system",
+      "name": "DestroyReplicationSystem",
+      "category": "ReplicationSystem",
+      "signature": "DestroyReplicationSystem(System)",
+      "params": [
+        {
+          "name": "System",
+          "type": "UReplicationSystem*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroys a ReplicationSystem.\n@param System A pointer to the system to destroy. Must have been created with CreateReplicationSystem.\n@see CreateReplicationSystem"
+    },
+    {
+      "id": "get-all-replication-systems",
+      "name": "GetAllReplicationSystems",
+      "category": "ReplicationSystem",
+      "signature": "GetAllReplicationSystems()",
+      "params": [],
+      "returnType": "TArrayView<UReplicationSystem*>",
+      "docs": "Returns all replication systems. Entries may be null."
+    },
+    {
+      "id": "get-replication-system-created-delegate",
+      "name": "GetReplicationSystemCreatedDelegate",
+      "category": "ReplicationSystem",
+      "signature": "GetReplicationSystemCreatedDelegate()",
+      "params": [],
+      "returnType": "FReplicationSystemCreatedDelegate&",
+      "docs": "Static delegate that is triggered just after creating and initializing a new replication system."
+    },
+    {
+      "id": "get-replication-system-destroyed-delegate",
+      "name": "GetReplicationSystemDestroyedDelegate",
+      "category": "ReplicationSystem",
+      "signature": "GetReplicationSystemDestroyedDelegate()",
+      "params": [],
+      "returnType": "FReplicationSystemDestroyedDelegate&",
+      "docs": "Static delegate that is triggered before we destroy a replication system."
+    }
+  ]
+}

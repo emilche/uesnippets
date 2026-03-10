@@ -1,0 +1,1066 @@
+{
+  "id": "unreal-client",
+  "label": "UnrealClient",
+  "includepath": "UnrealClient.h",
+  "includes": [
+    "CoreMinimal",
+    "InputKeyEventArgs",
+    "EngineBaseTypes",
+    "GCObject",
+    "RenderResource",
+    "HitProxies",
+    "RenderGraphDefinitions",
+    "TypedElementListFwd",
+    "GenericWindow",
+    "DynamicRenderScaling"
+  ],
+  "functions": [
+    {
+      "id": "f-render-target",
+      "name": "FRenderTarget",
+      "category": "UnrealClient",
+      "signature": "FRenderTarget()",
+      "params": [],
+      "returnType": "public :",
+      "docs": "=============================================================================\nUnrealClient.h: Interface definition for platform specific client code.\n============================================================================="
+    },
+    {
+      "id": "get-render-target-texture-4f978d",
+      "name": "GetRenderTargetTexture",
+      "category": "UnrealClient",
+      "signature": "GetRenderTargetTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        }
+      ],
+      "returnType": "FTextureRHIRef&",
+      "docs": "Accessor for the surface RHI when setting this render target\n@return render target surface RHI resource"
+    },
+    {
+      "id": "get-render-target-uav",
+      "name": "GetRenderTargetUAV",
+      "category": "UnrealClient",
+      "signature": "GetRenderTargetUAV(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        }
+      ],
+      "returnType": "FUnorderedAccessViewRHIRef"
+    },
+    {
+      "id": "get-render-target-texture-8ccfa7",
+      "name": "GetRenderTargetTexture",
+      "category": "UnrealClient",
+      "signature": "GetRenderTargetTexture(Target, Graph Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        }
+      ],
+      "returnType": "FRDGTextureRef",
+      "docs": "Returns a valid RDG texture for this render target."
+    },
+    {
+      "id": "get-shader-resource-texture",
+      "name": "GetShaderResourceTexture",
+      "category": "UnrealClient",
+      "signature": "GetShaderResourceTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        }
+      ],
+      "returnType": "FTextureRHIRef&",
+      "docs": "Accessor for the surface RHI to use when reading the reading target (may differ from GetRenderTargetTexture() for some implementations like cubemaps)\n@return surface RHI resource"
+    },
+    {
+      "id": "get-display-gamma",
+      "name": "GetDisplayGamma",
+      "category": "UnrealClient",
+      "signature": "GetDisplayGamma(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "@return display gamma expected for rendering to this render target"
+    },
+    {
+      "id": "read-pixels",
+      "name": "ReadPixels",
+      "category": "UnrealClient",
+      "signature": "ReadPixels(Target, Out Image Data, In Flags, In Src Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Out Image Data",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "FReadSurfaceDataFlags",
+          "default": "FReadSurfaceDataFlags(RCM_UNorm, CubeFace_MAX)"
+        },
+        {
+          "name": "In Src Rect",
+          "type": "FIntRect",
+          "default": "FIntRect(0, 0, 0, 0)"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the render target's displayed pixels into a preallocated color buffer.\n@param OutImageData - RGBA8 values will be stored in this buffer\n@param InFlags - Additional information about how to to read the surface data (cube face, slice index, etc.)\n@param InSrcRect - InSrcRect not specified means the whole rect\n@return True if the read succeeded.\nThis will convert whatever the pixel format is to FColor\nPrefer using FImageUtils::GetRenderTargetImage rather than calling this directly.\nThe default value for InFlags specifies RCM_UNorm which will cause values to be scaled into [0,1] ; use RCM_MinMax to retrieve values without change.\nIf the RenderTarget surface is float linear, it will converted to SRGB FColor, if InFlags.bLinearToGamma is set (which is on by default).\nIf the RenderTarget surface is U8, then the SRGB/not state is unchanged, the U8 values are retrieved unchanged in either Linear or SRGB.\nGamma is handled correctly automatically by FImageUtils::GetRenderTargetImage"
+    },
+    {
+      "id": "read-pixels-ptr",
+      "name": "ReadPixelsPtr",
+      "category": "UnrealClient",
+      "signature": "ReadPixelsPtr(Target, Out Image Bytes, In Flags, In Src Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Out Image Bytes",
+          "type": "FColor*"
+        },
+        {
+          "name": "In Flags",
+          "type": "FReadSurfaceDataFlags",
+          "default": "FReadSurfaceDataFlags(RCM_UNorm, CubeFace_MAX)"
+        },
+        {
+          "name": "In Src Rect",
+          "type": "FIntRect",
+          "default": "FIntRect(0, 0, 0, 0)"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the render target's displayed pixels into a preallocated color buffer.\n@param OutImageBytes - RGBA8 values will be stored in this buffer.  Buffer must be preallocated with the correct size!\n@param InFlags - Additional information about how to to read the surface data (cube face, slice index, etc.)\n@param InSrcRect - InSrcRect not specified means the whole rect\n@return True if the read succeeded.\nPtr variant of this API just does an extra memcpy; prefer the TArray variant.\nPrefer using FImageUtils::GetRenderTargetImage rather than calling this directly."
+    },
+    {
+      "id": "read-float-16-pixels-b485d0",
+      "name": "ReadFloat16Pixels",
+      "category": "UnrealClient",
+      "signature": "ReadFloat16Pixels(Target, Out Image Data, Cube Face)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Out Image Data",
+          "type": "TArray<FFloat16Color>&"
+        },
+        {
+          "name": "Cube Face",
+          "type": "ECubeFace"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the render target's displayed pixels into the given color buffer.\n@param OutImageData - RGBA16F values will be stored in this buffer\n@param CubeFace - optional cube face for when reading from a cube render target\n@return True if the read succeeded."
+    },
+    {
+      "id": "read-float-16-pixels-c8bf51",
+      "name": "ReadFloat16Pixels",
+      "category": "UnrealClient",
+      "signature": "ReadFloat16Pixels(Target, Out Image Data, In Flags, In Src Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Out Image Data",
+          "type": "TArray<FFloat16Color>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "FReadSurfaceDataFlags",
+          "default": "FReadSurfaceDataFlags(RCM_UNorm, CubeFace_MAX)"
+        },
+        {
+          "name": "In Src Rect",
+          "type": "FIntRect",
+          "default": "FIntRect(0, 0, 0, 0)"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the render target's displayed pixels into the given color buffer.\n@param OutImageData - RGBA16F values will be stored in this buffer\n@param InFlags - Additional information about how to to read the surface data (cube face, slice index, etc.)\n@param InSrcRect - InSrcRect not specified means the whole rect\n@return True if the read succeeded.\nThe default value for InFlags specifies RCM_UNorm which will cause values to be scaled into [0,1] ; use RCM_MinMax to retrieve values without change.\nUnlike other RenderTarget Read functions, this only works if surface is PF_FloatRGBA exactly ; it does not convert.\nPrefer using FImageUtils::GetRenderTargetImage rather than calling this directly."
+    },
+    {
+      "id": "read-linear-color-pixels",
+      "name": "ReadLinearColorPixels",
+      "category": "UnrealClient",
+      "signature": "ReadLinearColorPixels(Target, Out Image Data, In Flags, In Src Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Out Image Data",
+          "type": "TArray<FLinearColor>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "FReadSurfaceDataFlags",
+          "default": "FReadSurfaceDataFlags(RCM_MinMax, CubeFace_MAX)"
+        },
+        {
+          "name": "In Src Rect",
+          "type": "FIntRect",
+          "default": "FIntRect(0, 0, 0, 0)"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the render target's displayed pixels into the given color buffer.\n@param OutImageData - Linear color array to store the value\n@param InFlags - Additional information about how to to read the surface data (cube face, slice index, etc.)\n@param InSrcRect - InSrcRect not specified means the whole rect\n@return True if the read succeeded.\nThe default value for InFlags specifies RCM_UNorm which will cause values to be scaled into [0,1] ; use RCM_MinMax to retrieve values without change.\nThis will convert whatever the pixel format is to FLinearColor (if supported).\nPrefer using FImageUtils::GetRenderTargetImage rather than calling this directly."
+    },
+    {
+      "id": "read-linear-color-pixels-ptr",
+      "name": "ReadLinearColorPixelsPtr",
+      "category": "UnrealClient",
+      "signature": "ReadLinearColorPixelsPtr(Target, Out Image Bytes, In Flags, In Src Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderTarget*"
+        },
+        {
+          "name": "Out Image Bytes",
+          "type": "FLinearColor*"
+        },
+        {
+          "name": "In Flags",
+          "type": "FReadSurfaceDataFlags",
+          "default": "FReadSurfaceDataFlags(RCM_MinMax, CubeFace_MAX)"
+        },
+        {
+          "name": "In Src Rect",
+          "type": "FIntRect",
+          "default": "FIntRect(0, 0, 0, 0)"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Reads the render target's displayed pixels into the given color buffer.\n@param OutImageBytes - Linear color array will be stored in this buffer.  Buffer must be preallocated with the correct size!\n@param InFlags - Additional information about how to to read the surface data (cube face, slice index, etc.)\n@param InSrcRect - InSrcRect not specified means the whole rect\n@return True if the read succeeded.\nPtr variant of this API just does an extra memcpy; prefer the TArray variant.\nPrefer using FImageUtils::GetRenderTargetImage rather than calling this directly."
+    },
+    {
+      "id": "request-screenshot-e2106c",
+      "name": "RequestScreenshot",
+      "category": "UnrealClient",
+      "signature": "RequestScreenshot(In Show UI)",
+      "params": [
+        {
+          "name": "In Show UI",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Width"
+    },
+    {
+      "id": "request-screenshot-f10312",
+      "name": "RequestScreenshot",
+      "category": "UnrealClient",
+      "signature": "RequestScreenshot(In Filename, In Show UI, Add Filename Suffix, Hdr Screenshot)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "String&"
+        },
+        {
+          "name": "In Show UI",
+          "type": "Bool"
+        },
+        {
+          "name": "Add Filename Suffix",
+          "type": "Bool"
+        },
+        {
+          "name": "Hdr Screenshot",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Requests a new screenshot with a specific filename\n@param InFilename\t\t\tThe filename to use\n@param bInShowUI\t\t\t\tWhether or not to show Slate UI\n@param bAddFilenameSuffix\tWhether an auto-generated unique suffix should be added to the supplied filename"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "UnrealClient",
+      "signature": "Reset()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Resets a screenshot request"
+    },
+    {
+      "id": "create-viewport-screen-shot-filename",
+      "name": "CreateViewportScreenShotFilename",
+      "category": "UnrealClient",
+      "signature": "CreateViewportScreenShotFilename(In Out Filename)",
+      "params": [
+        {
+          "name": "In Out Filename",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a new screenshot filename from the passed in filename template"
+    },
+    {
+      "id": "get-highres-screenshot-mask-color-array",
+      "name": "GetHighresScreenshotMaskColorArray",
+      "category": "UnrealClient",
+      "signature": "GetHighresScreenshotMaskColorArray()",
+      "params": [],
+      "returnType": "TArray<FColor>*",
+      "docs": "Access a temporary color array for storing the pixel colors for the highres screenshot mask"
+    },
+    {
+      "id": "get-highres-screenshot-mask-extents",
+      "name": "GetHighresScreenshotMaskExtents",
+      "category": "UnrealClient",
+      "signature": "GetHighresScreenshotMaskExtents()",
+      "params": [],
+      "returnType": "FIntPoint&",
+      "docs": "Extents of array returned by function above"
+    },
+    {
+      "id": "get-memory-string",
+      "name": "GetMemoryString",
+      "category": "UnrealClient",
+      "signature": "GetMemoryString(Value, Auto Type)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "Double"
+        },
+        {
+          "name": "Auto Type",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "f-viewport-4854b6",
+      "name": "FViewport",
+      "category": "UnrealClient",
+      "signature": "FViewport(In Viewport Client)",
+      "params": [
+        {
+          "name": "In Viewport Client",
+          "type": "FViewportClient*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Send when a viewport is resized"
+    },
+    {
+      "id": "f-viewport-b5d87d",
+      "name": "FViewport",
+      "category": "UnrealClient",
+      "signature": "FViewport()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "enqueue-begin-render-frame",
+      "name": "EnqueueBeginRenderFrame",
+      "category": "UnrealClient",
+      "signature": "EnqueueBeginRenderFrame(Target, Should Present)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Should Present",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts a new rendering frame. Called from the game thread thread.\n@param bShouldPresent Whether the frame will be presented to the screen"
+    },
+    {
+      "id": "enqueue-end-render-frame",
+      "name": "EnqueueEndRenderFrame",
+      "category": "UnrealClient",
+      "signature": "EnqueueEndRenderFrame(Target, Lock To Vsync, Should Present)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Lock To Vsync",
+          "type": "Bool"
+        },
+        {
+          "name": "Should Present",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ends a rendering frame. Called from the game thread.\n@param bPresent\t\tWhether the frame should be presented to the screen"
+    },
+    {
+      "id": "begin-render-frame",
+      "name": "BeginRenderFrame",
+      "category": "UnrealClient",
+      "signature": "BeginRenderFrame(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts a new rendering frame. Called from the rendering thread."
+    },
+    {
+      "id": "end-render-frame",
+      "name": "EndRenderFrame",
+      "category": "UnrealClient",
+      "signature": "EndRenderFrame(Target, RHI Cmd List, Present, Lock To Vsync)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        },
+        {
+          "name": "Present",
+          "type": "Bool"
+        },
+        {
+          "name": "Lock To Vsync",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Ends a rendering frame. Called from the rendering thread.\n@param bPresent\t\tWhether the frame should be presented to the screen\n@param bLockToVsync\tWhether the GPU should block until VSYNC before presenting"
+    },
+    {
+      "id": "get-gpu-mask",
+      "name": "GetGPUMask",
+      "category": "UnrealClient",
+      "signature": "GetGPUMask(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        }
+      ],
+      "returnType": "FRHIGPUMask",
+      "docs": "Returns the GPU nodes on which to render this render target."
+    },
+    {
+      "id": "draw",
+      "name": "Draw",
+      "category": "UnrealClient",
+      "signature": "Draw(Target, Should Present)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Should Present",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates the viewport's displayed pixels with the results of calling ViewportClient->Draw.\n@param\tbShouldPresent\tWhether we want this frame to be presented"
+    },
+    {
+      "id": "defer-invalidate-hit-proxy",
+      "name": "DeferInvalidateHitProxy",
+      "category": "UnrealClient",
+      "signature": "DeferInvalidateHitProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidates the viewport's cached hit proxies at the end of the frame."
+    },
+    {
+      "id": "invalidate-hit-proxy",
+      "name": "InvalidateHitProxy",
+      "category": "UnrealClient",
+      "signature": "InvalidateHitProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidates cached hit proxies"
+    },
+    {
+      "id": "invalidate",
+      "name": "Invalidate",
+      "category": "UnrealClient",
+      "signature": "Invalidate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidates cached hit proxies and the display."
+    },
+    {
+      "id": "get-raw-hit-proxy-data",
+      "name": "GetRawHitProxyData",
+      "category": "UnrealClient",
+      "signature": "GetRawHitProxyData(Target, In Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "In Rect",
+          "type": "FIntRect"
+        }
+      ],
+      "returnType": "TArray<FColor>&"
+    },
+    {
+      "id": "get-hit-proxy-map",
+      "name": "GetHitProxyMap",
+      "category": "UnrealClient",
+      "signature": "GetHitProxyMap(Target, In Rect, Out Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "In Rect",
+          "type": "FIntRect"
+        },
+        {
+          "name": "Out Map",
+          "type": "TArray<HHitProxy*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copies the hit proxies from an area of the screen into a buffer.\nInRect must be entirely within the viewport's client area.\nIf the hit proxies are not cached, this will call ViewportClient->Draw with a hit-testing canvas."
+    },
+    {
+      "id": "get-hit-proxy",
+      "name": "GetHitProxy",
+      "category": "UnrealClient",
+      "signature": "GetHitProxy(Target, X, Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "X",
+          "type": "Int"
+        },
+        {
+          "name": "Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "HHitProxy*",
+      "docs": "Returns the dominant hit proxy at a given point.  If X,Y are outside the client area of the viewport, returns NULL.\nCaution is required as calling Invalidate after this will free the returned HHitProxy."
+    },
+    {
+      "id": "get-actors-and-models-in-hit-proxy",
+      "name": "GetActorsAndModelsInHitProxy",
+      "category": "UnrealClient",
+      "signature": "GetActorsAndModelsInHitProxy(Target, In Rect, Out Actors, Out Models)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "In Rect",
+          "type": "FIntRect"
+        },
+        {
+          "name": "Out Actors",
+          "type": "TSet<AActor*>&"
+        },
+        {
+          "name": "Out Models",
+          "type": "TSet<UModel*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns all actors and models found in the hit proxy within a specified region.\nInRect must be entirely within the viewport's client area.\nIf the hit proxies are not cached, this will call ViewportClient->Draw with a hit-testing canvas."
+    },
+    {
+      "id": "get-element-handle-at-point",
+      "name": "GetElementHandleAtPoint",
+      "category": "UnrealClient",
+      "signature": "GetElementHandleAtPoint(Target, X, Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "X",
+          "type": "Int"
+        },
+        {
+          "name": "Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FTypedElementHandle",
+      "docs": "Returns the dominant element handle at a given point.  If X,Y are outside the client area of the viewport, returns an invalid handle."
+    },
+    {
+      "id": "get-element-handles-in-rect",
+      "name": "GetElementHandlesInRect",
+      "category": "UnrealClient",
+      "signature": "GetElementHandlesInRect(Target, In Rect, Out Element Handles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "In Rect",
+          "type": "FIntRect"
+        },
+        {
+          "name": "Out Element Handles",
+          "type": "FTypedElementListRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns all element handles found within a specified region.\nInRect must be entirely within the viewport's client area.\nIf the hit proxies are not cached, this will call ViewportClient->Draw with a hit-testing canvas."
+    },
+    {
+      "id": "enumerate-hit-proxies-in-rect",
+      "name": "EnumerateHitProxiesInRect",
+      "category": "UnrealClient",
+      "signature": "EnumerateHitProxiesInRect(Target, In Rect, In Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "In Rect",
+          "type": "FIntRect"
+        },
+        {
+          "name": "In Callback",
+          "type": "TFunctionRef<bool ( HHitProxy* )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enumerate all valid hit proxies found within a specified region.\nInRect must be entirely within the viewport's client area.\nIf the hit proxies are not cached, this will call ViewportClient->Draw with a hit-testing canvas."
+    },
+    {
+      "id": "calculate-view-extents-943ab3",
+      "name": "CalculateViewExtents",
+      "category": "UnrealClient",
+      "signature": "CalculateViewExtents(Target, Aspect Ratio, View Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Aspect Ratio",
+          "type": "Float"
+        },
+        {
+          "name": "View Rect",
+          "type": "FIntRect&"
+        }
+      ],
+      "returnType": "FIntRect",
+      "docs": "Calculates the view inside the viewport when the aspect ratio is locked.\nUsed for creating cinematic bars.\n@param Aspect [in] ratio to lock to\n@param ViewRect [in] unconstrained view rectangle\n@return\tconstrained view rectangle"
+    },
+    {
+      "id": "calculate-view-extents-9d302c",
+      "name": "CalculateViewExtents",
+      "category": "UnrealClient",
+      "signature": "CalculateViewExtents(Aspect Ratio, Desired Aspect Ratio, View Rect, Dest Size)",
+      "params": [
+        {
+          "name": "Aspect Ratio",
+          "type": "Float"
+        },
+        {
+          "name": "Desired Aspect Ratio",
+          "type": "Float"
+        },
+        {
+          "name": "View Rect",
+          "type": "FIntRect&"
+        },
+        {
+          "name": "Dest Size",
+          "type": "FIntPoint&"
+        }
+      ],
+      "returnType": "FIntRect",
+      "docs": "Calculates the view inside the viewport when the aspect ratio is locked.\nUsed for creating cinematic bars.\n@param AspectRatio [in] ratio to lock to\n@param DesiredAspectRatio [in] the aspect ratio of the viewport\n@param ViewRect [in] unconstrained view rectangle\n@param DestSize [in] the size of the the viewport\n@return constrained view rectangle"
+    },
+    {
+      "id": "set-viewport-client",
+      "name": "SetViewportClient",
+      "category": "UnrealClient",
+      "signature": "SetViewportClient(Target, In Viewport Client)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "In Viewport Client",
+          "type": "FViewportClient*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a viewport client if one wasn't provided at construction time.\n@param InViewportClient\t- The viewport client to set."
+    },
+    {
+      "id": "set-game-rendering-enabled",
+      "name": "SetGameRenderingEnabled",
+      "category": "UnrealClient",
+      "signature": "SetGameRenderingEnabled(Is Enabled, Present And Stop Movie Delay)",
+      "params": [
+        {
+          "name": "Is Enabled",
+          "type": "Bool"
+        },
+        {
+          "name": "Present And Stop Movie Delay",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Globally enables/disables rendering\n@param bIsEnabled true if drawing should occur\n@param PresentAndStopMovieDelay Number of frames to delay before enabling bPresent in RHIEndDrawingViewport, and before stopping the movie"
+    },
+    {
+      "id": "process-toggle-freeze-command",
+      "name": "ProcessToggleFreezeCommand",
+      "category": "UnrealClient",
+      "signature": "ProcessToggleFreezeCommand(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles freezing/unfreezing of rendering"
+    },
+    {
+      "id": "has-toggle-freeze-command",
+      "name": "HasToggleFreezeCommand",
+      "category": "UnrealClient",
+      "signature": "HasToggleFreezeCommand(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if there is a command to toggle freezerendering"
+    },
+    {
+      "id": "set-initial-size",
+      "name": "SetInitialSize",
+      "category": "UnrealClient",
+      "signature": "SetInitialSize(Target, Initial Size XY)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Initial Size XY",
+          "type": "FIntPoint"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the initial size of this viewport.  Will do nothing if the viewport has already been sized\n@param InitialSizeXY\tThe initial size of the viewport"
+    },
+    {
+      "id": "take-high-res-screen-shot",
+      "name": "TakeHighResScreenShot",
+      "category": "UnrealClient",
+      "signature": "TakeHighResScreenShot(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "The current version of the running instance"
+    },
+    {
+      "id": "update-viewport-rhi",
+      "name": "UpdateViewportRHI",
+      "category": "UnrealClient",
+      "signature": "UpdateViewportRHI(Target, Destroyed, New Size X, New Size Y, New Window Mode, Preferred Pixel Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Destroyed",
+          "type": "Bool"
+        },
+        {
+          "name": "New Size X",
+          "type": "UInt"
+        },
+        {
+          "name": "New Size Y",
+          "type": "UInt"
+        },
+        {
+          "name": "New Window Mode",
+          "type": "EWindowMode::Type"
+        },
+        {
+          "name": "Preferred Pixel Format",
+          "type": "EPixelFormat"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The viewport's client."
+    },
+    {
+      "id": "f-hit-proxy-map",
+      "name": "FHitProxyMap",
+      "category": "UnrealClient",
+      "signature": "FHitProxyMap()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "A map from 2D coordinates to cached hit proxies."
+    },
+    {
+      "id": "release-rhi",
+      "name": "ReleaseRHI",
+      "category": "UnrealClient",
+      "signature": "ReleaseRHI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The width of the hit proxy map."
+    },
+    {
+      "id": "init-rhi",
+      "name": "InitRHI",
+      "category": "UnrealClient",
+      "signature": "InitRHI(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FViewport*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-ctrl-down",
+      "name": "IsCtrlDown",
+      "category": "UnrealClient",
+      "signature": "IsCtrlDown(Viewport)",
+      "params": [
+        {
+          "name": "Viewport",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-shift-down",
+      "name": "IsShiftDown",
+      "category": "UnrealClient",
+      "signature": "IsShiftDown(Viewport)",
+      "params": [
+        {
+          "name": "Viewport",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-alt-down",
+      "name": "IsAltDown",
+      "category": "UnrealClient",
+      "signature": "IsAltDown(Viewport)",
+      "params": [
+        {
+          "name": "Viewport",
+          "type": "FViewport*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-viewport-screen-shot",
+      "name": "GetViewportScreenShot",
+      "category": "UnrealClient",
+      "signature": "GetViewportScreenShot(Viewport, Bitmap, View Rect, Read Surface Flags)",
+      "params": [
+        {
+          "name": "Viewport",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Bitmap",
+          "type": "TArray<FColor>&"
+        },
+        {
+          "name": "View Rect",
+          "type": "FIntRect&",
+          "default": "FIntRect()"
+        },
+        {
+          "name": "Read Surface Flags",
+          "type": "FReadSurfaceDataFlags&",
+          "default": "FReadSurfaceDataFlags()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-viewport-screen-shot-hdr",
+      "name": "GetViewportScreenShotHDR",
+      "category": "UnrealClient",
+      "signature": "GetViewportScreenShotHDR(Viewport, Bitmap, View Rect, Read Surface Flags)",
+      "params": [
+        {
+          "name": "Viewport",
+          "type": "FViewport*"
+        },
+        {
+          "name": "Bitmap",
+          "type": "TArray<FLinearColor>&"
+        },
+        {
+          "name": "View Rect",
+          "type": "FIntRect&",
+          "default": "FIntRect()"
+        },
+        {
+          "name": "Read Surface Flags",
+          "type": "FReadSurfaceDataFlags&",
+          "default": "FReadSurfaceDataFlags(RCM_MinMax)"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-high-res-screen-shot-input",
+      "name": "GetHighResScreenShotInput",
+      "category": "UnrealClient",
+      "signature": "GetHighResScreenShotInput(Cmd, Ar, Out X Res, Out Y Res, Out Res Mult, Out Capture Region, Out Should Enable Mask, Out Dump Buffer Visualization Targets, Out Capture HDR, Out Filename Override, Out Use Date Time As File Name)",
+      "params": [
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        },
+        {
+          "name": "Out X Res",
+          "type": "UInt&"
+        },
+        {
+          "name": "Out Y Res",
+          "type": "UInt&"
+        },
+        {
+          "name": "Out Res Mult",
+          "type": "Float&"
+        },
+        {
+          "name": "Out Capture Region",
+          "type": "FIntRect&"
+        },
+        {
+          "name": "Out Should Enable Mask",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Dump Buffer Visualization Targets",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Capture HDR",
+          "type": "Bool&"
+        },
+        {
+          "name": "Out Filename Override",
+          "type": "String&"
+        },
+        {
+          "name": "Out Use Date Time As File Name",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

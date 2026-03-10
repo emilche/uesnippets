@@ -1,0 +1,682 @@
+{
+  "id": "package-path",
+  "label": "PackagePath",
+  "includepath": "Misc/PackagePath.h",
+  "includes": [
+    "ArrayView",
+    "ContainersFwd",
+    "StringFwd",
+    "StringView",
+    "UnrealString",
+    "Platform",
+    "Text",
+    "UniquePtr",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "PackagePath",
+      "signature": "LexToString(Target, Package Extension)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Extension",
+          "type": "EPackageExtension"
+        }
+      ],
+      "returnType": "TCHAR*"
+    },
+    {
+      "id": "f-package-path",
+      "name": "FPackagePath",
+      "category": "PackagePath",
+      "signature": "FPackagePath(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "FPackagePath&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "PackagePath",
+      "signature": "Empty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Free this PackagePath's data and set it to an empty PackagePath"
+    },
+    {
+      "id": "try-from-mounted-name",
+      "name": "TryFromMountedName",
+      "category": "PackagePath",
+      "signature": "TryFromMountedName(In Package Name Or Header File Path, Out Package Path)",
+      "params": [
+        {
+          "name": "In Package Name Or Header File Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "Out Package Path",
+          "type": "FPackagePath&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Construct a PackagePath from a LocalPath or PackageName string, assuming the given LocalPath or PackageName\nis in a directory that is mounted (aka registered with FPackageName::MountPointExists)\n@param InPackageNameOrHeaderFilePath A string that describes either the PackageName or LocalPath of a PackagePath\n@param OutPackagePath If the function succeeds, the created PackagePath is assigned to this variable.\nOtherwise this variable is not written\n@return True if the input string was found in a mounted path and OutPackagePath has been set, false otherwise"
+    },
+    {
+      "id": "try-from-package-name",
+      "name": "TryFromPackageName",
+      "category": "PackagePath",
+      "signature": "TryFromPackageName(In Package Name, Out Package Path)",
+      "params": [
+        {
+          "name": "In Package Name",
+          "type": "FStringView"
+        },
+        {
+          "name": "Out Package Path",
+          "type": "FPackagePath&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Attempt to construct a PackagePath from a LongPackageName StringView, FName, or TCHAR*\nDoes not handle InPackageNames that are actually LocalPaths; use TryFromMountedName if you need to handle\neither PackageName or LocalPath\nFails and returns false if and only if InPackageName is not a valid LongPackageName (/Root/Folder/File)\nWill be converted to a MountedPath when the LocalPath is required; if the package is not mounted at that\npoint the LocalPath will be empty\n@param InPackageName The LongPackageName to test, does not have to be mounted or existing\n@param OutPackagePath If InPackageName is valid, the constructed PackagePath is copied into this variable,\notherwise the variable is not written\n@return True if InPackageName is valid, else false"
+    },
+    {
+      "id": "from-package-name-checked",
+      "name": "FromPackageNameChecked",
+      "category": "PackagePath",
+      "signature": "FromPackageNameChecked(In Package Name)",
+      "params": [
+        {
+          "name": "In Package Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "FPackagePath",
+      "docs": "Construct a PackagePath from a LongPackageName StringView, FName, or TCHAR*\nDoes not handle InPackageNames that are actually LocalPaths; use TryFromMountedName if you need to handle\neither PackageName or LocalPath\nGives an error and returns an empty PackagePath if InPackageName is not a valid LongPackageName (/Root/Folder/File)\nWill be converted to a MountedPath when the LocalPath is required; if the package is not mounted at that point\nthe LocalPath will be empty\n@param InPackageName A valid LongPackageName, does not have to be mounted or existing\n@return The constructed PackagePath"
+    },
+    {
+      "id": "from-package-name-unchecked",
+      "name": "FromPackageNameUnchecked",
+      "category": "PackagePath",
+      "signature": "FromPackageNameUnchecked(In Package Name)",
+      "params": [
+        {
+          "name": "In Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FPackagePath",
+      "docs": "Construct a PackagePath from a known valid LongPackageName FName\nWill be converted to a MountedPath when the LocalPath is required; if the package is not mounted at that point\nthe LocalPath will be empty\n@param InPackageName A valid LongPackageName, does not have to be mounted or existing\n@return The constructed PackagePath"
+    },
+    {
+      "id": "from-local-path-1522ad",
+      "name": "FromLocalPath",
+      "category": "PackagePath",
+      "signature": "FromLocalPath(In Filename)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "FPackagePath",
+      "docs": "Construct a PackagePath from a LocalPath string\nDoes not handle InFilenames that are actually PackageNames; use TryFromMountedName if you need to handle either\nPackageName or LocalPath\nWill be converted to a MountedPath when the PackageName is required; if the package is not mounted at that\npoint the PackageName will be empty.\nAlways succeeds; all strings are valid filenames\n@param InFilename The full LocalPath, D:\\Folder\\File.Ext, may be relative or absolute, extension is not required\n@return The constructed PackagePath"
+    },
+    {
+      "id": "from-mounted-components",
+      "name": "FromMountedComponents",
+      "category": "PackagePath",
+      "signature": "FromMountedComponents(Package Name Root, File Path Root, Rel Path, In Extension, In Custom Extension)",
+      "params": [
+        {
+          "name": "Package Name Root",
+          "type": "FStringView"
+        },
+        {
+          "name": "File Path Root",
+          "type": "FStringView"
+        },
+        {
+          "name": "Rel Path",
+          "type": "FStringView"
+        },
+        {
+          "name": "In Extension",
+          "type": "EPackageExtension"
+        },
+        {
+          "name": "In Custom Extension",
+          "type": "FStringView",
+          "default": "FStringView()"
+        }
+      ],
+      "returnType": "FPackagePath",
+      "docs": "Construct a PackagePath from the components of a MountedPath\nThis function is less expensive than TryFromMountedName\nIt is invalid to call this function with arguments that do not match an existing directory that is mounted\n(aka registered with FPackageName::MountPointExists)\n@param PackageNameRoot The PackageName of the MountPoint\n@param FilePathRoot The FilePath of the MountPoint\n@param RelPath The relative path of the PackagePath from the PackageNameRoot/FilePathRoot\n(relative path from MountPoint is the same in PackageNames and LocalPaths)\n@param InExtension The header extension to give the PackagePath. Extensions that are not header extensions are ignored\n@param InCustomExtension The custom string to use if InExtension is EPackageExtension::Custom\n@return The constructed PackagePath"
+    },
+    {
+      "id": "try-match-case",
+      "name": "TryMatchCase",
+      "category": "PackagePath",
+      "signature": "TryMatchCase(Source Package Path, File Path To Match, Out Package Path)",
+      "params": [
+        {
+          "name": "Source Package Path",
+          "type": "FPackagePath&"
+        },
+        {
+          "name": "File Path To Match",
+          "type": "FStringView"
+        },
+        {
+          "name": "Out Package Path",
+          "type": "FPackagePath&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the capitalization of a PackagePath to match the given string\nIf the given FilePathToMatch is case-insensitively equal to the LocalPath of the source PackagePath,\nset the output PackagePath equal to a copy of the source but with\ncapitalization set equal to the capitalization in FilePathToMatch\n@param SourcePackagePath The PackagePath to compare against FilePathToMatch\n@param FilePathToMatch The LocalPath to compare against SourcePackagePath's LocalPath\n@param OutPackagePath Set to the matching-capitalization copy of SourcePackagePath if FilePathToMatch matched\nSourcePackagePath case-insensitively\n@return True if FilePathToMatch matched SourcePackagePath case-insensitively, else false"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "PackagePath",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether this is a PackagePath with no path information and can never identify a package on disk\nNote that IsEmpty == false does not imply that the package exists on disk, only that the PackagePath is valid"
+    },
+    {
+      "id": "is-mounted-path",
+      "name": "IsMountedPath",
+      "category": "PackagePath",
+      "signature": "IsMountedPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether a mount point has been found for this PackagePath\nWill attempt to mount before returning false"
+    },
+    {
+      "id": "has-package-name",
+      "name": "HasPackageName",
+      "category": "PackagePath",
+      "signature": "HasPackageName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return true if and only if GetPackageName returns non-empty\nReturning true is possible only for MountedPath and PackageOnly internal types.\nWill attempt to mount before returning false"
+    },
+    {
+      "id": "has-local-path",
+      "name": "HasLocalPath",
+      "category": "PackagePath",
+      "signature": "HasLocalPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return true if and only if GetLocalBaseFilenameWithPath returns non-empty\nReturning true is possible for MountedPath and LocalOnly internal types.\nWill attempt to mount before returning false"
+    },
+    {
+      "id": "get-package-name",
+      "name": "GetPackageName",
+      "category": "PackagePath",
+      "signature": "GetPackageName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Return the PackageName indicated by this PackagePath if known or available, or empty string if not\nReturning non-empty is possible only for MountedPath and PackageOnly internal types.\nWill attempt to mount before returning empty"
+    },
+    {
+      "id": "append-package-name",
+      "name": "AppendPackageName",
+      "category": "PackagePath",
+      "signature": "AppendPackageName(Target, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Builder",
+          "type": "FStringBuilderBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append the PackageName indicated by this PackagePath if known or available, or take no action if not\nAppending is possible only for MountedPath and PackageOnly internal types.\nWill attempt to mount before returning with no action"
+    },
+    {
+      "id": "get-package-f-name",
+      "name": "GetPackageFName",
+      "category": "PackagePath",
+      "signature": "GetPackageFName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Return as an FName the PackageName indicated by this PackagePath if known or available, or NAME_None if not\nReturning a valid name is possible only for MountedPath and PackageOnly internal types.\nWill attempt to mount before returning NAME_None"
+    },
+    {
+      "id": "get-local-full-path-b4f216",
+      "name": "GetLocalFullPath",
+      "category": "PackagePath",
+      "signature": "GetLocalFullPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Return the full LocalPath (path,basename,extension)\nThe path is in the standard UnrealEngine form - it is as a relative path from the process binary directory\nExtension is set based on the given segment\nIf the LocalPath for this PackagePath is unknown, returns the empty string\nReturning non-empty is possible only for MountedPath and LocalOnly internal types.\nWill attempt to mount before returning empty"
+    },
+    {
+      "id": "append-local-full-path-466ad3",
+      "name": "AppendLocalFullPath",
+      "category": "PackagePath",
+      "signature": "AppendLocalFullPath(Target, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Builder",
+          "type": "FStringBuilderBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append the full relative LocalPath (path,basename,extension)\nThe path is in the standard UnrealEngine form - it is as a relative path from the process binary directory\nExtension is set based on the given segment\nIf the LocalPath for this PackagePath is unknown, nothing is written to the Builder\nAppending is possible only for MountedPath and LocalOnly internal types.\nWill attempt to mount before returning with no action"
+    },
+    {
+      "id": "get-local-base-filename-with-path",
+      "name": "GetLocalBaseFilenameWithPath",
+      "category": "PackagePath",
+      "signature": "GetLocalBaseFilenameWithPath(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Return the Local (path,basename) of this PackagePath if known or available, or empty string if not\nReturning non-empty is possible only for MountedPath and LocalOnly internal types.\nWill attempt to mount before returning empty"
+    },
+    {
+      "id": "append-local-base-filename-with-path",
+      "name": "AppendLocalBaseFilenameWithPath",
+      "category": "PackagePath",
+      "signature": "AppendLocalBaseFilenameWithPath(Target, Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Builder",
+          "type": "FStringBuilderBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Append the Local (path,basename) of this PackagePath if known or available, or take no action if not\nAppending is possible only for MountedPath and LocalOnly internal types.\nWill attempt to mount before returning with no action"
+    },
+    {
+      "id": "get-header-extension",
+      "name": "GetHeaderExtension",
+      "category": "PackagePath",
+      "signature": "GetHeaderExtension(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "EPackageExtension",
+      "docs": "Return the HeaderExtension\nThe header extension is the extension the header segment of this PackagePath has on disk.\nIt is illegal to have multiple files on disk with the same BaseNameWithPath but different header extensions,\nso the header extension is optional. If unspecified, all header extensions will be searched.\nIf specified, it is assumed correct and searches will return false if they have a different header extension.\nThe header extension is a performance hint and matching header extensions is not required for equality.\nThe header extension will be mutated even on const FPackagePaths when it is not already set\nand functions are called that need to calculate it"
+    },
+    {
+      "id": "get-debug-name-db5bbc",
+      "name": "GetDebugName",
+      "category": "PackagePath",
+      "signature": "GetDebugName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a descriptor of this PackagePath, usable for an identifier in warning and log messages. Extension is not indicated."
+    },
+    {
+      "id": "get-debug-name-text-51d1b3",
+      "name": "GetDebugNameText",
+      "category": "PackagePath",
+      "signature": "GetDebugNameText(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Returns GetDebugName converted to FText"
+    },
+    {
+      "id": "get-debug-name-with-extension-926fed",
+      "name": "GetDebugNameWithExtension",
+      "category": "PackagePath",
+      "signature": "GetDebugNameWithExtension(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a descriptor of this PackagePath for the given segment, with extension."
+    },
+    {
+      "id": "get-package-name-or-fallback",
+      "name": "GetPackageNameOrFallback",
+      "category": "PackagePath",
+      "signature": "GetPackageNameOrFallback(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns the PackageName if available, otherwise the LocalPath\nDo not use this function as a PackageName; use it only for uniquely identifying PackagePaths in e.g. a TMap"
+    },
+    {
+      "id": "set-header-extension",
+      "name": "SetHeaderExtension",
+      "category": "PackagePath",
+      "signature": "SetHeaderExtension(Target, Extension, Custom Extension)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Extension",
+          "type": "EPackageExtension"
+        },
+        {
+          "name": "Custom Extension",
+          "type": "FStringView",
+          "default": "FStringView()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the HeaderExtension to use, including a custom string if Extension is EPackageExtension::Custom"
+    },
+    {
+      "id": "get-custom-extension",
+      "name": "GetCustomExtension",
+      "category": "PackagePath",
+      "signature": "GetCustomExtension(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        }
+      ],
+      "returnType": "FStringView",
+      "docs": "Return the custom string if this PackagePath is using HeaderExtension=EPackageExtension::Custom,\notherwise return an empty string"
+    },
+    {
+      "id": "parse-extension",
+      "name": "ParseExtension",
+      "category": "PackagePath",
+      "signature": "ParseExtension(Filename, Out Extension Start)",
+      "params": [
+        {
+          "name": "Filename",
+          "type": "FStringView"
+        },
+        {
+          "name": "Out Extension Start",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "EPackageExtension",
+      "docs": "Parse the extension from a filepath and convert it to an EPackageExtension.\nNote this is not the same as FPaths::GetExtension because some EPackageExtensions have multiple '.'s\n(e.g. .m.ubulk)\n@param Filename The path to parse the extension from\n@param OutExtensionStart If non-null, will be filled with the index of the '.' at the start of the extension,\nor with Filename.Len() if no extension is found\n@return The EPackageExtension matching the (case-insensitive) extension text in the filename.\nEPackageExtension::Unspecified if the filename has no extension.\nEPackageExtension::Custom if the filename's extension is not one of the\nenumerated possibilities in EPackageExtension"
+    },
+    {
+      "id": "get-optional-segment-extension-modifier",
+      "name": "GetOptionalSegmentExtensionModifier",
+      "category": "PackagePath",
+      "signature": "GetOptionalSegmentExtensionModifier()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Get the string identifying optional segments\n@return the string modifier added prior to the file extension that identify optional segments (i.e. \".o\")"
+    },
+    {
+      "id": "get-external-actors-folder-name",
+      "name": "GetExternalActorsFolderName",
+      "category": "PackagePath",
+      "signature": "GetExternalActorsFolderName()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Get the folder name from which all external actors paths are created\n@return folder name"
+    },
+    {
+      "id": "get-external-objects-folder-name",
+      "name": "GetExternalObjectsFolderName",
+      "category": "PackagePath",
+      "signature": "GetExternalObjectsFolderName()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Get the folder name from which all external objects paths are created\n@return folder name"
+    },
+    {
+      "id": "get-extension",
+      "name": "GetExtension",
+      "category": "PackagePath",
+      "signature": "GetExtension(Target, Package Segment, Out Custom Extension)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        },
+        {
+          "name": "Out Custom Extension",
+          "type": "FStringView&"
+        }
+      ],
+      "returnType": "public : EPackageExtension",
+      "docs": "Report the extension this PackagePath uses for the given segment\n@param PackageSegment The segment of the extension to look up\n@param OutCustomExtension If the segment is EPackageSegment::Header and this PackagePath has a custom header\nextension, filled with the Custom string, otherwise set to empty. CustomExtension can become invalid\nthe next time a function (even a const function) or the destructor is called on this FPackagePath\n@return the EPackageExtension for the given segment, which is possibly EPackageExtension::Unspecified or\nEPackageExtension::Custom for EPackageSegment::Header"
+    },
+    {
+      "id": "get-extension-string",
+      "name": "GetExtensionString",
+      "category": "PackagePath",
+      "signature": "GetExtensionString(Target, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "FStringView",
+      "docs": "Report the extension string this PackagePath uses for the given segment.\n@param PackageSegment The segment of the extension to look up\n@return the string for the given segment, which is possibly the empty string\nor a custom string for EPackageSegment::Header"
+    },
+    {
+      "id": "get-possible-extensions",
+      "name": "GetPossibleExtensions",
+      "category": "PackagePath",
+      "signature": "GetPossibleExtensions(Target, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "TConstArrayView<EPackageExtension>",
+      "docs": "Report the EPackageExtensions this PackagePath should look for on disk\nThe reported array will be length 1 for every case except\nEPackageSegment::Header and HeaderExtension == EPackageExtension::Unspecified,\nin that case it will be the list of all enumerated header extensions\n@param PackageSegment The segment of the extension to look up\n@return A TArray of EPackageExtensions. If the array contains EPackageExtension::Custom, caller must call\nGetCustomExtension to get the specific string."
+    },
+    {
+      "id": "get-local-full-path-2d5769",
+      "name": "GetLocalFullPath",
+      "category": "PackagePath",
+      "signature": "GetLocalFullPath(Target, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Version of GetLocalFullPath that takes a PackageSegment, otherwise same behavior as parameterless version"
+    },
+    {
+      "id": "append-local-full-path-7a65f9",
+      "name": "AppendLocalFullPath",
+      "category": "PackagePath",
+      "signature": "AppendLocalFullPath(Target, Builder, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Builder",
+          "type": "FStringBuilderBase&"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Version of AppendLocalFullPath that takes a PackageSegment, otherwise same behavior as parameterless version"
+    },
+    {
+      "id": "get-debug-name-5963aa",
+      "name": "GetDebugName",
+      "category": "PackagePath",
+      "signature": "GetDebugName(Target, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Version of GetDebugName that takes a PackageSegment, otherwise same behavior as parameterless version\nFor EPackageSegment::Header, HeaderExtension is not indicated.\nFor all other segments, segment is identified by extension"
+    },
+    {
+      "id": "get-debug-name-text-02dfbd",
+      "name": "GetDebugNameText",
+      "category": "PackagePath",
+      "signature": "GetDebugNameText(Target, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Version of GetDebugNameText that takes a PackageSegment, otherwise same behavior as parameterless version"
+    },
+    {
+      "id": "get-debug-name-with-extension-2db1fa",
+      "name": "GetDebugNameWithExtension",
+      "category": "PackagePath",
+      "signature": "GetDebugNameWithExtension(Target, Package Segment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackagePath*"
+        },
+        {
+          "name": "Package Segment",
+          "type": "EPackageSegment"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Version of GetDebugNameWithExtension that takes a PackageSegment, otherwise same behavior as parameterless version"
+    },
+    {
+      "id": "from-local-path-bdf35a",
+      "name": "FromLocalPath",
+      "category": "PackagePath",
+      "signature": "FromLocalPath(In Filename, Out Package Segment)",
+      "params": [
+        {
+          "name": "In Filename",
+          "type": "FStringView"
+        },
+        {
+          "name": "Out Package Segment",
+          "type": "EPackageSegment&"
+        }
+      ],
+      "returnType": "FPackagePath",
+      "docs": "Version of FromLocalPath that also returns the PackageSegment matching the Filename's extension"
+    }
+  ]
+}
