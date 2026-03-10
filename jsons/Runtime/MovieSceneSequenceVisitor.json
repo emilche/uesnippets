@@ -11,15 +11,6 @@
   ],
   "functions": [
     {
-      "id": "f-sub-sequence-space",
-      "name": "FSubSequenceSpace",
-      "category": "MovieSceneSequenceVisitor",
-      "signature": "FSubSequenceSpace()",
-      "params": [],
-      "returnType": "Void",
-      "docs": "Implements a visitor pattern to allow external code to easily iterate through a sequence hierarchy,\nrunning custom code for each track, object, sub-section, or section visited. This handles skipping\nover non-evaluated sub-scenes as well as accumulation of clamp ranges and sequence transforms as\nit iterates through the hierarchy. This does not currently support looping (only visits once, though\nFSubSequenceSpace::LocalClampRange will be the range of all the loops).\nExample:\nusing FCameraCutInfo = TTuple<UMovieSceneCameraCutSection*, FMovieSceneSequenceID, int16>;\nstruct FCameraCutVisitor : UE::MovieScene::ISequenceVisitor\n{\nvirtual void VisitTrack(UMovieSceneTrack* InTrack, const FGuid&, const UE::MovieScene::FSubSequenceSpace& LocalSpace)\n{\nif (UMovieSceneCameraCutTrack* CameraCutTrack = Cast<UMovieSceneCameraCutTrack>(InTrack))\n{\nfor (UMovieSceneSection* Section : CameraCutTrack->GetAllSections())\n{\nif (!Section->IsActive())\n{\ncontinue;\n}\nUMovieSceneCameraCutSection* CameraCutSection = CastChecked<UMovieSceneCameraCutSection>(Section);\nTRange<FFrameNumber> RootCameraRange = TRange<FFrameNumber>::Intersection(LocalSpace.RootClampRange, CameraCutSection->GetRange() * LocalSpace.RootToSequenceTransform.InverseNoLooping());\nif (!RootCameraRange.IsEmpty())\n{\nCameraCutTree.Add(RootCameraRange, MakeTuple(CameraCutSection, LocalSpace.SequenceID, LocalSpace.HierarchicalBias));\n}\n}\n}\n}\nTMovieSceneEvaluationTree<FCameraCutInfo> CameraCutTree;\n};\nUE::MovieScene::FSequenceVisitParams Params;\nParams.bVisitRootTracks = true;\nParams.bVisitSubSequences = true;\nFCameraCutVisitor CameraCutVisitor;\n// Visit all camera cuts\nVisitSequence(InSequence, Params, CameraCutVisitor);"
-    },
-    {
       "id": "visit-sequence",
       "name": "VisitSequence",
       "category": "MovieSceneSequenceVisitor",
