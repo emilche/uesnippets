@@ -1,0 +1,230 @@
+{
+  "id": "movie-scene-time-warping",
+  "label": "MovieSceneTimeWarping",
+  "includepath": "Evaluation/MovieSceneTimeWarping.h",
+  "includes": [
+    "UnrealString",
+    "CoreMinimal",
+    "Platform",
+    "Range",
+    "RangeBound",
+    "AssertionMacros",
+    "FrameNumber",
+    "FrameTime",
+    "MovieSceneTimeTransform",
+    "ObjectMacros",
+    "MovieSceneTimeWarping.generated"
+  ],
+  "functions": [
+    {
+      "id": "length",
+      "name": "Length",
+      "category": "MovieSceneTimeWarping",
+      "signature": "Length(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        }
+      ],
+      "returnType": "FFrameNumber",
+      "docs": "Returns the length of the warping."
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "MovieSceneTimeWarping",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this warping transform is doing anything."
+    },
+    {
+      "id": "get-range",
+      "name": "GetRange",
+      "category": "MovieSceneTimeWarping",
+      "signature": "GetRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>",
+      "docs": "Returns a range that encompasses the whole warping time span."
+    },
+    {
+      "id": "inverse-from-warp",
+      "name": "InverseFromWarp",
+      "category": "MovieSceneTimeWarping",
+      "signature": "InverseFromWarp(Target, Warp Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "Warp Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FMovieSceneTimeTransform",
+      "docs": "Returns a transformation that takes us from a local time into a given loop back to the root time."
+    },
+    {
+      "id": "transform-frame",
+      "name": "TransformFrame",
+      "category": "MovieSceneTimeWarping",
+      "signature": "TransformFrame(Target, In Frame, Out Frame, Out Warp Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "In Frame",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "Out Frame",
+          "type": "FFrameNumber&"
+        },
+        {
+          "name": "Out Warp Index",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Transforms the given frame and returns the warped frame time along with the warp index we ended up in."
+    },
+    {
+      "id": "transform-time",
+      "name": "TransformTime",
+      "category": "MovieSceneTimeWarping",
+      "signature": "TransformTime(Target, In Time, Out Time, Out Warp Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Out Time",
+          "type": "FFrameTime&"
+        },
+        {
+          "name": "Out Warp Index",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Transforms the given time and returns the warped time along with the warp index we ended up in."
+    },
+    {
+      "id": "transform-time-specific",
+      "name": "TransformTimeSpecific",
+      "category": "MovieSceneTimeWarping",
+      "signature": "TransformTimeSpecific(Target, In Time, Warp Count, Out Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameTime"
+        },
+        {
+          "name": "Warp Count",
+          "type": "UInt"
+        },
+        {
+          "name": "Out Time",
+          "type": "FFrameTime&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Transforms the given time by warping it by a specific warp count, regardless of how many warps are\nneeded in theory to stay in the warping range."
+    },
+    {
+      "id": "transform-range-pure",
+      "name": "TransformRangePure",
+      "category": "MovieSceneTimeWarping",
+      "signature": "TransformRangePure(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>",
+      "docs": "Transforms the given range in a \"naive\" way, i.e. its lower and upper bounds are transformed\nindependently by this time warping. This means that the output range could be \"inside-out\"... that is,\nthe output lower bound could be greater than the output upper bound, like, for instance, in the case\nof the input range starting near the end of a loop, and ending near the beginning of another loop."
+    },
+    {
+      "id": "transform-range-unwarped",
+      "name": "TransformRangeUnwarped",
+      "category": "MovieSceneTimeWarping",
+      "signature": "TransformRangeUnwarped(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>",
+      "docs": "Transforms the given range by time-warping its lower bound, and computing an upper bound so that the\nsize of the input range is preserved. So if the input range starts in the middle of a loop and lasts\n3 loops, the output range will start in the middle of the first loop, and last 3 times as long as\nthe Length of this time warp."
+    },
+    {
+      "id": "transform-range-constrained",
+      "name": "TransformRangeConstrained",
+      "category": "MovieSceneTimeWarping",
+      "signature": "TransformRangeConstrained(Target, Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameTime>&"
+        }
+      ],
+      "returnType": "TRange<FFrameTime>",
+      "docs": "Transforms the given range by time-warping it and figuring out if it \"covered\" a full loop or not.\nIf it covered a full loop, return a full-loop range, i.e. a range that goes from StartOffset to\n(Length - EndOffset).\nIf it didn't cover a full loop, return the transformed range, which should be a subset of the full\nloop range mentioned above."
+    },
+    {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "MovieSceneTimeWarping",
+      "signature": "LexToString(Target, In Warping)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTimeWarping*"
+        },
+        {
+          "name": "In Warping",
+          "type": "FMovieSceneTimeWarping&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Convert a FMovieSceneTimeWarping into a string"
+    }
+  ]
+}

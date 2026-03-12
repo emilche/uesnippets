@@ -69,6 +69,24 @@
       "docs": "Removes a default mode\n@param\tDefaultModeID\t\tThe mode ID for the default mode to remove"
     },
     {
+      "id": "is-default-mode",
+      "name": "IsDefaultMode",
+      "category": "EditorModeManager",
+      "signature": "IsDefaultMode(Target, Mode ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "Mode ID",
+          "type": "FEditorModeID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether or not the provided mode ID is a default mode"
+    },
+    {
       "id": "activate-default-mode",
       "name": "ActivateDefaultMode",
       "category": "EditorModeManager",
@@ -168,24 +186,6 @@
       ],
       "returnType": "Bool",
       "docs": "Whether or not the mode toolbox (where mode details panels and some tools are) should be shown."
-    },
-    {
-      "id": "exit-mode",
-      "name": "ExitMode",
-      "category": "EditorModeManager",
-      "signature": "ExitMode(Target, In Mode)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FEditorModeTools*"
-        },
-        {
-          "name": "In Mode",
-          "type": "UEdMode*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Exits the given editor mode"
     },
     {
       "id": "get-active-scriptable-mode",
@@ -347,6 +347,23 @@
       "docs": "Returns a pointer to an active mode specified by the passed in ID\nIf the editor mode is not active, NULL is returned"
     },
     {
+      "id": "get-active-mode-typed",
+      "name": "GetActiveModeTyped",
+      "category": "EditorModeManager",
+      "signature": "GetActiveModeTyped(Target, In ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "In ID",
+          "type": "FEditorModeID"
+        }
+      ],
+      "returnType": "template<SpecificModeType> SpecificModeType*"
+    },
+    {
       "id": "get-active-tool",
       "name": "GetActiveTool",
       "category": "EditorModeManager",
@@ -363,6 +380,23 @@
       ],
       "returnType": "FModeTool*",
       "docs": "Returns the active tool of the passed in editor mode.\nIf the passed in editor mode is not active or the mode has no active tool, NULL is returned"
+    },
+    {
+      "id": "set-show-widget",
+      "name": "SetShowWidget",
+      "category": "EditorModeManager",
+      "signature": "SetShowWidget(Target, In Show Widget)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "In Show Widget",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "get-show-widget",
@@ -490,6 +524,19 @@
         {
           "name": "In Viewport",
           "type": "FViewport*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-tracking",
+      "name": "IsTracking",
+      "category": "EditorModeManager",
+      "signature": "IsTracking(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
         }
       ],
       "returnType": "Bool"
@@ -983,28 +1030,6 @@
       "docs": "Notifies all active modes that the mouse has moved"
     },
     {
-      "id": "received-focus",
-      "name": "ReceivedFocus",
-      "category": "EditorModeManager",
-      "signature": "ReceivedFocus(Target, In Viewport Client, Viewport)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FEditorModeTools*"
-        },
-        {
-          "name": "In Viewport Client",
-          "type": "FEditorViewportClient*"
-        },
-        {
-          "name": "Viewport",
-          "type": "FViewport*"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Notifies all active modes that a viewport has received focus"
-    },
-    {
       "id": "lost-focus",
       "name": "LostFocus",
       "category": "EditorModeManager",
@@ -1362,21 +1387,17 @@
       "docs": "Get Widget Scale"
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "get-referencer-name",
+      "name": "GetReferencerName",
       "category": "EditorModeManager",
-      "signature": "AddReferencedObjects(Target, Collector)",
+      "signature": "GetReferencerName(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FEditorModeTools*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "String"
     },
     {
       "id": "load-config",
@@ -1429,6 +1450,130 @@
       "docs": "Sets the pivot locations\n@param Location \t\tThe location to set\n@param bIncGridBase\tWhether or not to also set the GridBase"
     },
     {
+      "id": "on-editor-mode-id-changed",
+      "name": "OnEditorModeIDChanged",
+      "category": "EditorModeManager",
+      "signature": "OnEditorModeIDChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        }
+      ],
+      "returnType": "FEditorModeIDChangedEvent&"
+    },
+    {
+      "id": "on-widget-mode-changed",
+      "name": "OnWidgetModeChanged",
+      "category": "EditorModeManager",
+      "signature": "OnWidgetModeChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        }
+      ],
+      "returnType": "FWidgetModeChangedEvent&"
+    },
+    {
+      "id": "broadcast-widget-mode-changed",
+      "name": "BroadcastWidgetModeChanged",
+      "category": "EditorModeManager",
+      "signature": "BroadcastWidgetModeChanged(Target, In Widget Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "In Widget Mode",
+          "type": "UE::Widget::EWidgetMode"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcasts the WidgetModeChanged event"
+    },
+    {
+      "id": "broadcast-editor-mode-id-changed",
+      "name": "BroadcastEditorModeIDChanged",
+      "category": "EditorModeManager",
+      "signature": "BroadcastEditorModeIDChanged(Target, Mode ID, Is Entering Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "Mode ID",
+          "type": "FEditorModeID&"
+        },
+        {
+          "name": "Is Entering Mode",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcasts the EditorModeIDChanged event"
+    },
+    {
+      "id": "on-coord-system-changed",
+      "name": "OnCoordSystemChanged",
+      "category": "EditorModeManager",
+      "signature": "OnCoordSystemChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        }
+      ],
+      "returnType": "FCoordSystemChangedEvent&"
+    },
+    {
+      "id": "broadcast-coord-system-changed",
+      "name": "BroadcastCoordSystemChanged",
+      "category": "EditorModeManager",
+      "signature": "BroadcastCoordSystemChanged(Target, In Coord System)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "In Coord System",
+          "type": "ECoordSystem"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcasts the CoordSystemChangedEvent event"
+    },
+    {
+      "id": "on-is-editing-disallowed-changed",
+      "name": "OnIsEditingDisallowedChanged",
+      "category": "EditorModeManager",
+      "signature": "OnIsEditingDisallowedChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        }
+      ],
+      "returnType": "FIsEditingDisallowedChangedEvent&"
+    },
+    {
+      "id": "broadcast-is-editing-disallowed-changed",
+      "name": "BroadcastIsEditingDisallowedChanged",
+      "category": "EditorModeManager",
+      "signature": "BroadcastIsEditingDisallowedChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcasts the IsEditingDisallowedChangedEvent event"
+    },
+    {
       "id": "get-coord-system",
       "name": "GetCoordSystem",
       "category": "EditorModeManager",
@@ -1464,6 +1609,38 @@
       ],
       "returnType": "Void",
       "docs": "Sets the current CoordSystem"
+    },
+    {
+      "id": "set-hide-viewport-ui",
+      "name": "SetHideViewportUI",
+      "category": "EditorModeManager",
+      "signature": "SetHideViewportUI(Target, In Hide Viewport UI)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        },
+        {
+          "name": "In Hide Viewport UI",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the hide viewport UI state"
+    },
+    {
+      "id": "is-viewport-ui-hidden",
+      "name": "IsViewportUIHidden",
+      "category": "EditorModeManager",
+      "signature": "IsViewportUIHidden(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorModeTools*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the viewport UI hidden?"
     },
     {
       "id": "on-request-close",
@@ -2200,24 +2377,6 @@
         }
       ],
       "returnType": "FRotationContext&"
-    },
-    {
-      "id": "on-editor-selection-changed",
-      "name": "OnEditorSelectionChanged",
-      "category": "EditorModeManager",
-      "signature": "OnEditorSelectionChanged(Target, New Selection)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FEditorModeTools*"
-        },
-        {
-          "name": "New Selection",
-          "type": "UObject*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "End New TRS Gizmo interface"
     }
   ]
 }

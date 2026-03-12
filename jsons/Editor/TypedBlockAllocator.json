@@ -1,0 +1,236 @@
+{
+  "id": "typed-block-allocator",
+  "label": "TypedBlockAllocator",
+  "includepath": "TypedBlockAllocator.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "Platform",
+    "PlatformMath",
+    "TypeCompatibleBytes",
+    "UniquePtr",
+    "UnrealTemplate"
+  ],
+  "functions": [
+    {
+      "id": "set-min-block-size",
+      "name": "SetMinBlockSize",
+      "category": "TypedBlockAllocator",
+      "signature": "SetMinBlockSize(Block Size)",
+      "params": [
+        {
+          "name": "Block Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType",
+      "docs": "An allocator that batches allocation calls into blocks to reduce malloc costs.\nNot threadsafe; must be guarded by critical section if used from multiple threads.\nBlock size is adaptive; it doubles with each new block, up to MaxBlockSize.\nAllocated memory is not released until Empty is called.\nThis is the base version and does not keep a free list. Freed elements will never be\nreused and will only be freed by Empty() or destructor.\nIn this base class, destructors for allocated elements are not automatically called;\nusers of the allocator must call destructor manually or must call DeleteElement on each\nelement they called NewElement on."
+    },
+    {
+      "id": "get-min-block-size",
+      "name": "GetMinBlockSize",
+      "category": "TypedBlockAllocator",
+      "signature": "GetMinBlockSize()",
+      "params": [],
+      "returnType": "template<ElementType> int32 TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "set-max-block-size",
+      "name": "SetMaxBlockSize",
+      "category": "TypedBlockAllocator",
+      "signature": "SetMaxBlockSize(Block Size)",
+      "params": [
+        {
+          "name": "Block Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType",
+      "docs": "Set the MaximumBlockSize. Default is 65536. New blocks added by Alloc will be this size or\nless (ignored if MaximumBlockSize < MinimumBlockSize). Blocks added by Reserve are not\nlimited by MaximumBlockSize."
+    },
+    {
+      "id": "get-max-block-size",
+      "name": "GetMaxBlockSize",
+      "category": "TypedBlockAllocator",
+      "signature": "GetMaxBlockSize()",
+      "params": [],
+      "returnType": "template<ElementType> int32 TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "alloc",
+      "name": "Alloc",
+      "category": "TypedBlockAllocator",
+      "signature": "Alloc()",
+      "params": [],
+      "returnType": "template<ElementType> ElementType* TTypedBlockAllocatorBase<ElementType",
+      "docs": "Return the memory for an Element without calling a constructor."
+    },
+    {
+      "id": "base-alloc",
+      "name": "BaseAlloc",
+      "category": "TypedBlockAllocator",
+      "signature": "BaseAlloc()",
+      "params": [],
+      "returnType": "template<ElementType> ElementType* TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "free",
+      "name": "Free",
+      "category": "TypedBlockAllocator",
+      "signature": "Free(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "ElementType*"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType",
+      "docs": "Make the memory for an Element returned from Alloc or Construct available again to Alloc.\nDoes not call the ElementType destructor. Does not return the memory to the inner allocator."
+    },
+    {
+      "id": "new-element",
+      "name": "NewElement",
+      "category": "TypedBlockAllocator",
+      "signature": "NewElement(Args)",
+      "params": [
+        {
+          "name": "Args",
+          "type": "ArgsType&& . . ."
+        }
+      ],
+      "returnType": "template<ElementType> template<. . . ArgsType> ElementType* TTypedBlockAllocatorBase<ElementType",
+      "docs": "Allocate an Element and call constructor with the given arguments."
+    },
+    {
+      "id": "delete-element",
+      "name": "DeleteElement",
+      "category": "TypedBlockAllocator",
+      "signature": "DeleteElement(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "ElementType*"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType",
+      "docs": "Call destructor on the given element and call Free on its memory."
+    },
+    {
+      "id": "call-destructor-internal",
+      "name": "CallDestructorInternal",
+      "category": "TypedBlockAllocator",
+      "signature": "CallDestructorInternal(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "ElementType*"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "enumerate-allocations",
+      "name": "EnumerateAllocations",
+      "category": "TypedBlockAllocator",
+      "signature": "EnumerateAllocations(Callback)",
+      "params": [
+        {
+          "name": "Callback",
+          "type": "CallbackType&&"
+        }
+      ],
+      "returnType": "template<ElementType> template<CallbackType> void TTypedBlockAllocatorBase<ElementType",
+      "docs": "Call the given Callback on every element that has been returned from Alloc. Not valid to call if any\nelements have been Freed because it is too expensive to prevent calling the Callback on the freed elements."
+    },
+    {
+      "id": "base-enumerate-allocations",
+      "name": "BaseEnumerateAllocations",
+      "category": "TypedBlockAllocator",
+      "signature": "BaseEnumerateAllocations(Callback)",
+      "params": [
+        {
+          "name": "Callback",
+          "type": "CallbackType&&"
+        }
+      ],
+      "returnType": "template<ElementType> template<CallbackType> void TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "reserve-delta",
+      "name": "ReserveDelta",
+      "category": "TypedBlockAllocator",
+      "signature": "ReserveDelta(Allocation Count, In Max Block Size)",
+      "params": [
+        {
+          "name": "Allocation Count",
+          "type": "Int"
+        },
+        {
+          "name": "In Max Block Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "base-reserve-delta",
+      "name": "BaseReserveDelta",
+      "category": "TypedBlockAllocator",
+      "signature": "BaseReserveDelta(Allocation Count, In Max Block Size, Num Available On Free List)",
+      "params": [
+        {
+          "name": "Allocation Count",
+          "type": "Int"
+        },
+        {
+          "name": "In Max Block Size",
+          "type": "Int"
+        },
+        {
+          "name": "Num Available On Free List",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "TypedBlockAllocator",
+      "signature": "Empty()",
+      "params": [],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType",
+      "docs": "Release all allocated memory. For performance, Empty does not require that allocations have been destructed\nor freed; caller is responsible for calling any necessary ElementType destructors and for dropping all\nreferences to the allocated ElementTypes."
+    },
+    {
+      "id": "base-empty",
+      "name": "BaseEmpty",
+      "category": "TypedBlockAllocator",
+      "signature": "BaseEmpty()",
+      "params": [],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorBase<ElementType"
+    },
+    {
+      "id": "t-typed-block-allocator-reset-list",
+      "name": "TTypedBlockAllocatorResetList",
+      "category": "TypedBlockAllocator",
+      "signature": "TTypedBlockAllocatorResetList()",
+      "params": [],
+      "returnType": "template<ElementType> TTypedBlockAllocatorResetList<ElementType>::~",
+      "docs": "A TTypedAllocatorBase with a resetlist. Freed elements are not destructed until empty is called. When NewElement is\ncalled and the reset list is available, a previously-freed element is returned without having had the destructor and\na second call to the constructor called on it.\nDestructors for elements added via NewElement are called automatically from Empty or from the allocator's\ndestructor."
+    },
+    {
+      "id": "realloc-free-list",
+      "name": "ReallocFreeList",
+      "category": "TypedBlockAllocator",
+      "signature": "ReallocFreeList(New Capacity)",
+      "params": [
+        {
+          "name": "New Capacity",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<ElementType> void TTypedBlockAllocatorResetList<ElementType"
+    }
+  ]
+}

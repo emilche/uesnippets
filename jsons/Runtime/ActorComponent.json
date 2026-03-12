@@ -25,6 +25,45 @@
   ],
   "functions": [
     {
+      "id": "get-incremental-update-timeout",
+      "name": "GetIncrementalUpdateTimeout",
+      "category": "ActorComponent",
+      "signature": "GetIncrementalUpdateTimeout(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRegisterComponentContext*"
+        }
+      ],
+      "returnType": "UE::FTimeout&"
+    },
+    {
+      "id": "get-incremental-update-add-primitive-batch-size",
+      "name": "GetIncrementalUpdateAddPrimitiveBatchSize",
+      "category": "ActorComponent",
+      "signature": "GetIncrementalUpdateAddPrimitiveBatchSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRegisterComponentContext*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-incremental-update-num-components-to-update",
+      "name": "GetIncrementalUpdateNumComponentsToUpdate",
+      "category": "ActorComponent",
+      "signature": "GetIncrementalUpdateNumComponentsToUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRegisterComponentContext*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
       "id": "send-render-dynamic-data",
       "name": "SendRenderDynamicData",
       "category": "ActorComponent",
@@ -40,6 +79,37 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "count",
+      "name": "Count",
+      "category": "ActorComponent",
+      "signature": "Count(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRegisterComponentContext*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "skip-physics-to-enum",
+      "name": "SkipPhysicsToEnum",
+      "category": "ActorComponent",
+      "signature": "SkipPhysicsToEnum(Target, Skip Physics)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Skip Physics",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "EUpdateTransformFlags",
+      "docs": "Converts legacy bool into the SkipPhysicsUpdate bitflag"
     },
     {
       "id": "update-all-primitive-scene-infos-for-single-component",
@@ -103,18 +173,60 @@
       "returnType": "Void"
     },
     {
-      "id": "determine-ucs-serialization-index-for-legacy-component",
-      "name": "DetermineUCSSerializationIndexForLegacyComponent",
+      "id": "get-ucs-serialization-index",
+      "name": "GetUCSSerializationIndex",
       "category": "ActorComponent",
-      "signature": "DetermineUCSSerializationIndexForLegacyComponent(Target)",
+      "signature": "GetUCSSerializationIndex(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UActorComponent*"
         }
       ],
-      "returnType": "Void",
-      "docs": "Calculate the UCS serialization index for a component that was saved before we started saving this data"
+      "returnType": "Int",
+      "docs": "Returns the UCS serialization index. This can be an expensive operation in the editor if you are dealing with a component that was saved before this information was present and it needs to be calculated."
+    },
+    {
+      "id": "is-async-destroy-physics-state-running",
+      "name": "IsAsyncDestroyPhysicsStateRunning",
+      "category": "ActorComponent",
+      "signature": "IsAsyncDestroyPhysicsStateRunning(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether asynchronous physics state destruction is running or not."
+    },
+    {
+      "id": "get-marked-for-end-of-frame-update-state",
+      "name": "GetMarkedForEndOfFrameUpdateState",
+      "category": "ActorComponent",
+      "signature": "GetMarkedForEndOfFrameUpdateState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Tracks whether the component has been added to one of the world's end of frame update lists"
+    },
+    {
+      "id": "get-marked-for-pre-end-of-frame-sync",
+      "name": "GetMarkedForPreEndOfFrameSync",
+      "category": "ActorComponent",
+      "signature": "GetMarkedForPreEndOfFrameSync(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Tracks whether the component has been added to one of the world's end of frame update lists"
     },
     {
       "id": "determine-ucs-modified-properties",
@@ -195,6 +307,62 @@
       "docs": "True if this component can be modified when it was inherited from a parent actor class"
     },
     {
+      "id": "has-been-created",
+      "name": "HasBeenCreated",
+      "category": "ActorComponent",
+      "signature": "HasBeenCreated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates that OnCreatedComponent has been called, but OnDestroyedComponent has not yet"
+    },
+    {
+      "id": "has-been-initialized",
+      "name": "HasBeenInitialized",
+      "category": "ActorComponent",
+      "signature": "HasBeenInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates that InitializeComponent has been called, but UninitializeComponent has not yet"
+    },
+    {
+      "id": "is-ready-for-replication",
+      "name": "IsReadyForReplication",
+      "category": "ActorComponent",
+      "signature": "IsReadyForReplication(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates that ReadyForReplication has been called"
+    },
+    {
+      "id": "has-begun-play",
+      "name": "HasBegunPlay",
+      "category": "ActorComponent",
+      "signature": "HasBegunPlay(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates that BeginPlay has been called, but EndPlay has not yet"
+    },
+    {
       "id": "is-being-destroyed",
       "name": "IsBeingDestroyed",
       "category": "Components",
@@ -223,33 +391,6 @@
       "docs": "Returns true if instances of this component are created by either the user or simple construction script"
     },
     {
-      "id": "on-rep-is-active",
-      "name": "OnRep_IsActive",
-      "category": "ActorComponent",
-      "signature": "OnRep_IsActive(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Handles replication of active state, handles ticking by default but should be overridden as needed"
-    },
-    {
-      "id": "get-actor-owner-noninline",
-      "name": "GetActorOwnerNoninline",
-      "category": "ActorComponent",
-      "signature": "GetActorOwnerNoninline(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "AActor*"
-    },
-    {
       "id": "get-owner",
       "name": "GetOwner",
       "category": "Components",
@@ -262,6 +403,20 @@
       ],
       "returnType": "template<class T> T*",
       "docs": "Follow the Outer chain to get the  AActor  that 'Owns' this component"
+    },
+    {
+      "id": "get-world",
+      "name": "GetWorld",
+      "category": "ActorComponent",
+      "signature": "GetWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "UWorld*",
+      "docs": "Getter for the cached world pointer, will return null if the component is not actually spawned in a level"
     },
     {
       "id": "component-has-tag",
@@ -448,6 +603,20 @@
       "docs": "Enable or disable replication. This is the equivalent of RemoteRole for actors (only a bool is required for components)"
     },
     {
+      "id": "get-is-replicated",
+      "name": "GetIsReplicated",
+      "category": "ActorComponent",
+      "signature": "GetIsReplicated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether replication is enabled or not."
+    },
+    {
       "id": "replicate-subobjects",
       "name": "ReplicateSubobjects",
       "category": "ActorComponent",
@@ -472,6 +641,52 @@
       ],
       "returnType": "Bool",
       "docs": "Allows a component to replicate other subobject on the actor.\nMust return true if any data gets serialized into the bunch.\nThis method is used only when bReplicateUsingRegisteredSubObjectList is false.\nOtherwise this function is not called and only the ReplicatedSubObjects list is used."
+    },
+    {
+      "id": "is-using-registered-sub-object-list",
+      "name": "IsUsingRegisteredSubObjectList",
+      "category": "ActorComponent",
+      "signature": "IsUsingRegisteredSubObjectList(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if this component is replicating subobjects via the registration list or via the virtual ReplicateSubObjects method.\nNote: the owning actor of this component must also have it's bReplicateUsingRegisteredSubObjectList flag set to true."
+    },
+    {
+      "id": "get-replication-condition",
+      "name": "GetReplicationCondition",
+      "category": "ActorComponent",
+      "signature": "GetReplicationCondition(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "ELifetimeCondition",
+      "docs": "Returns the replication condition for the component. Only works if the actor owning the component has bReplicateUsingRegisteredSubObjectList enabled."
+    },
+    {
+      "id": "pre-replication",
+      "name": "PreReplication",
+      "category": "ActorComponent",
+      "signature": "PreReplication(Target, Changed Property Tracker)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Changed Property Tracker",
+          "type": "IRepChangedPropertyTracker&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on the component right before replication occurs"
     },
     {
       "id": "get-component-class-can-replicate",
@@ -583,6 +798,66 @@
       "docs": "Tells if the object is registered to be replicated by this actor component."
     },
     {
+      "id": "is-editor-only",
+      "name": "IsEditorOnly",
+      "category": "ActorComponent",
+      "signature": "IsEditorOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this component is an editor-only object or not"
+    },
+    {
+      "id": "mark-as-editor-only-subobject",
+      "name": "MarkAsEditorOnlySubobject",
+      "category": "ActorComponent",
+      "signature": "MarkAsEditorOnlySubobject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called during component creation to mark this component as editor only"
+    },
+    {
+      "id": "is-visualization-component",
+      "name": "IsVisualizationComponent",
+      "category": "ActorComponent",
+      "signature": "IsVisualizationComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this component is only used for visualization, usually a sprite or text"
+    },
+    {
+      "id": "set-is-visualization-component",
+      "name": "SetIsVisualizationComponent",
+      "category": "ActorComponent",
+      "signature": "SetIsVisualizationComponent(Target, In Is Visualization Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "In Is Visualization Component",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets if this component is only used for visualization"
+    },
+    {
       "id": "get-owner-role",
       "name": "GetOwnerRole",
       "category": "ActorComponent",
@@ -595,6 +870,66 @@
       ],
       "returnType": "ENetRole",
       "docs": "Get the network role of the Owner, or ROLE_None if there is no owner."
+    },
+    {
+      "id": "is-net-startup-component",
+      "name": "IsNetStartupComponent",
+      "category": "ActorComponent",
+      "signature": "IsNetStartupComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this component was owned by a net startup actor during level load."
+    },
+    {
+      "id": "set-is-net-startup-component",
+      "name": "SetIsNetStartupComponent",
+      "category": "ActorComponent",
+      "signature": "SetIsNetStartupComponent(Target, In Is Net Startup Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "In Is Net Startup Component",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This should only be called by the engine in ULevel::InitializeNetworkActors to initialize bIsNetStartupComponent."
+    },
+    {
+      "id": "on-end-of-frame-update-during-tick",
+      "name": "OnEndOfFrameUpdateDuringTick",
+      "category": "ActorComponent",
+      "signature": "OnEndOfFrameUpdateDuringTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows components to handle an EOF update happening mid tick. Can be used to block on in-flight async tasks etc. This should ensure the the component's tick is complete so that it's render update is correct."
+    },
+    {
+      "id": "on-pre-end-of-frame-sync",
+      "name": "OnPreEndOfFrameSync",
+      "category": "ActorComponent",
+      "signature": "OnPreEndOfFrameSync(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows components to wait on outstanding tasks prior to sending EOF update data. Executed on Game Thread and may await tasks."
     },
     {
       "id": "register-replication-fragments",
@@ -647,20 +982,6 @@
       "docs": "Tell component to end replication, should not be called explicitly."
     },
     {
-      "id": "get-world-uncached",
-      "name": "GetWorld_Uncached",
-      "category": "ActorComponent",
-      "signature": "GetWorld_Uncached(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "UWorld*",
-      "docs": "If WorldPrivate isn't set this will determine the world from outers"
-    },
-    {
       "id": "should-incremental-pre-unregister",
       "name": "ShouldIncrementalPreUnregister",
       "category": "ActorComponent",
@@ -673,6 +994,32 @@
       ],
       "returnType": "Bool",
       "docs": "Returns whether PreUnregisterComponentFromWorld should be called for this component when its Level is being removed from the world."
+    },
+    {
+      "id": "allows-async-physics-state-creation",
+      "name": "AllowsAsyncPhysicsStateCreation",
+      "category": "ActorComponent",
+      "signature": "AllowsAsyncPhysicsStateCreation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "allows-async-physics-state-destruction",
+      "name": "AllowsAsyncPhysicsStateDestruction",
+      "category": "ActorComponent",
+      "signature": "AllowsAsyncPhysicsStateDestruction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "is-async-physics-state-created",
@@ -729,6 +1076,23 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "on-async-destroy-physics-state",
+      "name": "OnAsyncDestroyPhysicsState",
+      "category": "ActorComponent",
+      "signature": "OnAsyncDestroyPhysicsState(Target, Timeout)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Timeout",
+          "type": "UE::FTimeout&"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "on-async-destroy-physics-state-begin-game-thread",
@@ -799,20 +1163,6 @@
       "docs": "Begins Play for the component.\nCalled when the owning Actor begins play or when the component is created if the Actor has already begun play.\nActor BeginPlay normally happens right after PostInitializeComponents but can be delayed for networked or child actors.\nRequires component to be registered and initialized."
     },
     {
-      "id": "receive-begin-play",
-      "name": "ReceiveBeginPlay",
-      "category": "ActorComponent",
-      "signature": "ReceiveBeginPlay(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Blueprint implementable event for when the component is beginning play, called before its owning actor's BeginPlay\nor when the component is dynamically created if the Actor has already BegunPlay."
-    },
-    {
       "id": "end-play",
       "name": "EndPlay",
       "category": "ActorComponent",
@@ -843,24 +1193,6 @@
       ],
       "returnType": "Void",
       "docs": "Handle this component being Uninitialized.\nCalled from AActor::EndPlay only if bHasBeenInitialized is true"
-    },
-    {
-      "id": "receive-end-play",
-      "name": "ReceiveEndPlay",
-      "category": "ActorComponent",
-      "signature": "ReceiveEndPlay(Target, End Play Reason)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "End Play Reason",
-          "type": "EEndPlayReason::Type"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Blueprint implementable event for when the component ends play, generally via destruction or its Actor's EndPlay."
     },
     {
       "id": "register-all-component-tick-functions",
@@ -905,6 +1237,28 @@
       ],
       "returnType": "Void",
       "docs": "Function called every frame on this ActorComponent. Override this function to implement custom logic to be executed every frame.\nOnly executes if the component is registered, and also PrimaryComponentTick.bCanEverTick must be set to true.\n@param DeltaTime - The time since the last tick.\n@param TickType - The kind of tick this is, for example, are we paused, or 'simulating' in the editor\n@param ThisTickFunction - Internal tick function struct that caused this to run"
+    },
+    {
+      "id": "async-physics-tick-component",
+      "name": "AsyncPhysicsTickComponent",
+      "category": "ActorComponent",
+      "signature": "AsyncPhysicsTickComponent(Target, Delta Time, Sim Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Sim Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Override this function to implement custom logic to be executed every physics step.\nOnly executes if the component is registered, and also bAsyncPhysicsTick must be set to true.\n@param DeltaTime - The sim time associated with each step\n@param SimTime - This is the total sim time since the sim began"
     },
     {
       "id": "setup-actor-component-tick-function",
@@ -1080,6 +1434,20 @@
       "docs": "Registers a component with a specific world, which creates any visual/physical state\n@param InWorld - The world to register the component with."
     },
     {
+      "id": "is-ready-for-owner-to-auto-destroy",
+      "name": "IsReadyForOwnerToAutoDestroy",
+      "category": "ActorComponent",
+      "signature": "IsReadyForOwnerToAutoDestroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Overridable check for a component to indicate to its Owner that it should prevent the Actor from auto destroying when finished"
+    },
+    {
       "id": "is-owner-selected",
       "name": "IsOwnerSelected",
       "category": "ActorComponent",
@@ -1092,6 +1460,84 @@
       ],
       "returnType": "Bool",
       "docs": "Returns whether the component's owner is selected in the editor"
+    },
+    {
+      "id": "is-render-transform-dirty",
+      "name": "IsRenderTransformDirty",
+      "category": "ActorComponent",
+      "signature": "IsRenderTransformDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is this component's transform in need of sending to the renderer?"
+    },
+    {
+      "id": "is-render-instances-dirty",
+      "name": "IsRenderInstancesDirty",
+      "category": "ActorComponent",
+      "signature": "IsRenderInstancesDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is this component's instance data in need of sending to the renderer?"
+    },
+    {
+      "id": "is-render-state-dirty",
+      "name": "IsRenderStateDirty",
+      "category": "ActorComponent",
+      "signature": "IsRenderStateDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is this component in need of its whole state being sent to the renderer?"
+    },
+    {
+      "id": "invalidate-lighting-cache",
+      "name": "InvalidateLightingCache",
+      "category": "ActorComponent",
+      "signature": "InvalidateLightingCache(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidate lighting cache with default options."
+    },
+    {
+      "id": "invalidate-lighting-cache-detailed",
+      "name": "InvalidateLightingCacheDetailed",
+      "category": "ActorComponent",
+      "signature": "InvalidateLightingCacheDetailed(Target, Invalidate Build Enqueued Lighting, Translation Only)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Invalidate Build Enqueued Lighting",
+          "type": "Bool"
+        },
+        {
+          "name": "Translation Only",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when this actor component has moved, allowing it to discard statically cached lighting information."
     },
     {
       "id": "check-for-errors",
@@ -1108,6 +1554,74 @@
       "docs": "Function that gets called from within Map_Check to allow this actor component to check itself\nfor any potential errors and register them with map check dialog.\n@note Derived class implementations should call up to their parents."
     },
     {
+      "id": "get-editor-preview-info",
+      "name": "GetEditorPreviewInfo",
+      "category": "ActorComponent",
+      "signature": "GetEditorPreviewInfo(Target, Delta Time, View Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "View Out",
+          "type": "FMinimalViewInfo&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Supplies the editor with a view specific to this component (think a view\nfrom a camera components POV, a render, etc.). Used for PIP preview windows.\n@return True if the component overrides this, and fills out the view info output."
+    },
+    {
+      "id": "get-custom-editor-preview-widget",
+      "name": "GetCustomEditorPreviewWidget",
+      "category": "ActorComponent",
+      "signature": "GetCustomEditorPreviewWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "TSharedPtr<SWidget>",
+      "docs": "If this component is set up to provide a preview window in editor (see GetEditorPreviewInfo),\nyou can use this to customize the preview (to be something other than a world viewport).\nIf this returns an empty pointer, then the preview will default to a viewport using the FMinimalViewInfo\ndata from GetEditorPreviewInfo()."
+    },
+    {
+      "id": "get-custom-hlod-builder-class",
+      "name": "GetCustomHLODBuilderClass",
+      "category": "ActorComponent",
+      "signature": "GetCustomHLODBuilderClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "TSubclassOf<class UHLODBuilder>",
+      "docs": "Return the custom HLODBuilder class that should be used to generate HLODs for components of this type.\nAllows the HLOD system to include whatever is needed to represent a component at a distance.\nFor example, this is currently used to build custom HLODs for landscape streaming proxies.\nThis could be used to generate fake lights, represent custom FX at a distance, or even to insert\nexternally generated HLODs."
+    },
+    {
+      "id": "get-actor-desc-properties",
+      "name": "GetActorDescProperties",
+      "category": "ActorComponent",
+      "signature": "GetActorDescProperties(Target, Property Pairs Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Property Pairs Map",
+          "type": "FPropertyPairsMap&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add properties to the component owner's actor desc."
+    },
+    {
       "id": "do-deferred-render-updates-concurrent",
       "name": "DoDeferredRenderUpdates_Concurrent",
       "category": "ActorComponent",
@@ -1120,6 +1634,30 @@
       ],
       "returnType": "Void",
       "docs": "Uses the bRenderStateDirty/bRenderTransformDirty/bRenderInstancesDirty to perform any necessary work on this component.\nDo not call this directly, call MarkRenderStateDirty, MarkRenderDynamicDataDirty,  MarkRenderInstancesDataDirty,\n@warning This is called concurrently on multiple threads (but never the same component concurrently)"
+    },
+    {
+      "id": "update-component-to-world",
+      "name": "UpdateComponentToWorld",
+      "category": "ActorComponent",
+      "signature": "UpdateComponentToWorld(Target, Update Transform Flags, Teleport)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Update Transform Flags",
+          "type": "EUpdateTransformFlags",
+          "default": "EUpdateTransformFlags::None"
+        },
+        {
+          "name": "Teleport",
+          "type": "ETeleportType",
+          "default": "ETeleportType::None"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recalculate the value of our component to world transform"
     },
     {
       "id": "mark-render-state-dirty",
@@ -1276,6 +1814,48 @@
       "docs": "Recreate the physics state right way."
     },
     {
+      "id": "is-render-state-created",
+      "name": "IsRenderStateCreated",
+      "category": "ActorComponent",
+      "signature": "IsRenderStateCreated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the render 'state' (e.g. scene proxy) is created for this component"
+    },
+    {
+      "id": "is-render-state-recreating",
+      "name": "IsRenderStateRecreating",
+      "category": "ActorComponent",
+      "signature": "IsRenderStateRecreating(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the render 'state' is being recreated for this component (see additional comments on variable above)"
+    },
+    {
+      "id": "is-physics-state-created",
+      "name": "IsPhysicsStateCreated",
+      "category": "ActorComponent",
+      "signature": "IsPhysicsStateCreated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the physics 'state' (e.g. physx bodies) are created for this component"
+    },
+    {
       "id": "get-scene",
       "name": "GetScene",
       "category": "ActorComponent",
@@ -1340,6 +1920,34 @@
       "docs": "See if this component is in the persistent level"
     },
     {
+      "id": "on-actor-visibility-changed",
+      "name": "OnActorVisibilityChanged",
+      "category": "ActorComponent",
+      "signature": "OnActorVisibilityChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on each component when the Actor's visibility state changes"
+    },
+    {
+      "id": "on-actor-enable-collision-changed",
+      "name": "OnActorEnableCollisionChanged",
+      "category": "ActorComponent",
+      "signature": "OnActorEnableCollisionChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on each component when the Actor's bEnableCollisionChanged flag changes"
+    },
+    {
       "id": "get-readable-name",
       "name": "GetReadableName",
       "category": "ActorComponent",
@@ -1352,6 +1960,20 @@
       ],
       "returnType": "String",
       "docs": "Returns a readable name for this component, including the asset name if applicable\nBy default this appends a space plus AdditionalStatObject()"
+    },
+    {
+      "id": "additional-stat-object",
+      "name": "AdditionalStatObject",
+      "category": "ActorComponent",
+      "signature": "AdditionalStatObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Give a readable name for this component, including asset name if applicable"
     },
     {
       "id": "get-component-instance-data",
@@ -1382,17 +2004,27 @@
       "docs": "Called after ApplyToComponent has run."
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
+      "id": "get-component-child-elements",
+      "name": "GetComponentChildElements",
       "category": "ActorComponent",
-      "signature": "BeginDestroy(Target)",
+      "signature": "GetComponentChildElements(Target, Out Element Handles, Allow Create)",
       "params": [
         {
           "name": "Target",
           "type": "UActorComponent*"
+        },
+        {
+          "name": "Out Element Handles",
+          "type": "TArray<FTypedElementHandle>&"
+        },
+        {
+          "name": "Allow Create",
+          "type": "Bool",
+          "default": "true"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "Get the logical child elements of this component, if any.\n@see UTypedElementHierarchyInterface."
     },
     {
       "id": "needs-load-for-client",
@@ -1477,82 +2109,6 @@
       "returnType": "Void"
     },
     {
-      "id": "get-function-callspace",
-      "name": "GetFunctionCallspace",
-      "category": "ActorComponent",
-      "signature": "GetFunctionCallspace(Target, Function, Stack)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Function",
-          "type": "UFunction*"
-        },
-        {
-          "name": "Stack",
-          "type": "FFrame*"
-        }
-      ],
-      "returnType": "Int"
-    },
-    {
-      "id": "call-remote-function",
-      "name": "CallRemoteFunction",
-      "category": "ActorComponent",
-      "signature": "CallRemoteFunction(Target, Function, Parameters, Out Parms, Stack)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Function",
-          "type": "UFunction*"
-        },
-        {
-          "name": "Parameters",
-          "type": "void*"
-        },
-        {
-          "name": "Out Parms",
-          "type": "FOutParmRec*"
-        },
-        {
-          "name": "Stack",
-          "type": "FFrame*"
-        }
-      ],
-      "returnType": "Bool"
-    },
-    {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
-      "category": "ActorComponent",
-      "signature": "PostInitProperties(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "ActorComponent",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "post-migrate",
       "name": "PostMigrate",
       "category": "ActorComponent",
@@ -1598,61 +2154,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "post-rename",
-      "name": "PostRename",
-      "category": "ActorComponent",
-      "signature": "PostRename(Target, Old Outer, Old Name)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Old Outer",
-          "type": "UObject*"
-        },
-        {
-          "name": "Old Name",
-          "type": "Name"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "ActorComponent",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
-      "category": "ActorComponent",
-      "signature": "AddReferencedObjects(In This, Collector)",
-      "params": [
-        {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "modify",
       "name": "Modify",
       "category": "ActorComponent",
@@ -1688,87 +2189,83 @@
       "returnType": "Bool"
     },
     {
-      "id": "pre-edit-change",
-      "name": "PreEditChange",
-      "category": "ActorComponent",
-      "signature": "PreEditChange(Target, Property That Will Change)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Property That Will Change",
-          "type": "FProperty*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "ActorComponent",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-chain-property",
-      "name": "PostEditChangeChainProperty",
-      "category": "ActorComponent",
-      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedChainEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "pre-edit-undo",
-      "name": "PreEditUndo",
-      "category": "ActorComponent",
-      "signature": "PreEditUndo(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-undo",
-      "name": "PostEditUndo",
-      "category": "ActorComponent",
-      "signature": "PostEditUndo(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "is-selected-in-editor",
       "name": "IsSelectedInEditor",
       "category": "ActorComponent",
       "signature": "IsSelectedInEditor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-package-external",
+      "name": "SetPackageExternal",
+      "category": "ActorComponent",
+      "signature": "SetPackageExternal(Target, External, Should Dirty)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "External",
+          "type": "Bool"
+        },
+        {
+          "name": "Should Dirty",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-streaming-bounds",
+      "name": "GetStreamingBounds",
+      "category": "ActorComponent",
+      "signature": "GetStreamingBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "FBox"
+    },
+    {
+      "id": "get-streaming-bounds-editor",
+      "name": "GetStreamingBoundsEditor",
+      "category": "ActorComponent",
+      "signature": "GetStreamingBoundsEditor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "FBox"
+    },
+    {
+      "id": "force-actor-non-spatially-loaded",
+      "name": "ForceActorNonSpatiallyLoaded",
+      "category": "ActorComponent",
+      "signature": "ForceActorNonSpatiallyLoaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "force-actor-no-data-layers",
+      "name": "ForceActorNoDataLayers",
+      "category": "ActorComponent",
+      "signature": "ForceActorNoDataLayers(Target)",
       "params": [
         {
           "name": "Target",
@@ -1880,6 +2377,90 @@
       ],
       "returnType": "Bool",
       "docs": "See if the owning Actor is currently running the UCS"
+    },
+    {
+      "id": "is-pre-registering",
+      "name": "IsPreRegistering",
+      "category": "ActorComponent",
+      "signature": "IsPreRegistering(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "See if this component is currently pre-registering"
+    },
+    {
+      "id": "is-pre-registered",
+      "name": "IsPreRegistered",
+      "category": "ActorComponent",
+      "signature": "IsPreRegistered(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "See if this component is currently pre-registered"
+    },
+    {
+      "id": "is-pre-unregistering",
+      "name": "IsPreUnregistering",
+      "category": "ActorComponent",
+      "signature": "IsPreUnregistering(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "See if this component is currently pre-unregistering"
+    },
+    {
+      "id": "is-pre-unregistered",
+      "name": "IsPreUnregistered",
+      "category": "ActorComponent",
+      "signature": "IsPreUnregistered(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "See if this component is currently pre-unregistered"
+    },
+    {
+      "id": "is-registered",
+      "name": "IsRegistered",
+      "category": "ActorComponent",
+      "signature": "IsRegistered(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "See if this component is currently registered"
+    },
+    {
+      "id": "allow-reregistration",
+      "name": "AllowReregistration",
+      "category": "ActorComponent",
+      "signature": "AllowReregistration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether the component class allows reregistration during ReregisterAllComponents"
     },
     {
       "id": "register-component",
@@ -2083,44 +2664,26 @@
       "docs": "Remove tick dependency on PrerequisiteComponent."
     },
     {
-      "id": "receive-tick",
-      "name": "ReceiveTick",
+      "id": "apply-world-offset",
+      "name": "ApplyWorldOffset",
       "category": "ActorComponent",
-      "signature": "ReceiveTick(Target, Delta Seconds)",
+      "signature": "ApplyWorldOffset(Target, In Offset, World Shift)",
       "params": [
         {
           "name": "Target",
           "type": "UActorComponent*"
         },
         {
-          "name": "Delta Seconds",
-          "type": "Float"
+          "name": "In Offset",
+          "type": "FVector&"
+        },
+        {
+          "name": "World Shift",
+          "type": "Bool"
         }
       ],
       "returnType": "Void",
-      "docs": "Event called every frame if tick is enabled"
-    },
-    {
-      "id": "receive-async-physics-tick",
-      "name": "ReceiveAsyncPhysicsTick",
-      "category": "ActorComponent",
-      "signature": "ReceiveAsyncPhysicsTick(Target, Delta Seconds, Sim Seconds)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorComponent*"
-        },
-        {
-          "name": "Delta Seconds",
-          "type": "Float"
-        },
-        {
-          "name": "Sim Seconds",
-          "type": "Float"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Event called every async physics tick if bAsyncPhysicsTickEnabled is true"
+      "docs": "Called by owner actor on position shifting\nComponent should update all relevant data structures to reflect new actor location\n@param InWorldOffset\t Offset vector the actor shifted by\n@param bWorldShift\t Whether this call is part of whole world shifting"
     },
     {
       "id": "set-can-ever-affect-navigation",
@@ -2141,24 +2704,10 @@
       "docs": "Sets value of bCanEverAffectNavigation flag and update navigation octree if needed.\n@note This flag influences the required updates when setting other properties associated\nto the navigation data (e.g., transform, primitive, mesh, etc.).\nSo when setting it to 'true' it is more efficient to set the other properties first,\notherwise ('false') it is more efficient to set this one first, then the other properties."
     },
     {
-      "id": "can-be-hlod-relevant",
-      "name": "CanBeHLODRelevant",
+      "id": "is-navigation-relevant",
+      "name": "IsNavigationRelevant",
       "category": "ActorComponent",
-      "signature": "CanBeHLODRelevant(Actor Component)",
-      "params": [
-        {
-          "name": "Actor Component",
-          "type": "UActorComponent*"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Called When render state is marked dirty"
-    },
-    {
-      "id": "owner-needs-initialization",
-      "name": "OwnerNeedsInitialization",
-      "category": "ActorComponent",
-      "signature": "OwnerNeedsInitialization(Target)",
+      "signature": "IsNavigationRelevant(Target)",
       "params": [
         {
           "name": "Target",
@@ -2166,7 +2715,127 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Convenience method for testing whether or not our owner is still being constructed / initialized."
+      "docs": "Override to specify that a component is relevant to the navigation system"
+    },
+    {
+      "id": "is-hlod-relevant",
+      "name": "IsHLODRelevant",
+      "category": "ActorComponent",
+      "signature": "IsHLODRelevant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Override to specify that a component is relevant to the HLOD generation."
+    },
+    {
+      "id": "get-hlod-proxy-components",
+      "name": "GetHLODProxyComponents",
+      "category": "ActorComponent",
+      "signature": "GetHLODProxyComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "TArray<UActorComponent*>",
+      "docs": "Override to provide a custom set of components to be used in place of the current component for the HLOD generation."
+    },
+    {
+      "id": "compute-hlod-hash",
+      "name": "ComputeHLODHash",
+      "category": "ActorComponent",
+      "signature": "ComputeHLODHash(Target, Hash Builder)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Hash Builder",
+          "type": "FHLODHashBuilder&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Override to allow a component subclass to compute an hash for the purpose of HLOD generation."
+    },
+    {
+      "id": "can-ever-affect-navigation",
+      "name": "CanEverAffectNavigation",
+      "category": "ActorComponent",
+      "signature": "CanEverAffectNavigation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Can this component potentially influence navigation"
+    },
+    {
+      "id": "is-net-simulating",
+      "name": "IsNetSimulating",
+      "category": "ActorComponent",
+      "signature": "IsNetSimulating(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we are replicating and this client is not authoritative"
+    },
+    {
+      "id": "get-net-mode",
+      "name": "GetNetMode",
+      "category": "ActorComponent",
+      "signature": "GetNetMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "ENetMode",
+      "docs": "Get the network mode (dedicated server, client, standalone, etc) for this component.\n@see IsNetMode()"
+    },
+    {
+      "id": "is-net-mode",
+      "name": "IsNetMode",
+      "category": "ActorComponent",
+      "signature": "IsNetMode(Target, Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Mode",
+          "type": "ENetMode"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test whether net mode is the given mode.\nIn optimized non-editor builds this can be more efficient than GetNetMode()\nbecause it can check the static build flags without considering PIE."
+    },
+    {
+      "id": "clear-need-end-of-frame-update",
+      "name": "ClearNeedEndOfFrameUpdate",
+      "category": "ActorComponent",
+      "signature": "ClearNeedEndOfFrameUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If we belong to a world, clear the request to do a deferred update."
     },
     {
       "id": "bool",

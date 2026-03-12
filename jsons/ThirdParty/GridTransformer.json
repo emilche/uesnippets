@@ -1,0 +1,775 @@
+{
+  "id": "grid-transformer",
+  "label": "GridTransformer",
+  "includepath": "GridTransformer.h",
+  "includes": [
+    "Grid",
+    "Types",
+    "Math",
+    "NullInterrupter",
+    "ChangeBackground",
+    "Interpolation",
+    "LevelSetRebuild",
+    "SignedFloodFill",
+    "Prune",
+    "openvdb",
+    "blocked_range",
+    "parallel_reduce",
+    "cmath",
+    "functional",
+    "ExplicitInstantiation"
+  ],
+  "functions": [
+    {
+      "id": "sample",
+      "name": "sample",
+      "category": "GridTransformer",
+      "signature": "sample(Target, In Tree, In Coord, Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TileSampler*"
+        },
+        {
+          "name": "In Tree",
+          "type": "TreeT&"
+        },
+        {
+          "name": "In Coord",
+          "type": "Vec3R&"
+        },
+        {
+          "name": "Result",
+          "type": "ValueT&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-threaded",
+      "name": "setThreaded",
+      "category": "GridTransformer",
+      "signature": "setThreaded(Target, B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "B",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "threaded",
+      "name": "threaded",
+      "category": "GridTransformer",
+      "signature": "threaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-transform-tiles",
+      "name": "setTransformTiles",
+      "category": "GridTransformer",
+      "signature": "setTransformTiles(Target, B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "B",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "transform-tiles",
+      "name": "transformTiles",
+      "category": "GridTransformer",
+      "signature": "transformTiles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-transform",
+      "name": "getTransform",
+      "category": "GridTransformer",
+      "signature": "getTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        }
+      ],
+      "returnType": "Mat4R&"
+    },
+    {
+      "id": "decompose",
+      "name": "decompose",
+      "category": "GridTransformer",
+      "signature": "decompose(Target, M, Scale, Rotate, Translate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "M",
+          "type": "math::Mat4<T>&"
+        },
+        {
+          "name": "Scale",
+          "type": "math::Vec3<T>&"
+        },
+        {
+          "name": "Rotate",
+          "type": "math::Vec3<T>&"
+        },
+        {
+          "name": "Translate",
+          "type": "math::Vec3<T>&"
+        }
+      ],
+      "returnType": "template<T> int"
+    },
+    {
+      "id": "matrix-transform-42f332",
+      "name": "MatrixTransform",
+      "category": "GridTransformer",
+      "signature": "MatrixTransform(Target, Identity, Identity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "Identity",
+          "type": ") : mat ( Mat4R::"
+        },
+        {
+          "name": "Identity",
+          "type": "invMat ( Mat4R::"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "matrix-transform-5d400c",
+      "name": "MatrixTransform",
+      "category": "GridTransformer",
+      "signature": "MatrixTransform(Target, Xform, Inverse)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "Xform",
+          "type": "Mat4R& xform ) : mat ("
+        },
+        {
+          "name": "Inverse",
+          "type": "invMat ( xform ."
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-affine",
+      "name": "isAffine",
+      "category": "GridTransformer",
+      "signature": "isAffine(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "transform",
+      "name": "transform",
+      "category": "GridTransformer",
+      "signature": "transform(Target, Pos)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "Pos",
+          "type": "Vec3R&"
+        }
+      ],
+      "returnType": "Vec3R"
+    },
+    {
+      "id": "inv-transform",
+      "name": "invTransform",
+      "category": "GridTransformer",
+      "signature": "invTransform(Target, Pos)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "Pos",
+          "type": "Vec3R&"
+        }
+      ],
+      "returnType": "Vec3R"
+    },
+    {
+      "id": "ab-transform",
+      "name": "ABTransform",
+      "category": "GridTransformer",
+      "signature": "ABTransform(Target, A Xform, A Xform, B Xform, Is Linear, M B Xform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "A Xform",
+          "type": "math::Transform&"
+        },
+        {
+          "name": "A Xform",
+          "type": "math::Transform& bXform ) : mAXform ("
+        },
+        {
+          "name": "B Xform",
+          "type": "mBXform ("
+        },
+        {
+          "name": "Is Linear",
+          "type": "mIsAffine ( mAXform . isLinear ( )&& mBXform ."
+        },
+        {
+          "name": "M B Xform",
+          "type": "mIsIdentity ( mIsAffine&& mAXform = ="
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-identity",
+      "name": "isIdentity",
+      "category": "GridTransformer",
+      "signature": "isIdentity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-a",
+      "name": "getA",
+      "category": "GridTransformer",
+      "signature": "getA(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        }
+      ],
+      "returnType": "math::Transform&"
+    },
+    {
+      "id": "get-b",
+      "name": "getB",
+      "category": "GridTransformer",
+      "signature": "getB(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        }
+      ],
+      "returnType": "math::Transform&"
+    },
+    {
+      "id": "do-resample-to-match",
+      "name": "doResampleToMatch",
+      "category": "GridTransformer",
+      "signature": "doResampleToMatch(Target, In Grid, Out Grid, Interrupter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "In Grid",
+          "type": "GridType&"
+        },
+        {
+          "name": "Out Grid",
+          "type": "GridType&"
+        },
+        {
+          "name": "Interrupter",
+          "type": "Interrupter&"
+        }
+      ],
+      "returnType": "template<Sampler,Interrupter,GridType> void"
+    },
+    {
+      "id": "eval-c232ca",
+      "name": "eval",
+      "category": "GridTransformer",
+      "signature": "eval(Background, Voxel Size)",
+      "params": [
+        {
+          "name": "Background",
+          "type": "ValueType&"
+        },
+        {
+          "name": "Voxel Size",
+          "type": "Vec3d&"
+        }
+      ],
+      "returnType": "ValueType"
+    },
+    {
+      "id": "eval-7fa08a",
+      "name": "eval",
+      "category": "GridTransformer",
+      "signature": "eval(Background)",
+      "params": [
+        {
+          "name": "Background",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "resample-to-match-2bf79b",
+      "name": "resampleToMatch",
+      "category": "GridTransformer",
+      "signature": "resampleToMatch(Target, In Grid, Out Grid, Interrupter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "In Grid",
+          "type": "GridType&"
+        },
+        {
+          "name": "Out Grid",
+          "type": "GridType&"
+        },
+        {
+          "name": "Interrupter",
+          "type": "Interrupter&"
+        }
+      ],
+      "returnType": "template<Sampler,Interrupter,GridType> void",
+      "docs": "voxelSize"
+    },
+    {
+      "id": "resample-to-match-b9d7da",
+      "name": "resampleToMatch",
+      "category": "GridTransformer",
+      "signature": "resampleToMatch(Target, In Grid, Out Grid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "In Grid",
+          "type": "GridType&"
+        },
+        {
+          "name": "Out Grid",
+          "type": "GridType&"
+        }
+      ],
+      "returnType": "template<Sampler,GridType> void"
+    },
+    {
+      "id": "init",
+      "name": "init",
+      "category": "GridTransformer",
+      "signature": "init(Target, Pivot, Scale, Rotate, Translate, Xform Order, Rot Order)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "Pivot",
+          "type": "Vec3R&"
+        },
+        {
+          "name": "Scale",
+          "type": "Vec3R&"
+        },
+        {
+          "name": "Rotate",
+          "type": "Vec3R&"
+        },
+        {
+          "name": "Translate",
+          "type": "Vec3R&"
+        },
+        {
+          "name": "Xform Order",
+          "type": "std::string&"
+        },
+        {
+          "name": "Rot Order",
+          "type": "std::string&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-interrupter",
+      "name": "setInterrupter",
+      "category": "GridTransformer",
+      "signature": "setInterrupter(Target, Interrupter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Interrupter",
+          "type": "InterrupterType&"
+        }
+      ],
+      "returnType": "template<InterrupterType> void"
+    },
+    {
+      "id": "transform-grid-c4131e",
+      "name": "transformGrid",
+      "category": "GridTransformer",
+      "signature": "transformGrid(Target, Xform, In Grid, Out Grid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Xform",
+          "type": "Transformer&"
+        },
+        {
+          "name": "In Grid",
+          "type": "GridT&"
+        },
+        {
+          "name": "Out Grid",
+          "type": "GridT&"
+        }
+      ],
+      "returnType": "template<Sampler,GridT,Transformer> void",
+      "docs": "this="
+    },
+    {
+      "id": "transform-grid-945cf0",
+      "name": "transformGrid",
+      "category": "GridTransformer",
+      "signature": "transformGrid(Target, In Grid, Out Grid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridTransformer*"
+        },
+        {
+          "name": "In Grid",
+          "type": "GridT&"
+        },
+        {
+          "name": "Out Grid",
+          "type": "GridT&"
+        }
+      ],
+      "returnType": "template<class Sampler,class GridT> void"
+    },
+    {
+      "id": "range-processor-bd00d1",
+      "name": "RangeProcessor",
+      "category": "GridTransformer",
+      "signature": "RangeProcessor(Target, Xform, B, In T, True, Xform, B, In T, Out T, M In Tree, M Out Tree)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Xform",
+          "type": "Transformer&"
+        },
+        {
+          "name": "B",
+          "type": "CoordBBox&"
+        },
+        {
+          "name": "In T",
+          "type": "TreeT&"
+        },
+        {
+          "name": "True",
+          "type": "TreeT& outT ) : mIsRoot ("
+        },
+        {
+          "name": "Xform",
+          "type": "mXform ("
+        },
+        {
+          "name": "B",
+          "type": "mBBox ("
+        },
+        {
+          "name": "In T",
+          "type": "mInTree ("
+        },
+        {
+          "name": "Out T",
+          "type": "mOutTree (&"
+        },
+        {
+          "name": "M In Tree",
+          "type": "mInAcc ("
+        },
+        {
+          "name": "M Out Tree",
+          "type": "mOutAcc (*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "range-processor-80c3fb",
+      "name": "RangeProcessor",
+      "category": "GridTransformer",
+      "signature": "RangeProcessor(Target, Xform, B, False, Xform, B, In Tree, Background, M In Tree, M Out Tree)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Xform",
+          "type": "Transformer&"
+        },
+        {
+          "name": "B",
+          "type": "CoordBBox&"
+        },
+        {
+          "name": "False",
+          "type": "TreeT& inTree ) : mIsRoot ("
+        },
+        {
+          "name": "Xform",
+          "type": "mXform ("
+        },
+        {
+          "name": "B",
+          "type": "mBBox ("
+        },
+        {
+          "name": "In Tree",
+          "type": "mInTree ("
+        },
+        {
+          "name": "Background",
+          "type": "mOutTree ( new TreeT ( inTree ."
+        },
+        {
+          "name": "M In Tree",
+          "type": "mInAcc ("
+        },
+        {
+          "name": "M Out Tree",
+          "type": "mOutAcc (*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "range-processor-6fec48",
+      "name": "RangeProcessor",
+      "category": "GridTransformer",
+      "signature": "RangeProcessor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "range-processor-813620",
+      "name": "RangeProcessor",
+      "category": "GridTransformer",
+      "signature": "RangeProcessor(Target, Other, False, M Xform, M B Box, M In Tree, Background, M In Tree, M Out Tree, M Interrupt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Other",
+          "type": "RangeProcessor&"
+        },
+        {
+          "name": "False",
+          "type": "tbb::split ) : mIsRoot ("
+        },
+        {
+          "name": "M Xform",
+          "type": "mXform ( other ."
+        },
+        {
+          "name": "M B Box",
+          "type": "mBBox ( other ."
+        },
+        {
+          "name": "M In Tree",
+          "type": "mInTree ( other ."
+        },
+        {
+          "name": "Background",
+          "type": "mOutTree ( new TreeT ( mInTree ."
+        },
+        {
+          "name": "M In Tree",
+          "type": "mInAcc ("
+        },
+        {
+          "name": "M Out Tree",
+          "type": "mOutAcc (*"
+        },
+        {
+          "name": "M Interrupt",
+          "type": "mInterrupt ( other ."
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-interrupt",
+      "name": "setInterrupt",
+      "category": "GridTransformer",
+      "signature": "setInterrupt(Target, F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "F",
+          "type": "InterruptFunc&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "join",
+      "name": "join",
+      "category": "GridTransformer",
+      "signature": "join(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Other",
+          "type": "RangeProcessor&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-transform",
+      "name": "applyTransform",
+      "category": "GridTransformer",
+      "signature": "applyTransform(Target, Xform, In Grid, Out Grid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Xform",
+          "type": "Transformer&"
+        },
+        {
+          "name": "In Grid",
+          "type": "GridT&"
+        },
+        {
+          "name": "Out Grid",
+          "type": "GridT&"
+        }
+      ],
+      "returnType": "template<class Sampler,class GridT,Transformer> void"
+    },
+    {
+      "id": "transform-b-box",
+      "name": "transformBBox",
+      "category": "GridTransformer",
+      "signature": "transformBBox(Target, Xform, Bbox, In Tree, Out Tree, Interrupt, Sampler)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "GridResampler*"
+        },
+        {
+          "name": "Xform",
+          "type": "Transformer&"
+        },
+        {
+          "name": "Bbox",
+          "type": "CoordBBox&"
+        },
+        {
+          "name": "In Tree",
+          "type": "InTreeT&"
+        },
+        {
+          "name": "Out Tree",
+          "type": "OutTreeT&"
+        },
+        {
+          "name": "Interrupt",
+          "type": "InterruptFunc&"
+        },
+        {
+          "name": "Sampler",
+          "type": "Sampler&"
+        }
+      ],
+      "returnType": "template<class Sampler,class InTreeT,class OutTreeT,class Transformer> void"
+    }
+  ]
+}

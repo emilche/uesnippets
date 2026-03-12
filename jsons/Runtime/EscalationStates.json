@@ -54,17 +54,54 @@
       "docs": "Gets all counter time periods specified by the escalation state settings\n@return\t\tAll of the time periods in the state config settings"
     },
     {
-      "id": "validate-config-internal",
-      "name": "ValidateConfigInternal",
+      "id": "get-config-section",
+      "name": "GetConfigSection",
       "category": "EscalationStates",
-      "signature": "ValidateConfigInternal(Target)",
+      "signature": "GetConfigSection()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Static interface which FEscalateState subclasses must implement (called during construction, so virtuals won't do)"
+    },
+    {
+      "id": "get-base-config-class",
+      "name": "GetBaseConfigClass",
+      "category": "EscalationStates",
+      "signature": "GetBaseConfigClass()",
+      "params": [],
+      "returnType": "UClass*",
+      "docs": "Gets the UEscalationManagerConfig subclass escalation states are associated with"
+    },
+    {
+      "id": "reset-counters",
+      "name": "ResetCounters",
+      "category": "EscalationStates",
+      "signature": "ResetCounters(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FEscalationState*"
+          "type": "FEscalationCounter*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "Struct containing escalation counters covering any time period (e.g. frame/second/arbitrary-period)"
+    },
+    {
+      "id": "accumulate-counter",
+      "name": "AccumulateCounter",
+      "category": "EscalationStates",
+      "signature": "AccumulateCounter(Target, In Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationCounter*"
+        },
+        {
+          "name": "In Counter",
+          "type": "FEscalationCounter&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Accumulate another escalation counter into this one\n@param InCounter\t\tThe escalation counter to accumulate with"
     },
     {
       "id": "check-quotas",
@@ -97,6 +134,20 @@
       ],
       "returnType": "Void",
       "docs": "Ticks the escalation manager\nNOTE: This takes the current time, in seconds, rather than DeltaTime.\n@param TimeSeconds\tThe (can be approximate) current time"
+    },
+    {
+      "id": "does-require-tick",
+      "name": "DoesRequireTick",
+      "category": "EscalationStates",
+      "signature": "DoesRequireTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEscalationManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not calls to Tick are presently required\n@return\tWhether Tick is required"
     },
     {
       "id": "is-dormant",
@@ -161,6 +212,75 @@
       ],
       "returnType": "Void",
       "docs": "Sets a new NotifySeverityUpdate value"
+    },
+    {
+      "id": "get-counter-num-prealloc",
+      "name": "GetCounterNumPrealloc",
+      "category": "EscalationStates",
+      "signature": "GetCounterNumPrealloc()",
+      "params": [],
+      "returnType": "template<T,TEnableIf<TModels_V<CHasEnumPreallocNum,T>>::Type* = nullptr> int32"
+    },
+    {
+      "id": "t-escalation-manager",
+      "name": "TEscalationManager",
+      "category": "EscalationStates",
+      "signature": "TEscalationManager(State Alloc)",
+      "params": [
+        {
+          "name": "State Alloc",
+          "type": ") : FEscalationManager ( FEscalationManagerParms { TNum,MakeArrayView ( RegisteredCountersCacheAlloc,TNumCategories ),EscalationStateType::StaticStruct ( ),( uint8* )&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Base constructor"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "EscalationStates",
+      "signature": "Init(Config Context)",
+      "params": [
+        {
+          "name": "Config Context",
+          "type": "String"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes the escalation manager\n@param ConfigContext\t\tAdditional context to use for state configuration (e.g. NetDriver name, to separate config for each NetDriver)"
+    },
+    {
+      "id": "add-new-counter",
+      "name": "AddNewCounter",
+      "category": "EscalationStates",
+      "signature": "AddNewCounter(Count)",
+      "params": [
+        {
+          "name": "Count",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Dynamically adds a new counter not specified in CountersEnum, and returns its index.\nIf NumPrealloc (or Max if not specified) is exceeded, counter tracking will switch from inline allocation to the heap.\n@param Count\t\tThe number of counters to add\n@return\t\t\tThe index of the first added counter"
+    },
+    {
+      "id": "register-counter-category",
+      "name": "RegisterCounterCategory",
+      "category": "EscalationStates",
+      "signature": "RegisterCounterCategory(Category Index, Counter Index)",
+      "params": [
+        {
+          "name": "Category Index",
+          "type": "Int"
+        },
+        {
+          "name": "Counter Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Registers a counter for automatic processing under the specified counter category, as set by CounterCategoriesEnum\n(each category can implement a different type of custom processing, in HasHitAnyQuota)\n@param CategoryIndex\t\tThe processing category the counter should be registered under\n@param CounterIndex\t\tThe index of the counter to register"
     }
   ]
 }

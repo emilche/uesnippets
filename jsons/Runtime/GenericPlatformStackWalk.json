@@ -20,6 +20,29 @@
       "docs": "Initializes options related to stack walking from ini, i.e. how detailed the stack walking should be, performance settings etc."
     },
     {
+      "id": "init-stack-walking",
+      "name": "InitStackWalking",
+      "category": "GenericPlatformStackWalk",
+      "signature": "InitStackWalking()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Initializes stack traversal and symbol. Must be called before any other stack/symbol functions. Safe to reenter."
+    },
+    {
+      "id": "init-stack-walking-for-process",
+      "name": "InitStackWalkingForProcess",
+      "category": "GenericPlatformStackWalk",
+      "signature": "InitStackWalkingForProcess(Process)",
+      "params": [
+        {
+          "name": "Process",
+          "type": "FProcHandle&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Like InitStackWalking but initializes stack walking for another process.\n@param\tProcess\t\tProcess that is going to be queried\n@return\t\t\t\tTrue if successful, false otherwise."
+    },
+    {
       "id": "program-counter-to-human-readable-string",
       "name": "ProgramCounterToHumanReadableString",
       "category": "GenericPlatformStackWalk",
@@ -89,6 +112,42 @@
       ],
       "returnType": "Bool",
       "docs": "Same as above, but can be used with external applications."
+    },
+    {
+      "id": "program-counter-to-symbol-info",
+      "name": "ProgramCounterToSymbolInfo",
+      "category": "GenericPlatformStackWalk",
+      "signature": "ProgramCounterToSymbolInfo(Program Counter, Out Symbol Info)",
+      "params": [
+        {
+          "name": "Program Counter",
+          "type": "UInt64"
+        },
+        {
+          "name": "Out Symbol Info",
+          "type": "FProgramCounterSymbolInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Converts the passed in program counter address to a symbol info struct, filling in module and filename, line number and displacement.\n@warning: The code assumes that the destination strings are big enough\n@param\tProgramCounter\t\tAddress to look symbol information up for\n@param\tout_SymbolInfo\t\tSymbol information associated with program counter"
+    },
+    {
+      "id": "program-counter-to-symbol-info-ex",
+      "name": "ProgramCounterToSymbolInfoEx",
+      "category": "GenericPlatformStackWalk",
+      "signature": "ProgramCounterToSymbolInfoEx(Program Counter, Out Symbol Info)",
+      "params": [
+        {
+          "name": "Program Counter",
+          "type": "UInt64"
+        },
+        {
+          "name": "Out Symbol Info",
+          "type": "FProgramCounterSymbolInfoEx&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Same as above, but can be used with external applications since it doesn't re-initialize the active process."
     },
     {
       "id": "capture-stack-back-trace",
@@ -219,6 +278,32 @@
       "docs": "Walks the stack and updates the Stack array with the symbol information for each line in the stack.\n@param\tIgnoreCount\t\t\tNumber of stack entries to ignore (some are guaranteed to be in the stack walking code)\n@param\tMaxDepth\t\t\tThe maximum depth to trace, can't be more than 100, offset from IgnoreCount.\n@param\tContext\t\t\t\tOptional thread context information\n@return\tThe stack of symbols to return."
     },
     {
+      "id": "thread-stack-walk-and-dump",
+      "name": "ThreadStackWalkAndDump",
+      "category": "GenericPlatformStackWalk",
+      "signature": "ThreadStackWalkAndDump(Human Readable String, Human Readable String Size, Ignore Count, Thread Id)",
+      "params": [
+        {
+          "name": "Human Readable String",
+          "type": "ANSICHAR*"
+        },
+        {
+          "name": "Human Readable String Size",
+          "type": "SIZE_T"
+        },
+        {
+          "name": "Ignore Count",
+          "type": "Int"
+        },
+        {
+          "name": "Thread Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Walks the stack for the specified thread and appends the human readable string to the passed in one.\n@warning: The code assumes that HumanReadableString is large enough to contain the information.\n@param\tHumanReadableString\tString to concatenate information with\n@param\tHumanReadableStringSize size of string in characters\n@param\tIgnoreCount\t\t\tNumber of stack entries to ignore (some are guaranteed to be in the stack walking code)\n@param\tThreadId\t\t\t\tThreadId to walk the strack for."
+    },
+    {
       "id": "stack-walk-and-dump-ex-14a4e3",
       "name": "StackWalkAndDumpEx",
       "category": "GenericPlatformStackWalk",
@@ -281,6 +366,33 @@
       "docs": "Walks the stack and appends the human readable string to the passed in one.\n@warning: The code assumes that HumanReadableString is large enough to contain the information.\n@param\tHumanReadableString\tString to concatenate information with\n@param\tHumanReadableStringSize size of string in characters\n@param\tProgramCounter\t\tInstruction address that should be at the top of the stack\n@param   Flags\t\t\t\tUsed to pass additional information (see StackWalkFlags)\n@param\tContext\t\t\t\tOptional thread context information"
     },
     {
+      "id": "get-process-module-count",
+      "name": "GetProcessModuleCount",
+      "category": "GenericPlatformStackWalk",
+      "signature": "GetProcessModuleCount()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "Returns the number of modules loaded by the currently running process."
+    },
+    {
+      "id": "get-process-module-signatures",
+      "name": "GetProcessModuleSignatures",
+      "category": "GenericPlatformStackWalk",
+      "signature": "GetProcessModuleSignatures(Module Signatures, Module Signatures Size)",
+      "params": [
+        {
+          "name": "Module Signatures",
+          "type": "FStackWalkModuleInfo*"
+        },
+        {
+          "name": "Module Signatures Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the signature for every module loaded by the currently running process.\n@param\tModuleSignatures\t\tAn array to retrieve the module signatures.\n@param\tModuleSignaturesSize\tThe size of the array pointed to by ModuleSignatures.\n@return\tThe number of modules copied into ModuleSignatures"
+    },
+    {
       "id": "get-symbol-meta-data",
       "name": "GetSymbolMetaData",
       "category": "GenericPlatformStackWalk",
@@ -310,15 +422,6 @@
       ],
       "returnType": "Void",
       "docs": "Converts virtual path to local and write local path to Dest. If no virtual path if sound, Source will be written"
-    },
-    {
-      "id": "wants-detailed-callstacks-in-non-monolithic-builds",
-      "name": "WantsDetailedCallstacksInNonMonolithicBuilds",
-      "category": "GenericPlatformStackWalk",
-      "signature": "WantsDetailedCallstacksInNonMonolithicBuilds()",
-      "params": [],
-      "returnType": "Bool",
-      "docs": "Returns true if non-monolithic builds should produce full callstacks in the log (and load all debug symbols)"
     }
   ]
 }

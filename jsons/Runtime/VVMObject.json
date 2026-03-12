@@ -1,0 +1,91 @@
+{
+  "id": "vvm-object",
+  "label": "VVMObject",
+  "includepath": "VerseVM/VVMObject.h",
+  "includes": [
+    "VVMCell",
+    "VVMHeap",
+    "VVMPropertyInlineCache",
+    "VVMShape"
+  ],
+  "functions": [
+    {
+      "id": "is-struct",
+      "name": "IsStruct",
+      "category": "VVMObject",
+      "signature": "IsStruct(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "VObject*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-is-struct",
+      "name": "SetIsStruct",
+      "category": "VVMObject",
+      "signature": "SetIsStruct(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "VObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "data-offset",
+      "name": "DataOffset",
+      "category": "VVMObject",
+      "signature": "DataOffset(Target, Cpp Class Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "VObject*"
+        },
+        {
+          "name": "Cpp Class Info",
+          "type": "VCppClassInfo&"
+        }
+      ],
+      "returnType": "size_t"
+    },
+    {
+      "id": "get-data",
+      "name": "GetData",
+      "category": "VVMObject",
+      "signature": "GetData(Target, Cpp Class Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "VObject*"
+        },
+        {
+          "name": "Cpp Class Info",
+          "type": "VCppClassInfo&"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Mutable variables store their data as a `VRestValue`.\nIt's not an array of `VValue`s because you can potentially load a class member before actually defining it. i.e.\n```\nc := class {x:int}\nC := c{}\nFoo(C.X) # allocates a placeholder\nC.X := 1  # This is the first time `c.X` actually gets defined.\n```\nThis stores the actual data for individual fields. Some constants and procedures are stored in the shape, not the\nobject (since then there's no need to do an unnecessary index lookup).\nThe mapping of offsets to each field are stored in the emergent type's \"shape\".  The reason why the object\ndoesn't just store the mapping of fields to data itself is that it will eventually help when we implement inline\ncaches for retrieving fields on objects. It also helps reduce memory usage because multiple objects can share\nthe same hash table that describes their layouts."
+    },
+    {
+      "id": "get-field-data",
+      "name": "GetFieldData",
+      "category": "VVMObject",
+      "signature": "GetFieldData(Target, Cpp Class Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "VObject*"
+        },
+        {
+          "name": "Cpp Class Info",
+          "type": "VCppClassInfo&"
+        }
+      ],
+      "returnType": "VRestValue*"
+    }
+  ]
+}

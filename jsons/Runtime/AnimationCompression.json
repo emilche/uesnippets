@@ -1,0 +1,869 @@
+{
+  "id": "animation-compression",
+  "label": "AnimationCompression",
+  "includepath": "AnimationCompression.h",
+  "includes": [
+    "CoreMinimal",
+    "FloatPacker",
+    "AnimEnums",
+    "EngineLogs"
+  ],
+  "functions": [
+    {
+      "id": "unaligned-read",
+      "name": "UnalignedRead",
+      "category": "AnimationCompression",
+      "signature": "UnalignedRead(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "template<ValueType> ValueType"
+    },
+    {
+      "id": "interpolate",
+      "name": "Interpolate",
+      "category": "AnimationCompression",
+      "signature": "Interpolate(A, B, Alpha)",
+      "params": [
+        {
+          "name": "A",
+          "type": "T&"
+        },
+        {
+          "name": "B",
+          "type": "T&"
+        },
+        {
+          "name": "Alpha",
+          "type": "Float"
+        }
+      ],
+      "returnType": "template<T> T",
+      "docs": "Helper template function to interpolate between two data types.\nUsed in the FilterLinearKeysTemplate function below"
+    },
+    {
+      "id": "f-vector-3-f",
+      "name": "FVector3f",
+      "category": "AnimationCompression",
+      "signature": "FVector3f(A, B, Alpha)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "B",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Alpha",
+          "type": "Float"
+        }
+      ],
+      "returnType": "template<> FVector3f Interpolate<",
+      "docs": "custom instantiation of Interpolate for FVectors"
+    },
+    {
+      "id": "f-vector-3-d",
+      "name": "FVector3d",
+      "category": "AnimationCompression",
+      "signature": "FVector3d(A, B, Alpha)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "B",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Alpha",
+          "type": "Float"
+        }
+      ],
+      "returnType": "template<> FVector3d Interpolate<"
+    },
+    {
+      "id": "f-quat-4-d",
+      "name": "FQuat4d",
+      "category": "AnimationCompression",
+      "signature": "FQuat4d(A, B, Alpha)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FQuat4d&"
+        },
+        {
+          "name": "B",
+          "type": "FQuat4d&"
+        },
+        {
+          "name": "Alpha",
+          "type": "Float"
+        }
+      ],
+      "returnType": "template<> FQuat4d Interpolate<",
+      "docs": "custom instantiation of Interpolate for FQuats"
+    },
+    {
+      "id": "f-quat-4-f",
+      "name": "FQuat4f",
+      "category": "AnimationCompression",
+      "signature": "FQuat4f(A, B, Alpha)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "B",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "Alpha",
+          "type": "Float"
+        }
+      ],
+      "returnType": "template<> FQuat4f Interpolate<"
+    },
+    {
+      "id": "from-quat-f43fa6",
+      "name": "FromQuat",
+      "category": "AnimationCompression",
+      "signature": "FromQuat(Target, Quat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuatFixed48NoW*"
+        },
+        {
+          "name": "Quat",
+          "type": "FQuat4f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-quat-f7db5d",
+      "name": "ToQuat",
+      "category": "AnimationCompression",
+      "signature": "ToQuat(Target, Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FQuatFixed48NoW*"
+        },
+        {
+          "name": "Out",
+          "type": "FQuat4f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-fixed-32-no-w-5ee0ce",
+      "name": "FQuatFixed32NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFixed32NoW()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-fixed-32-no-w-d5b754",
+      "name": "FQuatFixed32NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFixed32NoW(Quat)",
+      "params": [
+        {
+          "name": "Quat",
+          "type": "FQuat4f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-quat-dfe217",
+      "name": "ToQuat",
+      "category": "AnimationCompression",
+      "signature": "ToQuat(Packed Value)",
+      "params": [
+        {
+          "name": "Packed Value",
+          "type": "UInt*"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned> FQuat4f"
+    },
+    {
+      "id": "f-quat-float-96-no-w-535191",
+      "name": "FQuatFloat96NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFloat96NoW()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-float-96-no-w-795956",
+      "name": "FQuatFloat96NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFloat96NoW(Quat)",
+      "params": [
+        {
+          "name": "Quat",
+          "type": "FQuat4f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-float-96-no-w-974498",
+      "name": "FQuatFloat96NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFloat96NoW(In X, In Y, In X, In Y, In Z)",
+      "params": [
+        {
+          "name": "In X",
+          "type": "Float"
+        },
+        {
+          "name": "In Y",
+          "type": "Float"
+        },
+        {
+          "name": "In X",
+          "type": "float InZ ) : X ("
+        },
+        {
+          "name": "In Y",
+          "type": "Y ("
+        },
+        {
+          "name": "In Z",
+          "type": "Z ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-quat-403ccc",
+      "name": "ToQuat",
+      "category": "AnimationCompression",
+      "signature": "ToQuat(Values)",
+      "params": [
+        {
+          "name": "Values",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned = true> FQuat4f"
+    },
+    {
+      "id": "f-vector-fixed-48-d5c43c",
+      "name": "FVectorFixed48",
+      "category": "AnimationCompression",
+      "signature": "FVectorFixed48()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-vector-fixed-48-d2c53b",
+      "name": "FVectorFixed48",
+      "category": "AnimationCompression",
+      "signature": "FVectorFixed48(Vec)",
+      "params": [
+        {
+          "name": "Vec",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "from-vector-993c29",
+      "name": "FromVector",
+      "category": "AnimationCompression",
+      "signature": "FromVector(Vec)",
+      "params": [
+        {
+          "name": "Vec",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-vector-006ec2",
+      "name": "ToVector",
+      "category": "AnimationCompression",
+      "signature": "ToVector(Out)",
+      "params": [
+        {
+          "name": "Out",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-vector-interval-fixed-32-no-w-7586c5",
+      "name": "FVectorIntervalFixed32NoW",
+      "category": "AnimationCompression",
+      "signature": "FVectorIntervalFixed32NoW()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-vector-interval-fixed-32-no-w-e355b8",
+      "name": "FVectorIntervalFixed32NoW",
+      "category": "AnimationCompression",
+      "signature": "FVectorIntervalFixed32NoW(Value, Mins, Ranges)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "from-vector-44c657",
+      "name": "FromVector",
+      "category": "AnimationCompression",
+      "signature": "FromVector(Value, Mins, Ranges)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-vector-9d159b",
+      "name": "ToVector",
+      "category": "AnimationCompression",
+      "signature": "ToVector(Mins, Ranges, Packed Value)",
+      "params": [
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        },
+        {
+          "name": "Packed Value",
+          "type": "UInt*"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned = true> FVector3f"
+    },
+    {
+      "id": "to-vector-95f786",
+      "name": "ToVector",
+      "category": "AnimationCompression",
+      "signature": "ToVector(Out, Mins, Ranges)",
+      "params": [
+        {
+          "name": "Out",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-interval-fixed-32-no-w-2ee551",
+      "name": "FQuatIntervalFixed32NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatIntervalFixed32NoW()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-interval-fixed-32-no-w-efe7e7",
+      "name": "FQuatIntervalFixed32NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatIntervalFixed32NoW(Quat, Mins, Ranges)",
+      "params": [
+        {
+          "name": "Quat",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "from-quat-021e45",
+      "name": "FromQuat",
+      "category": "AnimationCompression",
+      "signature": "FromQuat(Quat, Mins, Ranges)",
+      "params": [
+        {
+          "name": "Quat",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "to-quat-707fa5",
+      "name": "ToQuat",
+      "category": "AnimationCompression",
+      "signature": "ToQuat(Mins, Ranges, Packed Value)",
+      "params": [
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        },
+        {
+          "name": "Packed Value",
+          "type": "UInt*"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned> FQuat4f"
+    },
+    {
+      "id": "to-quat-ca6cc6",
+      "name": "ToQuat",
+      "category": "AnimationCompression",
+      "signature": "ToQuat(Out, Mins, Ranges)",
+      "params": [
+        {
+          "name": "Out",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "Mins",
+          "type": "Float*"
+        },
+        {
+          "name": "Ranges",
+          "type": "Float*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-float-32-no-w-144b03",
+      "name": "FQuatFloat32NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFloat32NoW()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-quat-float-32-no-w-93e24f",
+      "name": "FQuatFloat32NoW",
+      "category": "AnimationCompression",
+      "signature": "FQuatFloat32NoW(Quat)",
+      "params": [
+        {
+          "name": "Quat",
+          "type": "FQuat4f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "decompress-rotation-18674f",
+      "name": "DecompressRotation",
+      "category": "AnimationCompression",
+      "signature": "DecompressRotation(Out, Top Of Stream, Key Data)",
+      "params": [
+        {
+          "name": "Out",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "Top Of Stream",
+          "type": "uint8* RESTRICT"
+        },
+        {
+          "name": "Key Data",
+          "type": "uint8* RESTRICT"
+        }
+      ],
+      "returnType": "template<int32 FORMAT,bool bIsDataAligned = true> void",
+      "docs": "Templated Rotation Decompressor. Generates a unique decompressor per known quantization format\n@param\tOut\t\t\t\tThe FQuat to fill in.\n@param\tTopOfStream\t\tThe start of the compressed rotation stream data.\n@param\tKeyData\t\t\tThe compressed rotation data to decompress.\n@return\tNone."
+    },
+    {
+      "id": "decompress-translation-d90cc1",
+      "name": "DecompressTranslation",
+      "category": "AnimationCompression",
+      "signature": "DecompressTranslation(Out, Top Of Stream, Key Data)",
+      "params": [
+        {
+          "name": "Out",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Top Of Stream",
+          "type": "uint8* RESTRICT"
+        },
+        {
+          "name": "Key Data",
+          "type": "uint8* RESTRICT"
+        }
+      ],
+      "returnType": "template<int32 FORMAT,bool bIsDataAligned = true> void",
+      "docs": "Templated Translation Decompressor. Generates a unique decompressor per known quantization format\n@param\tOut\t\t\t\tThe FVector to fill in.\n@param\tTopOfStream\t\tThe start of the compressed translation stream data.\n@param\tKeyData\t\t\tThe compressed translation data to decompress.\n@return\tNone."
+    },
+    {
+      "id": "decompress-scale-103383",
+      "name": "DecompressScale",
+      "category": "AnimationCompression",
+      "signature": "DecompressScale(Out, Top Of Stream, Key Data)",
+      "params": [
+        {
+          "name": "Out",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Top Of Stream",
+          "type": "uint8* RESTRICT"
+        },
+        {
+          "name": "Key Data",
+          "type": "uint8* RESTRICT"
+        }
+      ],
+      "returnType": "template<int32 FORMAT,bool bIsDataAligned = true> void",
+      "docs": "Templated Scale Decompressor. Generates a unique decompressor per known quantization format\n@param\tOut\t\t\t\tThe FVector to fill in.\n@param\tTopOfStream\t\tThe start of the compressed Scale stream data.\n@param\tKeyData\t\t\tThe compressed Scale data to decompress.\n@return\tNone."
+    },
+    {
+      "id": "compress-fixed-16",
+      "name": "CompressFixed16",
+      "category": "AnimationCompression",
+      "signature": "CompressFixed16(Value, Log 2 Max Value)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "Float"
+        },
+        {
+          "name": "Log 2 Max Value",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "UInt16",
+      "docs": "This class contains helper methods for dealing with animations compressed with the per-track codec"
+    },
+    {
+      "id": "decompress-fixed-16",
+      "name": "DecompressFixed16",
+      "category": "AnimationCompression",
+      "signature": "DecompressFixed16(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAnimationCompression_PerTrackUtils*"
+        },
+        {
+          "name": "Value",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "template<> float",
+      "docs": "Decompresses a fixed point number encoded by ComrpessFixed16\n@param Value\t\t\tValue to decode\n@param Log2MaxValue\tEncoding range (can be 0..15)\n@return The decompressed value"
+    },
+    {
+      "id": "make-header",
+      "name": "MakeHeader",
+      "category": "AnimationCompression",
+      "signature": "MakeHeader(Num Keys, Key Format, Key Flags, Really Needs Frame Table)",
+      "params": [
+        {
+          "name": "Num Keys",
+          "type": "Int"
+        },
+        {
+          "name": "Key Format",
+          "type": "Int"
+        },
+        {
+          "name": "Key Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Really Needs Frame Table",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Creates a header integer with four fields:\nNumKeys can be no more than 24 bits (positions 0..23)\nKeyFlags can be no more than 3 bits (positions 24..27)\nbReallyNeedsFrameTable is a single bit (position 27)\nKeyFormat can be no more than 4 bits (positions 31..28)"
+    },
+    {
+      "id": "get-key-count-from-header",
+      "name": "GetKeyCountFromHeader",
+      "category": "AnimationCompression",
+      "signature": "GetKeyCountFromHeader(Header)",
+      "params": [
+        {
+          "name": "Header",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Extracts the number of keys from a header created by MakeHeader\n@param Header\tHeader to extract the number of keys from\n@return\t\t\tThe number of keys encoded in the header"
+    },
+    {
+      "id": "get-all-sizes-from-format",
+      "name": "GetAllSizesFromFormat",
+      "category": "AnimationCompression",
+      "signature": "GetAllSizesFromFormat(Key Format, Format Flags, Key Component Count, Key Component Size, Fixed Component Count, Fixed Component Size)",
+      "params": [
+        {
+          "name": "Key Format",
+          "type": "Int"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Key Component Count",
+          "type": "Int&"
+        },
+        {
+          "name": "Key Component Size",
+          "type": "Int&"
+        },
+        {
+          "name": "Fixed Component Count",
+          "type": "Int&"
+        },
+        {
+          "name": "Fixed Component Size",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Figures out the size of various parts of a compressed track from the format and format flags combo\n@param KeyFormat\t\tThe encoding format used for each key\n@param FormatFlags\t\tThree bits of format-specific information and a single bit to indicate if a key->frame table follows the keys"
+    },
+    {
+      "id": "get-byte-sizes-from-format",
+      "name": "GetByteSizesFromFormat",
+      "category": "AnimationCompression",
+      "signature": "GetByteSizesFromFormat(Key Format, Format Flags, Bytes Per Key, Fixed Bytes)",
+      "params": [
+        {
+          "name": "Key Format",
+          "type": "Int"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Bytes Per Key",
+          "type": "Int&"
+        },
+        {
+          "name": "Fixed Bytes",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "decompose-header-e0f454",
+      "name": "DecomposeHeader",
+      "category": "AnimationCompression",
+      "signature": "DecomposeHeader(Header, Key Format, Num Keys, Format Flags)",
+      "params": [
+        {
+          "name": "Header",
+          "type": "Int"
+        },
+        {
+          "name": "Key Format",
+          "type": "Int&"
+        },
+        {
+          "name": "Num Keys",
+          "type": "Int&"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "OUT"
+    },
+    {
+      "id": "decompose-header-380be1",
+      "name": "DecomposeHeader",
+      "category": "AnimationCompression",
+      "signature": "DecomposeHeader(Header, Key Format, Num Keys, Format Flags, Bytes Per Key, Fixed Bytes)",
+      "params": [
+        {
+          "name": "Header",
+          "type": "Int"
+        },
+        {
+          "name": "Key Format",
+          "type": "Int&"
+        },
+        {
+          "name": "Num Keys",
+          "type": "Int&"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int&"
+        },
+        {
+          "name": "Bytes Per Key",
+          "type": "Int&"
+        },
+        {
+          "name": "Fixed Bytes",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Decomposes a header created with MakeHeader into three/four fields (two are still left packed into FormatFlags):\n@param Header\t\t\t\tThe header to decompose\n@param KeyFormat [OUT]\t\tThe encoding format used for each key\n@param\tNumKeys\t[OUT]\t\tThe number of keys in this track\n@param FormatFlags [OUT]\tThree bits of format-specific information and a single bit to indicate if a key->frame table follows the keys\nAnd some derived values:\n@param\tBytesPerKey [OUT]\tThe number of bytes each key takes up\n@param\tFixedBytes [OUT]\tThe number of fixed bytes at the head of the track stream"
+    },
+    {
+      "id": "decompress-translation-313047",
+      "name": "DecompressTranslation",
+      "category": "AnimationCompression",
+      "signature": "DecompressTranslation(Format, Format Flags, Out, Top Of Stream, Key Data)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Int"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Out",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Top Of Stream",
+          "type": "uint8* RESTRICT"
+        },
+        {
+          "name": "Key Data",
+          "type": "uint8* RESTRICT"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned = true> void",
+      "docs": "OUT"
+    },
+    {
+      "id": "decompress-rotation-cf70d6",
+      "name": "DecompressRotation",
+      "category": "AnimationCompression",
+      "signature": "DecompressRotation(Format, Format Flags, Out, Top Of Stream, Key Data)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Int"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Out",
+          "type": "FQuat4f&"
+        },
+        {
+          "name": "Top Of Stream",
+          "type": "uint8* RESTRICT"
+        },
+        {
+          "name": "Key Data",
+          "type": "uint8* RESTRICT"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned = true> void",
+      "docs": "Decompress a single rotation key from a single track that was compressed with the PerTrack codec (scalar)"
+    },
+    {
+      "id": "decompress-scale-069d11",
+      "name": "DecompressScale",
+      "category": "AnimationCompression",
+      "signature": "DecompressScale(Format, Format Flags, Out, Top Of Stream, Key Data)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "Int"
+        },
+        {
+          "name": "Format Flags",
+          "type": "Int"
+        },
+        {
+          "name": "Out",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "Top Of Stream",
+          "type": "uint8* RESTRICT"
+        },
+        {
+          "name": "Key Data",
+          "type": "uint8* RESTRICT"
+        }
+      ],
+      "returnType": "template<bool bIsDataAligned = true> void",
+      "docs": "Decompress a single Scale key from a single track that was compressed with the PerTrack codec (scalar)"
+    }
+  ]
+}

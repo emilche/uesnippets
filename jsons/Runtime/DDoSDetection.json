@@ -12,6 +12,67 @@
   ],
   "functions": [
     {
+      "id": "has-hit-quota",
+      "name": "HasHitQuota",
+      "category": "DDoSDetection",
+      "signature": "HasHitQuota(Target, In Counter, Time Passed MS)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSState*"
+        },
+        {
+          "name": "In Counter",
+          "type": "FDDoSPacketCounters&"
+        },
+        {
+          "name": "Time Passed MS",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not the specified counters and time passed has hit any of the quota's\n@param InCounter\t\tThe counters to check against\n@param TimePassedMS\tThe amount of time passed in milliseconds, since the beginning of this state\n@return\t\t\t\tWhether or not the quota was hit"
+    },
+    {
+      "id": "apply-state",
+      "name": "ApplyState",
+      "category": "DDoSDetection",
+      "signature": "ApplyState(Target, Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSStateConfig*"
+        },
+        {
+          "name": "Target",
+          "type": "FDDoSState&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-adjusted-state",
+      "name": "ApplyAdjustedState",
+      "category": "DDoSDetection",
+      "signature": "ApplyAdjustedState(Target, Target, Frame Adjustment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSStateConfig*"
+        },
+        {
+          "name": "Target",
+          "type": "FDDoSState&"
+        },
+        {
+          "name": "Frame Adjustment",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Applies only the per-frame adjusted state (based on expected vs actual framerate), to active DDoS protection.\nApplyState should be called, first."
+    },
+    {
       "id": "init",
       "name": "Init",
       "category": "DDoSDetection",
@@ -112,10 +173,38 @@
       "docs": "Triggered after packet receive ends, during the current frame"
     },
     {
-      "id": "check-non-conn-quotas-and-limits",
-      "name": "CheckNonConnQuotasAndLimits",
+      "id": "cond-check-non-conn-quotas-and-limits",
+      "name": "CondCheckNonConnQuotasAndLimits",
       "category": "DDoSDetection",
-      "signature": "CheckNonConnQuotasAndLimits(Target)",
+      "signature": "CondCheckNonConnQuotasAndLimits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Rate limited call to CheckNonConnQuotasAndLimits"
+    },
+    {
+      "id": "cond-check-net-conn-limits",
+      "name": "CondCheckNetConnLimits",
+      "category": "DDoSDetection",
+      "signature": "CondCheckNetConnLimits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Rate limited call to CheckNetConnLimits"
+    },
+    {
+      "id": "check-log-restrictions",
+      "name": "CheckLogRestrictions",
+      "category": "DDoSDetection",
+      "signature": "CheckLogRestrictions(Target)",
       "params": [
         {
           "name": "Target",
@@ -123,7 +212,220 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Performs periodic checks on trigger quota's and packet limits, for non-NetConnection packets\n@return\tWhether or not non-NetConnection packet limits have been reached"
+      "docs": "Accessor for bDDoSLogRestrictions - doubles as a per-frame logspam counter, automatically disabling logs after a quota"
+    },
+    {
+      "id": "is-d-do-s-detection-enabled",
+      "name": "IsDDoSDetectionEnabled",
+      "category": "DDoSDetection",
+      "signature": "IsDDoSDetectionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-d-do-s-analytics-enabled",
+      "name": "IsDDoSAnalyticsEnabled",
+      "category": "DDoSDetection",
+      "signature": "IsDDoSAnalyticsEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-block-non-conn-packets",
+      "name": "ShouldBlockNonConnPackets",
+      "category": "DDoSDetection",
+      "signature": "ShouldBlockNonConnPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-block-net-conn-packets",
+      "name": "ShouldBlockNetConnPackets",
+      "category": "DDoSDetection",
+      "signature": "ShouldBlockNetConnPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "inc-non-conn-packet-counter",
+      "name": "IncNonConnPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "IncNonConnPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-non-conn-packet-counter",
+      "name": "GetNonConnPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "GetNonConnPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "inc-net-conn-packet-counter",
+      "name": "IncNetConnPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "IncNetConnPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-net-conn-packet-counter",
+      "name": "GetNetConnPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "GetNetConnPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "inc-disconn-packet-counter",
+      "name": "IncDisconnPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "IncDisconnPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-disconn-packet-counter",
+      "name": "GetDisconnPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "GetDisconnPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "inc-bad-packet-counter",
+      "name": "IncBadPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "IncBadPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-bad-packet-counter",
+      "name": "GetBadPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "GetBadPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "inc-error-packet-counter",
+      "name": "IncErrorPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "IncErrorPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-error-packet-counter",
+      "name": "GetErrorPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "GetErrorPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "inc-dropped-packet-counter",
+      "name": "IncDroppedPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "IncDroppedPacketCounter(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        },
+        {
+          "name": "Count",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-dropped-packet-counter",
+      "name": "GetDroppedPacketCounter",
+      "category": "DDoSDetection",
+      "signature": "GetDroppedPacketCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDDoSDetection*"
+        }
+      ],
+      "returnType": "Int"
     }
   ]
 }

@@ -1,0 +1,272 @@
+{
+  "id": "sparse-narrow-band-mesh-sdf",
+  "label": "SparseNarrowBandMeshSDF",
+  "includepath": "Implicit/SparseNarrowBandMeshSDF.h",
+  "includes": [
+    "MathUtil",
+    "MeshQueries",
+    "IndexUtil",
+    "MeshAABBTree3",
+    "BlockedLayout3",
+    "BlockedDenseGrid3",
+    "ParallelFor",
+    "GridInterpolant",
+    "SDFCalculationUtils",
+    "StaticArray",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "bool",
+      "name": "bool",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "bool(Target, Cancel F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        },
+        {
+          "name": "Cancel F",
+          "type": ")>",
+          "default": "[]("
+        }
+      ],
+      "returnType": "TFunction<",
+      "docs": "if this function returns true, the calculation will abort"
+    },
+    {
+      "id": "atomic-increment",
+      "name": "AtomicIncrement",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "AtomicIncrement(Target, Block Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScatterCounter*"
+        },
+        {
+          "name": "Block Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-tri-id",
+      "name": "AddTriID",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "AddTriID(Target, Block Index, Tri Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTriIDBlockGrid*"
+        },
+        {
+          "name": "Block Index",
+          "type": "Int&"
+        },
+        {
+          "name": "Tri Id",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-occupied-block-i-ds",
+      "name": "GetOccupiedBlockIDs",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "GetOccupiedBlockIDs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTriIDBlockGrid*"
+        }
+      ],
+      "returnType": "TArray<int32>"
+    },
+    {
+      "id": "make-interpolant",
+      "name": "MakeInterpolant",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "MakeInterpolant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        }
+      ],
+      "returnType": "TTriLinearGridInterpolant<TSparseNarrowBandMeshSDF>"
+    },
+    {
+      "id": "should-use-spatial",
+      "name": "ShouldUseSpatial",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "ShouldUseSpatial(Exact Cells, Cell Size, Avg Edge Len)",
+      "params": [
+        {
+          "name": "Exact Cells",
+          "type": "Int"
+        },
+        {
+          "name": "Cell Size",
+          "type": "Double"
+        },
+        {
+          "name": "Avg Edge Len",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Encodes heuristic for deciding whether it will be faster to use\n- NarrowBand_SpatialFloodFill\n- Or NarrowBandOnly\nThe heuristic is to use the Spatial method unless you have relatively long edges relative to the width\nof the narrow band.  For a 1-cell wide band, or one where few triangles interact w/ each cell in the band\nthe spatial overhead will probably not be worthwhile.\nTODO: test and tune this ..."
+    },
+    {
+      "id": "validate",
+      "name": "Validate",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "Validate(Target, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "compute",
+      "name": "Compute",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "Compute(Target, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute the SDF\n@param Bounds Bounding box for the mesh data (passed as param it is usually already available, depending on TriangleMeshType and whether an AABB tree was provided)\n@return false if cancelled or failed (e.g. due to invalid arguments); true otherwise"
+    },
+    {
+      "id": "dimensions",
+      "name": "Dimensions",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "Dimensions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        }
+      ],
+      "returnType": "FVector3i",
+      "docs": "@return the number of cells in each direction"
+    },
+    {
+      "id": "get-closest-tri-grid",
+      "name": "GetClosestTriGrid",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "GetClosestTriGrid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        }
+      ],
+      "returnType": "FBlockedGrid3i&",
+      "docs": "@return a grid that can be sampled within the narrow band to find the ID of the closest triangle.  Note: this is populated during Compute()"
+    },
+    {
+      "id": "get-intersections-grid",
+      "name": "GetIntersectionsGrid",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "GetIntersectionsGrid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        }
+      ],
+      "returnType": "FBlockedGrid3i&",
+      "docs": "@return a grid that can be sampled within the narrow band to find cells that actually contain mesh triangles.  Note: this is populated during Compute()"
+    },
+    {
+      "id": "at",
+      "name": "At",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "At(Target, I, J, K)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        },
+        {
+          "name": "I",
+          "type": "Int"
+        },
+        {
+          "name": "J",
+          "type": "Int"
+        },
+        {
+          "name": "K",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "@return the distance value at the specified grid cell."
+    },
+    {
+      "id": "get-value",
+      "name": "GetValue",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "GetValue(Target, Ijk)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        },
+        {
+          "name": "Ijk",
+          "type": "FVector3i&"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "@return the distance value at the specified grid cell."
+    },
+    {
+      "id": "cell-center",
+      "name": "CellCenter",
+      "category": "SparseNarrowBandMeshSDF",
+      "signature": "CellCenter(Target, I, J, K)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSparseNarrowBandMeshSDF*"
+        },
+        {
+          "name": "I",
+          "type": "Int"
+        },
+        {
+          "name": "J",
+          "type": "Int"
+        },
+        {
+          "name": "K",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3f",
+      "docs": "@return the physical space location of specified grid point."
+    }
+  ]
+}

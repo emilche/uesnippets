@@ -22,6 +22,20 @@
   ],
   "functions": [
     {
+      "id": "downcast-soundfield-ref",
+      "name": "DowncastSoundfieldRef",
+      "category": "ISoundfieldFormat",
+      "signature": "DowncastSoundfieldRef(In Ref)",
+      "params": [
+        {
+          "name": "In Ref",
+          "type": "FromType&"
+        }
+      ],
+      "returnType": "template<ToType,FromType> ToType&",
+      "docs": "Interfaces for Soundfield Encoding and Decoding\nThis set of interfaces can be implemented to add support for encoding to and decoding from a soundfield format.\nThere are four classes that are required to implement a soundfield format:\nISoundfieldPacket: Container for a single audio callback's resulting data for the soundfield format.\nFor example, for first order ambisonics, this would contain an interleaved buffer of floats.\nFor a proprietary spatial audio format, this would contain a bitstream.\nUSoundfieldEncodingSettingsBase: These are game thread-local, inspectable settings to define how a soundfield is getting encoded.\nFor example, this may contain the order of an ambisonics sound field.\nISoundfieldEncodingSettingsProxy: This should contain all data from USoundfieldEncodingSettingsBase that needs to be read by an\nencoder or transcoder stream to apply the settings from an implementation of USoundfieldEncodingSettingsBase.\nISoundfieldEncoderStream: Class that encodes interleaved audio from a set of arbitrary locations to an ISoundfieldPacket.\nISoundfieldDecoderStream: Class that decodes audio from an ISoundfieldPacket to interleaved audio at a set of arbitrary locations.\nISoundfieldTranscodeStream: Class that translates a soundfield stream from one type to another.\nISoundfieldMixerStream: Class that sums together multiple incoming ISoundfieldPackets into one ISoundfieldPacket.\nISoundfieldFactory: Factory class that declares the name of your format and creates new encoder, decoders, transcoders and mixers as requested."
+    },
+    {
       "id": "get-format-name-for-no-encoding",
       "name": "GetFormatNameForNoEncoding",
       "category": "ISoundfieldFormat",
@@ -99,22 +113,89 @@
       "returnType": "TArray<FName>"
     },
     {
-      "id": "supports-format",
-      "name": "SupportsFormat",
+      "id": "is-transcode-required-between-settings",
+      "name": "IsTranscodeRequiredBetweenSettings",
       "category": "ISoundfieldFormat",
-      "signature": "SupportsFormat(Target, False)",
+      "signature": "IsTranscodeRequiredBetweenSettings(Target, Source Settings, Destination Settings)",
       "params": [
         {
           "name": "Target",
-          "type": "USoundfieldEffectBase*"
+          "type": "ISoundfieldFactory*"
         },
         {
-          "name": "False",
-          "type": "FName& InFormat ) PURE_VIRTUAL ( USoundfieldEncodingSettingsBase::SupportsFormat,return"
+          "name": "Source Settings",
+          "type": "ISoundfieldEncodingSettingsProxy&"
+        },
+        {
+          "name": "Destination Settings",
+          "type": "ISoundfieldEncodingSettingsProxy&"
         }
       ],
       "returnType": "Bool",
-      "docs": "Get the implementation of USoundfieldProcessorSettingsBase that is used for this processor's settings. Will always be called on the CDO."
+      "docs": "Override this function to determine whether an incoming ISoundfieldPacket would need to be explicitly operated on between two submixes with the same format, but potentially different encoding settings.\nIf this returns true, a new transcoder will be created.\nif this returns false, then the source submix's ISoundfieldPacket will be passed down directly."
+    },
+    {
+      "id": "should-encode-all-streams-independently",
+      "name": "ShouldEncodeAllStreamsIndependently",
+      "category": "ISoundfieldFormat",
+      "signature": "ShouldEncodeAllStreamsIndependently(Target, Encoding Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldFactory*"
+        },
+        {
+          "name": "Encoding Settings",
+          "type": "ISoundfieldEncodingSettingsProxy&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If this is overridden to true, we will set up a separate encoding stream for every submix plugged into this soundfield submix.\nOtherwise, we mix all non-soundfield submixes plugged into this soundfield submix together and use one encoding stream."
+    },
+    {
+      "id": "get-custom-encoding-settings-class",
+      "name": "GetCustomEncodingSettingsClass",
+      "category": "ISoundfieldFormat",
+      "signature": "GetCustomEncodingSettingsClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldFactory*"
+        }
+      ],
+      "returnType": "UClass*",
+      "docs": "Should return the StaticClass of your implementation of USoundfieldEncodingSettingsBase."
+    },
+    {
+      "id": "is-endpoint-format",
+      "name": "IsEndpointFormat",
+      "category": "ISoundfieldFormat",
+      "signature": "IsEndpointFormat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISoundfieldFactory*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This is overridden to return true for soundfield formats that are only used for sending audio externally.\nRather than overriding this, consider implementing ISoundfieldEndpointFactory."
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "ISoundfieldFormat",
+      "signature": "GetTypeHash(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSoundfieldEncodingKey*"
+        },
+        {
+          "name": "Value",
+          "type": "FSoundfieldEncodingKey&"
+        }
+      ],
+      "returnType": "UInt"
     }
   ]
 }

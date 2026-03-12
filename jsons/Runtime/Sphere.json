@@ -1,57 +1,861 @@
 {
   "id": "sphere",
   "label": "Sphere",
-  "includepath": "Math/Sphere.h",
+  "includepath": "Chaos/Sphere.h",
   "includes": [
-    "CoreTypes",
-    "MathFwd",
-    "Matrix",
-    "Transform",
-    "UnrealMathUtility",
-    "Vector",
-    "Vector4",
-    "AssertionMacros",
-    "LargeWorldCoordinates",
-    "Archive",
-    "StructuredArchiveAdapters",
-    "IsUECoreType",
-    "UnrealTypeTraits",
-    "ObjectVersion"
+    "Box",
+    "GJKShape",
+    "ImplicitFwd",
+    "ImplicitObject",
+    "ChaosArchive",
+    "VectorRegister",
+    "ReleaseObjectVersion"
   ],
   "functions": [
     {
-      "id": "t-sphere-64827a",
-      "name": "TSphere",
+      "id": "compute-sample-points-18b90a",
+      "name": "ComputeSamplePoints",
       "category": "Sphere",
-      "signature": "TSphere(Points, Count)",
+      "signature": "ComputeSamplePoints(Points, Sphere, Num Points)",
       "params": [
         {
           "name": "Points",
-          "type": "TVector<float>*"
+          "type": "TArray<TVec3<T>>&"
         },
         {
-          "name": "Count",
+          "name": "Sphere",
+          "type": "TSphere<T,3>&"
+        },
+        {
+          "name": "Num Points",
           "type": "Int"
         }
       ],
-      "returnType": "template<> TSphere<float"
+      "returnType": "Void"
     },
     {
-      "id": "t-sphere-f160c0",
-      "name": "TSphere",
+      "id": "static-type",
+      "name": "StaticType",
       "category": "Sphere",
-      "signature": "TSphere(Spheres, Count)",
+      "signature": "StaticType()",
+      "params": [],
+      "returnType": "EImplicitObjectType"
+    },
+    {
+      "id": "get-radius",
+      "name": "GetRadius",
+      "category": "Sphere",
+      "signature": "GetRadius(Target)",
       "params": [
         {
-          "name": "Spheres",
-          "type": "TSphere<float>*"
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "get-radiusf",
+      "name": "GetRadiusf",
+      "category": "Sphere",
+      "signature": "GetRadiusf(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "phi-with-normal",
+      "name": "PhiWithNormal",
+      "category": "Sphere",
+      "signature": "PhiWithNormal(Target, In Sample Point, Out Normal)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
         },
         {
-          "name": "Count",
+          "name": "In Sample Point",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVector<T,d>&"
+        }
+      ],
+      "returnType": "T"
+    },
+    {
+      "id": "intersects",
+      "name": "Intersects",
+      "category": "Sphere",
+      "signature": "Intersects(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Other",
+          "type": "TSphere<T,d>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-closest-point",
+      "name": "FindClosestPoint",
+      "category": "Sphere",
+      "signature": "FindClosestPoint(Target, Start Point, Thickness)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Start Point",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Thickness",
+          "type": "T",
+          "default": "(T)0"
+        }
+      ],
+      "returnType": "TVector<T,d>"
+    },
+    {
+      "id": "raycast",
+      "name": "Raycast",
+      "category": "Sphere",
+      "signature": "Raycast(Target, Start Point, Dir, Length, Thickness, Out Time, Out Position, Out Normal, Out Face Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Start Point",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Dir",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Length",
+          "type": "T"
+        },
+        {
+          "name": "Thickness",
+          "type": "T"
+        },
+        {
+          "name": "Out Time",
+          "type": "T&"
+        },
+        {
+          "name": "Out Position",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Out Face Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-closest-intersection-imp",
+      "name": "FindClosestIntersectionImp",
+      "category": "Sphere",
+      "signature": "FindClosestIntersectionImp(Target, Start Point, End Point, Thickness)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Start Point",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "End Point",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Thickness",
+          "type": "T"
+        }
+      ],
+      "returnType": "Pair<TVector<T,d>,bool>"
+    },
+    {
+      "id": "support",
+      "name": "Support",
+      "category": "Sphere",
+      "signature": "Support(Target, Direction, Thickness, Vertex Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Direction",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Thickness",
+          "type": "T"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "TVector<T,d>"
+    },
+    {
+      "id": "support-core",
+      "name": "SupportCore",
+      "category": "Sphere",
+      "signature": "SupportCore(Target, Direction, In Margin, Out Support Delta, Vertex Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Direction",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "In Margin",
+          "type": "FReal"
+        },
+        {
+          "name": "Out Support Delta",
+          "type": "FReal*"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "TVector<T,d>"
+    },
+    {
+      "id": "support-core-simd",
+      "name": "SupportCoreSimd",
+      "category": "Sphere",
+      "signature": "SupportCoreSimd(Target, Direction, In Margin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Direction",
+          "type": "VectorRegister4Float&"
+        },
+        {
+          "name": "In Margin",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "VectorRegister4Float"
+    },
+    {
+      "id": "support-core-scaled",
+      "name": "SupportCoreScaled",
+      "category": "Sphere",
+      "signature": "SupportCoreScaled(Target, Direction, In Margin, Scale, Out Support Delta, Vertex Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Direction",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "In Margin",
+          "type": "FReal"
+        },
+        {
+          "name": "Scale",
+          "type": "TVector<T,d>&"
+        },
+        {
+          "name": "Out Support Delta",
+          "type": "FReal*"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "TVector<T,d>"
+    },
+    {
+      "id": "bounding-box",
+      "name": "BoundingBox",
+      "category": "Sphere",
+      "signature": "BoundingBox(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "TAABB<T,d>"
+    },
+    {
+      "id": "calculate-transformed-bounds",
+      "name": "CalculateTransformedBounds",
+      "category": "Sphere",
+      "signature": "CalculateTransformedBounds(Target, Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Transform",
+          "type": "FRigidTransform3&"
+        }
+      ],
+      "returnType": "FAABB3"
+    },
+    {
+      "id": "get-area-b6146e",
+      "name": "GetArea",
+      "category": "Sphere",
+      "signature": "GetArea(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "T"
+    },
+    {
+      "id": "get-area-f436bd",
+      "name": "GetArea",
+      "category": "Sphere",
+      "signature": "GetArea(In Radius)",
+      "params": [
+        {
+          "name": "In Radius",
+          "type": "T"
+        }
+      ],
+      "returnType": "T"
+    },
+    {
+      "id": "get-volume-b27a84",
+      "name": "GetVolume",
+      "category": "Sphere",
+      "signature": "GetVolume(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "T"
+    },
+    {
+      "id": "get-volume-1180ee",
+      "name": "GetVolume",
+      "category": "Sphere",
+      "signature": "GetVolume(In Radius)",
+      "params": [
+        {
+          "name": "In Radius",
+          "type": "T"
+        }
+      ],
+      "returnType": "T"
+    },
+    {
+      "id": "get-center",
+      "name": "GetCenter",
+      "category": "Sphere",
+      "signature": "GetCenter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "TVector<T,d>"
+    },
+    {
+      "id": "get-centerf",
+      "name": "GetCenterf",
+      "category": "Sphere",
+      "signature": "GetCenterf(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "FVec3f&"
+    },
+    {
+      "id": "get-center-of-mass",
+      "name": "GetCenterOfMass",
+      "category": "Sphere",
+      "signature": "GetCenterOfMass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "TVector<T,d>"
+    },
+    {
+      "id": "get-center-of-massf",
+      "name": "GetCenterOfMassf",
+      "category": "Sphere",
+      "signature": "GetCenterOfMassf(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "FVec3f&"
+    },
+    {
+      "id": "to-string",
+      "name": "ToString",
+      "category": "Sphere",
+      "signature": "ToString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "serialize-imp",
+      "name": "SerializeImp",
+      "category": "Sphere",
+      "signature": "SerializeImp(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-local-sample-points-fbdfa0",
+      "name": "ComputeLocalSamplePoints",
+      "category": "Sphere",
+      "signature": "ComputeLocalSamplePoints(Target, Num Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Num Points",
           "type": "Int"
         }
       ],
-      "returnType": "template<> TSphere<float"
+      "returnType": "TArray<TVector<T,d>>",
+      "docs": "Returns sample points centered about the origin."
+    },
+    {
+      "id": "compute-local-sample-points-da33d5",
+      "name": "ComputeLocalSamplePoints",
+      "category": "Sphere",
+      "signature": "ComputeLocalSamplePoints(Target, Points Per Unit Area, Min Points, Max Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Points Per Unit Area",
+          "type": "T"
+        },
+        {
+          "name": "Min Points",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Max Points",
+          "type": "Int",
+          "default": "1000"
+        }
+      ],
+      "returnType": "TArray<TVector<T,d>>"
+    },
+    {
+      "id": "compute-sample-points-5c040e",
+      "name": "ComputeSamplePoints",
+      "category": "Sphere",
+      "signature": "ComputeSamplePoints(Target, Num Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArray<TVector<T,d>>",
+      "docs": "Returns sample points at the current location of the sphere."
+    },
+    {
+      "id": "compute-sample-points-9ed8b8",
+      "name": "ComputeSamplePoints",
+      "category": "Sphere",
+      "signature": "ComputeSamplePoints(Target, Points Per Unit Area, Min Points, Max Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Points Per Unit Area",
+          "type": "T"
+        },
+        {
+          "name": "Min Points",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "Max Points",
+          "type": "Int",
+          "default": "1000"
+        }
+      ],
+      "returnType": "TArray<TVector<T,d>>"
+    },
+    {
+      "id": "get-inertia-tensor-6432c5",
+      "name": "GetInertiaTensor",
+      "category": "Sphere",
+      "signature": "GetInertiaTensor(Target, In Mass, In Thin Shell)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "In Mass",
+          "type": "T"
+        },
+        {
+          "name": "In Thin Shell",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "PMatrix<T,d,d>"
+    },
+    {
+      "id": "get-inertia-tensor-e95b41",
+      "name": "GetInertiaTensor",
+      "category": "Sphere",
+      "signature": "GetInertiaTensor(In Mass, In Radius, In Thin Shell)",
+      "params": [
+        {
+          "name": "In Mass",
+          "type": "T"
+        },
+        {
+          "name": "In Radius",
+          "type": "T"
+        },
+        {
+          "name": "In Thin Shell",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "PMatrix<T,d,d>"
+    },
+    {
+      "id": "get-rotation-of-mass",
+      "name": "GetRotationOfMass",
+      "category": "Sphere",
+      "signature": "GetRotationOfMass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "TRotation<T,d>"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "Sphere",
+      "signature": "GetTypeHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "copy-geometry",
+      "name": "CopyGeometry",
+      "category": "Sphere",
+      "signature": "CopyGeometry(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        }
+      ],
+      "returnType": "Chaos::FImplicitObjectPtr"
+    },
+    {
+      "id": "copy-geometry-with-scale",
+      "name": "CopyGeometryWithScale",
+      "category": "Sphere",
+      "signature": "CopyGeometryWithScale(Target, Scale)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSphere*"
+        },
+        {
+          "name": "Scale",
+          "type": "FVec3&"
+        }
+      ],
+      "returnType": "Chaos::FImplicitObjectPtr"
+    },
+    {
+      "id": "offset-of-center",
+      "name": "OffsetOfCenter",
+      "category": "Sphere",
+      "signature": "OffsetOfCenter()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "size-of-center",
+      "name": "SizeOfCenter",
+      "category": "Sphere",
+      "signature": "SizeOfCenter()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "compute-golden-spiral-points-9d10d3",
+      "name": "ComputeGoldenSpiralPoints",
+      "category": "Sphere",
+      "signature": "ComputeGoldenSpiralPoints(Points, Sphere, Num Points)",
+      "params": [
+        {
+          "name": "Points",
+          "type": "TArray<TVec2<T>>&"
+        },
+        {
+          "name": "Sphere",
+          "type": "TSphere<T,2>&"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns \\c NumPoints points evenly distributed on a 2D \\c Sphere (disk)."
+    },
+    {
+      "id": "compute-golden-spiral-points-d40843",
+      "name": "ComputeGoldenSpiralPoints",
+      "category": "Sphere",
+      "signature": "ComputeGoldenSpiralPoints(Points, Center, Radius, Num Points, Spiral Seed)",
+      "params": [
+        {
+          "name": "Points",
+          "type": "TArray<TVec2<T>>&"
+        },
+        {
+          "name": "Center",
+          "type": "TVec2<T>&"
+        },
+        {
+          "name": "Radius",
+          "type": "T"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Spiral Seed",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-golden-spiral-points-5e1493",
+      "name": "ComputeGoldenSpiralPoints",
+      "category": "Sphere",
+      "signature": "ComputeGoldenSpiralPoints(Points, Sphere, Num Points, First Half, Second Half, Spiral Seed)",
+      "params": [
+        {
+          "name": "Points",
+          "type": "TArray<TVec3<T>>&"
+        },
+        {
+          "name": "Sphere",
+          "type": "TSphere<T,3>&"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "First Half",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Second Half",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Spiral Seed",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns \\c NumPoints points evenly distributed on a 3D \\c Sphere."
+    },
+    {
+      "id": "compute-golden-spiral-points-be1361",
+      "name": "ComputeGoldenSpiralPoints",
+      "category": "Sphere",
+      "signature": "ComputeGoldenSpiralPoints(Points, Center, Radius, Num Points, Bottom Half, Top Half, Spiral Seed)",
+      "params": [
+        {
+          "name": "Points",
+          "type": "TArray<TVec3<T>>&"
+        },
+        {
+          "name": "Center",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Radius",
+          "type": "T"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Bottom Half",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Top Half",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Spiral Seed",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Use the golden spiral method to evenly distribute points on a sphere.\nThe \"golden\" part is derived from the golden ratio; stand at the center,\nturn a golden ratio of whole turns, then emit a point in that direction.\nPoints are generated starting from the bottom of the sphere, ending at\nthe top.  Contiguous entries in \\p Points generally will not be spatially\nadjacent.\n\\p Points to append to.\n\\p Center is the center of the sphere.\n\\p Radius is the radius of the sphere.\n\\p NumPoints is the number of points to generate.\n\\p BottomHalf causes the bottom half of the sphere to be generated,\nstarting at \\p Center - (0, 0, \\p Radius).\n\\p TopHalf causes the top half of the sphere to be generated,\nstarting at \\p Center.\n\\p SpiralSeed is the starting index for golden spiral generation.  When\nusing this method to continue a spiral started elsewhere, \\p SpiralSeed\nshould equal the number of particles already created."
+    },
+    {
+      "id": "compute-bottom-half-semi-sphere",
+      "name": "ComputeBottomHalfSemiSphere",
+      "category": "Sphere",
+      "signature": "ComputeBottomHalfSemiSphere(Points, Sphere, Num Points, Spiral Seed)",
+      "params": [
+        {
+          "name": "Points",
+          "type": "TArray<TVec3<T>>&"
+        },
+        {
+          "name": "Sphere",
+          "type": "TSphere<T,3>&"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Spiral Seed",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compute-top-half-semi-sphere",
+      "name": "ComputeTopHalfSemiSphere",
+      "category": "Sphere",
+      "signature": "ComputeTopHalfSemiSphere(Points, Sphere, Num Points, Spiral Seed)",
+      "params": [
+        {
+          "name": "Points",
+          "type": "TArray<TVec3<T>>&"
+        },
+        {
+          "name": "Sphere",
+          "type": "TSphere<T,3>&"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Spiral Seed",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

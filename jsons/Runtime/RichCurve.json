@@ -13,24 +13,6 @@
   ],
   "functions": [
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "RichCurve",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRichCurveKey*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "ICPPStructOps interface"
-    },
-    {
       "id": "get-const-ref-of-keys",
       "name": "GetConstRefOfKeys",
       "category": "RichCurve",
@@ -377,6 +359,20 @@
       ],
       "returnType": "Bool",
       "docs": "Returns whether the curve is constant or not"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "RichCurve",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the curve is empty or not"
     },
     {
       "id": "set-key-interp-mode-6d611f",
@@ -836,6 +832,20 @@
       "docs": "Compresses a rich curve for efficient runtime storage and evaluation"
     },
     {
+      "id": "duplicate",
+      "name": "Duplicate",
+      "category": "RichCurve",
+      "signature": "Duplicate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        }
+      ],
+      "returnType": "FIndexedCurve*",
+      "docs": "Allocates a duplicate of the curve"
+    },
+    {
       "id": "convert-to-chaos-curve",
       "name": "ConvertToChaosCurve",
       "category": "RichCurve",
@@ -854,33 +864,86 @@
       "docs": "Convert a rich curve to Chaos FLinearCurve"
     },
     {
-      "id": "remove-redundant-keys-internal",
-      "name": "RemoveRedundantKeysInternal",
+      "id": "get-key-index",
+      "name": "GetKeyIndex",
       "category": "RichCurve",
-      "signature": "RemoveRedundantKeysInternal(Target, Tolerance, In Start Keep Key, In End Keep Key, Sample Rate)",
+      "signature": "GetKeyIndex(Target, Key Time, Key Time Tolerance)",
       "params": [
         {
           "name": "Target",
           "type": "FRichCurve*"
         },
         {
-          "name": "Tolerance",
+          "name": "Key Time",
           "type": "Float"
         },
         {
-          "name": "In Start Keep Key",
-          "type": "Int"
-        },
-        {
-          "name": "In End Keep Key",
-          "type": "Int"
-        },
-        {
-          "name": "Sample Rate",
-          "type": "FFrameRate"
+          "name": "Key Time Tolerance",
+          "type": "Float"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-keys",
+      "name": "GetNumKeys",
+      "category": "RichCurve",
+      "signature": "GetNumKeys(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "t-constant-value-num-keys",
+      "name": "TConstantValueNumKeys",
+      "category": "RichCurve",
+      "signature": "TConstantValueNumKeys(Target, Num Keys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        },
+        {
+          "name": "Num Keys",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compression format used by CompressedKeys"
+    },
+    {
+      "id": "f-compressed-rich-curve",
+      "name": "FCompressedRichCurve",
+      "category": "RichCurve",
+      "signature": "FCompressedRichCurve(Target, RCCF Empty, RCKTCF Float 32, RCCE None, RCCE None)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        },
+        {
+          "name": "RCCF Empty",
+          "type": ") : CompressionFormat ("
+        },
+        {
+          "name": "RCKTCF Float 32",
+          "type": "KeyTimeCompressionFormat ("
+        },
+        {
+          "name": "RCCE None",
+          "type": "PreInfinityExtrap ("
+        },
+        {
+          "name": "RCCE None",
+          "type": "PostInfinityExtrap ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If the compression format is constant, this is the value returned\nInline here to reduce the likelihood of accessing the compressed keys data for the common case of constant/zero/empty curves\nWhen a curve is linear/cubic/mixed, the constant float value isn't used and instead we use the number of keys"
     },
     {
       "id": "populate-curve",
@@ -890,7 +953,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FCompressedRichCurve*"
+          "type": "FRichCurve*"
         },
         {
           "name": "Out Curve",
@@ -956,6 +1019,104 @@
       ],
       "returnType": "Float",
       "docs": "Evaluate this rich curve at the specified time"
+    },
+    {
+      "id": "f-rich-curve-edit-info-template-2558ee",
+      "name": "FRichCurveEditInfoTemplate",
+      "category": "RichCurve",
+      "signature": "FRichCurveEditInfoTemplate(Target, NAME None, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        },
+        {
+          "name": "NAME None",
+          "type": ") : CurveName ("
+        },
+        {
+          "name": "Nullptr",
+          "type": "CurveToEdit ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Override serialization for compressed rich curves to handle the union"
+    },
+    {
+      "id": "f-rich-curve-edit-info-template-2814a0",
+      "name": "FRichCurveEditInfoTemplate",
+      "category": "RichCurve",
+      "signature": "FRichCurveEditInfoTemplate(Target, NAME None, In Curve To Edit)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        },
+        {
+          "name": "NAME None",
+          "type": "T InCurveToEdit ) : CurveName ("
+        },
+        {
+          "name": "In Curve To Edit",
+          "type": "CurveToEdit ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-rich-curve-edit-info-template-e771b2",
+      "name": "FRichCurveEditInfoTemplate",
+      "category": "RichCurve",
+      "signature": "FRichCurveEditInfoTemplate(Target, In Curve To Edit, In Curve Name, In Curve To Edit)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        },
+        {
+          "name": "In Curve To Edit",
+          "type": "T"
+        },
+        {
+          "name": "In Curve Name",
+          "type": "FName InCurveName ) : CurveName ("
+        },
+        {
+          "name": "In Curve To Edit",
+          "type": "CurveToEdit ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-type-hash-752c27",
+      "name": "GetTypeHash",
+      "category": "RichCurve",
+      "signature": "GetTypeHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-type-hash-2d7f99",
+      "name": "GetTypeHash",
+      "category": "RichCurve",
+      "signature": "GetTypeHash(Target, Rich Curve Edit Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRichCurve*"
+        },
+        {
+          "name": "Rich Curve Edit Info",
+          "type": "FRichCurveEditInfoTemplate<T>&"
+        }
+      ],
+      "returnType": "UInt"
     }
   ]
 }

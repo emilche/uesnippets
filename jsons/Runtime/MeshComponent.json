@@ -25,6 +25,20 @@
       "returnType": "TArray<class UMaterialInterface*>"
     },
     {
+      "id": "use-nanite-override-materials",
+      "name": "UseNaniteOverrideMaterials",
+      "category": "MeshComponent",
+      "signature": "UseNaniteOverrideMaterials(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines if we use the nanite overrides from any materials"
+    },
+    {
       "id": "get-num-override-materials",
       "name": "GetNumOverrideMaterials",
       "category": "MeshComponent",
@@ -175,23 +189,6 @@
       ],
       "returnType": "Bool",
       "docs": "Returns true if there are any override materials set for this component"
-    },
-    {
-      "id": "post-edit-change-chain-property",
-      "name": "PostEditChangeChainProperty",
-      "category": "MeshComponent",
-      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMeshComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedChainEvent&"
-        }
-      ],
-      "returnType": "Void"
     },
     {
       "id": "get-num-materials",
@@ -464,6 +461,28 @@
       "docs": "Register a one-time callback that will be called when streaming starts or ends.\n@param CallbackStreamingStart\tThe callback to notify when streaming new LODs in begins. The callback will not always be called if the asset is not streamable, or the asset or component is unloaded.\n@param CallbackStreamingDone\t\tThe callback to notify when streaming is done. The callback will not be called if the start timeout expired.\n@param TimeoutStartSecs\t\t\tTimeout for streaming to start, in seconds\n@param TimeoutDoneSecs\t\t\tTimeout for streaming to end, in seconds"
     },
     {
+      "id": "get-material-streaming-data",
+      "name": "GetMaterialStreamingData",
+      "category": "MeshComponent",
+      "signature": "GetMaterialStreamingData(Target, Material Index, Material Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        },
+        {
+          "name": "Material Index",
+          "type": "Int"
+        },
+        {
+          "name": "Material Data",
+          "type": "FPrimitiveMaterialInfo&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get the material info for texture streaming. Return whether the data is valid or not."
+    },
+    {
       "id": "get-streaming-texture-info-inner",
       "name": "GetStreamingTextureInfoInner",
       "category": "MeshComponent",
@@ -528,6 +547,70 @@
       ],
       "returnType": "Void",
       "docs": "Output to the log which materials and textures are used by this component.\n@param Indent\tNumber of tabs to put before the log."
+    },
+    {
+      "id": "get-mesh-paint-texture",
+      "name": "GetMeshPaintTexture",
+      "category": "MeshComponent",
+      "signature": "GetMeshPaintTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        }
+      ],
+      "returnType": "UTexture*",
+      "docs": "Get the mesh paint texture set on this component. This does not take into account any transient override."
+    },
+    {
+      "id": "set-mesh-paint-texture",
+      "name": "SetMeshPaintTexture",
+      "category": "MeshComponent",
+      "signature": "SetMeshPaintTexture(Target, Texture)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        },
+        {
+          "name": "Texture",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the mesh paint texture on this component."
+    },
+    {
+      "id": "set-mesh-paint-texture-override",
+      "name": "SetMeshPaintTextureOverride",
+      "category": "MeshComponent",
+      "signature": "SetMeshPaintTextureOverride(Target, Override Texture)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        },
+        {
+          "name": "Override Texture",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a transient override mesh paint texture on this component."
+    },
+    {
+      "id": "get-mesh-paint-texture-coordinate-index",
+      "name": "GetMeshPaintTextureCoordinateIndex",
+      "category": "MeshComponent",
+      "signature": "GetMeshPaintTextureCoordinateIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the default coordinate index for painting to the mesh paint texture on this component."
     },
     {
       "id": "set-scalar-parameter-value-on-materials",
@@ -596,6 +679,24 @@
       "docs": "Set all occurrences of Vector Material Parameters with ParameterName in the set of materials of the SkeletalMesh to ParameterValue"
     },
     {
+      "id": "get-scalar-parameter-default-value",
+      "name": "GetScalarParameterDefaultValue",
+      "category": "MeshComponent",
+      "signature": "GetScalarParameterDefaultValue(Target, Parameter Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMeshComponent*"
+        },
+        {
+          "name": "Parameter Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Returns default value for the parameter input.\nNOTE: This is not reliable when cooking, as initializing the default value\nrequires a render resource that only exists if the owning world is rendering."
+    },
+    {
       "id": "get-component-material-slots-overlay-material",
       "name": "GetComponentMaterialSlotsOverlayMaterial",
       "category": "MeshComponent",
@@ -610,17 +711,22 @@
       "docs": "Retrieve the material slots overly materials assigned to this component"
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
+      "id": "get-default-material-slots-overlay-material",
+      "name": "GetDefaultMaterialSlotsOverlayMaterial",
       "category": "MeshComponent",
-      "signature": "BeginDestroy(Target)",
+      "signature": "GetDefaultMaterialSlotsOverlayMaterial(Target, Out Material Slot Overlay Materials)",
       "params": [
         {
           "name": "Target",
           "type": "UMeshComponent*"
+        },
+        {
+          "name": "Out Material Slot Overlay Materials",
+          "type": "TArray<TObjectPtr<UMaterialInterface>>&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "Get all default material slots overlay materials from the mesh."
     }
   ]
 }

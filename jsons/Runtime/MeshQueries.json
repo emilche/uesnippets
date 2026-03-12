@@ -1,0 +1,782 @@
+{
+  "id": "mesh-queries",
+  "label": "MeshQueries",
+  "includepath": "MeshQueries.h",
+  "includes": [
+    "DistPoint3Triangle3",
+    "IntrRay3Triangle3",
+    "IntrTriangle3Triangle3",
+    "BoxTypes",
+    "IndexTypes",
+    "Accumulate",
+    "ParallelFor"
+  ],
+  "functions": [
+    {
+      "id": "triangle-distance",
+      "name": "TriangleDistance",
+      "category": "MeshQueries",
+      "signature": "TriangleDistance(Mesh, Tri Idx, Point)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Point",
+          "type": "FVector3d"
+        }
+      ],
+      "returnType": "FDistPoint3Triangle3d",
+      "docs": "construct a DistPoint3Triangle3 object for a Mesh triangle"
+    },
+    {
+      "id": "triangle-intersection",
+      "name": "TriangleIntersection",
+      "category": "MeshQueries",
+      "signature": "TriangleIntersection(Mesh, Tri Idx, Ray)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        }
+      ],
+      "returnType": "FIntrRay3Triangle3d",
+      "docs": "convenience function to construct a IntrRay3Triangle3 object for a Mesh triangle"
+    },
+    {
+      "id": "get-tri-centroid",
+      "name": "GetTriCentroid",
+      "category": "MeshQueries",
+      "signature": "GetTriCentroid(Mesh, Tri Idx)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Compute triangle centroid\n@param Mesh Mesh with triangle\n@param TriIdx Index of triangle\n@return Computed centroid"
+    },
+    {
+      "id": "get-tri-normal-area-centroid",
+      "name": "GetTriNormalAreaCentroid",
+      "category": "MeshQueries",
+      "signature": "GetTriNormalAreaCentroid(Mesh, Tri Idx, Normal, Area, Centroid)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Normal",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Area",
+          "type": "Double&"
+        },
+        {
+          "name": "Centroid",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute the normal, area, and centroid of a triangle all together\n@param Mesh Mesh w/ triangle\n@param TriIdx Index of triangle\n@param Normal Computed normal (returned by reference)\n@param Area Computed area (returned by reference)\n@param Centroid Computed centroid (returned by reference)"
+    },
+    {
+      "id": "get-mesh-vertices-centroid",
+      "name": "GetMeshVerticesCentroid",
+      "category": "MeshQueries",
+      "signature": "GetMeshVerticesCentroid(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Get the average of the mesh vertices."
+    },
+    {
+      "id": "get-volume-non-watertight",
+      "name": "GetVolumeNonWatertight",
+      "category": "MeshQueries",
+      "signature": "GetVolumeNonWatertight(Mesh, Dim Scale Factor)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Dim Scale Factor",
+          "type": "Double",
+          "default": "1"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Get the volume of a mesh using a method that is more robust to inputs with holes\n@param Mesh Input shape\n@param DimScaleFactor Scale factor to apply to each dimension; useful for keeping volume calculation in a good range for floating point precision\n@return Mesh volume (scaled by DimScaleFactor^3)"
+    },
+    {
+      "id": "get-volume-area-36ac1f",
+      "name": "GetVolumeArea",
+      "category": "MeshQueries",
+      "signature": "GetVolumeArea(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "FVector2d"
+    },
+    {
+      "id": "get-volume-area-center",
+      "name": "GetVolumeAreaCenter",
+      "category": "MeshQueries",
+      "signature": "GetVolumeAreaCenter(Mesh, Out Center Of Mass)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Out Center Of Mass",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "FVector2d"
+    },
+    {
+      "id": "get-volume-area-9aab27",
+      "name": "GetVolumeArea",
+      "category": "MeshQueries",
+      "signature": "GetVolumeArea(Mesh, Tri Indices)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Indices",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "FVector2d"
+    },
+    {
+      "id": "get-tri-bounds",
+      "name": "GetTriBounds",
+      "category": "MeshQueries",
+      "signature": "GetTriBounds(Mesh, TID)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "TID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FAxisAlignedBox3d"
+    },
+    {
+      "id": "get-bounds",
+      "name": "GetBounds",
+      "category": "MeshQueries",
+      "signature": "GetBounds(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "FAxisAlignedBox3d"
+    },
+    {
+      "id": "get-triangles-bounds",
+      "name": "GetTrianglesBounds",
+      "category": "MeshQueries",
+      "signature": "GetTrianglesBounds(Mesh, Triangles, Transform)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Triangles",
+          "type": "EnumerableTriListType&"
+        },
+        {
+          "name": "Transform",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "template<EnumerableTriListType> FAxisAlignedBox3d",
+      "docs": "@return bounding box of subset of triangles of Mesh"
+    },
+    {
+      "id": "get-vertices-bounds",
+      "name": "GetVerticesBounds",
+      "category": "MeshQueries",
+      "signature": "GetVerticesBounds(Mesh, Vertices, Transform)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Vertices",
+          "type": "EnumerableTriListType&"
+        },
+        {
+          "name": "Transform",
+          "type": "FTransform&",
+          "default": "FTransform::Identity"
+        }
+      ],
+      "returnType": "template<EnumerableTriListType> FAxisAlignedBox3d",
+      "docs": "@return bounding box of subset of vertices of Mesh"
+    },
+    {
+      "id": "find-nearest-triangle-linear-search",
+      "name": "FindNearestTriangle_LinearSearch",
+      "category": "MeshQueries",
+      "signature": "FindNearestTriangle_LinearSearch(Mesh, P)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-nearest-point-linear-search",
+      "name": "FindNearestPoint_LinearSearch",
+      "category": "MeshQueries",
+      "signature": "FindNearestPoint_LinearSearch(Mesh, P)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "@return nearest point on Mesh to P, or P if nearest point was not found"
+    },
+    {
+      "id": "tri-distance-sqr",
+      "name": "TriDistanceSqr",
+      "category": "MeshQueries",
+      "signature": "TriDistanceSqr(Mesh, Tri Idx, Point)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Point",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Compute distance from Point to triangle in Mesh, with minimal extra objects/etc"
+    },
+    {
+      "id": "find-hit-triangle-linear-search",
+      "name": "FindHitTriangle_LinearSearch",
+      "category": "MeshQueries",
+      "signature": "FindHitTriangle_LinearSearch(Mesh, Ray)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-hit-triangles-linear-search",
+      "name": "FindHitTriangles_LinearSearch",
+      "category": "MeshQueries",
+      "signature": "FindHitTriangles_LinearSearch(Mesh, Ray, Sorted Hit Triangles)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Sorted Hit Triangles",
+          "type": "TArray<TPair<float,int>>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-intersecting-triangles-linear-search",
+      "name": "FindIntersectingTriangles_LinearSearch",
+      "category": "MeshQueries",
+      "signature": "FindIntersectingTriangles_LinearSearch(Mesh 1, Mesh 2)",
+      "params": [
+        {
+          "name": "Mesh 1",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Mesh 2",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "FIndex2i",
+      "docs": "brute force search for any intersecting triangles on two meshes\n@return Index pair of IDs of first intersecting triangles found, or InvalidID if no intersection found"
+    },
+    {
+      "id": "ray-triangle-intersection",
+      "name": "RayTriangleIntersection",
+      "category": "MeshQueries",
+      "signature": "RayTriangleIntersection(Mesh, Tri Idx, Ray)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Ray",
+          "type": "RayType&"
+        }
+      ],
+      "returnType": "template<RayType = FRay3d> FIntrRay3Triangle3d",
+      "docs": "convenience function to construct a IntrRay3Triangle3 object for a Mesh triangle"
+    },
+    {
+      "id": "get-all-edge-lengths",
+      "name": "GetAllEdgeLengths",
+      "category": "MeshQueries",
+      "signature": "GetAllEdgeLengths(Mesh, Lengths, Total Length)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Lengths",
+          "type": "TArray<double>&"
+        },
+        {
+          "name": "Total Length",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compute the length for each edge and return the result as an array of Mesh.MaxEdgeID() size.\nWhen mesh is not compact, the length of the missing edges is set to -1.0"
+    },
+    {
+      "id": "average-edge-length",
+      "name": "AverageEdgeLength",
+      "category": "MeshQueries",
+      "signature": "AverageEdgeLength(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "max-edge-length",
+      "name": "MaxEdgeLength",
+      "category": "MeshQueries",
+      "signature": "MaxEdgeLength(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "min-edge-length",
+      "name": "MinEdgeLength",
+      "category": "MeshQueries",
+      "signature": "MinEdgeLength(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "total-edge-length",
+      "name": "TotalEdgeLength",
+      "category": "MeshQueries",
+      "signature": "TotalEdgeLength(Mesh, Edges)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Edges",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "edge-length-stats-from-edges",
+      "name": "EdgeLengthStatsFromEdges",
+      "category": "MeshQueries",
+      "signature": "EdgeLengthStatsFromEdges(Mesh, Edges, Min Edge Length, Max Edge Length, Average Edge Length)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Edges",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Min Edge Length",
+          "type": "Double&"
+        },
+        {
+          "name": "Max Edge Length",
+          "type": "Double&"
+        },
+        {
+          "name": "Average Edge Length",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "edge-length-stats",
+      "name": "EdgeLengthStats",
+      "category": "MeshQueries",
+      "signature": "EdgeLengthStats(Mesh, Min Edge Length, Max Edge Length, Average Edge Length, Num Samples)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Min Edge Length",
+          "type": "Double&"
+        },
+        {
+          "name": "Max Edge Length",
+          "type": "Double&"
+        },
+        {
+          "name": "Average Edge Length",
+          "type": "Double&"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "vertex-to-surface-distances",
+      "name": "VertexToSurfaceDistances",
+      "category": "MeshQueries",
+      "signature": "VertexToSurfaceDistances(Mesh A, Spatial B, Distances)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        },
+        {
+          "name": "Distances",
+          "type": "TArray<double>&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> void"
+    },
+    {
+      "id": "hausdorff-distance",
+      "name": "HausdorffDistance",
+      "category": "MeshQueries",
+      "signature": "HausdorffDistance(Mesh A, Spatial B)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> double"
+    },
+    {
+      "id": "two-sided-hausdorff-distance",
+      "name": "TwoSidedHausdorffDistance",
+      "category": "MeshQueries",
+      "signature": "TwoSidedHausdorffDistance(Mesh A, Spatial A, Mesh B, Spatial B)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial A",
+          "type": "MeshSpatialType&"
+        },
+        {
+          "name": "Mesh B",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> double"
+    },
+    {
+      "id": "vertex-to-surface-distances-serial",
+      "name": "VertexToSurfaceDistancesSerial",
+      "category": "MeshQueries",
+      "signature": "VertexToSurfaceDistancesSerial(Mesh A, Spatial B, Distances)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        },
+        {
+          "name": "Distances",
+          "type": "TArray<double>&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> void"
+    },
+    {
+      "id": "hausdorff-distance-serial",
+      "name": "HausdorffDistanceSerial",
+      "category": "MeshQueries",
+      "signature": "HausdorffDistanceSerial(Mesh A, Spatial B)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> double"
+    },
+    {
+      "id": "two-sided-hausdorff-distance-serial",
+      "name": "TwoSidedHausdorffDistanceSerial",
+      "category": "MeshQueries",
+      "signature": "TwoSidedHausdorffDistanceSerial(Mesh A, Spatial A, Mesh B, Spatial B)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial A",
+          "type": "MeshSpatialType&"
+        },
+        {
+          "name": "Mesh B",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> double"
+    },
+    {
+      "id": "mesh-distance-statistics",
+      "name": "MeshDistanceStatistics",
+      "category": "MeshQueries",
+      "signature": "MeshDistanceStatistics(Mesh A, Spatial B, Mesh B, Spatial A, Symmetric, Max Distance, Min Distance, Average Distance, Root Mean Sqr Deviation)",
+      "params": [
+        {
+          "name": "Mesh A",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Spatial B",
+          "type": "MeshSpatialType&"
+        },
+        {
+          "name": "Mesh B",
+          "type": "TriangleMeshType*"
+        },
+        {
+          "name": "Spatial A",
+          "type": "MeshSpatialType*"
+        },
+        {
+          "name": "Symmetric",
+          "type": "Bool"
+        },
+        {
+          "name": "Max Distance",
+          "type": "Double&"
+        },
+        {
+          "name": "Min Distance",
+          "type": "Double&"
+        },
+        {
+          "name": "Average Distance",
+          "type": "Double&"
+        },
+        {
+          "name": "Root Mean Sqr Deviation",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "template<MeshSpatialType> void",
+      "docs": "Compute various statistics on distances between two meshes"
+    },
+    {
+      "id": "get-vertex-weights-on-triangle",
+      "name": "GetVertexWeightsOnTriangle",
+      "category": "MeshQueries",
+      "signature": "GetVertexWeightsOnTriangle(Mesh, Tri ID, Tri Area, Weight By Area, Weight By Angle)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Tri ID",
+          "type": "Int"
+        },
+        {
+          "name": "Tri Area",
+          "type": "Double"
+        },
+        {
+          "name": "Weight By Area",
+          "type": "Bool"
+        },
+        {
+          "name": "Weight By Angle",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Retrieve the area and/or angle weights for each vertex of a triangle.\n@param Mesh the mesh to query\n@param TriID the triangle index of the mesh to query\n@param TriArea the area of the triangle\n@param bWeightByArea if true, include weighting by the area of the triangle\n@param bWeightByAngle if true, include weighting by the interior angles of the triangle"
+    },
+    {
+      "id": "get-vertex-selected-triangles",
+      "name": "GetVertexSelectedTriangles",
+      "category": "MeshQueries",
+      "signature": "GetVertexSelectedTriangles(Mesh, Vertices)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Vertices",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "TArray<int32>",
+      "docs": "Get triangles that contain at least on vertex in the Vertices array.\n@param Vertices Array of mesh vertex IDs.\n@param Triangles Triangle IDs containing at least one vertex ID in Vertices."
+    },
+    {
+      "id": "expand-vertex-selection-to-neighbors",
+      "name": "ExpandVertexSelectionToNeighbors",
+      "category": "MeshQueries",
+      "signature": "ExpandVertexSelectionToNeighbors(Mesh, Selection, Expanded Selection, VID To Expanded Selection Idx)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Selection",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Expanded Selection",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "VID To Expanded Selection Idx",
+          "type": "TMap<int32,int32>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Expand selection of vertices with one-ring neighbors.\n@param Selection Array of Mesh vertex IDs.\n@param ExpandedSelection All vertices in Selection plus one-ring neighbors for each vertex.\n@param VIDToExpandedSelectionIdx Maps mesh Vertex ID to ExpandedSelection array index."
+    }
+  ]
+}

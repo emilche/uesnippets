@@ -21,6 +21,68 @@
   ],
   "functions": [
     {
+      "id": "launch-job",
+      "name": "LaunchJob",
+      "category": "DynamicMeshComponent",
+      "signature": "LaunchJob(Target, Debug Name, Job Work)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncComponentDataComputeQueue*"
+        },
+        {
+          "name": "Debug Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Job Work",
+          "type": "TFunction<TUniquePtr<DataType> ( FProgressCancel& Progress )>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "wait-for-all-jobs-during-shutdown",
+      "name": "WaitForAllJobsDuringShutdown",
+      "category": "DynamicMeshComponent",
+      "signature": "WaitForAllJobsDuringShutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncComponentDataComputeQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-mesh",
+      "name": "GetMesh",
+      "category": "DynamicMeshComponent",
+      "signature": "GetMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "FDynamicMesh3*",
+      "docs": "@return pointer to internal mesh\n@warning avoid usage of this function, access via GetDynamicMesh() instead"
+    },
+    {
+      "id": "get-dynamic-mesh",
+      "name": "GetDynamicMesh",
+      "category": "DynamicMeshComponent",
+      "signature": "GetDynamicMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "UDynamicMesh*",
+      "docs": "@return the child UDynamicMesh"
+    },
+    {
       "id": "set-dynamic-mesh",
       "name": "SetDynamicMesh",
       "category": "Dynamic Mesh Component",
@@ -118,6 +180,37 @@
       ],
       "returnType": "Void",
       "docs": "Apply transform to internal mesh. In some cases this can be more efficient than a general edit.\n@param bInvert if true, inverse tranform is applied instead of forward transform"
+    },
+    {
+      "id": "is-editable",
+      "name": "IsEditable",
+      "category": "DynamicMeshComponent",
+      "signature": "IsEditable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If set to false, this blocks external code from being able to modify the internal mesh. It prevents modifications through methods on this UDynamicMeshComponent such as EditMesh/SetMesh,\nHowever, this cannot prevent code from modifying the underlying UDynamicMesh through direct references (ex. via GetDynamicMesh()->SetMesh)."
+    },
+    {
+      "id": "set-is-editable",
+      "name": "SetIsEditable",
+      "category": "DynamicMeshComponent",
+      "signature": "SetIsEditable(Target, In Is Editable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDynamicMeshComponent*"
+        },
+        {
+          "name": "In Is Editable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "allows-geometry-selection",
@@ -437,6 +530,20 @@
       "docs": "When a FMeshChange or FMeshVertexChange is applied, by default we currently fully invalidate the render proxy. However in certain\nrealtime situations (eg like Sculpting tools) it can be critical to undo/redo performance to do more optimized render data updates\n(eg using one of the FastXYZ functions above). To allow for that, the full proxy invalidation on change can be (temporarily!) disabled\nusing this function."
     },
     {
+      "id": "get-invalidate-proxy-on-change-enabled",
+      "name": "GetInvalidateProxyOnChangeEnabled",
+      "category": "DynamicMeshComponent",
+      "signature": "GetInvalidateProxyOnChangeEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if InvalidateProxyOnChange is enabled (default)"
+    },
+    {
       "id": "clear-triangle-color-function",
       "name": "ClearTriangleColorFunction",
       "category": "DynamicMeshComponent",
@@ -582,19 +689,6 @@
       "name": "GetTangentsType",
       "category": "Dynamic Mesh Component",
       "signature": "GetTangentsType(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UDynamicMeshComponent*"
-        }
-      ],
-      "returnType": "EDynamicMeshComponentTangentsMode"
-    },
-    {
-      "id": "get-tangents-type-pure",
-      "name": "GetTangentsTypePure",
-      "category": "Dynamic Mesh Component",
-      "signature": "GetTangentsTypePure(Target)",
       "params": [
         {
           "name": "Target",
@@ -789,6 +883,19 @@
       ],
       "returnType": "Void",
       "docs": "Update the simple collision shapes associated with this mesh component\n@param AggGeom\t\t\t\tNew simple collision shapes to be used\n@param bUpdateCollision\t\tWhether to automatically call UpdateCollision() -- if false, manually call it to register the change with the physics system"
+    },
+    {
+      "id": "get-simple-collision-shapes",
+      "name": "GetSimpleCollisionShapes",
+      "category": "DynamicMeshComponent",
+      "signature": "GetSimpleCollisionShapes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "FKAggregateGeom&"
     },
     {
       "id": "clear-simple-collision-shapes",

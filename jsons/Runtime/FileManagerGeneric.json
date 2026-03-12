@@ -29,6 +29,102 @@
       "returnType": "Void"
     },
     {
+      "id": "set-sandbox-enabled",
+      "name": "SetSandboxEnabled",
+      "category": "FileManagerGeneric",
+      "signature": "SetSandboxEnabled(Target, In Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFileManagerGeneric*"
+        },
+        {
+          "name": "In Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-sandbox-enabled",
+      "name": "IsSandboxEnabled",
+      "category": "FileManagerGeneric",
+      "signature": "IsSandboxEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFileManagerGeneric*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "create-file-reader",
+      "name": "CreateFileReader",
+      "category": "FileManagerGeneric",
+      "signature": "CreateFileReader(Target, Filename, Read Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFileManagerGeneric*"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Read Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "FArchive*"
+    },
+    {
+      "id": "create-file-writer",
+      "name": "CreateFileWriter",
+      "category": "FileManagerGeneric",
+      "signature": "CreateFileWriter(Target, Filename, Write Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFileManagerGeneric*"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Write Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "FArchive*"
+    },
+    {
+      "id": "create-debug-file-writer",
+      "name": "CreateDebugFileWriter",
+      "category": "FileManagerGeneric",
+      "signature": "CreateDebugFileWriter(Target, Filename, Write Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFileManagerGeneric*"
+        },
+        {
+          "name": "Filename",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Write Flags",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "FArchive*"
+    },
+    {
       "id": "delete",
       "name": "Delete",
       "category": "FileManagerGeneric",
@@ -656,29 +752,26 @@
       "docs": "Returns the size of a file. (Thread-safe)\n@param Filename\t\tPlatform-independent Unreal filename.\n@return\t\t\t\tFile size in bytes or INDEX_NONE if the file didn't exist."
     },
     {
-      "id": "create-file-reader-internal",
-      "name": "CreateFileReaderInternal",
+      "id": "send-message-to-server",
+      "name": "SendMessageToServer",
       "category": "FileManagerGeneric",
-      "signature": "CreateFileReaderInternal(Target, Filename, Read Flags, Buffer Size)",
+      "signature": "SendMessageToServer(Target, Message, Handler)",
       "params": [
         {
           "name": "Target",
           "type": "FFileManagerGeneric*"
         },
         {
-          "name": "Filename",
+          "name": "Message",
           "type": "TCHAR*"
         },
         {
-          "name": "Read Flags",
-          "type": "UInt"
-        },
-        {
-          "name": "Buffer Size",
-          "type": "UInt"
+          "name": "Handler",
+          "type": "IPlatformFile::IFileServerMessageHandler*"
         }
       ],
-      "returnType": "FArchive*"
+      "returnType": "Bool",
+      "docs": "Sends a message to the file server, and will block until it's complete. Will return\nimmediately if the file manager doesn't support talking to a server.\n@param Message\tThe string message to send to the server\n@return\t\t\ttrue if the message was sent to server and it returned success, or false if there is no server, or the command failed"
     },
     {
       "id": "seek",
@@ -695,7 +788,45 @@
           "type": "Int64"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FArchiveFileReaderGeneric*",
+        "FArchiveFileWriterGeneric*"
+      ]
+    },
+    {
+      "id": "tell",
+      "name": "Tell",
+      "category": "FileManagerGeneric",
+      "signature": "Tell(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveFileReaderGeneric*"
+        }
+      ],
+      "returnType": "Int64",
+      "supportedTargets": [
+        "FArchiveFileReaderGeneric*",
+        "FArchiveFileWriterGeneric*"
+      ]
+    },
+    {
+      "id": "total-size",
+      "name": "TotalSize",
+      "category": "FileManagerGeneric",
+      "signature": "TotalSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FArchiveFileReaderGeneric*"
+        }
+      ],
+      "returnType": "Int64",
+      "supportedTargets": [
+        "FArchiveFileReaderGeneric*",
+        "FArchiveFileWriterGeneric*"
+      ]
     },
     {
       "id": "close",
@@ -708,28 +839,28 @@
           "type": "FArchiveFileReaderGeneric*"
         }
       ],
-      "returnType": "Bool"
+      "returnType": "Bool",
+      "supportedTargets": [
+        "FArchiveFileReaderGeneric*",
+        "FArchiveFileWriterGeneric*"
+      ]
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "get-archive-name",
+      "name": "GetArchiveName",
       "category": "FileManagerGeneric",
-      "signature": "Serialize(Target, V, Length)",
+      "signature": "GetArchiveName(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FArchiveFileReaderGeneric*"
-        },
-        {
-          "name": "V",
-          "type": "void*"
-        },
-        {
-          "name": "Length",
-          "type": "Int64"
         }
       ],
-      "returnType": "Void"
+      "returnType": "String",
+      "supportedTargets": [
+        "FArchiveFileReaderGeneric*",
+        "FArchiveFileWriterGeneric*"
+      ]
     },
     {
       "id": "flush-cache",
@@ -766,40 +897,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "internal-precache",
-      "name": "InternalPrecache",
-      "category": "FileManagerGeneric",
-      "signature": "InternalPrecache(Target, Precache Offset, Precache Size)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FArchiveFileReaderGeneric*"
-        },
-        {
-          "name": "Precache Offset",
-          "type": "Int64"
-        },
-        {
-          "name": "Precache Size",
-          "type": "Int64"
-        }
-      ],
-      "returnType": "Bool"
-    },
-    {
-      "id": "total-size",
-      "name": "TotalSize",
-      "category": "FileManagerGeneric",
-      "signature": "TotalSize(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FArchiveFileWriterGeneric*"
-        }
-      ],
-      "returnType": "Int64"
-    },
-    {
       "id": "flush",
       "name": "Flush",
       "category": "FileManagerGeneric",
@@ -811,20 +908,6 @@
         }
       ],
       "returnType": "Void"
-    },
-    {
-      "id": "flush-buffer",
-      "name": "FlushBuffer",
-      "category": "FileManagerGeneric",
-      "signature": "FlushBuffer(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FArchiveFileWriterGeneric*"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Write any internal buffer to the file handle\n@note Doesn't flush the handle itself, so this data may be cached by the OS and not yet written to disk!\n@return true if there was buffer data and it was written successfully, false if there was nothing to flush or the write failed"
     }
   ]
 }

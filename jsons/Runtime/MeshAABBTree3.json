@@ -1,0 +1,1218 @@
+{
+  "id": "mesh-aabb-tree-3",
+  "label": "MeshAABBTree3",
+  "includepath": "Spatial/MeshAABBTree3.h",
+  "includes": [
+    "DynamicVector",
+    "IntrRay3AxisAlignedBox3",
+    "IntrTriangle3Triangle3",
+    "IntersectionUtil",
+    "MeshQueries",
+    "SpatialInterfaces",
+    "DistTriangle3Triangle3"
+  ],
+  "functions": [
+    {
+      "id": "set-mesh",
+      "name": "SetMesh",
+      "category": "MeshAABBTree3",
+      "signature": "SetMesh(Target, Source Mesh, Auto Build)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Source Mesh",
+          "type": "TriangleMeshType*"
+        },
+        {
+          "name": "Auto Build",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-mesh",
+      "name": "GetMesh",
+      "category": "MeshAABBTree3",
+      "signature": "GetMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "TriangleMeshType*"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "MeshAABBTree3",
+      "signature": "IsValid(Target, Allow Unsafe Modified Mesh Queries)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Allow Unsafe Modified Mesh Queries",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@param bAllowUnsafeModifiedMeshQueries if true, then a built tree will still be considered valid even if the mesh change stamp has been modified\n@return true if tree is built and mesh is unchanged (identified based on change stamp)"
+    },
+    {
+      "id": "set-build-options",
+      "name": "SetBuildOptions",
+      "category": "MeshAABBTree3",
+      "signature": "SetBuildOptions(Target, Max Box Tri Count, Get Split Axis In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Max Box Tri Count",
+          "type": "Int"
+        },
+        {
+          "name": "Get Split Axis In",
+          "type": "GetSplitAxisFunc&&",
+          "default": "MakeDefaultSplitAxisFunc()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-77346a",
+      "name": "Build",
+      "category": "MeshAABBTree3",
+      "signature": "Build(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-c4b958",
+      "name": "Build",
+      "category": "MeshAABBTree3",
+      "signature": "Build(Target, Triangle List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Triangle List",
+          "type": "TArray<int32>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "supports-nearest-triangle",
+      "name": "SupportsNearestTriangle",
+      "category": "MeshAABBTree3",
+      "signature": "SupportsNearestTriangle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-nearest-triangle",
+      "name": "FindNearestTriangle",
+      "category": "MeshAABBTree3",
+      "signature": "FindNearestTriangle(Target, P, Nearest Dist Sqr, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Nearest Dist Sqr",
+          "type": "Double&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find the triangle closest to P, and distance to it, within distance MaxDist, or return InvalidID\nUse MeshQueries.TriangleDistance() to get more information"
+    },
+    {
+      "id": "get-bounding-box",
+      "name": "GetBoundingBox",
+      "category": "MeshAABBTree3",
+      "signature": "GetBoundingBox(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "FAxisAlignedBox3d",
+      "docs": "Get the overall bounding box of the whole tree"
+    },
+    {
+      "id": "find-nearest-point",
+      "name": "FindNearestPoint",
+      "category": "MeshAABBTree3",
+      "signature": "FindNearestPoint(Target, Point, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "FVector3d",
+      "docs": "Convenience function that calls FindNearestTriangle and then finds nearest point\n@return nearest point to Point, or Point itself if a nearest point was not found"
+    },
+    {
+      "id": "is-within-distance-squared",
+      "name": "IsWithinDistanceSquared",
+      "category": "MeshAABBTree3",
+      "signature": "IsWithinDistanceSquared(Target, Point, Threshold Distance Sqr, Out Triangle ID, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Threshold Distance Sqr",
+          "type": "Double"
+        },
+        {
+          "name": "Out Triangle ID",
+          "type": "Int&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test whether there is any triangle closer than sqrt(ThresholdDistanceSqr) to Point\nNote that FQueryOptions::MaxDistance is ignored by this query, as ThresholdDistanceSqr controls the query distance instead\n@param OutTriangleID  The ID of a triangle (not necessarily the closest) within the distance threshold, or InvalidID if none found."
+    },
+    {
+      "id": "find-nearest-hit-triangle-67c3d7",
+      "name": "FindNearestHitTriangle",
+      "category": "MeshAABBTree3",
+      "signature": "FindNearestHitTriangle(Target, Ray, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-nearest-hit-triangle-c20a06",
+      "name": "FindNearestHitTriangle",
+      "category": "MeshAABBTree3",
+      "signature": "FindNearestHitTriangle(Target, Ray, Nearest T, TID, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Nearest T",
+          "type": "Double&"
+        },
+        {
+          "name": "TID",
+          "type": "Int&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-nearest-hit-triangle-4e93c6",
+      "name": "FindNearestHitTriangle",
+      "category": "MeshAABBTree3",
+      "signature": "FindNearestHitTriangle(Target, Ray, Nearest T, TID, Bary Coords, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Nearest T",
+          "type": "Double&"
+        },
+        {
+          "name": "TID",
+          "type": "Int&"
+        },
+        {
+          "name": "Bary Coords",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-all-hit-triangles",
+      "name": "FindAllHitTriangles",
+      "category": "MeshAABBTree3",
+      "signature": "FindAllHitTriangles(Target, Ray, Out Hits, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Out Hits",
+          "type": "TArray<MeshIntersection::FHitIntersectionResult>&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "supports-point-containment",
+      "name": "SupportsPointContainment",
+      "category": "MeshAABBTree3",
+      "signature": "SupportsPointContainment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-inside",
+      "name": "IsInside",
+      "category": "MeshAABBTree3",
+      "signature": "IsInside(Target, P)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "bool",
+      "name": "bool",
+      "category": "MeshAABBTree3",
+      "signature": "bool(Target, Next Box F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Next Box F",
+          "type": "int )>",
+          "default": "[](const FAxisAlignedBox3d& Box, int Depth"
+        }
+      ],
+      "returnType": "TFunction<"
+    },
+    {
+      "id": "void-6a02fc",
+      "name": "void",
+      "category": "MeshAABBTree3",
+      "signature": "void(Target, Begin Box Triangles F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Begin Box Triangles F",
+          "type": "int )>",
+          "default": "[](int BoxID, int Depth"
+        }
+      ],
+      "returnType": "TFunction<"
+    },
+    {
+      "id": "void-667b2f",
+      "name": "void",
+      "category": "MeshAABBTree3",
+      "signature": "void(Target, Next Triangle F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Next Triangle F",
+          "type": "int )>",
+          "default": "[](int TriangleID"
+        }
+      ],
+      "returnType": "TFunction<"
+    },
+    {
+      "id": "void-0c3b70",
+      "name": "void",
+      "category": "MeshAABBTree3",
+      "signature": "void(Target, End Box Triangles F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "End Box Triangles F",
+          "type": "int )>",
+          "default": "[](int BoxID"
+        }
+      ],
+      "returnType": "TFunction<"
+    },
+    {
+      "id": "do-traversal",
+      "name": "DoTraversal",
+      "category": "MeshAABBTree3",
+      "signature": "DoTraversal(Target, Traversal, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Traversal",
+          "type": "FTreeTraversal&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Hierarchically descend through the tree Nodes, calling the FTreeTraversal functions at each level"
+    },
+    {
+      "id": "test-intersection-37b3c4",
+      "name": "TestIntersection",
+      "category": "MeshAABBTree3",
+      "signature": "TestIntersection(Target, Other Tree, Transform F, Options, Other Tree Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Other Tree",
+          "type": "TMeshAABBTree3&"
+        },
+        {
+          "name": "Transform F",
+          "type": "TFunction<FVector3d ( FVector3d& )>&",
+          "default": "nullptr"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        },
+        {
+          "name": "Other Tree Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if there is *any* intersection between our mesh and 'other' mesh.\nTransformF takes vertices of OtherTree into our tree - can be null if in same coord space"
+    },
+    {
+      "id": "test-intersection-dffa1f",
+      "name": "TestIntersection",
+      "category": "MeshAABBTree3",
+      "signature": "TestIntersection(Target, Triangle, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Triangle",
+          "type": "FTriangle3d&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if triangle intersects any triangle of our mesh"
+    },
+    {
+      "id": "find-all-intersections",
+      "name": "FindAllIntersections",
+      "category": "MeshAABBTree3",
+      "signature": "FindAllIntersections(Target, Other Tree, Transform F, Options, Other Tree Options, Intersection Fn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Other Tree",
+          "type": "TMeshAABBTree3&"
+        },
+        {
+          "name": "Transform F",
+          "type": "TFunction<FVector3d ( FVector3d& )>&",
+          "default": "nullptr"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        },
+        {
+          "name": "Other Tree Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        },
+        {
+          "name": "Intersection Fn",
+          "type": "TFunction<bool ( FIntrTriangle3Triangle3d& )>",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "MeshIntersection::FIntersectionsQueryResult",
+      "docs": "Compute all intersections between two meshes.\nTransformF argument transforms vertices of OtherTree to our tree (can be null if in same coord space)\nReturns pairs of intersecting triangles, which could intersect in either point or segment\nCurrently *does not* return coplanar intersections."
+    },
+    {
+      "id": "find-all-self-intersections",
+      "name": "FindAllSelfIntersections",
+      "category": "MeshAABBTree3",
+      "signature": "FindAllSelfIntersections(Target, Ignore Topo Connected, Options, Intersection Fn)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Ignore Topo Connected",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        },
+        {
+          "name": "Intersection Fn",
+          "type": "TFunction<bool ( FIntrTriangle3Triangle3d& )>",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "MeshIntersection::FIntersectionsQueryResult",
+      "docs": "Compute self intersections on our mesh.\nReturns pairs of intersecting triangles, which could intersect in either point or segment\nCurrently *does not* return coplanar intersections.\n@param bIgnoreTopoConnected Ignore intersections between triangles that share a vertex (if false a lot of triangles that simply share an edge will be counted as self intersecting)"
+    },
+    {
+      "id": "test-self-intersection",
+      "name": "TestSelfIntersection",
+      "category": "MeshAABBTree3",
+      "signature": "TestSelfIntersection(Target, Ignore Topo Connected, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Ignore Topo Connected",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&",
+          "default": "FQueryOptions()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "box-distance-sqr",
+      "name": "BoxDistanceSqr",
+      "category": "MeshAABBTree3",
+      "signature": "BoxDistanceSqr(Target, I Box, V)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "V",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "box-contains",
+      "name": "box_contains",
+      "category": "MeshAABBTree3",
+      "signature": "box_contains(Target, I Box, P)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "box-ray-intersect-t",
+      "name": "box_ray_intersect_t",
+      "category": "MeshAABBTree3",
+      "signature": "box_ray_intersect_t(Target, I Box, Ray)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Ray",
+          "type": "RayType&"
+        }
+      ],
+      "returnType": "template<RayType> double"
+    },
+    {
+      "id": "box-box-intersect",
+      "name": "box_box_intersect",
+      "category": "MeshAABBTree3",
+      "signature": "box_box_intersect(Target, I Box, Test Box)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Test Box",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-boxes-set",
+      "name": "FBoxesSet",
+      "category": "MeshAABBTree3",
+      "signature": "FBoxesSet(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-top-down-2955dd",
+      "name": "BuildTopDown",
+      "category": "MeshAABBTree3",
+      "signature": "BuildTopDown(Target, Sorted)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Sorted",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-top-down-146ef2",
+      "name": "BuildTopDown",
+      "category": "MeshAABBTree3",
+      "signature": "BuildTopDown(Target, Sorted, Triangle List, Num Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Sorted",
+          "type": "Bool"
+        },
+        {
+          "name": "Triangle List",
+          "type": "TriIndexEnumerable"
+        },
+        {
+          "name": "Num Triangles",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<TriIndexEnumerable> void"
+    },
+    {
+      "id": "build-top-down-4eace0",
+      "name": "BuildTopDown",
+      "category": "MeshAABBTree3",
+      "signature": "BuildTopDown(Target, Triangles, Centers, Num Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Centers",
+          "type": "TArray<FVector3d>&"
+        },
+        {
+          "name": "Num Triangles",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "split-tri-set-midpoint",
+      "name": "SplitTriSetMidpoint",
+      "category": "MeshAABBTree3",
+      "signature": "SplitTriSetMidpoint(Target, Triangles, Centers, I Start, I Count, Depth, Min Tri Count, Tris, Nodes, Box)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        },
+        {
+          "name": "Centers",
+          "type": "TArray<FVector3d>&"
+        },
+        {
+          "name": "I Start",
+          "type": "Int"
+        },
+        {
+          "name": "I Count",
+          "type": "Int"
+        },
+        {
+          "name": "Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Min Tri Count",
+          "type": "Int"
+        },
+        {
+          "name": "Tris",
+          "type": "FBoxesSet&"
+        },
+        {
+          "name": "Nodes",
+          "type": "FBoxesSet&"
+        },
+        {
+          "name": "Box",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-nearest-triangles",
+      "name": "find_nearest_triangles",
+      "category": "MeshAABBTree3",
+      "signature": "find_nearest_triangles(Target, I Box, Other Tree, Transform F, O Box, Depth, Nearest Sqr, Nearest Pair, Options, Other Tree Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Other Tree",
+          "type": "TMeshAABBTree3&"
+        },
+        {
+          "name": "Transform F",
+          "type": "TFunction<FVector3d ( FVector3d& )>&"
+        },
+        {
+          "name": "O Box",
+          "type": "Int"
+        },
+        {
+          "name": "Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Nearest Sqr",
+          "type": "Double&"
+        },
+        {
+          "name": "Nearest Pair",
+          "type": "FIndex2i&"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        },
+        {
+          "name": "Other Tree Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "box-box-distsqr",
+      "name": "box_box_distsqr",
+      "category": "MeshAABBTree3",
+      "signature": "box_box_distsqr(Target, I Box, Test Box)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Test Box",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "triangle-intersection-filter",
+      "name": "TriangleIntersectionFilter",
+      "category": "MeshAABBTree3",
+      "signature": "TriangleIntersectionFilter(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FTriangle3d&"
+        },
+        {
+          "name": "B",
+          "type": "FTriangle3d&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Standard tri tri intersection test (without computing intersection geometry)"
+    },
+    {
+      "id": "triangle-intersection",
+      "name": "TriangleIntersection",
+      "category": "MeshAABBTree3",
+      "signature": "TriangleIntersection(Intr)",
+      "params": [
+        {
+          "name": "Intr",
+          "type": "FIntrTriangle3Triangle3d&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Standard tri tri intersection test (with computing intersection geometry)\n@param Intr Stores intersection problem; after call, should be set with intersection result\n@return true if triangles were intersecting"
+    },
+    {
+      "id": "find-any-intersection-f1df69",
+      "name": "find_any_intersection",
+      "category": "MeshAABBTree3",
+      "signature": "find_any_intersection(Target, I Box, Triangle, Tri Bounds, Triangle Intersection Test, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Triangle",
+          "type": "FTriangle3d&"
+        },
+        {
+          "name": "Tri Bounds",
+          "type": "FAxisAlignedBox3d&"
+        },
+        {
+          "name": "Triangle Intersection Test",
+          "type": "TFunctionRef<bool ( FTriangle3d& A,FTriangle3d& B )>"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-any-intersection-43d708",
+      "name": "find_any_intersection",
+      "category": "MeshAABBTree3",
+      "signature": "find_any_intersection(Target, I Box, Other Tree, Transform F, O Box, Depth, Triangle Intersection Test, Options, Other Tree Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Other Tree",
+          "type": "TMeshAABBTree3&"
+        },
+        {
+          "name": "Transform F",
+          "type": "TFunction<FVector3d ( FVector3d& )>&"
+        },
+        {
+          "name": "O Box",
+          "type": "Int"
+        },
+        {
+          "name": "Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Triangle Intersection Test",
+          "type": "TFunctionRef<bool ( FTriangle3d& A,FTriangle3d& B )>"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        },
+        {
+          "name": "Other Tree Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-self-intersections-acrossboxes",
+      "name": "find_self_intersections_acrossboxes",
+      "category": "MeshAABBTree3",
+      "signature": "find_self_intersections_acrossboxes(Target, Box 1, Box 2, Result, Ignore Topo Connected, Depth, Intersect Fn, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Box 1",
+          "type": "Int"
+        },
+        {
+          "name": "Box 2",
+          "type": "Int"
+        },
+        {
+          "name": "Result",
+          "type": "MeshIntersection::FIntersectionsQueryResult*"
+        },
+        {
+          "name": "Ignore Topo Connected",
+          "type": "Bool"
+        },
+        {
+          "name": "Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Intersect Fn",
+          "type": "TFunctionRef<bool ( FIntrTriangle3Triangle3d& )>"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-tri-tri-intersections",
+      "name": "find_tri_tri_intersections",
+      "category": "MeshAABBTree3",
+      "signature": "find_tri_tri_intersections(Target, TID A, Idx Range Start, Idx Range End, Result, Ignore Topo Connected, Intersect Fn, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "TID A",
+          "type": "Int"
+        },
+        {
+          "name": "Idx Range Start",
+          "type": "Int"
+        },
+        {
+          "name": "Idx Range End",
+          "type": "Int"
+        },
+        {
+          "name": "Result",
+          "type": "MeshIntersection::FIntersectionsQueryResult*"
+        },
+        {
+          "name": "Ignore Topo Connected",
+          "type": "Bool"
+        },
+        {
+          "name": "Intersect Fn",
+          "type": "TFunctionRef<bool ( FIntrTriangle3Triangle3d& )>"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-tri-tri-intersection-result",
+      "name": "AddTriTriIntersectionResult",
+      "category": "MeshAABBTree3",
+      "signature": "AddTriTriIntersectionResult(Intr, TID A, TID B, Result)",
+      "params": [
+        {
+          "name": "Intr",
+          "type": "FIntrTriangle3Triangle3d&"
+        },
+        {
+          "name": "TID A",
+          "type": "Int"
+        },
+        {
+          "name": "TID B",
+          "type": "Int"
+        },
+        {
+          "name": "Result",
+          "type": "MeshIntersection::FIntersectionsQueryResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper to add a triangle-triangle intersection result from to a intersection result struct"
+    },
+    {
+      "id": "find-self-intersections",
+      "name": "find_self_intersections",
+      "category": "MeshAABBTree3",
+      "signature": "find_self_intersections(Target, Result, Ignore Topo Connected, Intersect Fn, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "Result",
+          "type": "MeshIntersection::FIntersectionsQueryResult*"
+        },
+        {
+          "name": "Ignore Topo Connected",
+          "type": "Bool"
+        },
+        {
+          "name": "Intersect Fn",
+          "type": "TFunctionRef<bool ( FIntrTriangle3Triangle3d& )>"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "find-intersections",
+      "name": "find_intersections",
+      "category": "MeshAABBTree3",
+      "signature": "find_intersections(Target, I Box, Other Tree, Transform F, O Box, Depth, Result, Intersect Fn, Options, Other Tree Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        },
+        {
+          "name": "I Box",
+          "type": "Int"
+        },
+        {
+          "name": "Other Tree",
+          "type": "TMeshAABBTree3&"
+        },
+        {
+          "name": "Transform F",
+          "type": "TFunction<FVector3d ( FVector3d& )>&"
+        },
+        {
+          "name": "O Box",
+          "type": "Int"
+        },
+        {
+          "name": "Depth",
+          "type": "Int"
+        },
+        {
+          "name": "Result",
+          "type": "MeshIntersection::FIntersectionsQueryResult&"
+        },
+        {
+          "name": "Intersect Fn",
+          "type": "TFunctionRef<bool ( FIntrTriangle3Triangle3d& )>"
+        },
+        {
+          "name": "Options",
+          "type": "FQueryOptions&"
+        },
+        {
+          "name": "Other Tree Options",
+          "type": "FQueryOptions&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "test-coverage",
+      "name": "TestCoverage",
+      "category": "MeshAABBTree3",
+      "signature": "TestCoverage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "total-volume",
+      "name": "TotalVolume",
+      "category": "MeshAABBTree3",
+      "signature": "TotalVolume(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshAABBTree3*"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Total sum of volumes of all boxes in the tree. Mainly useful to evaluate tree quality."
+    }
+  ]
+}

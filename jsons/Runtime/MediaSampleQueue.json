@@ -1,0 +1,338 @@
+{
+  "id": "media-sample-queue",
+  "label": "MediaSampleQueue",
+  "includepath": "MediaSampleQueue.h",
+  "includes": [
+    "Queue",
+    "PlatformAtomics",
+    "IMediaSamples",
+    "CriticalSection",
+    "Interval",
+    "App",
+    "ScopeLock",
+    "Timespan",
+    "SharedPointer",
+    "MediaSampleSink",
+    "MediaSampleSource",
+    "IMediaTimeSource",
+    "IMediaAudioSample",
+    "IMediaTextureSample",
+    "IMediaBinarySample",
+    "IMediaOverlaySample"
+  ],
+  "functions": [
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "MediaSampleQueue",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of samples in the queue.\nNote: The value returned by this function is only eventually consistent. It\ncan be called by both consumer and producer threads, but it should not be used\nto query the actual state of the queue. Always use Dequeue and Peek instead!\n@return Number of samples.\n@see Enqueue, Dequeue, Peek"
+    },
+    {
+      "id": "dequeue",
+      "name": "Dequeue",
+      "category": "MediaSampleQueue",
+      "signature": "Dequeue(Target, Out Sample)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Out Sample",
+          "type": "TSharedPtr<SampleType,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "peek",
+      "name": "Peek",
+      "category": "MediaSampleQueue",
+      "signature": "Peek(Target, Out Sample)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Out Sample",
+          "type": "TSharedPtr<SampleType,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-sample-times",
+      "name": "GetSampleTimes",
+      "category": "MediaSampleQueue",
+      "signature": "GetSampleTimes(Target, Out Sample Time Ranges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Out Sample Time Ranges",
+          "type": "TArray<TRange<FMediaTimeStamp>>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pop",
+      "name": "Pop",
+      "category": "MediaSampleQueue",
+      "signature": "Pop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "discard",
+      "name": "Discard",
+      "category": "MediaSampleQueue",
+      "signature": "Discard(Target, Time Range, Reverse)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        },
+        {
+          "name": "Reverse",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "fetch-best-sample-for-time-range",
+      "name": "FetchBestSampleForTimeRange",
+      "category": "MediaSampleQueue",
+      "signature": "FetchBestSampleForTimeRange(Target, Time Range, Out Sample, Reverse, Consistent Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Time Range",
+          "type": "TRange<FMediaTimeStamp>&"
+        },
+        {
+          "name": "Out Sample",
+          "type": "TSharedPtr<SampleType,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Reverse",
+          "type": "Bool"
+        },
+        {
+          "name": "Consistent Result",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "EMediaSampleQueueFetchResult"
+    },
+    {
+      "id": "purge-outdated-samples",
+      "name": "PurgeOutdatedSamples",
+      "category": "MediaSampleQueue",
+      "signature": "PurgeOutdatedSamples(Target, Reference Time, Reversed, Max Age)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Reference Time",
+          "type": "FMediaTimeStamp&"
+        },
+        {
+          "name": "Reversed",
+          "type": "Bool"
+        },
+        {
+          "name": "Max Age",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "purge-until-sequence-index",
+      "name": "PurgeUntilSequenceIndex",
+      "category": "MediaSampleQueue",
+      "signature": "PurgeUntilSequenceIndex(Target, In Until Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "In Until Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enqueue",
+      "name": "Enqueue",
+      "category": "MediaSampleQueue",
+      "signature": "Enqueue(Target, Sample)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Sample",
+          "type": "TSharedRef<SampleType,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "request-flush",
+      "name": "RequestFlush",
+      "category": "MediaSampleQueue",
+      "signature": "RequestFlush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-flush-count",
+      "name": "GetFlushCount",
+      "category": "MediaSampleQueue",
+      "signature": "GetFlushCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "can-accept-samples",
+      "name": "CanAcceptSamples",
+      "category": "MediaSampleQueue",
+      "signature": "CanAcceptSamples(Target, Num Samples)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Num Samples",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-media-audio-sample-queue",
+      "name": "FMediaAudioSampleQueue",
+      "category": "MediaSampleQueue",
+      "signature": "FMediaAudioSampleQueue(Target, Max Samples In Queue)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "Max Samples In Queue",
+          "type": "UInt",
+          "default": "-1)\n\t\t: TMediaSampleQueue<class IMediaAudioSample, class FMediaAudioSampleSink>(MaxSamplesInQueue"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "audio sample queue."
+    },
+    {
+      "id": "set-audio-time",
+      "name": "SetAudioTime",
+      "category": "MediaSampleQueue",
+      "signature": "SetAudioTime(Target, In Audio Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "In Audio Time",
+          "type": "FMediaTimeStampSample&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-audio-time-if-equal-flush-count",
+      "name": "SetAudioTimeIfEqualFlushCount",
+      "category": "MediaSampleQueue",
+      "signature": "SetAudioTimeIfEqualFlushCount(Target, In Audio Time, In Flush Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        },
+        {
+          "name": "In Audio Time",
+          "type": "FMediaTimeStampSample&"
+        },
+        {
+          "name": "In Flush Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-audio-time",
+      "name": "GetAudioTime",
+      "category": "MediaSampleQueue",
+      "signature": "GetAudioTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        }
+      ],
+      "returnType": "FMediaTimeStampSample"
+    },
+    {
+      "id": "invalidate-audio-time",
+      "name": "InvalidateAudioTime",
+      "category": "MediaSampleQueue",
+      "signature": "InvalidateAudioTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaSampleQueue*"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

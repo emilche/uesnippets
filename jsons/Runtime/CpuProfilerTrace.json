@@ -14,6 +14,126 @@
   ],
   "functions": [
     {
+      "id": "output-event-type",
+      "name": "OutputEventType",
+      "category": "CpuProfilerTrace",
+      "signature": "OutputEventType(Name, File, Line)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "ANSICHAR*"
+        },
+        {
+          "name": "File",
+          "type": "ANSICHAR*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Line",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "FORCENOINLINE uint32",
+      "docs": "Facilities for tracing timed CPU events. Two types of events are supported, static/constant events where the identifier is\nknown at compile time or it is constant during execution, and dynamic events were identifier can change between calls.\nStatic/constant events have lower overhead, so always prefer to use them if possible.\nEvents are tracked per thread, so begin/end calls must be matched and called on the same thread. It is possible to use any channel\nto emit the events, but both that channel and the CpuChannel must then be enabled.\nUsage of the scope macros is highly encouraged in order to avoid mistakes."
+    },
+    {
+      "id": "output-event-metadata-spec",
+      "name": "OutputEventMetadataSpec",
+      "category": "CpuProfilerTrace",
+      "signature": "OutputEventMetadataSpec(Spec Id, Static Name, Name Format, Field Names)",
+      "params": [
+        {
+          "name": "Spec Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Static Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Name Format",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Field Names",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "FORCENOINLINE void",
+      "docs": "Output CPU event metadata spec.\nThe trace event emitted by this function is an \"important event\" (so all events emitted will add to the Trace System's cache).\nIt is the responsibility of the caller code to ensure this function is not abused.\n@param SpecId - The SpecId of the event to associate this metadata spec with\n@param StaticName - The static name of the event\n@param NameFormat - The format string for the event\n@param FieldNames - Cbor data representing the serialized field names. These should be descriptive names for the metadata values passed to OutputBeginEventWithMetadata."
+    },
+    {
+      "id": "output-metadata",
+      "name": "OutputMetadata",
+      "category": "CpuProfilerTrace",
+      "signature": "OutputMetadata(Spec Id, Cbor Data)",
+      "params": [
+        {
+          "name": "Spec Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Cbor Data",
+          "type": "TArray<uint8>&"
+        }
+      ],
+      "returnType": "FORCENOINLINE uint32",
+      "docs": "Output CPU event metadata. This metadata can than be associated with multiple timing events emitted with OutputBeginEventWithMetadata.\n@param SpecId - The SpecId of the event to associate this metadata with.\n@param CborData - The serialized metadata associated with the event.\n@returns A MetadataId that can be used with OutputBeginEventWithMetadata. Returns 0 if the cpu channel is off."
+    },
+    {
+      "id": "output-dynamic-event-type",
+      "name": "OutputDynamicEventType",
+      "category": "CpuProfilerTrace",
+      "signature": "OutputDynamicEventType(Name, File, Line)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "ANSICHAR*"
+        },
+        {
+          "name": "File",
+          "type": "ANSICHAR*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Line",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "FORCENOINLINE uint32",
+      "docs": "Output CPU event definition (spec) for a dynamic event.\nThe Name will be cached and the trace event will only be emitted once (for each unique Name; even if File or Line changes).\n@param Name - The event name\n@param File - The source filename\n@param Line - The line number in source file\n@returns The event definition id"
+    },
+    {
+      "id": "output-dynamic-event-type-with-id",
+      "name": "OutputDynamicEventTypeWithId",
+      "category": "CpuProfilerTrace",
+      "signature": "OutputDynamicEventTypeWithId(Id, Name, File, Line)",
+      "params": [
+        {
+          "name": "Id",
+          "type": "FNameParam"
+        },
+        {
+          "name": "Name",
+          "type": "ANSICHAR*"
+        },
+        {
+          "name": "File",
+          "type": "ANSICHAR*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Line",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "FORCENOINLINE uint32",
+      "docs": "Output CPU event definition (spec) for a dynamic event identified by an FName.\nThe Id will be cached and the trace event will only be emitted once (for each unique Id; even if Name, File or Line changes).\nThis is faster and less memory expensive than \\ref OutputDynamicEventType that receives ANSICHAR* or TCHAR* name.\n@param Id - The id of event\n@param Name - The name of event\n@param File - The source filename\n@param Line - The line number in source file"
+    },
+    {
       "id": "output-begin-event",
       "name": "OutputBeginEvent",
       "category": "CpuProfilerTrace",

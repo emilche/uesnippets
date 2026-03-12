@@ -1,0 +1,171 @@
+{
+  "id": "type-container",
+  "label": "TypeContainer",
+  "includepath": "Misc/TypeContainer.h",
+  "includes": [
+    "CoreTypes",
+    "PointerIsConvertibleFromTo",
+    "AssertionMacros",
+    "UnrealTypeTraits",
+    "UnrealString",
+    "Function",
+    "Map",
+    "SharedPointer",
+    "TlsAutoCleanup",
+    "ScopeLock"
+  ],
+  "functions": [
+    {
+      "id": "get-instance",
+      "name": "GetInstance",
+      "category": "TypeContainer",
+      "signature": "GetInstance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFunctionInstanceProvider*"
+        }
+      ],
+      "returnType": "TSharedPtr<void,Mode>",
+      "docs": "Gets an instance of a class.\n@return Shared pointer to the instance (must be cast to TSharedPtr<R, Mode>).",
+      "supportedTargets": [
+        "TFunctionInstanceProvider*",
+        "TSharedInstanceProvider*",
+        "TThreadInstanceProvider*"
+      ]
+    },
+    {
+      "id": "get-instance-ref",
+      "name": "GetInstanceRef",
+      "category": "TypeContainer",
+      "signature": "GetInstanceRef(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        }
+      ],
+      "returnType": "template<class R> TSharedRef<R,Mode>",
+      "docs": "Gets a shared reference to an instance of the specified class.\nUnlike GetInstance(), this function will assert if no instance was registered for\nthe requested type of class using either RegisterClass() or RegisterInstance().\n@param R The type of class that an instance is being requested for.\n@param A shared pointer to the instance.\n@see GetInstance, RegisterClass, RegisterInstance"
+    },
+    {
+      "id": "is-registered",
+      "name": "IsRegistered",
+      "category": "TypeContainer",
+      "signature": "IsRegistered(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        }
+      ],
+      "returnType": "template<class R> bool",
+      "docs": "Check whether the specified class has been registered.\n@param R The type of registered class to check.\n@return true if the class was registered, false otherwise."
+    },
+    {
+      "id": "register-class",
+      "name": "RegisterClass",
+      "category": "TypeContainer",
+      "signature": "RegisterClass(Target, Scope)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        },
+        {
+          "name": "Scope",
+          "type": "ETypeContainerScope",
+          "default": "ETypeContainerScope::Process"
+        }
+      ],
+      "returnType": "template<class R,class T,. . . P> void",
+      "docs": "Registers a class for instances of the specified class.\n@param R The type of class to register an instance class for.\n@param T Tye type of class to register (must be the same as or derived from R).\n@param P The constructor parameters that the class requires.\n@param Scope The scope at which instances must be unique (default = Process).\n@see RegisterDelegate, RegisterInstance, Unregister"
+    },
+    {
+      "id": "register-delegate",
+      "name": "RegisterDelegate",
+      "category": "TypeContainer",
+      "signature": "RegisterDelegate(Target, Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        },
+        {
+          "name": "Delegate",
+          "type": "D"
+        }
+      ],
+      "returnType": "template<class R,class D,. . . P> void",
+      "docs": "Register a factory delegate for the specified class.\n@param R The type of class to register an instance class for.\n@param D Tye type of factory delegate to register.\n@param P The parameters that the delegate requires.\n@param Delegate The delegate to register."
+    },
+    {
+      "id": "register-factory-cea1ec",
+      "name": "RegisterFactory",
+      "category": "TypeContainer",
+      "signature": "RegisterFactory(Target, Create Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        },
+        {
+          "name": "Create Func",
+          "type": "TFunction<TSharedRef<R,Mode> ( )>&"
+        }
+      ],
+      "returnType": "template<class R> void",
+      "docs": "Register a factory function for the specified class.\n@param R The type of class to register the instance for.\n@param P Additional parameters that the factory function requires.\n@param CreateFunc The factory function that will create instances.\n@see RegisterClass, RegisterInstance, Unregister"
+    },
+    {
+      "id": "register-factory-3e9452",
+      "name": "RegisterFactory",
+      "category": "TypeContainer",
+      "signature": "RegisterFactory(Target, Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        },
+        {
+          "name": "Mode",
+          "type": "TSharedRef<R,Mode> (* CreateFunc ) ( TSharedRef<P,"
+        }
+      ],
+      "returnType": "template<class R,. . . P> void",
+      "docs": "Register a factory function for the specified class.\nThis is a Clang/VS2015-specific overload for handling raw function pointers.\n@param R The type of class to register the instance for.\n@param P Additional parameters that the factory function requires.\n@param CreateFunc The factory function that will create instances.\n@see RegisterClass, RegisterInstance, Unregister"
+    },
+    {
+      "id": "register-instance",
+      "name": "RegisterInstance",
+      "category": "TypeContainer",
+      "signature": "RegisterInstance(Target, Instance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        },
+        {
+          "name": "Instance",
+          "type": "TSharedRef<T,Mode>&"
+        }
+      ],
+      "returnType": "template<class R,class T> void",
+      "docs": "Registers an existing instance for the specified class.\n@param R The type of class to register the instance for.\n@param T The type of the instance to register (must be the same as or derived from R).\n@param Instance The instance of the class to register.\n@see RegisterClass, RegisterDelegate, Unregister"
+    },
+    {
+      "id": "unregister",
+      "name": "Unregister",
+      "category": "TypeContainer",
+      "signature": "Unregister(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTypeContainer*"
+        }
+      ],
+      "returnType": "template<class R> void",
+      "docs": "Unregisters the instance or class for a previously registered class.\n@param R The type of class to unregister.\n@see RegisterClass, RegisterDelegate, RegisterInstance"
+    }
+  ]
+}

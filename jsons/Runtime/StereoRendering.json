@@ -8,6 +8,74 @@
   ],
   "functions": [
     {
+      "id": "is-stereo-enabled-on-next-frame",
+      "name": "IsStereoEnabledOnNextFrame",
+      "category": "StereoRendering",
+      "signature": "IsStereoEnabledOnNextFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not stereo rendering is on on next frame. Useful to determine if some preparation work\nshould be done before stereo got enabled in next frame."
+    },
+    {
+      "id": "get-desired-number-of-views",
+      "name": "GetDesiredNumberOfViews",
+      "category": "StereoRendering",
+      "signature": "GetDesiredNumberOfViews(Target, Stereo Requested)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        },
+        {
+          "name": "Stereo Requested",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the desired number of views, so that devices that require additional views can allocate them.\nDefault is two viewports if using stereo rendering."
+    },
+    {
+      "id": "get-view-pass-for-index",
+      "name": "GetViewPassForIndex",
+      "category": "StereoRendering",
+      "signature": "GetViewPassForIndex(Target, Stereo Requested, View Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        },
+        {
+          "name": "Stereo Requested",
+          "type": "Bool"
+        },
+        {
+          "name": "View Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "EStereoscopicPass",
+      "docs": "For the specified view index in the view family, assign a stereoscopic pass type based on the extension's usage"
+    },
+    {
+      "id": "is-stereo-eye-pass",
+      "name": "IsStereoEyePass",
+      "category": "StereoRendering",
+      "signature": "IsStereoEyePass(Pass)",
+      "params": [
+        {
+          "name": "Pass",
+          "type": "EStereoscopicPass"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Static helper. Return true if this pass is for a stereo eye view"
+    },
+    {
       "id": "is-stereo-eye-view",
       "name": "IsStereoEyeView",
       "category": "StereoRendering",
@@ -20,6 +88,20 @@
       ],
       "returnType": "Bool",
       "docs": "Static helper. Return true if this is a stereoscopic view"
+    },
+    {
+      "id": "is-a-primary-pass",
+      "name": "IsAPrimaryPass",
+      "category": "StereoRendering",
+      "signature": "IsAPrimaryPass(Pass)",
+      "params": [
+        {
+          "name": "Pass",
+          "type": "EStereoscopicPass"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Static helper. Return true if this pass is for a view we do all the work for (ie this view can't borrow from another)"
     },
     {
       "id": "is-a-primary-view",
@@ -36,6 +118,20 @@
       "docs": "Static helper. Return true if primary view"
     },
     {
+      "id": "is-a-secondary-pass",
+      "name": "IsASecondaryPass",
+      "category": "StereoRendering",
+      "signature": "IsASecondaryPass(Pass)",
+      "params": [
+        {
+          "name": "Pass",
+          "type": "EStereoscopicPass"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Static helper. Return true if this pass is for a view for which we share some work done for eSSP_PRIMARY (ie borrow some intermediate state from that view)"
+    },
+    {
       "id": "is-a-secondary-view",
       "name": "IsASecondaryView",
       "category": "StereoRendering",
@@ -48,6 +144,196 @@
       ],
       "returnType": "Bool",
       "docs": "Static helper. Return true if secondary view"
+    },
+    {
+      "id": "get-lod-view-index",
+      "name": "GetLODViewIndex",
+      "category": "StereoRendering",
+      "signature": "GetLODViewIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Return the index of the view that is used for selecting LODs"
+    },
+    {
+      "id": "is-standalone-stereo-only-device",
+      "name": "IsStandaloneStereoOnlyDevice",
+      "category": "StereoRendering",
+      "signature": "IsStandaloneStereoOnlyDevice(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True when a device has only stereo display (like a self contained mobile vr headset)."
+    },
+    {
+      "id": "set-final-view-rect",
+      "name": "SetFinalViewRect",
+      "category": "StereoRendering",
+      "signature": "SetFinalViewRect(Target, RHI Cmd List, View Index, Final View Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        },
+        {
+          "name": "View Index",
+          "type": "Int"
+        },
+        {
+          "name": "Final View Rect",
+          "type": "FIntRect&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Provides the final view rect that the renderer will render into."
+    },
+    {
+      "id": "render-texture-render-thread",
+      "name": "RenderTexture_RenderThread",
+      "category": "StereoRendering",
+      "signature": "RenderTexture_RenderThread(Target, RHI Cmd List, Back Buffer, Src Texture, Window Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        },
+        {
+          "name": "Back Buffer",
+          "type": "FRHITexture*"
+        },
+        {
+          "name": "Src Texture",
+          "type": "FRHITexture*"
+        },
+        {
+          "name": "Window Size",
+          "type": "FVector2D"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-render-target-manager",
+      "name": "GetRenderTargetManager",
+      "category": "StereoRendering",
+      "signature": "GetRenderTargetManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        }
+      ],
+      "returnType": "IStereoRenderTargetManager*",
+      "docs": "Returns currently active render target manager."
+    },
+    {
+      "id": "get-stereo-layers",
+      "name": "GetStereoLayers",
+      "category": "StereoRendering",
+      "signature": "GetStereoLayers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        }
+      ],
+      "returnType": "IStereoLayers*",
+      "docs": "Returns an IStereoLayers implementation, if one is present"
+    },
+    {
+      "id": "start-final-postprocess-settings",
+      "name": "StartFinalPostprocessSettings",
+      "category": "StereoRendering",
+      "signature": "StartFinalPostprocessSettings(Target, Start Post Processing Settings, Stereo Pass Type, Stereo View Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IStereoRendering*"
+        },
+        {
+          "name": "Start Post Processing Settings",
+          "type": "FPostProcessSettings*"
+        },
+        {
+          "name": "Stereo Pass Type",
+          "type": "EStereoscopicPass"
+        },
+        {
+          "name": "Stereo View Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "override-final-postprocess-settings",
+      "name": "OverrideFinalPostprocessSettings",
+      "category": "StereoRendering",
+      "signature": "OverrideFinalPostprocessSettings(Target, Override Post Processing Settings, Stereo Pass Type, Stereo View Index, Blend Weight)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPostProcessSettings*"
+        },
+        {
+          "name": "Override Post Processing Settings",
+          "type": "FPostProcessSettings*"
+        },
+        {
+          "name": "Stereo Pass Type",
+          "type": "EStereoscopicPass"
+        },
+        {
+          "name": "Stereo View Index",
+          "type": "Int"
+        },
+        {
+          "name": "Blend Weight",
+          "type": "Float&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "end-final-postprocess-settings",
+      "name": "EndFinalPostprocessSettings",
+      "category": "StereoRendering",
+      "signature": "EndFinalPostprocessSettings(Target, Final Post Processing Settings, Stereo Pass Type, Stereo View Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPostProcessSettings*"
+        },
+        {
+          "name": "Final Post Processing Settings",
+          "type": "FPostProcessSettings*"
+        },
+        {
+          "name": "Stereo Pass Type",
+          "type": "EStereoscopicPass"
+        },
+        {
+          "name": "Stereo View Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "is-start-in-vr",

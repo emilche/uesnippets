@@ -16,30 +16,76 @@
   ],
   "functions": [
     {
-      "id": "execute-tick",
-      "name": "ExecuteTick",
+      "id": "add-supported-tick-type",
+      "name": "AddSupportedTickType",
       "category": "MassProcessingPhaseManager",
-      "signature": "ExecuteTick(Target, Delta Time, Tick Type, Current Thread, My Completion Graph Event)",
+      "signature": "AddSupportedTickType(Target, Tick Type)",
       "params": [
         {
           "name": "Target",
           "type": "FMassProcessingPhase*"
         },
         {
-          "name": "Delta Time",
-          "type": "Float"
+          "name": "Tick Type",
+          "type": "ELevelTick"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-supported-tick-type",
+      "name": "RemoveSupportedTickType",
+      "category": "MassProcessingPhaseManager",
+      "signature": "RemoveSupportedTickType(Target, Tick Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhase*"
         },
         {
           "name": "Tick Type",
           "type": "ELevelTick"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-mass-phase-processor-configuration-helper",
+      "name": "FMassPhaseProcessorConfigurationHelper",
+      "category": "MassProcessingPhaseManager",
+      "signature": "FMassPhaseProcessorConfigurationHelper(Target, In Out Phase Processor, In Phase Config, In Processor Outer, In Out Phase Processor, In Phase Config, In Processor Outer, In Phase)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
         },
         {
-          "name": "Current Thread",
-          "type": "ENamedThreads::Type"
+          "name": "In Out Phase Processor",
+          "type": "UMassCompositeProcessor&"
         },
         {
-          "name": "My Completion Graph Event",
-          "type": "FGraphEventRef&"
+          "name": "In Phase Config",
+          "type": "FMassProcessingPhaseConfig&"
+        },
+        {
+          "name": "In Processor Outer",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Out Phase Processor",
+          "type": "EMassProcessingPhase InPhase ) : PhaseProcessor ("
+        },
+        {
+          "name": "In Phase Config",
+          "type": "PhaseConfig ("
+        },
+        {
+          "name": "In Processor Outer",
+          "type": "ProcessorOuter ("
+        },
+        {
+          "name": "In Phase",
+          "type": "Phase ("
         }
       ],
       "returnType": "Void"
@@ -52,7 +98,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FMassPhaseProcessorConfigurationHelper*"
+          "type": "FMassProcessingPhaseManager*"
         },
         {
           "name": "Dynamic Processors",
@@ -86,7 +132,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FMassPhaseProcessorConfigurationHelper*"
+          "type": "FMassProcessingPhaseManager*"
         },
         {
           "name": "Dynamic Processors",
@@ -108,6 +154,83 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "f-mass-processing-phase-manager",
+      "name": "FMassProcessingPhaseManager",
+      "category": "MassProcessingPhaseManager",
+      "signature": "FMassProcessingPhaseManager(In Processor Execution Flags)",
+      "params": [
+        {
+          "name": "In Processor Execution Flags",
+          "type": "EProcessorExecutionFlags",
+          "default": "EProcessorExecutionFlags::None"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "MassProcessingPhaseManager owns separate FMassProcessingPhase instances for every ETickingGroup. When activated\nvia Start function it registers and enables the FMassProcessingPhase instances which themselves are tick functions\nthat host UMassCompositeProcessor which they trigger as part of their Tick function.\nMassProcessingPhaseManager serves as an interface to said FMassProcessingPhase instances and allows initialization\nwith collections of processors (via Initialize function) as well as registering arbitrary functions to be called\nwhen a particular phase starts or ends (via GetOnPhaseStart and GetOnPhaseEnd functions)."
+    },
+    {
+      "id": "get-entity-manager",
+      "name": "GetEntityManager",
+      "category": "MassProcessingPhaseManager",
+      "signature": "GetEntityManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "TSharedPtr<FMassEntityManager>&"
+    },
+    {
+      "id": "get-entity-manager-ref",
+      "name": "GetEntityManagerRef",
+      "category": "MassProcessingPhaseManager",
+      "signature": "GetEntityManagerRef(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "FMassEntityManager&"
+    },
+    {
+      "id": "get-on-phase-start",
+      "name": "GetOnPhaseStart",
+      "category": "MassProcessingPhaseManager",
+      "signature": "GetOnPhaseStart(Target, Phase)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "Phase",
+          "type": "EMassProcessingPhase"
+        }
+      ],
+      "returnType": "FMassProcessingPhase::FOnPhaseEvent&",
+      "docs": "Retrieves OnPhaseStart multicast delegate's reference for a given Phase"
+    },
+    {
+      "id": "get-on-phase-end",
+      "name": "GetOnPhaseEnd",
+      "category": "MassProcessingPhaseManager",
+      "signature": "GetOnPhaseEnd(Target, Phase)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "Phase",
+          "type": "EMassProcessingPhase"
+        }
+      ],
+      "returnType": "FMassProcessingPhase::FOnPhaseEvent&",
+      "docs": "Retrieves OnPhaseEnd multicast delegate's reference for a given Phase"
     },
     {
       "id": "initialize",
@@ -230,6 +353,19 @@
       "returnType": "Void"
     },
     {
+      "id": "is-running",
+      "name": "IsRunning",
+      "category": "MassProcessingPhaseManager",
+      "signature": "IsRunning(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "pause",
       "name": "Pause",
       "category": "MassProcessingPhaseManager",
@@ -307,21 +443,232 @@
       "docs": "Removes a previously registered dynamic processor of throws an assert if not found."
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "get-referencer-name",
+      "name": "GetReferencerName",
       "category": "MassProcessingPhaseManager",
-      "signature": "AddReferencedObjects(Target, Collector)",
+      "signature": "GetReferencerName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "register-dynamic-processor-internal",
+      "name": "RegisterDynamicProcessorInternal",
+      "category": "MassProcessingPhaseManager",
+      "signature": "RegisterDynamicProcessorInternal(Target, Processor)",
       "params": [
         {
           "name": "Target",
           "type": "FMassProcessingPhaseManager*"
         },
         {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
+          "name": "Processor",
+          "type": "TNotNull<UMassProcessor*>"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "unregister-dynamic-processor-internal",
+      "name": "UnregisterDynamicProcessorInternal",
+      "category": "MassProcessingPhaseManager",
+      "signature": "UnregisterDynamicProcessorInternal(Target, Processor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "Processor",
+          "type": "TNotNull<UMassProcessor*>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "handle-pending-dynamic-processor-operations",
+      "name": "HandlePendingDynamicProcessorOperations",
+      "category": "MassProcessingPhaseManager",
+      "signature": "HandlePendingDynamicProcessorOperations(Target, Phase Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "Phase Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-tick-functions",
+      "name": "EnableTickFunctions",
+      "category": "MassProcessingPhaseManager",
+      "signature": "EnableTickFunctions(Target, World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "World",
+          "type": "UWorld&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Override this function if you want to modify how the phase tick functions get executed."
+    },
+    {
+      "id": "create-phases",
+      "name": "CreatePhases",
+      "category": "MassProcessingPhaseManager",
+      "signature": "CreatePhases(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates phase processors instances for each declared phase name, based on MassEntitySettings"
+    },
+    {
+      "id": "on-phase-start",
+      "name": "OnPhaseStart",
+      "category": "MassProcessingPhaseManager",
+      "signature": "OnPhaseStart(Target, Phase)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "Phase",
+          "type": "FMassProcessingPhase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by the given Phase at the very start of its execution function (the FMassProcessingPhase::ExecuteTick),\neven before the FMassProcessingPhase.OnPhaseStart broadcast delegate"
+    },
+    {
+      "id": "on-phase-end",
+      "name": "OnPhaseEnd",
+      "category": "MassProcessingPhaseManager",
+      "signature": "OnPhaseEnd(Target, Phase)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "Phase",
+          "type": "FMassProcessingPhase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by the given Phase at the very end of its execution function (the FMassProcessingPhase::ExecuteTick),\nafter the FMassProcessingPhase.OnPhaseEnd broadcast delegate"
+    },
+    {
+      "id": "on-new-archetype",
+      "name": "OnNewArchetype",
+      "category": "MassProcessingPhaseManager",
+      "signature": "OnNewArchetype(Target, New Archetype)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        },
+        {
+          "name": "New Archetype",
+          "type": "FMassArchetypeHandle&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-debug-entity-manager-initialized",
+      "name": "OnDebugEntityManagerInitialized",
+      "category": "MassProcessingPhaseManager",
+      "signature": "OnDebugEntityManagerInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-debug-entity-manager-deinitialized",
+      "name": "OnDebugEntityManagerDeinitialized",
+      "category": "MassProcessingPhaseManager",
+      "signature": "OnDebugEntityManagerDeinitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "debug-get-phase-processor",
+      "name": "DebugGetPhaseProcessor",
+      "category": "MassProcessingPhaseManager",
+      "signature": "DebugGetPhaseProcessor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhase*"
+        }
+      ],
+      "returnType": "UMassCompositeProcessor*"
+    },
+    {
+      "id": "debug-get-processing-phases",
+      "name": "DebugGetProcessingPhases",
+      "category": "MassProcessingPhaseManager",
+      "signature": "DebugGetProcessingPhases(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "TConstArrayView<FMassProcessingPhase>"
+    },
+    {
+      "id": "debug-get-processing-graph-build-states",
+      "name": "DebugGetProcessingGraphBuildStates",
+      "category": "MassProcessingPhaseManager",
+      "signature": "DebugGetProcessingGraphBuildStates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "TConstArrayView<FMassProcessingPhaseManager::FPhaseGraphBuildState>"
+    },
+    {
+      "id": "is-paused",
+      "name": "IsPaused",
+      "category": "MassProcessingPhaseManager",
+      "signature": "IsPaused(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassProcessingPhaseManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine if this Phase Manager is currently paused.\nWhile paused, phases will transition as usual, but processors\nwill not be executed.\n@return True if this PhaseManager is currently paused; else False"
     }
   ]
 }

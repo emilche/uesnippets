@@ -1,0 +1,452 @@
+{
+  "id": "pso-lru-cache",
+  "label": "PsoLruCache",
+  "includepath": "PsoLruCache.h",
+  "includes": [
+    "CoreTypes",
+    "Set",
+    "AssertionMacros"
+  ],
+  "functions": [
+    {
+      "id": "link-before",
+      "name": "LinkBefore",
+      "category": "PsoLruCache",
+      "signature": "LinkBefore(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCacheEntry*"
+        },
+        {
+          "name": "Other",
+          "type": "FCacheEntry*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add this entry before the given one."
+    },
+    {
+      "id": "unlink",
+      "name": "Unlink",
+      "category": "PsoLruCache",
+      "signature": "Unlink(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCacheEntry*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove this entry from the list."
+    },
+    {
+      "id": "get-set-key",
+      "name": "GetSetKey",
+      "category": "PsoLruCache",
+      "signature": "GetSetKey(Entry)",
+      "params": [
+        {
+          "name": "Entry",
+          "type": "FCacheEntry*"
+        }
+      ],
+      "returnType": "KeyType&",
+      "docs": "Lookup set key functions."
+    },
+    {
+      "id": "matches",
+      "name": "Matches",
+      "category": "PsoLruCache",
+      "signature": "Matches(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "KeyType"
+        },
+        {
+          "name": "B",
+          "type": "KeyType"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-key-hash",
+      "name": "GetKeyHash",
+      "category": "PsoLruCache",
+      "signature": "GetKeyHash(Key)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "KeyType"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "add",
+      "name": "Add",
+      "category": "PsoLruCache",
+      "signature": "Add(Target, Key, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "Value",
+          "type": "ValueType&"
+        }
+      ],
+      "returnType": "FSetElementId",
+      "docs": "Add an entry to the cache.\nThe new entry must not exist in the cache,\nthere must be space within the LRU for the new entry.\nThe new entry will be marked as the most recently used one.\n@param Key The entry's lookup key.\n@param Value The entry's value.\n@return FSetElementId of the entry, update recent status without requiring a find operation.\n@see Empty, Find, GetKeys, Remove"
+    },
+    {
+      "id": "contains",
+      "name": "Contains",
+      "category": "PsoLruCache",
+      "signature": "Contains(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether an entry with the specified key is in the cache.\n@param Key The key of the entry to check.\n@return true if the entry is in the cache, false otherwise.\n@see Add, ContainsByPredicate, Empty, FilterByPredicate, Find, GetKeys, Remove"
+    },
+    {
+      "id": "contains-by-predicate",
+      "name": "ContainsByPredicate",
+      "category": "PsoLruCache",
+      "signature": "ContainsByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> bool",
+      "docs": "Check whether an entry for which a predicate returns true is in the cache.\n@param Pred The predicate functor to apply to each entry.\n@return true if at least one matching entry is in the cache, false otherwise.\n@see Contains, FilterByPredicate, FindByPredicate, RemoveByPredicate"
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "PsoLruCache",
+      "signature": "Empty(Target, In Max Num Elements)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "In Max Num Elements",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Empty the cache.\n@param InMaxNumElements The maximum number of elements this cache can hold (default = 0).\n@see Add, Find, GetKeys, Max, Num, Remove"
+    },
+    {
+      "id": "filter-by-predicate",
+      "name": "FilterByPredicate",
+      "category": "PsoLruCache",
+      "signature": "FilterByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> TArray<ValueType>",
+      "docs": "Filter the entries in the cache using a predicate.\n@param Pred The predicate functor to apply to each entry.\n@return Collection of values for which the predicate returned true.\n@see ContainsByPredicate, FindByPredicate, Find, RemoveByPredicate"
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "category": "PsoLruCache",
+      "signature": "Find(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        }
+      ],
+      "returnType": "ValueType*",
+      "docs": "Find the value of the entry with the specified key.\n@param Key The key of the entry to get.\n@return Pointer to the value, or nullptr if not found.\n@see Add, Contains, Empty, FindAndTouch, GetKeys, Remove"
+    },
+    {
+      "id": "find-and-touch",
+      "name": "FindAndTouch",
+      "category": "PsoLruCache",
+      "signature": "FindAndTouch(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        }
+      ],
+      "returnType": "ValueType*",
+      "docs": "Find the value of the entry with the specified key and mark it as the most recently used.\n@param Key The key of the entry to get.\n@return Pointer to the value, or nullptr if not found.\n@see Add, Contains, Empty, Find, GetKeys, Remove"
+    },
+    {
+      "id": "find-by-predicate",
+      "name": "FindByPredicate",
+      "category": "PsoLruCache",
+      "signature": "FindByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> ValueType*",
+      "docs": "Find the value of an entry using a predicate.\n@param Pred The predicate functor to apply to each entry.\n@return Pointer to value for which the predicate returned true, or nullptr if not found.\n@see ContainsByPredicate, FilterByPredicate, RemoveByPredicate"
+    },
+    {
+      "id": "get-keys",
+      "name": "GetKeys",
+      "category": "PsoLruCache",
+      "signature": "GetKeys(Target, Out Keys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Out Keys",
+          "type": "TArray<KeyType>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Find the keys of all cached entries.\n@param OutKeys Will contain the collection of keys.\n@see Add, Empty, Find"
+    },
+    {
+      "id": "max",
+      "name": "Max",
+      "category": "PsoLruCache",
+      "signature": "Max(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the maximum number of entries in the cache.\n@return Maximum number of entries.\n@see Empty, Num"
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "PsoLruCache",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of entries in the cache.\n@return Number of entries.\n@see Empty, Max"
+    },
+    {
+      "id": "remove-834587",
+      "name": "Remove",
+      "category": "PsoLruCache",
+      "signature": "Remove(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove all entries with the specified key from the cache.\n@param Key The key of the entries to remove.\n@see Add, Empty, Find, RemoveByPredicate"
+    },
+    {
+      "id": "remove-ae677f",
+      "name": "Remove",
+      "category": "PsoLruCache",
+      "signature": "Remove(Target, Key, Removed Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "Removed Value",
+          "type": "ValueType&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remove-by-predicate",
+      "name": "RemoveByPredicate",
+      "category": "PsoLruCache",
+      "signature": "RemoveByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> int32",
+      "docs": "Remove all entries using a predicate.\n@param Pred The predicate function to apply to each entry.\n@return Number of removed entries.\n@see ContainsByPredicate, FilterByPredicate, FindByPredicate, Remove"
+    },
+    {
+      "id": "remove-least-recent",
+      "name": "RemoveLeastRecent",
+      "category": "PsoLruCache",
+      "signature": "RemoveLeastRecent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        }
+      ],
+      "returnType": "ValueType",
+      "docs": "Remove and return the least recent element from the cache.\n@return Copy of removed value."
+    },
+    {
+      "id": "get-least-recent",
+      "name": "GetLeastRecent",
+      "category": "PsoLruCache",
+      "signature": "GetLeastRecent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        }
+      ],
+      "returnType": "ValueType",
+      "docs": "Return the least recent element from the cache.\n@return Copy of the least recent value."
+    },
+    {
+      "id": "remove-most-recent",
+      "name": "RemoveMostRecent",
+      "category": "PsoLruCache",
+      "signature": "RemoveMostRecent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        }
+      ],
+      "returnType": "ValueType",
+      "docs": "Remove and return the most recent element from the cache.\n@return Copy of removed value."
+    },
+    {
+      "id": "mark-as-recent",
+      "name": "MarkAsRecent",
+      "category": "PsoLruCache",
+      "signature": "MarkAsRecent(Target, LRU Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPsoLruCache*"
+        },
+        {
+          "name": "LRU Node",
+          "type": "FSetElementId&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "bool",
+      "name": "bool",
+      "category": "PsoLruCache",
+      "signature": "bool(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBaseIterator*"
+        }
+      ],
+      "returnType": "operator"
+    },
+    {
+      "id": "key",
+      "name": "Key",
+      "category": "PsoLruCache",
+      "signature": "Key(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBaseIterator*"
+        }
+      ],
+      "returnType": "KeyType&"
+    },
+    {
+      "id": "value",
+      "name": "Value",
+      "category": "PsoLruCache",
+      "signature": "Value(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBaseIterator*"
+        }
+      ],
+      "returnType": "ValueType&"
+    },
+    {
+      "id": "remove-current-and-increment",
+      "name": "RemoveCurrentAndIncrement",
+      "category": "PsoLruCache",
+      "signature": "RemoveCurrentAndIncrement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TIterator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes the current element from the cache and increments the iterator."
+    }
+  ]
+}

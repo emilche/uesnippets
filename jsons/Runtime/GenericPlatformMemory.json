@@ -11,6 +11,23 @@
   ],
   "functions": [
     {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "GenericPlatformMemory",
+      "signature": "LexToString(Target, Bucket)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        },
+        {
+          "name": "Bucket",
+          "type": "EPlatformMemorySizeBucket"
+        }
+      ],
+      "returnType": "TCHAR*"
+    },
+    {
       "id": "get-memory-pressure-status",
       "name": "GetMemoryPressureStatus",
       "category": "GenericPlatformMemory",
@@ -55,6 +72,62 @@
       "returnType": "UInt64"
     },
     {
+      "id": "set-end-frame-csv-stats",
+      "name": "SetEndFrameCsvStats",
+      "category": "GenericPlatformMemory",
+      "signature": "SetEndFrameCsvStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemoryStats*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by FCsvProfiler::EndFrame to set platform specific CSV stats."
+    },
+    {
+      "id": "get-name",
+      "name": "GetName",
+      "category": "GenericPlatformMemory",
+      "signature": "GetName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Generic representation of a shared memory region"
+    },
+    {
+      "id": "get-address",
+      "name": "GetAddress",
+      "category": "GenericPlatformMemory",
+      "signature": "GetAddress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Returns the beginning of the region in process address space"
+    },
+    {
+      "id": "get-size",
+      "name": "GetSize",
+      "category": "GenericPlatformMemory",
+      "signature": "GetSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "SIZE_T",
+      "docs": "Returns size of the region in bytes"
+    },
+    {
       "id": "init",
       "name": "Init",
       "category": "GenericPlatformMemory",
@@ -88,6 +161,15 @@
       "params": [],
       "returnType": "Void",
       "docs": "Initializes the memory pools, should be called by the init function."
+    },
+    {
+      "id": "get-back-memory-pool-size",
+      "name": "GetBackMemoryPoolSize",
+      "category": "GenericPlatformMemory",
+      "signature": "GetBackMemoryPoolSize()",
+      "params": [],
+      "returnType": "UInt",
+      "docs": "@return how much memory the platform should pre-allocate for crash handling (this will be allocated ahead of time, and freed when system runs out of memory)."
     },
     {
       "id": "base-allocator",
@@ -216,6 +298,224 @@
       "docs": "Returns pages allocated by BinnedAllocFromOS to the OS.\n@param A pointer previously returned from BinnedAllocFromOS\n@param Size size of the allocation previously passed to BinnedAllocFromOS"
     },
     {
+      "id": "mi-malloc-init",
+      "name": "MiMallocInit",
+      "category": "GenericPlatformMemory",
+      "signature": "MiMallocInit()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Performs initial setup for MiMalloc.\nThis is a noop on platforms that do not support MiMalloc, or when MIMALLOC_ENABLED is not defined."
+    },
+    {
+      "id": "nano-malloc-init",
+      "name": "NanoMallocInit",
+      "category": "GenericPlatformMemory",
+      "signature": "NanoMallocInit()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Performs initial setup for Nano malloc.\nThis is a noop on non-apple platforms"
+    },
+    {
+      "id": "ptr-is-os-malloc",
+      "name": "PtrIsOSMalloc",
+      "category": "GenericPlatformMemory",
+      "signature": "PtrIsOSMalloc(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Was this pointer allocated by the OS malloc?\nCurrently only Apple platforms implement this to detect small block allocations.\n@param The pointer to query\n@return True if this pointer was allocated by the OS."
+    },
+    {
+      "id": "is-nano-malloc-available",
+      "name": "IsNanoMallocAvailable",
+      "category": "GenericPlatformMemory",
+      "signature": "IsNanoMallocAvailable()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Nano Malloc is Apple's tiny block allocator.\nDoes the Nano malloc zone exist?\n@return True if Nano malloc is enabled and available."
+    },
+    {
+      "id": "ptr-is-from-nano-malloc",
+      "name": "PtrIsFromNanoMalloc",
+      "category": "GenericPlatformMemory",
+      "signature": "PtrIsFromNanoMalloc(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Was this pointer allocated by in the Nano Malloc Zone?\nCurrently only Apple platforms implement this to detect small block allocations.\n@param The pointer to query\n@return True if this pointer is in the Nano Malloc Region"
+    },
+    {
+      "id": "f-basic-virtual-memory-block-f1c112",
+      "name": "FBasicVirtualMemoryBlock",
+      "category": "GenericPlatformMemory",
+      "signature": "FBasicVirtualMemoryBlock(Target, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        },
+        {
+          "name": "Nullptr",
+          "type": ") : Ptr ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-basic-virtual-memory-block-d72e85",
+      "name": "FBasicVirtualMemoryBlock",
+      "category": "GenericPlatformMemory",
+      "signature": "FBasicVirtualMemoryBlock(Target, In Ptr, In Ptr, In VM Size Div Virtual Size Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        },
+        {
+          "name": "In Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "In Ptr",
+          "type": "uint32 InVMSizeDivVirtualSizeAlignment ) : Ptr ("
+        },
+        {
+          "name": "In VM Size Div Virtual Size Alignment",
+          "type": "VMSizeDivVirtualSizeAlignment ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-actual-size-in-pages",
+      "name": "GetActualSizeInPages",
+      "category": "GenericPlatformMemory",
+      "signature": "GetActualSizeInPages(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-virtual-pointer",
+      "name": "GetVirtualPointer",
+      "category": "GenericPlatformMemory",
+      "signature": "GetVirtualPointer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "commit-by-ptr",
+      "name": "CommitByPtr",
+      "category": "GenericPlatformMemory",
+      "signature": "CommitByPtr(Target, In Ptr, In Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        },
+        {
+          "name": "In Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "In Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "decommit-by-ptr",
+      "name": "DecommitByPtr",
+      "category": "GenericPlatformMemory",
+      "signature": "DecommitByPtr(Target, In Ptr, In Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        },
+        {
+          "name": "In Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "In Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "commit",
+      "name": "Commit",
+      "category": "GenericPlatformMemory",
+      "signature": "Commit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "decommit",
+      "name": "Decommit",
+      "category": "GenericPlatformMemory",
+      "signature": "Decommit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-actual-size",
+      "name": "GetActualSize",
+      "category": "GenericPlatformMemory",
+      "signature": "GetActualSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericPlatformMemory*"
+        }
+      ],
+      "returnType": "size_t"
+    },
+    {
+      "id": "binned-platform-has-memory-pool-for-this-size",
+      "name": "BinnedPlatformHasMemoryPoolForThisSize",
+      "category": "GenericPlatformMemory",
+      "signature": "BinnedPlatformHasMemoryPoolForThisSize(Size)",
+      "params": [
+        {
+          "name": "Size",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Some platforms may pool allocations of this size to reduce OS calls. This function\nserves as a hint for BinnedMalloc's CachedOSPageAllocator so it does not cache these allocations additionally"
+    },
+    {
       "id": "dump-stats",
       "name": "DumpStats",
       "category": "GenericPlatformMemory",
@@ -251,6 +551,211 @@
       "params": [],
       "returnType": "EPlatformMemorySizeBucket",
       "docs": "Return which \"high level\", per platform, memory bucket we are in"
+    },
+    {
+      "id": "memmove",
+      "name": "Memmove",
+      "category": "GenericPlatformMemory",
+      "signature": "Memmove(Dest, Src, Count)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Src",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "@name Memory functions"
+    },
+    {
+      "id": "memcmp",
+      "name": "Memcmp",
+      "category": "GenericPlatformMemory",
+      "signature": "Memcmp(Buf 1, Buf 2, Count)",
+      "params": [
+        {
+          "name": "Buf 1",
+          "type": "void*"
+        },
+        {
+          "name": "Buf 2",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "memset",
+      "name": "Memset",
+      "category": "GenericPlatformMemory",
+      "signature": "Memset(Dest, Char, Count)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Char",
+          "type": "Byte"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "memzero",
+      "name": "Memzero",
+      "category": "GenericPlatformMemory",
+      "signature": "Memzero(Dest, Count)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "memcpy",
+      "name": "Memcpy",
+      "category": "GenericPlatformMemory",
+      "signature": "Memcpy(Dest, Src, Count)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Src",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "big-block-memcpy",
+      "name": "BigBlockMemcpy",
+      "category": "GenericPlatformMemory",
+      "signature": "BigBlockMemcpy(Dest, Src, Count)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Src",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Memcpy optimized for big blocks."
+    },
+    {
+      "id": "streaming-memcpy",
+      "name": "StreamingMemcpy",
+      "category": "GenericPlatformMemory",
+      "signature": "StreamingMemcpy(Dest, Src, Count)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Src",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "On some platforms memcpy optimized for big blocks that avoid L2 cache pollution are available"
+    },
+    {
+      "id": "parallel-memcpy",
+      "name": "ParallelMemcpy",
+      "category": "GenericPlatformMemory",
+      "signature": "ParallelMemcpy(Dest, Src, Count, Policy)",
+      "params": [
+        {
+          "name": "Dest",
+          "type": "void*"
+        },
+        {
+          "name": "Src",
+          "type": "void*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        },
+        {
+          "name": "Policy",
+          "type": "EMemcpyCachePolicy",
+          "default": "EMemcpyCachePolicy::StoreCached"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "On some platforms memcpy can be distributed over multiple threads for throughput."
+    },
+    {
+      "id": "read-unaligned",
+      "name": "ReadUnaligned",
+      "category": "GenericPlatformMemory",
+      "signature": "ReadUnaligned(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "template<T> T",
+      "docs": "Loads a simple POD type from unaligned memory.\n@param Ptr unaligned memory of at least size sizeof(T)\n@return Value at Ptr"
+    },
+    {
+      "id": "write-unaligned",
+      "name": "WriteUnaligned",
+      "category": "GenericPlatformMemory",
+      "signature": "WriteUnaligned(Ptr, In Value)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "In Value",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<T> void",
+      "docs": "Stores a simple POD type to unaligned memory.\n@param Ptr unaligned memory of at least size sizeof(T)\n@param Value value to write at Ptr"
     },
     {
       "id": "map-named-shared-memory-region",
@@ -293,6 +798,15 @@
       "docs": "Unmaps a name shared memory region\n@param MemoryRegion an object that encapsulates a shared memory region (will be destroyed even if function fails!)\n@return true if successful"
     },
     {
+      "id": "supports-fast-vram-memory",
+      "name": "SupportsFastVRAMMemory",
+      "category": "GenericPlatformMemory",
+      "signature": "SupportsFastVRAMMemory()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Gets whether this platform supports Fast VRAM memory\nIe, whether TexCreate_FastVRAM flags actually mean something or not\n@return\tbool\t\ttrue if supported, false if not"
+    },
+    {
       "id": "is-extra-development-memory-available",
       "name": "IsExtraDevelopmentMemoryAvailable",
       "category": "GenericPlatformMemory",
@@ -309,6 +823,29 @@
       "params": [],
       "returnType": "UInt64",
       "docs": "Returns >0 if debug memory has been assigned to the title for general use.\nOnly applies to platforms with fixed memory and no paging."
+    },
+    {
+      "id": "get-program-size",
+      "name": "GetProgramSize",
+      "category": "GenericPlatformMemory",
+      "signature": "GetProgramSize()",
+      "params": [],
+      "returnType": "UInt64",
+      "docs": "Returns initial program size or 0 if the platform doesn't track initial program size"
+    },
+    {
+      "id": "set-program-size",
+      "name": "SetProgramSize",
+      "category": "GenericPlatformMemory",
+      "signature": "SetProgramSize(In Program Size)",
+      "params": [
+        {
+          "name": "In Program Size",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the initial program size"
     },
     {
       "id": "get-llm-alloc-functions",
@@ -333,6 +870,99 @@
       "docs": "This function sets AllocFunction and FreeFunction and returns true, or just returns false.\nThese functions are the platform dependant low low low level functions that LLM uses to allocate memory."
     },
     {
+      "id": "on-low-level-memory-alloc",
+      "name": "OnLowLevelMemory_Alloc",
+      "category": "GenericPlatformMemory",
+      "signature": "OnLowLevelMemory_Alloc(Pointer, Size, Tag)",
+      "params": [
+        {
+          "name": "Pointer",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Tag",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called for all default tracker LLM allocations and frees, when LLM is enabled.\nProvides a single alloc/free hook that platforms can implement to support platform specific memory analysis tools."
+    },
+    {
+      "id": "on-low-level-memory-free",
+      "name": "OnLowLevelMemory_Free",
+      "category": "GenericPlatformMemory",
+      "signature": "OnLowLevelMemory_Free(Pointer, Size, Tag)",
+      "params": [
+        {
+          "name": "Pointer",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        },
+        {
+          "name": "Tag",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "register-custom-llm-tags",
+      "name": "RegisterCustomLLMTags",
+      "category": "GenericPlatformMemory",
+      "signature": "RegisterCustomLLMTags()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Called once at LLM initialization time to let the platform add any custom tags"
+    },
+    {
+      "id": "update-custom-llm-tags",
+      "name": "UpdateCustomLLMTags",
+      "category": "GenericPlatformMemory",
+      "signature": "UpdateCustomLLMTags()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Called once per frame when LLM is collating the data for the current frame.\nCan be used to set platform-specific calculated tag data via SetTagAmountForTracker"
+    },
+    {
+      "id": "tracks-llm-allocations",
+      "name": "TracksLLMAllocations",
+      "category": "GenericPlatformMemory",
+      "signature": "TracksLLMAllocations()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Indicates whether LLM allocations are already accounted for with tracking and in GetStats.\nReturns true if LLM allocations come from a memory pool separate from the main engine's memory or\nare already tagged with tracking by the platform memory system.\nReturns false if LLM uses the regular memory shared with the engine and allocations are not tracked.\n@see GetLLMAllocFunctions"
+    },
+    {
+      "id": "has-fork-page-protector-enabled",
+      "name": "HasForkPageProtectorEnabled",
+      "category": "GenericPlatformMemory",
+      "signature": "HasForkPageProtectorEnabled()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true if Protecting the parent processes pages has been enabled\nOnly supported on platforms that support forking"
+    },
+    {
+      "id": "get-forked-page-allocation-info",
+      "name": "GetForkedPageAllocationInfo",
+      "category": "GenericPlatformMemory",
+      "signature": "GetForkedPageAllocationInfo(Out Page Allocation Infos)",
+      "params": [
+        {
+          "name": "Out Page Allocation Infos",
+          "type": "TArray<FForkedPageAllocation>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return the page allocations from the operating system (/proc/self/smaps). This only means something on\nplatforms that can fork and have Copy On Write behavior."
+    },
+    {
       "id": "pretty-memory",
       "name": "PrettyMemory",
       "category": "GenericPlatformMemory",
@@ -345,6 +975,15 @@
       ],
       "returnType": "String",
       "docs": "Returns a pretty-string for an amount of memory given in bytes.\n@param Memory amount in bytes\n@return Memory in a pretty formatted string"
+    },
+    {
+      "id": "can-overallocate-virtual-memory",
+      "name": "CanOverallocateVirtualMemory",
+      "category": "GenericPlatformMemory",
+      "signature": "CanOverallocateVirtualMemory()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Return true if the platform can allocate a lot more virtual memory than physical memory\nIt's true for most platforms, but iOS needs a special entitlement and Linux a kernel config for this"
     }
   ]
 }

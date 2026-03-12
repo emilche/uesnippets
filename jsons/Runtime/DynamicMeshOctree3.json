@@ -1,0 +1,407 @@
+{
+  "id": "dynamic-mesh-octree-3",
+  "label": "DynamicMeshOctree3",
+  "includepath": "DynamicMesh/DynamicMeshOctree3.h",
+  "includes": [
+    "MeshAABBTree3",
+    "SparseDynamicOctree3",
+    "MeshQueries",
+    "DynamicMesh3",
+    "ParallelFor"
+  ],
+  "functions": [
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "DynamicMeshOctree3",
+      "signature": "Initialize(Target, Mesh In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Mesh In",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "FDynamicMeshOctree3 is an extension of FSparseDynamicOctree3 for the triangles of a FDynamicMesh3 instance.\nThis extension does several things:\n1) provides a simplified API based on triangle IDs to various Octree functions\n2) tracks ModifiedBounds box of modified areas\n3) support for computing/updating/querying a \"Cut\" of the octree, ie a set of cells which are roots of sub-branches\nthat partition the tree. This is useful for splitting up mesh processing/rendering into spatially-coherent chunks.\n(This functionality should probably be extracted into a separate class...)"
+    },
+    {
+      "id": "reset-modified-bounds",
+      "name": "ResetModifiedBounds",
+      "category": "DynamicMeshOctree3",
+      "signature": "ResetModifiedBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the internal ModifiedBounds box that tracks modified triangle bounds"
+    },
+    {
+      "id": "insert-triangle",
+      "name": "InsertTriangle",
+      "category": "DynamicMeshOctree3",
+      "signature": "InsertTriangle(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Insert a triangle into the tree"
+    },
+    {
+      "id": "insert-triangles",
+      "name": "InsertTriangles",
+      "category": "DynamicMeshOctree3",
+      "signature": "InsertTriangles(Target, Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Insert a list of triangles into the tree"
+    },
+    {
+      "id": "remove-triangle",
+      "name": "RemoveTriangle",
+      "category": "DynamicMeshOctree3",
+      "signature": "RemoveTriangle(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove a triangle from the tree"
+    },
+    {
+      "id": "remove-triangles",
+      "name": "RemoveTriangles",
+      "category": "DynamicMeshOctree3",
+      "signature": "RemoveTriangles(Target, Triangles, Mark Modified Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "EnumerableType&"
+        },
+        {
+          "name": "Mark Modified Bounds",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Remove a set of triangles into the tree"
+    },
+    {
+      "id": "reinsert-triangles",
+      "name": "ReinsertTriangles",
+      "category": "DynamicMeshOctree3",
+      "signature": "ReinsertTriangles(Target, Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "EnumerableType&"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Reinsert a set of triangles into the tree"
+    },
+    {
+      "id": "reinsert-triangles-parallel",
+      "name": "ReinsertTrianglesParallel",
+      "category": "DynamicMeshOctree3",
+      "signature": "ReinsertTrianglesParallel(Target, Triangles, Temp Buffer, Temp Flag Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Temp Buffer",
+          "type": "TArray<uint32>&"
+        },
+        {
+          "name": "Temp Flag Buffer",
+          "type": "TArray<bool>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reinsert a set of triangles into the tree. Internally precomputes which triangles need\nre-inserting, which can be done in parallel and generally saves time as some triangles can be skipped."
+    },
+    {
+      "id": "notify-pending-modification-98e53c",
+      "name": "NotifyPendingModification",
+      "category": "DynamicMeshOctree3",
+      "signature": "NotifyPendingModification(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Include the current bounds of a triangle in the ModifiedBounds box"
+    },
+    {
+      "id": "notify-pending-modification-2f00ba",
+      "name": "NotifyPendingModification",
+      "category": "DynamicMeshOctree3",
+      "signature": "NotifyPendingModification(Target, Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangles",
+          "type": "EnumerableType&"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Include the current bounds of a set of triangles in the ModifiedBounds box"
+    },
+    {
+      "id": "find-nearest-hit-object-013fd7",
+      "name": "FindNearestHitObject",
+      "category": "DynamicMeshOctree3",
+      "signature": "FindNearestHitObject(Target, Ray, Max Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Max Distance",
+          "type": "Double",
+          "default": "TNumericLimits<double>::Max()"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find the nearest triangle of the mesh that is hit by the ray"
+    },
+    {
+      "id": "find-nearest-hit-object-f7fa2a",
+      "name": "FindNearestHitObject",
+      "category": "DynamicMeshOctree3",
+      "signature": "FindNearestHitObject(Target, Ray, Include Triangle ID Func, Max Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Ray",
+          "type": "FRay3d&"
+        },
+        {
+          "name": "Include Triangle ID Func",
+          "type": "TFunctionRef<bool ( int )>"
+        },
+        {
+          "name": "Max Distance",
+          "type": "Double",
+          "default": "TNumericLimits<double>::Max()"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Find the nearest triangle of the mesh that is hit by the ray\n@param IncludeTriangleIDFunc predicate function that must return true for given TriangleID for it to be considered"
+    },
+    {
+      "id": "check-validity",
+      "name": "CheckValidity",
+      "category": "DynamicMeshOctree3",
+      "signature": "CheckValidity(Target, Fail Mode, Verbose, Fail On Missing Objects)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Fail Mode",
+          "type": "EValidityCheckFailMode",
+          "default": "EValidityCheckFailMode::Check"
+        },
+        {
+          "name": "Verbose",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Fail On Missing Objects",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Check that the Octree is internally valid"
+    },
+    {
+      "id": "build-level-cut-set",
+      "name": "BuildLevelCutSet",
+      "category": "DynamicMeshOctree3",
+      "signature": "BuildLevelCutSet(Target, Cut Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Cut Level",
+          "type": "UInt",
+          "default": "5"
+        }
+      ],
+      "returnType": "FTreeCutSet",
+      "docs": "FCellReference is a handle to an internal cell of the octree"
+    },
+    {
+      "id": "update-level-cut-set",
+      "name": "UpdateLevelCutSet",
+      "category": "DynamicMeshOctree3",
+      "signature": "UpdateLevelCutSet(Target, Cut Set, New Cut Cells Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Cut Set",
+          "type": "FTreeCutSet&"
+        },
+        {
+          "name": "New Cut Cells Out",
+          "type": "TArray<FCellReference>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For a fixed-level cut set created by BuildLevelCutSet, check that all current cells at that level are in the cut set\n(call this after adding/removing to the tree to make sure the CutSet is up to date)\n@param CutSet the tree cut set to check/update\n@param NewCutCellsOut list of new cut cells added by the update"
+    },
+    {
+      "id": "test-cell-intersection",
+      "name": "TestCellIntersection",
+      "category": "DynamicMeshOctree3",
+      "signature": "TestCellIntersection(Target, Cell Ref, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Cell Ref",
+          "type": "FCellReference&"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the cell identified by CellRef intersects the Bounds box"
+    },
+    {
+      "id": "collect-triangles",
+      "name": "CollectTriangles",
+      "category": "DynamicMeshOctree3",
+      "signature": "CollectTriangles(Target, Cell Ref, Triangle Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Cell Ref",
+          "type": "FCellReference&"
+        },
+        {
+          "name": "Triangle Func",
+          "type": "TFunctionRef<void ( int )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call TriangleFunc on any triangles in the branch of the tree starting at CellRef"
+    },
+    {
+      "id": "collect-root-triangles",
+      "name": "CollectRootTriangles",
+      "category": "DynamicMeshOctree3",
+      "signature": "CollectRootTriangles(Target, Cut Set, Triangle Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Cut Set",
+          "type": "FTreeCutSet&"
+        },
+        {
+          "name": "Triangle Func",
+          "type": "TFunctionRef<void ( int )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call TriangleFunc for all triangles in the octree \"above\" the CutSet\n(ie at tree cells that are not children of any cut cells)"
+    },
+    {
+      "id": "collect-spill-triangles",
+      "name": "CollectSpillTriangles",
+      "category": "DynamicMeshOctree3",
+      "signature": "CollectSpillTriangles(Target, Triangle Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshOctree3*"
+        },
+        {
+          "name": "Triangle Func",
+          "type": "TFunctionRef<void ( int )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call TriangleFunc for any triangles in the spill set (ie not contained in any Root cell)"
+    }
+  ]
+}

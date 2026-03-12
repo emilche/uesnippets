@@ -11,6 +11,52 @@
   ],
   "functions": [
     {
+      "id": "reset-rpc-counters",
+      "name": "ResetRPCCounters",
+      "category": "RPCDoSDetection",
+      "signature": "ResetRPCCounters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSCounters*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Whether or not debugging/ensures for RPC DoS Tick/Packet scopes should be enabled"
+    },
+    {
+      "id": "accumulate-counter",
+      "name": "AccumulateCounter",
+      "category": "RPCDoSDetection",
+      "signature": "AccumulateCounter(Target, In Counter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSCounters*"
+        },
+        {
+          "name": "In Counter",
+          "type": "FRPCDoSCounters&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Accumulate another RPC counter into this one\n@param InCounter\t\tThe RPC counter to accumulate with"
+    },
+    {
+      "id": "get-current-history-idx",
+      "name": "GetCurrentHistoryIdx",
+      "category": "RPCDoSDetection",
+      "signature": "GetCurrentHistoryIdx(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCTrackingInfo*"
+        }
+      ],
+      "returnType": "Byte",
+      "docs": "The status of blocking for an individual RPC"
+    },
+    {
       "id": "apply-implied-values",
       "name": "ApplyImpliedValues",
       "category": "RPCDoSDetection",
@@ -22,7 +68,297 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Some configuration values are implicitly enabled by other configuration values - this function applies them"
+      "docs": "Some configuration values are implicitly enabled by other configuration values - this function applies them",
+      "supportedTargets": [
+        "FRPCDoSState*",
+        "FRPCDoSStateConfig*"
+      ]
+    },
+    {
+      "id": "update-severity",
+      "name": "UpdateSeverity",
+      "category": "RPCDoSDetection",
+      "signature": "UpdateSeverity(Target, Update, Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        },
+        {
+          "name": "Update",
+          "type": "ERPCDoSSeverityUpdate"
+        },
+        {
+          "name": "Reason",
+          "type": "ERPCDoSEscalateReason"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates the current RPC DoS detection severity state\n@param Update\tWhether or not we are escalating or de-escalating the severity state\n@param Reason\tThe reason for the escalation change"
+    },
+    {
+      "id": "pre-received-packet",
+      "name": "PreReceivedPacket",
+      "category": "RPCDoSDetection",
+      "signature": "PreReceivedPacket(Target, Time Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        },
+        {
+          "name": "Time Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called prior to the current NetConnection receiving a packet.\n@param TimeSeconds\tCached/approximate timestamp, to save grabbing a new timestamp"
+    },
+    {
+      "id": "notify-received-rpc",
+      "name": "NotifyReceivedRPC",
+      "category": "RPCDoSDetection",
+      "signature": "NotifyReceivedRPC(Target, Reader, Unmapped Guids, Object, Function, Function Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        },
+        {
+          "name": "Reader",
+          "type": "FNetBitReader&"
+        },
+        {
+          "name": "Unmapped Guids",
+          "type": "TSet<FNetworkGUID>&"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Function Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ERPCNotifyResult",
+      "docs": "If RPC monitoring is enabled, provides a notification for every RPC that is received, with the ability to block it.\n@param Reader\t\t\tThe net bit reader containing the packet data, in case parsing of RPC parameters is desired\n@param UnmappedGuids\t\tReference to the set of unmapped Guid's - in case it's necessary for parsing RPC parameters\n@param Object\t\t\tThe UObject the RPC will be called on\n@param Function\t\t\tThe UFunction representing the RPC\n@param FunctionName\t\tThe cached name of the function\n@return\t\t\t\t\tWhether or not to block the RPC"
+    },
+    {
+      "id": "lightweight-received-rpc",
+      "name": "LightweightReceivedRPC",
+      "category": "RPCDoSDetection",
+      "signature": "LightweightReceivedRPC(Target, Function, Function Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Function Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "If RPC monitoring is disabled, does extremely lightweight tracking of RPC calls, for monitoring tracking triggers,\nand to allow a chance for deducing full RPC tracking information if monitoring is enabled while receiving\n(so that e.g. if an RPC DoS attack enables monitoring, information on the RPC responsible can be recovered).\n@param Function\t\t\tThe UFunction representing the RPC\n@param FunctionName\t\tThe cached name of the function"
+    },
+    {
+      "id": "post-received-rpc",
+      "name": "PostReceivedRPC",
+      "category": "RPCDoSDetection",
+      "signature": "PostReceivedRPC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after the current NetConnection receives an RPC."
+    },
+    {
+      "id": "post-received-packet",
+      "name": "PostReceivedPacket",
+      "category": "RPCDoSDetection",
+      "signature": "PostReceivedPacket(Target, Time Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        },
+        {
+          "name": "Time Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after the current NetConnection receives a packet.\n@param TimeSeconds\tCached/approximate timestamp, to save grabbing a new timestamp"
+    },
+    {
+      "id": "should-monitor-received-rpc",
+      "name": "ShouldMonitorReceivedRPC",
+      "category": "RPCDoSDetection",
+      "signature": "ShouldMonitorReceivedRPC(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not monitoring of received RPC's (i.e. calling of NotifyReceivedRPC) should be performed\n@return\t\tWhether or not to monitor received RPC's."
+    },
+    {
+      "id": "is-rpc-do-s-detection-enabled",
+      "name": "IsRPCDoSDetectionEnabled",
+      "category": "RPCDoSDetection",
+      "signature": "IsRPCDoSDetectionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRPCDoSDetection*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not RPC DoS Detection is enabled"
+    },
+    {
+      "id": "is-active",
+      "name": "IsActive",
+      "category": "RPCDoSDetection",
+      "signature": "IsActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TScopeBase*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether or not the current code scope is active"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "RPCDoSDetection",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TScopeBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the properties covered by this scope, at both the start/end of the scope",
+      "supportedTargets": [
+        "TScopeBase*",
+        "FTickScope*",
+        "FPacketScope*",
+        "FSequentialRPCScope*"
+      ]
+    },
+    {
+      "id": "cond-check-count-quota",
+      "name": "CondCheckCountQuota",
+      "category": "RPCDoSDetection",
+      "signature": "CondCheckCountQuota(Target, This)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickScope*"
+        },
+        {
+          "name": "This",
+          "type": "FRPCDoSDetection&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Wrapper for CondCheckCountQuota which forces FTickScope acquisition"
+    },
+    {
+      "id": "cond-check-time-quota",
+      "name": "CondCheckTimeQuota",
+      "category": "RPCDoSDetection",
+      "signature": "CondCheckTimeQuota(Target, This, Time Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickScope*"
+        },
+        {
+          "name": "This",
+          "type": "FRPCDoSDetection&"
+        },
+        {
+          "name": "Time Seconds",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Wrapper for CondCheckTimeQuota which forces FTickScope acquisition",
+      "supportedTargets": [
+        "FTickScope*",
+        "FSequentialRPCScope*"
+      ]
+    },
+    {
+      "id": "check-rpc-tracking",
+      "name": "CheckRPCTracking",
+      "category": "RPCDoSDetection",
+      "signature": "CheckRPCTracking(Target, This, Function, Function Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequentialRPCScope*"
+        },
+        {
+          "name": "This",
+          "type": "FRPCDoSDetection&"
+        },
+        {
+          "name": "Function",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Function Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "ERPCNotifyResult",
+      "docs": "Wrapper for CheckRPCTracking which forces FSequentialRPCScope acquisition"
+    },
+    {
+      "id": "find-or-add-rpc-tracking",
+      "name": "FindOrAddRPCTracking",
+      "category": "RPCDoSDetection",
+      "signature": "FindOrAddRPCTracking(Target, This, In Func, Out New Tracking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequentialRPCScope*"
+        },
+        {
+          "name": "This",
+          "type": "FRPCDoSDetection&"
+        },
+        {
+          "name": "In Func",
+          "type": "UFunction*"
+        },
+        {
+          "name": "Out New Tracking",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "FRPCTrackingInfo&",
+      "docs": "Wrapper for FindOrAddRPCTracking which forces FSequentialRPCScope acquisition"
     }
   ]
 }

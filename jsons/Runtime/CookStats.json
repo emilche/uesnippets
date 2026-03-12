@@ -19,6 +19,24 @@
   ],
   "functions": [
     {
+      "id": "make-pair",
+      "name": "MakePair",
+      "category": "CookStats",
+      "signature": "MakePair(In Key, In Value)",
+      "params": [
+        {
+          "name": "In Key",
+          "type": "KeyType&&"
+        },
+        {
+          "name": "In Value",
+          "type": "ValueType&&"
+        }
+      ],
+      "returnType": "template<KeyType,ValueType> TKeyValuePair<TDecay<KeyType>::Type,TDecay<ValueType>::Type>",
+      "docs": "Helper to construct a TKeyValuePair."
+    },
+    {
       "id": "log-cook-stats",
       "name": "LogCookStats",
       "category": "CookStats",
@@ -31,6 +49,424 @@
       ],
       "returnType": "Void",
       "docs": "Use this to register a callback to gather cook stats for a translation unit. When a cook is finished, this delegate will be fired."
+    },
+    {
+      "id": "f-auto-register-callback",
+      "name": "FAutoRegisterCallback",
+      "category": "CookStats",
+      "signature": "FAutoRegisterCallback(Target, Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStatsManager*"
+        },
+        {
+          "name": "Callback",
+          "type": "Func"
+        }
+      ],
+      "returnType": "template<Func>",
+      "docs": "Helper struct to auto-register your STATIC FUNCTION with CookStatsCallbacks"
+    },
+    {
+      "id": "create-key-value-array",
+      "name": "CreateKeyValueArray",
+      "category": "CookStats",
+      "signature": "CreateKeyValueArray(Args)",
+      "params": [
+        {
+          "name": "Args",
+          "type": "ArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgTypes> TArray<FCookStatsManager::StringKeyValue>",
+      "docs": "Helper to create an array of KeyValues using a single expression. If there is an odd number of arguments, the last value is considered to be an empty string."
+    },
+    {
+      "id": "accumulate-07aad7",
+      "name": "Accumulate",
+      "category": "CookStats",
+      "signature": "Accumulate(Target, Value, Is In Game Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Value",
+          "type": "Int64"
+        },
+        {
+          "name": "Is In Game Thread",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shared code to provide some common cook telemetry functionality.\nExposes a CallStats class that exposes counters that track call count, cycles, and \"bytes processed\" for a call, bucketing by \"cache hits/misses\" and \"game/other thread\".\nThis allows us to quickly time a call that may be executing on any thread, but quickly see the main thread time vs other time, split by \"hits\" or \"misses\", where hit/miss typically refers to a DDC hit/miss."
+    },
+    {
+      "id": "get-accumulated-value-259c55",
+      "name": "GetAccumulatedValue",
+      "category": "CookStats",
+      "signature": "GetAccumulatedValue(Target, Is In Game Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Is In Game Thread",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Access the accumulated values (exposed for more uniform access methds to each accumulator)."
+    },
+    {
+      "id": "accumulate-f1d8a0",
+      "name": "Accumulate",
+      "category": "CookStats",
+      "signature": "Accumulate(Target, Hit Or Miss, Stat Type, Value, Is In Game Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Hit Or Miss",
+          "type": "EHitOrMiss"
+        },
+        {
+          "name": "Stat Type",
+          "type": "EStatType"
+        },
+        {
+          "name": "Value",
+          "type": "Int64"
+        },
+        {
+          "name": "Is In Game Thread",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Make it easier to update an accumulator by providing strongly typed access to the 2D array."
+    },
+    {
+      "id": "get-accumulated-value-d74fc6",
+      "name": "GetAccumulatedValue",
+      "category": "CookStats",
+      "signature": "GetAccumulatedValue(Target, Hit Or Miss, Stat Type, Is In Game Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Hit Or Miss",
+          "type": "EHitOrMiss"
+        },
+        {
+          "name": "Stat Type",
+          "type": "EStatType"
+        },
+        {
+          "name": "Is In Game Thread",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Make it easier to access an accumulator using a uniform, stronly typed interface."
+    },
+    {
+      "id": "get-accumulated-value-any-thread",
+      "name": "GetAccumulatedValueAnyThread",
+      "category": "CookStats",
+      "signature": "GetAccumulatedValueAnyThread(Target, Hit Or Miss, Stat Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Hit Or Miss",
+          "type": "EHitOrMiss"
+        },
+        {
+          "name": "Stat Type",
+          "type": "EStatType"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Make it easier to access an accumulator using a uniform, stronly typed interface."
+    },
+    {
+      "id": "log-stats-a772a4",
+      "name": "LogStats",
+      "category": "CookStats",
+      "signature": "LogStats(Target, Add Stat, Stat Name, Node Name, Call Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Add Stat",
+          "type": "FCookStatsManager::AddStatFuncRef"
+        },
+        {
+          "name": "Stat Name",
+          "type": "String&"
+        },
+        {
+          "name": "Node Name",
+          "type": "String&"
+        },
+        {
+          "name": "Call Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to log the instance in a common way."
+    },
+    {
+      "id": "combine",
+      "name": "Combine",
+      "category": "CookStats",
+      "signature": "Combine(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Other",
+          "type": "CallStats&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-scoped-stats-counter-e675bd",
+      "name": "FScopedStatsCounter",
+      "category": "CookStats",
+      "signature": "FScopedStatsCounter(Target, In Stats, Cycles 64, Is In Game Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "In Stats",
+          "type": "CallStats& InStats ) : Stats ("
+        },
+        {
+          "name": "Cycles 64",
+          "type": "StartTime ( FPlatformTime::"
+        },
+        {
+          "name": "Is In Game Thread",
+          "type": "bIsInGameThread ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "used to accumulate cycles to a CallStats instance.\nWill also accumulate hit/miss stats in the dtor as well.\nIf AddHit is not called, it will assume a miss. If AddMiss is called, it will convert the call to a miss."
+    },
+    {
+      "id": "f-scoped-stats-counter-7f7819",
+      "name": "FScopedStatsCounter",
+      "category": "CookStats",
+      "signature": "FScopedStatsCounter(Target, Stats, Start Time, Bytes Processed, B Is In Game Thread, B Canceled, B Track Cycles Only, Hit Or Miss)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Stats",
+          "type": "FScopedStatsCounter&& InOther ) : Stats ( InOther ."
+        },
+        {
+          "name": "Start Time",
+          "type": "StartTime ( InOther ."
+        },
+        {
+          "name": "Bytes Processed",
+          "type": "BytesProcessed ( InOther ."
+        },
+        {
+          "name": "B Is In Game Thread",
+          "type": "bIsInGameThread ( InOther ."
+        },
+        {
+          "name": "B Canceled",
+          "type": "bCanceled ( InOther ."
+        },
+        {
+          "name": "B Track Cycles Only",
+          "type": "bTrackCyclesOnly ( InOther ."
+        },
+        {
+          "name": "Hit Or Miss",
+          "type": "HitOrMiss ( InOther ."
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-scoped-stats-counter-4412f5",
+      "name": "FScopedStatsCounter",
+      "category": "CookStats",
+      "signature": "FScopedStatsCounter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Stop the timer and flushes the stats to the underlying stats object."
+    },
+    {
+      "id": "add-hit",
+      "name": "AddHit",
+      "category": "CookStats",
+      "signature": "AddHit(Target, In Bytes Processed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "In Bytes Processed",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to indicate a Get or Put \"cache hit\". Exists calls by definition don't have hits or misses."
+    },
+    {
+      "id": "add-miss",
+      "name": "AddMiss",
+      "category": "CookStats",
+      "signature": "AddMiss(Target, In Bytes Processed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "In Bytes Processed",
+          "type": "Int64",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to indicate a Get or Put \"cache miss\". This is optional, as a Miss is assumed by the timer. Some calls by definition don't have hits or misses."
+    },
+    {
+      "id": "add-hit-or-miss",
+      "name": "AddHitOrMiss",
+      "category": "CookStats",
+      "signature": "AddHitOrMiss(Target, In Hit Or Miss, In Bytes Processed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "In Hit Or Miss",
+          "type": "CallStats::EHitOrMiss"
+        },
+        {
+          "name": "In Bytes Processed",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to indicate either a hit or miss. See AddHit and AddMiss."
+    },
+    {
+      "id": "cancel",
+      "name": "Cancel",
+      "category": "CookStats",
+      "signature": "Cancel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to cancel a timing, if we had to start one without knowing in advance if we must record it."
+    },
+    {
+      "id": "track-cycles-only",
+      "name": "TrackCyclesOnly",
+      "category": "CookStats",
+      "signature": "TrackCyclesOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to track cycles, but not as a new hit/miss. Used when the timing for a \"call\" is spread out in the code and mustbe measured in multiple places."
+    },
+    {
+      "id": "time-sync-work",
+      "name": "TimeSyncWork",
+      "category": "CookStats",
+      "signature": "TimeSyncWork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        }
+      ],
+      "returnType": "FCookStats::FScopedStatsCounter",
+      "docs": "Stats for a resource class that uses the DDC to load the resource.\nThis supports timing a call for synchronous work and asynchronous waits.\nSyncWork timing should be any code that is explicitly synchronous, be it a DDC fetch or building the DDC resource.\nFor SyncWork, a \"hit\" means we fetched from the DDC, and a \"miss\" means we had to build the resource. Either way,\nthe bytes processed should be set appropriately via calls to AddHitOrMiss().\nAsyncWait timing should be any code that is waiting on any explicitly asynchronous work to complete.\nThis should only time the wait portion.\nA \"hit\" or \"miss\" should be interpreted the same way as in SyncWork.\nThe Cycles counter should be measuring WAIT time, NOT the time the async task took to complete.\nMany systems build assets in a very different spot in the code than they are retrieved. When that happens\nTrackCyclesOnly() should be called on the timer, and the Miss should be timed where the resource\nis actually built so the size can cycles used to build the resource can be tracked properly.\nIn such cases, the time to TRY to get from the DDC will be timed along with the actual time to build the resource\nBut there will only be a single CallCount recorded. This is desired so that every Miss() counted will properly equate\nto one resource built. Look for calls to TrackCyclesOnly() to see how this works in practice.\nAsync tasks can sometimes actually be executed synchronously if the code ends up waiting on the results\nbefore the task can even get started. Either way, this should be treated as \"async\" wait time. Be sure\nnot to double count this time. Basically, do your counting at the level that decides whether to execute\nthe work synchronously or not, so you can be sure to track the time properly as SyncWork or AsyncWait."
+    },
+    {
+      "id": "time-async-wait",
+      "name": "TimeAsyncWait",
+      "category": "CookStats",
+      "signature": "TimeAsyncWait(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        }
+      ],
+      "returnType": "FCookStats::FScopedStatsCounter",
+      "docs": "Call this where the code is waiting on async work to build the resource"
+    },
+    {
+      "id": "log-stats-62973c",
+      "name": "LogStats",
+      "category": "CookStats",
+      "signature": "LogStats(Target, Add Stat, Stat Name, Node Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Add Stat",
+          "type": "FCookStatsManager::AddStatFuncRef"
+        },
+        {
+          "name": "Stat Name",
+          "type": "String&"
+        },
+        {
+          "name": "Node Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "trace-package",
@@ -158,6 +594,44 @@
         {
           "name": "Stat Type",
           "type": "EPackageEventStatType"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-scoped-cook-stat-edaee8",
+      "name": "FScopedCookStat",
+      "category": "CookStats",
+      "signature": "FScopedCookStat(Target, Id, Id, In Stat Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
+        },
+        {
+          "name": "Id",
+          "type": "UInt64"
+        },
+        {
+          "name": "Id",
+          "type": "EPackageEventStatType InStatType ) : Id ("
+        },
+        {
+          "name": "In Stat Type",
+          "type": "StatType ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-scoped-cook-stat-65dd66",
+      "name": "FScopedCookStat",
+      "category": "CookStats",
+      "signature": "FScopedCookStat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCookStats*"
         }
       ],
       "returnType": "Void"

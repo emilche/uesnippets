@@ -12,6 +12,27 @@
   ],
   "functions": [
     {
+      "id": "ue-vstack-alloc-helper",
+      "name": "UeVstackAllocHelper",
+      "category": "Stack",
+      "signature": "UeVstackAllocHelper(Allocator, Size, Align)",
+      "params": [
+        {
+          "name": "Allocator",
+          "type": "FVirtualStackAllocator*"
+        },
+        {
+          "name": "Size",
+          "type": "size_t"
+        },
+        {
+          "name": "Align",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
       "id": "step",
       "name": "Step",
       "category": "Stack",
@@ -51,31 +72,6 @@
       "docs": "Replacement for Step that uses an explicitly specified property to unpack arguments *"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "Stack",
-      "signature": "Serialize(Target, V, Verbosity, Category)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FFrame*"
-        },
-        {
-          "name": "V",
-          "type": "TCHAR*"
-        },
-        {
-          "name": "Verbosity",
-          "type": "ELogVerbosity::Type"
-        },
-        {
-          "name": "Category",
-          "type": "Name&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "kismet-execution-message",
       "name": "KismetExecutionMessage",
       "category": "Stack",
@@ -96,6 +92,38 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "peek-code",
+      "name": "PeekCode",
+      "category": "Stack",
+      "signature": "PeekCode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "Byte",
+      "docs": "Returns the current script op code"
+    },
+    {
+      "id": "skip-code",
+      "name": "SkipCode",
+      "category": "Stack",
+      "signature": "SkipCode(Target, Num Ops)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Num Ops",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Skips over the number of op codes specified by NumOps"
     },
     {
       "id": "get-stack-trace-48d6bf",
@@ -240,12 +268,250 @@
       "returnType": "FFrame*"
     },
     {
+      "id": "read",
+      "name": "Read",
+      "category": "Stack",
+      "signature": "Read(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "template<T> T"
+    },
+    {
+      "id": "read-int",
+      "name": "ReadInt",
+      "category": "Stack",
+      "signature": "ReadInt(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "template<TNumericType> TNumericType"
+    },
+    {
+      "id": "read-object",
+      "name": "ReadObject",
+      "category": "Stack",
+      "signature": "ReadObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "UObject*"
+    },
+    {
+      "id": "read-property",
+      "name": "ReadProperty",
+      "category": "Stack",
+      "signature": "ReadProperty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "FProperty*"
+    },
+    {
+      "id": "read-property-unchecked",
+      "name": "ReadPropertyUnchecked",
+      "category": "Stack",
+      "signature": "ReadPropertyUnchecked(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "FProperty*",
+      "docs": "May return null"
+    },
+    {
+      "id": "read-float",
+      "name": "ReadFloat",
+      "category": "Stack",
+      "signature": "ReadFloat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "read-double",
+      "name": "ReadDouble",
+      "category": "Stack",
+      "signature": "ReadDouble(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "read-pointer",
+      "name": "ReadPointer",
+      "category": "Stack",
+      "signature": "ReadPointer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "ScriptPointerType"
+    },
+    {
+      "id": "read-word",
+      "name": "ReadWord",
+      "category": "Stack",
+      "signature": "ReadWord(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "read-code-skip-count",
+      "name": "ReadCodeSkipCount",
+      "category": "Stack",
+      "signature": "ReadCodeSkipCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "CodeSkipSizeType",
+      "docs": "Reads a value from the bytestream, which represents the number of bytes to advance\nthe code pointer for certain expressions.\n@param\tExpressionField\t\treceives a pointer to the field representing the expression; used by various execs\nto drive VM logic"
+    },
+    {
+      "id": "read-variable-size",
+      "name": "ReadVariableSize",
+      "category": "Stack",
+      "signature": "ReadVariableSize(Target, Expression Field)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Expression Field",
+          "type": "FProperty**"
+        }
+      ],
+      "returnType": "VariableSizeType",
+      "docs": "Reads a value from the bytestream which represents the number of bytes that should be zero'd out if a NULL context\nis encountered\n@param\tExpressionField\t\treceives a pointer to the field representing the expression; used by various execs\nto drive VM logic"
+    },
+    {
+      "id": "read-name",
+      "name": "ReadName",
+      "category": "Stack",
+      "signature": "ReadName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
       "id": "g-init-runaway",
       "name": "GInitRunaway",
       "category": "Stack",
       "signature": "GInitRunaway()",
       "params": [],
       "returnType": "Void"
+    },
+    {
+      "id": "step-and-check-most-recent-property",
+      "name": "StepAndCheckMostRecentProperty",
+      "category": "Stack",
+      "signature": "StepAndCheckMostRecentProperty(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Context",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Convenience function that calls Step, but also returns true if both MostRecentProperty and MostRecentPropertyAddress are non-null."
+    },
+    {
+      "id": "step-compiled-in-64e80b",
+      "name": "StepCompiledIn",
+      "category": "Stack",
+      "signature": "StepCompiledIn(Target, Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Result",
+          "type": "void*"
+        }
+      ],
+      "returnType": "template<class TProperty> void",
+      "docs": "Replacement for Step that checks the for byte code, and if none exists, then PropertyChainForCompiledIn is used. Also, makes an effort to verify that the params are in the correct order and the types are compatible. *"
+    },
+    {
+      "id": "step-compiled-in-0a274a",
+      "name": "StepCompiledIn",
+      "category": "Stack",
+      "signature": "StepCompiledIn(Target, Result, Expected Property Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Result",
+          "type": "void*"
+        },
+        {
+          "name": "Expected Property Type",
+          "type": "FFieldClass*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "step-compiled-in-ref",
+      "name": "StepCompiledInRef",
+      "category": "Stack",
+      "signature": "StepCompiledInRef(Target, Temporary Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFrame*"
+        },
+        {
+          "name": "Temporary Buffer",
+          "type": "void*"
+        }
+      ],
+      "returnType": "template<class TProperty,TNativeType> TNativeType&",
+      "docs": "Replacement for Step that checks the for byte code, and if none exists, then PropertyChainForCompiledIn is used. Also, makes an effort to verify that the params are in the correct order and the types are compatible. *"
     }
   ]
 }

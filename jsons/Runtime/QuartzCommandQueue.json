@@ -1,0 +1,49 @@
+{
+  "id": "quartz-command-queue",
+  "label": "QuartzCommandQueue",
+  "includepath": "Sound/QuartzCommandQueue.h",
+  "includes": [
+    "type_traits",
+    "ConsumeAllMpmcQueue",
+    "UniquePtr",
+    "QuartzCompileTimeVisitor"
+  ],
+  "functions": [
+    {
+      "id": "push-lambda",
+      "name": "PushLambda",
+      "category": "QuartzCommandQueue",
+      "signature": "PushLambda(Target, In Lambda)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TQuartzCommandQueue*"
+        },
+        {
+          "name": "In Lambda",
+          "type": "TFunction<void ( TargetInterface& )>"
+        }
+      ],
+      "returnType": "template<class TargetInterface> void",
+      "docs": "PushLambda():\npush a function that takes a TargetInterface& as an argument.\nListeners will execute this code with (*static_cast<TargetInterface*>(this)) as the input()"
+    },
+    {
+      "id": "pump-command-queue",
+      "name": "PumpCommandQueue",
+      "category": "QuartzCommandQueue",
+      "signature": "PumpCommandQueue(Target, In Listener)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TQuartzCommandQueue*"
+        },
+        {
+          "name": "In Listener",
+          "type": "IConsumerBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "void PumpCommandQueue(TArray<IConsumerBase*>& InListeners)\n{\nQueue.ConsumeAllFifo([&InListeners](TUniquePtr<ICommandBase> InCommand)\n{\nfor(TUniquePtr<ICommandBase> Listener : InListeners)\n{\nif (ensure(InCommand))\n{\nListener->Accept(*InCommand);\n}\n}\n});\n}"
+    }
+  ]
+}

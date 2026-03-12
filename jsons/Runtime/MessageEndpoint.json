@@ -1,0 +1,1327 @@
+{
+  "id": "message-endpoint",
+  "label": "MessageEndpoint",
+  "includepath": "MessageEndpoint.h",
+  "includes": [
+    "CoreTypes",
+    "TaskGraphInterfaces",
+    "Array",
+    "ArrayBuilder",
+    "Queue",
+    "IMessageAttachment",
+    "IMessageBus",
+    "IMessageContext",
+    "IMessageHandler",
+    "IMessageReceiver",
+    "IMessageSender",
+    "IMessageBusListener",
+    "Guid",
+    "SharedPointer",
+    "NameTypes",
+    "ScopeLock"
+  ],
+  "functions": [
+    {
+      "id": "disable",
+      "name": "Disable",
+      "category": "MessageEndpoint",
+      "signature": "Disable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disables this endpoint.\nA disabled endpoint will not receive any subscribed messages until it is enabled again.\nEndpoints should be created in an enabled state by default.\n@see Enable, IsEnabled"
+    },
+    {
+      "id": "enable",
+      "name": "Enable",
+      "category": "MessageEndpoint",
+      "signature": "Enable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enables this endpoint.\nAn activated endpoint will receive subscribed messages.\nEndpoints should be created in an enabled state by default.\n@see Disable, IsEnabled"
+    },
+    {
+      "id": "get-address",
+      "name": "GetAddress",
+      "category": "MessageEndpoint",
+      "signature": "GetAddress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "FMessageAddress&",
+      "docs": "Gets the endpoint's message address.\n@return Message address."
+    },
+    {
+      "id": "is-connected",
+      "name": "IsConnected",
+      "category": "MessageEndpoint",
+      "signature": "IsConnected(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether this endpoint is connected to the bus.\n@return true if connected, false otherwise.\n@see IsEnabled"
+    },
+    {
+      "id": "is-enabled",
+      "name": "IsEnabled",
+      "category": "MessageEndpoint",
+      "signature": "IsEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether this endpoint is enabled.\n@return true if the endpoint is enabled, false otherwise.\n@see Disable, Enable, IsConnected"
+    },
+    {
+      "id": "set-recipient-thread",
+      "name": "SetRecipientThread",
+      "category": "MessageEndpoint",
+      "signature": "SetRecipientThread(Target, Named Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Named Thread",
+          "type": "ENamedThreads::Type&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the name of the thread to receive messages on.\nUse this method to receive messages on a particular thread, for example, if the\nconsumer owning this endpoint is not thread-safe. The default value is ThreadAny.\nThreadAny is the fastest way to receive messages. It should be used if the receiving\ncode is completely thread-safe and if it is sufficiently fast. ThreadAny MUST NOT\nbe used if the receiving code is not thread-safe. It also SHOULD NOT be used if the\ncode includes time consuming operations, because it will block the message router,\ncausing no other messages to be delivered in the meantime.\n@param NamedThread The name of the thread to receive messages on."
+    },
+    {
+      "id": "defer",
+      "name": "Defer",
+      "category": "MessageEndpoint",
+      "signature": "Defer(Target, Context, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Context",
+          "type": "TSharedRef<IMessageContext,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Defers processing of the given message by the specified time delay.\nThe message is effectively delivered again to this endpoint after the\noriginal sent time plus the time delay have elapsed.\n@param Context The context of the message to defer.\n@param Delay The time delay."
+    },
+    {
+      "id": "forward-eabda1",
+      "name": "Forward",
+      "category": "MessageEndpoint",
+      "signature": "Forward(Target, Context, Recipients, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Context",
+          "type": "TSharedRef<IMessageContext,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forwards a previously received message.\nMessages can only be forwarded to endpoints within the same process.\n@param Context The context of the message to forward.\n@param Recipients The list of message recipients to forward the message to.\n@param Delay The time delay."
+    },
+    {
+      "id": "publish-effc07",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Type Info, Scope, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "void*"
+        },
+        {
+          "name": "Type Info",
+          "type": "UScriptStruct*"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Publishes a message to all subscribed recipients within the specified scope.\n@param Message The message to publish.\n@param TypeInfo The message's type information.\n@param Scope The message scope.\n@param Fields The message content.\n@param Delay The delay after which to publish the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "publish-221f69",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Type Info, Scope, Annotations, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "void*"
+        },
+        {
+          "name": "Type Info",
+          "type": "UScriptStruct*"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Publishes a message to all subscribed recipients within the specified scope.\n@param Message The message to publish.\n@param TypeInfo The message's type information.\n@param Scope The message scope.\n@param Annotations An optional message annotations header.\n@param Fields The message content.\n@param Delay The delay after which to publish the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "send-179fde",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Type Info, Attachment, Recipients, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "void*"
+        },
+        {
+          "name": "Type Info",
+          "type": "UScriptStruct*"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends a message to the specified list of recipients.\n@param Message The message to send.\n@param TypeInfo The message's type information.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "send-3ac361",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Type Info, Flags, Attachment, Recipients, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "void*"
+        },
+        {
+          "name": "Type Info",
+          "type": "UScriptStruct*"
+        },
+        {
+          "name": "Flags",
+          "type": "EMessageFlags"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends a message to the specified list of recipients.\nAllows to specify message flags\n@param Message The message to send.\n@param TypeInfo The message's type information.\n@param Flags The message's type information.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "send-d3df3b",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Type Info, Flags, Annotations, Attachment, Recipients, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "void*"
+        },
+        {
+          "name": "Type Info",
+          "type": "UScriptStruct*"
+        },
+        {
+          "name": "Flags",
+          "type": "EMessageFlags"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sends a message to the specified list of recipients.\n@param Message The message to send.\n@param TypeInfo The message's type information.\n@param Flags The message's type information.\n@param Annotations An optional message annotations header.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "subscribe-dbf3a6",
+      "name": "Subscribe",
+      "category": "MessageEndpoint",
+      "signature": "Subscribe(Target, Message Type, Scope Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message Type",
+          "type": "Name&"
+        },
+        {
+          "name": "Scope Range",
+          "type": "FMessageScopeRange&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Subscribes a message handler.\n@param MessageType The type name of the messages to subscribe to.\n@param ScopeRange The range of message scopes to include in the subscription."
+    },
+    {
+      "id": "unsubscribe-ff013b",
+      "name": "Unsubscribe",
+      "category": "MessageEndpoint",
+      "signature": "Unsubscribe(Target, Message Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message Type",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unsubscribes this endpoint from the specified message type.\n@param MessageType The type of message to unsubscribe (IMessageBus::PATHNAME_All = all types).\n@see Subscribe"
+    },
+    {
+      "id": "disable-inbox",
+      "name": "DisableInbox",
+      "category": "MessageEndpoint",
+      "signature": "DisableInbox(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disables the inbox for unhandled messages.\nThe inbox is disabled by default.\n@see EnableInbox, IsInboxEmpty, IsInboxEnabled, ProcessInbox, ReceiveFromInbox"
+    },
+    {
+      "id": "enable-inbox",
+      "name": "EnableInbox",
+      "category": "MessageEndpoint",
+      "signature": "EnableInbox(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enables the inbox for unhandled messages.\nIf enabled, the inbox will queue up all received messages. Use ProcessInbox() to synchronously\ninvoke the registered message handlers for all queued up messages, or ReceiveFromInbox() to\nmanually receive one message from the inbox at a time. The inbox is disabled by default.\n@see DisableInbox, IsInboxEmpty, IsInboxEnabled, ProcessInbox, ReceiveFromInbox"
+    },
+    {
+      "id": "is-inbox-empty",
+      "name": "IsInboxEmpty",
+      "category": "MessageEndpoint",
+      "signature": "IsInboxEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether the inbox is empty.\n@return true if the inbox is empty, false otherwise.\n@see DisableInbox, EnableInbox, IsInboxEnabled, ProcessInbox, ReceiveFromInbox"
+    },
+    {
+      "id": "is-inbox-enabled",
+      "name": "IsInboxEnabled",
+      "category": "MessageEndpoint",
+      "signature": "IsInboxEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether the inbox is enabled.\n@see DisableInbox, EnableInbox, IsInboxEmpty, ProcessInbox, ReceiveFromInbox"
+    },
+    {
+      "id": "process-inbox",
+      "name": "ProcessInbox",
+      "category": "MessageEndpoint",
+      "signature": "ProcessInbox(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Calls the matching message handlers for all messages queued up in the inbox.\nNote that an incoming message will only be queued up in the endpoint's inbox if the inbox has\nbeen enabled and no matching message handler handled it. The inbox is disabled by default and\nmust be enabled using the EnableInbox() method.\n@see IsInboxEmpty, ReceiveFromInbox"
+    },
+    {
+      "id": "get-debug-name",
+      "name": "GetDebugName",
+      "category": "MessageEndpoint",
+      "signature": "GetDebugName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "get-recipient-id",
+      "name": "GetRecipientId",
+      "category": "MessageEndpoint",
+      "signature": "GetRecipientId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "FGuid&"
+    },
+    {
+      "id": "get-recipient-thread",
+      "name": "GetRecipientThread",
+      "category": "MessageEndpoint",
+      "signature": "GetRecipientThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "ENamedThreads::Type"
+    },
+    {
+      "id": "is-local",
+      "name": "IsLocal",
+      "category": "MessageEndpoint",
+      "signature": "IsLocal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-listener-thread",
+      "name": "GetListenerThread",
+      "category": "MessageEndpoint",
+      "signature": "GetListenerThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "ENamedThreads::Type"
+    },
+    {
+      "id": "notify-registration",
+      "name": "NotifyRegistration",
+      "category": "MessageEndpoint",
+      "signature": "NotifyRegistration(Target, In Address, In Notification)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "In Address",
+          "type": "FMessageAddress&"
+        },
+        {
+          "name": "In Notification",
+          "type": "EMessageBusNotification"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-sender-address",
+      "name": "GetSenderAddress",
+      "category": "MessageEndpoint",
+      "signature": "GetSenderAddress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "FMessageAddress"
+    },
+    {
+      "id": "notify-message-error",
+      "name": "NotifyMessageError",
+      "category": "MessageEndpoint",
+      "signature": "NotifyMessageError(Target, Context, Error)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Context",
+          "type": "TSharedRef<IMessageContext,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Error",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "make-message",
+      "name": "MakeMessage",
+      "category": "MessageEndpoint",
+      "signature": "MakeMessage(Args)",
+      "params": [
+        {
+          "name": "Args",
+          "type": "InArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<T,. . . InArgTypes> T*",
+      "docs": "Creates a message of the specified template type.\nPrefer using this helper rather than explicit new. See FEngineServicePong.\n@param Args The constructor arguments to the template type"
+    },
+    {
+      "id": "forward-552004",
+      "name": "Forward",
+      "category": "MessageEndpoint",
+      "signature": "Forward(Target, Context, Recipient)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Context",
+          "type": "TSharedRef<IMessageContext,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Immediately forwards a previously received message to the specified recipient.\nMessages can only be forwarded to endpoints within the same process.\n@param Context The context of the message to forward.\n@param Recipient The address of the recipient to forward the message to."
+    },
+    {
+      "id": "forward-9c2d22",
+      "name": "Forward",
+      "category": "MessageEndpoint",
+      "signature": "Forward(Target, Context, Recipient, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Context",
+          "type": "TSharedRef<IMessageContext,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Forwards a previously received message to the specified recipient after a given delay.\nMessages can only be forwarded to endpoints within the same process.\n@param Context The context of the message to forward.\n@param Recipient The address of the recipient to forward the message to.\n@param ForwardingScope The scope of the forwarded message.\n@param Delay The delay after which to publish the message."
+    },
+    {
+      "id": "forward-666de7",
+      "name": "Forward",
+      "category": "MessageEndpoint",
+      "signature": "Forward(Target, Context, Recipients)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Context",
+          "type": "TSharedRef<IMessageContext,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Immediately forwards a previously received message to the specified list of recipients.\nMessages can only be forwarded to endpoints within the same process.\n@param Context The context of the message to forward.\n@param Recipients The list of message recipients to forward the message to.\n@param ForwardingScope The scope of the forwarded message."
+    },
+    {
+      "id": "publish-6116b4",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately publishes a message to all subscribed recipients.\n@param Message The message to publish."
+    },
+    {
+      "id": "publish-108dca",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Scope)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately pa message to all subscribed recipients within the specified scope.\n@param Message The message to publish.\n@param Scope The message scope."
+    },
+    {
+      "id": "publish-109807",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Annotations)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately publishes a message to all subscribed recipients.\n@param Message The message to publish.\n@param Annotations An optional message annotations header."
+    },
+    {
+      "id": "publish-e2caf3",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Annotations, Scope)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately pa message to all subscribed recipients within the specified scope.\n@param Message The message to publish.\n@param Annotations An optional message annotations header.\n@param Scope The message scope."
+    },
+    {
+      "id": "publish-41b4d6",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Publishes a message to all subscribed recipients after a given delay.\n@param Message The message to publish.\n@param Delay The delay after which to publish the message."
+    },
+    {
+      "id": "publish-70b281",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Scope, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Publishes a message to all subscribed recipients within the specified scope after a given delay.\n@param Message The message to publish.\n@param Scope The message scope.\n@param Delay The delay after which to publish the message."
+    },
+    {
+      "id": "publish-4e5df0",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Scope, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Publishes a message to all subscribed recipients within the specified scope.\n@param Message The message to publish.\n@param Scope The message scope.\n@param Fields The message content.\n@param Delay The delay after which to publish the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "publish-754cd4",
+      "name": "Publish",
+      "category": "MessageEndpoint",
+      "signature": "Publish(Target, Message, Annotations, Scope, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Scope",
+          "type": "EMessageScope"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Publishes a message to all subscribed recipients within the specified scope.\n@param Message The message to publish.\n@param Annotations An optional message annotations header.\n@param Scope The message scope.\n@param Fields The message content.\n@param Delay The delay after which to publish the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "send-759933",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Recipient)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately sends a message to the specified recipient.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Recipient The message recipient."
+    },
+    {
+      "id": "send-8ba48a",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Annotations, Recipient)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately sends a message to the specified recipient.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Annotations An optional message annotations header.\n@param Recipient The message recipient."
+    },
+    {
+      "id": "send-efe161",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Recipient, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message to the specified recipient after a given delay.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Recipient The message recipient.\n@param Delay The delay after which to send the message."
+    },
+    {
+      "id": "send-a22df2",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Recipient, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message with fields and expiration to the specified recipient after a given delay.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Recipient The message recipient.\n@param Expiration The time at which the message expires.\n@param Delay The delay after which to send the message."
+    },
+    {
+      "id": "send-8aedef",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Attachment, Recipient)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message with fields and attachment to the specified recipient.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Attachment An optional binary data attachment.\n@param Recipient The message recipient."
+    },
+    {
+      "id": "send-378cbe",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Attachment, Recipient, Expiration, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message with fields, attachment and expiration to the specified recipient after a given delay.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Attachment An optional binary data attachment.\n@param Recipient The message recipient.\n@param Expiration The time at which the message expires.\n@param Delay The delay after which to send the message."
+    },
+    {
+      "id": "send-9591cd",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Annotations, Attachment, Recipient, Expiration, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipient",
+          "type": "FMessageAddress&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message with fields, attachment and expiration to the specified recipient after a given delay.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Annotations An optional message annotations header.\n@param Attachment An optional binary data attachment.\n@param Recipient The message recipient.\n@param Expiration The time at which the message expires.\n@param Delay The delay after which to send the message."
+    },
+    {
+      "id": "send-c2d0be",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Recipients)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Immediately sends a message to the specified list of recipients.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Recipients The message recipients."
+    },
+    {
+      "id": "send-e9fd09",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Recipients, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message to the specified list of recipients after a given delay after a given delay.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message."
+    },
+    {
+      "id": "send-56ac35",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Attachment, Recipients, Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message with fields and attachment to the specified list of recipients after a given delay.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message."
+    },
+    {
+      "id": "send-76e845",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Attachment, Recipients, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message to the specified list of recipients.\n@param MessageType The type of message to send.\n@param Message The message to send.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "send-dbbe16",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Flags, Attachment, Recipients, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Flags",
+          "type": "EMessageFlags"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message to the specified list of recipients.\nAllows to specify message flags\n@param Message The message to send.\n@param TypeInfo The message's type information.\n@param Flags The message's type information.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "send-b25432",
+      "name": "Send",
+      "category": "MessageEndpoint",
+      "signature": "Send(Target, Message, Flags, Annotations, Attachment, Recipients, Delay, Expiration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Message",
+          "type": "MessageType*"
+        },
+        {
+          "name": "Flags",
+          "type": "EMessageFlags"
+        },
+        {
+          "name": "Annotations",
+          "type": "TMap<FName,FString>"
+        },
+        {
+          "name": "Attachment",
+          "type": "TSharedPtr<IMessageAttachment,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Recipients",
+          "type": "TArray<FMessageAddress>&"
+        },
+        {
+          "name": "Delay",
+          "type": "FTimespan&"
+        },
+        {
+          "name": "Expiration",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "template<MessageType> void",
+      "docs": "Sends a message to the specified list of recipients.\nAllows to specify message flags\n@param Message The message to send.\n@param TypeInfo The message's type information.\n@param Flags The message's type information.\n@param Annotations An optional message annotations header.\n@param Attachment An optional binary data attachment.\n@param Recipients The message recipients.\n@param Delay The delay after which to send the message.\n@param Expiration The time at which the message expires."
+    },
+    {
+      "id": "subscribe-27cac6",
+      "name": "Subscribe",
+      "category": "MessageEndpoint",
+      "signature": "Subscribe(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "template<class MessageType> void",
+      "docs": "Template method to subscribe the message endpoint to the specified type of messages with the default message scope.\nThe default message scope is all messages excluding loopback messages.\n@param HandlerType The type of the class handling the message.\n@param MessageType The type of messages to subscribe to.\n@param Handler The class handling the messages.\n@param HandlerFunc The class function handling the messages."
+    },
+    {
+      "id": "subscribe-6d70dd",
+      "name": "Subscribe",
+      "category": "MessageEndpoint",
+      "signature": "Subscribe(Target, Scope Range)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        },
+        {
+          "name": "Scope Range",
+          "type": "FMessageScopeRange&"
+        }
+      ],
+      "returnType": "template<class MessageType> void",
+      "docs": "Template method to subscribe the message endpoint to the specified type and scope of messages.\n@param HandlerType The type of the class handling the message.\n@param MessageType The type of messages to subscribe to.\n@param Handler The class handling the messages.\n@param HandlerFunc The class function handling the messages.\n@param ScopeRange The range of message scopes to include in the subscription."
+    },
+    {
+      "id": "unsubscribe-d45bb4",
+      "name": "Unsubscribe",
+      "category": "MessageEndpoint",
+      "signature": "Unsubscribe(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMessageEndpoint*"
+        }
+      ],
+      "returnType": "template<class MessageType> void",
+      "docs": "Unsubscribes this endpoint from all message types.\n@see Subscribe"
+    },
+    {
+      "id": "safe-release",
+      "name": "SafeRelease",
+      "category": "MessageEndpoint",
+      "signature": "SafeRelease(Endpoint)",
+      "params": [
+        {
+          "name": "Endpoint",
+          "type": "TSharedPtr<FMessageEndpoint,ESPMode::ThreadSafe>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Safely releases a message endpoint that is receiving messages on AnyThread.\nWhen an object that owns a message endpoint receiving on AnyThread is being destroyed,\nit is possible that the endpoint can outlive the object for a brief period of time if\nthe Messaging system is dispatching messages to it. This helper function\nis to block the calling thread while any messages are being dispatched, so that the\nendpoint does not invoke any message handlers after the object has been destroyed.\n@param Endpoint The message endpoint to release."
+    }
+  ]
+}

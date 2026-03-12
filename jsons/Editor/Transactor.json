@@ -18,6 +18,54 @@
   ],
   "functions": [
     {
+      "id": "set-object",
+      "name": "SetObject",
+      "category": "Transactor",
+      "signature": "SetObject(Target, In Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSerializedObject*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Base class for tracking transactions for undo/redo."
+    },
+    {
+      "id": "reset-ac99fb",
+      "name": "Reset",
+      "category": "Transactor",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSerializedObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "swap",
+      "name": "Swap",
+      "category": "Transactor",
+      "signature": "Swap(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSerializedObject*"
+        },
+        {
+          "name": "Other",
+          "type": "FSerializedObject&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "serialize-contents",
       "name": "SerializeContents",
       "category": "Transactor",
@@ -157,24 +205,6 @@
       "returnType": "Void"
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
-      "category": "Transactor",
-      "signature": "AddReferencedObjects(Target, Collector)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FObjectRecord*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Used by GC to collect referenced objects."
-    },
-    {
       "id": "contains-pie-object",
       "name": "ContainsPieObject",
       "category": "Transactor",
@@ -214,7 +244,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "@return true if the record has a custom change and the change has expired"
+      "docs": "@return true if the record has a custom change and the change has expired",
+      "supportedTargets": [
+        "FObjectRecord*",
+        "FTransaction*"
+      ]
     },
     {
       "id": "save-array",
@@ -402,6 +436,20 @@
       "docs": "Finalize the transaction (try and work out what's changed)."
     },
     {
+      "id": "get-context",
+      "name": "GetContext",
+      "category": "Transactor",
+      "signature": "GetContext(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "FTransactionContext",
+      "docs": "Gets the full context for the transaction."
+    },
+    {
       "id": "is-transient",
       "name": "IsTransient",
       "category": "Transactor",
@@ -427,7 +475,25 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "@return True if this record contains a reference to a pie object"
+      "docs": "@return True if this record contains a reference to a pie object",
+      "supportedTargets": [
+        "FTransaction*",
+        "UTransactor*"
+      ]
+    },
+    {
+      "id": "get-transaction-type",
+      "name": "GetTransactionType",
+      "category": "Transactor",
+      "signature": "GetTransactionType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Returns a unique string to serve as a type ID for the FTranscationBase-derived type."
     },
     {
       "id": "data-size",
@@ -441,6 +507,62 @@
         }
       ],
       "returnType": "SIZE_T"
+    },
+    {
+      "id": "get-id",
+      "name": "GetId",
+      "category": "Transactor",
+      "signature": "GetId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Returns the unique identifier for this transaction, used to track it during its lifetime"
+    },
+    {
+      "id": "get-operation-id",
+      "name": "GetOperationId",
+      "category": "Transactor",
+      "signature": "GetOperationId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Returns the unique identifier for the active operation on this transaction (if any)"
+    },
+    {
+      "id": "get-title",
+      "name": "GetTitle",
+      "category": "Transactor",
+      "signature": "GetTitle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Returns the descriptive text for the transaction"
+    },
+    {
+      "id": "get-description",
+      "name": "GetDescription",
+      "category": "Transactor",
+      "signature": "GetDescription(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Returns the description of each contained Object Record"
     },
     {
       "id": "get-transaction-objects",
@@ -472,6 +594,19 @@
         }
       ],
       "returnType": "Int"
+    },
+    {
+      "id": "get-primary-object",
+      "name": "GetPrimaryObject",
+      "category": "Transactor",
+      "signature": "GetPrimaryObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTransaction*"
+        }
+      ],
+      "returnType": "UObject*"
     },
     {
       "id": "is-object-transacting",
@@ -536,6 +671,398 @@
       ],
       "returnType": "FTransactionDiff",
       "docs": "Create a map that holds information about objects of a given transaction compared to their previous state the last time this transaction was applied to those objects (via PostTransacted)."
+    },
+    {
+      "id": "begin",
+      "name": "Begin",
+      "category": "Transactor",
+      "signature": "Begin(Target, Session Context, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Session Context",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Return",
+          "type": "FText& Description ) PURE_VIRTUAL ( UTransactor::Begin,"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Begins a new undo transaction.  An undo transaction is defined as all actions\nwhich take place when the user selects \"undo\" a single time.\nIf there is already an active transaction in progress, increments that transaction's\naction counter instead of beginning a new transaction.\n@param\tSessionContext\tthe context for the undo session; typically the tool/editor that cause the undo operation\n@param\tDescription\t\tthe description for the undo session;  this is the text that\nwill appear in the \"Edit\" menu next to the Undo item\n@return\tNumber of active actions when Begin() was called;  values greater than\n0 indicate that there was already an existing undo transaction in progress."
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "category": "Transactor",
+      "signature": "End(Target, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Return",
+          "type": ") PURE_VIRTUAL ( UTransactor::End,"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Attempts to close an undo transaction.  Only successful if the transaction's action\ncounter is 1.\n@return\tNumber of active actions when End() was called; a value of 1 indicates that the\ntransaction was successfully closed"
+    },
+    {
+      "id": "cancel",
+      "name": "Cancel",
+      "category": "Transactor",
+      "signature": "Cancel(Target, Start Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int",
+          "default": "0 ) PURE_VIRTUAL(UTransactor::Cancel,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cancels the current transaction, no longer capture actions to be placed in the undo buffer.\n@param\tStartIndex\tthe value of ActiveIndex when the transaction to be canceled was began."
+    },
+    {
+      "id": "reset-5fb21a",
+      "name": "Reset",
+      "category": "Transactor",
+      "signature": "Reset(Target, Reset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Reset",
+          "type": "FText& Reason ) PURE_VIRTUAL ( UTransactor::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the entire undo buffer;  deletes all undo transactions."
+    },
+    {
+      "id": "is-active",
+      "name": "IsActive",
+      "category": "Transactor",
+      "signature": "IsActive(Target, False)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "False",
+          "type": ") PURE_VIRTUAL ( UTransactor::IsActive,return"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether there are any active actions; i.e. whether actions are currently\nbeing captured into the undo buffer."
+    },
+    {
+      "id": "can-undo",
+      "name": "CanUndo",
+      "category": "Transactor",
+      "signature": "CanUndo(Target, Text)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Text",
+          "type": "Text*",
+          "default": "nullptr ) PURE_VIRTUAL(UTransactor::CanUndo,return false;"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines whether the undo option should be selectable.\n@param\tStr\t\t[out] the reason that undo is disabled\n@return\ttrue if the \"Undo\" option should be selectable."
+    },
+    {
+      "id": "can-redo",
+      "name": "CanRedo",
+      "category": "Transactor",
+      "signature": "CanRedo(Target, Text)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Text",
+          "type": "Text*",
+          "default": "nullptr ) PURE_VIRTUAL(UTransactor::CanRedo,return false;"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines whether the redo option should be selectable.\n@param\tStr\t\t[out] the reason that redo is disabled\n@return\ttrue if the \"Redo\" option should be selectable."
+    },
+    {
+      "id": "get-queue-length",
+      "name": "GetQueueLength",
+      "category": "Transactor",
+      "signature": "GetQueueLength(Target, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Return",
+          "type": ") PURE_VIRTUAL ( UTransactor::GetQueueLength,"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the current length of the transaction queue.\n@return Queue length."
+    },
+    {
+      "id": "find-transaction-index",
+      "name": "FindTransactionIndex",
+      "category": "Transactor",
+      "signature": "FindTransactionIndex(Target, INDEX NONE)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "INDEX NONE",
+          "type": "FGuid& TransactionId ) PURE_VIRTUAL ( UTransactor::FindTransactionIndex,return"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the transaction queue index from its TransactionId.\n@param TransactionId - The id of transaction in the queue.\n@return The queue index or INDEX_NONE if not found."
+    },
+    {
+      "id": "get-transaction",
+      "name": "GetTransaction",
+      "category": "Transactor",
+      "signature": "GetTransaction(Target, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Nullptr",
+          "type": "int32 QueueIndex ) PURE_VIRTUAL ( UTransactor::GetTransaction,return"
+        }
+      ],
+      "returnType": "FTransaction*",
+      "docs": "Gets the transaction at the specified queue index.\n@param QueueIndex - The index of the transaction in the queue.\n@return A read-only pointer to the transaction, or NULL if it does not exist."
+    },
+    {
+      "id": "get-undo-context",
+      "name": "GetUndoContext",
+      "category": "Transactor",
+      "signature": "GetUndoContext(Target, Check Whether Undo Possible)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Check Whether Undo Possible",
+          "type": "Bool",
+          "default": "true ) PURE_VIRTUAL(UTransactor::GetUndoContext,return FTransactionContext();"
+        }
+      ],
+      "returnType": "FTransactionContext",
+      "docs": "Returns the description of the undo action that will be performed next.\nThis is the text that is shown next to the \"Undo\" item in the menu.\n@param\tbCheckWhetherUndoPossible\tPerform test whether undo is possible and return Error if not and option is set\n@return\ttext describing the next undo transaction"
+    },
+    {
+      "id": "get-undo-size",
+      "name": "GetUndoSize",
+      "category": "Transactor",
+      "signature": "GetUndoSize(Target, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Return",
+          "type": ") PURE_VIRTUAL ( UTransactor::GetUndoSize,"
+        }
+      ],
+      "returnType": "SIZE_T",
+      "docs": "Determines the amount of data currently stored by the transaction buffer.\n@return\tnumber of bytes stored in the undo buffer"
+    },
+    {
+      "id": "get-undo-count",
+      "name": "GetUndoCount",
+      "category": "Transactor",
+      "signature": "GetUndoCount(Target, Return)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Return",
+          "type": ") PURE_VIRTUAL ( UTransactor::GetUndoCount,"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of transactions that were undone and can be redone.\n@return Undo count."
+    },
+    {
+      "id": "get-redo-context",
+      "name": "GetRedoContext",
+      "category": "Transactor",
+      "signature": "GetRedoContext(Target, F Transaction Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "F Transaction Context",
+          "type": ") PURE_VIRTUAL ( UTransactor::GetRedoContext,return"
+        }
+      ],
+      "returnType": "FTransactionContext",
+      "docs": "Returns the description of the redo action that will be performed next.\nThis is the text that is shown next to the \"Redo\" item in the menu.\n@return\ttext describing the next redo transaction"
+    },
+    {
+      "id": "set-undo-barrier",
+      "name": "SetUndoBarrier",
+      "category": "Transactor",
+      "signature": "SetUndoBarrier(Target, Set Undo Barrier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Set Undo Barrier",
+          "type": ") PURE_VIRTUAL ( UTransactor::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets an undo barrier at the current point in the transaction buffer.\nUndoing beyond this point will not be allowed until the barrier is removed."
+    },
+    {
+      "id": "remove-undo-barrier",
+      "name": "RemoveUndoBarrier",
+      "category": "Transactor",
+      "signature": "RemoveUndoBarrier(Target, Remove Undo Barrier)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Remove Undo Barrier",
+          "type": ") PURE_VIRTUAL ( UTransactor::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes the last set undo barrier from the transaction buffer."
+    },
+    {
+      "id": "clear-undo-barriers",
+      "name": "ClearUndoBarriers",
+      "category": "Transactor",
+      "signature": "ClearUndoBarriers(Target, Clear Undo Barriers)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Clear Undo Barriers",
+          "type": ") PURE_VIRTUAL ( UTransactor::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears all undo barriers."
+    },
+    {
+      "id": "get-current-undo-barrier",
+      "name": "GetCurrentUndoBarrier",
+      "category": "Transactor",
+      "signature": "GetCurrentUndoBarrier(Target, INDEX NONE)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "INDEX NONE",
+          "type": ") PURE_VIRTUAL ( UTransactor::GetCurrentUndoBarrier ( ),{ return"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the current undo barrier's position in transaction queue"
+    },
+    {
+      "id": "enable-object-serialization",
+      "name": "EnableObjectSerialization",
+      "category": "Transactor",
+      "signature": "EnableObjectSerialization(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Enables the transaction buffer to serialize the set of objects it references.\n@return\ttrue if the transaction buffer is able to serialize object references."
+    },
+    {
+      "id": "disable-object-serialization",
+      "name": "DisableObjectSerialization",
+      "category": "Transactor",
+      "signature": "DisableObjectSerialization(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Disables the transaction buffer from serializing the set of objects it references.\n@return\ttrue if the transaction buffer is able to serialize object references."
+    },
+    {
+      "id": "is-object-serialization-enabled",
+      "name": "IsObjectSerializationEnabled",
+      "category": "Transactor",
+      "signature": "IsObjectSerializationEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Wrapper for checking if the transaction buffer is allowed to serialize object references."
+    },
+    {
+      "id": "is-object-in-transaction-buffer",
+      "name": "IsObjectInTransactionBuffer",
+      "category": "Transactor",
+      "signature": "IsObjectInTransactionBuffer(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTransactor*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if a specific object is referenced by the transaction buffer"
     }
   ]
 }

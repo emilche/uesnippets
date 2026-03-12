@@ -12,6 +12,137 @@
   ],
   "functions": [
     {
+      "id": "enable-custom-code-serialize",
+      "name": "EnableCustomCodeSerialize",
+      "category": "ShaderSerialization",
+      "signature": "EnableCustomCodeSerialize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderSerializeContext*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If this is overridden to return true, SerializeCode will be called to serialize shader code separately from the rest of the serialized object.",
+      "supportedTargets": [
+        "FShaderSerializeContext*",
+        "FShaderCacheSerializeContext*"
+      ]
+    },
+    {
+      "id": "serialize-code",
+      "name": "SerializeCode",
+      "category": "ShaderSerialization",
+      "signature": "SerializeCode(Target, Resource, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderSerializeContext*"
+        },
+        {
+          "name": "Resource",
+          "type": "FShaderCodeResource&"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Optional function which must be implemented if EnableCustomCodeSerialize returns true; use to serialize shader code separately from the main object",
+      "supportedTargets": [
+        "FShaderSerializeContext*",
+        "FShaderCacheSaveContext*",
+        "FShaderCacheLoadContext*"
+      ]
+    },
+    {
+      "id": "reserve-code",
+      "name": "ReserveCode",
+      "category": "ShaderSerialization",
+      "signature": "ReserveCode(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderSerializeContext*"
+        },
+        {
+          "name": "Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Optional function that can be used to reserve space for the given number of code objects by derived classes.",
+      "supportedTargets": [
+        "FShaderSerializeContext*",
+        "FShaderCacheSaveContext*"
+      ]
+    },
+    {
+      "id": "get-main-archive",
+      "name": "GetMainArchive",
+      "category": "ShaderSerialization",
+      "signature": "GetMainArchive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderSerializeContext*"
+        }
+      ],
+      "returnType": "FArchive&",
+      "docs": "Archive pointer which should be used for serializing the object, possibly excluding shader code if the EnableCustomCodeSerialize returns true"
+    },
+    {
+      "id": "get-serialized-size",
+      "name": "GetSerializedSize",
+      "category": "ShaderSerialization",
+      "signature": "GetSerializedSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSerializeContext*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Get the total serialized size of data for this context; note that this will return 0 if called prior to the FSharedBuffers\nbeing set (this is done in the derived implementations, see below)."
+    },
+    {
+      "id": "move-code",
+      "name": "MoveCode",
+      "category": "ShaderSerialization",
+      "signature": "MoveCode(Target, Target Code, Target Symbols)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSerializeContext*"
+        },
+        {
+          "name": "Target Code",
+          "type": "TArray<FCompositeBuffer>&"
+        },
+        {
+          "name": "Target Symbols",
+          "type": "TArray<FCompressedBuffer>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Populates the given code array (transfering ownership) and resets the internal view to point to the new owning array's data"
+    },
+    {
+      "id": "has-data",
+      "name": "HasData",
+      "category": "ShaderSerialization",
+      "signature": "HasData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShaderCacheSerializeContext*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if there is valid serialized data referenced by this context."
+    },
+    {
       "id": "finalize",
       "name": "Finalize",
       "category": "ShaderSerialization",
@@ -24,46 +155,6 @@
       ],
       "returnType": "Void",
       "docs": "Converts the raw serialized object data into the ShaderObjectData FSharedBuffer.\nNote that this is called by BuildCacheRecord as well, calls subsequent to the first will have no effect."
-    },
-    {
-      "id": "serialize-code",
-      "name": "SerializeCode",
-      "category": "ShaderSerialization",
-      "signature": "SerializeCode(Target, Resource, Index)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FShaderCacheSaveContext*"
-        },
-        {
-          "name": "Resource",
-          "type": "FShaderCodeResource&"
-        },
-        {
-          "name": "Index",
-          "type": "Int"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Optional function which must be implemented if EnableCustomCodeSerialize returns true; use to serialize shader code separately from the main object"
-    },
-    {
-      "id": "reserve-code",
-      "name": "ReserveCode",
-      "category": "ShaderSerialization",
-      "signature": "ReserveCode(Target, Count)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FShaderCacheSaveContext*"
-        },
-        {
-          "name": "Count",
-          "type": "Int"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Optional function that can be used to reserve space for the given number of code objects by derived classes."
     },
     {
       "id": "build-cache-record",

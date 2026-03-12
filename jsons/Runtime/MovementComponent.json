@@ -30,19 +30,6 @@
       "returnType": "Void"
     },
     {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "MovementComponent",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMovementComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "deactivate",
       "name": "Deactivate",
       "category": "MovementComponent",
@@ -51,23 +38,6 @@
         {
           "name": "Target",
           "type": "UMovementComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "MovementComponent",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMovementComponent*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
         }
       ],
       "returnType": "Void"
@@ -99,23 +69,6 @@
       ],
       "returnType": "Void",
       "docs": "Overridden to update component properties that should be updated while being edited."
-    },
-    {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "MovementComponent",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMovementComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
     },
     {
       "id": "physics-locked-axis-setting-changed",
@@ -380,41 +333,6 @@
       "docs": "Return true if the given collision shape overlaps other geometry at the given location and rotation. The collision params are set by InitCollisionParams()."
     },
     {
-      "id": "move-updated-component-impl",
-      "name": "MoveUpdatedComponentImpl",
-      "category": "MovementComponent",
-      "signature": "MoveUpdatedComponentImpl(Target, Delta, New Rotation, Sweep, Out Hit, Teleport)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMovementComponent*"
-        },
-        {
-          "name": "Delta",
-          "type": "FVector&"
-        },
-        {
-          "name": "New Rotation",
-          "type": "FQuat&"
-        },
-        {
-          "name": "Sweep",
-          "type": "Bool"
-        },
-        {
-          "name": "Out Hit",
-          "type": "FHitResult*",
-          "default": "NULL"
-        },
-        {
-          "name": "Teleport",
-          "type": "ETeleportType",
-          "default": "ETeleportType::None"
-        }
-      ],
-      "returnType": "Bool"
-    },
-    {
       "id": "safe-move-updated-component",
       "name": "SafeMoveUpdatedComponent",
       "category": "MovementComponent",
@@ -466,31 +384,6 @@
       ],
       "returnType": "FVector",
       "docs": "Calculate a movement adjustment to try to move out of a penetration from a failed move.\n@param Hit the result of the failed move\n@return The adjustment to use after a failed move, or a zero vector if no attempt should be made."
-    },
-    {
-      "id": "resolve-penetration-impl",
-      "name": "ResolvePenetrationImpl",
-      "category": "MovementComponent",
-      "signature": "ResolvePenetrationImpl(Target, Adjustment, Hit, New Rotation)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UMovementComponent*"
-        },
-        {
-          "name": "Adjustment",
-          "type": "FVector&"
-        },
-        {
-          "name": "Hit",
-          "type": "FHitResult&"
-        },
-        {
-          "name": "New Rotation",
-          "type": "FQuat&"
-        }
-      ],
-      "returnType": "Bool"
     },
     {
       "id": "slide-along-surface",
@@ -820,6 +713,79 @@
       ],
       "returnType": "Void",
       "docs": "Snap the updated component to the plane constraint, if enabled."
+    },
+    {
+      "id": "on-teleported",
+      "name": "OnTeleported",
+      "category": "MovementComponent",
+      "signature": "OnTeleported(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovementComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called by owning Actor upon successful teleport from AActor::TeleportTo()."
+    },
+    {
+      "id": "move-updated-component",
+      "name": "MoveUpdatedComponent",
+      "category": "MovementComponent",
+      "signature": "MoveUpdatedComponent(Target, Delta, New Rotation, Sweep, Out Hit, Teleport)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovementComponent*"
+        },
+        {
+          "name": "Delta",
+          "type": "FVector&"
+        },
+        {
+          "name": "New Rotation",
+          "type": "FQuat&"
+        },
+        {
+          "name": "Sweep",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Hit",
+          "type": "FHitResult*"
+        },
+        {
+          "name": "Teleport",
+          "type": "ETeleportType"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "resolve-penetration",
+      "name": "ResolvePenetration",
+      "category": "MovementComponent",
+      "signature": "ResolvePenetration(Target, Adjustment, Hit, New Rotation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UMovementComponent*"
+        },
+        {
+          "name": "Adjustment",
+          "type": "FVector&"
+        },
+        {
+          "name": "Hit",
+          "type": "FHitResult&"
+        },
+        {
+          "name": "New Rotation",
+          "type": "FQuat&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Try to move out of penetration in an object after a failed move. This function should respect the plane constraint if applicable.\n@note This simply calls the virtual ResolvePenetrationImpl() which can be overridden to implement custom behavior.\n@note The overload taking rotation as an FQuat is slightly faster than the version using FRotator (which will be converted to an FQuat)..\n@param Adjustment\tThe requested adjustment, usually from GetPenetrationAdjustment()\n@param Hit\t\t\tThe result of the failed move\n@return True if the adjustment was successful and the original move should be retried, or false if no repeated attempt should be made."
     }
   ]
 }

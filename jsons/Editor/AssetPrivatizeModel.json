@@ -9,6 +9,62 @@
   ],
   "functions": [
     {
+      "id": "get-object",
+      "name": "GetObject",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingPrivateAsset*"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Gets the object being privatized"
+    },
+    {
+      "id": "get-owning-package",
+      "name": "GetOwningPackage",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetOwningPackage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingPrivateAsset*"
+        }
+      ],
+      "returnType": "UPackage*",
+      "docs": "Gets the objects owning package"
+    },
+    {
+      "id": "is-referenced-in-memory-by-non-undo",
+      "name": "IsReferencedInMemoryByNonUndo",
+      "category": "AssetPrivatizeModel",
+      "signature": "IsReferencedInMemoryByNonUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingPrivateAsset*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the pending object referenced in memory by the undo stack"
+    },
+    {
+      "id": "is-referenced-in-memory-by-undo",
+      "name": "IsReferencedInMemoryByUndo",
+      "category": "AssetPrivatizeModel",
+      "signature": "IsReferencedInMemoryByUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingPrivateAsset*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the pending private object referenced in memory by something other than the undo stack"
+    },
+    {
       "id": "add-object-to-privatize",
       "name": "AddObjectToPrivatize",
       "category": "AssetPrivatizeModel",
@@ -31,6 +87,34 @@
       "docs": "Add an object to the list of pending private assets, this will invalidate the scanning state"
     },
     {
+      "id": "get-pending-private-assets",
+      "name": "GetPendingPrivateAssets",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetPendingPrivateAssets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "TArray<TSharedPtr<FPendingPrivateAsset>>*",
+      "docs": "Returns the pending private assets"
+    },
+    {
+      "id": "get-illegal-asset-references",
+      "name": "GetIllegalAssetReferences",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetIllegalAssetReferences(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "TSet<FName>&",
+      "docs": "Gets the packages of the assets on disk that would illegally reference the pending private objects if they were made private; won't be accurate until the scanning process completes."
+    },
+    {
       "id": "tick",
       "name": "Tick",
       "category": "AssetPrivatizeModel",
@@ -47,6 +131,20 @@
       ],
       "returnType": "Void",
       "docs": "Ticks the privatize model which does a timeslice of work before returning"
+    },
+    {
+      "id": "get-state",
+      "name": "GetState",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "EState",
+      "docs": "Returns the current state of the scanning process"
     },
     {
       "id": "get-progress",
@@ -75,6 +173,62 @@
       ],
       "returnType": "Text",
       "docs": "Gets the current text to display for the current progress of the scan"
+    },
+    {
+      "id": "is-anything-referenced-in-memory-by-non-undo",
+      "name": "IsAnythingReferencedInMemoryByNonUndo",
+      "category": "AssetPrivatizeModel",
+      "signature": "IsAnythingReferencedInMemoryByNonUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Are any of the pending assets being referenced in memory."
+    },
+    {
+      "id": "is-anything-referenced-in-memory-by-undo",
+      "name": "IsAnythingReferencedInMemoryByUndo",
+      "category": "AssetPrivatizeModel",
+      "signature": "IsAnythingReferencedInMemoryByUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Are any of the pending assets being referenced in the undo stack."
+    },
+    {
+      "id": "get-objects-privatized-count",
+      "name": "GetObjectsPrivatizedCount",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetObjectsPrivatizedCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of objects successfully made private"
+    },
+    {
+      "id": "get-target-asset-access-specifier",
+      "name": "GetTargetAssetAccessSpecifier",
+      "category": "AssetPrivatizeModel",
+      "signature": "GetTargetAssetAccessSpecifier(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetPrivatizeModel*"
+        }
+      ],
+      "returnType": "EAssetAccessSpecifier",
+      "docs": "Get asset access specifier to apply"
     },
     {
       "id": "can-privatize",
@@ -133,22 +287,18 @@
       "docs": "Marks the pending private objects as private and nulls out all detected illegal references"
     },
     {
-      "id": "set-state",
-      "name": "SetState",
+      "id": "on-state-changed",
+      "name": "OnStateChanged",
       "category": "AssetPrivatizeModel",
-      "signature": "SetState(Target, New State)",
+      "signature": "OnStateChanged(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FAssetPrivatizeModel*"
-        },
-        {
-          "name": "New State",
-          "type": "EState"
         }
       ],
-      "returnType": "Void",
-      "docs": "Sets the current state of the model"
+      "returnType": "FOnStateChanged&",
+      "docs": "NewState"
     }
   ]
 }

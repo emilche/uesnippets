@@ -1,0 +1,202 @@
+{
+  "id": "flow-graph-impl",
+  "label": "_flow_graph_impl",
+  "includepath": "_flow_graph_impl.h",
+  "includes": [
+    "_task",
+    "task_group",
+    "task_arena",
+    "flow_graph_abstractions",
+    "concurrent_priority_queue",
+    "list"
+  ],
+  "functions": [
+    {
+      "id": "graph-task",
+      "name": "graph_task",
+      "category": "_flow_graph_impl",
+      "signature": "graph_task(G, Allocator, Node Priority, Node Priority, Allocator)",
+      "params": [
+        {
+          "name": "G",
+          "type": "graph&"
+        },
+        {
+          "name": "Allocator",
+          "type": "small_object_allocator&"
+        },
+        {
+          "name": "Node Priority",
+          "type": "node_priority_t",
+          "default": "no_priority\n    )\n        : my_graph(g)"
+        },
+        {
+          "name": "Node Priority",
+          "type": "priority ("
+        },
+        {
+          "name": "Allocator",
+          "type": "my_allocator ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "priority-task-selector",
+      "name": "priority_task_selector",
+      "category": "_flow_graph_impl",
+      "signature": "priority_task_selector(Priority Queue, Priority Queue, Allocator)",
+      "params": [
+        {
+          "name": "Priority Queue",
+          "type": "graph_task_priority_queue_t&"
+        },
+        {
+          "name": "Priority Queue",
+          "type": "small_object_allocator& allocator ) : my_priority_queue ("
+        },
+        {
+          "name": "Allocator",
+          "type": "my_allocator ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "execute",
+      "name": "execute",
+      "category": "_flow_graph_impl",
+      "signature": "execute(Ed)",
+      "params": [
+        {
+          "name": "Ed",
+          "type": "execution_data&"
+        }
+      ],
+      "returnType": "task*"
+    },
+    {
+      "id": "cancel",
+      "name": "cancel",
+      "category": "_flow_graph_impl",
+      "signature": "cancel(Ed)",
+      "params": [
+        {
+          "name": "Ed",
+          "type": "execution_data&"
+        }
+      ],
+      "returnType": "task*"
+    },
+    {
+      "id": "wait-for-all",
+      "name": "wait_for_all",
+      "category": "_flow_graph_impl",
+      "signature": "wait_for_all(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "graph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The waiting thread will go off and steal work while it is blocked in the wait_for_all."
+    },
+    {
+      "id": "is-cancelled",
+      "name": "is_cancelled",
+      "category": "_flow_graph_impl",
+      "signature": "is_cancelled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "graph*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "exception-thrown",
+      "name": "exception_thrown",
+      "category": "_flow_graph_impl",
+      "signature": "exception_thrown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "graph*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "destruct-and-deallocate",
+      "name": "destruct_and_deallocate",
+      "category": "_flow_graph_impl",
+      "signature": "destruct_and_deallocate(Target, Ed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "graph_task*"
+        },
+        {
+          "name": "Ed",
+          "type": "execution_data&"
+        }
+      ],
+      "returnType": "template<DerivedType> void"
+    },
+    {
+      "id": "finalize",
+      "name": "finalize",
+      "category": "_flow_graph_impl",
+      "signature": "finalize(Target, Ed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "graph_task*"
+        },
+        {
+          "name": "Ed",
+          "type": "execution_data&"
+        }
+      ],
+      "returnType": "template<DerivedType> void"
+    },
+    {
+      "id": "spawn-in-graph-arena",
+      "name": "spawn_in_graph_arena",
+      "category": "_flow_graph_impl",
+      "signature": "spawn_in_graph_arena(G, Arena Task)",
+      "params": [
+        {
+          "name": "G",
+          "type": "graph&"
+        },
+        {
+          "name": "Arena Task",
+          "type": "graph_task&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "******************************************************************************\n// end of graph tasks helpers\n//********************************************************************************\n#if __TBB_PREVIEW_FLOW_GRAPH_NODE_SET\nclass get_graph_helper;\n#endif\n//! The base of all graph nodes.\nclass graph_node : no_copy {\nfriend class graph;\ntemplate<typename C, typename N>\nfriend class graph_iterator;\n#if __TBB_PREVIEW_FLOW_GRAPH_NODE_SET\nfriend class get_graph_helper;\n#endif\nprotected:\ngraph& my_graph;\ngraph& graph_reference() const {\n// TODO revamp: propagate graph_reference() method to all the reference places.\nreturn my_graph;\n}\ngraph_node* next = nullptr;\ngraph_node* prev = nullptr;\npublic:\nexplicit graph_node(graph& g);\nvirtual ~graph_node();\nprotected:\n// performs the reset on an individual node.\nvirtual void reset_node(reset_flags f = rf_reset_protocol) = 0;\n};  // class graph_node\ninline void activate_graph(graph& g) {\ng.my_is_active = true;\n}\ninline void deactivate_graph(graph& g) {\ng.my_is_active = false;\n}\ninline bool is_graph_active(graph& g) {\nreturn g.my_is_active;\n}\ninline graph_task* prioritize_task(graph& g, graph_task& gt) {\nif( no_priority == gt.priority )\nreturn &gt;\n//! Non-preemptive priority pattern. The original task is submitted as a work item to the\n//! priority queue, and a new critical task is created to take and execute a work item with\n//! the highest known priority. The reference counting responsibility is transferred (via\n//! allocate_continuation) to the new task.\ntask* critical_task = gt.my_allocator.new_object<priority_task_selector>(g.my_priority_queue, gt.my_allocator);\n__TBB_ASSERT( critical_task, \"bad_alloc?\" );\ng.my_priority_queue.push(&gt);\nusing tbb::detail::d1::submit;\nsubmit( *critical_task, *g.my_task_arena, *g.my_context, /*as_critical="
+    },
+    {
+      "id": "enqueue-in-graph-arena",
+      "name": "enqueue_in_graph_arena",
+      "category": "_flow_graph_impl",
+      "signature": "enqueue_in_graph_arena(G, Arena Task)",
+      "params": [
+        {
+          "name": "G",
+          "type": "graph&"
+        },
+        {
+          "name": "Arena Task",
+          "type": "graph_task&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "as_critical="
+    }
+  ]
+}

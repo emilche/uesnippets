@@ -1,0 +1,170 @@
+{
+  "id": "hessenberg-decomposition",
+  "label": "HessenbergDecomposition",
+  "includepath": "HessenbergDecomposition.h",
+  "includes": [],
+  "functions": [
+    {
+      "id": "compute-23de9d",
+      "name": "compute",
+      "category": "HessenbergDecomposition",
+      "signature": "compute(Target, Matrix)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        },
+        {
+          "name": "Matrix",
+          "type": "EigenBase<InputType>&"
+        }
+      ],
+      "returnType": "template<InputType> HessenbergDecomposition&",
+      "docs": "\\brief Computes Hessenberg decomposition of given matrix.\n\\param[in]  matrix  Square matrix whose Hessenberg decomposition is to be computed.\n\\returns    Reference to \\c *this\nThe Hessenberg decomposition is computed by bringing the columns of the\nmatrix successively in the required form using Householder reflections\n(see, e.g., Algorithm 7.4.2 in Golub \\& Van Loan, <i>%Matrix\nComputations</i>). The cost is \\f$ 10n^3/3 \\f$ flops, where \\f$ n \\f$\ndenotes the size of the given matrix.\nThis method reuses of the allocated data in the HessenbergDecomposition\nobject.\nExample: \\include HessenbergDecomposition_compute.cpp\nOutput: \\verbinclude HessenbergDecomposition_compute.out"
+    },
+    {
+      "id": "householder-coefficients",
+      "name": "householderCoefficients",
+      "category": "HessenbergDecomposition",
+      "signature": "householderCoefficients(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        }
+      ],
+      "returnType": "CoeffVectorType&",
+      "docs": "\\brief Returns the Householder coefficients.\n\\returns a const reference to the vector of Householder coefficients\n\\pre Either the constructor HessenbergDecomposition(const MatrixType&)\nor the member function compute(const MatrixType&) has been called\nbefore to compute the Hessenberg decomposition of a matrix.\nThe Householder coefficients allow the reconstruction of the matrix\n\\f$ Q \\f$ in the Hessenberg decomposition from the packed data.\n\\sa packedMatrix(), \\ref Householder_Module \"Householder module\""
+    },
+    {
+      "id": "packed-matrix",
+      "name": "packedMatrix",
+      "category": "HessenbergDecomposition",
+      "signature": "packedMatrix(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        }
+      ],
+      "returnType": "MatrixType&",
+      "docs": "\\brief Returns the internal representation of the decomposition\n\\returns a const reference to a matrix with the internal representation\nof the decomposition.\n\\pre Either the constructor HessenbergDecomposition(const MatrixType&)\nor the member function compute(const MatrixType&) has been called\nbefore to compute the Hessenberg decomposition of a matrix.\nThe returned matrix contains the following information:\n- the upper part and lower sub-diagonal represent the Hessenberg matrix H\n- the rest of the lower part contains the Householder vectors that, combined with\nHouseholder coefficients returned by householderCoefficients(),\nallows to reconstruct the matrix Q as\n\\f$ Q = H_{N-1} \\ldots H_1 H_0 \\f$.\nHere, the matrices \\f$ H_i \\f$ are the Householder transformations\n\\f$ H_i = (I - h_i v_i v_i^T) \\f$\nwhere \\f$ h_i \\f$ is the \\f$ i \\f$th Householder coefficient and\n\\f$ v_i \\f$ is the Householder vector defined by\n\\f$ v_i = [ 0, \\ldots, 0, 1, M(i+2,i), \\ldots, M(N-1,i) ]^T \\f$\nwith M the matrix returned by this function.\nSee LAPACK for further details on this packed storage.\nExample: \\include HessenbergDecomposition_packedMatrix.cpp\nOutput: \\verbinclude HessenbergDecomposition_packedMatrix.out\n\\sa householderCoefficients()"
+    },
+    {
+      "id": "matrix-q",
+      "name": "matrixQ",
+      "category": "HessenbergDecomposition",
+      "signature": "matrixQ(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        }
+      ],
+      "returnType": "HouseholderSequenceType",
+      "docs": "\\brief Reconstructs the orthogonal matrix Q in the decomposition\n\\returns object representing the matrix Q\n\\pre Either the constructor HessenbergDecomposition(const MatrixType&)\nor the member function compute(const MatrixType&) has been called\nbefore to compute the Hessenberg decomposition of a matrix.\nThis function returns a light-weight object of template class\nHouseholderSequence. You can either apply it directly to a matrix or\nyou can convert it to a matrix of type #MatrixType.\n\\sa matrixH() for an example, class HouseholderSequence"
+    },
+    {
+      "id": "matrix-h",
+      "name": "matrixH",
+      "category": "HessenbergDecomposition",
+      "signature": "matrixH(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        }
+      ],
+      "returnType": "MatrixHReturnType",
+      "docs": "\\brief Constructs the Hessenberg matrix H in the decomposition\n\\returns expression object representing the matrix H\n\\pre Either the constructor HessenbergDecomposition(const MatrixType&)\nor the member function compute(const MatrixType&) has been called\nbefore to compute the Hessenberg decomposition of a matrix.\nThe object returned by this function constructs the Hessenberg matrix H\nwhen it is assigned to a matrix or otherwise evaluated. The matrix H is\nconstructed from the packed matrix as returned by packedMatrix(): The\nupper part (including the subdiagonal) of the packed matrix contains\nthe matrix H. It may sometimes be better to directly use the packed\nmatrix instead of constructing the matrix H.\nExample: \\include HessenbergDecomposition_matrixH.cpp\nOutput: \\verbinclude HessenbergDecomposition_matrixH.out\n\\sa matrixQ(), packedMatrix()"
+    },
+    {
+      "id": "compute-cbe6cf",
+      "name": "_compute",
+      "category": "HessenbergDecomposition",
+      "signature": "_compute(Target, Mat A, H Coeffs, Temp)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        },
+        {
+          "name": "Mat A",
+          "type": "MatrixType&"
+        },
+        {
+          "name": "H Coeffs",
+          "type": "CoeffVectorType&"
+        },
+        {
+          "name": "Temp",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "template<MatrixType> void HessenbergDecomposition<MatrixType",
+      "docs": "\\internal\nPerforms a tridiagonal decomposition of \\a matA in place.\n\\param matA the input selfadjoint matrix\n\\param hCoeffs returned Householder coefficients\nThe result is written in the lower triangular part of \\a matA.\nImplemented from Golub's \"%Matrix Computations\", algorithm 8.3.1.\n\\sa packedMatrix()"
+    },
+    {
+      "id": "hessenberg-decomposition-matrix-h-return-type",
+      "name": "HessenbergDecompositionMatrixHReturnType",
+      "category": "HessenbergDecomposition",
+      "signature": "HessenbergDecompositionMatrixHReturnType(Target, Hess)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        },
+        {
+          "name": "Hess",
+          "type": "HessenbergDecomposition<MatrixType>& hess ) : m_hess ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "\\eigenvalues_module \\ingroup Eigenvalues_Module\n\\brief Expression type for return value of HessenbergDecomposition::matrixH()\n\\tparam MatrixType type of matrix in the Hessenberg decomposition\nObjects of this type represent the Hessenberg matrix in the Hessenberg\ndecomposition of some matrix. The object holds a reference to the\nHessenbergDecomposition class until the it is assigned or evaluated for\nsome other reason (the reference should remain valid during the life time\nof this object). This class is the return type of\nHessenbergDecomposition::matrixH(); there is probably no other use for this\nclass."
+    },
+    {
+      "id": "eval-to",
+      "name": "evalTo",
+      "category": "HessenbergDecomposition",
+      "signature": "evalTo(Target, Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        },
+        {
+          "name": "Result",
+          "type": "ResultType&"
+        }
+      ],
+      "returnType": "template<ResultType> void",
+      "docs": "\\brief Hessenberg matrix in decomposition.\n\\param[out] result  Hessenberg matrix in decomposition \\p hess which\nwas passed to the constructor"
+    },
+    {
+      "id": "rows",
+      "name": "rows",
+      "category": "HessenbergDecomposition",
+      "signature": "rows(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        }
+      ],
+      "returnType": "Index"
+    },
+    {
+      "id": "cols",
+      "name": "cols",
+      "category": "HessenbergDecomposition",
+      "signature": "cols(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "HessenbergDecomposition*"
+        }
+      ],
+      "returnType": "Index"
+    }
+  ]
+}

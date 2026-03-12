@@ -1,0 +1,75 @@
+{
+  "id": "projection",
+  "label": "Projection",
+  "includepath": "Templates/Projection.h",
+  "includes": [
+    "type_traits"
+  ],
+  "functions": [
+    {
+      "id": "decltype-c786d9",
+      "name": "decltype",
+      "category": "Projection",
+      "signature": "decltype(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TProjectionMemberFunction*"
+        },
+        {
+          "name": "Args",
+          "type": "auto ) operator ( ) ( Arg0Type&& Arg0,ArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<Arg0Type,. . . ArgTypes>"
+    },
+    {
+      "id": "decltype-93440d",
+      "name": "decltype",
+      "category": "Projection",
+      "signature": "decltype(Target, Arg 0)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TProjectionMemberData*"
+        },
+        {
+          "name": "Arg 0",
+          "type": "auto ) operator ( ) ( Arg0Type&&"
+        }
+      ],
+      "returnType": "template<Arg0Type>"
+    },
+    {
+      "id": "t-is-member-pointer-to-function",
+      "name": "TIsMemberPointerToFunction",
+      "category": "Projection",
+      "signature": "TIsMemberPointerToFunction(Class)",
+      "params": [
+        {
+          "name": "Class",
+          "type": "MemberType"
+        }
+      ],
+      "returnType": "template<Class,MemberType> bool"
+    },
+    {
+      "id": "projection",
+      "name": "Projection",
+      "category": "Projection",
+      "signature": "Projection(Invocable 0, Invocables)",
+      "params": [
+        {
+          "name": "Invocable 0",
+          "type": "Invocable0Type&&"
+        },
+        {
+          "name": "Invocables",
+          "type": "InvocableTypes&& . . ."
+        }
+      ],
+      "returnType": "template<Invocable0Type,. . . InvocableTypes> [ [ nodiscard ] ] auto",
+      "docs": "Projection() is a related function to Invoke(), in that it can be used to invoke an object with a set of arguments.\nHowever, it works by transforming something invocable into something callable, i.e. can be called with a normal parenthesized set of arguments.\n// These are equivalent:\nProjection(I)(Args...)\nInvoke(I, Args...).\n... with the same advantages:\n// Can accept member function pointers\nInvoke(&FObjType::Member, Obj);            // equivalent to Obj.Member\nInvoke(&FObjType::Func, Obj, Args...);     // equivalent to Obj.Func(Args...)\nProjection(&FObjType::Member)(Obj);        // equivalent to Obj.Member\nProjection(&FObjType::Func)(Obj, Args...); // equivalent to Obj.Func(Args...)\n// Can operate on pointers, including smart pointers\nInvoke(&FObjType::Member, ObjPtr);            // equivalent to ObjPtr->Member\nInvoke(&FObjType::Func, ObjPtr, Args...);     // equivalent to ObjPtr->Func(Args...)\nProjection(&FObjType::Member)(ObjPtr);        // equivalent to ObjPtr->Member\nProjection(&FObjType::Func)(ObjPtr, Args...); // equivalent to ObjPtr->Func(Args...)\nHowever, Projection() has some additional advantages:\n- Projection(I) returns I unchanged if it is already callable, meaning no redundant stepping in and out of many Invoke() calls in the debugger.\n- Projection(...) is variadic and can transform a sequence of invocables into a callable that invokes them one by one:\nProjection(A, B, C)(Args...)\nInvoke(C, Invoke(B, Invoke(A, Args...)))\nThis allows users to pass a sequence of projections to an algorithm that takes a single projection:\nstruct FInner\n{\nFString Name;\n};\nstruct FOuter\n{\nFInner Inner;\n};\n// Sort array of outers by the names of inner,\nAlgo::SortBy(ArrayOfOuters, Projection(&FOuter::Inner, &FInner::Name));"
+    }
+  ]
+}

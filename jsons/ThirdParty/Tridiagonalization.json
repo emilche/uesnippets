@@ -1,0 +1,305 @@
+{
+  "id": "tridiagonalization",
+  "label": "Tridiagonalization",
+  "includepath": "Tridiagonalization.h",
+  "includes": [],
+  "functions": [
+    {
+      "id": "compute",
+      "name": "compute",
+      "category": "Tridiagonalization",
+      "signature": "compute(Target, Matrix)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        },
+        {
+          "name": "Matrix",
+          "type": "EigenBase<InputType>&"
+        }
+      ],
+      "returnType": "template<InputType> Tridiagonalization&",
+      "docs": "\\brief Computes tridiagonal decomposition of given matrix.\n\\param[in]  matrix  Selfadjoint matrix whose tridiagonal decomposition\nis to be computed.\n\\returns    Reference to \\c *this\nThe tridiagonal decomposition is computed by bringing the columns of\nthe matrix successively in the required form using Householder\nreflections. The cost is \\f$ 4n^3/3 \\f$ flops, where \\f$ n \\f$ denotes\nthe size of the given matrix.\nThis method reuses of the allocated data in the Tridiagonalization\nobject, if the size of the matrix does not change.\nExample: \\include Tridiagonalization_compute.cpp\nOutput: \\verbinclude Tridiagonalization_compute.out"
+    },
+    {
+      "id": "householder-coefficients",
+      "name": "householderCoefficients",
+      "category": "Tridiagonalization",
+      "signature": "householderCoefficients(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "CoeffVectorType",
+      "docs": "\\brief Returns the Householder coefficients.\n\\returns a const reference to the vector of Householder coefficients\n\\pre Either the constructor Tridiagonalization(const MatrixType&) or\nthe member function compute(const MatrixType&) has been called before\nto compute the tridiagonal decomposition of a matrix.\nThe Householder coefficients allow the reconstruction of the matrix\n\\f$ Q \\f$ in the tridiagonal decomposition from the packed data.\nExample: \\include Tridiagonalization_householderCoefficients.cpp\nOutput: \\verbinclude Tridiagonalization_householderCoefficients.out\n\\sa packedMatrix(), \\ref Householder_Module \"Householder module\""
+    },
+    {
+      "id": "packed-matrix",
+      "name": "packedMatrix",
+      "category": "Tridiagonalization",
+      "signature": "packedMatrix(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "MatrixType&",
+      "docs": "\\brief Returns the internal representation of the decomposition\n\\returns a const reference to a matrix with the internal representation\nof the decomposition.\n\\pre Either the constructor Tridiagonalization(const MatrixType&) or\nthe member function compute(const MatrixType&) has been called before\nto compute the tridiagonal decomposition of a matrix.\nThe returned matrix contains the following information:\n- the strict upper triangular part is equal to the input matrix A.\n- the diagonal and lower sub-diagonal represent the real tridiagonal\nsymmetric matrix T.\n- the rest of the lower part contains the Householder vectors that,\ncombined with Householder coefficients returned by\nhouseholderCoefficients(), allows to reconstruct the matrix Q as\n\\f$ Q = H_{N-1} \\ldots H_1 H_0 \\f$.\nHere, the matrices \\f$ H_i \\f$ are the Householder transformations\n\\f$ H_i = (I - h_i v_i v_i^T) \\f$\nwhere \\f$ h_i \\f$ is the \\f$ i \\f$th Householder coefficient and\n\\f$ v_i \\f$ is the Householder vector defined by\n\\f$ v_i = [ 0, \\ldots, 0, 1, M(i+2,i), \\ldots, M(N-1,i) ]^T \\f$\nwith M the matrix returned by this function.\nSee LAPACK for further details on this packed storage.\nExample: \\include Tridiagonalization_packedMatrix.cpp\nOutput: \\verbinclude Tridiagonalization_packedMatrix.out\n\\sa householderCoefficients()"
+    },
+    {
+      "id": "matrix-q",
+      "name": "matrixQ",
+      "category": "Tridiagonalization",
+      "signature": "matrixQ(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "HouseholderSequenceType",
+      "docs": "\\brief Returns the unitary matrix Q in the decomposition\n\\returns object representing the matrix Q\n\\pre Either the constructor Tridiagonalization(const MatrixType&) or\nthe member function compute(const MatrixType&) has been called before\nto compute the tridiagonal decomposition of a matrix.\nThis function returns a light-weight object of template class\nHouseholderSequence. You can either apply it directly to a matrix or\nyou can convert it to a matrix of type #MatrixType.\n\\sa Tridiagonalization(const MatrixType&) for an example,\nmatrixT(), class HouseholderSequence"
+    },
+    {
+      "id": "matrix-t",
+      "name": "matrixT",
+      "category": "Tridiagonalization",
+      "signature": "matrixT(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "MatrixTReturnType",
+      "docs": "\\brief Returns an expression of the tridiagonal matrix T in the decomposition\n\\returns expression object representing the matrix T\n\\pre Either the constructor Tridiagonalization(const MatrixType&) or\nthe member function compute(const MatrixType&) has been called before\nto compute the tridiagonal decomposition of a matrix.\nCurrently, this function can be used to extract the matrix T from internal\ndata and copy it to a dense matrix object. In most cases, it may be\nsufficient to directly use the packed matrix or the vector expressions\nreturned by diagonal() and subDiagonal() instead of creating a new\ndense copy matrix with this function.\n\\sa Tridiagonalization(const MatrixType&) for an example,\nmatrixQ(), packedMatrix(), diagonal(), subDiagonal()"
+    },
+    {
+      "id": "diagonal",
+      "name": "diagonal",
+      "category": "Tridiagonalization",
+      "signature": "diagonal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "template<MatrixType> Tridiagonalization<MatrixType>::DiagonalReturnType Tridiagonalization<MatrixType",
+      "docs": "\\brief Returns the diagonal of the tridiagonal matrix T in the decomposition.\n\\returns expression representing the diagonal of T\n\\pre Either the constructor Tridiagonalization(const MatrixType&) or\nthe member function compute(const MatrixType&) has been called before\nto compute the tridiagonal decomposition of a matrix.\nExample: \\include Tridiagonalization_diagonal.cpp\nOutput: \\verbinclude Tridiagonalization_diagonal.out\n\\sa matrixT(), subDiagonal()"
+    },
+    {
+      "id": "sub-diagonal",
+      "name": "subDiagonal",
+      "category": "Tridiagonalization",
+      "signature": "subDiagonal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "template<MatrixType> Tridiagonalization<MatrixType>::SubDiagonalReturnType Tridiagonalization<MatrixType",
+      "docs": "\\brief Returns the subdiagonal of the tridiagonal matrix T in the decomposition.\n\\returns expression representing the subdiagonal of T\n\\pre Either the constructor Tridiagonalization(const MatrixType&) or\nthe member function compute(const MatrixType&) has been called before\nto compute the tridiagonal decomposition of a matrix.\n\\sa diagonal() for an example, matrixT()"
+    },
+    {
+      "id": "tridiagonalization-inplace-8a977b",
+      "name": "tridiagonalization_inplace",
+      "category": "Tridiagonalization",
+      "signature": "tridiagonalization_inplace(Target, Mat A, H Coeffs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        },
+        {
+          "name": "Mat A",
+          "type": "MatrixType&"
+        },
+        {
+          "name": "H Coeffs",
+          "type": "CoeffVectorType&"
+        }
+      ],
+      "returnType": "template<MatrixType,CoeffVectorType> EIGEN_DEVICE_FUNC void",
+      "docs": "\\internal\nPerforms a tridiagonal decomposition of the selfadjoint matrix \\a matA in-place.\n\\param[in,out] matA On input the selfadjoint matrix. Only the \\b lower triangular part is referenced.\nOn output, the strict upper part is left unchanged, and the lower triangular part\nrepresents the T and Q matrices in packed format has detailed below.\n\\param[out]    hCoeffs returned Householder coefficients (see below)\nOn output, the tridiagonal selfadjoint matrix T is stored in the diagonal\nand lower sub-diagonal of the matrix \\a matA.\nThe unitary matrix Q is represented in a compact way as a product of\nHouseholder reflectors \\f$ H_i \\f$ such that:\n\\f$ Q = H_{N-1} \\ldots H_1 H_0 \\f$.\nThe Householder reflectors are defined as\n\\f$ H_i = (I - h_i v_i v_i^T) \\f$\nwhere \\f$ h_i = hCoeffs[i]\\f$ is the \\f$ i \\f$th Householder coefficient and\n\\f$ v_i \\f$ is the Householder vector defined by\n\\f$ v_i = [ 0, \\ldots, 0, 1, matA(i+2,i), \\ldots, matA(N-1,i) ]^T \\f$.\nImplemented from Golub's \"Matrix Computations\", algorithm 8.3.1.\n\\sa Tridiagonalization::packedMatrix()"
+    },
+    {
+      "id": "tridiagonalization-inplace-10dd47",
+      "name": "tridiagonalization_inplace",
+      "category": "Tridiagonalization",
+      "signature": "tridiagonalization_inplace(Target, Mat, Diag, Subdiag, Hcoeffs, Extract Q)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        },
+        {
+          "name": "Mat",
+          "type": "MatrixType&"
+        },
+        {
+          "name": "Diag",
+          "type": "DiagonalType&"
+        },
+        {
+          "name": "Subdiag",
+          "type": "SubDiagonalType&"
+        },
+        {
+          "name": "Hcoeffs",
+          "type": "CoeffVectorType&"
+        },
+        {
+          "name": "Extract Q",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<MatrixType,DiagonalType,SubDiagonalType,CoeffVectorType> EIGEN_DEVICE_FUNC void",
+      "docs": "\\brief Performs a full tridiagonalization in place\n\\param[in,out]  mat  On input, the selfadjoint matrix whose tridiagonal\ndecomposition is to be computed. Only the lower triangular part referenced.\nThe rest is left unchanged. On output, the orthogonal matrix Q\nin the decomposition if \\p extractQ is true.\n\\param[out]  diag  The diagonal of the tridiagonal matrix T in the\ndecomposition.\n\\param[out]  subdiag  The subdiagonal of the tridiagonal matrix T in\nthe decomposition.\n\\param[in]  extractQ  If true, the orthogonal matrix Q in the\ndecomposition is computed and stored in \\p mat.\nComputes the tridiagonal decomposition of the selfadjoint matrix \\p mat in place\nsuch that \\f$ mat = Q T Q^* \\f$ where \\f$ Q \\f$ is unitary and \\f$ T \\f$ a real\nsymmetric tridiagonal matrix.\nThe tridiagonal matrix T is passed to the output parameters \\p diag and \\p subdiag. If\n\\p extractQ is true, then the orthogonal matrix Q is passed to \\p mat. Otherwise the lower\npart of the matrix \\p mat is destroyed.\nThe vectors \\p diag and \\p subdiag are not resized. The function\nassumes that they are already of the correct size. The length of the\nvector \\p diag should equal the number of rows in \\p mat, and the\nlength of the vector \\p subdiag should be one left.\nThis implementation contains an optimized path for 3-by-3 matrices\nwhich is especially useful for plane fitting.\n\\note Currently, it requires two temporary vectors to hold the intermediate\nHouseholder coefficients, and to reconstruct the matrix Q from the Householder\nreflectors.\nExample (this uses the same matrix as the example in\nTridiagonalization::Tridiagonalization(const MatrixType&)):\n\\include Tridiagonalization_decomposeInPlace.cpp\nOutput: \\verbinclude Tridiagonalization_decomposeInPlace.out\n\\sa class Tridiagonalization"
+    },
+    {
+      "id": "run-2eaf21",
+      "name": "run",
+      "category": "Tridiagonalization",
+      "signature": "run(Mat, Diag, Subdiag, H Coeffs, Extract Q)",
+      "params": [
+        {
+          "name": "Mat",
+          "type": "MatrixType&"
+        },
+        {
+          "name": "Diag",
+          "type": "DiagonalType&"
+        },
+        {
+          "name": "Subdiag",
+          "type": "SubDiagonalType&"
+        },
+        {
+          "name": "H Coeffs",
+          "type": "CoeffVectorType&"
+        },
+        {
+          "name": "Extract Q",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<DiagonalType,SubDiagonalType> EIGEN_DEVICE_FUNC void",
+      "docs": "\\internal\nGeneral full tridiagonalization"
+    },
+    {
+      "id": "run-4554fa",
+      "name": "run",
+      "category": "Tridiagonalization",
+      "signature": "run(Mat, Diag, Subdiag, Extract Q)",
+      "params": [
+        {
+          "name": "Mat",
+          "type": "MatrixType&"
+        },
+        {
+          "name": "Diag",
+          "type": "DiagonalType&"
+        },
+        {
+          "name": "Subdiag",
+          "type": "SubDiagonalType&"
+        },
+        {
+          "name": "Extract Q",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<DiagonalType,SubDiagonalType,CoeffVectorType> void",
+      "docs": "\\internal\nSpecialization for 3x3 real matrices.\nEspecially useful for plane fitting."
+    },
+    {
+      "id": "run-0cdd0e",
+      "name": "run",
+      "category": "Tridiagonalization",
+      "signature": "run(Mat, Diag, Extract Q)",
+      "params": [
+        {
+          "name": "Mat",
+          "type": "MatrixType&"
+        },
+        {
+          "name": "Diag",
+          "type": "DiagonalType&"
+        },
+        {
+          "name": "Extract Q",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<DiagonalType,SubDiagonalType,CoeffVectorType> EIGEN_DEVICE_FUNC void",
+      "docs": "\\internal\nTrivial specialization for 1x1 matrices"
+    },
+    {
+      "id": "tridiagonalization-matrix-t-return-type",
+      "name": "TridiagonalizationMatrixTReturnType",
+      "category": "Tridiagonalization",
+      "signature": "TridiagonalizationMatrixTReturnType(Target, Mat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        },
+        {
+          "name": "Mat",
+          "type": "MatrixType& mat ) : m_matrix ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "\\internal\n\\eigenvalues_module \\ingroup Eigenvalues_Module\n\\brief Expression type for return value of Tridiagonalization::matrixT()\n\\tparam MatrixType type of underlying dense matrix"
+    },
+    {
+      "id": "eval-to",
+      "name": "evalTo",
+      "category": "Tridiagonalization",
+      "signature": "evalTo(Target, Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        },
+        {
+          "name": "Result",
+          "type": "ResultType&"
+        }
+      ],
+      "returnType": "template<ResultType> void"
+    },
+    {
+      "id": "rows",
+      "name": "rows",
+      "category": "Tridiagonalization",
+      "signature": "rows(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "EIGEN_CONSTEXPR Index"
+    },
+    {
+      "id": "cols",
+      "name": "cols",
+      "category": "Tridiagonalization",
+      "signature": "cols(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Tridiagonalization*"
+        }
+      ],
+      "returnType": "EIGEN_CONSTEXPR Index"
+    }
+  ]
+}

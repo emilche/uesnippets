@@ -16,6 +16,19 @@
   ],
   "functions": [
     {
+      "id": "requires-cached-leaf-info",
+      "name": "RequiresCachedLeafInfo",
+      "category": "ShapeInstance",
+      "signature": "RequiresCachedLeafInfo(Geometry)",
+      "params": [
+        {
+          "name": "Geometry",
+          "type": "FImplicitObject*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "create-per-shape-data",
       "name": "CreatePerShapeData",
       "category": "ShapeInstance",
@@ -63,18 +76,56 @@
       "returnType": "FPerShapeData*"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "update-shape-bounds-a733ed",
+      "name": "UpdateShapeBounds",
       "category": "ShapeInstance",
-      "signature": "Serialize(Target, Ar)",
+      "signature": "UpdateShapeBounds(Target, World TM, Bounds Expansion)",
       "params": [
         {
           "name": "Target",
           "type": "FPerShapeData*"
         },
         {
-          "name": "Ar",
-          "type": "FChaosArchive&"
+          "name": "World TM",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "Bounds Expansion",
+          "type": "FVec3&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-world-space-inflated-shape-bounds",
+      "name": "GetWorldSpaceInflatedShapeBounds",
+      "category": "ShapeInstance",
+      "signature": "GetWorldSpaceInflatedShapeBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "TAABB<FReal,3>&"
+    },
+    {
+      "id": "update-world-space-state-403e15",
+      "name": "UpdateWorldSpaceState",
+      "category": "ShapeInstance",
+      "signature": "UpdateWorldSpaceState(Target, World Transform, Bounds Expansion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        },
+        {
+          "name": "World Transform",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "Bounds Expansion",
+          "type": "FVec3&"
         }
       ],
       "returnType": "Void"
@@ -91,14 +142,14 @@
         },
         {
           "name": "In Geometry",
-          "type": "FImplicitObjectPtr&"
+          "type": "TSerializablePtr<FImplicitObject>"
         }
       ],
       "returnType": "TUniquePtr<FShapeInstanceProxy>",
-      "docs": "NOTE: FShapeInstance is a Physics-Thread object.\nSee FShapeInstanceProxy for the game-thread equivalent\nFShapeInstance contains the per-shape data associated with a single shape on a particle.\nThis contains data like the collision / query filters, material properties etc.\nEvery particle holds one FShapeInstance object for each geometry they use.\nIf the particle has a Union of geometries there will be one FShapeInstance\nfor each geometry in the union. (Except ClusteredUnions - these are not flattened\nbecause they contain their own query acceleration structure.)\nNOTE: keep size to a minimum. There can be millions of these in s scene.\nNOTE: this version has reduced-memory material storage compared to FShapeInstanceProxy,\nbut increased cost when switching from a single-material to a multi-material shape\n(though this should not be happening much if at all)."
+      "docs": "NOTE: FShapeInstanceProxy is a Game-Thread object.\nSee FShapeInstance for the physics-thread equivalent\nFShapeInstanceProxy contains the per-shape data associated with a single shape on a particle.\nThis contains data like the collision / query filters, material properties etc.\nEvery particle holds one FShapeInstanceProxy object for each geometry they use.\nIf the particle has a Union of geometries there will be one FShapeInstanceProxy\nfor each geometry in the union. (Except ClusteredUnions - these are not flattened\nbecause they contain their own query acceleration structure.)\nNOTE: keep size to a minimum. There can be millions of these in s scene.\n@todo(chaos) : try to remove the GT Proxy pointer - this could easily be passed into the\nrelevant functions instead.\n@todo(chaos) : reduce the cost of MaterialData for shapes with one materialand no masks etc."
     },
     {
-      "id": "update-shape-bounds",
+      "id": "update-shape-bounds-1c44aa",
       "name": "UpdateShapeBounds",
       "category": "ShapeInstance",
       "signature": "UpdateShapeBounds(Target, World TM)",
@@ -112,10 +163,135 @@
           "type": "FRigidTransform3&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
     },
     {
-      "id": "update-world-space-state",
+      "id": "get-user-data",
+      "name": "GetUserData",
+      "category": "ShapeInstance",
+      "signature": "GetUserData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "void*",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-user-data",
+      "name": "SetUserData",
+      "category": "ShapeInstance",
+      "signature": "SetUserData(Target, In User Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In User Data",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-query-data",
+      "name": "GetQueryData",
+      "category": "ShapeInstance",
+      "signature": "GetQueryData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "FCollisionFilterData&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-query-data",
+      "name": "SetQueryData",
+      "category": "ShapeInstance",
+      "signature": "SetQueryData(Target, In Query Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Query Data",
+          "type": "FCollisionFilterData&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-sim-data",
+      "name": "GetSimData",
+      "category": "ShapeInstance",
+      "signature": "GetSimData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "FCollisionFilterData&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-sim-data",
+      "name": "SetSimData",
+      "category": "ShapeInstance",
+      "signature": "SetSimData(Target, In Sim Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Sim Data",
+          "type": "FCollisionFilterData&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "update-world-space-state-6ae079",
       "name": "UpdateWorldSpaceState",
       "category": "ShapeInstance",
       "signature": "UpdateWorldSpaceState(Target, World Transform)",
@@ -129,7 +305,12 @@
           "type": "FRigidTransform3&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
     },
     {
       "id": "get-leaf-geometry",
@@ -142,7 +323,12 @@
           "type": "FShapeInstanceProxy*"
         }
       ],
-      "returnType": "FImplicitObject*"
+      "returnType": "FImplicitObject*",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
     },
     {
       "id": "get-leaf-relative-transform",
@@ -155,7 +341,12 @@
           "type": "FShapeInstanceProxy*"
         }
       ],
-      "returnType": "FRigidTransform3"
+      "returnType": "FRigidTransform3",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
     },
     {
       "id": "get-leaf-world-transform",
@@ -172,7 +363,12 @@
           "type": "FGeometryParticleHandle*"
         }
       ],
-      "returnType": "FRigidTransform3"
+      "returnType": "FRigidTransform3",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
     },
     {
       "id": "update-leaf-world-transform",
@@ -187,6 +383,834 @@
         {
           "name": "Particle",
           "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "num-materials",
+      "name": "NumMaterials",
+      "category": "ShapeInstance",
+      "signature": "NumMaterials(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "Int",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-material",
+      "name": "GetMaterial",
+      "category": "ShapeInstance",
+      "signature": "GetMaterial(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FMaterialHandle&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-materials",
+      "name": "GetMaterials",
+      "category": "ShapeInstance",
+      "signature": "GetMaterials(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "TArray<FMaterialHandle>&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-material-masks",
+      "name": "GetMaterialMasks",
+      "category": "ShapeInstance",
+      "signature": "GetMaterialMasks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "TArray<FMaterialMaskHandle>&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-material-mask-maps",
+      "name": "GetMaterialMaskMaps",
+      "category": "ShapeInstance",
+      "signature": "GetMaterialMaskMaps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "TArray<uint32>&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-material-mask-map-materials",
+      "name": "GetMaterialMaskMapMaterials",
+      "category": "ShapeInstance",
+      "signature": "GetMaterialMaskMapMaterials(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "TArray<FMaterialHandle>&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-dirty-flags",
+      "name": "GetDirtyFlags",
+      "category": "ShapeInstance",
+      "signature": "GetDirtyFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "FShapeDirtyFlags",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-material",
+      "name": "SetMaterial",
+      "category": "ShapeInstance",
+      "signature": "SetMaterial(Target, In Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Material",
+          "type": "FMaterialHandle"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-materials",
+      "name": "SetMaterials",
+      "category": "ShapeInstance",
+      "signature": "SetMaterials(Target, In Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Materials",
+          "type": "TArray<FMaterialHandle>&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-material-masks",
+      "name": "SetMaterialMasks",
+      "category": "ShapeInstance",
+      "signature": "SetMaterialMasks(Target, In Material Masks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Material Masks",
+          "type": "TArray<FMaterialMaskHandle>&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-material-mask-maps",
+      "name": "SetMaterialMaskMaps",
+      "category": "ShapeInstance",
+      "signature": "SetMaterialMaskMaps(Target, In Material Mask Maps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Material Mask Maps",
+          "type": "TArray<uint32>&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-material-mask-map-materials",
+      "name": "SetMaterialMaskMapMaterials",
+      "category": "ShapeInstance",
+      "signature": "SetMaterialMaskMapMaterials(Target, In Material Mask Map Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Material Mask Map Materials",
+          "type": "TArray<FMaterialHandle>&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-query-enabled",
+      "name": "GetQueryEnabled",
+      "category": "ShapeInstance",
+      "signature": "GetQueryEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "Bool",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-query-enabled",
+      "name": "SetQueryEnabled",
+      "category": "ShapeInstance",
+      "signature": "SetQueryEnabled(Target, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-sim-enabled",
+      "name": "GetSimEnabled",
+      "category": "ShapeInstance",
+      "signature": "GetSimEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "Bool",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-sim-enabled",
+      "name": "SetSimEnabled",
+      "category": "ShapeInstance",
+      "signature": "SetSimEnabled(Target, Enable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Enable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-is-probe",
+      "name": "GetIsProbe",
+      "category": "ShapeInstance",
+      "signature": "GetIsProbe(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "Bool",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-is-probe",
+      "name": "SetIsProbe",
+      "category": "ShapeInstance",
+      "signature": "SetIsProbe(Target, Is Probe)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Is Probe",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-collision-trace-type",
+      "name": "GetCollisionTraceType",
+      "category": "ShapeInstance",
+      "signature": "GetCollisionTraceType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "EChaosCollisionTraceFlag",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-collision-trace-type",
+      "name": "SetCollisionTraceType",
+      "category": "ShapeInstance",
+      "signature": "SetCollisionTraceType(Target, In Trace Flag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Trace Flag",
+          "type": "EChaosCollisionTraceFlag"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-collision-data",
+      "name": "GetCollisionData",
+      "category": "ShapeInstance",
+      "signature": "GetCollisionData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "FCollisionData&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-collision-data",
+      "name": "SetCollisionData",
+      "category": "ShapeInstance",
+      "signature": "SetCollisionData(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Data",
+          "type": "FCollisionData&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "get-material-data",
+      "name": "GetMaterialData",
+      "category": "ShapeInstance",
+      "signature": "GetMaterialData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        }
+      ],
+      "returnType": "FMaterialData&",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-material-data",
+      "name": "SetMaterialData",
+      "category": "ShapeInstance",
+      "signature": "SetMaterialData(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Data",
+          "type": "FMaterialData&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "sync-remote-data",
+      "name": "SyncRemoteData",
+      "category": "ShapeInstance",
+      "signature": "SyncRemoteData(Target, Manager, Shape Data Idx, Remote Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Manager",
+          "type": "FDirtyPropertiesManager&"
+        },
+        {
+          "name": "Shape Data Idx",
+          "type": "Int"
+        },
+        {
+          "name": "Remote Data",
+          "type": "FShapeDirtyData&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "set-proxy",
+      "name": "SetProxy",
+      "category": "ShapeInstance",
+      "signature": "SetProxy(Target, In Proxy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "In Proxy",
+          "type": "IPhysicsProxyBase*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "modify-sim-data",
+      "name": "ModifySimData",
+      "category": "ShapeInstance",
+      "signature": "ModifySimData(Target, Lambda Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Lambda Func",
+          "type": "Lambda&"
+        }
+      ],
+      "returnType": "template<Lambda> void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "modify-materials",
+      "name": "ModifyMaterials",
+      "category": "ShapeInstance",
+      "signature": "ModifyMaterials(Target, Lambda Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Lambda Func",
+          "type": "Lambda&"
+        }
+      ],
+      "returnType": "template<Lambda> void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "modify-material-masks",
+      "name": "ModifyMaterialMasks",
+      "category": "ShapeInstance",
+      "signature": "ModifyMaterialMasks(Target, Lambda Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Lambda Func",
+          "type": "Lambda&"
+        }
+      ],
+      "returnType": "template<Lambda> void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "modify-material-mask-maps",
+      "name": "ModifyMaterialMaskMaps",
+      "category": "ShapeInstance",
+      "signature": "ModifyMaterialMaskMaps(Target, Lambda Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Lambda Func",
+          "type": "Lambda&"
+        }
+      ],
+      "returnType": "template<Lambda> void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "modify-material-mask-map-materials",
+      "name": "ModifyMaterialMaskMapMaterials",
+      "category": "ShapeInstance",
+      "signature": "ModifyMaterialMaskMapMaterials(Target, Lambda Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceProxy*"
+        },
+        {
+          "name": "Lambda Func",
+          "type": "Lambda&"
+        }
+      ],
+      "returnType": "template<Lambda> void",
+      "supportedTargets": [
+        "FShapeInstanceProxy*",
+        "FShapeInstance*",
+        "FPerShapeData*"
+      ]
+    },
+    {
+      "id": "num-materials-internal",
+      "name": "NumMaterialsInternal",
+      "category": "ShapeInstance",
+      "signature": "NumMaterialsInternal(Target, Sim Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstance*"
+        },
+        {
+          "name": "Sim Materials",
+          "type": "THandleArray<FChaosPhysicsMaterial>*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-material-internal",
+      "name": "GetMaterialInternal",
+      "category": "ShapeInstance",
+      "signature": "GetMaterialInternal(Target, Index, Sim Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstance*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Sim Materials",
+          "type": "THandleArray<FChaosPhysicsMaterial>*"
+        }
+      ],
+      "returnType": "FMaterialHandle&"
+    },
+    {
+      "id": "get-world-transform",
+      "name": "GetWorldTransform",
+      "category": "ShapeInstance",
+      "signature": "GetWorldTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceExtended*"
+        }
+      ],
+      "returnType": "FRigidTransform3",
+      "docs": "An extended version of FShapeInstance (physics-thread shape instance data) that caches\nsome world-space state of the shape for use in collision detection. This extended data\nif only required for shapes that have a transform relative to the particle they are\nattached to. It helps by avoiding the need to recalculate the shape transform every\ntime it is needed in collision detection, which is once for each other shape we\nmay be in contact with.\nNOTE: keep size to a minimum. There can be millions of these in s scene."
+    },
+    {
+      "id": "set-world-transform",
+      "name": "SetWorldTransform",
+      "category": "ShapeInstance",
+      "signature": "SetWorldTransform(Target, Leaf World Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstanceExtended*"
+        },
+        {
+          "name": "Leaf World Transform",
+          "type": "FRigidTransform3&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "as-shape-instance-proxy",
+      "name": "AsShapeInstanceProxy",
+      "category": "ShapeInstance",
+      "signature": "AsShapeInstanceProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "FShapeInstanceProxy*"
+    },
+    {
+      "id": "as-shape-instance",
+      "name": "AsShapeInstance",
+      "category": "ShapeInstance",
+      "signature": "AsShapeInstance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "FShapeInstance*"
+    },
+    {
+      "id": "as-shape-instance-extended",
+      "name": "AsShapeInstanceExtended",
+      "category": "ShapeInstance",
+      "signature": "AsShapeInstanceExtended(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "Private::FShapeInstanceExtended*"
+    },
+    {
+      "id": "decltype",
+      "name": "decltype",
+      "category": "ShapeInstance",
+      "signature": "decltype(Target, Lambda)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FShapeInstance*"
+        },
+        {
+          "name": "Lambda",
+          "type": "auto ) FPerShapeData::DownCast ( TLambda&"
+        }
+      ],
+      "returnType": "template<TLambda>"
+    },
+    {
+      "id": "get-geometry",
+      "name": "GetGeometry",
+      "category": "ShapeInstance",
+      "signature": "GetGeometry(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "FImplicitObjectRef"
+    },
+    {
+      "id": "get-world-space-shape-bounds",
+      "name": "GetWorldSpaceShapeBounds",
+      "category": "ShapeInstance",
+      "signature": "GetWorldSpaceShapeBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "TAABB<FReal,3>&"
+    },
+    {
+      "id": "get-shape-index",
+      "name": "GetShapeIndex",
+      "category": "ShapeInstance",
+      "signature": "GetShapeIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "modify-shape-index",
+      "name": "ModifyShapeIndex",
+      "category": "ShapeInstance",
+      "signature": "ModifyShapeIndex(Target, New Shape Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPerShapeData*"
+        },
+        {
+          "name": "New Shape Index",
+          "type": "Int"
         }
       ],
       "returnType": "Void"

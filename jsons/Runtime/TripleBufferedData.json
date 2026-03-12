@@ -1,0 +1,39 @@
+{
+  "id": "triple-buffered-data",
+  "label": "TripleBufferedData",
+  "includepath": "Framework/TripleBufferedData.h",
+  "includes": [
+    "Atomic",
+    "SharedPointer"
+  ],
+  "functions": [
+    {
+      "id": "exchange-producer-buffer",
+      "name": "ExchangeProducerBuffer",
+      "category": "TripleBufferedData",
+      "signature": "ExchangeProducerBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTripleBufferedData*"
+        }
+      ],
+      "returnType": "DataType*",
+      "docs": "Get a new buffer for the producing thread to write to, while at\nthe same time making the previous buffer available to the consumer.\nThis function will manufacture new instances of \\c DataType, if it\nneeds to.  Thus, the returned pointer will never be null.\nThe \\c DataType value is returned by shared pointer to simplify\nownership semantics, particularly with respect to cleanup.  It is\nimportant to not mistake that for exclusive ownership of the memory,\nand retain the return value of this function too long.  For instance:\n\\code\nTTripleBufferedData<int> IntBuffer;\n...\nint* MyCopy = IntBuffer.ExchangeProducerBuffer();\n(*MyCopy) = 1; // Ok\nIntBuffer.ExchangeProducerBuffer(); // Mem holding \"1\" now available to consumer thread.\n(*MyCopy) = 2; // Race condition!\n\\endcode\nInstead, always reuse the same shared pointer, or dereference the\nreturned shared pointer if you're not worried about copying the data.\n\\code\nTTripleBufferedData<int> IntBuffer;\n...\nint* MyCopy = IntBuffer.ExchangeProducerBuffer();\n(*MyCopy) = 1; // Ok\nMyCopy = IntBuffer.ExchangeProducerBuffer(); // Mem holding \"1\" now available to consumer thread.\n(*MyCopy) = 2; // Ok\n\\endcode"
+    },
+    {
+      "id": "exchange-consumer-buffer",
+      "name": "ExchangeConsumerBuffer",
+      "category": "TripleBufferedData",
+      "signature": "ExchangeConsumerBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTripleBufferedData*"
+        }
+      ],
+      "returnType": "DataType*",
+      "docs": "Get an updated buffer for the consuming thread to read from.\nThe returned pointer may be null if the producer thread hasn't done\nan update since the last time this function was called.\nThe same capacity for a race condition exists with this functions\nreturn value as with \\c ExchangeProducerBuffer().\n\\code\nTTripleBufferedData<int> IntBuffer;\n...\nint* MyCopy = IntBuffer.ExchangeConsumerBuffer();\nint X = *MyCopy; // Ok\nIntBuffer.ExchangeConsumerBuffer(); // Mem holding X returned to producer thread.\nint Y = *MyCopy; // Race condition!\n\\endcode\nAlways refresh the same variable.\n\\code\nTTripleBufferedData<int> IntBuffer;\n...\nint* MyCopy = IntBuffer.ExchangeConsumerBuffer();\nint X = *MyCopy; // Ok\nMyCopy = IntBuffer.ExchangeConsumerBuffer(); // Mem holding X returned to producer thread.\nint Y = *MyCopy; // Ok\n\\endcode"
+    }
+  ]
+}

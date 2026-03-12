@@ -1,0 +1,237 @@
+{
+  "id": "sim-sweep",
+  "label": "SimSweep",
+  "includepath": "Chaos/Collision/SimSweep.h",
+  "includes": [
+    "CollisionFilter",
+    "GeometryQueries",
+    "ISpatialAcceleration",
+    "ParticleHandle"
+  ],
+  "functions": [
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "SimSweep",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSimSweepParticleHit*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FSimSweepParticleHit*",
+        "FSimSweepCollectorFirstHit*"
+      ]
+    },
+    {
+      "id": "is-hit",
+      "name": "IsHit",
+      "category": "SimSweep",
+      "signature": "IsHit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSimSweepParticleHit*"
+        }
+      ],
+      "returnType": "Bool",
+      "supportedTargets": [
+        "FSimSweepParticleHit*",
+        "FSimSweepCollectorFirstHit*"
+      ]
+    },
+    {
+      "id": "overlap",
+      "name": "Overlap",
+      "category": "SimSweep",
+      "signature": "Overlap(Target, Instance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSimSweepSQVisitor*"
+        },
+        {
+          "name": "Instance",
+          "type": "FVisitorData&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "sweep",
+      "name": "Sweep",
+      "category": "SimSweep",
+      "signature": "Sweep(Target, Instance, Cur Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSimSweepSQVisitor*"
+        },
+        {
+          "name": "Instance",
+          "type": "FVisitorData&"
+        },
+        {
+          "name": "Cur Data",
+          "type": "FQueryFastData&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "raycast",
+      "name": "Raycast",
+      "category": "SimSweep",
+      "signature": "Raycast(Target, Instance, Cur Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSimSweepSQVisitor*"
+        },
+        {
+          "name": "Instance",
+          "type": "FVisitorData&"
+        },
+        {
+          "name": "Cur Data",
+          "type": "FQueryFastData&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "sim-overlap-bounds",
+      "name": "SimOverlapBounds",
+      "category": "SimSweep",
+      "signature": "SimOverlapBounds(Spatial Acceleration, Query Bounds, Particle Filter, Shape Filter, Overlap Collector)",
+      "params": [
+        {
+          "name": "Spatial Acceleration",
+          "type": "ISpatialAcceleration<FAccelerationStructureHandle,FReal,3>*"
+        },
+        {
+          "name": "Query Bounds",
+          "type": "FAABB3&"
+        },
+        {
+          "name": "Particle Filter",
+          "type": "TParticleFilter&"
+        },
+        {
+          "name": "Shape Filter",
+          "type": "TShapeFilter&"
+        },
+        {
+          "name": "Overlap Collector",
+          "type": "TOverlapCollector&"
+        }
+      ],
+      "returnType": "template<TParticleFilter,TShapeFilter,TOverlapCollector> void",
+      "docs": "Produce a set of particles and their shapes that overlap the query bounds and pass the particle and shape filters.\n@TParam TParticleFilter a particle that returns true to check a particle for overlaps. Signature bool(const FGeometryParticleHandle*)\n@TParam TShapeFilter a shape that returns true to check a particle for overlaps. Signature bool(const FPerShapeData*, const FImplicitObject*)\n@TParam TOverlapCollector an overlap collector functor with the signature void(const FSimOverlapParticleShape&)"
+    },
+    {
+      "id": "sim-sweep-particle-pair",
+      "name": "SimSweepParticlePair",
+      "category": "SimSweep",
+      "signature": "SimSweepParticlePair(Swept Particle, Other Particle, Start Pos, Rot, Dir, Length, Shape Filter, Hit Collector)",
+      "params": [
+        {
+          "name": "Swept Particle",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Other Particle",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Start Pos",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Rot",
+          "type": "FRotation3&"
+        },
+        {
+          "name": "Dir",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Length",
+          "type": "FReal"
+        },
+        {
+          "name": "Shape Filter",
+          "type": "TShapeFilter&"
+        },
+        {
+          "name": "Hit Collector",
+          "type": "THitCollector&"
+        }
+      ],
+      "returnType": "template<TShapeFilter,THitCollector> void",
+      "docs": "Sweep SweptParticle against OtherParticle. The provided filter policy can be used to reject shape pairs.\nThe collector policy chooses which sweep results(s) to keep.\n@tparam TShapeFilter A custom filter functor with the signature bool(const FPerShapeData* SweptShape, const FImplicitObject* SweptImplicit, const FPerShapeData* OtherShape, const FImplicitObject* OtherImplicit)\nused to accept/reject shapes pairs. It should return true if the pair should be considered for a sweep check.\n@see FSimSweepShapeFilterNarrowPhase which provides the standard narrowphase filter used in collision detection.\n@tparam THitCollector A hit collector functor with signature bool(const FVec3& Dir, const FReal Length, const FSimSweepParticleHit& InHit).\nIt should return true to continue checking further objects, or false to stop any further sweeping.\n@see FSimSweepCollectorFirstHit which keeps the hit with the lowest time of impact and the most opposing normal if there is a tie.\n@param SweptParticle The particle to be swept\n@param OtherParticle The particle to be swept against\n@param StartPos The start position of the particle to be swept\n@param Rot The rotation to use for the sweep\n@param Dir The direction of the sweep (must be normalized)\n@param Length The sweep length\n@param ShapeFilter The filter to use to accept/reject shape pairs within the particle pairs\n@param HitCollector Hits are passed to the collector one at a time in a random order (i.e., they are not sorted by TOI)\n@note This function does not reset the HitCollector."
+    },
+    {
+      "id": "sim-sweep-particle",
+      "name": "SimSweepParticle",
+      "category": "SimSweep",
+      "signature": "SimSweepParticle(Spatial Acceleration, Swept Particle, Start Pos, Rot, Dir, Length, Particle Filter, Shape Filter, Hit Collector)",
+      "params": [
+        {
+          "name": "Spatial Acceleration",
+          "type": "ISpatialAcceleration<FAccelerationStructureHandle,FReal,3>*"
+        },
+        {
+          "name": "Swept Particle",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Start Pos",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Rot",
+          "type": "FRotation3&"
+        },
+        {
+          "name": "Dir",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Length",
+          "type": "FReal"
+        },
+        {
+          "name": "Particle Filter",
+          "type": "TParticleFilter&"
+        },
+        {
+          "name": "Shape Filter",
+          "type": "TShapeFilter&"
+        },
+        {
+          "name": "Hit Collector",
+          "type": "THitCollector&"
+        }
+      ],
+      "returnType": "template<TParticleFilter,TShapeFilter,THitCollector> void",
+      "docs": "Sweep a particle against all other particles that it may hit. The particles are visited in a semi-random order, depending on how\nthe particles are held in the spatial acceleration. The provided filter policies can be used to reject particle pairs or shape pairs.\nThe collector policy chooses which sweep result(s) to keep.\n@tparam TParticleFilter A custom filter functor with the signature bool(const FGeometryParticleHandle* SweptParticle, const FGeometryParticleHandle* OtherParticle)\nused to accept/reject particle pairs. It should return true if the particle pair should be considered for a sweep check.\n@see FSimSweepParticleFilterBroadPhase which provides the standard broadphase filter used in collision detection.\n@tparam TShapeFilter A custom filter functor with the signature bool(const FPerShapeData* SweptShape, const FImplicitObject* SweptImplicit, const FPerShapeData* OtherShape, const FImplicitObject* OtherImplicit)\nused to accept/reject shapes pairs. It should return true if the pair should be considered for a sweep check.\n@see FSimSweepShapeFilterNarrowPhase which provides the standard narrowphase filter used in collision detection.\n@tparam THitCollector A hit collector functor with signature bool(const FVec3& Dir, const FReal Length, const FSimSweepParticleHit& InHit).\nIt should return true to continue checking further objects, or false to stop any further sweeping.\n@see FSimSweepCollectorFirstHit which keeps the hit with the lowest time of impact and the most opposing normal if there is a tie.\n@param SweptParticle The particle to be swept\n@param StartPos The start position of the particle to be swept\n@param Rot The rotation to use for the sweep\n@param Dir The direction of the sweep (must be normalized)\n@param Length The sweep length\n@param ParticleFilter The filter to use to accept/reject particle pairs\n@param ShapeFilter The filter to use to accept/reject shape pairs within the particle pairs\n@param HitCollector Hits are passed to the collector one at a time in a semi-random order (i.e., they are not sorted by TOI)"
+    },
+    {
+      "id": "get-first-hit",
+      "name": "GetFirstHit",
+      "category": "SimSweep",
+      "signature": "GetFirstHit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSimSweepCollectorFirstHit*"
+        }
+      ],
+      "returnType": "FSimSweepParticleHit&"
+    }
+  ]
+}

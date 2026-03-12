@@ -39,14 +39,18 @@
       "params": [
         {
           "name": "Target",
-          "type": "FParamsChangedHelper*"
+          "type": "FBasePinChangeHelper*"
         },
         {
           "name": "Tunnel Node",
           "type": "UK2Node_Tunnel*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FBasePinChangeHelper*",
+        "FParamsChangedHelper*"
+      ]
     },
     {
       "id": "edit-macro-instance",
@@ -127,6 +131,19 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-associated-guid",
+      "name": "GetAssociatedGuid",
+      "category": "BlueprintEditorUtils",
+      "signature": "GetAssociatedGuid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FUCSComponentId*"
+        }
+      ],
+      "returnType": "FGuid"
     },
     {
       "id": "reconstruct-all-nodes",
@@ -665,6 +682,32 @@
       "docs": "Creates a new function graph with a signature that matches InNode\n@param InNode        Node to copy signature from\n@param InSchemaClass The schema for the new graph"
     },
     {
+      "id": "create-function-graph",
+      "name": "CreateFunctionGraph",
+      "category": "BlueprintEditorUtils",
+      "signature": "CreateFunctionGraph(Blueprint, Graph, Is User Created, Signature From Object)",
+      "params": [
+        {
+          "name": "Blueprint",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "Graph",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Is User Created",
+          "type": "Bool"
+        },
+        {
+          "name": "Signature From Object",
+          "type": "SignatureType*"
+        }
+      ],
+      "returnType": "template<SignatureType> void",
+      "docs": "Creates a function graph, but does not add it to the blueprint.  If bIsUserCreated is true, the entry/exit nodes will be editable.\nSignatureFromObject is used to find signature for entry/exit nodes if using an existing signature.\nThe template argument SignatureType should be UClass or UFunction."
+    },
+    {
       "id": "get-override-function-class",
       "name": "GetOverrideFunctionClass",
       "category": "BlueprintEditorUtils",
@@ -956,6 +999,60 @@
       ],
       "returnType": "UK2Node_Event*",
       "docs": "Find the Custom Event if it already exists in the Blueprint"
+    },
+    {
+      "id": "get-all-nodes-of-class",
+      "name": "GetAllNodesOfClass",
+      "category": "BlueprintEditorUtils",
+      "signature": "GetAllNodesOfClass(Blueprint, Out Nodes)",
+      "params": [
+        {
+          "name": "Blueprint",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "Out Nodes",
+          "type": "TArray<T*>&"
+        }
+      ],
+      "returnType": "template<class T> void",
+      "docs": "Returns all nodes in all graphs of the specified class"
+    },
+    {
+      "id": "get-all-nodes-of-class-ex",
+      "name": "GetAllNodesOfClassEx",
+      "category": "BlueprintEditorUtils",
+      "signature": "GetAllNodesOfClassEx(Blueprint, Out Nodes)",
+      "params": [
+        {
+          "name": "Blueprint",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "Out Nodes",
+          "type": "TArray<ArrayClassType*>&"
+        }
+      ],
+      "returnType": "template<class MinNodeType,class ArrayClassType> void",
+      "docs": "Returns all nodes in all graphs of at least the minimum node type"
+    },
+    {
+      "id": "get-node-by-guid",
+      "name": "GetNodeByGUID",
+      "category": "BlueprintEditorUtils",
+      "signature": "GetNodeByGUID(In Blueprint, In Node Guid)",
+      "params": [
+        {
+          "name": "In Blueprint",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "In Node Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "UEdGraphNode*",
+      "docs": "Searches all nodes in a Blueprint and checks for a matching Guid\n@param InBlueprint\t\t\tThe Blueprint to search\n@param InNodeGuid\t\t\tThe Guid to check Blueprints against\n@return\t\t\t\t\t\tReturns a Node with a matching Guid"
     },
     {
       "id": "gather-dependencies",
@@ -3514,25 +3611,6 @@
       "docs": "Copies the value from a property into the string OutForm. DirectValue is the raw memory address of the property value\nNOTE: This function does not work correctly with static arrays."
     },
     {
-      "id": "post-edit-change-blueprint-actors",
-      "name": "PostEditChangeBlueprintActors",
-      "category": "BlueprintEditorUtils",
-      "signature": "PostEditChangeBlueprintActors(Blueprint, Component Edit Change)",
-      "params": [
-        {
-          "name": "Blueprint",
-          "type": "UBlueprint*"
-        },
-        {
-          "name": "Component Edit Change",
-          "type": "Bool",
-          "default": "false"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Call PostEditChange() on all Actors based on the given Blueprint"
-    },
-    {
       "id": "is-property-private",
       "name": "IsPropertyPrivate",
       "category": "BlueprintEditorUtils",
@@ -3627,6 +3705,52 @@
       ],
       "returnType": "UActorComponent*",
       "docs": "Attempts to match up the FComponentKey with a ComponentTemplate from the Blueprint's UCS. Will fall back to try matching the given template name if the key cannot be used."
+    },
+    {
+      "id": "propagate-nativization-setting",
+      "name": "PropagateNativizationSetting",
+      "category": "BlueprintEditorUtils",
+      "signature": "PropagateNativizationSetting(Blueprint)",
+      "params": [
+        {
+          "name": "Blueprint",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Takes the Blueprint's NativizedFlag property and applies it to the authoritative config (does the same for flagged dependencies)"
+    },
+    {
+      "id": "find-nativization-dependencies",
+      "name": "FindNativizationDependencies",
+      "category": "BlueprintEditorUtils",
+      "signature": "FindNativizationDependencies(Blueprint, Nativize Dependencies Out)",
+      "params": [
+        {
+          "name": "Blueprint",
+          "type": "UBlueprint*"
+        },
+        {
+          "name": "Nativize Dependencies Out",
+          "type": "TArray<UClass*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves all dependencies that need to be nativized for this to work as a nativized Blueprint"
+    },
+    {
+      "id": "should-nativize-implicitly",
+      "name": "ShouldNativizeImplicitly",
+      "category": "BlueprintEditorUtils",
+      "signature": "ShouldNativizeImplicitly(Blueprint)",
+      "params": [
+        {
+          "name": "Blueprint",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether or not the given Blueprint should be nativized implicitly, regardless of whether or not the user has explicitly enabled it"
     },
     {
       "id": "find-interface-graph-guid",
@@ -4150,6 +4274,20 @@
       ],
       "returnType": "Void",
       "docs": "Cleanses a name of invalid characters and replaces them with '_'.\nSee UE_BLUEPRINT_INVALID_NAME_CHARACTERS for invalid characters.\n@param InBaseName The base name to assign"
+    },
+    {
+      "id": "replace-invalid-blueprint-name-characters-inline",
+      "name": "ReplaceInvalidBlueprintNameCharactersInline",
+      "category": "BlueprintEditorUtils",
+      "signature": "ReplaceInvalidBlueprintNameCharactersInline(In Base Name)",
+      "params": [
+        {
+          "name": "In Base Name",
+          "type": "String"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Util version of ReplaceInvalidBlueprintNameCharacters that performs the operation inline."
     },
     {
       "id": "find-unique-custom-event-name",
@@ -4764,19 +4902,6 @@
       "docs": "Recombine any nested subpins on this node"
     },
     {
-      "id": "clean-null-graph-references-recursive",
-      "name": "CleanNullGraphReferencesRecursive",
-      "category": "BlueprintEditorUtils",
-      "signature": "CleanNullGraphReferencesRecursive(Graph)",
-      "params": [
-        {
-          "name": "Graph",
-          "type": "UEdGraph*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "rename-variable-references",
       "name": "RenameVariableReferences",
       "category": "BlueprintEditorUtils",
@@ -5026,6 +5151,57 @@
         }
       ],
       "returnType": "Bool"
+    },
+    {
+      "id": "has-any-flag",
+      "name": "HasAnyFlag",
+      "category": "BlueprintEditorUtils",
+      "signature": "HasAnyFlag(In Flags)",
+      "params": [
+        {
+          "name": "In Flags",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-make-class-spawnable-on-scope-369bba",
+      "name": "FMakeClassSpawnableOnScope",
+      "category": "BlueprintEditorUtils",
+      "signature": "FMakeClassSpawnableOnScope(Target, In Class, False, False)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintEditorUtils*"
+        },
+        {
+          "name": "In Class",
+          "type": "UClass* InClass ) : ("
+        },
+        {
+          "name": "False",
+          "type": "bIsDeprecated ("
+        },
+        {
+          "name": "False",
+          "type": "bIsAbstract ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-make-class-spawnable-on-scope-345a42",
+      "name": "FMakeClassSpawnableOnScope",
+      "category": "BlueprintEditorUtils",
+      "signature": "FMakeClassSpawnableOnScope(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBlueprintEditorUtils*"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

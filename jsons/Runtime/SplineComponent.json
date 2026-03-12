@@ -196,7 +196,7 @@
       "docs": "Update the spline's internal data according to the passed-in params\n@param\tbClosedLoop\t\t\t\tWhether the spline is to be considered as a closed loop.\n@param\tbStationaryEndpoints\tWhether the endpoints of the spline are considered stationary when traversing the spline at non-constant velocity.  Essentially this sets the endpoints' tangents to zero vectors.\n@param\tReparamStepsPerSegment\tNumber of steps per spline segment to place in the reparameterization table\n@param\tbLoopPositionOverride\tWhether to override the loop position with LoopPosition\n@param\tLoopPosition\t\t\tThe loop position to use instead of the last key\n@param\tScale3D\t\t\t\t\tThe world scale to override"
     },
     {
-      "id": "get-segment-length-2d9014",
+      "id": "get-segment-length",
       "name": "GetSegmentLength",
       "category": "SplineComponent",
       "signature": "GetSegmentLength(Target, Index, Param, Closed Loop, Scale 3 D)",
@@ -239,7 +239,11 @@
         }
       ],
       "returnType": "Float",
-      "docs": "Returns total length along this spline"
+      "docs": "Returns total length along this spline",
+      "supportedTargets": [
+        "FSplineCurves*",
+        "USplineComponent*"
+      ]
     },
     {
       "id": "build",
@@ -282,36 +286,6 @@
       "returnType": "Void"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "SplineComponent",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USplineComponent*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "SplineComponent",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USplineComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "get-ignore-bounds-for-editor-focus",
       "name": "GetIgnoreBoundsForEditorFocus",
       "category": "SplineComponent",
@@ -323,23 +297,6 @@
         }
       ],
       "returnType": "Bool"
-    },
-    {
-      "id": "post-edit-change-chain-property",
-      "name": "PostEditChangeChainProperty",
-      "category": "SplineComponent",
-      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USplineComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedChainEvent&"
-        }
-      ],
-      "returnType": "Void"
     },
     {
       "id": "get-component-instance-data",
@@ -514,6 +471,19 @@
       "returnType": "FInterpCurveVector&"
     },
     {
+      "id": "get-spline-points-metadata",
+      "name": "GetSplinePointsMetadata",
+      "category": "SplineComponent",
+      "signature": "GetSplinePointsMetadata(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USplineComponent*"
+        }
+      ],
+      "returnType": "USplineMetadata*"
+    },
+    {
       "id": "get-enabled-spline-point-types",
       "name": "GetEnabledSplinePointTypes",
       "category": "SplineComponent",
@@ -526,6 +496,76 @@
       ],
       "returnType": "TArray<ESplinePointType::Type>",
       "docs": "Get the enabled Spline Point types for this spline component."
+    },
+    {
+      "id": "allows-spine-point-location-editing",
+      "name": "AllowsSpinePointLocationEditing",
+      "category": "SplineComponent",
+      "signature": "AllowsSpinePointLocationEditing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USplineComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Controls the visibility of the Spline point location editor in the details panel."
+    },
+    {
+      "id": "allows-spline-point-rotation-editing",
+      "name": "AllowsSplinePointRotationEditing",
+      "category": "SplineComponent",
+      "signature": "AllowsSplinePointRotationEditing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USplineComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Controls the visibility of the Spline point rotation editor in the details panel."
+    },
+    {
+      "id": "allows-spline-point-scale-editing",
+      "name": "AllowsSplinePointScaleEditing",
+      "category": "SplineComponent",
+      "signature": "AllowsSplinePointScaleEditing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USplineComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Controls the visibility of the Spline point scale editor in the details panel."
+    },
+    {
+      "id": "allows-spline-point-arrive-tangent-editing",
+      "name": "AllowsSplinePointArriveTangentEditing",
+      "category": "SplineComponent",
+      "signature": "AllowsSplinePointArriveTangentEditing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USplineComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Controls the visibility of the Spline point arrive tangent editor in the details panel."
+    },
+    {
+      "id": "allows-spline-point-leave-tangent-editing",
+      "name": "AllowsSplinePointLeaveTangentEditing",
+      "category": "SplineComponent",
+      "signature": "AllowsSplinePointLeaveTangentEditing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USplineComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Controls the visibility of the Spline point leave tangent editor in the details panel."
     },
     {
       "id": "apply-component-instance-data",
@@ -3282,27 +3322,38 @@
       "docs": "Get a vector attribute value by parameter.\n@param InKey The parameter to use when evaluating the specified attribute channel.\n@param PropertyName The name of the attribute channel to evaluate.\n@return The attribute value."
     },
     {
-      "id": "get-segment-length-db0880",
-      "name": "GetSegmentLength",
+      "id": "contains-data",
+      "name": "ContainsData",
       "category": "SplineComponent",
-      "signature": "GetSegmentLength(Target, Index, Param)",
+      "signature": "ContainsData(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "USplineComponent*"
-        },
-        {
-          "name": "Index",
-          "type": "Int"
-        },
-        {
-          "name": "Param",
-          "type": "Float",
-          "default": "1.0f"
+          "type": "FSplineInstanceData*"
         }
       ],
-      "returnType": "Float",
-      "docs": "Returns the length of the specified spline segment up to the parametric value given"
+      "returnType": "Bool"
+    },
+    {
+      "id": "apply-to-component",
+      "name": "ApplyToComponent",
+      "category": "SplineComponent",
+      "signature": "ApplyToComponent(Target, Component, Cache Apply Phase)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSplineInstanceData*"
+        },
+        {
+          "name": "Component",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Cache Apply Phase",
+          "type": "ECacheApplyPhase"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "convert-spline-point-type-to-interp-curve-mode",

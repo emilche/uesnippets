@@ -15,21 +15,52 @@
   ],
   "functions": [
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
+      "id": "on-post-data-import",
+      "name": "OnPostDataImport",
       "category": "DataTable",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "signature": "OnPostDataImport(Target, In Data Table, In Row Name, Out Collected Import Problems)",
       "params": [
         {
           "name": "Target",
+          "type": "FTableRowBase*"
+        },
+        {
+          "name": "In Data Table",
           "type": "UDataTable*"
         },
         {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
+          "name": "In Row Name",
+          "type": "Name"
+        },
+        {
+          "name": "Out Collected Import Problems",
+          "type": "TArray<FString>&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "Can be overridden by subclasses; Called whenever the owning data table is imported or re-imported.\nAllows for custom fix-ups, parsing, etc. after initial data is read in.\n@param InDataTable\t\t\t\t\tThe data table that owns this row\n@param InRowName\t\t\t\t\t\tThe name of the row we're performing fix-up on\n@param OutCollectedImportProblems\tList of problems accumulated during import; Can be added to via this method"
+    },
+    {
+      "id": "on-data-table-changed",
+      "name": "OnDataTableChanged",
+      "category": "DataTable",
+      "signature": "OnDataTableChanged(Target, In Data Table, In Row Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTableRowBase*"
+        },
+        {
+          "name": "In Data Table",
+          "type": "UDataTable*"
+        },
+        {
+          "name": "In Row Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Can be overridden by subclasses; Called on every row when the owning data table is modified\nAllows for custom fix-ups, parsing, etc for user changes\nThis will be called in addition to OnPostDataImport when importing\n@param InDataTable\t\t\t\t\tThe data table that owns this row\n@param InRowName\t\t\t\t\t\tThe name of the row we're performing fix-up on"
     },
     {
       "id": "is-data-valid",
@@ -39,7 +70,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "UDataTable*"
+          "type": "FTableRowBase*"
         },
         {
           "name": "Context",
@@ -47,58 +78,51 @@
         }
       ],
       "returnType": "EDataValidationResult",
-      "docs": "Generic function to validate data table row.\n@param\tContext\tthe context holding validation warnings/errors.\n@return\tValid if this table row has data validation rules set up for it and the data for this object is valid.\nReturns Invalid if it does not pass the rules. Returns NotValidated if no rules are set for this object."
+      "docs": "Generic function to validate data table row.\n@param\tContext\tthe context holding validation warnings/errors.\n@return\tValid if this table row has data validation rules set up for it and the data for this object is valid.\nReturns Invalid if it does not pass the rules. Returns NotValidated if no rules are set for this object.",
+      "supportedTargets": [
+        "FTableRowBase*",
+        "UDataTable*"
+      ]
     },
     {
-      "id": "threaded-post-load-asset-registry-tags-override",
-      "name": "ThreadedPostLoadAssetRegistryTagsOverride",
+      "id": "get-row-map",
+      "name": "GetRowMap",
       "category": "DataTable",
-      "signature": "ThreadedPostLoadAssetRegistryTagsOverride(Target, Context)",
+      "signature": "GetRowMap(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UDataTable*"
-        },
-        {
-          "name": "Context",
-          "type": "FPostLoadAssetRegistryTagsContext&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "TMap<FName,uint8*>&"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "get-row-struct",
+      "name": "GetRowStruct",
       "category": "DataTable",
-      "signature": "Serialize(Target, Record)",
+      "signature": "GetRowStruct(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UDataTable*"
-        },
-        {
-          "name": "Record",
-          "type": "FStructuredArchiveRecord"
         }
       ],
-      "returnType": "Void"
+      "returnType": "UScriptStruct*"
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "allow-duplicate-rows-on-import",
+      "name": "AllowDuplicateRowsOnImport",
       "category": "DataTable",
-      "signature": "AddReferencedObjects(In This, Collector)",
+      "signature": "AllowDuplicateRowsOnImport(Target)",
       "params": [
         {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
+          "name": "Target",
+          "type": "UDataTable*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Bool",
+      "docs": "Returns true if it is valid to import multiple table rows with the same name; returns false otherwise"
     },
     {
       "id": "get-preload-dependencies",
@@ -133,6 +157,32 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "needs-load-for-client",
+      "name": "NeedsLoadForClient",
+      "category": "DataTable",
+      "signature": "NeedsLoadForClient(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "needs-load-for-editor-game",
+      "name": "NeedsLoadForEditorGame",
+      "category": "DataTable",
+      "signature": "NeedsLoadForEditorGame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "get-row-struct-path-name",
@@ -182,32 +232,6 @@
       "returnType": "Void"
     },
     {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
-      "category": "DataTable",
-      "signature": "PostInitProperties(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UDataTable*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "DataTable",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UDataTable*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "handle-data-table-changed",
       "name": "HandleDataTableChanged",
       "category": "DataTable",
@@ -225,6 +249,113 @@
       ],
       "returnType": "Void",
       "docs": "Call whenever the data of a table has changed, this calls the OnDataTableChanged() delegate and per-row callbacks.\nIf ChangedRowName is not none, only that row was changed, otherwise assume all rows have changed"
+    },
+    {
+      "id": "get-all-rows",
+      "name": "GetAllRows",
+      "category": "DataTable",
+      "signature": "GetAllRows(Target, Context String, Out Row Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        },
+        {
+          "name": "Context String",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out Row Array",
+          "type": "OUT TArray<T*>&"
+        }
+      ],
+      "returnType": "template<class T> void",
+      "docs": "Get all of the rows in the table, regardless of name"
+    },
+    {
+      "id": "find-row",
+      "name": "FindRow",
+      "category": "DataTable",
+      "signature": "FindRow(Target, Row Name, Context String, Warn If Row Missing)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        },
+        {
+          "name": "Row Name",
+          "type": "Name"
+        },
+        {
+          "name": "Context String",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Warn If Row Missing",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "template<class T> T*",
+      "docs": "Function to find the row of a table given its name."
+    },
+    {
+      "id": "foreach-row",
+      "name": "ForeachRow",
+      "category": "DataTable",
+      "signature": "ForeachRow(Target, Context String, Predicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        },
+        {
+          "name": "Context String",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Predicate",
+          "type": "TFunctionRef<void ( FName& Key,T& Value )>"
+        }
+      ],
+      "returnType": "template<class T> void",
+      "docs": "Perform some operation for every row."
+    },
+    {
+      "id": "find-table-property",
+      "name": "FindTableProperty",
+      "category": "DataTable",
+      "signature": "FindTableProperty(Target, Property Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        },
+        {
+          "name": "Property Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "FProperty*",
+      "docs": "Returns the column property where PropertyName matches the name of the column property. Returns nullptr if no match is found or the match is not a supported table property"
+    },
+    {
+      "id": "find-row-unchecked",
+      "name": "FindRowUnchecked",
+      "category": "DataTable",
+      "signature": "FindRowUnchecked(Target, Row Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataTable*"
+        },
+        {
+          "name": "Row Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Byte*",
+      "docs": "High performance version with no type safety"
     },
     {
       "id": "empty-table",
@@ -543,6 +674,60 @@
       "docs": "Get array for each row in the table. The first row is the titles"
     },
     {
+      "id": "is-null",
+      "name": "IsNull",
+      "category": "DataTable",
+      "signature": "IsNull(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDataTableRowHandle*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this handle is specifically pointing to nothing",
+      "supportedTargets": [
+        "FDataTableRowHandle*",
+        "FDataTableCategoryHandle*"
+      ]
+    },
+    {
+      "id": "get-row",
+      "name": "GetRow",
+      "category": "DataTable",
+      "signature": "GetRow(Target, Context String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDataTableRowHandle*"
+        },
+        {
+          "name": "Context String",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "template<class T> T*",
+      "docs": "Get the row straight from the row handle"
+    },
+    {
+      "id": "to-debug-string",
+      "name": "ToDebugString",
+      "category": "DataTable",
+      "signature": "ToDebugString(Target, Use Full Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDataTableRowHandle*"
+        },
+        {
+          "name": "Use Full Path",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
       "id": "post-serialize",
       "name": "PostSerialize",
       "category": "DataTable",
@@ -558,6 +743,28 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-rows",
+      "name": "GetRows",
+      "category": "DataTable",
+      "signature": "GetRows(Target, Out Rows, Context String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDataTableCategoryHandle*"
+        },
+        {
+          "name": "Out Rows",
+          "type": "TArray<T*>&"
+        },
+        {
+          "name": "Context String",
+          "type": "String&"
+        }
+      ],
+      "returnType": "template<class T> void",
+      "docs": "Searches DataTable for all rows that contain entries with RowContents in the column named ColumnName and returns them."
     }
   ]
 }

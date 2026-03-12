@@ -11,6 +11,37 @@
   ],
   "functions": [
     {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-instance-contribution-to-hit-group-index",
+      "name": "GetInstanceContributionToHitGroupIndex",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "GetInstanceContributionToHitGroupIndex(Target, Layer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Layer",
+          "type": "ERayTracingShaderBindingLayer"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the InstanceContributionToHitGroupIndex for the given layer which is stored in the RayTracingInstance data"
+    },
+    {
       "id": "get-record-index",
       "name": "GetRecordIndex",
       "category": "RayTracingShaderBindingTable",
@@ -18,7 +49,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FRayTracingSBTAllocation*"
+          "type": "FRayTracingShaderBindingTable*"
         },
         {
           "name": "Layer",
@@ -40,10 +71,65 @@
       "params": [
         {
           "name": "Target",
-          "type": "FRayTracingSBTAllocation*"
+          "type": "FRayTracingShaderBindingTable*"
         }
       ],
       "returnType": "Int"
+    },
+    {
+      "id": "has-layer",
+      "name": "HasLayer",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "HasLayer(Target, Layer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Layer",
+          "type": "ERayTracingShaderBindingLayer"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "init-dynamic",
+      "name": "InitDynamic",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "InitDynamic(Target, In Allocated Layers, In Base Record Index, In Records Per Layer, In Num Records)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "In Allocated Layers",
+          "type": "ERayTracingShaderBindingLayerMask"
+        },
+        {
+          "name": "In Base Record Index",
+          "type": "UInt"
+        },
+        {
+          "name": "In Records Per Layer",
+          "type": "UInt"
+        },
+        {
+          "name": "In Num Records",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-ray-tracing-shader-binding-table",
+      "name": "FRayTracingShaderBindingTable",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "FRayTracingShaderBindingTable()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Shader binding table use for raytracing"
     },
     {
       "id": "get-dirty-bindings",
@@ -88,6 +174,75 @@
       ],
       "returnType": "FRayTracingPersistentShaderBindingTableID",
       "docs": "Allocate persistent SBT ID - can be used to retrieve the rhi object during rendering"
+    },
+    {
+      "id": "release-persistent-sbt",
+      "name": "ReleasePersistentSBT",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "ReleasePersistentSBT(Target, Persistent SBTID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Persistent SBTID",
+          "type": "FRayTracingPersistentShaderBindingTableID"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Release previously allocated persistent SBT ID"
+    },
+    {
+      "id": "get-persistent-sbt",
+      "name": "GetPersistentSBT",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "GetPersistentSBT(Target, Persistent SBTID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Persistent SBTID",
+          "type": "FRayTracingPersistentShaderBindingTableID"
+        }
+      ],
+      "returnType": "FRHIShaderBindingTable*"
+    },
+    {
+      "id": "get-persistent-inline-binding-data-buffer",
+      "name": "GetPersistentInlineBindingDataBuffer",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "GetPersistentInlineBindingDataBuffer(Target, Graph Builder, Persistent SBTID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Persistent SBTID",
+          "type": "FRayTracingPersistentShaderBindingTableID"
+        }
+      ],
+      "returnType": "FRDGBufferRef"
+    },
+    {
+      "id": "get-num-shader-slots-per-segment",
+      "name": "GetNumShaderSlotsPerSegment",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "GetNumShaderSlotsPerSegment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        }
+      ],
+      "returnType": "UInt"
     },
     {
       "id": "check-persistent-rhi",
@@ -156,7 +311,29 @@
       "docs": "Get the total number of allocated geometry segments (static and dynamic)"
     },
     {
-      "id": "allocate-static-range",
+      "id": "allocate-static-range-744ade",
+      "name": "AllocateStaticRange",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "AllocateStaticRange(Target, Allocated Layers, Segment Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Allocated Layers",
+          "type": "ERayTracingShaderBindingLayerMask"
+        },
+        {
+          "name": "Segment Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FRayTracingSBTAllocation*",
+      "docs": "Allocate single static range of records for the given SegmentCount for all layers in the AllocatedLayersMask"
+    },
+    {
+      "id": "allocate-static-range-300447",
       "name": "AllocateStaticRange",
       "category": "RayTracingShaderBindingTable",
       "signature": "AllocateStaticRange(Target, Segment Count, Geometry, Flags)",
@@ -233,6 +410,80 @@
       ],
       "returnType": "Void",
       "docs": "Mark all currently allocated dynamic ranges as free again so they can be allocated"
+    },
+    {
+      "id": "reset-static-allocation-lock",
+      "name": "ResetStaticAllocationLock",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "ResetStaticAllocationLock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the static allocation lock again (used for validation)"
+    },
+    {
+      "id": "allocate-static-range-internal",
+      "name": "AllocateStaticRangeInternal",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "AllocateStaticRangeInternal(Target, Allocated Layers, Segment Count, Geometry, Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Allocated Layers",
+          "type": "ERayTracingShaderBindingLayerMask"
+        },
+        {
+          "name": "Segment Count",
+          "type": "UInt"
+        },
+        {
+          "name": "Geometry",
+          "type": "FRHIRayTracingGeometry*"
+        },
+        {
+          "name": "Flags",
+          "type": "FRayTracingCachedMeshCommandFlags"
+        }
+      ],
+      "returnType": "FRayTracingSBTAllocation*",
+      "docs": "Allocate single static range of records for the given SegmentCount for all layers in the AllocatedLayersMask"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "GetTypeHash(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        },
+        {
+          "name": "Key",
+          "type": "FAllocationKey&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "RayTracingShaderBindingTable",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRayTracingShaderBindingTable*"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

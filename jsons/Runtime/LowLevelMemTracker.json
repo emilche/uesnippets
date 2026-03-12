@@ -21,6 +21,19 @@
   ],
   "functions": [
     {
+      "id": "true-on-first-call-only",
+      "name": "TrueOnFirstCallOnly",
+      "category": "LowLevelMemTracker",
+      "signature": "TrueOnFirstCallOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
+        }
+      ],
+      "returnType": "template<Type> bool"
+    },
+    {
       "id": "llm-get-untagged-tag-name",
       "name": "LLMGetUntaggedTagName",
       "category": "LowLevelMemTracker",
@@ -38,22 +51,64 @@
       "returnType": "Name"
     },
     {
-      "id": "add-initialised-callback",
-      "name": "AddInitialisedCallback",
+      "id": "new",
+      "name": "New",
       "category": "LowLevelMemTracker",
-      "signature": "AddInitialisedCallback(Callback, User Data)",
+      "signature": "New(Target, Args)",
       "params": [
         {
-          "name": "Callback",
-          "type": "FLLMInitialisedCallback"
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
         },
         {
-          "name": "User Data",
-          "type": "UPTRINT"
+          "name": "Args",
+          "type": "ArgsType&& . . ."
         }
       ],
-      "returnType": "Void",
-      "docs": "Callbacks that can occur during LLM Initialisation. These happen before main and are therefore\ndangerous to use, so they are private."
+      "returnType": "template<T,. . . ArgsType> T*"
+    },
+    {
+      "id": "delete",
+      "name": "Delete",
+      "category": "LowLevelMemTracker",
+      "signature": "Delete(Target, Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
+        },
+        {
+          "name": "Ptr",
+          "type": "T*"
+        }
+      ],
+      "returnType": "template<T> void"
+    },
+    {
+      "id": "get-platform-alloc",
+      "name": "GetPlatformAlloc",
+      "category": "LowLevelMemTracker",
+      "signature": "GetPlatformAlloc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
+        }
+      ],
+      "returnType": "LLMAllocFunction"
+    },
+    {
+      "id": "get-platform-free",
+      "name": "GetPlatformFree",
+      "category": "LowLevelMemTracker",
+      "signature": "GetPlatformFree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
+        }
+      ],
+      "returnType": "LLMFreeFunction"
     },
     {
       "id": "construct",
@@ -976,6 +1031,32 @@
       "returnType": "Void"
     },
     {
+      "id": "is-initialized",
+      "name": "IsInitialized",
+      "category": "LowLevelMemTracker",
+      "signature": "IsInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-configured",
+      "name": "IsConfigured",
+      "category": "LowLevelMemTracker",
+      "signature": "IsConfigured(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLowLevelMemTracker*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "bootstrap-initialise",
       "name": "BootstrapInitialise",
       "category": "LowLevelMemTracker",
@@ -1004,17 +1085,52 @@
       "docs": "Finish initialization if not already done. Calls BootstrapInitialise if necessary. After being called,\nall functions in LLM including those returning FNames are available.\nThis function should be called as soon as possible after FNames are available so that other tracking\nsystems reliant on LLM's FName data can start tracking as soon as possible."
     },
     {
-      "id": "destruct",
-      "name": "Destruct",
+      "id": "get-stat-name",
+      "name": "GetStatName",
       "category": "LowLevelMemTracker",
-      "signature": "Destruct(Target)",
+      "signature": "GetStatName(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FLLMScope*"
+          "type": "ILLMDynamicTagConstructor*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "String",
+      "supportedTargets": [
+        "ILLMDynamicTagConstructor*",
+        "FLLMDynamicTagConstructorStatString*"
+      ]
+    },
+    {
+      "id": "needs-stat-construction",
+      "name": "NeedsStatConstruction",
+      "category": "LowLevelMemTracker",
+      "signature": "NeedsStatConstruction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ILLMDynamicTagConstructor*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-enabled",
+      "name": "IsEnabled",
+      "category": "LowLevelMemTracker",
+      "signature": "IsEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLLMScopeDynamic*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether LLM is enabled - activated by the commandline and is tracking allocations.\nAlso returns true early during startup before commandline has been processed.",
+      "supportedTargets": [
+        "FLLMScopeDynamic*",
+        "FLowLevelMemTracker*"
+      ]
     },
     {
       "id": "try-find-tag",
@@ -1068,79 +1184,17 @@
       "returnType": "Void"
     },
     {
-      "id": "init-1549da",
-      "name": "Init",
+      "id": "get-unique-name",
+      "name": "GetUniqueName",
       "category": "LowLevelMemTracker",
-      "signature": "Init(Target, In Tracker, In Tag Set)",
+      "signature": "GetUniqueName(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FLLMScopeDynamic*"
-        },
-        {
-          "name": "In Tracker",
-          "type": "ELLMTracker"
-        },
-        {
-          "name": "In Tag Set",
-          "type": "ELLMTagSet"
+          "type": "FLLMTagDeclaration*"
         }
       ],
-      "returnType": "Void"
-    },
-    {
-      "id": "init-f61164",
-      "name": "Init",
-      "category": "LowLevelMemTracker",
-      "signature": "Init(Target, Tag Name, Enum Tag, Is Enum Tag, Is Stat Tag, Amount, Tracker To Pause, In Alloc Type)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FLLMPauseScope*"
-        },
-        {
-          "name": "Tag Name",
-          "type": "Name"
-        },
-        {
-          "name": "Enum Tag",
-          "type": "ELLMTag"
-        },
-        {
-          "name": "Is Enum Tag",
-          "type": "Bool"
-        },
-        {
-          "name": "Is Stat Tag",
-          "type": "Bool"
-        },
-        {
-          "name": "Amount",
-          "type": "UInt64"
-        },
-        {
-          "name": "Tracker To Pause",
-          "type": "ELLMTracker"
-        },
-        {
-          "name": "In Alloc Type",
-          "type": "ELLMAllocType"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "add-creation-callback",
-      "name": "AddCreationCallback",
-      "category": "LowLevelMemTracker",
-      "signature": "AddCreationCallback(In Callback)",
-      "params": [
-        {
-          "name": "In Callback",
-          "type": "FCreationCallback"
-        }
-      ],
-      "returnType": "Void"
+      "returnType": "Name"
     }
   ]
 }

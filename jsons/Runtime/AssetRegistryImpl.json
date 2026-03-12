@@ -1,0 +1,389 @@
+{
+  "id": "asset-registry-impl",
+  "label": "AssetRegistryImpl",
+  "includepath": "AssetRegistryImpl.h",
+  "includes": [
+    "AssetDataGatherer",
+    "AssetData",
+    "AssetRegistryState",
+    "IAssetRegistry",
+    "PathTree",
+    "RingBuffer",
+    "Map",
+    "Set",
+    "CriticalSection",
+    "NumericLimits",
+    "Optional",
+    "TransactionallySafeRWLock",
+    "ScopeRWLock",
+    "ModuleDescriptor",
+    "PackageDependencyData",
+    "Function",
+    "UniquePtr",
+    "atomic"
+  ],
+  "functions": [
+    {
+      "id": "write-unlock",
+      "name": "WriteUnlock",
+      "category": "AssetRegistryImpl",
+      "signature": "WriteUnlock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRWLockWithPriority*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "read-lock",
+      "name": "ReadLock",
+      "category": "AssetRegistryImpl",
+      "signature": "ReadLock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRWLockWithPriority*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "read-unlock",
+      "name": "ReadUnlock",
+      "category": "AssetRegistryImpl",
+      "signature": "ReadUnlock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRWLockWithPriority*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-waiters",
+      "name": "HasWaiters",
+      "category": "AssetRegistryImpl",
+      "signature": "HasWaiters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRWLockWithPriority*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-early-exit-callback",
+      "name": "SetEarlyExitCallback",
+      "category": "AssetRegistryImpl",
+      "signature": "SetEarlyExitCallback(Target, In Callback)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        },
+        {
+          "name": "In Callback",
+          "type": "ShouldExitEarlyCallbackType&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-unlimited-tick-time",
+      "name": "SetUnlimitedTickTime",
+      "category": "AssetRegistryImpl",
+      "signature": "SetUnlimitedTickTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-limited-tick-time",
+      "name": "SetLimitedTickTime",
+      "category": "AssetRegistryImpl",
+      "signature": "SetLimitedTickTime(Target, In Tick Start Time, In Max Running Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        },
+        {
+          "name": "In Tick Start Time",
+          "type": "Double"
+        },
+        {
+          "name": "In Max Running Time",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-tick-start-time",
+      "name": "GetTickStartTime",
+      "category": "AssetRegistryImpl",
+      "signature": "GetTickStartTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "is-time-slicing-enabled",
+      "name": "IsTimeSlicingEnabled",
+      "category": "AssetRegistryImpl",
+      "signature": "IsTimeSlicingEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "was-interrupted",
+      "name": "WasInterrupted",
+      "category": "AssetRegistryImpl",
+      "signature": "WasInterrupted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "request-early-exit",
+      "name": "RequestEarlyExit",
+      "category": "AssetRegistryImpl",
+      "signature": "RequestEarlyExit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInterruptionContext*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-tick-active",
+      "name": "IsTickActive",
+      "category": "AssetRegistryImpl",
+      "signature": "IsTickActive(Target, Status)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetRegistryImpl*"
+        },
+        {
+          "name": "Status",
+          "type": "UE::AssetRegistry::Impl::EGatherStatus"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if ANY work remains to be done. This work might require the game thread."
+    },
+    {
+      "id": "on-asset-dependency-gatherer-registered",
+      "name": "OnAssetDependencyGathererRegistered",
+      "category": "AssetRegistryImpl",
+      "signature": "OnAssetDependencyGathererRegistered(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when new gatherer is registered. Requires subsequent call to RebuildAssetDependencyGathererMapIfNeeded"
+    },
+    {
+      "id": "is-initial-search-completed",
+      "name": "IsInitialSearchCompleted",
+      "category": "AssetRegistryImpl",
+      "signature": "IsInitialSearchCompleted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-temp-caching-enabled",
+      "name": "IsTempCachingEnabled",
+      "category": "AssetRegistryImpl",
+      "signature": "IsTempCachingEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-temp-caching-always-enabled",
+      "name": "IsTempCachingAlwaysEnabled",
+      "category": "AssetRegistryImpl",
+      "signature": "IsTempCachingAlwaysEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-initial-search-started",
+      "name": "IsInitialSearchStarted",
+      "category": "AssetRegistryImpl",
+      "signature": "IsInitialSearchStarted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-additional-mount-search-in-progress",
+      "name": "IsAdditionalMountSearchInProgress",
+      "category": "AssetRegistryImpl",
+      "signature": "IsAdditionalMountSearchInProgress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-search-all-assets",
+      "name": "IsSearchAllAssets",
+      "category": "AssetRegistryImpl",
+      "signature": "IsSearchAllAssets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-temp-cached-inheritance-buffer",
+      "name": "GetTempCachedInheritanceBuffer",
+      "category": "AssetRegistryImpl",
+      "signature": "GetTempCachedInheritanceBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Impl::FClassInheritanceBuffer&"
+    },
+    {
+      "id": "get-saved-generator-classes-version-number",
+      "name": "GetSavedGeneratorClassesVersionNumber",
+      "category": "AssetRegistryImpl",
+      "signature": "GetSavedGeneratorClassesVersionNumber(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "get-saved-all-classes-version-number",
+      "name": "GetSavedAllClassesVersionNumber",
+      "category": "AssetRegistryImpl",
+      "signature": "GetSavedAllClassesVersionNumber(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "get-performance-mode",
+      "name": "GetPerformanceMode",
+      "category": "AssetRegistryImpl",
+      "signature": "GetPerformanceMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Impl::EPerformanceMode",
+      "docs": "Query the performance mode, which modifies how data structures are loaded"
+    },
+    {
+      "id": "get-background-tick-interruptions-count",
+      "name": "GetBackgroundTickInterruptionsCount",
+      "category": "AssetRegistryImpl",
+      "signature": "GetBackgroundTickInterruptionsCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "UInt&"
+    },
+    {
+      "id": "is-game-thread-take-over-gather-each-tick",
+      "name": "IsGameThreadTakeOverGatherEachTick",
+      "category": "AssetRegistryImpl",
+      "signature": "IsGameThreadTakeOverGatherEachTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "At some times during editor startup, depending on config settings, we might want to block\non the gather, and not tick the rest of the editor. When we want that to happen, we set\nthis flag. This function can be read outside of the lock (we need to do that during Tick)."
+    },
+    {
+      "id": "set-game-thread-take-over-gather-each-tick",
+      "name": "SetGameThreadTakeOverGatherEachTick",
+      "category": "AssetRegistryImpl",
+      "signature": "SetGameThreadTakeOverGatherEachTick(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetRegistryImpl*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

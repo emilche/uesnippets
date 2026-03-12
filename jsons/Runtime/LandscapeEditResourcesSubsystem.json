@@ -14,6 +14,87 @@
   ],
   "functions": [
     {
+      "id": "f-scratch-render-target-params",
+      "name": "FScratchRenderTargetParams",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "FScratchRenderTargetParams(Target, In Debug Name, In Exact Dimensions, In Use UAV, In Target Array Slices Independently, In Resolution, In Num Slices, In Format, In Clear Color, In Debug Name, B In Exact Dimensions, B In Use UAV, B In Target Array Slices Independently, In Resolution, In Num Slices, In Format, In Clear Color, In Initial State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL*"
+        },
+        {
+          "name": "In Debug Name",
+          "type": "String&"
+        },
+        {
+          "name": "In Exact Dimensions",
+          "type": "Bool"
+        },
+        {
+          "name": "In Use UAV",
+          "type": "Bool"
+        },
+        {
+          "name": "In Target Array Slices Independently",
+          "type": "Bool"
+        },
+        {
+          "name": "In Resolution",
+          "type": "FIntPoint&"
+        },
+        {
+          "name": "In Num Slices",
+          "type": "Int"
+        },
+        {
+          "name": "In Format",
+          "type": "ETextureRenderTargetFormat"
+        },
+        {
+          "name": "In Clear Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "In Debug Name",
+          "type": "ERHIAccess InInitialState ) : DebugName ("
+        },
+        {
+          "name": "B In Exact Dimensions",
+          "type": "bExactDimensions ("
+        },
+        {
+          "name": "B In Use UAV",
+          "type": "bUseUAV ("
+        },
+        {
+          "name": "B In Target Array Slices Independently",
+          "type": "bTargetArraySlicesIndependently ("
+        },
+        {
+          "name": "In Resolution",
+          "type": "Resolution ("
+        },
+        {
+          "name": "In Num Slices",
+          "type": "NumSlices ("
+        },
+        {
+          "name": "In Format",
+          "type": "Format ("
+        },
+        {
+          "name": "In Clear Color",
+          "type": "ClearColor ("
+        },
+        {
+          "name": "In Initial State",
+          "type": "InitialState ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "get-debug-name",
       "name": "GetDebugName",
       "category": "LandscapeEditResourcesSubsystem",
@@ -26,6 +107,20 @@
       ],
       "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL FString&",
       "docs": "@return a debug name while this render target is in use. This helps track things down, since the underlying resource can be recycled"
+    },
+    {
+      "id": "get-render-target",
+      "name": "GetRenderTarget",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetRenderTarget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeScratchRenderTarget*"
+        }
+      ],
+      "returnType": "UTextureRenderTarget*",
+      "docs": "@return Getter for the internal UTextureRenderTarget"
     },
     {
       "id": "get-render-target-2-d",
@@ -140,6 +235,32 @@
       "docs": "@return the internal render target's effective number of slices (can be different than the actual number of slices if CurrentRenderTargetParams.bExactDimensions is false) while this render target is in use"
     },
     {
+      "id": "is-texture-2-d",
+      "name": "IsTexture2D",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "IsTexture2D(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeScratchRenderTarget*"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL bool"
+    },
+    {
+      "id": "is-texture-2-d-array",
+      "name": "IsTexture2DArray",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "IsTexture2DArray(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeScratchRenderTarget*"
+        }
+      ],
+      "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL bool"
+    },
+    {
       "id": "get-format",
       "name": "GetFormat",
       "category": "LandscapeEditResourcesSubsystem",
@@ -164,6 +285,32 @@
         }
       ],
       "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL FLinearColor"
+    },
+    {
+      "id": "get-current-state",
+      "name": "GetCurrentState",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetCurrentState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeScratchRenderTarget*"
+        }
+      ],
+      "returnType": "ERHIAccess"
+    },
+    {
+      "id": "get-current-render-target-params",
+      "name": "GetCurrentRenderTargetParams",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetCurrentRenderTargetParams(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeScratchRenderTarget*"
+        }
+      ],
+      "returnType": "UE::Landscape::FScratchRenderTargetParams&"
     },
     {
       "id": "copy-from",
@@ -226,6 +373,124 @@
       ],
       "returnType": "LANDSCAPE_EDIT_LAYERS_BATCHED_MERGE_EXPERIMENTAL void",
       "docs": "Perform a clear of the scratch texture\n@param RDGBuilderRecorder  when the recorder is in \"recording\" mode, the clear's render command enqueuing will be delayed to the render thread, after a FRDGBuilder has been created\nbut the scratch render target's current state will still be mutated to reflect the state change on the game thread. In \"immediate\" mode, a render command will be enqueued immediately"
+    },
+    {
+      "id": "is-in-use",
+      "name": "IsInUse",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "IsInUse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeScratchRenderTarget*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the scratch texture is currently in use (it has been requested but not released)"
+    },
+    {
+      "id": "get-layer-debug-color-material",
+      "name": "GetLayerDebugColorMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetLayerDebugColorMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-selection-color-material",
+      "name": "GetSelectionColorMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetSelectionColorMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-selection-region-material",
+      "name": "GetSelectionRegionMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetSelectionRegionMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-mask-region-material",
+      "name": "GetMaskRegionMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetMaskRegionMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-color-mask-region-material",
+      "name": "GetColorMaskRegionMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetColorMaskRegionMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-landscape-black-texture",
+      "name": "GetLandscapeBlackTexture",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetLandscapeBlackTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UTexture2D*"
+    },
+    {
+      "id": "get-landscape-layer-usage-material",
+      "name": "GetLandscapeLayerUsageMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetLandscapeLayerUsageMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-landscape-dirty-material",
+      "name": "GetLandscapeDirtyMaterial",
+      "category": "LandscapeEditResourcesSubsystem",
+      "signature": "GetLandscapeDirtyMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULandscapeEditResourcesSubsystem*"
+        }
+      ],
+      "returnType": "UMaterialInterface*"
     }
   ]
 }

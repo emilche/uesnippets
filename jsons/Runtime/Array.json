@@ -1,58 +1,1502 @@
 {
   "id": "array",
   "label": "Array",
-  "includepath": "Containers/Array.h",
+  "includepath": "uLang/Common/Containers/Array.h",
   "includes": [
-    "CoreTypes",
-    "AssertionMacros",
-    "IntrusiveUnsetOptionalState",
-    "ReverseIterate",
-    "UnrealMemory",
-    "UnrealTypeTraits",
-    "UnrealTemplate",
-    "AllowShrinking",
-    "ContainerAllocationPolicies",
-    "ContainerElementTypeCompatibility",
-    "Archive",
-    "MemoryImageWriter",
-    "Heapify",
-    "HeapSort",
-    "IsHeap",
-    "BinaryHeap",
+    "Sort",
     "StableSort",
-    "GetTypeHashable",
-    "IdentityFunctor",
-    "Invoke",
-    "Less",
-    "LosesQualifiersFromTo",
-    "Requires",
-    "Sorting",
-    "AlignmentTemplates",
-    "ElementType",
-    "limits",
-    "type_traits",
-    "IsSigned",
-    "AndOrNot",
-    "IsConstructible",
-    "MakeUnsigned"
+    "Allocator",
+    "MemoryOps",
+    "MathUtils",
+    "Sorting"
   ],
   "functions": [
     {
-      "id": "on-invalid-array-num",
-      "name": "OnInvalidArrayNum",
+      "id": "get-data",
+      "name": "GetData",
       "category": "Array",
-      "signature": "OnInvalidArrayNum(Target, New Num)",
+      "signature": "GetData(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "TArray*"
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType*",
+      "docs": "Helper function for returning a typed pointer to the first array entry.\n@returns Pointer to first array entry or nullptr if ArrayMax == 0."
+    },
+    {
+      "id": "get-type-size",
+      "name": "GetTypeSize",
+      "category": "Array",
+      "signature": "GetTypeSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE uint32_t",
+      "docs": "Helper function returning the size of the inner type.\n@returns Size in bytes of array type."
+    },
+    {
+      "id": "get-allocated-size",
+      "name": "GetAllocatedSize",
+      "category": "Array",
+      "signature": "GetAllocatedSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE uint32_t",
+      "docs": "Helper function to return the amount of memory allocated by this\ncontainer.\nOnly returns the size of allocations made directly by the container, not the elements themselves.\n@returns Number of bytes allocated by this container."
+    },
+    {
+      "id": "get-slack",
+      "name": "GetSlack",
+      "category": "Array",
+      "signature": "GetSlack(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE int32_t",
+      "docs": "Returns the amount of slack in this array in elements.\n@see Num, Shrink"
+    },
+    {
+      "id": "check-invariants",
+      "name": "CheckInvariants",
+      "category": "Array",
+      "signature": "CheckInvariants(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Checks array invariants: if array size is greater than zero and less\nthan maximum."
+    },
+    {
+      "id": "range-check",
+      "name": "RangeCheck",
+      "category": "Array",
+      "signature": "RangeCheck(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Checks if index is in array range.\n@param Index Index to check."
+    },
+    {
+      "id": "is-valid-index",
+      "name": "IsValidIndex",
+      "category": "Array",
+      "signature": "IsValidIndex(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool",
+      "docs": "Tests if index is valid, i.e. greater than or equal to zero, and less than the number of elements in the array.\n@param Index Index to test.\n@returns True if index is valid. False otherwise."
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "Array",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE int32_t",
+      "docs": "Returns number of elements in array.\n@returns Number of elements in array.\n@see GetSlack"
+    },
+    {
+      "id": "max",
+      "name": "Max",
+      "category": "Array",
+      "signature": "Max(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE int32_t",
+      "docs": "Returns maximum number of elements in array.\n@returns Maximum number of elements in array.\n@see GetSlack"
+    },
+    {
+      "id": "get-raw-allocator",
+      "name": "GetRawAllocator",
+      "category": "Array",
+      "signature": "GetRawAllocator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementAllocatorType::RawAllocatorType&",
+      "docs": "Accesses the raw allocator."
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "Array",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool",
+      "docs": "Returns true if no elements in array\n@returns true if no elements in array or false if one or more elements.\n@see IsFull, Num"
+    },
+    {
+      "id": "is-filled",
+      "name": "IsFilled",
+      "category": "Array",
+      "signature": "IsFilled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool",
+      "docs": "Returns true if any elements in array\n@returns true if one or more elements in array or false no elements.\n@see IsEmpty, Num"
+    },
+    {
+      "id": "pop",
+      "name": "Pop",
+      "category": "Array",
+      "signature": "Pop(Target, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType",
+      "docs": "Pops element from the array.\n@param bAllowShrinking If this call allows shrinking of the array during element remove.\n@returns Popped element."
+    },
+    {
+      "id": "push",
+      "name": "Push",
+      "category": "Array",
+      "signature": "Push(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&&"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Pushes element into the array.\n@param Item Item to push."
+    },
+    {
+      "id": "top",
+      "name": "Top",
+      "category": "Array",
+      "signature": "Top(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType&",
+      "docs": "Returns the top element, i.e. the last one.\n@returns Reference to the top element.\n@see Pop, Push"
+    },
+    {
+      "id": "last",
+      "name": "Last",
+      "category": "Array",
+      "signature": "Last(Target, Index From The End)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index From The End",
+          "type": "int32_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType&",
+      "docs": "Returns n-th last element from the array.\n@param IndexFromTheEnd (Optional) Index from the end of array (default = 0).\n@returns Reference to n-th last element from the array."
+    },
+    {
+      "id": "shrink",
+      "name": "Shrink",
+      "category": "Array",
+      "signature": "Shrink(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Shrinks the array's used memory to smallest possible to store elements currently in it.\n@see Slack"
+    },
+    {
+      "id": "find-5e07c6",
+      "name": "Find",
+      "category": "Array",
+      "signature": "Find(Target, Item, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t&"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool",
+      "docs": "Finds element within the array.\n@param Item Item to look for.\n@param Index Will contain the found index.\n@returns True if found. False otherwise.\n@see FindLast, FindLastByPredicate"
+    },
+    {
+      "id": "find-72e5ce",
+      "name": "Find",
+      "category": "Array",
+      "signature": "Find(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Finds element within the array.\n@param Item Item to look for.\n@returns Index of the found element. IndexNone otherwise.\n@see FindLast, FindLastByPredicate"
+    },
+    {
+      "id": "find-last-2586a0",
+      "name": "FindLast",
+      "category": "Array",
+      "signature": "FindLast(Target, Item, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t&"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool",
+      "docs": "Finds element within the array starting from the end.\n@param Item Item to look for.\n@param Index Output parameter. Found index.\n@returns True if found. False otherwise.\n@see Find, FindLastByPredicate"
+    },
+    {
+      "id": "find-last-73c671",
+      "name": "FindLast",
+      "category": "Array",
+      "signature": "FindLast(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Finds element within the array starting from the end.\n@param Item Item to look for.\n@returns Index of the found element. IndexNone otherwise."
+    },
+    {
+      "id": "find-last-by-predicate-c1caf6",
+      "name": "FindLastByPredicate",
+      "category": "Array",
+      "signature": "FindLastByPredicate(Target, Pred, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "template<Predicate> int32_t",
+      "docs": "Searches an initial subrange of the array for the last occurrence of an element which matches the specified predicate.\n@param Pred Predicate taking array element and returns true if element matches search criteria, false otherwise.\n@param Count The number of elements from the front of the array through which to search.\n@returns Index of the found element. IndexNone otherwise."
+    },
+    {
+      "id": "find-last-by-predicate-8ad4b6",
+      "name": "FindLastByPredicate",
+      "category": "Array",
+      "signature": "FindLastByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> ULANG_FORCEINLINE int32_t",
+      "docs": "Searches the array for the last occurrence of an element which matches the specified predicate.\n@param Pred Predicate taking array element and returns true if element matches search criteria, false otherwise.\n@returns Index of the found element. IndexNone otherwise."
+    },
+    {
+      "id": "index-of-by-key",
+      "name": "IndexOfByKey",
+      "category": "Array",
+      "signature": "IndexOfByKey(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        }
+      ],
+      "returnType": "template<KeyType> int32_t",
+      "docs": "Finds an item by key (assuming the ElementType overloads operator== for\nthe comparison).\n@param Key The key to search by.\n@returns Index to the first matching element, or IndexNone if none is found."
+    },
+    {
+      "id": "index-of-by-predicate",
+      "name": "IndexOfByPredicate",
+      "category": "Array",
+      "signature": "IndexOfByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> int32_t",
+      "docs": "Finds an item by predicate.\n@param Pred The predicate to match.\n@returns Index to the first matching element, or IndexNone if none is found."
+    },
+    {
+      "id": "find-by-key",
+      "name": "FindByKey",
+      "category": "Array",
+      "signature": "FindByKey(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Key",
+          "type": "KeyType&"
+        }
+      ],
+      "returnType": "template<KeyType> ULANG_FORCEINLINE ElementType*",
+      "docs": "Finds an item by key (assuming the ElementType overloads operator== for\nthe comparison).\n@param Key The key to search by.\n@returns Pointer to the first matching element, or nullptr if none is found.\n@see Find"
+    },
+    {
+      "id": "find-by-predicate",
+      "name": "FindByPredicate",
+      "category": "Array",
+      "signature": "FindByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> ULANG_FORCEINLINE ElementType*",
+      "docs": "Finds an element which matches a predicate functor.\n@param Pred The functor to apply to each element.\n@returns Pointer to the first element for which the predicate returns true, or nullptr if none is found.\n@see FilterByPredicate, ContainsByPredicate"
+    },
+    {
+      "id": "filter-by-predicate",
+      "name": "FilterByPredicate",
+      "category": "Array",
+      "signature": "FilterByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> TArrayG",
+      "docs": "Filters the elements in the array based on a predicate functor.\n@param Pred The functor to apply to each element.\n@returns TArrayG with the same type as this object which contains\nthe subset of elements for which the functor returns true.\n@see FindByPredicate, ContainsByPredicate"
+    },
+    {
+      "id": "contains",
+      "name": "Contains",
+      "category": "Array",
+      "signature": "Contains(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ComparisonType&"
+        }
+      ],
+      "returnType": "template<ComparisonType> bool",
+      "docs": "Checks if this array contains the element.\n@returns True if found. False otherwise.\n@see ContainsByPredicate, FilterByPredicate, FindByPredicate"
+    },
+    {
+      "id": "contains-by-predicate",
+      "name": "ContainsByPredicate",
+      "category": "Array",
+      "signature": "ContainsByPredicate(Target, Pred)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Pred",
+          "type": "Predicate"
+        }
+      ],
+      "returnType": "template<Predicate> ULANG_FORCEINLINE bool",
+      "docs": "Checks if this array contains element for which the predicate is true.\n@param Predicate to use\n@returns True if found. False otherwise.\n@see Contains, Find"
+    },
+    {
+      "id": "add-uninitialized",
+      "name": "AddUninitialized",
+      "category": "Array",
+      "signature": "AddUninitialized(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t",
+          "default": "1"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE int32_t",
+      "docs": "Adds a given number of uninitialized elements into the array.\nCaution, AddUninitialized() will create elements without calling\nthe constructor and this is not appropriate for element types that\nrequire a constructor to function properly.\n@param Count Number of elements to add.\n@returns Number of elements in array before addition."
+    },
+    {
+      "id": "insert-uninitialized",
+      "name": "InsertUninitialized",
+      "category": "Array",
+      "signature": "InsertUninitialized(Target, Index, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inserts a given number of uninitialized elements into the array at given\nlocation.\nCaution, InsertUninitialized() will create elements without calling the\nconstructor and this is not appropriate for element types that require\na constructor to function properly.\n@param Index Tells where to insert the new elements.\n@param Count Number of elements to add.\n@see Insert, InsertZeroed, InsertDefaulted"
+    },
+    {
+      "id": "insert-zeroed",
+      "name": "InsertZeroed",
+      "category": "Array",
+      "signature": "InsertZeroed(Target, Index, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inserts a given number of zeroed elements into the array at given\nlocation.\nCaution, InsertZeroed() will create elements without calling the\nconstructor and this is not appropriate for element types that require\na constructor to function properly.\n@param Index Tells where to insert the new elements.\n@param Count Number of elements to add.\n@see Insert, InsertUninitialized, InsertDefaulted"
+    },
+    {
+      "id": "insert-zeroed-get-ref",
+      "name": "InsertZeroed_GetRef",
+      "category": "Array",
+      "signature": "InsertZeroed_GetRef(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "ElementType&",
+      "docs": "Inserts a zeroed element into the array at given location.\nCaution, InsertZeroed_GetRef() will create an element without calling the\nconstructor and this is not appropriate for element types that require\na constructor to function properly.\n@param Index Tells where to insert the new element.\n@return A reference to the newly-inserted element.\n@see Insert_GetRef, InsertDefaulted_GetRef"
+    },
+    {
+      "id": "insert-defaulted",
+      "name": "InsertDefaulted",
+      "category": "Array",
+      "signature": "InsertDefaulted(Target, Index, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inserts a given number of default-constructed elements into the array at a given\nlocation.\n@param Index Tells where to insert the new elements.\n@param Count Number of elements to add.\n@see Insert, InsertUninitialized, InsertZeroed"
+    },
+    {
+      "id": "insert-defaulted-get-ref",
+      "name": "InsertDefaulted_GetRef",
+      "category": "Array",
+      "signature": "InsertDefaulted_GetRef(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "ElementType&",
+      "docs": "Inserts a default-constructed element into the array at a given\nlocation.\n@param Index Tells where to insert the new element.\n@return A reference to the newly-inserted element.\n@see Insert_GetRef, InsertZeroed_GetRef"
+    },
+    {
+      "id": "insert-702051",
+      "name": "Insert",
+      "category": "Array",
+      "signature": "Insert(Target, Init List, In Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Init List",
+          "type": "std::initializer_list<ElementType>"
+        },
+        {
+          "name": "In Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Inserts given elements into the array at given location.\n@param Items Array of elements to insert.\n@param InIndex Tells where to insert the new elements.\n@returns Location at which the item was inserted."
+    },
+    {
+      "id": "insert-2c8c5d",
+      "name": "Insert",
+      "category": "Array",
+      "signature": "Insert(Target, Items, In Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Items",
+          "type": "TArrayG<ElementType,OtherElementAllocatorType,OtherRawAllocatorArgsType . . .>&"
+        },
+        {
+          "name": "In Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "template<OtherElementAllocatorType,. . . OtherRawAllocatorArgsType> int32_t",
+      "docs": "Inserts given elements into the array at given location.\n@param Items Array of elements to insert.\n@param InIndex Tells where to insert the new elements.\n@returns Location at which the item was inserted."
+    },
+    {
+      "id": "insert-b3f7d3",
+      "name": "Insert",
+      "category": "Array",
+      "signature": "Insert(Target, Ptr, Count, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Ptr",
+          "type": "ElementType*"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Inserts a raw array of elements at a particular index in the TArrayG.\n@param Ptr A pointer to an array of elements to add.\n@param Count The number of elements to insert from Ptr.\n@param Index The index to insert the elements at.\n@return The index of the first element inserted.\n@see Add, Remove"
+    },
+    {
+      "id": "check-address",
+      "name": "CheckAddress",
+      "category": "Array",
+      "signature": "CheckAddress(Target, Addr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Addr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Checks that the specified address is not part of an element within the\ncontainer. Used for implementations to ULANG_ASSERTF that reference arguments\naren't going to be invalidated by possible reallocation.\n@param Addr The address to check.\n@see Add, Remove"
+    },
+    {
+      "id": "insert-62184e",
+      "name": "Insert",
+      "category": "Array",
+      "signature": "Insert(Target, Item, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&&"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Inserts a given element into the array at given location. Move semantics\nversion.\n@param Item The element to insert.\n@param Index Tells where to insert the new elements.\n@returns Location at which the insert was done.\n@see Add, Remove"
+    },
+    {
+      "id": "insert-get-ref",
+      "name": "Insert_GetRef",
+      "category": "Array",
+      "signature": "Insert_GetRef(Target, Item, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&&"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "ElementType&",
+      "docs": "Inserts a given element into the array at given location. Move semantics\nversion.\n@param Item The element to insert.\n@param Index Tells where to insert the new element.\n@return A reference to the newly-inserted element.\n@see Add, Remove"
+    },
+    {
+      "id": "remove-at",
+      "name": "RemoveAt",
+      "category": "Array",
+      "signature": "RemoveAt(Target, Index, Count, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Count",
+          "type": "CountType"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "template<CountType> ULANG_FORCEINLINE void",
+      "docs": "Removes an element (or elements) at given location optionally shrinking\nthe array.\n@param Index Location in array of the element to remove.\n@param Count (Optional) Number of elements to remove. Default is 1.\n@param bAllowShrinking (Optional) Tells if this call can shrink array if suitable after remove. Default is true."
+    },
+    {
+      "id": "remove-at-swap",
+      "name": "RemoveAtSwap",
+      "category": "Array",
+      "signature": "RemoveAtSwap(Target, Index, Count, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Count",
+          "type": "CountType"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "template<CountType> ULANG_FORCEINLINE void",
+      "docs": "Removes an element (or elements) at given location optionally shrinking\nthe array.\nThis version is much more efficient than RemoveAt (O(Count) instead of\nO(ArrayNum)), but does not preserve the order.\n@param Index Location in array of the element to remove.\n@param Count (Optional) Number of elements to remove. Default is 1.\n@param bAllowShrinking (Optional) Tells if this call can shrink array if\nsuitable after remove. Default is true."
+    },
+    {
+      "id": "replace",
+      "name": "Replace",
+      "category": "Array",
+      "signature": "Replace(Target, Old Item, New Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Old Item",
+          "type": "ElementType&"
+        },
+        {
+          "name": "New Item",
+          "type": "ElementType&"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Replaces specified element with the supplied element.\n@param OldItem The element to replace.\n@param NewItem The element to replace with.\n@returns Location at which the replace was done.\n@see Add, Remove, Insert"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "Array",
+      "signature": "Reset(Target, New Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "New Size",
+          "type": "int32_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Same as empty, but doesn't change memory allocations, unless the new size is larger than\nthe current array. It calls the destructors on held items if needed and then zeros the ArrayNum.\n@param NewSize The expected usage size after calling this function."
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "Array",
+      "signature": "Empty(Target, Slack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Slack",
+          "type": "int32_t",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Empties the array. It calls the destructors on held items if needed.\n@param Slack (Optional) The expected usage size after empty operation. Default is 0."
+    },
+    {
+      "id": "set-num",
+      "name": "SetNum",
+      "category": "Array",
+      "signature": "SetNum(Target, New Num, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
         },
         {
           "name": "New Num",
-          "type": "unsigned long long"
+          "type": "int32_t"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
         }
       ],
-      "returnType": "noreturn ] ] void"
+      "returnType": "Void",
+      "docs": "Resizes array to given number of elements.\n@param NewNum New size of the array.\n@param bAllowShrinking Tell if this function can shrink the memory in-use if suitable."
+    },
+    {
+      "id": "set-num-zeroed",
+      "name": "SetNumZeroed",
+      "category": "Array",
+      "signature": "SetNumZeroed(Target, New Num, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "New Num",
+          "type": "int32_t"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resizes array to given number of elements. New elements will be zeroed.\n@param NewNum New size of the array."
+    },
+    {
+      "id": "set-num-uninitialized",
+      "name": "SetNumUninitialized",
+      "category": "Array",
+      "signature": "SetNumUninitialized(Target, New Num, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "New Num",
+          "type": "int32_t"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resizes array to given number of elements. New elements will be uninitialized.\n@param NewNum New size of the array."
+    },
+    {
+      "id": "set-num-unsafe-internal",
+      "name": "SetNumUnsafeInternal",
+      "category": "Array",
+      "signature": "SetNumUnsafeInternal(Target, New Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "New Num",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Does nothing except setting the new number of elements in the array. Does not destruct items, does not de-allocate memory.\n@param NewNum New number of elements in the array, must be <= the current number of elements in the array."
+    },
+    {
+      "id": "append-96bb0c",
+      "name": "Append",
+      "category": "Array",
+      "signature": "Append(Target, Source)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Source",
+          "type": "TArrayG<ElementType,OtherElementAllocatorType,OtherRawAllocatorArgsType . . .>&"
+        }
+      ],
+      "returnType": "template<OtherElementAllocatorType,. . . OtherRawAllocatorArgsType> void",
+      "docs": "Appends the specified array to this array.\nAllocator changing version.\n@param Source The array to append.\n@see Add, Insert"
+    },
+    {
+      "id": "append-6e44c1",
+      "name": "Append",
+      "category": "Array",
+      "signature": "Append(Target, Ptr, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Ptr",
+          "type": "ElementType*"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a raw array of elements to the end of the TArrayG.\n@param Ptr   A pointer to an array of elements to add.\n@param Count The number of elements to insert from Ptr.\n@see Add, Insert"
+    },
+    {
+      "id": "append-4b62dd",
+      "name": "Append",
+      "category": "Array",
+      "signature": "Append(Target, Init List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Init List",
+          "type": "std::initializer_list<ElementType>"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Adds an initializer list of elements to the end of the TArrayG.\n@param InitList The initializer list of elements to add.\n@see Add, Insert"
+    },
+    {
+      "id": "emplace",
+      "name": "Emplace",
+      "category": "Array",
+      "signature": "Emplace(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Args",
+          "type": "ArgsType&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgsType> ULANG_FORCEINLINE int32_t",
+      "docs": "Constructs a new item at the end of the array, possibly reallocating the whole array to fit.\n@param Args  The arguments to forward to the constructor of the new item.\n@return      Index to the new item"
+    },
+    {
+      "id": "emplace-get-ref",
+      "name": "Emplace_GetRef",
+      "category": "Array",
+      "signature": "Emplace_GetRef(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Args",
+          "type": "ArgsType&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgsType> ULANG_FORCEINLINE ElementType&",
+      "docs": "Constructs a new item at the end of the array, possibly reallocating the whole array to fit.\n@param Args  The arguments to forward to the constructor of the new item.\n@return A reference to the newly-inserted element."
+    },
+    {
+      "id": "emplace-at",
+      "name": "EmplaceAt",
+      "category": "Array",
+      "signature": "EmplaceAt(Target, Index, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Args",
+          "type": "ArgsType&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgsType> ULANG_FORCEINLINE void",
+      "docs": "Constructs a new item at a specified index, possibly reallocating the whole array to fit.\n@param Index The index to add the item at.\n@param Args  The arguments to forward to the constructor of the new item."
+    },
+    {
+      "id": "emplace-at-get-ref",
+      "name": "EmplaceAt_GetRef",
+      "category": "Array",
+      "signature": "EmplaceAt_GetRef(Target, Index, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Index",
+          "type": "int32_t"
+        },
+        {
+          "name": "Args",
+          "type": "ArgsType&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgsType> ULANG_FORCEINLINE ElementType&",
+      "docs": "Constructs a new item at a specified index, possibly reallocating the whole array to fit.\n@param Index The index to add the item at.\n@param Args  The arguments to forward to the constructor of the new item.\n@return A reference to the newly-inserted element."
+    },
+    {
+      "id": "add",
+      "name": "Add",
+      "category": "Array",
+      "signature": "Add(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&&"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE int32_t",
+      "docs": "Adds a new item to the end of the array, possibly reallocating the whole array to fit.\nMove semantics version.\n@param Item The item to add\n@return Index to the new item\n@see AddDefaulted, AddUnique, AddZeroed, Append, Insert"
+    },
+    {
+      "id": "add-get-ref",
+      "name": "Add_GetRef",
+      "category": "Array",
+      "signature": "Add_GetRef(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&&"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType&",
+      "docs": "Adds a new item to the end of the array, possibly reallocating the whole array to fit.\nMove semantics version.\n@param Item The item to add\n@return A reference to the newly-inserted element.\n@see AddDefaulted_GetRef, AddUnique_GetRef, AddZeroed_GetRef, Insert_GetRef"
+    },
+    {
+      "id": "add-zeroed",
+      "name": "AddZeroed",
+      "category": "Array",
+      "signature": "AddZeroed(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t",
+          "default": "1"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Adds new items to the end of the array, possibly reallocating the whole\narray to fit. The new items will be zeroed.\nCaution, AddZeroed() will create elements without calling the\nconstructor and this is not appropriate for element types that require\na constructor to function properly.\n@param  Count  The number of new items to add.\n@return Index to the first of the new items.\n@see Add, AddDefaulted, AddUnique, Append, Insert"
+    },
+    {
+      "id": "add-zeroed-get-ref",
+      "name": "AddZeroed_GetRef",
+      "category": "Array",
+      "signature": "AddZeroed_GetRef(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ElementType&",
+      "docs": "Adds a new item to the end of the array, possibly reallocating the whole\narray to fit. The new item will be zeroed.\nCaution, AddZeroed_GetRef() will create elements without calling the\nconstructor and this is not appropriate for element types that require\na constructor to function properly.\n@return A reference to the newly-inserted element.\n@see Add_GetRef, AddDefaulted_GetRef, AddUnique_GetRef, Insert_GetRef"
+    },
+    {
+      "id": "add-defaulted",
+      "name": "AddDefaulted",
+      "category": "Array",
+      "signature": "AddDefaulted(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Count",
+          "type": "int32_t",
+          "default": "1"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Adds new items to the end of the array, possibly reallocating the whole\narray to fit. The new items will be default-constructed.\n@param  Count  The number of new items to add.\n@return Index to the first of the new items.\n@see Add, AddZeroed, AddUnique, Append, Insert"
+    },
+    {
+      "id": "add-defaulted-get-ref",
+      "name": "AddDefaulted_GetRef",
+      "category": "Array",
+      "signature": "AddDefaulted_GetRef(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ElementType&",
+      "docs": "Add a new item to the end of the array, possibly reallocating the whole\narray to fit. The new item will be default-constructed.\n@return A reference to the newly-inserted element.\n@see Add_GetRef, AddZeroed_GetRef, AddUnique_GetRef, Insert_GetRef"
+    },
+    {
+      "id": "add-unique",
+      "name": "AddUnique",
+      "category": "Array",
+      "signature": "AddUnique(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE int32_t",
+      "docs": "Adds unique element to array if it doesn't exist.\n@param Args Item to add.\n@returns Index of the element in the array.\n@see Add, AddDefaulted, AddZeroed, Append, Insert"
+    },
+    {
+      "id": "reserve",
+      "name": "Reserve",
+      "category": "Array",
+      "signature": "Reserve(Target, Number)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Number",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE void",
+      "docs": "Reserves memory such that the array can contain at least Number elements.\n@param Number The number of elements that the array should be able to contain after allocation.\n@see Shrink"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "Array",
+      "signature": "Init(Target, Element, Number)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Element",
+          "type": "ElementType&"
+        },
+        {
+          "name": "Number",
+          "type": "int32_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the size of the array, filling it with the given element.\n@param Element The element to fill array with.\n@param Number The number of elements that the array should be able to contain after allocation."
+    },
+    {
+      "id": "remove-single",
+      "name": "RemoveSingle",
+      "category": "Array",
+      "signature": "RemoveSingle(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Removes the first occurrence of the specified item in the array,\nmaintaining order but not indices.\n@param Item The item to remove.\n@returns The number of items removed. For RemoveSingleItem, this is always either 0 or 1.\n@see Add, Insert, Remove, RemoveAll, RemoveAllSwap"
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "category": "Array",
+      "signature": "Remove(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "OtherElementType&"
+        }
+      ],
+      "returnType": "template<OtherElementType> int32_t",
+      "docs": "Removes as many instances of Item as there are in the array, maintaining\norder but not indices.\n@param Item Item to remove from array.\n@returns Number of removed elements.\n@see Add, Insert, RemoveAll, RemoveAllSwap, RemoveSingle, RemoveSwap"
+    },
+    {
+      "id": "remove-all",
+      "name": "RemoveAll",
+      "category": "Array",
+      "signature": "RemoveAll(Target, Predicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Predicate",
+          "type": "PREDICATE_CLASS&"
+        }
+      ],
+      "returnType": "template<class PREDICATE_CLASS> int32_t",
+      "docs": "Remove all instances that match the predicate, maintaining order but not indices\nOptimized to work with runs of matches/non-matches\n@param Predicate Predicate class instance\n@returns Number of removed elements.\n@see Add, Insert, RemoveAllSwap, RemoveSingle, RemoveSwap"
+    },
+    {
+      "id": "remove-all-swap",
+      "name": "RemoveAllSwap",
+      "category": "Array",
+      "signature": "RemoveAllSwap(Target, Predicate, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Predicate",
+          "type": "PREDICATE_CLASS&"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "template<class PREDICATE_CLASS> void",
+      "docs": "Remove all instances that match the predicate\n@param Predicate Predicate class instance\n@see Remove, RemoveSingle, RemoveSingleSwap, RemoveSwap"
+    },
+    {
+      "id": "remove-single-swap",
+      "name": "RemoveSingleSwap",
+      "category": "Array",
+      "signature": "RemoveSingleSwap(Target, Item, Allow Shrinking)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        },
+        {
+          "name": "Allow Shrinking",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Removes the first occurrence of the specified item in the array. This version is much more efficient\nO(Count) instead of O(ArrayNum), but does not preserve the order\n@param Item The item to remove\n@returns The number of items removed. For RemoveSingleItem, this is always either 0 or 1.\n@see Add, Insert, Remove, RemoveAll, RemoveAllSwap, RemoveSwap"
+    },
+    {
+      "id": "remove-swap",
+      "name": "RemoveSwap",
+      "category": "Array",
+      "signature": "RemoveSwap(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Item",
+          "type": "ElementType&"
+        }
+      ],
+      "returnType": "int32_t",
+      "docs": "Removes item from the array.\nThis version is much more efficient, because it uses RemoveAtSwap\ninternally which is O(Count) instead of RemoveAt which is O(ArrayNum),\nbut does not preserve the order.\n@returns Number of elements removed.\n@see Add, Insert, Remove, RemoveAll, RemoveAllSwap"
+    },
+    {
+      "id": "begin",
+      "name": "begin",
+      "category": "Array",
+      "signature": "begin(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType*",
+      "docs": "DO NOT USE DIRECTLY\nSTL-like iterators to enable range-based for loop support."
+    },
+    {
+      "id": "end",
+      "name": "end",
+      "category": "Array",
+      "signature": "end(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE ElementType*"
+    },
+    {
+      "id": "sort-40dfe4",
+      "name": "Sort",
+      "category": "Array",
+      "signature": "Sort(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sorts the array assuming < operator is defined for the item type.\n@note: If your array contains raw pointers, they will be automatically dereferenced during sorting.\nTherefore, your array will be sorted by the values being pointed to, rather than the pointers' values.\nIf this is not desirable, please use Algo::Sort(MyArray) instead.\nThe auto-dereferencing behavior does not occur with smart pointers."
+    },
+    {
+      "id": "sort-dcf11f",
+      "name": "Sort",
+      "category": "Array",
+      "signature": "Sort(Target, Predicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType&"
+        }
+      ],
+      "returnType": "template<class PredicateType> void",
+      "docs": "Sorts the array using user define predicate class.\n@param Predicate Predicate instance or lambda.\n@note: If your array contains raw pointers, they will be automatically dereferenced during sorting.\nTherefore, your predicate will be passed references rather than pointers.\nIf this is not desirable, please use Algo::Sort(MyArray, Predicate) instead.\nThe auto-dereferencing behavior does not occur with smart pointers."
+    },
+    {
+      "id": "stable-sort",
+      "name": "StableSort",
+      "category": "Array",
+      "signature": "StableSort(Target, Predicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType&"
+        }
+      ],
+      "returnType": "template<class PredicateType> void"
+    },
+    {
+      "id": "remove-successive-duplicates",
+      "name": "RemoveSuccessiveDuplicates",
+      "category": "Array",
+      "signature": "RemoveSuccessiveDuplicates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TArrayG*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove successive duplicates. Assumes that elements of the array have ==."
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "Array",
+      "signature": "GetTypeHash(Target, Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TIsTArray*"
+        },
+        {
+          "name": "Array",
+          "type": "TArray<T>"
+        }
+      ],
+      "returnType": "template<T> ULANG_FORCEINLINE uint32_t",
+      "docs": "Traits class which determines whether or not a type is a TArray."
     }
   ]
 }

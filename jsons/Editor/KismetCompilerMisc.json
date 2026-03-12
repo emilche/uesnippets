@@ -667,10 +667,10 @@
       "docs": "Similar to UFunction::IsSignatureCompatibleWith, but also checks if the function signatures are convertible.\nFor example, if a parameter in SourceFunction is of type float, but its corresponding type in OtherFunction is double, then the function is deemed \"convertible\".\nThis is primarily used for binding Blueprint functions with native delegate signatures that use float types."
     },
     {
-      "id": "resolve-and-register-scoped-term",
-      "name": "ResolveAndRegisterScopedTerm",
+      "id": "compile",
+      "name": "Compile",
       "category": "KismetCompilerMisc",
-      "signature": "ResolveAndRegisterScopedTerm(Target, Context, Net, Net Array)",
+      "signature": "Compile(Target, Context, Node)",
       "params": [
         {
           "name": "Target",
@@ -681,16 +681,57 @@
           "type": "FKismetFunctionContext&"
         },
         {
-          "name": "Net",
-          "type": "UEdGraphPin*"
-        },
-        {
-          "name": "Net Array",
-          "type": "TIndirectArray<FBPTerminal>&"
+          "name": "Node",
+          "type": "UEdGraphNode*"
         }
       ],
       "returnType": "Void",
-      "docs": "Helper function that verifies the variable name referenced by the net exists in the associated scope (either the class being compiled or via an object reference on the Self pin), and then creates/registers a term for that variable access."
+      "supportedTargets": [
+        "FNodeHandlingFunctor*",
+        "FKCHandler_Passthru*"
+      ]
+    },
+    {
+      "id": "transform",
+      "name": "Transform",
+      "category": "KismetCompilerMisc",
+      "signature": "Transform(Target, Context, Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNodeHandlingFunctor*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Node",
+          "type": "UEdGraphNode*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "register-net",
+      "name": "RegisterNet",
+      "category": "KismetCompilerMisc",
+      "signature": "RegisterNet(Target, Context, Pin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNodeHandlingFunctor*"
+        },
+        {
+          "name": "Context",
+          "type": "FKismetFunctionContext&"
+        },
+        {
+          "name": "Pin",
+          "type": "UEdGraphPin*"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "register-nets",
@@ -714,6 +755,19 @@
       "returnType": "Void"
     },
     {
+      "id": "requires-register-nets-before-scheduling",
+      "name": "RequiresRegisterNetsBeforeScheduling",
+      "category": "KismetCompilerMisc",
+      "signature": "RequiresRegisterNetsBeforeScheduling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNodeHandlingFunctor*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "sanitize-name",
       "name": "SanitizeName",
       "category": "KismetCompilerMisc",
@@ -728,14 +782,23 @@
       "docs": "Creates a sanitized name.\n@param [in,out]\tName\tThe name to modify and make a legal C++ identifier."
     },
     {
-      "id": "make-base-name",
-      "name": "MakeBaseName",
+      "id": "make-valid-name",
+      "name": "MakeValidName",
       "category": "KismetCompilerMisc",
-      "signature": "MakeBaseName(Net)",
+      "signature": "MakeValidName(Target, Net, Context)",
       "params": [
+        {
+          "name": "Target",
+          "type": "FNetNameMapping*"
+        },
         {
           "name": "Net",
           "type": "UEdGraphNode*"
+        },
+        {
+          "name": "Context",
+          "type": "String&",
+          "default": "TEXT(\"\")"
         }
       ],
       "returnType": "String"

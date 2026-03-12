@@ -1,0 +1,394 @@
+{
+  "id": "tensor-reduction-sycl",
+  "label": "TensorReductionSycl",
+  "includepath": "TensorReductionSycl.h",
+  "includes": [],
+  "functions": [
+    {
+      "id": "get-op-9a3db2",
+      "name": "get_op",
+      "category": "TensorReductionSycl",
+      "signature": "get_op(Op)",
+      "params": [
+        {
+          "name": "Op",
+          "type": "Op&"
+        }
+      ],
+      "returnType": "EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE type",
+      "docs": "***************************************************************\nTensorReductionSycl.h\n\\brief:\nThis is the specialization of the reduction operation. Two phase reduction approach\nis used since the GPU does not have Global Synchronization for global memory among\ndifferent work-group/thread block. To solve the problem, we need to create two kernels\nto reduce the data, where the first kernel reduce the data locally and each local\nworkgroup/thread-block save the input data into global memory. In the second phase (global reduction)\none work-group uses one work-group/thread-block to reduces the intermediate data into one single element.\nHere is an NVIDIA presentation explaining the optimized two phase reduction algorithm on GPU:\nhttps://developer.download.nvidia.com/assets/cuda/files/reduction.pdf\n***************************************************************"
+    },
+    {
+      "id": "finalise-op-2e1b8b",
+      "name": "finalise_op",
+      "category": "TensorReductionSycl",
+      "signature": "finalise_op(Accumulator)",
+      "params": [
+        {
+          "name": "Accumulator",
+          "type": "PacketReturnType&"
+        }
+      ],
+      "returnType": "EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE PacketReturnType"
+    },
+    {
+      "id": "get-op-5ed270",
+      "name": "get_op",
+      "category": "TensorReductionSycl",
+      "signature": "get_op(Coeff Return Type)",
+      "params": [
+        {
+          "name": "Coeff Return Type",
+          "type": "Eigen::internal::MeanReducer<"
+        }
+      ],
+      "returnType": "EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE type"
+    },
+    {
+      "id": "finalise-op-b4abd4",
+      "name": "finalise_op",
+      "category": "TensorReductionSycl",
+      "signature": "finalise_op(Accumulator, Scale)",
+      "params": [
+        {
+          "name": "Accumulator",
+          "type": "CoeffReturnType&"
+        },
+        {
+          "name": "Scale",
+          "type": "Index&"
+        }
+      ],
+      "returnType": "EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE CoeffReturnType"
+    },
+    {
+      "id": "full-reduction-kernel-functor",
+      "name": "FullReductionKernelFunctor",
+      "category": "TensorReductionSycl",
+      "signature": "FullReductionKernelFunctor(Scratch, Evaluator, Final Output, Rng, Scratch, Evaluator, Final Output, Rng, Op)",
+      "params": [
+        {
+          "name": "Scratch",
+          "type": "LocalAccessor"
+        },
+        {
+          "name": "Evaluator",
+          "type": "Evaluator"
+        },
+        {
+          "name": "Final Output",
+          "type": "EvaluatorPointerType"
+        },
+        {
+          "name": "Rng",
+          "type": "Index"
+        },
+        {
+          "name": "Scratch",
+          "type": "OpType op_ ) : scratch ("
+        },
+        {
+          "name": "Evaluator",
+          "type": "evaluator ("
+        },
+        {
+          "name": "Final Output",
+          "type": "final_output ("
+        },
+        {
+          "name": "Rng",
+          "type": "rng ("
+        },
+        {
+          "name": "Op",
+          "type": "op ( OpDef::get_op ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "vect",
+      "name": "Vect",
+      "category": "TensorReductionSycl",
+      "signature": "Vect(Item ID)",
+      "params": [
+        {
+          "name": "Item ID",
+          "type": "Evaluator::ReducerTraits::PacketAccess& Evaluator::InputPacketAccess )> EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE::Eigen::internal::enable_if<Vect>::type compute_reduction ( cl::sycl::nd_item<1>&"
+        }
+      ],
+      "returnType": "template<bool"
+    },
+    {
+      "id": "generic-nondeterministic-reducer",
+      "name": "GenericNondeterministicReducer",
+      "category": "TensorReductionSycl",
+      "signature": "GenericNondeterministicReducer(Evaluator, Output Accessor, Functor, Range, Evaluator, Output Accessor, Functor, Range, Num Values To Reduce)",
+      "params": [
+        {
+          "name": "Evaluator",
+          "type": "Evaluator"
+        },
+        {
+          "name": "Output Accessor",
+          "type": "EvaluatorPointerType"
+        },
+        {
+          "name": "Functor",
+          "type": "OpType"
+        },
+        {
+          "name": "Range",
+          "type": "Index"
+        },
+        {
+          "name": "Evaluator",
+          "type": "Index num_values_to_reduce_ ) : evaluator ("
+        },
+        {
+          "name": "Output Accessor",
+          "type": "output_accessor ("
+        },
+        {
+          "name": "Functor",
+          "type": "functor ( OpDef::get_op ("
+        },
+        {
+          "name": "Range",
+          "type": "range ("
+        },
+        {
+          "name": "Num Values To Reduce",
+          "type": "num_values_to_reduce ("
+        }
+      ],
+      "returnType": "template<Scratch>"
+    },
+    {
+      "id": "partial-reduction-kernel",
+      "name": "PartialReductionKernel",
+      "category": "TensorReductionSycl",
+      "signature": "PartialReductionKernel(Scratch, Evaluator, Output Accessor, Op, Preserve Elements Num Groups, Reduce Elements Num Groups, Num Coeffs To Preserve, Scratch, Evaluator, Output Accessor, Op, Preserve Elements Num Groups, Reduce Elements Num Groups, Num Coeffs To Preserve, Num Coeffs To Reduce)",
+      "params": [
+        {
+          "name": "Scratch",
+          "type": "ScratchAcc"
+        },
+        {
+          "name": "Evaluator",
+          "type": "Evaluator"
+        },
+        {
+          "name": "Output Accessor",
+          "type": "EvaluatorPointerType"
+        },
+        {
+          "name": "Op",
+          "type": "OpType"
+        },
+        {
+          "name": "Preserve Elements Num Groups",
+          "type": "Index"
+        },
+        {
+          "name": "Reduce Elements Num Groups",
+          "type": "Index"
+        },
+        {
+          "name": "Num Coeffs To Preserve",
+          "type": "Index"
+        },
+        {
+          "name": "Scratch",
+          "type": "Index num_coeffs_to_reduce_ ) : scratch ("
+        },
+        {
+          "name": "Evaluator",
+          "type": "evaluator ("
+        },
+        {
+          "name": "Output Accessor",
+          "type": "output_accessor ("
+        },
+        {
+          "name": "Op",
+          "type": "op ( OpDef::get_op ("
+        },
+        {
+          "name": "Preserve Elements Num Groups",
+          "type": "preserve_elements_num_groups ("
+        },
+        {
+          "name": "Reduce Elements Num Groups",
+          "type": "reduce_elements_num_groups ("
+        },
+        {
+          "name": "Num Coeffs To Preserve",
+          "type": "num_coeffs_to_preserve ("
+        },
+        {
+          "name": "Num Coeffs To Reduce",
+          "type": "num_coeffs_to_reduce ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "element-wise-reduce",
+      "name": "element_wise_reduce",
+      "category": "TensorReductionSycl",
+      "signature": "element_wise_reduce(Global R Id, Global P Id, Accumulator)",
+      "params": [
+        {
+          "name": "Global R Id",
+          "type": "Index"
+        },
+        {
+          "name": "Global P Id",
+          "type": "Index"
+        },
+        {
+          "name": "Accumulator",
+          "type": "CoeffReturnType&"
+        }
+      ],
+      "returnType": "EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE void"
+    },
+    {
+      "id": "second-step-partial-reduction",
+      "name": "SecondStepPartialReduction",
+      "category": "TensorReductionSycl",
+      "signature": "SecondStepPartialReduction(Input Accessor, Output Accessor, Op, Num Coeffs To Preserve, Input Accessor, Output Accessor, Op, Num Coeffs To Preserve, Num Coeffs To Reduce)",
+      "params": [
+        {
+          "name": "Input Accessor",
+          "type": "InputAccessor"
+        },
+        {
+          "name": "Output Accessor",
+          "type": "OutputAccessor"
+        },
+        {
+          "name": "Op",
+          "type": "OpType"
+        },
+        {
+          "name": "Num Coeffs To Preserve",
+          "type": "Index"
+        },
+        {
+          "name": "Input Accessor",
+          "type": "Index num_coeffs_to_reduce_ ) : input_accessor ("
+        },
+        {
+          "name": "Output Accessor",
+          "type": "output_accessor ("
+        },
+        {
+          "name": "Op",
+          "type": "op ( OpDef::get_op ("
+        },
+        {
+          "name": "Num Coeffs To Preserve",
+          "type": "num_coeffs_to_preserve ("
+        },
+        {
+          "name": "Num Coeffs To Reduce",
+          "type": "num_coeffs_to_reduce ("
+        }
+      ],
+      "returnType": "EIGEN_DEVICE_FUNC EIGEN_STRONG_INLINE"
+    },
+    {
+      "id": "run-e9fe76",
+      "name": "run",
+      "category": "TensorReductionSycl",
+      "signature": "run(Self, Reducer, Dev, Output, Num Coeffs To Reduce, Num Coeffs To Preserve)",
+      "params": [
+        {
+          "name": "Self",
+          "type": "Self&"
+        },
+        {
+          "name": "Reducer",
+          "type": "Op&"
+        },
+        {
+          "name": "Dev",
+          "type": "Eigen::SyclDevice&"
+        },
+        {
+          "name": "Output",
+          "type": "EvaluatorPointerType"
+        },
+        {
+          "name": "Num Coeffs To Reduce",
+          "type": "Index"
+        },
+        {
+          "name": "Num Coeffs To Preserve",
+          "type": "Index"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "run-983a6c",
+      "name": "run",
+      "category": "TensorReductionSycl",
+      "signature": "run(Self, Reducer, Dev, Data)",
+      "params": [
+        {
+          "name": "Self",
+          "type": "Self&"
+        },
+        {
+          "name": "Reducer",
+          "type": "Op&"
+        },
+        {
+          "name": "Dev",
+          "type": "Eigen::SyclDevice&"
+        },
+        {
+          "name": "Data",
+          "type": "EvaluatorPointerType"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "run-bf9521",
+      "name": "run",
+      "category": "TensorReductionSycl",
+      "signature": "run(Self, Reducer, Dev, Output, Num Values To Reduce, Num Coeffs To Preserve)",
+      "params": [
+        {
+          "name": "Self",
+          "type": "Self&"
+        },
+        {
+          "name": "Reducer",
+          "type": "Op&"
+        },
+        {
+          "name": "Dev",
+          "type": "Eigen::SyclDevice&"
+        },
+        {
+          "name": "Output",
+          "type": "Self::EvaluatorPointerType"
+        },
+        {
+          "name": "Num Values To Reduce",
+          "type": "Self::Index"
+        },
+        {
+          "name": "Num Coeffs To Preserve",
+          "type": "Self::Index"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

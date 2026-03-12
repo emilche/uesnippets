@@ -17,6 +17,46 @@
   ],
   "functions": [
     {
+      "id": "is-looping",
+      "name": "IsLooping",
+      "category": "AnimBank",
+      "signature": "IsLooping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Note: This is almost fully conservative, but since it is derived from\nbone positions on the skeleton (not skinning all verts across all frames)\nit could have some edge cases for (presumably) strange content.\nThis hasn't been an issue in practice yet, so we won't worry about it,\nand each anim bank sequence has an optional BoundsScale that can be adjusted\nto account for certain cases that might fail.\nOne possible future idea if needed, is to calculate a per-bone influence radius\nin the skeleton mesh build, where each bone has a bounding sphere of all weighted\nvertex positions. Then we could try something like the following to make the\nbounds possibly fit this content better.\nInitialAnimatedBoundsMin(AssetBounds.Origin - AssetBounds.BoxExtent);\nInitialAnimatedBoundsMax(AssetBounds.Origin + AssetBounds.BoxExtent);\nFor each Key,Bone:\nAnimatedBoundsMin = Min(AnimatedBoundsMin, InitialAnimatedBoundsMin + Bone.Pos[Key] - Bone.RefPos)\nAnimatedBoundsMax = Max(AnimatedBoundsMax, InitialAnimatedBoundsMax + Bone.Pos[Key] - Bone.RefPos)"
+    },
+    {
+      "id": "is-auto-start",
+      "name": "IsAutoStart",
+      "category": "AnimBank",
+      "signature": "IsAutoStart(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-anim-bank-sequence",
+      "name": "FAnimBankSequence",
+      "category": "AnimBank",
+      "signature": "FAnimBankSequence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "validate-position",
       "name": "ValidatePosition",
       "category": "AnimBank",
@@ -24,7 +64,127 @@
       "params": [
         {
           "name": "Target",
-          "type": "FAnimBankSequence*"
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-data",
+      "name": "GetData",
+      "category": "AnimBank",
+      "signature": "GetData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "FAnimBankData&"
+    },
+    {
+      "id": "f-anim-bank-item-92bcfc",
+      "name": "FAnimBankItem",
+      "category": "AnimBank",
+      "signature": "FAnimBankItem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-anim-bank-item-35f9f4",
+      "name": "FAnimBankItem",
+      "category": "AnimBank",
+      "signature": "FAnimBankItem(Target, In Bank Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        },
+        {
+          "name": "In Bank Item",
+          "type": "FAnimBankItem&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-type-hash-4c25ab",
+      "name": "GetTypeHash",
+      "category": "AnimBank",
+      "signature": "GetTypeHash(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        },
+        {
+          "name": "Key",
+          "type": "FAnimBankItem&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-type-hash-cc9ed0",
+      "name": "GetTypeHash",
+      "category": "AnimBank",
+      "signature": "GetTypeHash(Target, In Bank Items)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        },
+        {
+          "name": "In Bank Items",
+          "type": "TArray<FAnimBankItem>&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "f-soft-anim-bank-item-741393",
+      "name": "FSoftAnimBankItem",
+      "category": "AnimBank",
+      "signature": "FSoftAnimBankItem(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-soft-anim-bank-item-2433f4",
+      "name": "FSoftAnimBankItem",
+      "category": "AnimBank",
+      "signature": "FSoftAnimBankItem(Target, In Bank Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        },
+        {
+          "name": "In Bank Item",
+          "type": "FSoftAnimBankItem&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-skinned-mesh-component-descriptor-base",
+      "name": "FSkinnedMeshComponentDescriptorBase",
+      "category": "AnimBank",
+      "signature": "FSkinnedMeshComponentDescriptorBase(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
         }
       ],
       "returnType": "Void"
@@ -37,7 +197,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FSkinnedMeshComponentDescriptorBase*"
+          "type": "UAnimBank*"
         },
         {
           "name": "Outer",
@@ -64,7 +224,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FSkinnedMeshComponentDescriptorBase*"
+          "type": "UAnimBank*"
         },
         {
           "name": "Component",
@@ -86,11 +246,24 @@
       "params": [
         {
           "name": "Target",
-          "type": "FSkinnedMeshComponentDescriptorBase*"
+          "type": "UAnimBank*"
         },
         {
           "name": "ISM Component",
           "type": "UInstancedSkinnedMeshComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-skinned-mesh-component-descriptor",
+      "name": "FSkinnedMeshComponentDescriptor",
+      "category": "AnimBank",
+      "signature": "FSkinnedMeshComponentDescriptor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
         }
       ],
       "returnType": "Void"
@@ -103,7 +276,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FSkinnedMeshComponentDescriptor*"
+          "type": "UAnimBank*"
         }
       ],
       "returnType": "UInt"
@@ -116,11 +289,37 @@
       "params": [
         {
           "name": "Target",
-          "type": "FSkinnedMeshComponentDescriptor*"
+          "type": "UAnimBank*"
         },
         {
           "name": "Loader",
           "type": "UObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-type-hash-752c27",
+      "name": "GetTypeHash",
+      "category": "AnimBank",
+      "signature": "GetTypeHash(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "f-soft-skinned-mesh-component-descriptor",
+      "name": "FSoftSkinnedMeshComponentDescriptor",
+      "category": "AnimBank",
+      "signature": "FSoftSkinnedMeshComponentDescriptor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
         }
       ],
       "returnType": "Void"
@@ -133,7 +332,67 @@
       "params": [
         {
           "name": "Target",
-          "type": "FAnimBankDesc*"
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-type-hash-05c848",
+      "name": "GetTypeHash",
+      "category": "AnimBank",
+      "signature": "GetTypeHash(Target, Desc)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        },
+        {
+          "name": "Desc",
+          "type": "FAnimBankDesc&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "AnimBank",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimBank*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "matches",
+      "name": "Matches",
+      "category": "AnimBank",
+      "signature": "Matches(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "KeyInitType"
+        },
+        {
+          "name": "B",
+          "type": "KeyInitType"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-key-hash",
+      "name": "GetKeyHash",
+      "category": "AnimBank",
+      "signature": "GetKeyHash(Key)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "KeyInitType"
         }
       ],
       "returnType": "UInt"

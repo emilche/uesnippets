@@ -34,6 +34,20 @@
       "docs": "Upload initialized mesh buffers.\n@warning This can only be called on the Rendering Thread."
     },
     {
+      "id": "upload-index-buffer-update",
+      "name": "UploadIndexBufferUpdate",
+      "category": "MeshRenderBufferSet",
+      "signature": "UploadIndexBufferUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fast path to only update the primary and secondary index buffers. This can be used\nwhen (eg) the secondary index buffer is being used to highlight/hide a subset of triangles.\n@warning This can only be called on the Rendering Thread."
+    },
+    {
       "id": "upload-vertex-update",
       "name": "UploadVertexUpdate",
       "category": "MeshRenderBufferSet",
@@ -94,6 +108,88 @@
       "docs": "Fast path to update various vertex buffers. This path does not support changing the\nsize/counts of any of the sub-buffers, a direct memcopy from the CPU-side buffer to the RHI buffer is used.\n@warning This can only be called on the Rendering Thread."
     },
     {
+      "id": "invalidate-ray-tracing-data",
+      "name": "InvalidateRayTracingData",
+      "category": "MeshRenderBufferSet",
+      "signature": "InvalidateRayTracingData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSet*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "validate-ray-tracing-data",
+      "name": "ValidateRayTracingData",
+      "category": "MeshRenderBufferSet",
+      "signature": "ValidateRayTracingData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSet*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize-buffers-from-overlays-75cd58",
+      "name": "InitializeBuffersFromOverlays",
+      "category": "MeshRenderBufferSet",
+      "signature": "InitializeBuffersFromOverlays(Target, Render Buffers, Mesh, Num Triangles, Enumerable, UV Overlay, Normal Overlay, Color Overlay, Tangents Func, Track Triangles, Parallel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Render Buffers",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Num Triangles",
+          "type": "Int"
+        },
+        {
+          "name": "Enumerable",
+          "type": "TriangleEnumerable&"
+        },
+        {
+          "name": "UV Overlay",
+          "type": "FDynamicMeshUVOverlay*"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Color Overlay",
+          "type": "FDynamicMeshColorOverlay*"
+        },
+        {
+          "name": "Tangents Func",
+          "type": "TFunctionRef<void ( int,int,int,FVector3f&,FVector3f&,FVector3f& )>"
+        },
+        {
+          "name": "Track Triangles",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Parallel",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "template<TriangleEnumerable> void",
+      "docs": "Initialize rendering buffers from given attribute overlays.\nCreates three vertices per triangle, IE no shared vertices in buffers."
+    },
+    {
       "id": "update-secondary-triangle-buffer",
       "name": "UpdateSecondaryTriangleBuffer",
       "category": "MeshRenderBufferSet",
@@ -142,6 +238,28 @@
       "docs": "RecomputeRenderBufferTriangleIndexSets re-sorts the existing set of triangles in a FMeshRenderBufferSet\ninto primary and secondary index buffers. Note that UploadIndexBufferUpdate() must be called\nafter this function!"
     },
     {
+      "id": "get-overlay-color-as-f-color",
+      "name": "GetOverlayColorAsFColor",
+      "category": "MeshRenderBufferSet",
+      "signature": "GetOverlayColorAsFColor(Target, Color Overlay, Element ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Color Overlay",
+          "type": "FDynamicMeshColorOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FColor",
+      "docs": "Get the overlay color the FColor,  respecting the ColorSpaceTransformMode utilizing the VertexColorRemappingFunc if requested."
+    },
+    {
       "id": "convert",
       "name": "Convert",
       "category": "MeshRenderBufferSet",
@@ -166,6 +284,147 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "initialize-buffers-from-overlays-b1d147",
+      "name": "InitializeBuffersFromOverlays",
+      "category": "MeshRenderBufferSet",
+      "signature": "InitializeBuffersFromOverlays(Target, Render Buffers, Mesh, Num Triangles, Enumerable, UV Overlays, Normal Overlay, Color Overlay, Tangents Func, Track Triangles, Parallel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Render Buffers",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Num Triangles",
+          "type": "Int"
+        },
+        {
+          "name": "Enumerable",
+          "type": "TriangleEnumerable&"
+        },
+        {
+          "name": "UV Overlays",
+          "type": "TArray<FDynamicMeshUVOverlay*,UVOverlayListAllocator>&"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Color Overlay",
+          "type": "FDynamicMeshColorOverlay*"
+        },
+        {
+          "name": "Tangents Func",
+          "type": "TFunctionRef<void ( int,int,int,FVector3f&,FVector3f&,FVector3f& )>"
+        },
+        {
+          "name": "Track Triangles",
+          "type": "Bool"
+        },
+        {
+          "name": "Parallel",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<TriangleEnumerable,UVOverlayListAllocator> void"
+    },
+    {
+      "id": "update-vertex-buffers-from-overlays",
+      "name": "UpdateVertexBuffersFromOverlays",
+      "category": "MeshRenderBufferSet",
+      "signature": "UpdateVertexBuffersFromOverlays(Target, Render Buffers, Mesh, Num Triangles, Enumerable, Normal Overlay, Color Overlay, Tangents Func, Update Positions, Update Normals, Update Colors)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Render Buffers",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Num Triangles",
+          "type": "Int"
+        },
+        {
+          "name": "Enumerable",
+          "type": "TriangleEnumerable&"
+        },
+        {
+          "name": "Normal Overlay",
+          "type": "FDynamicMeshNormalOverlay*"
+        },
+        {
+          "name": "Color Overlay",
+          "type": "FDynamicMeshColorOverlay*"
+        },
+        {
+          "name": "Tangents Func",
+          "type": "TFunctionRef<void ( int,int,int,FVector3f&,FVector3f&,FVector3f& )>"
+        },
+        {
+          "name": "Update Positions",
+          "type": "Bool"
+        },
+        {
+          "name": "Update Normals",
+          "type": "Bool"
+        },
+        {
+          "name": "Update Colors",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<TriangleEnumerable> void",
+      "docs": "Update vertex positions/normals/colors of an existing set of render buffers.\nAssumes that buffers were created with unshared vertices, ie three vertices per triangle, eg by InitializeBuffersFromOverlays()"
+    },
+    {
+      "id": "update-vertex-uv-buffer-from-overlays",
+      "name": "UpdateVertexUVBufferFromOverlays",
+      "category": "MeshRenderBufferSet",
+      "signature": "UpdateVertexUVBufferFromOverlays(Target, Render Buffers, Mesh, Num Triangles, Enumerable, UV Overlays)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMeshRenderBufferSetConversionUtil*"
+        },
+        {
+          "name": "Render Buffers",
+          "type": "FMeshRenderBufferSet*"
+        },
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        },
+        {
+          "name": "Num Triangles",
+          "type": "Int"
+        },
+        {
+          "name": "Enumerable",
+          "type": "TriangleEnumerable&"
+        },
+        {
+          "name": "UV Overlays",
+          "type": "TArray<FDynamicMeshUVOverlay*,UVOverlayListAllocator>&"
+        }
+      ],
+      "returnType": "template<TriangleEnumerable,UVOverlayListAllocator> void",
+      "docs": "Update vertex uvs of an existing set of render buffers.\nAssumes that buffers were created with unshared vertices, ie three vertices per triangle, eg by InitializeBuffersFromOverlays()"
     }
   ]
 }

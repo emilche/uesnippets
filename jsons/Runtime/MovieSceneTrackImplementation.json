@@ -23,22 +23,135 @@
   ],
   "functions": [
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "has-custom-initialize",
+      "name": "HasCustomInitialize",
       "category": "MovieSceneTrackImplementation",
-      "signature": "Serialize(Target, Ar)",
+      "signature": "HasCustomInitialize(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FMovieSceneTrackImplementationPtr*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
+          "type": "FMovieSceneTrackImplementation*"
         }
       ],
       "returnType": "Bool",
-      "docs": "Serialize the template"
+      "docs": "Determine whether this track implementation has its own custom initialization override"
+    },
+    {
+      "id": "has-custom-evaluate",
+      "name": "HasCustomEvaluate",
+      "category": "MovieSceneTrackImplementation",
+      "signature": "HasCustomEvaluate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTrackImplementation*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine whether this track implementation has its own custom evaluation override"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "MovieSceneTrackImplementation",
+      "signature": "Initialize(Target, Track, Children, Operand, Context, Persistent Data, Player)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTrackImplementation*"
+        },
+        {
+          "name": "Track",
+          "type": "FMovieSceneEvaluationTrack&"
+        },
+        {
+          "name": "Children",
+          "type": "TArrayView<FMovieSceneFieldEntry_ChildTemplate>"
+        },
+        {
+          "name": "Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Persistent Data",
+          "type": "FPersistentEvaluationData&"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform pre frame initialization on the specified segment of the track. Will generally call Initialize on all child templates in the current segment as well.\n@note\t\t\t\t\tThis function is intended to allow pre-frame set up, and should avoid mutating any state.\nOnly called if EnableOverrides(CustomInitializeFlag) has been called (see SetupOverrides).\n@param Track\t\t\t\tThe parent evaluation track that has knowledge of all child tracks and segments\n@param SegmentID\t\t\tThe identifier of the segment at the current time\n@param Operand\t\t\tUnique handle to the operand on which we are to operate. May represent multiple objects. Resolve through IMovieScenePlayer::FindBoundObjects(Operand)\n@param Context\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param PersistentData\tPersistent data store which can be used to store arbitrary data pertaining to the current template that may be required in Evaluate(Swept)\n@param Player\t\t\tThe movie scene player currently playing back this sequence"
+    },
+    {
+      "id": "evaluate",
+      "name": "Evaluate",
+      "category": "MovieSceneTrackImplementation",
+      "signature": "Evaluate(Target, Track, Children, Operand, Context, Persistent Data, Execution Tokens)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTrackImplementation*"
+        },
+        {
+          "name": "Track",
+          "type": "FMovieSceneEvaluationTrack&"
+        },
+        {
+          "name": "Children",
+          "type": "TArrayView<FMovieSceneFieldEntry_ChildTemplate>"
+        },
+        {
+          "name": "Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Persistent Data",
+          "type": "FPersistentEvaluationData&"
+        },
+        {
+          "name": "Execution Tokens",
+          "type": "FMovieSceneExecutionTokens&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform evaluation on the specified segment of the track. Will generally call Evaluate on all child templates in the current segment as well.\n@note\t\t\t\t\tThis function should perform any expensive or costly evaluation logic required to calculate the final animated state.\nPotentially called on a thread, and as such has no access to the current evaluation environment.\nOnly called if EnableOverrides(CustomEvaluateFlag) has been called (see SetupOverrides).\n@param Track\t\t\t\tThe parent evaluation track that has knowledge of all child tracks and segments\n@param SegmentID\t\t\tThe identifier of the segment at the current time\n@param Operand\t\t\tUnique handle to the operand on which we are to operate. Only to be used as a reference, or forwarded throgh to an execution token.\n@param Context\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param PersistentData\tPersistent data store which can be used to access arbitrary data pertaining to the current template that should have been set up in initialize.\n@param ExecutionTokens\tStack of execution tokens that will be used to apply animated state to the environment at a later time."
+    },
+    {
+      "id": "interrogate",
+      "name": "Interrogate",
+      "category": "MovieSceneTrackImplementation",
+      "signature": "Interrogate(Target, Context, Container, Binding Override)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneTrackImplementation*"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Container",
+          "type": "FMovieSceneInterrogationData&"
+        },
+        {
+          "name": "Binding Override",
+          "type": "UObject*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Interrogate this template for its output. Should not have any side effects.\n@param Context\t\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param Container\t\t\t\tContainer to populate with the desired output from this track\n@param BindingOverride\t\tOptional binding to specify the object that is being animated by this track"
     }
   ]
 }

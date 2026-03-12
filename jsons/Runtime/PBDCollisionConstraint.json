@@ -39,6 +39,23 @@
       "docs": "@brief A contact constraint\nA contact constraint represents the non-penetration, friction, and restitution constraints for a single\nshape pair on a particle pair. I.e., a specific particle-pair may have multiple contact constraints\nbetween them if one or boht has multuple collision shapes that overlap the shape(s) of the other body.\nEach contact constraint contains a Manifold, which is a set of contact points that approximate the\ncontact patch between the two shapes.\nContact constraints are allocated on the heap (Asee FCollisionConstraintAllocator) and have permanent addresses.\nThey use intrusive handles to reduce unnecessary indirection."
     },
     {
+      "id": "f-implicit-bounds-test-flags",
+      "name": "FImplicitBoundsTestFlags",
+      "category": "PBDCollisionConstraint",
+      "signature": "FImplicitBoundsTestFlags(Target, Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Bits",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "calculate-implicit-bounds-test-flags",
       "name": "CalculateImplicitBoundsTestFlags",
       "category": "PBDCollisionConstraint",
@@ -78,6 +95,20 @@
         }
       ],
       "returnType": "FImplicitBoundsTestFlags"
+    },
+    {
+      "id": "clear-container-data",
+      "name": "ClearContainerData",
+      "category": "PBDCollisionConstraint",
+      "signature": "ClearContainerData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraintContainerCookie*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Used to clear the container data when copying constraints out of the container (see resim cache)\nThe constraint index will not be valid when the constraint is copied out of the container, but everything\nelse is ok and should be restorable."
     },
     {
       "id": "make",
@@ -192,7 +223,362 @@
       "docs": "Restore the properties of a collision from the properties of another. Used by the rewind/resim system when restoring\na collision constraint that was saved (and called MakeCopy).\nThis takes care not to overwrite any data maintained for the use of other systems (the ContainerCookie, Graph data, etc)"
     },
     {
-      "id": "activate",
+      "id": "get-ccd-enabled",
+      "name": "GetCCDEnabled",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCCDEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether CCD is enabled for this collision.\nThis value depends only on the CCD requirements of the two particles. It does not change from tick to tick."
+    },
+    {
+      "id": "set-ccd-enabled",
+      "name": "SetCCDEnabled",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetCCDEnabled(Target, CCD Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "CCD Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable or disable CCD for this constraint. Called once right after the constraint is created."
+    },
+    {
+      "id": "get-ccd-sweep-enabled",
+      "name": "GetCCDSweepEnabled",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCCDSweepEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "For CCD constraints, do we need to run the initial sweep/rewind step.\nThis may change from tick to tick as an object's velocity changes."
+    },
+    {
+      "id": "set-ccd-sweep-enabled",
+      "name": "SetCCDSweepEnabled",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetCCDSweepEnabled(Target, CCD Sweep Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "CCD Sweep Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For CCD constraints, enable or disable the pre-solve sweep/rewind for this tick. Called\nevery tick for CCD constraints based on current velocity versus size etc."
+    },
+    {
+      "id": "get-ccd-enable-penetration",
+      "name": "GetCCDEnablePenetration",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCCDEnablePenetration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal",
+      "docs": "@brief If CCD is enabled, contacts deeper than this will be handled by CCD"
+    },
+    {
+      "id": "get-ccd-target-penetration",
+      "name": "GetCCDTargetPenetration",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCCDTargetPenetration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal",
+      "docs": "@brief If CCD is enabled and processed the contact, CCD resolution leaves up to this much penetration"
+    },
+    {
+      "id": "get-particle-0",
+      "name": "GetParticle0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetParticle0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FGeometryParticleHandle*"
+    },
+    {
+      "id": "get-particle-1",
+      "name": "GetParticle1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetParticle1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FGeometryParticleHandle*"
+    },
+    {
+      "id": "get-particle",
+      "name": "GetParticle",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetParticle(Target, Particle Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Particle Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FGeometryParticleHandle*"
+    },
+    {
+      "id": "get-implicit-0",
+      "name": "GetImplicit0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetImplicit0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FImplicitObject*"
+    },
+    {
+      "id": "get-implicit-1",
+      "name": "GetImplicit1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetImplicit1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FImplicitObject*"
+    },
+    {
+      "id": "get-implicit",
+      "name": "GetImplicit",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetImplicit(Target, Particle Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Particle Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FImplicitObject*"
+    },
+    {
+      "id": "get-shape-0",
+      "name": "GetShape0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShape0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FShapeInstance*"
+    },
+    {
+      "id": "get-shape-1",
+      "name": "GetShape1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShape1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FShapeInstance*"
+    },
+    {
+      "id": "get-shape",
+      "name": "GetShape",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShape(Target, Particle Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Particle Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FShapeInstance*"
+    },
+    {
+      "id": "get-collision-particles-0",
+      "name": "GetCollisionParticles0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionParticles0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FBVHParticles*"
+    },
+    {
+      "id": "get-collision-particles-1",
+      "name": "GetCollisionParticles1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionParticles1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FBVHParticles*"
+    },
+    {
+      "id": "get-collision-particles",
+      "name": "GetCollisionParticles",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionParticles(Target, Particle Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Particle Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FBVHParticles*"
+    },
+    {
+      "id": "get-collision-margin-0",
+      "name": "GetCollisionMargin0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionMargin0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "get-collision-margin-1",
+      "name": "GetCollisionMargin1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionMargin1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "is-quadratic-0",
+      "name": "IsQuadratic0",
+      "category": "PBDCollisionConstraint",
+      "signature": "IsQuadratic0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-quadratic-1",
+      "name": "IsQuadratic1",
+      "category": "PBDCollisionConstraint",
+      "signature": "IsQuadratic1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-quadratic-shape",
+      "name": "HasQuadraticShape",
+      "category": "PBDCollisionConstraint",
+      "signature": "HasQuadraticShape(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-collision-radius-0",
+      "name": "GetCollisionRadius0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionRadius0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "get-collision-radius-1",
+      "name": "GetCollisionRadius1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionRadius1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "activate-48f697",
       "name": "Activate",
       "category": "PBDCollisionConstraint",
       "signature": "Activate(Target)",
@@ -204,6 +590,23 @@
       ],
       "returnType": "Void",
       "docs": "Called each frame when the constraint is active after primary collision detection (but not per incremental collision detection call if enabled)"
+    },
+    {
+      "id": "activate-d8fd1d",
+      "name": "Activate",
+      "category": "PBDCollisionConstraint",
+      "signature": "Activate(Target, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Dt",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "update-particle-transform",
@@ -221,6 +624,204 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "reset-phi",
+      "name": "ResetPhi",
+      "category": "PBDCollisionConstraint",
+      "signature": "ResetPhi(Target, In Phi)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Phi",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-phi",
+      "name": "GetPhi",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetPhi(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "begin-tick",
+      "name": "BeginTick",
+      "category": "PBDCollisionConstraint",
+      "signature": "BeginTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-current",
+      "name": "IsCurrent",
+      "category": "PBDCollisionConstraint",
+      "signature": "IsCurrent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-disabled",
+      "name": "SetDisabled",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetDisabled(Target, In Disabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Disabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-disabled",
+      "name": "GetDisabled",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetDisabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-is-one-way-interaction",
+      "name": "GetIsOneWayInteraction",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetIsOneWayInteraction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-is-probe",
+      "name": "SetIsProbe",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetIsProbe(Target, In Probe)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Probe",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-is-probe",
+      "name": "GetIsProbe",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetIsProbe(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-is-initial-contact",
+      "name": "SetIsInitialContact",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetIsInitialContact(Target, In Is Initial Contact)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Is Initial Contact",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-initial-contact",
+      "name": "IsInitialContact",
+      "category": "PBDCollisionConstraint",
+      "signature": "IsInitialContact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-min-initial-phi",
+      "name": "GetMinInitialPhi",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetMinInitialPhi(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "use-per-contact-initial-phi",
+      "name": "UsePerContactInitialPhi",
+      "category": "PBDCollisionConstraint",
+      "signature": "UsePerContactInitialPhi(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "supports-sleeping",
+      "name": "SupportsSleeping",
+      "category": "PBDCollisionConstraint",
+      "signature": "SupportsSleeping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "is-sleeping",
@@ -279,6 +880,414 @@
       "returnType": "FVec3"
     },
     {
+      "id": "clear-material-properties",
+      "name": "ClearMaterialProperties",
+      "category": "PBDCollisionConstraint",
+      "signature": "ClearMaterialProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-material-properties",
+      "name": "UpdateMaterialProperties",
+      "category": "PBDCollisionConstraint",
+      "signature": "UpdateMaterialProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-modifier-applied",
+      "name": "SetModifierApplied",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetModifierApplied(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-collision-material",
+      "name": "GetCollisionMaterial",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FPBDCollisionConstraintMaterial&"
+    },
+    {
+      "id": "set-inv-mass-scale-0",
+      "name": "SetInvMassScale0",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetInvMassScale0(Target, In Inv Mass Scale)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Inv Mass Scale",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-inv-mass-scale-0",
+      "name": "GetInvMassScale0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetInvMassScale0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-inv-mass-scale-1",
+      "name": "SetInvMassScale1",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetInvMassScale1(Target, In Inv Mass Scale)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Inv Mass Scale",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-inv-mass-scale-1",
+      "name": "GetInvMassScale1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetInvMassScale1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-inv-inertia-scale-0",
+      "name": "SetInvInertiaScale0",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetInvInertiaScale0(Target, In Inv Inertia Scale)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Inv Inertia Scale",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-inv-inertia-scale-0",
+      "name": "GetInvInertiaScale0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetInvInertiaScale0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-inv-inertia-scale-1",
+      "name": "SetInvInertiaScale1",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetInvInertiaScale1(Target, In Inv Inertia Scale)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Inv Inertia Scale",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-inv-inertia-scale-1",
+      "name": "GetInvInertiaScale1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetInvInertiaScale1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-stiffness",
+      "name": "SetStiffness",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetStiffness(Target, In Stiffness)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Stiffness",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-stiffness",
+      "name": "GetStiffness",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetStiffness(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-restitution",
+      "name": "SetRestitution",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetRestitution(Target, In Restitution)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Restitution",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-restitution",
+      "name": "GetRestitution",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetRestitution(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-restitution-threshold",
+      "name": "SetRestitutionThreshold",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetRestitutionThreshold(Target, In Restitution Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Restitution Threshold",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-restitution-threshold",
+      "name": "GetRestitutionThreshold",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetRestitutionThreshold(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-static-friction",
+      "name": "SetStaticFriction",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetStaticFriction(Target, In Static Friction)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Static Friction",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-static-friction",
+      "name": "GetStaticFriction",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetStaticFriction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-dynamic-friction",
+      "name": "SetDynamicFriction",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetDynamicFriction(Target, In Dynamic Friction)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Dynamic Friction",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-dynamic-friction",
+      "name": "GetDynamicFriction",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetDynamicFriction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "set-min-friction-push-out",
+      "name": "SetMinFrictionPushOut",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetMinFrictionPushOut(Target, In Min Friction Push Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Min Friction Push Out",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-min-friction-push-out",
+      "name": "GetMinFrictionPushOut",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetMinFrictionPushOut(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "is-soft-contact",
+      "name": "IsSoftContact",
+      "category": "PBDCollisionConstraint",
+      "signature": "IsSoftContact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-soft-separation",
+      "name": "SetSoftSeparation",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetSoftSeparation(Target, In Soft Separation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Soft Separation",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-soft-separation",
+      "name": "GetSoftSeparation",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetSoftSeparation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "get-shapes-type",
+      "name": "GetShapesType",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapesType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "EContactShapesType"
+    },
+    {
       "id": "to-string",
       "name": "ToString",
       "category": "PBDCollisionConstraint",
@@ -290,6 +1299,145 @@
         }
       ],
       "returnType": "String"
+    },
+    {
+      "id": "get-cull-distance",
+      "name": "GetCullDistance",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCullDistance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal"
+    },
+    {
+      "id": "get-cull-distancef",
+      "name": "GetCullDistancef",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCullDistancef(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "set-cull-distance",
+      "name": "SetCullDistance",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetCullDistance(Target, In Cull Distance)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Cull Distance",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-relative-movement",
+      "name": "GetRelativeMovement",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetRelativeMovement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FVec3f"
+    },
+    {
+      "id": "set-relative-movement",
+      "name": "SetRelativeMovement",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetRelativeMovement(Target, In Delta)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Delta",
+          "type": "FVec3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-use-manifold",
+      "name": "GetUseManifold",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetUseManifold(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-use-incremental-manifold",
+      "name": "GetUseIncrementalManifold",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetUseIncrementalManifold(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-use-incremental-collision-detection",
+      "name": "GetUseIncrementalCollisionDetection",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetUseIncrementalCollisionDetection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-initial-overlap-depenetration-velocity",
+      "name": "GetInitialOverlapDepenetrationVelocity",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetInitialOverlapDepenetrationVelocity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "reset-modifications",
+      "name": "ResetModifications",
+      "category": "PBDCollisionConstraint",
+      "signature": "ResetModifications(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the material properties to those from the shape materials. Called each frame to reset contact modifications to the material."
     },
     {
       "id": "reset-manifold",
@@ -304,6 +1452,126 @@
       ],
       "returnType": "Void",
       "docs": "@brief Clear the current and previous manifolds"
+    },
+    {
+      "id": "get-manifold-points",
+      "name": "GetManifoldPoints",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetManifoldPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "TArrayView<FManifoldPoint>"
+    },
+    {
+      "id": "num-manifold-points",
+      "name": "NumManifoldPoints",
+      "category": "PBDCollisionConstraint",
+      "signature": "NumManifoldPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-manifold-point",
+      "name": "GetManifoldPoint",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetManifoldPoint(Target, Point Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Point Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FManifoldPoint&"
+    },
+    {
+      "id": "get-closest-manifold-point",
+      "name": "GetClosestManifoldPoint",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetClosestManifoldPoint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FManifoldPoint*"
+    },
+    {
+      "id": "is-manifold-point-active",
+      "name": "IsManifoldPointActive",
+      "category": "PBDCollisionConstraint",
+      "signature": "IsManifoldPointActive(Target, Point Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Point Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-manifold-point-result",
+      "name": "GetManifoldPointResult",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetManifoldPointResult(Target, Point Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Point Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FManifoldPointResult&"
+    },
+    {
+      "id": "num-enabled-manifold-points",
+      "name": "NumEnabledManifoldPoints",
+      "category": "PBDCollisionConstraint",
+      "signature": "NumEnabledManifoldPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "disable-manifold-point",
+      "name": "DisableManifoldPoint",
+      "category": "PBDCollisionConstraint",
+      "signature": "DisableManifoldPoint(Target, Disabled Manifold Point Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Disabled Manifold Point Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "add-incremental-manifold-contact",
@@ -321,6 +1589,41 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "add-oneshot-manifold-contact",
+      "name": "AddOneshotManifoldContact",
+      "category": "PBDCollisionConstraint",
+      "signature": "AddOneshotManifoldContact(Target, Contact Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Contact Point",
+          "type": "FContactPointf&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-one-shot-manifold-contacts",
+      "name": "SetOneShotManifoldContacts",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetOneShotManifoldContacts(Target, Contact Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Contact Points",
+          "type": "TArrayView<FContactPoint>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Replace the current manifold points with the input.\nThe input array should contain no more than MaxManifoldPoints contacts (any extra will be ignored).\nWe assume that all input contacts have been initialized and will not return false from IsSet().\nIgnores contacts deeper than the CullDistance for this constraint."
     },
     {
       "id": "correct-manifold-points",
@@ -347,6 +1650,147 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-shape-relative-transform-0",
+      "name": "GetShapeRelativeTransform0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapeRelativeTransform0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRigidTransform3&"
+    },
+    {
+      "id": "get-shape-relative-transform-1",
+      "name": "GetShapeRelativeTransform1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapeRelativeTransform1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRigidTransform3&"
+    },
+    {
+      "id": "get-shape-relative-transform",
+      "name": "GetShapeRelativeTransform",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapeRelativeTransform(Target, Particle Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Particle Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FRigidTransform3&"
+    },
+    {
+      "id": "get-shape-world-transform-0",
+      "name": "GetShapeWorldTransform0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapeWorldTransform0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRigidTransform3&"
+    },
+    {
+      "id": "get-shape-world-transform-1",
+      "name": "GetShapeWorldTransform1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapeWorldTransform1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FRigidTransform3&"
+    },
+    {
+      "id": "get-shape-world-transform",
+      "name": "GetShapeWorldTransform",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetShapeWorldTransform(Target, Particle Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Particle Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FRigidTransform3&"
+    },
+    {
+      "id": "set-shape-world-transforms",
+      "name": "SetShapeWorldTransforms",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetShapeWorldTransforms(Target, In Shape World Transform 0, In Shape World Transform 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Shape World Transform 0",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "In Shape World Transform 1",
+          "type": "FRigidTransform3&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-last-shape-world-transforms",
+      "name": "SetLastShapeWorldTransforms",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetLastShapeWorldTransforms(Target, In Shape World Transform 0, In Shape World Transform 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Shape World Transform 0",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "In Shape World Transform 1",
+          "type": "FRigidTransform3&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-can-restore-manifold",
+      "name": "GetCanRestoreManifold",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCanRestoreManifold(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "try-restore-manifold",
@@ -409,6 +1853,80 @@
       "returnType": "Bool"
     },
     {
+      "id": "get-gjk-warm-start-data",
+      "name": "GetGJKWarmStartData",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetGJKWarmStartData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FGJKSimplexData&"
+    },
+    {
+      "id": "get-solver-body-0",
+      "name": "GetSolverBody0",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetSolverBody0(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FSolverBody*"
+    },
+    {
+      "id": "get-solver-body-1",
+      "name": "GetSolverBody1",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetSolverBody1(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FSolverBody*"
+    },
+    {
+      "id": "set-solver-bodies",
+      "name": "SetSolverBodies",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetSolverBodies(Target, In Solver Body 0, In Solver Body 1)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Solver Body 0",
+          "type": "FSolverBody*"
+        },
+        {
+          "name": "In Solver Body 1",
+          "type": "FSolverBody*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "was-manifold-restored",
+      "name": "WasManifoldRestored",
+      "category": "PBDCollisionConstraint",
+      "signature": "WasManifoldRestored(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@brief Whether this constraint was fully restored from a previous tick, and the manifold should be reused as-is"
+    },
+    {
       "id": "get-constraint-direction",
       "name": "GetConstraintDirection",
       "category": "PBDCollisionConstraint",
@@ -425,6 +1943,245 @@
       ],
       "returnType": "ECollisionConstraintDirection",
       "docs": "Determine the constraint direction based on Normal and Phi.\nThis function assumes that the constraint is update-to-date."
+    },
+    {
+      "id": "reset-saved-manifold-points",
+      "name": "ResetSavedManifoldPoints",
+      "category": "PBDCollisionConstraint",
+      "signature": "ResetSavedManifoldPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Clear the saved manifold points. This effectively resets friction anchors."
+    },
+    {
+      "id": "num-saved-manifold-points",
+      "name": "NumSavedManifoldPoints",
+      "category": "PBDCollisionConstraint",
+      "signature": "NumSavedManifoldPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-saved-manifold-point",
+      "name": "GetSavedManifoldPoint",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetSavedManifoldPoint(Target, Point Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Point Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FSavedManifoldPoint&"
+    },
+    {
+      "id": "get-ccd-time-of-impact",
+      "name": "GetCCDTimeOfImpact",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCCDTimeOfImpact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FReal",
+      "docs": "@brief Time of impact from CCD sweep test if CCD is activate.Otherwise undefined."
+    },
+    {
+      "id": "set-ccd-time-of-impact",
+      "name": "SetCCDTimeOfImpact",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetCCDTimeOfImpact(Target, TOI)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "TOI",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Set the CCD TOI from the collision detection sweep"
+    },
+    {
+      "id": "reset-ccd-time-of-impact",
+      "name": "ResetCCDTimeOfImpact",
+      "category": "PBDCollisionConstraint",
+      "signature": "ResetCCDTimeOfImpact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the CCD TOI to the highest possible value"
+    },
+    {
+      "id": "set-ccd-results",
+      "name": "SetCCDResults",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetCCDResults(Target, In Net Impulse)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Net Impulse",
+          "type": "FVec3&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "\\brief Store the results of CCD contact resolution, if active"
+    },
+    {
+      "id": "reset-solver-results",
+      "name": "ResetSolverResults",
+      "category": "PBDCollisionConstraint",
+      "signature": "ResetSolverResults(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-solver-results",
+      "name": "SetSolverResults",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetSolverResults(Target, Manifold Point Index, Net Push Out, Net Impulse, Static Friction Ratio, Dt)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Manifold Point Index",
+          "type": "Int"
+        },
+        {
+          "name": "Net Push Out",
+          "type": "FVec3f&"
+        },
+        {
+          "name": "Net Impulse",
+          "type": "FVec3f&"
+        },
+        {
+          "name": "Static Friction Ratio",
+          "type": "FRealSingle"
+        },
+        {
+          "name": "Dt",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Store the data from the solver that is retained between ticks for the specified manifold point or used by dependent systems (plasticity, breaking, etc.)"
+    },
+    {
+      "id": "get-particle-pair-key",
+      "name": "GetParticlePairKey",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetParticlePairKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Private::FCollisionParticlePairKey",
+      "docs": "A key used to uniquely identify the constraint (it is based on the two particle IDs)"
+    },
+    {
+      "id": "get-collision-sort-key",
+      "name": "GetCollisionSortKey",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetCollisionSortKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Private::FCollisionSortKey",
+      "docs": "A key that uniquely identifies a collision constraint and provides a good sort order for the solver"
+    },
+    {
+      "id": "set-collision-sort-key",
+      "name": "SetCollisionSortKey",
+      "category": "PBDCollisionConstraint",
+      "signature": "SetCollisionSortKey(Target, In Collision Sort Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "In Collision Sort Key",
+          "type": "Private::FCollisionSortKey&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-bounds-test-flags",
+      "name": "GetBoundsTestFlags",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetBoundsTestFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Private::FImplicitBoundsTestFlags"
+    },
+    {
+      "id": "get-constraint-handle",
+      "name": "GetConstraintHandle",
+      "category": "PBDCollisionConstraint",
+      "signature": "GetConstraintHandle(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "FPBDCollisionConstraintHandle*"
+    },
+    {
+      "id": "update-and-try-restore-manifold",
+      "name": "UpdateAndTryRestoreManifold",
+      "category": "PBDCollisionConstraint",
+      "signature": "UpdateAndTryRestoreManifold(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool"
     }
   ]
 }

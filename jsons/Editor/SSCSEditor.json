@@ -55,6 +55,578 @@
   ],
   "functions": [
     {
+      "id": "get-or-create-editable-component-template",
+      "name": "GetOrCreateEditableComponentTemplate",
+      "category": "SSCSEditor",
+      "signature": "GetOrCreateEditableComponentTemplate(Target, Actual Edited Blueprint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "Actual Edited Blueprint",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "UActorComponent*",
+      "docs": "@param ActualEditedBlueprint currently edited blueprint\n@note Derived classes should override GetOrCreateEditableObjectForBlueprint().\n@return The component template that can be editable for actual class."
+    },
+    {
+      "id": "get-parent",
+      "name": "GetParent",
+      "category": "SSCSEditor",
+      "signature": "GetParent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "FSCSEditorTreeNodePtrType",
+      "docs": "@return This object's parent node (or an invalid reference if no parent is assigned)."
+    },
+    {
+      "id": "get-children",
+      "name": "GetChildren",
+      "category": "SSCSEditor",
+      "signature": "GetChildren(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "TArray<FSCSEditorTreeNodePtrType>&",
+      "docs": "@return The set of nodes which are parented to this node (read-only)."
+    },
+    {
+      "id": "get-actor-root-node",
+      "name": "GetActorRootNode",
+      "category": "SSCSEditor",
+      "signature": "GetActorRootNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "FSCSEditorActorNodePtrType",
+      "docs": "@return The root of the actor subtree to which this node belongs."
+    },
+    {
+      "id": "is-actor-node",
+      "name": "IsActorNode",
+      "category": "SSCSEditor",
+      "signature": "IsActorNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return True if this represents an actor node type"
+    },
+    {
+      "id": "is-component-node",
+      "name": "IsComponentNode",
+      "category": "SSCSEditor",
+      "signature": "IsComponentNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return True if this represents a component node type"
+    },
+    {
+      "id": "get-component-template",
+      "name": "GetComponentTemplate",
+      "category": "SSCSEditor",
+      "signature": "GetComponentTemplate(Target, Even If Pending Kill)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "Even If Pending Kill",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "UActorComponent*",
+      "docs": "@param\tbEvenIfPendingKill\tIf false, nullptr will be returned if the cached component template is pending kill.\nIf true, it will be returned regardless (this is used for recaching the component template if the objects\nhave been reinstanced following construction script execution).\n@note\tDeliberately non-virtual, for performance reasons.\n@warning This will not return the right component for components overridden by the inherited component handler, you need to call GetOrCreateEditableComponentTemplate instead\n@return\tThe component template or instance represented by this node, if it's a component node."
+    },
+    {
+      "id": "get-object",
+      "name": "GetObject",
+      "category": "SSCSEditor",
+      "signature": "GetObject(Target, Even If Pending Kill)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "Even If Pending Kill",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "template<class T> T*",
+      "docs": "@param\tbEvenIfPendingKill\tIf false, nullptr will be returned if the cached object instance is pending kill.\nIf true, it will be returned regardless (this is used for recaching the object if the objects\nhave been reinstanced following construction script execution).\n@note\tDeliberately non-virtual, for performance reasons.\n@return\tA read-only reference to the object represented by this node."
+    },
+    {
+      "id": "get-editable-object-for-blueprint",
+      "name": "GetEditableObjectForBlueprint",
+      "category": "SSCSEditor",
+      "signature": "GetEditableObjectForBlueprint(Target, In Blueprint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "In Blueprint",
+          "type": "UBlueprint*"
+        }
+      ],
+      "returnType": "template<class T> T*",
+      "docs": "@param\tInBlueprint\t\t\tThe Blueprint in which the object will be edited.\n@note\tMay not be the same as the value returned by GetObject().\n@return\tA reference to the object represented by this node that can be modified within the given Blueprint."
+    },
+    {
+      "id": "set-object",
+      "name": "SetObject",
+      "category": "SSCSEditor",
+      "signature": "SetObject(Target, In Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the internal object instance represented by this node."
+    },
+    {
+      "id": "is-directly-attached-to",
+      "name": "IsDirectlyAttachedTo",
+      "category": "SSCSEditor",
+      "signature": "IsDirectlyAttachedTo(Target, In Node Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "In Node Ptr",
+          "type": "FSCSEditorTreeNodePtrType"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this node is a direct child of the given node."
+    },
+    {
+      "id": "is-scene-component",
+      "name": "IsSceneComponent",
+      "category": "SSCSEditor",
+      "signature": "IsSceneComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-child-actor-node",
+      "name": "GetChildActorNode",
+      "category": "SSCSEditor",
+      "signature": "GetChildActorNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "FSCSEditorChildActorNodePtrType",
+      "docs": "Returns the associated child actor node if applicable to this node type."
+    },
+    {
+      "id": "is-native-component",
+      "name": "IsNativeComponent",
+      "category": "SSCSEditor",
+      "signature": "IsNativeComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents a \"native\" component template (i.e. one that is not found in the SCS tree)."
+    },
+    {
+      "id": "is-root-component",
+      "name": "IsRootComponent",
+      "category": "SSCSEditor",
+      "signature": "IsRootComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents a root component."
+    },
+    {
+      "id": "is-inherited-scs-node",
+      "name": "IsInheritedSCSNode",
+      "category": "SSCSEditor",
+      "signature": "IsInheritedSCSNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents an inherited SCS node (one from a SCS node in a parent Blueprint)."
+    },
+    {
+      "id": "is-inherited-component",
+      "name": "IsInheritedComponent",
+      "category": "SSCSEditor",
+      "signature": "IsInheritedComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object was declared in the current class (or instance).  Anything inherited cannot be reorganized (renamed, reparented, etc...).",
+      "supportedTargets": [
+        "FSCSEditorTreeNode*",
+        "SSCSEditor*"
+      ]
+    },
+    {
+      "id": "is-instanced",
+      "name": "IsInstanced",
+      "category": "SSCSEditor",
+      "signature": "IsInstanced(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this node represents an instanced object (i.e. not a template).",
+      "supportedTargets": [
+        "FSCSEditorTreeNode*",
+        "SSCSEditor*"
+      ]
+    },
+    {
+      "id": "is-instanced-actor",
+      "name": "IsInstancedActor",
+      "category": "SSCSEditor",
+      "signature": "IsInstancedActor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this node represents an instanced actor object."
+    },
+    {
+      "id": "is-instanced-component",
+      "name": "IsInstancedComponent",
+      "category": "SSCSEditor",
+      "signature": "IsInstancedComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this node represents an instanced component object."
+    },
+    {
+      "id": "is-blueprint-component",
+      "name": "IsBlueprintComponent",
+      "category": "SSCSEditor",
+      "signature": "IsBlueprintComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this node represents a Blueprint (i.e. non-native) component object."
+    },
+    {
+      "id": "is-user-instanced-component",
+      "name": "IsUserInstancedComponent",
+      "category": "SSCSEditor",
+      "signature": "IsUserInstancedComponent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents a component instance that was created by the user and not by a native or Blueprint-generated class.",
+      "supportedTargets": [
+        "FSCSEditorTreeNode*",
+        "SSCSEditor*"
+      ]
+    },
+    {
+      "id": "is-default-scene-root",
+      "name": "IsDefaultSceneRoot",
+      "category": "SSCSEditor",
+      "signature": "IsDefaultSceneRoot(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents the default SCS scene root component."
+    },
+    {
+      "id": "can-delete",
+      "name": "CanDelete",
+      "category": "SSCSEditor",
+      "signature": "CanDelete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents a node that can be deleted from the SCS tree.",
+      "supportedTargets": [
+        "FSCSEditorTreeNode*",
+        "SSCSEditor*"
+      ]
+    },
+    {
+      "id": "can-reparent",
+      "name": "CanReparent",
+      "category": "SSCSEditor",
+      "signature": "CanReparent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not this object represents a node that can be reparented to other nodes based on its context."
+    },
+    {
+      "id": "can-edit",
+      "name": "CanEdit",
+      "category": "SSCSEditor",
+      "signature": "CanEdit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not we can edit properties for the object represented by this node.",
+      "supportedTargets": [
+        "FSCSEditorTreeNode*",
+        "SSCSEditor*"
+      ]
+    },
+    {
+      "id": "can-rename",
+      "name": "CanRename",
+      "category": "SSCSEditor",
+      "signature": "CanRename(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether or not we can rename the object or variable represented by this node.",
+      "supportedTargets": [
+        "FSCSEditorTreeNode*",
+        "SSCSEditor*"
+      ]
+    },
+    {
+      "id": "set-rename-requested-delegate",
+      "name": "SetRenameRequestedDelegate",
+      "category": "SSCSEditor",
+      "signature": "SetRenameRequestedDelegate(Target, In Rename Requested)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        },
+        {
+          "name": "In Rename Requested",
+          "type": "FOnRenameRequested"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets up the delegate for a rename operation"
+    },
+    {
+      "id": "is-flagged-for-filtration",
+      "name": "IsFlaggedForFiltration",
+      "category": "SSCSEditor",
+      "signature": "IsFlaggedForFiltration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSCSEditorTreeNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Query that determines if this item should be filtered out or not"
+    },
+    {
+      "id": "get-variable-name",
+      "name": "GetVariableName",
+      "category": "SSCSEditor",
+      "signature": "GetVariableName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "@return The name of the variable represented by this node."
+    },
+    {
+      "id": "fscs-editor-tree-node-actor-base",
+      "name": "FSCSEditorTreeNodeActorBase",
+      "category": "SSCSEditor",
+      "signature": "FSCSEditorTreeNodeActorBase(Target, In Node Type, In Node Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        },
+        {
+          "name": "In Node Type",
+          "type": "FSCSEditorTreeNode::ENodeType"
+        },
+        {
+          "name": "In Node Type",
+          "type": "AActor* InActor ) : FSCSEditorTreeNode ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fscs-editor-tree-node-root-actor",
+      "name": "FSCSEditorTreeNodeRootActor",
+      "category": "SSCSEditor",
+      "signature": "FSCSEditorTreeNodeRootActor(Target, In Actor, In Actor, B In Allow Rename, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "In Actor",
+          "type": "bool bInAllowRename ) : FSCSEditorTreeNodeActorBase ( FSCSEditorTreeNode::RootActorNode,"
+        },
+        {
+          "name": "B In Allow Rename",
+          "type": "bAllowRename ("
+        },
+        {
+          "name": "Nullptr",
+          "type": "CachedFilterType ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The actor's subtree owner (if valid)"
+    },
+    {
+      "id": "fscs-editor-tree-node-child-actor",
+      "name": "FSCSEditorTreeNodeChildActor",
+      "category": "SSCSEditor",
+      "signature": "FSCSEditorTreeNodeChildActor(Target, In Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        },
+        {
+          "name": "In Actor",
+          "type": "AActor* InActor ) : FSCSEditorTreeNodeActorBase ( FSCSEditorTreeNode::ChildActorNode,"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "fscs-editor-tree-node-separator",
+      "name": "FSCSEditorTreeNodeSeparator",
+      "category": "SSCSEditor",
+      "signature": "FSCSEditorTreeNodeSeparator(Target, Separator Node)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        },
+        {
+          "name": "Separator Node",
+          "type": ") : FSCSEditorTreeNode ( FSCSEditorTreeNode::"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-blueprint",
+      "name": "GetBlueprint",
+      "category": "SSCSEditor",
+      "signature": "GetBlueprint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        }
+      ],
+      "returnType": "UBlueprint*",
+      "docs": "@return The Blueprint to which the object represented by this node belongs (requires implementation in subclass)."
+    },
+    {
       "id": "get-color-tint-for-icon",
       "name": "GetColorTintForIcon",
       "category": "SSCSEditor",
@@ -66,6 +638,92 @@
         }
       ],
       "returnType": "FSlateColor"
+    },
+    {
+      "id": "get-node",
+      "name": "GetNode",
+      "category": "SSCSEditor",
+      "signature": "GetNode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        }
+      ],
+      "returnType": "FSCSEditorTreeNodePtrType",
+      "docs": "Get the node used by the row Widget"
+    },
+    {
+      "id": "on-attach-to-drop-action",
+      "name": "OnAttachToDropAction",
+      "category": "SSCSEditor",
+      "signature": "OnAttachToDropAction(Target, Dropped Node Ptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        },
+        {
+          "name": "Dropped Node Ptr",
+          "type": "FSCSEditorTreeNodePtrType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handler for attaching a single node to this node"
+    },
+    {
+      "id": "f-add-new-component-params",
+      "name": "FAddNewComponentParams",
+      "category": "SSCSEditor",
+      "signature": "FAddNewComponentParams(Target, False, True, True)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        },
+        {
+          "name": "False",
+          "type": ") : bSkipMarkBlueprintModified ("
+        },
+        {
+          "name": "True",
+          "type": "bSetFocusToNewItem ("
+        },
+        {
+          "name": "True",
+          "type": "bConformTransformToParent ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a component to the SCS tree"
+    },
+    {
+      "id": "get-num-selected-nodes",
+      "name": "GetNumSelectedNodes",
+      "category": "SSCSEditor",
+      "signature": "GetNumSelectedNodes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of currently selected tree nodes"
+    },
+    {
+      "id": "get-editor-mode",
+      "name": "GetEditorMode",
+      "category": "SSCSEditor",
+      "signature": "GetEditorMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "SSCSEditor*"
+        }
+      ],
+      "returnType": "EComponentEditorMode::Type",
+      "docs": "@return The current editor mode (editing live actors or editing blueprints)"
     }
   ]
 }

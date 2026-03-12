@@ -1,0 +1,1040 @@
+{
+  "id": "i-texture-format",
+  "label": "ITextureFormat",
+  "includepath": "Interfaces/ITextureFormat.h",
+  "includes": [
+    "CoreMinimal",
+    "PixelFormat",
+    "CompactBinary"
+  ],
+  "functions": [
+    {
+      "id": "get-streaming-disabled-for-non-virtual-texture-properties",
+      "name": "GetStreamingDisabledForNonVirtualTextureProperties",
+      "category": "ITextureFormat",
+      "signature": "GetStreamingDisabledForNonVirtualTextureProperties(In Cube Map, In Volume Texture, In Texture Array, In Engine Parameters)",
+      "params": [
+        {
+          "name": "In Cube Map",
+          "type": "Bool"
+        },
+        {
+          "name": "In Volume Texture",
+          "type": "Bool"
+        },
+        {
+          "name": "In Texture Array",
+          "type": "Bool"
+        },
+        {
+          "name": "In Engine Parameters",
+          "type": "FTextureEngineParameters&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Holds various engine configuration parameters that can affect the output of a build but\nshould generally be constant across all texture builds. These are sourced from CVars\nand enums/defines that aren't necessarily visible in all modules.\nThis structure serializes to compact binary only writing if the values are not default,\nso changing the default initialization without changing the texture build version/guid\ncan result in build mismatch.\nCreated via GenerateTextureEngineParameters() in TextureDerivedDataTask.cpp."
+    },
+    {
+      "id": "get-num-streaming-mips-direct",
+      "name": "GetNumStreamingMipsDirect",
+      "category": "ITextureFormat",
+      "signature": "GetNumStreamingMipsDirect(In Num Mips, In Cube Map, In Volume Texture, In Texture Array, In Extended Data, In Engine Parameters)",
+      "params": [
+        {
+          "name": "In Num Mips",
+          "type": "Int"
+        },
+        {
+          "name": "In Cube Map",
+          "type": "Bool"
+        },
+        {
+          "name": "In Volume Texture",
+          "type": "Bool"
+        },
+        {
+          "name": "In Texture Array",
+          "type": "Bool"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        },
+        {
+          "name": "In Engine Parameters",
+          "type": "FTextureEngineParameters&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Calculate the number of streaming mips for the given set of texture properties. This must work off\nof properties that can (eventually) be calculated without running a full texture build.\nTexture mips are split in to two large groups: streaming and non-streaming (aka \"inline\"). Note\nthat \"inline\" is sometimes used as a verb to mean \"load off of disk and place in our bulk data\".\n\"Inline\" textures are loaded with the texture asset, and streaming textures are loaded on demand.\nGenerally, 7 of the smallest mips are inlined, however some platforms pack a lot of mips in to a single\nallocation (\"packed mip tail\" = NumMipsInTail). Those mips must all be inlined.\nThis function is used primarily for determining where to put mips in the DDC. Runtime inlining is subject\nto further constraints and must use the GetNumNonStreamingMipsDirect() function.\nInNumMips\t\t\t    The total mips that the texture contains.\nInExtendedData\t    If the texture is being built for a platform that provides extended data, pass it\nhere. For platforms that don't need it (i.e. PC), this should be nullptr.\nInEngineParameters    Holds a vairety of engine configuration constants, create with GenerateEngineParameters()"
+    },
+    {
+      "id": "get-num-non-streaming-mips-direct",
+      "name": "GetNumNonStreamingMipsDirect",
+      "category": "ITextureFormat",
+      "signature": "GetNumNonStreamingMipsDirect(In Num Mips, In Top Mip Size X, In Top Mip Size Y, In Pixel Format, In Num Mips In Tail, In Num Inline Derived Mips)",
+      "params": [
+        {
+          "name": "In Num Mips",
+          "type": "Int"
+        },
+        {
+          "name": "In Top Mip Size X",
+          "type": "Int"
+        },
+        {
+          "name": "In Top Mip Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "In Pixel Format",
+          "type": "EPixelFormat"
+        },
+        {
+          "name": "In Num Mips In Tail",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Inline Derived Mips",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Return how many mips need to be inlined for the given texture properties. This pays attention to runtime\nsize restrictions and should be used for serializing cooked data.\nInNumMips, InTopMipSizeX, InTopMipSizeY must all be sizes _before_ any LOD stripping during cook, with the expectation\nthat the returned value is verified against the remaining mip count after LOD stripping.\nThis function is not valid if streaming is disabled for the texture."
+    },
+    {
+      "id": "get-rhi-style-size-z",
+      "name": "GetRHIStyleSizeZ",
+      "category": "ITextureFormat",
+      "signature": "GetRHIStyleSizeZ(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-slices-with-depth",
+      "name": "GetNumSlices_WithDepth",
+      "category": "ITextureFormat",
+      "signature": "GetNumSlices_WithDepth(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-slices-no-depth",
+      "name": "GetNumSlices_NoDepth",
+      "category": "ITextureFormat",
+      "signature": "GetNumSlices_NoDepth(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-width-5333ae",
+      "name": "GetMipWidth",
+      "category": "ITextureFormat",
+      "signature": "GetMipWidth(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-height-150b10",
+      "name": "GetMipHeight",
+      "category": "ITextureFormat",
+      "signature": "GetMipHeight(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-depth-3ab450",
+      "name": "GetMipDepth",
+      "category": "ITextureFormat",
+      "signature": "GetMipDepth(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-width-691a47",
+      "name": "GetMipWidth",
+      "category": "ITextureFormat",
+      "signature": "GetMipWidth(In Texture Width, In Mip Index)",
+      "params": [
+        {
+          "name": "In Texture Width",
+          "type": "Int"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-height-bf3c9c",
+      "name": "GetMipHeight",
+      "category": "ITextureFormat",
+      "signature": "GetMipHeight(In Texture Height, In Mip Index)",
+      "params": [
+        {
+          "name": "In Texture Height",
+          "type": "Int"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-depth-b61a7b",
+      "name": "GetMipDepth",
+      "category": "ITextureFormat",
+      "signature": "GetMipDepth(In Texture Depth, In Mip Index, In Volume Texture)",
+      "params": [
+        {
+          "name": "In Texture Depth",
+          "type": "Int"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        },
+        {
+          "name": "In Volume Texture",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-dimensions",
+      "name": "GetMipDimensions",
+      "category": "ITextureFormat",
+      "signature": "GetMipDimensions(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIntVector3"
+    },
+    {
+      "id": "get-mip-size-in-bytes",
+      "name": "GetMipSizeInBytes",
+      "category": "ITextureFormat",
+      "signature": "GetMipSizeInBytes(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "get-mip-slice-size-in-bytes",
+      "name": "GetMipSliceSizeInBytes",
+      "category": "ITextureFormat",
+      "signature": "GetMipSliceSizeInBytes(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "get-mip-slice-row-pitch-bytes",
+      "name": "GetMipSliceRowPitchBytes",
+      "category": "ITextureFormat",
+      "signature": "GetMipSliceRowPitchBytes(Target, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "get-num-streaming-mips",
+      "name": "GetNumStreamingMips",
+      "category": "ITextureFormat",
+      "signature": "GetNumStreamingMips(Target, In Extended Data, In Engine Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        },
+        {
+          "name": "In Engine Parameters",
+          "type": "FTextureEngineParameters&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-non-streaming-mips",
+      "name": "GetNumNonStreamingMips",
+      "category": "ITextureFormat",
+      "signature": "GetNumNonStreamingMips(Target, In Extended Data, In Engine Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        },
+        {
+          "name": "In Engine Parameters",
+          "type": "FTextureEngineParameters&"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-linear-mip-sizes-in-bytes",
+      "name": "GetLinearMipSizesInBytes",
+      "category": "ITextureFormat",
+      "signature": "GetLinearMipSizesInBytes(Target, Out Mip Sizes In Bytes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Out Mip Sizes In Bytes",
+          "type": "TArray<uint64,TInlineAllocator<FEncodedTextureExtendedData::MAX_TEXTURE_MIP_COUNT>>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-encoded-mip-iterators",
+      "name": "GetEncodedMipIterators",
+      "category": "ITextureFormat",
+      "signature": "GetEncodedMipIterators(Target, In Extended Data, Out Mip Tail Index, Out Mips In Tail)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        },
+        {
+          "name": "Out Mip Tail Index",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Mips In Tail",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-num-encoded-mips",
+      "name": "GetNumEncodedMips",
+      "category": "ITextureFormat",
+      "signature": "GetNumEncodedMips(Target, In Extended Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-description-for-mip-level",
+      "name": "GetDescriptionForMipLevel",
+      "category": "ITextureFormat",
+      "signature": "GetDescriptionForMipLevel(Target, In Extended Data, In Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FEncodedTextureDescription"
+    },
+    {
+      "id": "remove-top-mips",
+      "name": "RemoveTopMips",
+      "category": "ITextureFormat",
+      "signature": "RemoveTopMips(Target, In Extended Data, In Remove Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData*"
+        },
+        {
+          "name": "In Remove Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FEncodedTextureDescription"
+    },
+    {
+      "id": "detile-mip-chain",
+      "name": "DetileMipChain",
+      "category": "ITextureFormat",
+      "signature": "DetileMipChain(Target, Out Linear Mips, In Tiled Mips, In Texture Description, In Extended Data, In Texture Path Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureTiler*"
+        },
+        {
+          "name": "Out Linear Mips",
+          "type": "FEncodedTextureDescription::FUniqueBufferMipChain&"
+        },
+        {
+          "name": "In Tiled Mips",
+          "type": "FEncodedTextureDescription::FSharedBufferMipChain"
+        },
+        {
+          "name": "In Texture Description",
+          "type": "FEncodedTextureDescription&"
+        },
+        {
+          "name": "In Extended Data",
+          "type": "FEncodedTextureExtendedData&"
+        },
+        {
+          "name": "In Texture Path Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Given a tiled mip chain, detile in to OutLinearMips. For mip tails, OutLinearMips.Num may end up larger than InTiledMips.Num.\nMips have all slices concatenated together."
+    },
+    {
+      "id": "supports-encode-speed",
+      "name": "SupportsEncodeSpeed",
+      "category": "ITextureFormat",
+      "signature": "SupportsEncodeSpeed(Target, Format, Target Platform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Format",
+          "type": "Name"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatformSettings*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Exposes whether the format supports the fast/final encode speed switching in project settings.\nNeeds the Format so that we can thunk through the child texture formats correctly."
+    },
+    {
+      "id": "can-accept-non-f-32-source",
+      "name": "CanAcceptNonF32Source",
+      "category": "ITextureFormat",
+      "signature": "CanAcceptNonF32Source(Target, Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Format",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@returns true in case Compress can handle other than RGBA32F image formats"
+    },
+    {
+      "id": "get-decode-build-function-name",
+      "name": "GetDecodeBuildFunctionName",
+      "category": "ITextureFormat",
+      "signature": "GetDecodeBuildFunctionName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "FUtf8StringView"
+    },
+    {
+      "id": "get-derived-data-key-string",
+      "name": "GetDerivedDataKeyString",
+      "category": "ITextureFormat",
+      "signature": "GetDerivedDataKeyString(Target, In Build Settings, In Mip Count, In Mip 0 Dimensions)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "In Mip Count",
+          "type": "Int"
+        },
+        {
+          "name": "In Mip 0 Dimensions",
+          "type": "FIntVector3&"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Gets an optional derived data key string, so that the compressor can\nrely upon the number of mips, size of texture, etc, when compressing the image\n@param InBuildSettings Reference to the build settings we are compressing with.\n@param InMipCount Mip count of the physical texture that will be built - 0 for virtual textures.\n@param InMip0Dimensions Mip width/height/slices of the physical texture that will be built - 0s for virtual textures.\n@return A string that will be used with the DDC, the string should be in the format \"<DATA>_\""
+    },
+    {
+      "id": "get-format-capabilities",
+      "name": "GetFormatCapabilities",
+      "category": "ITextureFormat",
+      "signature": "GetFormatCapabilities(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "FTextureFormatCompressorCaps",
+      "docs": "Gets the capabilities of the texture compressor.\n@param OutCaps Filled with capability properties of texture format compressor."
+    },
+    {
+      "id": "get-format-capabilities-ex",
+      "name": "GetFormatCapabilitiesEx",
+      "category": "ITextureFormat",
+      "signature": "GetFormatCapabilitiesEx(Target, Build Settings, Num Mips, Example Image, Image Has Alpha Channel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "Num Mips",
+          "type": "UInt"
+        },
+        {
+          "name": "Example Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Image Has Alpha Channel",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "FTextureFormatCompressorCaps",
+      "docs": "Gets the capabilities of the texture compressor.\n@param OutCaps Filled with capability properties of texture format compressor."
+    },
+    {
+      "id": "get-pixel-format-for-image",
+      "name": "GetPixelFormatForImage",
+      "category": "ITextureFormat",
+      "signature": "GetPixelFormatForImage(Target, Build Settings, Image, Image Has Alpha Channel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Image Has Alpha Channel",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "EPixelFormat",
+      "docs": "Calculate the final/runtime pixel format for this image on this platform"
+    },
+    {
+      "id": "get-encoded-pixel-format",
+      "name": "GetEncodedPixelFormat",
+      "category": "ITextureFormat",
+      "signature": "GetEncodedPixelFormat(Target, In Build Settings, In Image Has Alpha Channel)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FImage*"
+        },
+        {
+          "name": "In Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "In Image Has Alpha Channel",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "EPixelFormat",
+      "docs": "Returns what the compressed pixel format will be for a given format and the given settings.\nbInImageHasAlphaChannel is whether or not to treat the source image format as having an alpha channel,\nindependent of whether or not it actually has one."
+    },
+    {
+      "id": "get-extended-data-for-texture",
+      "name": "GetExtendedDataForTexture",
+      "category": "ITextureFormat",
+      "signature": "GetExtendedDataForTexture(Target, In Texture Description, In LOD Bias)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Texture Description",
+          "type": "FEncodedTextureDescription&"
+        },
+        {
+          "name": "In LOD Bias",
+          "type": "Int8"
+        }
+      ],
+      "returnType": "nodiscard ] ] FEncodedTextureExtendedData",
+      "docs": "Interface for platform formats that consume a linear, unpacked texture that an be built on\na host platform (e.g. windows) and then tile/pack it as necessary."
+    },
+    {
+      "id": "can-decode-format",
+      "name": "CanDecodeFormat",
+      "category": "ITextureFormat",
+      "signature": "CanDecodeFormat(Target, In Pixel Format)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Pixel Format",
+          "type": "EPixelFormat"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "decode-image",
+      "name": "DecodeImage",
+      "category": "ITextureFormat",
+      "signature": "DecodeImage(Target, In Size X, In Size Y, In Num Slices, In Pixel Format, In SRGB, In Texture Format Name, In Encoded Data, Out Image, In Texture Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "In Size X",
+          "type": "Int"
+        },
+        {
+          "name": "In Size Y",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Slices",
+          "type": "Int"
+        },
+        {
+          "name": "In Pixel Format",
+          "type": "EPixelFormat"
+        },
+        {
+          "name": "In SRGB",
+          "type": "Bool"
+        },
+        {
+          "name": "In Texture Format Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Encoded Data",
+          "type": "FSharedBuffer"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "In Texture Name",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Decodes an image encoded as a EPixelFormat into something encoded as a ERawImageFormat. This will only be called if CanDecodeFormat returns true."
+    },
+    {
+      "id": "compress-image-ex",
+      "name": "CompressImageEx",
+      "category": "ITextureFormat",
+      "signature": "CompressImageEx(Target, Images, Num Images, Build Settings, In Mip 0 Dimensions, In Mip 0 Num Slices No Depth, In Mip Index, In Mip Count, Debug Texture Path Name, Image Has Alpha Channel, Ext Data, Out Compressed Image)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Images",
+          "type": "FImage*"
+        },
+        {
+          "name": "Num Images",
+          "type": "UInt"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "In Mip 0 Dimensions",
+          "type": "FIntVector3&"
+        },
+        {
+          "name": "In Mip 0 Num Slices No Depth",
+          "type": "Int"
+        },
+        {
+          "name": "In Mip Index",
+          "type": "Int"
+        },
+        {
+          "name": "In Mip Count",
+          "type": "Int"
+        },
+        {
+          "name": "Debug Texture Path Name",
+          "type": "FStringView"
+        },
+        {
+          "name": "Image Has Alpha Channel",
+          "type": "Bool"
+        },
+        {
+          "name": "Ext Data",
+          "type": "UInt"
+        },
+        {
+          "name": "Out Compressed Image",
+          "type": "FCompressedImage2D&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compress an image (or images for a miptail) into a single mip blob.\n@param Images The input image(s).  Image.RawData may be freed or modified by CompressImage; do not use after calling this.\n@param NumImages The number of images (for a miptail, this number should match what was returned in GetExtendedDataForTexture, mostly used for verification)\n@param BuildSettings Build settings.\n@param InMip0Dimensions X/Y = Width/Height; Z = 1 unless volume texture, then its depth\n@param InMip0NumSlicesNoDepth see FEncodedTextureDescription::NumSlices_NoDepth()\n@param InMipIndex Mip index of current image in the overall texture.\n@param InMipCount Total mips this texture will be created with.\n@param DebugTexturePathName The path name of the texture we are building, for debug logging/filtering/dumping.\n@param bImageHasAlphaChannel true if the image has a non-white alpha channel.\n@param ExtData Extra data that the format may want to have passed back in to each compress call (makes the format class be stateless)\n@param OutCompressedMip The compressed image.\n@returns true on success, false otherwise."
+    },
+    {
+      "id": "compress-image-tiled",
+      "name": "CompressImageTiled",
+      "category": "ITextureFormat",
+      "signature": "CompressImageTiled(Target, Images, Num Images, Build Settings, Debug Texture Path Name, Image Has Alpha Channel, Tiler Settings, Out Compressed Image)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Images",
+          "type": "FImage*"
+        },
+        {
+          "name": "Num Images",
+          "type": "UInt"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "Debug Texture Path Name",
+          "type": "FStringView"
+        },
+        {
+          "name": "Image Has Alpha Channel",
+          "type": "Bool"
+        },
+        {
+          "name": "Tiler Settings",
+          "type": "TSharedPtr<FTilerSettings>&"
+        },
+        {
+          "name": "Out Compressed Image",
+          "type": "FCompressedImage2D&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "An object produced by PrepareTiling and used by SetTiling and CompressImageTiled.\nThis is used as an inheritance base for tiling formats to add their own information."
+    },
+    {
+      "id": "supports-tiling",
+      "name": "SupportsTiling",
+      "category": "ITextureFormat",
+      "signature": "SupportsTiling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompressedImage2D*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether device-specific tiling is supported by the compressor.\n@param BuildSettings Build settings.\n@returns true if tiling is supported, false if it must be done by the caller"
+    },
+    {
+      "id": "prepare-tiling",
+      "name": "PrepareTiling",
+      "category": "ITextureFormat",
+      "signature": "PrepareTiling(Target, Images, Num Images, Build Settings, Image Has Alpha Channel, Out Tiler Settings, Out Compressed Image)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Images",
+          "type": "FImage*"
+        },
+        {
+          "name": "Num Images",
+          "type": "UInt"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "Image Has Alpha Channel",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Tiler Settings",
+          "type": "TSharedPtr<FTilerSettings>&"
+        },
+        {
+          "name": "Out Compressed Image",
+          "type": "TArray<FCompressedImage2D>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Prepares to compresses a single image with tiling. The result OutTilerSettings is used by SetTiling and CompressImageTiled.\n@param Image The input image.\n@param BuildSettings Build settings.\n@param bImageHasAlphaChannel true if the image has a non-white alpha channel.\n@param OutTilerSettings The tiler settings that will be used by CompressImageTiled and SetTiling.\n@param OutCompressedImage The image to tile.\n@returns true on success, false otherwise."
+    },
+    {
+      "id": "set-tiling",
+      "name": "SetTiling",
+      "category": "ITextureFormat",
+      "signature": "SetTiling(Target, Build Settings, Tiler Settings, Reordered Blocks, Num Blocks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "Tiler Settings",
+          "type": "TSharedPtr<FTilerSettings>&"
+        },
+        {
+          "name": "Reordered Blocks",
+          "type": "TArray64<uint8>&"
+        },
+        {
+          "name": "Num Blocks",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Sets the tiling settings after device-specific tiling has been performed.\n@param BuildSettings Build settings.\n@param TilerSettings The tiler settings produced by PrepareTiling.\n@param ReorderedBlocks The blocks that have been tiled.\n@param NumBlocks The number of blocks.\n@returns true on success, false otherwise."
+    },
+    {
+      "id": "release-tiling",
+      "name": "ReleaseTiling",
+      "category": "ITextureFormat",
+      "signature": "ReleaseTiling(Target, Build Settings, Tiler Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        },
+        {
+          "name": "Tiler Settings",
+          "type": "TSharedPtr<FTilerSettings>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cleans up the FTilerSettings object once it is finished.\n@param BuildSettings Build settings.\n@param TilerSettings The tiler settings object to release."
+    },
+    {
+      "id": "export-global-format-config",
+      "name": "ExportGlobalFormatConfig",
+      "category": "ITextureFormat",
+      "signature": "ExportGlobalFormatConfig(Target, Build Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        },
+        {
+          "name": "Build Settings",
+          "type": "FTextureBuildSettings&"
+        }
+      ],
+      "returnType": "FCbObject",
+      "docs": "Obtains the current global format config object for this texture format.\nThis is only ever called during task creation - never in a build worker\n(FormatConfigOverride is empty)\n@param BuildSettings Build settings.\n@returns The current format config object or an empty object if no format config is defined for this texture format."
+    },
+    {
+      "id": "get-alternate-texture-format-prefix",
+      "name": "GetAlternateTextureFormatPrefix",
+      "category": "ITextureFormat",
+      "signature": "GetAlternateTextureFormatPrefix(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "If this is an Alternate Texture Format, return the prefix to apply"
+    },
+    {
+      "id": "get-child-format",
+      "name": "GetChildFormat",
+      "category": "ITextureFormat",
+      "signature": "GetChildFormat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "FChildTextureFormat*"
+    },
+    {
+      "id": "get-latest-sdk-version",
+      "name": "GetLatestSdkVersion",
+      "category": "ITextureFormat",
+      "signature": "GetLatestSdkVersion(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Identify the latest sdk version for this texture encoder\n(note the SdkVersion is different than the TextureFormat Version)"
+    },
+    {
+      "id": "uses-task-graph",
+      "name": "UsesTaskGraph",
+      "category": "ITextureFormat",
+      "signature": "UsesTaskGraph(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ITextureFormat*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

@@ -28,6 +28,19 @@
   ],
   "functions": [
     {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "NavigationSystem",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCustomLinkOwnerInfo*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "should-load-navigation-on-client",
       "name": "ShouldLoadNavigationOnClient",
       "category": "NavigationSystem",
@@ -54,16 +67,25 @@
       "returnType": "Void"
     },
     {
+      "id": "setup-time-slice",
+      "name": "SetupTimeSlice",
+      "category": "NavigationSystem",
+      "signature": "SetupTimeSlice(Slice Duration)",
+      "params": [
+        {
+          "name": "Slice Duration",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Setup the initial values for a time slice. This can be called on an instance after TestTimeSliceFinished() has returned true and EndTimeSliceAndAdjustDuration() has been called"
+    },
+    {
       "id": "start-time-slice",
       "name": "StartTimeSlice",
       "category": "NavigationSystem",
-      "signature": "StartTimeSlice(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSlicer*"
-        }
-      ],
+      "signature": "StartTimeSlice()",
+      "params": [],
       "returnType": "Void",
       "docs": "Starts the time slice, this can be called multiple times as long as EndTimeSliceAndAdjustDuration() is called between each call.\nStartTimeSlice should not be called after TestTimeSliceFinished() has returned true"
     },
@@ -71,39 +93,58 @@
       "id": "end-time-slice-and-adjust-duration",
       "name": "EndTimeSliceAndAdjustDuration",
       "category": "NavigationSystem",
-      "signature": "EndTimeSliceAndAdjustDuration(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSlicer*"
-        }
-      ],
+      "signature": "EndTimeSliceAndAdjustDuration()",
+      "params": [],
       "returnType": "Void",
       "docs": "Useful when multiple sections of code need to be timesliced per frame using the same time slice duration that do not necessarily occur concurrently.\nThis ends the time sliced code section and adjusts the RemainingDuration based on the time used between calls to StartTimeSlice and the last call to TestTimeSliceFinished.\nNote the actual time slice is not tested in this function. Thats done in TestTimeSliceFinished!\nThis can be called multiple times as long as StartTimeSlice() is called before EndTimeSliceAndAdjustDuration().\nEndTimeSliceAndAdjustDuration can be called after TestTimeSliceFinished() has returned true in this case the RemainingDuration will just be zero"
+    },
+    {
+      "id": "get-start-time",
+      "name": "GetStartTime",
+      "category": "NavigationSystem",
+      "signature": "GetStartTime()",
+      "params": [],
+      "returnType": "Double"
     },
     {
       "id": "test-time-slice-finished",
       "name": "TestTimeSliceFinished",
       "category": "NavigationSystem",
-      "signature": "TestTimeSliceFinished(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSlicer*"
-        }
-      ],
+      "signature": "TestTimeSliceFinished()",
+      "params": [],
       "returnType": "Bool"
+    },
+    {
+      "id": "is-time-slice-finished-cached",
+      "name": "IsTimeSliceFinishedCached",
+      "category": "NavigationSystem",
+      "signature": "IsTimeSliceFinishedCached()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns the cached result of calling TestTimeSliceFinished, false by default"
+    },
+    {
+      "id": "get-remaining-duration",
+      "name": "GetRemainingDuration",
+      "category": "NavigationSystem",
+      "signature": "GetRemainingDuration()",
+      "params": [],
+      "returnType": "Double"
+    },
+    {
+      "id": "get-remaining-duration-fraction",
+      "name": "GetRemainingDurationFraction",
+      "category": "NavigationSystem",
+      "signature": "GetRemainingDurationFraction()",
+      "params": [],
+      "returnType": "Double"
     },
     {
       "id": "debug-set-long-time-slice-data",
       "name": "DebugSetLongTimeSliceData",
       "category": "NavigationSystem",
-      "signature": "DebugSetLongTimeSliceData(Target, Long Time Slice Function, Long Time Slice Duration)",
+      "signature": "DebugSetLongTimeSliceData(Long Time Slice Function, Long Time Slice Duration)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSlicer*"
-        },
         {
           "name": "Long Time Slice Function",
           "type": "TFunction<void ( FName,double )>"
@@ -120,25 +161,68 @@
       "id": "debug-reset-long-time-slice-function",
       "name": "DebugResetLongTimeSliceFunction",
       "category": "NavigationSystem",
-      "signature": "DebugResetLongTimeSliceFunction(Target)",
+      "signature": "DebugResetLongTimeSliceFunction()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "debug-set-section-name",
+      "name": "DebugSetSectionName",
+      "category": "NavigationSystem",
+      "signature": "DebugSetSectionName(In Debug Section Name)",
       "params": [
         {
-          "name": "Target",
-          "type": "FNavRegenTimeSlicer*"
+          "name": "In Debug Section Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the debug name for a time sliced section of code.\nDo not call this directly use MARK_TIMESLICE_SECTION_DEBUG"
+    },
+    {
+      "id": "f-nav-regen-time-slice-manager",
+      "name": "FNavRegenTimeSliceManager",
+      "category": "NavigationSystem",
+      "signature": "FNavRegenTimeSliceManager()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Tile coordinates *"
+    },
+    {
+      "id": "push-tile-regen-time",
+      "name": "PushTileRegenTime",
+      "category": "NavigationSystem",
+      "signature": "PushTileRegenTime(New Time)",
+      "params": [
+        {
+          "name": "New Time",
+          "type": "Double"
         }
       ],
       "returnType": "Void"
     },
     {
+      "id": "get-average-tile-regen-time",
+      "name": "GetAverageTileRegenTime",
+      "category": "NavigationSystem",
+      "signature": "GetAverageTileRegenTime()",
+      "params": [],
+      "returnType": "Double"
+    },
+    {
+      "id": "get-average-delta-time",
+      "name": "GetAverageDeltaTime",
+      "category": "NavigationSystem",
+      "signature": "GetAverageDeltaTime()",
+      "params": [],
+      "returnType": "Double"
+    },
+    {
       "id": "reset-tile-wait-time-arrays",
       "name": "ResetTileWaitTimeArrays",
       "category": "NavigationSystem",
-      "signature": "ResetTileWaitTimeArrays(Target, Nav Data Set)",
+      "signature": "ResetTileWaitTimeArrays(Nav Data Set)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Set",
           "type": "TArray<TObjectPtr<ANavigationData>>&"
@@ -150,12 +234,8 @@
       "id": "push-tile-wait-time",
       "name": "PushTileWaitTime",
       "category": "NavigationSystem",
-      "signature": "PushTileWaitTime(Target, Nav Data Index, New Time)",
+      "signature": "PushTileWaitTime(Nav Data Index, New Time)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Index",
           "type": "Int"
@@ -171,12 +251,8 @@
       "id": "reset-tile-history-data",
       "name": "ResetTileHistoryData",
       "category": "NavigationSystem",
-      "signature": "ResetTileHistoryData(Target, Nav Data Set)",
+      "signature": "ResetTileHistoryData(Nav Data Set)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Set",
           "type": "TArray<TObjectPtr<ANavigationData>>&"
@@ -188,12 +264,8 @@
       "id": "push-tile-history-data",
       "name": "PushTileHistoryData",
       "category": "NavigationSystem",
-      "signature": "PushTileHistoryData(Target, Nav Data Index, Tile Data)",
+      "signature": "PushTileHistoryData(Nav Data Index, Tile Data)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Index",
           "type": "Int"
@@ -209,12 +281,8 @@
       "id": "get-average-tile-wait-time",
       "name": "GetAverageTileWaitTime",
       "category": "NavigationSystem",
-      "signature": "GetAverageTileWaitTime(Target, Nav Data Index)",
+      "signature": "GetAverageTileWaitTime(Nav Data Index)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Index",
           "type": "Int"
@@ -226,12 +294,8 @@
       "id": "reset-tile-wait-time",
       "name": "ResetTileWaitTime",
       "category": "NavigationSystem",
-      "signature": "ResetTileWaitTime(Target, Nav Data Index)",
+      "signature": "ResetTileWaitTime(Nav Data Index)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Index",
           "type": "Int"
@@ -240,15 +304,19 @@
       "returnType": "Void"
     },
     {
+      "id": "do-time-sliced-update",
+      "name": "DoTimeSlicedUpdate",
+      "category": "NavigationSystem",
+      "signature": "DoTimeSlicedUpdate()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
       "id": "calc-average-delta-time",
       "name": "CalcAverageDeltaTime",
       "category": "NavigationSystem",
-      "signature": "CalcAverageDeltaTime(Target, Frame Num)",
+      "signature": "CalcAverageDeltaTime(Frame Num)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Frame Num",
           "type": "UInt64"
@@ -260,12 +328,8 @@
       "id": "calc-time-slice-duration",
       "name": "CalcTimeSliceDuration",
       "category": "NavigationSystem",
-      "signature": "CalcTimeSliceDuration(Target, Nav Data Set, Num Tiles To Regen, Current Tile Regen Durations)",
+      "signature": "CalcTimeSliceDuration(Nav Data Set, Num Tiles To Regen, Current Tile Regen Durations)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Set",
           "type": "TArray<TObjectPtr<ANavigationData>>&"
@@ -285,12 +349,8 @@
       "id": "set-min-time-slice-duration",
       "name": "SetMinTimeSliceDuration",
       "category": "NavigationSystem",
-      "signature": "SetMinTimeSliceDuration(Target, New Min Time Slice Duration)",
+      "signature": "SetMinTimeSliceDuration(New Min Time Slice Duration)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "New Min Time Slice Duration",
           "type": "Double"
@@ -302,12 +362,8 @@
       "id": "set-max-time-slice-duration",
       "name": "SetMaxTimeSliceDuration",
       "category": "NavigationSystem",
-      "signature": "SetMaxTimeSliceDuration(Target, New Max Time Slice Duration)",
+      "signature": "SetMaxTimeSliceDuration(New Max Time Slice Duration)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "New Max Time Slice Duration",
           "type": "Double"
@@ -319,12 +375,8 @@
       "id": "set-max-desired-tile-regen-duration",
       "name": "SetMaxDesiredTileRegenDuration",
       "category": "NavigationSystem",
-      "signature": "SetMaxDesiredTileRegenDuration(Target, New Max Desired Tile Regen Duration)",
+      "signature": "SetMaxDesiredTileRegenDuration(New Max Desired Tile Regen Duration)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "New Max Desired Tile Regen Duration",
           "type": "Float"
@@ -333,15 +385,40 @@
       "returnType": "Void"
     },
     {
+      "id": "get-nav-data-idx",
+      "name": "GetNavDataIdx",
+      "category": "NavigationSystem",
+      "signature": "GetNavDataIdx()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "set-nav-data-idx",
+      "name": "SetNavDataIdx",
+      "category": "NavigationSystem",
+      "signature": "SetNavDataIdx(In Nav Data Idx)",
+      "params": [
+        {
+          "name": "In Nav Data Idx",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-time-slicer",
+      "name": "GetTimeSlicer",
+      "category": "NavigationSystem",
+      "signature": "GetTimeSlicer()",
+      "params": [],
+      "returnType": "FNavRegenTimeSlicer&"
+    },
+    {
       "id": "log-tile-statistics",
       "name": "LogTileStatistics",
       "category": "NavigationSystem",
-      "signature": "LogTileStatistics(Target, Nav Data Set)",
+      "signature": "LogTileStatistics(Nav Data Set)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FNavRegenTimeSliceManager*"
-        },
         {
           "name": "Nav Data Set",
           "type": "TArray<TObjectPtr<ANavigationData>>&"
@@ -350,15 +427,25 @@
       "returnType": "Void"
     },
     {
+      "id": "u-navigation-system-v-1",
+      "name": "UNavigationSystemV1",
+      "category": "NavigationSystem",
+      "signature": "UNavigationSystemV1(Object Initializer)",
+      "params": [
+        {
+          "name": "Object Initializer",
+          "type": "FObjectInitializer&",
+          "default": "FObjectInitializer::Get()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "gather-debug-labels",
       "name": "GatherDebugLabels",
       "category": "NavigationSystem",
-      "signature": "GatherDebugLabels(Target, In Out Debug Labels)",
+      "signature": "GatherDebugLabels(In Out Debug Labels)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "In Out Debug Labels",
           "type": "TArray<FString>&"
@@ -367,17 +454,26 @@
       "returnType": "Void"
     },
     {
-      "id": "update-nav-data-active-tiles",
-      "name": "UpdateNavDataActiveTiles",
+      "id": "update-invokers",
+      "name": "UpdateInvokers",
       "category": "NavigationSystem",
-      "signature": "UpdateNavDataActiveTiles(Target)",
+      "signature": "UpdateInvokers()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "set to true when navigation processing was blocked due to missing nav bounds"
+    },
+    {
+      "id": "get-navigation-system",
+      "name": "GetNavigationSystem",
+      "category": "AI",
+      "signature": "GetNavigationSystem(World Context Object)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "World Context Object",
+          "type": "UObject*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "UNavigationSystemV1*"
     },
     {
       "id": "project-point-to-navigation-c7f9b4",
@@ -733,12 +829,8 @@
       "id": "set-max-simultaneous-tile-generation-jobs-count",
       "name": "SetMaxSimultaneousTileGenerationJobsCount",
       "category": "AI",
-      "signature": "SetMaxSimultaneousTileGenerationJobsCount(Target, Max Number Of Jobs)",
+      "signature": "SetMaxSimultaneousTileGenerationJobsCount(Max Number Of Jobs)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Max Number Of Jobs",
           "type": "Int"
@@ -751,26 +843,17 @@
       "id": "reset-max-simultaneous-tile-generation-jobs-count",
       "name": "ResetMaxSimultaneousTileGenerationJobsCount",
       "category": "AI",
-      "signature": "ResetMaxSimultaneousTileGenerationJobsCount(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "ResetMaxSimultaneousTileGenerationJobsCount()",
+      "params": [],
       "returnType": "Void",
       "docs": "Brings limit of simultaneous navmesh tile generation jobs back to Project Setting's default value"
     },
     {
-      "id": "register-navigation-invoker-238f65",
+      "id": "register-navigation-invoker-46a407",
       "name": "RegisterNavigationInvoker",
       "category": "AI",
-      "signature": "RegisterNavigationInvoker(Target, Invoker, Tile Generation Radius, Tile Removal Radius)",
+      "signature": "RegisterNavigationInvoker(Invoker, Tile Generation Radius, Tile Removal Radius)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Invoker",
           "type": "AActor*"
@@ -790,15 +873,11 @@
       "docs": "Registers given actor as a \"navigation enforcer\" which means navigation system will\nmake sure navigation is being generated in specified radius around it.\n@note: you need NavigationSystem's GenerateNavigationOnlyAroundNavigationInvokers to be set to true\nto take advantage of this feature"
     },
     {
-      "id": "unregister-navigation-invoker-2fd4a0",
+      "id": "unregister-navigation-invoker",
       "name": "UnregisterNavigationInvoker",
       "category": "AI",
-      "signature": "UnregisterNavigationInvoker(Target, Invoker)",
+      "signature": "UnregisterNavigationInvoker(Invoker)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Invoker",
           "type": "AActor*"
@@ -811,12 +890,8 @@
       "id": "set-geometry-gathering-mode",
       "name": "SetGeometryGatheringMode",
       "category": "AI",
-      "signature": "SetGeometryGatheringMode(Target, New Mode)",
+      "signature": "SetGeometryGatheringMode(New Mode)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Mode",
           "type": "ENavDataGatheringModeConfig"
@@ -825,118 +900,27 @@
       "returnType": "Void"
     },
     {
-      "id": "k-2-replace-area-in-octree-data",
-      "name": "K2_ReplaceAreaInOctreeData",
-      "category": "AI",
-      "signature": "K2_ReplaceAreaInOctreeData(Target, Object, Old Area, New Area)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
-        {
-          "name": "Object",
-          "type": "UObject*"
-        },
-        {
-          "name": "Old Area",
-          "type": "TSubclassOf<UNavArea>"
-        },
-        {
-          "name": "New Area",
-          "type": "TSubclassOf<UNavArea>"
-        }
-      ],
-      "returnType": "Bool"
-    },
-    {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
+      "id": "is-active-tiles-generation-enabled",
+      "name": "IsActiveTilesGenerationEnabled",
       "category": "NavigationSystem",
-      "signature": "PostInitProperties(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "called after navigation influencing event takes place"
+      "signature": "IsActiveTilesGenerationEnabled()",
+      "params": [],
+      "returnType": "Bool"
     },
     {
       "id": "finish-destroy",
       "name": "FinishDestroy",
       "category": "NavigationSystem",
-      "signature": "FinishDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
-      "category": "NavigationSystem",
-      "signature": "AddReferencedObjects(In This, Collector)",
-      "params": [
-        {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-chain-property",
-      "name": "PostEditChangeChainProperty",
-      "category": "NavigationSystem",
-      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedChainEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "NavigationSystem",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
+      "signature": "FinishDestroy()",
+      "params": [],
       "returnType": "Void"
     },
     {
       "id": "tick",
       "name": "Tick",
       "category": "NavigationSystem",
-      "signature": "Tick(Target, Delta Seconds)",
+      "signature": "Tick(Delta Seconds)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Delta Seconds",
           "type": "Float"
@@ -945,44 +929,77 @@
       "returnType": "Void"
     },
     {
-      "id": "calc-time-sliced-update-data",
-      "name": "CalcTimeSlicedUpdateData",
+      "id": "get-world",
+      "name": "GetWorld",
       "category": "NavigationSystem",
-      "signature": "CalcTimeSlicedUpdateData(Target, Out Current Time Sliced Build Task Durations, Out Is Time Slicing Array, Out Any Non Time Sliced Generators, Out Num Time Sliced Remaining Build Tasks Array)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
-        {
-          "name": "Out Current Time Sliced Build Task Durations",
-          "type": "TArray<double>&"
-        },
-        {
-          "name": "Out Is Time Slicing Array",
-          "type": "TArray<bool>&"
-        },
-        {
-          "name": "Out Any Non Time Sliced Generators",
-          "type": "Bool&"
-        },
-        {
-          "name": "Out Num Time Sliced Remaining Build Tasks Array",
-          "type": "TArray<int32,TInlineAllocator<8>>&"
-        }
-      ],
-      "returnType": "Void"
+      "signature": "GetWorld()",
+      "params": [],
+      "returnType": "UWorld*"
     },
     {
-      "id": "find-path-sync",
-      "name": "FindPathSync",
+      "id": "get-crowd-manager",
+      "name": "GetCrowdManager",
       "category": "NavigationSystem",
-      "signature": "FindPathSync(Target, Query, Mode)",
+      "signature": "GetCrowdManager()",
+      "params": [],
+      "returnType": "UCrowdManagerBase*"
+    },
+    {
+      "id": "create-crowd-manager",
+      "name": "CreateCrowdManager",
+      "category": "NavigationSystem",
+      "signature": "CreateCrowdManager()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "spawn new crowd manager"
+    },
+    {
+      "id": "set-supported-agents-navigation-class",
+      "name": "SetSupportedAgentsNavigationClass",
+      "category": "NavigationSystem",
+      "signature": "SetSupportedAgentsNavigationClass(Agent Index, Navigation Data Class)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Agent Index",
+          "type": "Int"
         },
+        {
+          "name": "Navigation Data Class",
+          "type": "TSubclassOf<ANavigationData>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to properly set navigation class for indicated agent and propagate information to other places\n(like project settings) that may need this information"
+    },
+    {
+      "id": "find-path-sync-ebefc8",
+      "name": "FindPathSync",
+      "category": "NavigationSystem",
+      "signature": "FindPathSync(Agent Properties, Query, Mode)",
+      "params": [
+        {
+          "name": "Agent Properties",
+          "type": "FNavAgentProperties&"
+        },
+        {
+          "name": "Query",
+          "type": "FPathFindingQuery"
+        },
+        {
+          "name": "Mode",
+          "type": "EPathFindingMode::Type",
+          "default": "EPathFindingMode::Regular"
+        }
+      ],
+      "returnType": "FPathFindingResult",
+      "docs": "Synchronously looks for a path from @fLocation to @EndLocation for agent with properties @AgentProperties. NavData actor appropriate for specified\nFNavAgentProperties will be found automatically\n@param ResultPath results are put here\n@param NavData optional navigation data that will be used instead of the one that would be deducted from AgentProperties\n@param Mode switch between normal and hierarchical path finding algorithms"
+    },
+    {
+      "id": "find-path-sync-72d9ee",
+      "name": "FindPathSync",
+      "category": "NavigationSystem",
+      "signature": "FindPathSync(Query, Mode)",
+      "params": [
         {
           "name": "Query",
           "type": "FPathFindingQuery"
@@ -1000,12 +1017,8 @@
       "id": "find-path-async",
       "name": "FindPathAsync",
       "category": "NavigationSystem",
-      "signature": "FindPathAsync(Target, Agent Properties, Query, Result Delegate, Mode)",
+      "signature": "FindPathAsync(Agent Properties, Query, Result Delegate, Mode)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Agent Properties",
           "type": "FNavAgentProperties&"
@@ -1031,12 +1044,8 @@
       "id": "abort-async-find-path-request",
       "name": "AbortAsyncFindPathRequest",
       "category": "NavigationSystem",
-      "signature": "AbortAsyncFindPathRequest(Target, Asyn Path Query ID)",
+      "signature": "AbortAsyncFindPathRequest(Asyn Path Query ID)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Asyn Path Query ID",
           "type": "UInt"
@@ -1049,12 +1058,8 @@
       "id": "test-path-sync",
       "name": "TestPathSync",
       "category": "NavigationSystem",
-      "signature": "TestPathSync(Target, Query, Mode, Num Visited Nodes)",
+      "signature": "TestPathSync(Query, Mode, Num Visited Nodes)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Query",
           "type": "FPathFindingQuery"
@@ -1077,12 +1082,8 @@
       "id": "get-random-point",
       "name": "GetRandomPoint",
       "category": "NavigationSystem",
-      "signature": "GetRandomPoint(Target, Result Location, Nav Data, Query Filter)",
+      "signature": "GetRandomPoint(Result Location, Nav Data, Query Filter)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Result Location",
           "type": "FNavLocation&"
@@ -1102,15 +1103,11 @@
       "docs": "Finds random point in navigable space\n@param ResultLocation Found point is put here\n@param NavData If NavData == NULL then MainNavData is used.\n@return true if any location found, false otherwise"
     },
     {
-      "id": "get-random-reachable-point-in-radius-4b9330",
+      "id": "get-random-reachable-point-in-radius-c1ba7d",
       "name": "GetRandomReachablePointInRadius",
       "category": "NavigationSystem",
-      "signature": "GetRandomReachablePointInRadius(Target, Origin, Radius, Result Location, Nav Data, Query Filter)",
+      "signature": "GetRandomReachablePointInRadius(Origin, Radius, Result Location, Nav Data, Query Filter)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Origin",
           "type": "FVector&"
@@ -1138,15 +1135,11 @@
       "docs": "Finds random, reachable point in navigable space restricted to Radius around Origin\n@param ResultLocation Found point is put here\n@param NavData If NavData == NULL then MainNavData is used.\n@return true if any location found, false otherwise"
     },
     {
-      "id": "get-random-point-in-navigable-radius-6fdb30",
+      "id": "get-random-point-in-navigable-radius-a5efd8",
       "name": "GetRandomPointInNavigableRadius",
       "category": "NavigationSystem",
-      "signature": "GetRandomPointInNavigableRadius(Target, Origin, Radius, Result Location, Nav Data, Query Filter)",
+      "signature": "GetRandomPointInNavigableRadius(Origin, Radius, Result Location, Nav Data, Query Filter)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Origin",
           "type": "FVector&"
@@ -1174,15 +1167,11 @@
       "docs": "Finds random, point in navigable space restricted to Radius around Origin. Resulting location is not tested for reachability from the Origin\n@param ResultLocation Found point is put here\n@param NavData If NavData == NULL then MainNavData is used.\n@return true if any location found, false otherwise"
     },
     {
-      "id": "get-path-cost-6e9678",
+      "id": "get-path-cost-2477e9",
       "name": "GetPathCost",
       "category": "AI",
-      "signature": "GetPathCost(Target, Path Start, Path End, Path Cost, Nav Data, Query Filter)",
+      "signature": "GetPathCost(Path Start, Path End, Path Cost, Nav Data, Query Filter)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Path Start",
           "type": "FVector&"
@@ -1210,15 +1199,11 @@
       "docs": "Calculates a path from PathStart to PathEnd and retrieves its cost.\n@NOTE potentially expensive, so use it with caution"
     },
     {
-      "id": "get-path-length-75858e",
+      "id": "get-path-length-a4e8c6",
       "name": "GetPathLength",
       "category": "AI",
-      "signature": "GetPathLength(Target, Path Start, Path End, Path Length, Nav Data, Query Filter)",
+      "signature": "GetPathLength(Path Start, Path End, Path Length, Nav Data, Query Filter)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Path Start",
           "type": "FVector&"
@@ -1249,12 +1234,8 @@
       "id": "get-path-length-and-cost",
       "name": "GetPathLengthAndCost",
       "category": "NavigationSystem",
-      "signature": "GetPathLengthAndCost(Target, Path Start, Path End, Path Length, Path Cost, Nav Data, Query Filter)",
+      "signature": "GetPathLengthAndCost(Path Start, Path End, Path Length, Path Cost, Nav Data, Query Filter)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Path Start",
           "type": "FVector&"
@@ -1286,15 +1267,43 @@
       "docs": "Calculates a path from PathStart to PathEnd and retrieves its overestimated length and cost.\n@NOTE potentially expensive, so use it with caution"
     },
     {
-      "id": "project-point-to-navigation-d4b013",
+      "id": "project-point-to-navigation-b47597",
       "name": "ProjectPointToNavigation",
       "category": "NavigationSystem",
-      "signature": "ProjectPointToNavigation(Target, Point, Out Location, Extent, Nav Data, Query Filter)",
+      "signature": "ProjectPointToNavigation(Point, Out Location, Extent, Agent Properties, Query Filter)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Point",
+          "type": "FVector&"
         },
+        {
+          "name": "Out Location",
+          "type": "FNavLocation&"
+        },
+        {
+          "name": "Extent",
+          "type": "FVector&",
+          "default": "INVALID_NAVEXTENT"
+        },
+        {
+          "name": "Agent Properties",
+          "type": "FNavAgentProperties*",
+          "default": "NULL"
+        },
+        {
+          "name": "Query Filter",
+          "type": "FSharedConstNavQueryFilter",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "project-point-to-navigation-8a8990",
+      "name": "ProjectPointToNavigation",
+      "category": "NavigationSystem",
+      "signature": "ProjectPointToNavigation(Point, Out Location, Extent, Nav Data, Query Filter)",
+      "params": [
         {
           "name": "Point",
           "type": "FVector&"
@@ -1322,15 +1331,11 @@
       "returnType": "Bool"
     },
     {
-      "id": "get-nav-data-for-props-4f1779",
+      "id": "get-nav-data-for-props-0dc7c8",
       "name": "GetNavDataForProps",
       "category": "NavigationSystem",
-      "signature": "GetNavDataForProps(Target, Agent Properties)",
+      "signature": "GetNavDataForProps(Agent Properties)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Agent Properties",
           "type": "FNavAgentProperties&"
@@ -1343,12 +1348,8 @@
       "id": "get-nav-data-for-agent-name",
       "name": "GetNavDataForAgentName",
       "category": "NavigationSystem",
-      "signature": "GetNavDataForAgentName(Target, Agent Name)",
+      "signature": "GetNavDataForAgentName(Agent Name)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Agent Name",
           "type": "Name"
@@ -1358,15 +1359,11 @@
       "docs": "Goes through all registered NavigationData instances and retrieves the one\nsupporting agent named AgentName"
     },
     {
-      "id": "get-nav-data-for-props-49b0a1",
+      "id": "get-nav-data-for-props-cc3567",
       "name": "GetNavDataForProps",
       "category": "NavigationSystem",
-      "signature": "GetNavDataForProps(Target, Agent Properties, Agent Location, Extent)",
+      "signature": "GetNavDataForProps(Agent Properties, Agent Location, Extent)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Agent Properties",
           "type": "FNavAgentProperties&"
@@ -1385,15 +1382,11 @@
       "docs": "Looks up NavData appropriate for specified movement properties and returns it. NULL if not found;\nThis is the encouraged way of querying for the appropriate NavData. It makes no difference for NavigationSystemV1\n(AgentLocation and Extent parameters not being used) but NaV2 will take advantage of it and all engine-level\nAI navigation code is going to use call this flavor."
     },
     {
-      "id": "get-default-nav-data-instance",
+      "id": "get-default-nav-data-instance-8fb4e1",
       "name": "GetDefaultNavDataInstance",
       "category": "NavigationSystem",
-      "signature": "GetDefaultNavDataInstance(Target, Create New If None Found)",
+      "signature": "GetDefaultNavDataInstance(Create New If None Found)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Create New If None Found",
           "type": "FNavigationSystem::ECreateIfMissing"
@@ -1403,15 +1396,28 @@
       "docs": "Returns the world default navigation data instance. Creates one if it doesn't exist."
     },
     {
+      "id": "get-main-nav-data",
+      "name": "GetMainNavData",
+      "category": "NavigationSystem",
+      "signature": "GetMainNavData()",
+      "params": [],
+      "returnType": "INavigationDataInterface*",
+      "docs": "Returns the world default navigation data instance."
+    },
+    {
+      "id": "get-main-nav-data-checked",
+      "name": "GetMainNavDataChecked",
+      "category": "NavigationSystem",
+      "signature": "GetMainNavDataChecked()",
+      "params": [],
+      "returnType": "ANavigationData&"
+    },
+    {
       "id": "set-build-bounds",
       "name": "SetBuildBounds",
       "category": "NavigationSystem",
-      "signature": "SetBuildBounds(Target, Bounds)",
+      "signature": "SetBuildBounds(Bounds)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Bounds",
           "type": "FBox&"
@@ -1424,25 +1430,16 @@
       "id": "get-navigable-world-bounds",
       "name": "GetNavigableWorldBounds",
       "category": "NavigationSystem",
-      "signature": "GetNavigableWorldBounds(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetNavigableWorldBounds()",
+      "params": [],
       "returnType": "FBox"
     },
     {
       "id": "contains-nav-data",
       "name": "ContainsNavData",
       "category": "NavigationSystem",
-      "signature": "ContainsNavData(Target, Bounds)",
+      "signature": "ContainsNavData(Bounds)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Bounds",
           "type": "FBox&"
@@ -1454,25 +1451,16 @@
       "id": "compute-nav-data-bounds",
       "name": "ComputeNavDataBounds",
       "category": "NavigationSystem",
-      "signature": "ComputeNavDataBounds(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "ComputeNavDataBounds()",
+      "params": [],
       "returnType": "FBox"
     },
     {
       "id": "add-navigation-data-chunk",
       "name": "AddNavigationDataChunk",
       "category": "NavigationSystem",
-      "signature": "AddNavigationDataChunk(Target, Data Chunk Actor)",
+      "signature": "AddNavigationDataChunk(Data Chunk Actor)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Data Chunk Actor",
           "type": "ANavigationDataChunkActor&"
@@ -1484,12 +1472,8 @@
       "id": "remove-navigation-data-chunk",
       "name": "RemoveNavigationDataChunk",
       "category": "NavigationSystem",
-      "signature": "RemoveNavigationDataChunk(Target, Data Chunk Actor)",
+      "signature": "RemoveNavigationDataChunk(Data Chunk Actor)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Data Chunk Actor",
           "type": "ANavigationDataChunkActor&"
@@ -1501,12 +1485,8 @@
       "id": "fill-navigation-data-chunk-actor",
       "name": "FillNavigationDataChunkActor",
       "category": "NavigationSystem",
-      "signature": "FillNavigationDataChunkActor(Target, Query Bounds, Data Chunk Actor, Out Tiles Bounds)",
+      "signature": "FillNavigationDataChunkActor(Query Bounds, Data Chunk Actor, Out Tiles Bounds)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Query Bounds",
           "type": "FBox&"
@@ -1523,15 +1503,27 @@
       "returnType": "Void"
     },
     {
+      "id": "get-default-nav-data-instance-0bd20e",
+      "name": "GetDefaultNavDataInstance",
+      "category": "NavigationSystem",
+      "signature": "GetDefaultNavDataInstance()",
+      "params": [],
+      "returnType": "ANavigationData*"
+    },
+    {
+      "id": "get-abstract-nav-data",
+      "name": "GetAbstractNavData",
+      "category": "NavigationSystem",
+      "signature": "GetAbstractNavData()",
+      "params": [],
+      "returnType": "ANavigationData*"
+    },
+    {
       "id": "create-navigation-data-instance-in-level",
       "name": "CreateNavigationDataInstanceInLevel",
       "category": "NavigationSystem",
-      "signature": "CreateNavigationDataInstanceInLevel(Target, Nav Config, Spawn Level)",
+      "signature": "CreateNavigationDataInstanceInLevel(Nav Config, Spawn Level)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Config",
           "type": "FNavDataConfig&"
@@ -1548,25 +1540,16 @@
       "id": "create-default-query-filter-copy",
       "name": "CreateDefaultQueryFilterCopy",
       "category": "NavigationSystem",
-      "signature": "CreateDefaultQueryFilterCopy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "CreateDefaultQueryFilterCopy()",
+      "params": [],
       "returnType": "FSharedNavQueryFilter"
     },
     {
       "id": "should-generator-run",
       "name": "ShouldGeneratorRun",
       "category": "NavigationSystem",
-      "signature": "ShouldGeneratorRun(Target, Generator)",
+      "signature": "ShouldGeneratorRun(Generator)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Generator",
           "type": "FNavDataGenerator*"
@@ -1579,12 +1562,8 @@
       "id": "is-navigation-built",
       "name": "IsNavigationBuilt",
       "category": "NavigationSystem",
-      "signature": "IsNavigationBuilt(Target, Settings)",
+      "signature": "IsNavigationBuilt(Settings)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Settings",
           "type": "AWorldSettings*"
@@ -1596,11 +1575,36 @@
       "id": "is-there-anywhere-to-build-navigation",
       "name": "IsThereAnywhereToBuildNavigation",
       "category": "NavigationSystem",
-      "signature": "IsThereAnywhereToBuildNavigation(Target)",
+      "signature": "IsThereAnywhereToBuildNavigation()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-generate-navigation-everywhere",
+      "name": "ShouldGenerateNavigationEverywhere",
+      "category": "NavigationSystem",
+      "signature": "ShouldGenerateNavigationEverywhere()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-allow-client-side-navigation",
+      "name": "ShouldAllowClientSideNavigation",
+      "category": "NavigationSystem",
+      "signature": "ShouldAllowClientSideNavigation()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-discard-sub-level-nav-data",
+      "name": "ShouldDiscardSubLevelNavData",
+      "category": "NavigationSystem",
+      "signature": "ShouldDiscardSubLevelNavData(Nav Data)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Nav Data",
+          "type": "ANavigationData*",
+          "default": "nullptr"
         }
       ],
       "returnType": "Bool"
@@ -1609,25 +1613,16 @@
       "id": "get-world-bounds",
       "name": "GetWorldBounds",
       "category": "NavigationSystem",
-      "signature": "GetWorldBounds(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetWorldBounds()",
+      "params": [],
       "returnType": "FBox"
     },
     {
       "id": "get-level-bounds",
       "name": "GetLevelBounds",
       "category": "NavigationSystem",
-      "signature": "GetLevelBounds(Target, In Level)",
+      "signature": "GetLevelBounds(In Level)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "In Level",
           "type": "ULevel*"
@@ -1639,12 +1634,8 @@
       "id": "is-navigation-relevant",
       "name": "IsNavigationRelevant",
       "category": "NavigationSystem",
-      "signature": "IsNavigationRelevant(Target, Test Actor)",
+      "signature": "IsNavigationRelevant(Test Actor)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Test Actor",
           "type": "AActor*"
@@ -1656,13 +1647,8 @@
       "id": "get-navigation-bounds",
       "name": "GetNavigationBounds",
       "category": "NavigationSystem",
-      "signature": "GetNavigationBounds(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetNavigationBounds()",
+      "params": [],
       "returnType": "TSet<FNavigationBounds>&"
     },
     {
@@ -1703,25 +1689,24 @@
       "id": "get-default-supported-agent-config",
       "name": "GetDefaultSupportedAgentConfig",
       "category": "NavigationSystem",
-      "signature": "GetDefaultSupportedAgentConfig(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetDefaultSupportedAgentConfig()",
+      "params": [],
       "returnType": "FNavDataConfig&"
+    },
+    {
+      "id": "get-supported-agents",
+      "name": "GetSupportedAgents",
+      "category": "NavigationSystem",
+      "signature": "GetSupportedAgents()",
+      "params": [],
+      "returnType": "TArray<FNavDataConfig>&"
     },
     {
       "id": "override-supported-agents",
       "name": "OverrideSupportedAgents",
       "category": "NavigationSystem",
-      "signature": "OverrideSupportedAgents(Target, New Supported Agents)",
+      "signature": "OverrideSupportedAgents(New Supported Agents)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Supported Agents",
           "type": "TArray<FNavDataConfig>&"
@@ -1733,12 +1718,8 @@
       "id": "set-supported-agents-mask",
       "name": "SetSupportedAgentsMask",
       "category": "NavigationSystem",
-      "signature": "SetSupportedAgentsMask(Target, In Supported Agents Mask)",
+      "signature": "SetSupportedAgentsMask(In Supported Agents Mask)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "In Supported Agents Mask",
           "type": "FNavAgentSelector&"
@@ -1747,15 +1728,19 @@
       "returnType": "Void"
     },
     {
+      "id": "get-supported-agents-mask",
+      "name": "GetSupportedAgentsMask",
+      "category": "NavigationSystem",
+      "signature": "GetSupportedAgentsMask()",
+      "params": [],
+      "returnType": "FNavAgentSelector"
+    },
+    {
       "id": "apply-world-offset",
       "name": "ApplyWorldOffset",
       "category": "NavigationSystem",
-      "signature": "ApplyWorldOffset(Target, In Offset, World Shift)",
+      "signature": "ApplyWorldOffset(In Offset, World Shift)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "In Offset",
           "type": "FVector&"
@@ -1771,13 +1756,8 @@
       "id": "is-navigation-dirty",
       "name": "IsNavigationDirty",
       "category": "NavigationSystem",
-      "signature": "IsNavigationDirty(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "IsNavigationDirty()",
+      "params": [],
       "returnType": "Bool",
       "docs": "checks if navigation/navmesh is dirty and needs to be rebuilt"
     },
@@ -1785,15 +1765,18 @@
       "id": "can-rebuild-dirty-navigation",
       "name": "CanRebuildDirtyNavigation",
       "category": "NavigationSystem",
-      "signature": "CanRebuildDirtyNavigation(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "CanRebuildDirtyNavigation()",
+      "params": [],
       "returnType": "Bool",
       "docs": "checks if dirty navigation data can rebuild itself"
+    },
+    {
+      "id": "supports-navigation-generation",
+      "name": "SupportsNavigationGeneration",
+      "category": "NavigationSystem",
+      "signature": "SupportsNavigationGeneration()",
+      "params": [],
+      "returnType": "Bool"
     },
     {
       "id": "does-path-intersect-box-6e6e68",
@@ -1857,12 +1840,8 @@
       "id": "register-invoker",
       "name": "RegisterInvoker",
       "category": "NavigationSystem",
-      "signature": "RegisterInvoker(Target, Invoker, Tile Generation Radius, Tile Removal Radius, Agents, In Priority)",
+      "signature": "RegisterInvoker(Invoker, Tile Generation Radius, Tile Removal Radius, Agents, In Priority)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Invoker",
           "type": "AActor&"
@@ -1890,12 +1869,8 @@
       "id": "unregister-invoker",
       "name": "UnregisterInvoker",
       "category": "NavigationSystem",
-      "signature": "UnregisterInvoker(Target, Invoker)",
+      "signature": "UnregisterInvoker(Invoker)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Invoker",
           "type": "AActor&"
@@ -1935,28 +1910,27 @@
       "returnType": "Void"
     },
     {
-      "id": "unregister-navigation-invoker-efc1b2",
-      "name": "UnregisterNavigationInvoker",
-      "category": "AI",
-      "signature": "UnregisterNavigationInvoker(Invoker)",
-      "params": [
-        {
-          "name": "Invoker",
-          "type": "AActor&"
-        }
-      ],
-      "returnType": "Void"
+      "id": "get-invoker-locations",
+      "name": "GetInvokerLocations",
+      "category": "NavigationSystem",
+      "signature": "GetInvokerLocations()",
+      "params": [],
+      "returnType": "TArray<FNavigationInvokerRaw>&"
+    },
+    {
+      "id": "get-invokers-seed-bounds",
+      "name": "GetInvokersSeedBounds",
+      "category": "NavigationSystem",
+      "signature": "GetInvokersSeedBounds()",
+      "params": [],
+      "returnType": "TArray<FBox>&"
     },
     {
       "id": "unregister-nav-data",
       "name": "UnregisterNavData",
       "category": "NavigationSystem",
-      "signature": "UnregisterNavData(Target, Nav Data)",
+      "signature": "UnregisterNavData(Nav Data)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Data",
           "type": "ANavigationData*"
@@ -1968,13 +1942,8 @@
       "id": "unregister-unused-nav-data",
       "name": "UnregisterUnusedNavData",
       "category": "NavigationSystem",
-      "signature": "UnregisterUnusedNavData(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "UnregisterUnusedNavData()",
+      "params": [],
       "returnType": "Void",
       "docs": "Traverses SupportedAgents and for all agents not supported (i.e. filtered\nout by SupportedAgentsMask) checks if there's a currently registered\nNavigationData instance for that agent, and if so it unregisters that agent"
     },
@@ -1982,12 +1951,8 @@
       "id": "request-registration-deferred",
       "name": "RequestRegistrationDeferred",
       "category": "NavigationSystem",
-      "signature": "RequestRegistrationDeferred(Target, Nav Data)",
+      "signature": "RequestRegistrationDeferred(Nav Data)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Data",
           "type": "ANavigationData&"
@@ -1997,16 +1962,169 @@
       "docs": "Adds NavData to registration candidates queue - NavDataRegistrationQueue"
     },
     {
-      "id": "apply-supported-agents-filter",
-      "name": "ApplySupportedAgentsFilter",
+      "id": "register-navigation-data-instances",
+      "name": "RegisterNavigationDataInstances",
       "category": "NavigationSystem",
-      "signature": "ApplySupportedAgentsFilter(Target)",
+      "signature": "RegisterNavigationDataInstances()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Processes all NavigationData instances in UWorld owning navigation system instance, and registers\nall previously unregistered"
+    },
+    {
+      "id": "conditional-populate-nav-octree",
+      "name": "ConditionalPopulateNavOctree",
+      "category": "NavigationSystem",
+      "signature": "ConditionalPopulateNavOctree()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "called in places where we need to spawn the NavOctree, but is checking additional conditions if we really want to do that\ndepending on navigation data setup among others\n@return true if NavOctree instance has been created, or if one is already present"
+    },
+    {
+      "id": "construct-nav-octree",
+      "name": "ConstructNavOctree",
+      "category": "NavigationSystem",
+      "signature": "ConstructNavOctree()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "called to instantiate NavigationSystem's NavOctree instance"
+    },
+    {
+      "id": "process-registration-candidates",
+      "name": "ProcessRegistrationCandidates",
+      "category": "NavigationSystem",
+      "signature": "ProcessRegistrationCandidates()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Processes registration of candidates queues via RequestRegistration and stored in NavDataRegistrationQueue"
+    },
+    {
+      "id": "process-custom-link-pending-registration",
+      "name": "ProcessCustomLinkPendingRegistration",
+      "category": "NavigationSystem",
+      "signature": "ProcessCustomLinkPendingRegistration()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Registers custom navigation links awaiting registration in the navigation object repository"
+    },
+    {
+      "id": "perform-navigation-bounds-update",
+      "name": "PerformNavigationBoundsUpdate",
+      "category": "NavigationSystem",
+      "signature": "PerformNavigationBoundsUpdate(Update Requests)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Update Requests",
+          "type": "TArray<FNavigationBoundsUpdateRequest>&"
         }
       ],
+      "returnType": "Void",
+      "docs": "used to apply updates of nav volumes in navigation system's tick"
+    },
+    {
+      "id": "add-navigation-bounds",
+      "name": "AddNavigationBounds",
+      "category": "NavigationSystem",
+      "signature": "AddNavigationBounds(New Bounds)",
+      "params": [
+        {
+          "name": "New Bounds",
+          "type": "FNavigationBounds&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "adds data to RegisteredNavBounds"
+    },
+    {
+      "id": "gather-navigation-bounds",
+      "name": "GatherNavigationBounds",
+      "category": "NavigationSystem",
+      "signature": "GatherNavigationBounds()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Searches for all valid navigation bounds in the world and stores them"
+    },
+    {
+      "id": "get-invoker-seed-locations",
+      "name": "GetInvokerSeedLocations",
+      "category": "NavigationSystem",
+      "signature": "GetInvokerSeedLocations(In World, Out Seed Locations)",
+      "params": [
+        {
+          "name": "In World",
+          "type": "UWorld&"
+        },
+        {
+          "name": "Out Seed Locations",
+          "type": "TArray<FVector,TInlineAllocator<3 2>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get seed locations for invokers, @see InvokersMaximumDistanceFromSeed\nBy default these are the player pawn locations. If a player controller has no pawn assigned, the player's camera location will be used instead."
+    },
+    {
+      "id": "get-nav-data-with-id",
+      "name": "GetNavDataWithID",
+      "category": "NavigationSystem",
+      "signature": "GetNavDataWithID(Nav Data ID)",
+      "params": [
+        {
+          "name": "Nav Data ID",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "ANavigationData*",
+      "docs": "@return pointer to ANavigationData instance of given ID, or NULL if it was not found. Note it looks only through registered navigation data"
+    },
+    {
+      "id": "get-navigation-element-for-u-object",
+      "name": "GetNavigationElementForUObject",
+      "category": "NavigationSystem",
+      "signature": "GetNavigationElementForUObject()",
+      "params": [],
+      "returnType": "TSharedPtr<FNavigationElement>",
+      "docs": "@return Valid shared pointer on a FNavigationElement if the provided UObject is registered in the navigation system, an invalid one otherwise."
+    },
+    {
+      "id": "get-navigation-element-handle-for-u-object",
+      "name": "GetNavigationElementHandleForUObject",
+      "category": "NavigationSystem",
+      "signature": "GetNavigationElementHandleForUObject()",
+      "params": [],
+      "returnType": "FNavigationElementHandle",
+      "docs": "@return Valid handle if the provided UObject is registered in the navigation system, FNavigationElementHandle::Invalid otherwise."
+    },
+    {
+      "id": "register-component-to-nav-octree",
+      "name": "RegisterComponentToNavOctree",
+      "category": "NavigationSystem",
+      "signature": "RegisterComponentToNavOctree(Comp)",
+      "params": [
+        {
+          "name": "Comp",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unregister-component-to-nav-octree",
+      "name": "UnregisterComponentToNavOctree",
+      "category": "NavigationSystem",
+      "signature": "UnregisterComponentToNavOctree(Comp)",
+      "params": [
+        {
+          "name": "Comp",
+          "type": "UActorComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "release-initial-building-lock",
+      "name": "ReleaseInitialBuildingLock",
+      "category": "NavigationSystem",
+      "signature": "ReleaseInitialBuildingLock()",
+      "params": [],
       "returnType": "Void"
     },
     {
@@ -2255,10 +2373,10 @@
       "docs": "update all navoctree entries for actor and its non scene components after root movement"
     },
     {
-      "id": "register-nav-relevant-object-static",
-      "name": "RegisterNavRelevantObjectStatic",
+      "id": "register-nav-relevant-object-internal",
+      "name": "RegisterNavRelevantObjectInternal",
       "category": "NavigationSystem",
-      "signature": "RegisterNavRelevantObjectStatic(Nav Relevant Object, Object)",
+      "signature": "RegisterNavRelevantObjectInternal(Nav Relevant Object, Object)",
       "params": [
         {
           "name": "Nav Relevant Object",
@@ -2270,7 +2388,107 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Fetches the repository from the provided object and registers the object with it."
+      "docs": "Similar to UnregisterNavRelevantObjectStatic but uses the cached repository."
+    },
+    {
+      "id": "unregister-nav-relevant-object-static",
+      "name": "UnregisterNavRelevantObjectStatic",
+      "category": "NavigationSystem",
+      "signature": "UnregisterNavRelevantObjectStatic(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Fetches the repository from the provided object and unregisters the object with it."
+    },
+    {
+      "id": "unregister-nav-relevant-object-internal",
+      "name": "UnregisterNavRelevantObjectInternal",
+      "category": "NavigationSystem",
+      "signature": "UnregisterNavRelevantObjectInternal(Object)",
+      "params": [
+        {
+          "name": "Object",
+          "type": "UObject&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Similar to UnregisterNavRelevantObjectStatic but uses the cached repository."
+    },
+    {
+      "id": "update-nav-relevant-object-in-nav-octree-static",
+      "name": "UpdateNavRelevantObjectInNavOctreeStatic",
+      "category": "NavigationSystem",
+      "signature": "UpdateNavRelevantObjectInNavOctreeStatic(In Nav Relevant Object, In Object, In Navigation System, In Callback)",
+      "params": [
+        {
+          "name": "In Nav Relevant Object",
+          "type": "INavRelevantInterface&"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "In Navigation System",
+          "type": "UNavigationSystemV1*"
+        },
+        {
+          "name": "In Callback",
+          "type": "TFunctionRef<void ( UNavigationSystemV1&,TSharedRef<FNavigationElement>& )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "In actor/component code paths it is possible that updates get called without a previous call to register (wasn't relevant at that time).\nIn those cases we create a new, or an updated, navigation element if needed.\n@note Method expects only navigation relevant objects and will ensure otherwise."
+    },
+    {
+      "id": "get-all-attached-actors",
+      "name": "GetAllAttachedActors",
+      "category": "NavigationSystem",
+      "signature": "GetAllAttachedActors(Root Actor, Out Attached Actors)",
+      "params": [
+        {
+          "name": "Root Actor",
+          "type": "AActor&"
+        },
+        {
+          "name": "Out Attached Actors",
+          "type": "TArray<AActor*>&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "A helper function that gathers all actors attached to RootActor and fetches\nthem back. The function does consider multi-level attachments.\n@param RootActor The reference actor to get the attached actors from.\n@param OutAttachedActors is getting reset at the beginning of the function.\nWhen done it is guaranteed to contain unique, non-null ptrs. It\nwill not include RootActor.\n@return the number of unique attached actors"
+    },
+    {
+      "id": "update-attached-actors-in-nav-octree",
+      "name": "UpdateAttachedActorsInNavOctree",
+      "category": "NavigationSystem",
+      "signature": "UpdateAttachedActorsInNavOctree(Root Actor)",
+      "params": [
+        {
+          "name": "Root Actor",
+          "type": "AActor&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "updates navoctree information on actors attached to RootActor"
+    },
+    {
+      "id": "clear-nav-octree-all",
+      "name": "ClearNavOctreeAll",
+      "category": "NavigationSystem",
+      "signature": "ClearNavOctreeAll(Actor)",
+      "params": [
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "removes all navoctree entries for actor and its components"
     },
     {
       "id": "update-nav-octree-bounds",
@@ -2287,15 +2505,11 @@
       "docs": "updates bounds of all components implementing INavRelevantInterface"
     },
     {
-      "id": "add-dirty-area-195dfd",
+      "id": "add-dirty-area-d9b839",
       "name": "AddDirtyArea",
       "category": "NavigationSystem",
-      "signature": "AddDirtyArea(Target, New Area, Flags, Debug Reason)",
+      "signature": "AddDirtyArea(New Area, Flags, Debug Reason)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Area",
           "type": "FBox&"
@@ -2313,15 +2527,11 @@
       "returnType": "Void"
     },
     {
-      "id": "add-dirty-area-578fe0",
+      "id": "add-dirty-area-163e4e",
       "name": "AddDirtyArea",
       "category": "NavigationSystem",
-      "signature": "AddDirtyArea(Target, New Area, Flags, Element Provider Func, Debug Reason)",
+      "signature": "AddDirtyArea(New Area, Flags, Element Provider Func, Debug Reason)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Area",
           "type": "FBox&"
@@ -2346,12 +2556,8 @@
       "id": "add-dirty-areas",
       "name": "AddDirtyAreas",
       "category": "NavigationSystem",
-      "signature": "AddDirtyAreas(Target, New Areas, Flags, Debug Reason)",
+      "signature": "AddDirtyAreas(New Areas, Flags, Debug Reason)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Areas",
           "type": "TArray<FBox>&"
@@ -2369,15 +2575,11 @@
       "returnType": "Void"
     },
     {
-      "id": "add-dirty-area-c2b7d2",
+      "id": "add-dirty-area-12a491",
       "name": "AddDirtyArea",
       "category": "NavigationSystem",
-      "signature": "AddDirtyArea(Target, New Area, Flags, Object Provider Func, Debug Reason)",
+      "signature": "AddDirtyArea(New Area, Flags, Object Provider Func, Debug Reason)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Area",
           "type": "FBox&"
@@ -2402,27 +2604,41 @@
       "id": "has-dirty-areas-queued",
       "name": "HasDirtyAreasQueued",
       "category": "NavigationSystem",
-      "signature": "HasDirtyAreasQueued(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "HasDirtyAreasQueued()",
+      "params": [],
       "returnType": "Bool"
     },
     {
       "id": "get-num-dirty-areas",
       "name": "GetNumDirtyAreas",
       "category": "NavigationSystem",
-      "signature": "GetNumDirtyAreas(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetNumDirtyAreas()",
+      "params": [],
       "returnType": "Int"
+    },
+    {
+      "id": "get-dirty-area-warning-size-threshold",
+      "name": "GetDirtyAreaWarningSizeThreshold",
+      "category": "NavigationSystem",
+      "signature": "GetDirtyAreaWarningSizeThreshold()",
+      "params": [],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-nav-octree",
+      "name": "GetNavOctree",
+      "category": "NavigationSystem",
+      "signature": "GetNavOctree()",
+      "params": [],
+      "returnType": "FNavigationOctree*"
+    },
+    {
+      "id": "get-mutable-nav-octree",
+      "name": "GetMutableNavOctree",
+      "category": "NavigationSystem",
+      "signature": "GetMutableNavOctree()",
+      "params": [],
+      "returnType": "FNavigationOctree*"
     },
     {
       "id": "hash-object",
@@ -2438,15 +2654,24 @@
       "returnType": "UInt"
     },
     {
+      "id": "get-nav-octree-id-for-element",
+      "name": "GetNavOctreeIdForElement",
+      "category": "NavigationSystem",
+      "signature": "GetNavOctreeIdForElement(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "FNavigationElementHandle"
+        }
+      ],
+      "returnType": "FOctreeElementId2*"
+    },
+    {
       "id": "get-objects-nav-octree-id",
       "name": "GetObjectsNavOctreeId",
       "category": "NavigationSystem",
-      "signature": "GetObjectsNavOctreeId(Target, Object)",
+      "signature": "GetObjectsNavOctreeId(Object)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject&"
@@ -2455,15 +2680,24 @@
       "returnType": "FOctreeElementId2*"
     },
     {
+      "id": "has-pending-update-for-element",
+      "name": "HasPendingUpdateForElement",
+      "category": "NavigationSystem",
+      "signature": "HasPendingUpdateForElement(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "FNavigationElementHandle"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "has-pending-object-nav-octree-id",
       "name": "HasPendingObjectNavOctreeId",
       "category": "NavigationSystem",
-      "signature": "HasPendingObjectNavOctreeId(Target, Object)",
+      "signature": "HasPendingObjectNavOctreeId(Object)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject*"
@@ -2475,12 +2709,8 @@
       "id": "remove-objects-nav-octree-id",
       "name": "RemoveObjectsNavOctreeId",
       "category": "NavigationSystem",
-      "signature": "RemoveObjectsNavOctreeId(Target, Object)",
+      "signature": "RemoveObjectsNavOctreeId(Object)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject&"
@@ -2492,12 +2722,8 @@
       "id": "remove-nav-octree-element-id",
       "name": "RemoveNavOctreeElementId",
       "category": "NavigationSystem",
-      "signature": "RemoveNavOctreeElementId(Target, Element Id, Update Flags)",
+      "signature": "RemoveNavOctreeElementId(Element Id, Update Flags)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Element Id",
           "type": "FOctreeElementId2&"
@@ -2510,36 +2736,24 @@
       "returnType": "Void"
     },
     {
-      "id": "remove-from-nav-octree",
-      "name": "RemoveFromNavOctree",
+      "id": "get-data-for-element",
+      "name": "GetDataForElement",
       "category": "NavigationSystem",
-      "signature": "RemoveFromNavOctree(Target, Element Id, Update Flags)",
+      "signature": "GetDataForElement(Element)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
-        {
-          "name": "Element Id",
-          "type": "FOctreeElementId2&"
-        },
-        {
-          "name": "Update Flags",
-          "type": "Int"
+          "name": "Element",
+          "type": "FNavigationElementHandle"
         }
       ],
-      "returnType": "Void"
+      "returnType": "FNavigationRelevantData*"
     },
     {
       "id": "get-data-for-object",
       "name": "GetDataForObject",
       "category": "NavigationSystem",
-      "signature": "GetDataForObject(Target, Object)",
+      "signature": "GetDataForObject(Object)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject&"
@@ -2551,12 +2765,8 @@
       "id": "get-mutable-data-for-element",
       "name": "GetMutableDataForElement",
       "category": "NavigationSystem",
-      "signature": "GetMutableDataForElement(Target, Element)",
+      "signature": "GetMutableDataForElement(Element)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Element",
           "type": "FNavigationElementHandle"
@@ -2568,12 +2778,8 @@
       "id": "get-mutable-data-for-object",
       "name": "GetMutableDataForObject",
       "category": "NavigationSystem",
-      "signature": "GetMutableDataForObject(Target, Object)",
+      "signature": "GetMutableDataForObject(Object)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject&"
@@ -2585,12 +2791,8 @@
       "id": "find-elements-in-nav-octree",
       "name": "FindElementsInNavOctree",
       "category": "NavigationSystem",
-      "signature": "FindElementsInNavOctree(Target, Query Box, Filter, Elements)",
+      "signature": "FindElementsInNavOctree(Query Box, Filter, Elements)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Query Box",
           "type": "FBox&"
@@ -2611,12 +2813,8 @@
       "id": "update-nav-octree-element",
       "name": "UpdateNavOctreeElement",
       "category": "NavigationSystem",
-      "signature": "UpdateNavOctreeElement(Target, Handle, Element, Update Flags)",
+      "signature": "UpdateNavOctreeElement(Handle, Element, Update Flags)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Handle",
           "type": "FNavigationElementHandle"
@@ -2637,12 +2835,8 @@
       "id": "update-nav-octree-parent-chain",
       "name": "UpdateNavOctreeParentChain",
       "category": "NavigationSystem",
-      "signature": "UpdateNavOctreeParentChain(Target, Element Owner, Skip Element Owner Update)",
+      "signature": "UpdateNavOctreeParentChain(Element Owner, Skip Element Owner Update)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Element Owner",
           "type": "UObject*"
@@ -2656,15 +2850,11 @@
       "returnType": "Void"
     },
     {
-      "id": "update-nav-octree-element-bounds-04dc10",
+      "id": "update-nav-octree-element-bounds-492c97",
       "name": "UpdateNavOctreeElementBounds",
       "category": "NavigationSystem",
-      "signature": "UpdateNavOctreeElementBounds(Target, Handle, New Bounds, Dirty Areas)",
+      "signature": "UpdateNavOctreeElementBounds(Handle, New Bounds, Dirty Areas)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Handle",
           "type": "FNavigationElementHandle"
@@ -2682,15 +2872,11 @@
       "docs": "update element's bounds in navigation octree and mark only specified area as dirty, doesn't re-export geometry"
     },
     {
-      "id": "update-nav-octree-element-bounds-11653c",
+      "id": "update-nav-octree-element-bounds-bba74f",
       "name": "UpdateNavOctreeElementBounds",
       "category": "NavigationSystem",
-      "signature": "UpdateNavOctreeElementBounds(Target, Comp, New Bounds, Dirty Area)",
+      "signature": "UpdateNavOctreeElementBounds(Comp, New Bounds, Dirty Area)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Comp",
           "type": "UActorComponent*"
@@ -2708,15 +2894,11 @@
       "docs": "update component bounds in navigation octree and mark only specified area as dirty, doesn't re-export component geometry"
     },
     {
-      "id": "update-nav-octree-element-bounds-1ca236",
+      "id": "update-nav-octree-element-bounds-3979b9",
       "name": "UpdateNavOctreeElementBounds",
       "category": "NavigationSystem",
-      "signature": "UpdateNavOctreeElementBounds(Target, Object, New Bounds, Dirty Areas)",
+      "signature": "UpdateNavOctreeElementBounds(Object, New Bounds, Dirty Areas)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject&"
@@ -2733,15 +2915,11 @@
       "returnType": "Bool"
     },
     {
-      "id": "replace-area-in-octree-data-d99293",
+      "id": "replace-area-in-octree-data-c19d98",
       "name": "ReplaceAreaInOctreeData",
       "category": "NavigationSystem",
-      "signature": "ReplaceAreaInOctreeData(Target, Handle, Old Area, New Area, Replace Child Classes)",
+      "signature": "ReplaceAreaInOctreeData(Handle, Old Area, New Area, Replace Child Classes)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Handle",
           "type": "FNavigationElementHandle"
@@ -2764,15 +2942,11 @@
       "docs": "fetched element's data from the octree and replaces occurrences of OldArea with NewArea"
     },
     {
-      "id": "replace-area-in-octree-data-a9bfcf",
+      "id": "replace-area-in-octree-data-dae666",
       "name": "ReplaceAreaInOctreeData",
       "category": "NavigationSystem",
-      "signature": "ReplaceAreaInOctreeData(Target, Object, Old Area, New Area, Replace Child Classes)",
+      "signature": "ReplaceAreaInOctreeData(Object, Old Area, New Area, Replace Child Classes)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Object",
           "type": "UObject&"
@@ -2797,12 +2971,8 @@
       "id": "register-custom-link",
       "name": "RegisterCustomLink",
       "category": "NavigationSystem",
-      "signature": "RegisterCustomLink(Target, Custom Link)",
+      "signature": "RegisterCustomLink(Custom Link)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Custom Link",
           "type": "INavLinkCustomInterface&"
@@ -2814,18 +2984,22 @@
       "id": "unregister-custom-link",
       "name": "UnregisterCustomLink",
       "category": "NavigationSystem",
-      "signature": "UnregisterCustomLink(Target, Custom Link)",
+      "signature": "UnregisterCustomLink(Custom Link)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Custom Link",
           "type": "INavLinkCustomInterface&"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-num-custom-links",
+      "name": "GetNumCustomLinks",
+      "category": "NavigationSystem",
+      "signature": "GetNumCustomLinks()",
+      "params": [],
+      "returnType": "Int"
     },
     {
       "id": "request-custom-link-registering",
@@ -2865,30 +3039,21 @@
       "id": "get-custom-link",
       "name": "GetCustomLink",
       "category": "NavigationSystem",
-      "signature": "GetCustomLink(Target, Unique Link Id)",
+      "signature": "GetCustomLink(Unique Link Id)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
-        {
           "name": "Unique Link Id",
-          "type": "FNavLinkId"
+          "type": "UInt"
         }
       ],
-      "returnType": "INavLinkCustomInterface*",
-      "docs": "find custom link by unique ID"
+      "returnType": "INavLinkCustomInterface*"
     },
     {
       "id": "update-custom-link",
       "name": "UpdateCustomLink",
       "category": "NavigationSystem",
-      "signature": "UpdateCustomLink(Target, Custom Link)",
+      "signature": "UpdateCustomLink(Custom Link)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Custom Link",
           "type": "INavLinkCustomInterface*"
@@ -2938,15 +3103,11 @@
       "returnType": "Void"
     },
     {
-      "id": "get-supported-agent-index-27224b",
+      "id": "get-supported-agent-index-148db7",
       "name": "GetSupportedAgentIndex",
       "category": "NavigationSystem",
-      "signature": "GetSupportedAgentIndex(Target, Nav Data)",
+      "signature": "GetSupportedAgentIndex(Nav Data)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Data",
           "type": "ANavigationData*"
@@ -2956,15 +3117,11 @@
       "docs": "find index in SupportedAgents array for given navigation data"
     },
     {
-      "id": "get-supported-agent-index-d45727",
+      "id": "get-supported-agent-index-56b06b",
       "name": "GetSupportedAgentIndex",
       "category": "NavigationSystem",
-      "signature": "GetSupportedAgentIndex(Target, Nav Agent)",
+      "signature": "GetSupportedAgentIndex(Nav Agent)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Agent",
           "type": "FNavAgentProperties&"
@@ -2974,15 +3131,11 @@
       "docs": "find index in SupportedAgents array for agent type"
     },
     {
-      "id": "describe-filter-flags-34787e",
+      "id": "describe-filter-flags-25c762",
       "name": "DescribeFilterFlags",
       "category": "NavigationSystem",
-      "signature": "DescribeFilterFlags(Target, Flags Enum)",
+      "signature": "DescribeFilterFlags(Flags Enum)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Flags Enum",
           "type": "UEnum*"
@@ -2992,15 +3145,11 @@
       "docs": "prepare descriptions of navigation flags in UNavigationQueryFilter class: using enum"
     },
     {
-      "id": "describe-filter-flags-abd7d6",
+      "id": "describe-filter-flags-6f1651",
       "name": "DescribeFilterFlags",
       "category": "NavigationSystem",
-      "signature": "DescribeFilterFlags(Target, Flags Desc)",
+      "signature": "DescribeFilterFlags(Flags Desc)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Flags Desc",
           "type": "TArray<FString>&"
@@ -3013,12 +3162,8 @@
       "id": "reset-cached-filter",
       "name": "ResetCachedFilter",
       "category": "NavigationSystem",
-      "signature": "ResetCachedFilter(Target, Filter Class)",
+      "signature": "ResetCachedFilter(Filter Class)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Filter Class",
           "type": "TSubclassOf<UNavigationQueryFilter>"
@@ -3031,13 +3176,8 @@
       "id": "build",
       "name": "Build",
       "category": "NavigationSystem",
-      "signature": "Build(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "Build()",
+      "params": [],
       "returnType": "Void",
       "docs": "Triggers navigation building on all eligible navigation data."
     },
@@ -3045,13 +3185,8 @@
       "id": "cancel-build",
       "name": "CancelBuild",
       "category": "NavigationSystem",
-      "signature": "CancelBuild(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "CancelBuild()",
+      "params": [],
       "returnType": "Void",
       "docs": "Cancels all currently running navigation builds"
     },
@@ -3059,38 +3194,56 @@
       "id": "on-pie-start",
       "name": "OnPIEStart",
       "category": "NavigationSystem",
-      "signature": "OnPIEStart(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "OnPIEStart()",
+      "params": [],
       "returnType": "Void"
     },
     {
       "id": "on-pie-end",
       "name": "OnPIEEnd",
       "category": "NavigationSystem",
-      "signature": "OnPIEEnd(Target)",
+      "signature": "OnPIEEnd()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-navigation-building-locked",
+      "name": "IsNavigationBuildingLocked",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationBuildingLocked(Flags)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Flags",
+          "type": "Byte",
+          "default": "~0"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-navigation-building-permanently-locked",
+      "name": "IsNavigationBuildingPermanentlyLocked",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationBuildingPermanentlyLocked()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "check if building is permanently locked to avoid showing navmesh building notify (due to queued dirty areas)"
+    },
+    {
+      "id": "is-navigation-octree-locked",
+      "name": "IsNavigationOctreeLocked",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationOctreeLocked()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "check if navigation octree updates are currently ignored"
     },
     {
       "id": "on-navigation-bounds-updated",
       "name": "OnNavigationBoundsUpdated",
       "category": "AI",
-      "signature": "OnNavigationBoundsUpdated(Target, Nav Volume)",
+      "signature": "OnNavigationBoundsUpdated(Nav Volume)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Volume",
           "type": "ANavMeshBoundsVolume*"
@@ -3102,12 +3255,8 @@
       "id": "on-navigation-bounds-added",
       "name": "OnNavigationBoundsAdded",
       "category": "NavigationSystem",
-      "signature": "OnNavigationBoundsAdded(Target, Nav Volume)",
+      "signature": "OnNavigationBoundsAdded(Nav Volume)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Volume",
           "type": "ANavMeshBoundsVolume*"
@@ -3119,12 +3268,8 @@
       "id": "on-navigation-bounds-removed",
       "name": "OnNavigationBoundsRemoved",
       "category": "NavigationSystem",
-      "signature": "OnNavigationBoundsRemoved(Target, Nav Volume)",
+      "signature": "OnNavigationBoundsRemoved(Nav Volume)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Volume",
           "type": "ANavMeshBoundsVolume*"
@@ -3136,13 +3281,8 @@
       "id": "is-navigation-build-in-progress",
       "name": "IsNavigationBuildInProgress",
       "category": "NavigationSystem",
-      "signature": "IsNavigationBuildInProgress(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "IsNavigationBuildInProgress()",
+      "params": [],
       "returnType": "Bool",
       "docs": "determines whether any generator is performing navigation building actions at the moment, dirty areas are also checked"
     },
@@ -3150,12 +3290,8 @@
       "id": "on-navigation-generation-finished",
       "name": "OnNavigationGenerationFinished",
       "category": "NavigationSystem",
-      "signature": "OnNavigationGenerationFinished(Target, Nav Data)",
+      "signature": "OnNavigationGenerationFinished(Nav Data)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Data",
           "type": "ANavigationData&"
@@ -3167,13 +3303,8 @@
       "id": "get-num-remaining-build-tasks",
       "name": "GetNumRemainingBuildTasks",
       "category": "NavigationSystem",
-      "signature": "GetNumRemainingBuildTasks(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetNumRemainingBuildTasks()",
+      "params": [],
       "returnType": "Int",
       "docs": "Used to display \"navigation building in progress\" counter"
     },
@@ -3181,41 +3312,69 @@
       "id": "get-num-running-build-tasks",
       "name": "GetNumRunningBuildTasks",
       "category": "NavigationSystem",
-      "signature": "GetNumRunningBuildTasks(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "GetNumRunningBuildTasks()",
+      "params": [],
       "returnType": "Int",
       "docs": "Number of currently running tasks"
     },
     {
-      "id": "do-initial-setup",
-      "name": "DoInitialSetup",
+      "id": "update-abstract-nav-data",
+      "name": "UpdateAbstractNavData",
       "category": "NavigationSystem",
-      "signature": "DoInitialSetup(Target)",
+      "signature": "UpdateAbstractNavData()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Find or create abstract nav data"
+    },
+    {
+      "id": "add-level-to-octree",
+      "name": "AddLevelToOctree",
+      "category": "NavigationSystem",
+      "signature": "AddLevelToOctree(Level)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Level",
+          "type": "ULevel&"
         }
       ],
       "returnType": "Void",
-      "docs": "Sets up SuportedAgents and NavigationDataCreators. Override it to add additional setup, but make sure to call Super implementation"
+      "docs": "Called during ConditionalPopulateNavOctree and gives subclassess a chance\nto influence what gets added"
+    },
+    {
+      "id": "on-begin-tearing-down",
+      "name": "OnBeginTearingDown",
+      "category": "NavigationSystem",
+      "signature": "OnBeginTearingDown(World)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called as part of UWorld::BeginTearingDown"
+    },
+    {
+      "id": "clean-up",
+      "name": "CleanUp",
+      "category": "NavigationSystem",
+      "signature": "CleanUp(Mode)",
+      "params": [
+        {
+          "name": "Mode",
+          "type": "FNavigationSystem::ECleanupMode",
+          "default": "FNavigationSystem::ECleanupMode::CleanupUnsafe"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called upon UWorld destruction to release what needs to be released"
     },
     {
       "id": "on-initialize-actors",
       "name": "OnInitializeActors",
       "category": "NavigationSystem",
-      "signature": "OnInitializeActors(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "OnInitializeActors()",
+      "params": [],
       "returnType": "Void",
       "docs": "Called when owner-UWorld initializes actors"
     },
@@ -3223,12 +3382,8 @@
       "id": "on-world-init-done",
       "name": "OnWorldInitDone",
       "category": "NavigationSystem",
-      "signature": "OnWorldInitDone(Target, Mode)",
+      "signature": "OnWorldInitDone(Mode)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Mode",
           "type": "FNavigationSystemRunMode"
@@ -3237,16 +3392,36 @@
       "returnType": "Void"
     },
     {
+      "id": "is-world-init-done",
+      "name": "IsWorldInitDone",
+      "category": "NavigationSystem",
+      "signature": "IsWorldInitDone()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true if world has been initialized."
+    },
+    {
+      "id": "is-initialized",
+      "name": "IsInitialized",
+      "category": "NavigationSystem",
+      "signature": "IsInitialized()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-run-mode",
+      "name": "GetRunMode",
+      "category": "NavigationSystem",
+      "signature": "GetRunMode()",
+      "params": [],
+      "returnType": "FNavigationSystemRunMode"
+    },
+    {
       "id": "initialize-level-collisions",
       "name": "InitializeLevelCollisions",
       "category": "NavigationSystem",
-      "signature": "InitializeLevelCollisions(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "InitializeLevelCollisions()",
+      "params": [],
       "returnType": "Void",
       "docs": "adds BSP collisions of currently streamed in levels to octree"
     },
@@ -3254,12 +3429,8 @@
       "id": "add-navigation-build-lock",
       "name": "AddNavigationBuildLock",
       "category": "NavigationSystem",
-      "signature": "AddNavigationBuildLock(Target, Flags)",
+      "signature": "AddNavigationBuildLock(Flags)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Flags",
           "type": "Byte"
@@ -3271,12 +3442,8 @@
       "id": "remove-navigation-build-lock",
       "name": "RemoveNavigationBuildLock",
       "category": "NavigationSystem",
-      "signature": "RemoveNavigationBuildLock(Target, Flags, Rebuild Action)",
+      "signature": "RemoveNavigationBuildLock(Flags, Rebuild Action)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Flags",
           "type": "Byte"
@@ -3293,18 +3460,23 @@
       "id": "set-navigation-octree-lock",
       "name": "SetNavigationOctreeLock",
       "category": "NavigationSystem",
-      "signature": "SetNavigationOctreeLock(Target, Lock)",
+      "signature": "SetNavigationOctreeLock(Lock)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Lock",
           "type": "Bool"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-is-auto-update-enabled",
+      "name": "GetIsAutoUpdateEnabled",
+      "category": "NavigationSystem",
+      "signature": "GetIsAutoUpdateEnabled()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "checks if auto-rebuilding navigation data is enabled. Defaults to bNavigationAutoUpdateEnabled\nvalue, but can be overridden per nav sys instance"
     },
     {
       "id": "set-navigation-auto-update-enabled",
@@ -3325,21 +3497,75 @@
       "docs": "allow editor to toggle whether seamless navigation building is enabled"
     },
     {
+      "id": "is-navigation-register-locked",
+      "name": "IsNavigationRegisterLocked",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationRegisterLocked()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-navigation-unregister-locked",
+      "name": "IsNavigationUnregisterLocked",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationUnregisterLocked()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-navigation-update-locked",
+      "name": "IsNavigationUpdateLocked",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationUpdateLocked()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-navigation-update-lock",
+      "name": "AddNavigationUpdateLock",
+      "category": "NavigationSystem",
+      "signature": "AddNavigationUpdateLock(Flags)",
+      "params": [
+        {
+          "name": "Flags",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-navigation-update-lock",
+      "name": "RemoveNavigationUpdateLock",
+      "category": "NavigationSystem",
+      "signature": "RemoveNavigationUpdateLock(Flags)",
+      "params": [
+        {
+          "name": "Flags",
+          "type": "Byte"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "update-level-collision",
       "name": "UpdateLevelCollision",
       "category": "NavigationSystem",
-      "signature": "UpdateLevelCollision(Target, In Level)",
+      "signature": "UpdateLevelCollision(In Level)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "In Level",
           "type": "ULevel*"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "is-set-up-for-lazy-geometry-exporting",
+      "name": "IsSetUpForLazyGeometryExporting",
+      "category": "NavigationSystem",
+      "signature": "IsSetUpForLazyGeometryExporting()",
+      "params": [],
+      "returnType": "Bool"
     },
     {
       "id": "create-navigation-system",
@@ -3384,12 +3610,8 @@
       "id": "initialize-for-world",
       "name": "InitializeForWorld",
       "category": "NavigationSystem",
-      "signature": "InitializeForWorld(Target, World, Mode)",
+      "signature": "InitializeForWorld(World, Mode)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "World",
           "type": "UWorld&"
@@ -3405,12 +3627,8 @@
       "id": "get-nav-agent-properties-array",
       "name": "GetNavAgentPropertiesArray",
       "category": "NavigationSystem",
-      "signature": "GetNavAgentPropertiesArray(Target, Out Nav Agent Properties)",
+      "signature": "GetNavAgentPropertiesArray(Out Nav Agent Properties)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Out Nav Agent Properties",
           "type": "TArray<FNavAgentProperties>&"
@@ -3419,15 +3637,19 @@
       "returnType": "Void"
     },
     {
+      "id": "should-update-nav-octree-on-component-change",
+      "name": "ShouldUpdateNavOctreeOnComponentChange",
+      "category": "NavigationSystem",
+      "signature": "ShouldUpdateNavOctreeOnComponentChange()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
       "id": "should-create-navigation-system-instance",
       "name": "ShouldCreateNavigationSystemInstance",
       "category": "NavigationSystem",
-      "signature": "ShouldCreateNavigationSystemInstance(Target, World)",
+      "signature": "ShouldCreateNavigationSystemInstance(World)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "World",
           "type": "UWorld*"
@@ -3435,6 +3657,14 @@
       ],
       "returnType": "Bool",
       "docs": "Indicates whether navigation is allowed for a given world.\n@param World The world in which the navigation would be used\n@return whether the navigation system can be used in the specified world or not"
+    },
+    {
+      "id": "is-navigation-system-static",
+      "name": "IsNavigationSystemStatic",
+      "category": "NavigationSystem",
+      "signature": "IsNavigationSystemStatic()",
+      "params": [],
+      "returnType": "Bool"
     },
     {
       "id": "configure-as-static",
@@ -3468,12 +3698,8 @@
       "id": "handle-cycle-nav-drawn-command",
       "name": "HandleCycleNavDrawnCommand",
       "category": "NavigationSystem",
-      "signature": "HandleCycleNavDrawnCommand(Target, Cmd, Ar)",
+      "signature": "HandleCycleNavDrawnCommand(Cmd, Ar)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Cmd",
           "type": "TCHAR*"
@@ -3490,24 +3716,594 @@
       "id": "handle-count-nav-mem-command",
       "name": "HandleCountNavMemCommand",
       "category": "NavigationSystem",
-      "signature": "HandleCountNavMemCommand(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        }
-      ],
+      "signature": "HandleCountNavMemCommand()",
+      "params": [],
       "returnType": "Bool"
     },
     {
       "id": "cycle-navigation-data-drawn",
       "name": "CycleNavigationDataDrawn",
       "category": "NavigationSystem",
-      "signature": "CycleNavigationDataDrawn(Target)",
+      "signature": "CycleNavigationDataDrawn()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-mutable-nav-regen-time-slice-manager",
+      "name": "GetMutableNavRegenTimeSliceManager",
+      "category": "NavigationSystem",
+      "signature": "GetMutableNavRegenTimeSliceManager()",
+      "params": [],
+      "returnType": "FNavRegenTimeSliceManager&"
+    },
+    {
+      "id": "get-operation-mode",
+      "name": "GetOperationMode",
+      "category": "NavigationSystem",
+      "signature": "GetOperationMode()",
+      "params": [],
+      "returnType": "FNavigationSystemRunMode"
+    },
+    {
+      "id": "on-post-load-map",
+      "name": "OnPostLoadMap",
+      "category": "NavigationSystem",
+      "signature": "OnPostLoadMap(Loaded World)",
       "params": [
         {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
+          "name": "Loaded World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "set of locking flags applied on startup of navigation system"
+    },
+    {
+      "id": "on-actor-moved",
+      "name": "OnActorMoved",
+      "category": "NavigationSystem",
+      "signature": "OnActorMoved(Actor)",
+      "params": [
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "delegate handler for ActorMoved events"
+    },
+    {
+      "id": "on-navigation-dirtied",
+      "name": "OnNavigationDirtied",
+      "category": "NavigationSystem",
+      "signature": "OnNavigationDirtied(Bounds)",
+      "params": [
+        {
+          "name": "Bounds",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "delegate handler called when navigation is dirtied"
+    },
+    {
+      "id": "on-reload-complete",
+      "name": "OnReloadComplete",
+      "category": "NavigationSystem",
+      "signature": "OnReloadComplete(Reason)",
+      "params": [
+        {
+          "name": "Reason",
+          "type": "EReloadCompleteReason"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "called to notify NavigationSystem about finished reload"
+    },
+    {
+      "id": "register-nav-data",
+      "name": "RegisterNavData",
+      "category": "NavigationSystem",
+      "signature": "RegisterNavData(Nav Data)",
+      "params": [
+        {
+          "name": "Nav Data",
+          "type": "ANavigationData*"
+        }
+      ],
+      "returnType": "ERegistrationResult",
+      "docs": "Registers given navigation data with this Navigation System.\n@return RegistrationSuccessful if registration was successful, other results mean it failed\n@see ERegistrationResult"
+    },
+    {
+      "id": "register-nav-area-class",
+      "name": "RegisterNavAreaClass",
+      "category": "NavigationSystem",
+      "signature": "RegisterNavAreaClass(Nav Area Class)",
+      "params": [
+        {
+          "name": "Nav Area Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "tries to register navigation area"
+    },
+    {
+      "id": "unregister-nav-area-class",
+      "name": "UnregisterNavAreaClass",
+      "category": "NavigationSystem",
+      "signature": "UnregisterNavAreaClass(Nav Area Class)",
+      "params": [
+        {
+          "name": "Nav Area Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "tries to unregister navigation area"
+    },
+    {
+      "id": "on-navigation-area-event",
+      "name": "OnNavigationAreaEvent",
+      "category": "NavigationSystem",
+      "signature": "OnNavigationAreaEvent(Area Class, Event)",
+      "params": [
+        {
+          "name": "Area Class",
+          "type": "UClass*"
+        },
+        {
+          "name": "Event",
+          "type": "ENavAreaEvent::Type"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "register-navigation-element-with-nav-octree",
+      "name": "RegisterNavigationElementWithNavOctree",
+      "category": "NavigationSystem",
+      "signature": "RegisterNavigationElementWithNavOctree(Element, Update Flags)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "TSharedRef<FNavigationElement>&"
+        },
+        {
+          "name": "Update Flags",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FSetElementId"
+    },
+    {
+      "id": "register-nav-octree-element",
+      "name": "RegisterNavOctreeElement",
+      "category": "NavigationSystem",
+      "signature": "RegisterNavOctreeElement(Element Owner, Element Interface, Update Flags)",
+      "params": [
+        {
+          "name": "Element Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Element Interface",
+          "type": "INavRelevantInterface*"
+        },
+        {
+          "name": "Update Flags",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FSetElementId"
+    },
+    {
+      "id": "unregister-navigation-element-with-octree",
+      "name": "UnregisterNavigationElementWithOctree",
+      "category": "NavigationSystem",
+      "signature": "UnregisterNavigationElementWithOctree(Element, Update Flags)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "TSharedRef<FNavigationElement>&"
+        },
+        {
+          "name": "Update Flags",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "unregister-nav-octree-element",
+      "name": "UnregisterNavOctreeElement",
+      "category": "NavigationSystem",
+      "signature": "UnregisterNavOctreeElement(Element Owner, Element Interface, Update Flags)",
+      "params": [
+        {
+          "name": "Element Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Element Interface",
+          "type": "INavRelevantInterface*"
+        },
+        {
+          "name": "Update Flags",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-nav-octree-element-data-93beb0",
+      "name": "GetNavOctreeElementData",
+      "category": "NavigationSystem",
+      "signature": "GetNavOctreeElementData(Element, Out Dirty Flags, Out Dirty Bounds)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "FNavigationElementHandle"
+        },
+        {
+          "name": "Out Dirty Flags",
+          "type": "ENavigationDirtyFlag&"
+        },
+        {
+          "name": "Out Dirty Bounds",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "read element data from navigation octree"
+    },
+    {
+      "id": "get-nav-octree-element-data-5191ab",
+      "name": "GetNavOctreeElementData",
+      "category": "NavigationSystem",
+      "signature": "GetNavOctreeElementData(Node Owner, Dirty Flags, Dirty Bounds)",
+      "params": [
+        {
+          "name": "Node Owner",
+          "type": "UObject&"
+        },
+        {
+          "name": "Dirty Flags",
+          "type": "Int&"
+        },
+        {
+          "name": "Dirty Bounds",
+          "type": "FBox&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-element-to-nav-octree",
+      "name": "AddElementToNavOctree",
+      "category": "NavigationSystem",
+      "signature": "AddElementToNavOctree(Dirty Element)",
+      "params": [
+        {
+          "name": "Dirty Element",
+          "type": "FNavigationDirtyElement&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds given element to NavOctree. No check for owner's validity are performed,\nnor its presence in NavOctree - function assumes callee responsibility\nin this regard *"
+    },
+    {
+      "id": "set-crowd-manager",
+      "name": "SetCrowdManager",
+      "category": "NavigationSystem",
+      "signature": "SetCrowdManager(New Crowd Manager)",
+      "params": [
+        {
+          "name": "New Crowd Manager",
+          "type": "UCrowdManagerBase*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-level-collision-to-octree",
+      "name": "AddLevelCollisionToOctree",
+      "category": "NavigationSystem",
+      "signature": "AddLevelCollisionToOctree(Level)",
+      "params": [
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add BSP collision data to navigation octree"
+    },
+    {
+      "id": "remove-level-collision-from-octree",
+      "name": "RemoveLevelCollisionFromOctree",
+      "category": "NavigationSystem",
+      "signature": "RemoveLevelCollisionFromOctree(Level)",
+      "params": [
+        {
+          "name": "Level",
+          "type": "ULevel*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove BSP collision data from navigation octree"
+    },
+    {
+      "id": "spawn-missing-navigation-data",
+      "name": "SpawnMissingNavigationData",
+      "category": "NavigationSystem",
+      "signature": "SpawnMissingNavigationData()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "fill-instantiated-data-mask",
+      "name": "FillInstantiatedDataMask",
+      "category": "NavigationSystem",
+      "signature": "FillInstantiatedDataMask(Out Instantiated Mask, In Level)",
+      "params": [
+        {
+          "name": "Out Instantiated Mask",
+          "type": "TBitArray<>&"
+        },
+        {
+          "name": "In Level",
+          "type": "ULevel*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Byte",
+      "docs": "Fills a mask indicating which navigation data associated to the supported agent mask are already instantiated.\n@param OutInstantiatedMask The mask that will represent already instantiated navigation data.\n@param InLevel If specified will be used to search for navigation data; will use the owning world otherwise.\n@return Number of instantiated navigation data."
+    },
+    {
+      "id": "spawn-missing-navigation-data-in-level",
+      "name": "SpawnMissingNavigationDataInLevel",
+      "category": "NavigationSystem",
+      "signature": "SpawnMissingNavigationDataInLevel(In Instantiated Mask, In Level)",
+      "params": [
+        {
+          "name": "In Instantiated Mask",
+          "type": "TBitArray<>&"
+        },
+        {
+          "name": "In Level",
+          "type": "ULevel*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Spawns missing navigation data.\n@param InInstantiatedMask The mask representing already instantiated navigation data.\n@param InLevel Level in which the new data must be added. See CreateNavigationDataInstanceInLevel doc."
+    },
+    {
+      "id": "demand-lazy-data-gathering",
+      "name": "DemandLazyDataGathering",
+      "category": "NavigationSystem",
+      "signature": "DemandLazyDataGathering(Element Data)",
+      "params": [
+        {
+          "name": "Element Data",
+          "type": "FNavigationRelevantData&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-navigation-bounds-update-request",
+      "name": "AddNavigationBoundsUpdateRequest",
+      "category": "NavigationSystem",
+      "signature": "AddNavigationBoundsUpdateRequest(Update Request)",
+      "params": [
+        {
+          "name": "Update Request",
+          "type": "FNavigationBoundsUpdateRequest&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rebuild-all",
+      "name": "RebuildAll",
+      "category": "NavigationSystem",
+      "signature": "RebuildAll(Is Load Time)",
+      "params": [
+        {
+          "name": "Is Load Time",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Triggers navigation building on all eligible navigation data."
+    },
+    {
+      "id": "on-level-added-to-world",
+      "name": "OnLevelAddedToWorld",
+      "category": "NavigationSystem",
+      "signature": "OnLevelAddedToWorld(In Level, In World)",
+      "params": [
+        {
+          "name": "In Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handler for FWorldDelegates::LevelAddedToWorld event"
+    },
+    {
+      "id": "on-level-removed-from-world",
+      "name": "OnLevelRemovedFromWorld",
+      "category": "NavigationSystem",
+      "signature": "OnLevelRemovedFromWorld(In Level, In World)",
+      "params": [
+        {
+          "name": "In Level",
+          "type": "ULevel*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handler for FWorldDelegates::LevelRemovedFromWorld event"
+    },
+    {
+      "id": "on-world-post-actor-tick",
+      "name": "OnWorldPostActorTick",
+      "category": "NavigationSystem",
+      "signature": "OnWorldPostActorTick(World, Tick Type, Delta Time)",
+      "params": [
+        {
+          "name": "World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Tick Type",
+          "type": "ELevelTick"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handler for FWorldDelegates::OnWorldPostActorTick event"
+    },
+    {
+      "id": "add-async-query",
+      "name": "AddAsyncQuery",
+      "category": "NavigationSystem",
+      "signature": "AddAsyncQuery(Query)",
+      "params": [
+        {
+          "name": "Query",
+          "type": "FAsyncPathFindingQuery&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds given request to requests queue. Note it's to be called only on game thread only"
+    },
+    {
+      "id": "trigger-async-queries",
+      "name": "TriggerAsyncQueries",
+      "category": "NavigationSystem",
+      "signature": "TriggerAsyncQueries(Path Finding Queries)",
+      "params": [
+        {
+          "name": "Path Finding Queries",
+          "type": "TArray<FAsyncPathFindingQuery>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "spawns a non-game-thread task to process requests given in PathFindingQueries.\nIn the process PathFindingQueries gets copied."
+    },
+    {
+      "id": "perform-async-queries",
+      "name": "PerformAsyncQueries",
+      "category": "NavigationSystem",
+      "signature": "PerformAsyncQueries(Path Finding Queries)",
+      "params": [
+        {
+          "name": "Path Finding Queries",
+          "type": "TArray<FAsyncPathFindingQuery>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Processes pathfinding requests given in PathFindingQueries."
+    },
+    {
+      "id": "dispatch-async-queries-results",
+      "name": "DispatchAsyncQueriesResults",
+      "category": "NavigationSystem",
+      "signature": "DispatchAsyncQueriesResults(Path Finding Queries)",
+      "params": [
+        {
+          "name": "Path Finding Queries",
+          "type": "TArray<FAsyncPathFindingQuery>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcasts completion delegate for all completed async pathfinding requests."
+    },
+    {
+      "id": "postpone-async-queries",
+      "name": "PostponeAsyncQueries",
+      "category": "NavigationSystem",
+      "signature": "PostponeAsyncQueries()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Requests the async pathfinding task to abort and waits for it to complete\nbefore resuming the main thread. Pathfind task will postpone remaining queries to next frame."
+    },
+    {
+      "id": "destroy-nav-octree",
+      "name": "DestroyNavOctree",
+      "category": "NavigationSystem",
+      "signature": "DestroyNavOctree()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "requires-nav-octree",
+      "name": "RequiresNavOctree",
+      "category": "NavigationSystem",
+      "signature": "RequiresNavOctree()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Whether Navigation system needs to populate nav octree.\nDepends on runtime generation settings of each navigation data, always true in the editor"
+    },
+    {
+      "id": "get-runtime-generation-type",
+      "name": "GetRuntimeGenerationType",
+      "category": "NavigationSystem",
+      "signature": "GetRuntimeGenerationType()",
+      "params": [],
+      "returnType": "ERuntimeGenerationType",
+      "docs": "Return \"Strongest\" runtime generation type required by registered navigation data objects\nDepends on runtime generation settings of each navigation data, always ERuntimeGenerationType::Dynamic in the editor world"
+    },
+    {
+      "id": "log-nav-data-registration-result",
+      "name": "LogNavDataRegistrationResult",
+      "category": "NavigationSystem",
+      "signature": "LogNavDataRegistrationResult()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-allowed-to-rebuild",
+      "name": "IsAllowedToRebuild",
+      "category": "NavigationSystem",
+      "signature": "IsAllowedToRebuild()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Whether Navigation System is allowed to rebuild the navmesh\nDepends on runtime generation settings of each navigation data, always true in the editor"
+    },
+    {
+      "id": "on-generate-navigation-only-around-navigation-invokers-changed",
+      "name": "OnGenerateNavigationOnlyAroundNavigationInvokersChanged",
+      "category": "NavigationSystem",
+      "signature": "OnGenerateNavigationOnlyAroundNavigationInvokersChanged()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Handle forwarding the information where needed when the setting is changed"
+    },
+    {
+      "id": "verify-navigation-rendering-components",
+      "name": "VerifyNavigationRenderingComponents",
+      "category": "NavigationSystem",
+      "signature": "VerifyNavigationRenderingComponents(Show)",
+      "params": [
+        {
+          "name": "Show",
+          "type": "Bool"
         }
       ],
       "returnType": "Void"
@@ -3516,12 +4312,8 @@
       "id": "get-navigation-bounds-for-nav-data",
       "name": "GetNavigationBoundsForNavData",
       "category": "NavigationSystem",
-      "signature": "GetNavigationBoundsForNavData(Target, Nav Data, Out Bounds, In Level)",
+      "signature": "GetNavigationBoundsForNavData(Nav Data, Out Bounds, In Level)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Nav Data",
           "type": "ANavigationData&"
@@ -3556,12 +4348,8 @@
       "id": "configure",
       "name": "Configure",
       "category": "NavigationSystem",
-      "signature": "Configure(Target, Config)",
+      "signature": "Configure(Config)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Config",
           "type": "UNavigationSystemConfig&"
@@ -3573,12 +4361,8 @@
       "id": "append-config",
       "name": "AppendConfig",
       "category": "NavigationSystem",
-      "signature": "AppendConfig(Target, New Config)",
+      "signature": "AppendConfig(New Config)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "New Config",
           "type": "UNavigationSystemConfig&"
@@ -3590,12 +4374,8 @@
       "id": "get-on-screen-messages",
       "name": "GetOnScreenMessages",
       "category": "NavigationSystem",
-      "signature": "GetOnScreenMessages(Target, Out Messages)",
+      "signature": "GetOnScreenMessages(Out Messages)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemV1*"
-        },
         {
           "name": "Out Messages",
           "type": "TMultiMap<FCoreDelegates::EOnScreenMessageSeverity,FText>&"
@@ -3639,21 +4419,44 @@
       "returnType": "Bool"
     },
     {
+      "id": "u-navigation-system-module-config",
+      "name": "UNavigationSystemModuleConfig",
+      "category": "NavigationSystem",
+      "signature": "UNavigationSystemModuleConfig(Object Initializer)",
+      "params": [
+        {
+          "name": "Object Initializer",
+          "type": "FObjectInitializer&",
+          "default": "FObjectInitializer::Get()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "create-and-configure-navigation-system",
       "name": "CreateAndConfigureNavigationSystem",
       "category": "NavigationSystem",
-      "signature": "CreateAndConfigureNavigationSystem(Target, World)",
+      "signature": "CreateAndConfigureNavigationSystem(World)",
       "params": [
-        {
-          "name": "Target",
-          "type": "UNavigationSystemModuleConfig*"
-        },
         {
           "name": "World",
           "type": "UWorld&"
         }
       ],
       "returnType": "UNavigationSystemBase*"
+    },
+    {
+      "id": "update-with-nav-sys-cdo",
+      "name": "UpdateWithNavSysCDO",
+      "category": "NavigationSystem",
+      "signature": "UpdateWithNavSysCDO(Nav Sys CDO)",
+      "params": [
+        {
+          "name": "Nav Sys CDO",
+          "type": "UNavigationSystemV1&"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

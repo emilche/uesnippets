@@ -12,6 +12,32 @@
   ],
   "functions": [
     {
+      "id": "get-data-key-internal",
+      "name": "GetDataKeyInternal",
+      "category": "TelemetryRouter",
+      "signature": "GetDataKeyInternal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTelemetryRouter*"
+        }
+      ],
+      "returnType": "template<DATA_TYPE> auto"
+    },
+    {
+      "id": "get-data-key",
+      "name": "GetDataKey",
+      "category": "TelemetryRouter",
+      "signature": "GetDataKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTelemetryRouter*"
+        }
+      ],
+      "returnType": "template<DATA_TYPE> FGuid"
+    },
+    {
       "id": "get",
       "name": "Get",
       "category": "TelemetryRouter",
@@ -20,34 +46,58 @@
       "returnType": "FTelemetryRouter&"
     },
     {
-      "id": "register-telemetry-sink-internal",
-      "name": "RegisterTelemetrySinkInternal",
+      "id": "provide-telemetry",
+      "name": "ProvideTelemetry",
       "category": "TelemetryRouter",
-      "signature": "RegisterTelemetrySinkInternal(Target, Key, Expected Size, In Handle, Sink)",
+      "signature": "ProvideTelemetry(Target, Data)",
       "params": [
         {
           "name": "Target",
           "type": "FTelemetryRouter*"
         },
         {
-          "name": "Key",
-          "type": "FGuid"
-        },
+          "name": "Data",
+          "type": "DATA_TYPE&"
+        }
+      ],
+      "returnType": "template<DATA_TYPE> void",
+      "docs": "Sends data in a type-safe manner to consumers expecting this data type.\n@param Data Strongly typed data to be sent. Type must implement a static method called GetTelemetryID returning an FGuid."
+    },
+    {
+      "id": "on-telemetry",
+      "name": "OnTelemetry",
+      "category": "TelemetryRouter",
+      "signature": "OnTelemetry(Target, Sink)",
+      "params": [
         {
-          "name": "Expected Size",
-          "type": "SIZE_T"
-        },
-        {
-          "name": "In Handle",
-          "type": "FDelegateHandle"
+          "name": "Target",
+          "type": "FTelemetryRouter*"
         },
         {
           "name": "Sink",
-          "type": "TFunction<bool ( FMemoryView )>"
+          "type": "TDelegate<void ( DATA_TYPE& )>"
         }
       ],
-      "returnType": "Void",
-      "docs": "Register a callback to receive telemetry. The callback should return false if the sink is stale and should be removed from future consideration."
+      "returnType": "template<DATA_TYPE> FDelegateHandle",
+      "docs": "Registers a delegate as callback to receive telemetry of a certain type.\n@return a handle that can be used to unregister this sink later so it is no longer called."
+    },
+    {
+      "id": "unregister-telemetry-sink",
+      "name": "UnregisterTelemetrySink",
+      "category": "TelemetryRouter",
+      "signature": "UnregisterTelemetrySink(Target, Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTelemetryRouter*"
+        },
+        {
+          "name": "Handle",
+          "type": "FDelegateHandle"
+        }
+      ],
+      "returnType": "template<DATA_TYPE> void",
+      "docs": "Removes a previously registered callback."
     }
   ]
 }

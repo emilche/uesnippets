@@ -8,6 +8,80 @@
   ],
   "functions": [
     {
+      "id": "get-object",
+      "name": "GetObject",
+      "category": "AssetDeleteModel",
+      "signature": "GetObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingDelete*"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Gets the object being deleted."
+    },
+    {
+      "id": "is-referenced-in-memory-by-non-undo",
+      "name": "IsReferencedInMemoryByNonUndo",
+      "category": "AssetDeleteModel",
+      "signature": "IsReferencedInMemoryByNonUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingDelete*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the pending deleted object referenced in memory by something other than the undo stack; INCLUDES PENDING DELETES"
+    },
+    {
+      "id": "is-referenced-in-memory-by-undo",
+      "name": "IsReferencedInMemoryByUndo",
+      "category": "AssetDeleteModel",
+      "signature": "IsReferencedInMemoryByUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingDelete*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the pending deleted object referenced in memory by the undo stack; INCLUDES PENDING DELETES"
+    },
+    {
+      "id": "is-internal-bf9e08",
+      "name": "IsInternal",
+      "category": "AssetDeleteModel",
+      "signature": "IsInternal(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingDelete*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the pending delete is internal, and need not be shown to the user."
+    },
+    {
+      "id": "is-internal-6dec99",
+      "name": "IsInternal",
+      "category": "AssetDeleteModel",
+      "signature": "IsInternal(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPendingDelete*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets if the pending delete is internal, and need not be shown to the user."
+    },
+    {
       "id": "add-object-to-delete",
       "name": "AddObjectToDelete",
       "category": "AssetDeleteModel",
@@ -24,6 +98,62 @@
       ],
       "returnType": "Void",
       "docs": "Add an object to the list of pending deleted assets, this will invalidate the scanning state."
+    },
+    {
+      "id": "get-pending-deleted-assets",
+      "name": "GetPendingDeletedAssets",
+      "category": "AssetDeleteModel",
+      "signature": "GetPendingDeletedAssets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetDeleteModel*"
+        }
+      ],
+      "returnType": "TArray<TSharedPtr<FPendingDelete>>*",
+      "docs": "Returns the pending deleted assets."
+    },
+    {
+      "id": "get-pending-deleted-source-file-counts",
+      "name": "GetPendingDeletedSourceFileCounts",
+      "category": "AssetDeleteModel",
+      "signature": "GetPendingDeletedSourceFileCounts(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetDeleteModel*"
+        }
+      ],
+      "returnType": "TMap<FString,int32>&",
+      "docs": "Returns a map of currently discovered source content files, and the number of times they are referenced by non-deleted assets"
+    },
+    {
+      "id": "get-state",
+      "name": "GetState",
+      "category": "AssetDeleteModel",
+      "signature": "GetState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetDeleteModel*"
+        }
+      ],
+      "returnType": "EState",
+      "docs": "Returns the current state of the deletion process"
+    },
+    {
+      "id": "get-asset-references",
+      "name": "GetAssetReferences",
+      "category": "AssetDeleteModel",
+      "signature": "GetAssetReferences(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetDeleteModel*"
+        }
+      ],
+      "returnType": "TSet<FName>&",
+      "docs": "Gets the packages of the assets on disk that reference the pending deleted objects;  won't be accurate until the scanning process completes."
     },
     {
       "id": "tick",
@@ -228,6 +358,34 @@
       "docs": "Gets the current text to display for the current progress of the scanning."
     },
     {
+      "id": "is-anything-referenced-in-memory-by-non-undo",
+      "name": "IsAnythingReferencedInMemoryByNonUndo",
+      "category": "AssetDeleteModel",
+      "signature": "IsAnythingReferencedInMemoryByNonUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetDeleteModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is any of the pending deleted assets being referenced in memory."
+    },
+    {
+      "id": "is-anything-referenced-in-memory-by-undo",
+      "name": "IsAnythingReferencedInMemoryByUndo",
+      "category": "AssetDeleteModel",
+      "signature": "IsAnythingReferencedInMemoryByUndo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAssetDeleteModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is any of the pending deleted assets being referenced in the undo stack."
+    },
+    {
       "id": "has-any-source-content-files-to-delete",
       "name": "HasAnySourceContentFilesToDelete",
       "category": "AssetDeleteModel",
@@ -270,21 +428,18 @@
       "docs": "Gets the number of objects successfully deleted."
     },
     {
-      "id": "prepare-to-delete",
-      "name": "PrepareToDelete",
+      "id": "on-state-changed",
+      "name": "OnStateChanged",
       "category": "AssetDeleteModel",
-      "signature": "PrepareToDelete(Target, In Object)",
+      "signature": "OnStateChanged(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FAssetDeleteModel*"
-        },
-        {
-          "name": "In Object",
-          "type": "UObject*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "FOnStateChanged&",
+      "docs": "NewState"
     }
   ]
 }

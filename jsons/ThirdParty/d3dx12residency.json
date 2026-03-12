@@ -1,0 +1,628 @@
+{
+  "id": "d-3-dx-12-residency",
+  "label": "d3dx12residency",
+  "includepath": "d3dx12residency.h",
+  "includes": [],
+  "functions": [
+    {
+      "id": "initialize-list-head",
+      "name": "InitializeListHead",
+      "category": "d3dx12residency",
+      "signature": "InitializeListHead(P Head)",
+      "params": [
+        {
+          "name": "P Head",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "*******************************************************\n//\n// Copyright (c) Microsoft. All rights reserved.\n// This code is licensed under the MIT License (MIT).\n// THIS CODE IS PROVIDED *AS IS* WITHOUT WARRANTY OF\n// ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING ANY\n// IMPLIED WARRANTIES OF FITNESS FOR A PARTICULAR\n// PURPOSE, MERCHANTABILITY, OR NON-INFRINGEMENT.\n//\n//*********************************************************\n#pragma once\nnamespace D3DX12Residency\n{\n#if 0\n#define RESIDENCY_CHECK(x) \\\nif((x) == false) { DebugBreak(); }\n#define RESIDENCY_CHECK_RESULT(x) \\\nif((x) != S_OK) { DebugBreak(); }\n#else\n#define RESIDENCY_CHECK(x)\n#define RESIDENCY_CHECK_RESULT(x) x\n#endif\n// Note: This library automatically runs in a single-threaded mode if ID3D12Device3 is supported.\n#define RESIDENCY_SINGLE_THREADED 0\n#define RESIDENCY_MIN(x,y) ((x) < (y) ? (x) : (y))\n#define RESIDENCY_MAX(x,y) ((x) > (y) ? (x) : (y))\n// This size can be tuned to your app in order to save space\n#define MAX_NUM_CONCURRENT_CMD_LISTS 1024\nnamespace Internal\n{\nclass CriticalSection\n{\nfriend class ScopedLock;\npublic:\nCriticalSection()\n{\nInitializeCriticalSectionAndSpinCount(&CS, 8);\n}\n~CriticalSection()\n{\nDeleteCriticalSection(&CS);\n}\nprivate:\nCRITICAL_SECTION CS;\n};\nclass ScopedLock\n{\npublic:\nScopedLock() : pCS(nullptr) {};\nScopedLock(CriticalSection* pCSIn) : pCS(pCSIn)\n{\nif (pCS)\n{\nEnterCriticalSection(&pCS->CS);\n}\n};\n~ScopedLock()\n{\nif (pCS)\n{\nLeaveCriticalSection(&pCS->CS);\n}\n}\nprivate:\nCriticalSection* pCS;\n};\n// One per Residency Manager\nclass SyncManager\n{\npublic:\nSyncManager()\n{\nfor (UINT32 i = 0; i < ARRAYSIZE(AvailableCommandLists); i++)\n{\nAvailableCommandLists[i] = false;\n}\n}\nInternal::CriticalSection MaskCriticalSection;\nstatic const UINT32 sUnsetValue = UINT32(-1);\n// Represents which command lists are currently open for recording\nbool AvailableCommandLists[MAX_NUM_CONCURRENT_CMD_LISTS];\n};\n//Forward Declaration\nclass ResidencyManagerInternal;\n}\n// Used to track meta data for each object the app potentially wants\n// to make resident or evict.\nclass ManagedObject\n{\npublic:\nenum class RESIDENCY_STATUS\n{\nRESIDENT,\nEVICTED\n};\nManagedObject() :\npUnderlying(nullptr),\nSize(0),\nResidencyStatus(RESIDENCY_STATUS::RESIDENT),\nLastGPUSyncPoint(0),\nLastUsedTimestamp(0)\n{\nmemset(CommandListsUsedOn, 0, sizeof(CommandListsUsedOn));\n}\nvoid Initialize(ID3D12Pageable* pUnderlyingIn, UINT64 ObjectSize, UINT64 InitialGPUSyncPoint = 0)\n{\nRESIDENCY_CHECK(pUnderlying == nullptr);\npUnderlying = pUnderlyingIn;\nSize = ObjectSize;\nLastGPUSyncPoint = InitialGPUSyncPoint;\n}\ninline bool IsInitialized() { return pUnderlying != nullptr; }\n// Wether the object is resident or not\nRESIDENCY_STATUS ResidencyStatus;\n// The underlying D3D Object being tracked\nID3D12Pageable* pUnderlying;\n// The size of the D3D Object in bytes\nUINT64 Size;\nUINT64 LastGPUSyncPoint;\nUINT64 LastUsedTimestamp;\n// This is used to track which open command lists this resource is currently used on.\nbool CommandListsUsedOn[MAX_NUM_CONCURRENT_CMD_LISTS];\n// Linked list entry\nLIST_ENTRY ListEntry;\n};\n// This represents a set of objects which are referenced by a command list i.e. every time a resource\n// is bound for rendering, clearing, copy etc. the set must be updated to ensure the it is resident\n// for execution.\nclass ResidencySet\n{\nfriend class ResidencyManager;\nfriend class Internal::ResidencyManagerInternal;\npublic:\nstatic const UINT32 InvalidIndex = (UINT32)-1;\nResidencySet() :\nCommandListIndex(InvalidIndex),\nMaxResidencySetSize(0),\nCurrentSetSize(0),\nppSet(nullptr),\nIsOpen(false),\nOutOfMemory(false),\npSyncManager(nullptr)\n{\n};\n~ResidencySet()\n{\ndelete[](ppSet);\n}\n// Returns true if the object was inserted, false otherwise\ninline bool Insert(ManagedObject* pObject)\n{\nRESIDENCY_CHECK(IsOpen);\nRESIDENCY_CHECK(CommandListIndex != InvalidIndex);\n// If we haven't seen this object on this command list mark it\nif (pObject->CommandListsUsedOn[CommandListIndex] == false)\n{\npObject->CommandListsUsedOn[CommandListIndex] = true;\nif (ppSet == nullptr || CurrentSetSize >= MaxResidencySetSize)\n{\nRealloc();\n}\nif (ppSet == nullptr)\n{\nOutOfMemory = true;\nreturn false;\n}\nppSet[CurrentSetSize++] = pObject;\nreturn true;\n}\nelse\n{\nreturn false;\n}\n}\nHRESULT Open()\n{\nInternal::ScopedLock Lock(&pSyncManager->MaskCriticalSection);\n// It's invalid to open a set that is already open\nif (IsOpen)\n{\nreturn E_INVALIDARG;\n}\nRESIDENCY_CHECK(CommandListIndex == InvalidIndex);\nbool CommandlistAvailable = false;\n// Find the first available command list by bitscanning\nfor (UINT32 i = 0; i < ARRAYSIZE(pSyncManager->AvailableCommandLists); i++)\n{\nif (pSyncManager->AvailableCommandLists[i] == false)\n{\nCommandListIndex = i;\npSyncManager->AvailableCommandLists[i] = true;\nCommandlistAvailable = true;\nbreak;\n}\n}\nif (CommandlistAvailable == false)\n{\n// There are too many open residency sets, consider using less or increasing the value of MAX_NUM_CONCURRENT_CMD_LISTS\nRESIDENCY_CHECK(false);\nreturn E_OUTOFMEMORY;\n}\nCurrentSetSize = 0;\nIsOpen = true;\nOutOfMemory = false;\nreturn S_OK;\n}\nHRESULT Close()\n{\nif (IsOpen == false)\n{\nreturn E_INVALIDARG;\n}\nif (OutOfMemory == true)\n{\nreturn E_OUTOFMEMORY;\n}\nfor (INT32 i = 0; i < CurrentSetSize; i++)\n{\nRemove(ppSet[i]);\n}\nReturnCommandListReservation();\nIsOpen = false;\nreturn S_OK;\n}\nprivate:\ninline void Remove(ManagedObject* pObject)\n{\npObject->CommandListsUsedOn[CommandListIndex] = false;\n}\ninline void ReturnCommandListReservation()\n{\nInternal::ScopedLock Lock(&pSyncManager->MaskCriticalSection);\npSyncManager->AvailableCommandLists[CommandListIndex] = false;\nCommandListIndex = ResidencySet::InvalidIndex;\nIsOpen = false;\n}\nvoid Initialize(Internal::SyncManager* pSyncManagerIn)\n{\npSyncManager = pSyncManagerIn;\n}\nbool Initialize(Internal::SyncManager* pSyncManagerIn, UINT32 MaxSize)\n{\npSyncManager = pSyncManagerIn;\nMaxResidencySetSize = MaxSize;\nif (MaxSize)\n{\nppSet = new ManagedObject*[MaxResidencySetSize];\nreturn ppSet != nullptr;\n}\n// Empty set may be indicative of errors higher up, e.g. that something doesn't have its ResidencySet initialized. Unfortunately, such errors are generally masked\n// by everything else that has it properly initialized, so it generally only hits on super tiny commandlists.\n// That is not a fatal error though, so we accept the zero case here, otherwise new[] below returns nullptr, and a spurious E_OUTOFMEMORY is returned from ExecuteSubset()\n// resulting in the termination of the process with a confusing \"driver crash\" end user message.\nreturn true;\n}\ninline void Realloc()\n{\nMaxResidencySetSize = (MaxResidencySetSize == 0) ? 4096 : INT32(MaxResidencySetSize + (MaxResidencySetSize / 2.0f));\nManagedObject** ppNewAlloc = new ManagedObject*[MaxResidencySetSize];\nif (ppSet && ppNewAlloc)\n{\nmemcpy(ppNewAlloc, ppSet, CurrentSetSize * sizeof(ManagedObject*));\ndelete[](ppSet);\n}\nppSet = ppNewAlloc;\n}\nUINT32 CommandListIndex;\nManagedObject** ppSet;\nINT32 MaxResidencySetSize;\nINT32 CurrentSetSize;\nbool IsOpen;\nbool OutOfMemory;\nInternal::SyncManager* pSyncManager;\n};\nnamespace Internal\n{\n/* List Helpers"
+    },
+    {
+      "id": "insert-head-list",
+      "name": "InsertHeadList",
+      "category": "d3dx12residency",
+      "signature": "InsertHeadList(P Head, P Entry)",
+      "params": [
+        {
+          "name": "P Head",
+          "type": "LIST_ENTRY*"
+        },
+        {
+          "name": "P Entry",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "insert-tail-list",
+      "name": "InsertTailList",
+      "category": "d3dx12residency",
+      "signature": "InsertTailList(P Head, P Entry)",
+      "params": [
+        {
+          "name": "P Head",
+          "type": "LIST_ENTRY*"
+        },
+        {
+          "name": "P Entry",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-entry-list",
+      "name": "RemoveEntryList",
+      "category": "d3dx12residency",
+      "signature": "RemoveEntryList(P Entry)",
+      "params": [
+        {
+          "name": "P Entry",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-head-list",
+      "name": "RemoveHeadList",
+      "category": "d3dx12residency",
+      "signature": "RemoveHeadList(P Head)",
+      "params": [
+        {
+          "name": "P Head",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "LIST_ENTRY*"
+    },
+    {
+      "id": "remove-tail-list",
+      "name": "RemoveTailList",
+      "category": "d3dx12residency",
+      "signature": "RemoveTailList(P Head)",
+      "params": [
+        {
+          "name": "P Head",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "LIST_ENTRY*"
+    },
+    {
+      "id": "is-list-empty",
+      "name": "IsListEmpty",
+      "category": "d3dx12residency",
+      "signature": "IsListEmpty(P Entry)",
+      "params": [
+        {
+          "name": "P Entry",
+          "type": "LIST_ENTRY*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "initialize-53408d",
+      "name": "Initialize",
+      "category": "d3dx12residency",
+      "signature": "Initialize(Target, P Device)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Fence*"
+        },
+        {
+          "name": "P Device",
+          "type": "ID3D12Device*"
+        }
+      ],
+      "returnType": "HRESULT"
+    },
+    {
+      "id": "destroy",
+      "name": "Destroy",
+      "category": "d3dx12residency",
+      "signature": "Destroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Fence*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "Fence*",
+        "ResidencyManagerInternal*",
+        "ResidencyManager*"
+      ]
+    },
+    {
+      "id": "gpu-wait",
+      "name": "GPUWait",
+      "category": "d3dx12residency",
+      "signature": "GPUWait(Target, P Queue)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Fence*"
+        },
+        {
+          "name": "P Queue",
+          "type": "ID3D12CommandQueue*"
+        }
+      ],
+      "returnType": "HRESULT"
+    },
+    {
+      "id": "gpu-signal",
+      "name": "GPUSignal",
+      "category": "d3dx12residency",
+      "signature": "GPUSignal(Target, P Queue)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Fence*"
+        },
+        {
+          "name": "P Queue",
+          "type": "ID3D12CommandQueue*"
+        }
+      ],
+      "returnType": "HRESULT"
+    },
+    {
+      "id": "increment",
+      "name": "Increment",
+      "category": "d3dx12residency",
+      "signature": "Increment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "Fence*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-completed",
+      "name": "IsCompleted",
+      "category": "d3dx12residency",
+      "signature": "IsCompleted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "QueueSyncPoint*"
+        }
+      ],
+      "returnType": "Bool",
+      "supportedTargets": [
+        "QueueSyncPoint*",
+        "DeviceWideSyncPoint*"
+      ]
+    },
+    {
+      "id": "wait-for-completion",
+      "name": "WaitForCompletion",
+      "category": "d3dx12residency",
+      "signature": "WaitForCompletion(Target, Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "QueueSyncPoint*"
+        },
+        {
+          "name": "Event",
+          "type": "HANDLE"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "QueueSyncPoint*",
+        "DeviceWideSyncPoint*"
+      ]
+    },
+    {
+      "id": "create-sync-point",
+      "name": "CreateSyncPoint",
+      "category": "d3dx12residency",
+      "signature": "CreateSyncPoint(Num Queues, Generation)",
+      "params": [
+        {
+          "name": "Num Queues",
+          "type": "UInt"
+        },
+        {
+          "name": "Generation",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "DeviceWideSyncPoint*"
+    },
+    {
+      "id": "lru-cache",
+      "name": "LRUCache",
+      "category": "d3dx12residency",
+      "signature": "LRUCache(Num Resident Objects)",
+      "params": [
+        {
+          "name": "Num Resident Objects",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "insert",
+      "name": "Insert",
+      "category": "d3dx12residency",
+      "signature": "Insert(P Object)",
+      "params": [
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "category": "d3dx12residency",
+      "signature": "Remove(P Object)",
+      "params": [
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "object-referenced",
+      "name": "ObjectReferenced",
+      "category": "d3dx12residency",
+      "signature": "ObjectReferenced(P Object)",
+      "params": [
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "make-resident-bed3d6",
+      "name": "MakeResident",
+      "category": "d3dx12residency",
+      "signature": "MakeResident(P Object)",
+      "params": [
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "evict",
+      "name": "Evict",
+      "category": "d3dx12residency",
+      "signature": "Evict(P Object)",
+      "params": [
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trim-to-sync-point-inclusive",
+      "name": "TrimToSyncPointInclusive",
+      "category": "d3dx12residency",
+      "signature": "TrimToSyncPointInclusive(Current Usage, Current Budget, Eviction List, Num Objects To Evict, Sync Point)",
+      "params": [
+        {
+          "name": "Current Usage",
+          "type": "Int64"
+        },
+        {
+          "name": "Current Budget",
+          "type": "Int64"
+        },
+        {
+          "name": "Eviction List",
+          "type": "ID3D12Pageable**"
+        },
+        {
+          "name": "Num Objects To Evict",
+          "type": "UInt&"
+        },
+        {
+          "name": "Sync Point",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "trim-aged-allocations",
+      "name": "TrimAgedAllocations",
+      "category": "d3dx12residency",
+      "signature": "TrimAgedAllocations(Max Sync Point, Eviction List, Num Objects To Evict, Current Time Stamp, Min Delta)",
+      "params": [
+        {
+          "name": "Max Sync Point",
+          "type": "DeviceWideSyncPoint*"
+        },
+        {
+          "name": "Eviction List",
+          "type": "ID3D12Pageable**"
+        },
+        {
+          "name": "Num Objects To Evict",
+          "type": "UInt&"
+        },
+        {
+          "name": "Current Time Stamp",
+          "type": "UInt64"
+        },
+        {
+          "name": "Min Delta",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-resident-list-head",
+      "name": "GetResidentListHead",
+      "category": "d3dx12residency",
+      "signature": "GetResidentListHead()",
+      "params": [],
+      "returnType": "ManagedObject*"
+    },
+    {
+      "id": "initialize-282b45",
+      "name": "Initialize",
+      "category": "d3dx12residency",
+      "signature": "Initialize(Target, Parent Device, Device Node Index, Parent Adapter, Max Latency)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "Parent Device",
+          "type": "ID3D12Device*"
+        },
+        {
+          "name": "Device Node Index",
+          "type": "UINT"
+        },
+        {
+          "name": "Parent Adapter",
+          "type": "IDXGIAdapter*"
+        },
+        {
+          "name": "Max Latency",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "HRESULT",
+      "supportedTargets": [
+        "ResidencyManagerInternal*",
+        "ResidencyManager*"
+      ]
+    },
+    {
+      "id": "begin-tracking-object",
+      "name": "BeginTrackingObject",
+      "category": "d3dx12residency",
+      "signature": "BeginTrackingObject(Target, P Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "ResidencyManagerInternal*",
+        "ResidencyManager*"
+      ]
+    },
+    {
+      "id": "end-tracking-object",
+      "name": "EndTrackingObject",
+      "category": "d3dx12residency",
+      "signature": "EndTrackingObject(Target, P Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "P Object",
+          "type": "ManagedObject*"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "ResidencyManagerInternal*",
+        "ResidencyManager*"
+      ]
+    },
+    {
+      "id": "execute-command-lists",
+      "name": "ExecuteCommandLists",
+      "category": "d3dx12residency",
+      "signature": "ExecuteCommandLists(Target, Queue, Command Lists, Residency Sets, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "Queue",
+          "type": "ID3D12CommandQueue*"
+        },
+        {
+          "name": "Command Lists",
+          "type": "ID3D12CommandList**"
+        },
+        {
+          "name": "Residency Sets",
+          "type": "ResidencySet**"
+        },
+        {
+          "name": "Count",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "HRESULT",
+      "supportedTargets": [
+        "ResidencyManagerInternal*",
+        "ResidencyManager*"
+      ]
+    },
+    {
+      "id": "make-resident-bf6d43",
+      "name": "MakeResident",
+      "category": "d3dx12residency",
+      "signature": "MakeResident(Target, Queue, Master Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "Queue",
+          "type": "ID3D12CommandQueue*"
+        },
+        {
+          "name": "Master Set",
+          "type": "ResidencySet*"
+        }
+      ],
+      "returnType": "HRESULT"
+    },
+    {
+      "id": "signal-fence",
+      "name": "SignalFence",
+      "category": "d3dx12residency",
+      "signature": "SignalFence(Target, Queue)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "Queue",
+          "type": "ID3D12CommandQueue*"
+        }
+      ],
+      "returnType": "HRESULT",
+      "supportedTargets": [
+        "ResidencyManagerInternal*",
+        "ResidencyManager*"
+      ]
+    },
+    {
+      "id": "get-current-gpu-sync-point-7c2ffb",
+      "name": "GetCurrentGPUSyncPoint",
+      "category": "d3dx12residency",
+      "signature": "GetCurrentGPUSyncPoint(Target, Queue, P GPU Sync Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManagerInternal*"
+        },
+        {
+          "name": "Queue",
+          "type": "ID3D12CommandQueue*"
+        },
+        {
+          "name": "P GPU Sync Point",
+          "type": "UInt64*"
+        }
+      ],
+      "returnType": "HRESULT"
+    },
+    {
+      "id": "get-current-gpu-sync-point-3289fb",
+      "name": "GetCurrentGPUSyncPoint",
+      "category": "d3dx12residency",
+      "signature": "GetCurrentGPUSyncPoint(Target, Queue, P Current GPU Sync Point)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManager*"
+        },
+        {
+          "name": "Queue",
+          "type": "ID3D12CommandQueue*"
+        },
+        {
+          "name": "P Current GPU Sync Point",
+          "type": "UInt64*"
+        }
+      ],
+      "returnType": "HRESULT"
+    },
+    {
+      "id": "create-residency-set",
+      "name": "CreateResidencySet",
+      "category": "d3dx12residency",
+      "signature": "CreateResidencySet(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManager*"
+        }
+      ],
+      "returnType": "ResidencySet*"
+    },
+    {
+      "id": "destroy-residency-set",
+      "name": "DestroyResidencySet",
+      "category": "d3dx12residency",
+      "signature": "DestroyResidencySet(Target, P Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManager*"
+        },
+        {
+          "name": "P Set",
+          "type": "ResidencySet*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-local-memory-budget-limit",
+      "name": "SetLocalMemoryBudgetLimit",
+      "category": "d3dx12residency",
+      "signature": "SetLocalMemoryBudgetLimit(Target, In Local Memory Budget Limit)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ResidencyManager*"
+        },
+        {
+          "name": "In Local Memory Budget Limit",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

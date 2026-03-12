@@ -15,6 +15,589 @@
   ],
   "functions": [
     {
+      "id": "xxh-vec-revb",
+      "name": "XXH_vec_revb",
+      "category": "xxh3",
+      "signature": "XXH_vec_revb(Val)",
+      "params": [
+        {
+          "name": "Val",
+          "type": "xxh_u64x2"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64x2"
+    },
+    {
+      "id": "xxh-vec-loadu",
+      "name": "XXH_vec_loadu",
+      "category": "xxh3",
+      "signature": "XXH_vec_loadu(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64x2",
+      "docs": "XXH_VSX_BE"
+    },
+    {
+      "id": "xxh-vec-mulo",
+      "name": "XXH_vec_mulo",
+      "category": "xxh3",
+      "signature": "XXH_vec_mulo(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "xxh_u32x4"
+        },
+        {
+          "name": "B",
+          "type": "xxh_u32x4"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64x2",
+      "docs": "Clang has a better way to control this, we can just use the builtin which doesn't swap."
+    },
+    {
+      "id": "xxh-vec-mule",
+      "name": "XXH_vec_mule",
+      "category": "xxh3",
+      "signature": "XXH_vec_mule(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "xxh_u32x4"
+        },
+        {
+          "name": "B",
+          "type": "xxh_u32x4"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64x2"
+    },
+    {
+      "id": "xxh-mult-64-to-128",
+      "name": "XXH_mult64to128",
+      "category": "xxh3",
+      "signature": "XXH_mult64to128(Lhs, Rhs)",
+      "params": [
+        {
+          "name": "Lhs",
+          "type": "xxh_u64"
+        },
+        {
+          "name": "Rhs",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "XXH128_hash_t",
+      "docs": "Calculates a 64->128-bit long multiply.\nUses __uint128_t and _umul128 if available, otherwise uses a scalar version."
+    },
+    {
+      "id": "xxh-3-mul-128-fold-64",
+      "name": "XXH3_mul128_fold64",
+      "category": "xxh3",
+      "signature": "XXH3_mul128_fold64(Lhs, Rhs)",
+      "params": [
+        {
+          "name": "Lhs",
+          "type": "xxh_u64"
+        },
+        {
+          "name": "Rhs",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "xxh_u64",
+      "docs": "Does a 64-bit to 128-bit multiply, then XOR folds it.\nThe reason for the separate function is to prevent passing too many structs\naround by value. This will hopefully inline the multiply, but we don't force it."
+    },
+    {
+      "id": "xxh-xorshift-64",
+      "name": "XXH_xorshift64",
+      "category": "xxh3",
+      "signature": "XXH_xorshift64(V 64, Shift)",
+      "params": [
+        {
+          "name": "V 64",
+          "type": "xxh_u64"
+        },
+        {
+          "name": "Shift",
+          "type": "Int"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64",
+      "docs": "Seems to produce slightly better code on GCC for some reason."
+    },
+    {
+      "id": "xxh-3-avalanche",
+      "name": "XXH3_avalanche",
+      "category": "xxh3",
+      "signature": "XXH3_avalanche(H 64)",
+      "params": [
+        {
+          "name": "H 64",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "XXH64_hash_t",
+      "docs": "We don't need to (or want to) mix as much as XXH64.\nShort hashes are more evenly distributed, so it isn't necessary."
+    },
+    {
+      "id": "xxh-3-len-1-to-3-64-b",
+      "name": "XXH3_len_1to3_64b",
+      "category": "xxh3",
+      "signature": "XXH3_len_1to3_64b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH64_hash_t",
+      "docs": "==========================================\nShort keys\n==========================================\nOne of the shortcomings of XXH32 and XXH64 was that their performance was\nsub-optimal on short lengths. It used an iterative algorithm which strongly\nfavored lengths that were a multiple of 4 or 8.\nInstead of iterating over individual inputs, we use a set of single shot\nfunctions which piece together a range of lengths and operate in constant time.\nAdditionally, the number of multiplies has been significantly reduced. This\nreduces latency, especially when emulating 64-bit multiplies on 32-bit.\nDepending on the platform, this may or may not be faster than XXH32, but it\nis almost guaranteed to be faster than XXH64."
+    },
+    {
+      "id": "xxh-3-len-4-to-8-64-b",
+      "name": "XXH3_len_4to8_64b",
+      "category": "xxh3",
+      "signature": "XXH3_len_4to8_64b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-len-9-to-16-64-b",
+      "name": "XXH3_len_9to16_64b",
+      "category": "xxh3",
+      "signature": "XXH3_len_9to16_64b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-len-0-to-16-64-b",
+      "name": "XXH3_len_0to16_64b",
+      "category": "xxh3",
+      "signature": "XXH3_len_0to16_64b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-mix-16-b",
+      "name": "XXH3_mix16B",
+      "category": "xxh3",
+      "signature": "XXH3_mix16B(Input, Secret, Seed 64)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Seed 64",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64",
+      "docs": "DISCLAIMER: There are known *seed-dependent* multicollisions here due to\nmultiplication by zero, affecting hashes of lengths 17 to 240.\nHowever, they are very unlikely.\nKeep this in mind when using the unseeded XXH3_64bits() variant: As with all\nunseeded non-cryptographic hashes, it does not attempt to defend itself\nagainst specially crafted inputs, only random inputs.\nCompared to classic UMAC where a 1 in 2^31 chance of 4 consecutive bytes\ncancelling out the secret is taken an arbitrary number of times (addressed\nin XXH3_accumulate_512), this collision is very unlikely with random inputs\nand/or proper seeding:\nThis only has a 1 in 2^63 chance of 8 consecutive bytes cancelling out, in a\nfunction that is only called up to 16 times per hash with up to 240 bytes of\ninput.\nThis is not too bad for a non-cryptographic hash function, especially with\nonly 64 bit outputs.\nThe 128-bit variant (which trades some speed for strength) is NOT affected\nby this, although it is always a good idea to use a proper seed if you care\nabout strength."
+    },
+    {
+      "id": "xxh-3-len-17-to-128-64-b",
+      "name": "XXH3_len_17to128_64b",
+      "category": "xxh3",
+      "signature": "XXH3_len_17to128_64b(Input, Len, Secret, Secret Size, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH64_hash_t",
+      "docs": "For mid range keys, XXH3 uses a Mum-hash variant."
+    },
+    {
+      "id": "xxh-3-len-129-to-240-64-b",
+      "name": "XXH3_len_129to240_64b",
+      "category": "xxh3",
+      "signature": "XXH3_len_129to240_64b(Input, Len, Secret, Secret Size, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-accumulate-512",
+      "name": "XXH3_accumulate_512",
+      "category": "xxh3",
+      "signature": "XXH3_accumulate_512(Acc, Input, Secret, Acc Width)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "void* XXH_RESTRICT"
+        },
+        {
+          "name": "Input",
+          "type": "void* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret",
+          "type": "void* XXH_RESTRICT"
+        },
+        {
+          "name": "Acc Width",
+          "type": "XXH3_accWidth_e"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void",
+      "docs": "XXH3_accumulate_512 is the tightest loop for long inputs, and it is the most optimized.\nIt is a hardened version of UMAC, based off of FARSH's implementation.\nThis was chosen because it adapts quite well to 32-bit, 64-bit, and SIMD\nimplementations, and it is ridiculously fast.\nWe harden it by mixing the original input to the accumulators as well as the product.\nThis means that in the (relatively likely) case of a multiply by zero, the\noriginal input is preserved.\nOn 128-bit inputs, we swap 64-bit pairs when we add the input to improve\ncross-pollination, as otherwise the upper and lower halves would be\nessentially independent.\nThis doesn't matter on 64-bit hashes since they all get merged together in\nthe end, so we skip the extra step.\nBoth XXH3_64bits and XXH3_128bits use this subroutine."
+    },
+    {
+      "id": "xxh-3-scramble-acc",
+      "name": "XXH3_scrambleAcc",
+      "category": "xxh3",
+      "signature": "XXH3_scrambleAcc(Acc, Secret)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "void* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret",
+          "type": "void* XXH_RESTRICT"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void",
+      "docs": "XXH3_scrambleAcc: Scrambles the accumulators to improve mixing.\nMultiplication isn't perfect, as explained by Google in HighwayHash:\n// Multiplication mixes/scrambles bytes 0-7 of the 64-bit result to\n// varying degrees. In descending order of goodness, bytes\n// 3 4 2 5 1 6 0 7 have quality 228 224 164 160 100 96 36 32.\n// As expected, the upper and lower bytes are much worse.\nSource: https://github.com/google/highwayhash/blob/0aaf66b/highwayhash/hh_avx2.h#L291\nSince our algorithm uses a pseudorandom secret to add some variance into the\nmix, we don't need to (or want to) mix as often or as much as HighwayHash does.\nThis isn't as tight as XXH3_accumulate, but still written in SIMD to avoid\nextraction.\nBoth XXH3_64bits and XXH3_128bits use this subroutine."
+    },
+    {
+      "id": "xxh-3-accumulate",
+      "name": "XXH3_accumulate",
+      "category": "xxh3",
+      "signature": "XXH3_accumulate(Acc, Input, Secret, Nb Stripes, Acc Width)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "xxh_u64* XXH_RESTRICT"
+        },
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Nb Stripes",
+          "type": "size_t"
+        },
+        {
+          "name": "Acc Width",
+          "type": "XXH3_accWidth_e"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void",
+      "docs": "XXH3_accumulate()\nLoops over XXH3_accumulate_512().\nAssumption: nbStripes will not overflow the secret size"
+    },
+    {
+      "id": "xxh-3-hash-long-internal-loop",
+      "name": "XXH3_hashLong_internal_loop",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_internal_loop(Acc, Input, Len, Secret, Secret Size, Acc Width)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "xxh_u64* XXH_RESTRICT"
+        },
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        },
+        {
+          "name": "Acc Width",
+          "type": "XXH3_accWidth_e"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void"
+    },
+    {
+      "id": "xxh-3-mix-2-accs",
+      "name": "XXH3_mix2Accs",
+      "category": "xxh3",
+      "signature": "XXH3_mix2Accs(Acc, Secret)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "xxh_u64* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE xxh_u64"
+    },
+    {
+      "id": "xxh-3-merge-accs",
+      "name": "XXH3_mergeAccs",
+      "category": "xxh3",
+      "signature": "XXH3_mergeAccs(Acc, Secret, Start)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "xxh_u64* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Start",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-hash-long-internal",
+      "name": "XXH3_hashLong_internal",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_internal(Input, Len, Secret, Secret Size)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-hash-long-64-b-default-secret",
+      "name": "XXH3_hashLong_64b_defaultSecret",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_64b_defaultSecret(Input, Len)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH64_hash_t",
+      "docs": "It's important for performance that XXH3_hashLong is not inlined. Not sure\nwhy (uop cache maybe?), but the difference is large and easily measurable."
+    },
+    {
+      "id": "xxh-3-hash-long-64-b-with-secret",
+      "name": "XXH3_hashLong_64b_withSecret",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_64b_withSecret(Input, Len, Secret, Secret Size)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH64_hash_t",
+      "docs": "It's important for performance that XXH3_hashLong is not inlined. Not sure\nwhy (uop cache maybe?), but the difference is large and easily measurable."
+    },
+    {
+      "id": "xxh-write-le-64",
+      "name": "XXH_writeLE64",
+      "category": "xxh3",
+      "signature": "XXH_writeLE64(Dst, V 64)",
+      "params": [
+        {
+          "name": "Dst",
+          "type": "void*"
+        },
+        {
+          "name": "V 64",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void"
+    },
+    {
+      "id": "xxh-3-init-custom-secret",
+      "name": "XXH3_initCustomSecret",
+      "category": "xxh3",
+      "signature": "XXH3_initCustomSecret(Custom Secret, Seed 64)",
+      "params": [
+        {
+          "name": "Custom Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed 64",
+          "type": "xxh_u64"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void",
+      "docs": "XXH3_initCustomSecret() :\ndestination `customSecret` is presumed allocated and same size as `kSecret`."
+    },
+    {
+      "id": "xxh-3-hash-long-64-b-with-seed",
+      "name": "XXH3_hashLong_64b_withSeed",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_64b_withSeed(Input, Len, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH64_hash_t",
+      "docs": "XXH3_hashLong_64b_withSeed():\nGenerate a custom key based on alteration of default kSecret with the seed,\nand then use this key for long mode hashing.\nThis operation is decently fast but nonetheless costs a little bit of time.\nTry to avoid it whenever possible (typically when seed==0).\nIt's important for performance that XXH3_hashLong is not inlined. Not sure\nwhy (uop cache maybe?), but the difference is large and easily measurable."
+    },
+    {
       "id": "xxh-3-64-bits",
       "name": "XXH3_64bits",
       "category": "xxh3",
@@ -118,6 +701,31 @@
       "returnType": "Void"
     },
     {
+      "id": "xxh-3-64-bits-reset-internal",
+      "name": "XXH3_64bits_reset_internal",
+      "category": "xxh3",
+      "signature": "XXH3_64bits_reset_internal(State Ptr, Seed, Secret, Secret Size)",
+      "params": [
+        {
+          "name": "State Ptr",
+          "type": "XXH3_state_t*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "xxh-3-64-bits-reset",
       "name": "XXH3_64bits_reset",
       "category": "xxh3",
@@ -169,6 +777,73 @@
       "returnType": "XXH_errorcode"
     },
     {
+      "id": "xxh-3-consume-stripes",
+      "name": "XXH3_consumeStripes",
+      "category": "xxh3",
+      "signature": "XXH3_consumeStripes(Acc, Nb Stripes So Far Ptr, Nb Stripes Per Block, Input, Total Stripes, Secret, Secret Limit, Acc Width)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "xxh_u64*"
+        },
+        {
+          "name": "Nb Stripes So Far Ptr",
+          "type": "XXH32_hash_t*"
+        },
+        {
+          "name": "Nb Stripes Per Block",
+          "type": "XXH32_hash_t"
+        },
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Total Stripes",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Secret Limit",
+          "type": "size_t"
+        },
+        {
+          "name": "Acc Width",
+          "type": "XXH3_accWidth_e"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void"
+    },
+    {
+      "id": "xxh-3-update",
+      "name": "XXH3_update",
+      "category": "xxh3",
+      "signature": "XXH3_update(State, Input, Len, Acc Width)",
+      "params": [
+        {
+          "name": "State",
+          "type": "XXH3_state_t*"
+        },
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Acc Width",
+          "type": "XXH3_accWidth_e"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH_errorcode",
+      "docs": "Both XXH3_64bits_update and XXH3_128bits_update use this routine."
+    },
+    {
       "id": "xxh-3-64-bits-update",
       "name": "XXH3_64bits_update",
       "category": "xxh3",
@@ -190,6 +865,27 @@
       "returnType": "XXH_errorcode"
     },
     {
+      "id": "xxh-3-digest-long",
+      "name": "XXH3_digest_long",
+      "category": "xxh3",
+      "signature": "XXH3_digest_long(Acc, State, Acc Width)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "XXH64_hash_t*"
+        },
+        {
+          "name": "State",
+          "type": "XXH3_state_t*"
+        },
+        {
+          "name": "Acc Width",
+          "type": "XXH3_accWidth_e"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE void"
+    },
+    {
       "id": "xxh-3-64-bits-digest",
       "name": "XXH3_64bits_digest",
       "category": "xxh3",
@@ -201,6 +897,288 @@
         }
       ],
       "returnType": "XXH64_hash_t"
+    },
+    {
+      "id": "xxh-3-len-1-to-3-128-b",
+      "name": "XXH3_len_1to3_128b",
+      "category": "xxh3",
+      "signature": "XXH3_len_1to3_128b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t",
+      "docs": "==========================================\nXXH3 128 bits (=> XXH128)\n=========================================="
+    },
+    {
+      "id": "xxh-3-len-4-to-8-128-b",
+      "name": "XXH3_len_4to8_128b",
+      "category": "xxh3",
+      "signature": "XXH3_len_4to8_128b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t",
+      "docs": "high64"
+    },
+    {
+      "id": "xxh-3-len-9-to-16-128-b",
+      "name": "XXH3_len_9to16_128b",
+      "category": "xxh3",
+      "signature": "XXH3_len_9to16_128b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t"
+    },
+    {
+      "id": "xxh-3-len-0-to-16-128-b",
+      "name": "XXH3_len_0to16_128b",
+      "category": "xxh3",
+      "signature": "XXH3_len_0to16_128b(Input, Len, Secret, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t",
+      "docs": "Assumption : `secret` size is >= 16\nNote : it should be >= XXH3_SECRET_SIZE_MIN anyway"
+    },
+    {
+      "id": "xxh-128-mix-32-b",
+      "name": "XXH128_mix32B",
+      "category": "xxh3",
+      "signature": "XXH128_mix32B(Acc, Input 1, Input 2, Secret, Seed)",
+      "params": [
+        {
+          "name": "Acc",
+          "type": "XXH128_hash_t"
+        },
+        {
+          "name": "Input 1",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Input 2",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t",
+      "docs": "A bit slower than XXH3_mix16B, but handles multiply by zero better."
+    },
+    {
+      "id": "xxh-3-len-17-to-128-128-b",
+      "name": "XXH3_len_17to128_128b",
+      "category": "xxh3",
+      "signature": "XXH3_len_17to128_128b(Input, Len, Secret, Secret Size, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t"
+    },
+    {
+      "id": "xxh-3-len-129-to-240-128-b",
+      "name": "XXH3_len_129to240_128b",
+      "category": "xxh3",
+      "signature": "XXH3_len_129to240_128b(Input, Len, Secret, Secret Size, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH128_hash_t"
+    },
+    {
+      "id": "xxh-3-hash-long-128-b-internal",
+      "name": "XXH3_hashLong_128b_internal",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_128b_internal(Input, Len, Secret, Secret Size)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8* XXH_RESTRICT"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "XXH_FORCE_INLINE XXH128_hash_t"
+    },
+    {
+      "id": "xxh-3-hash-long-128-b-default-secret",
+      "name": "XXH3_hashLong_128b_defaultSecret",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_128b_defaultSecret(Input, Len)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH128_hash_t",
+      "docs": "It's important for performance that XXH3_hashLong is not inlined. Not sure\nwhy (uop cache maybe?), but the difference is large and easily measurable."
+    },
+    {
+      "id": "xxh-3-hash-long-128-b-with-secret",
+      "name": "XXH3_hashLong_128b_withSecret",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_128b_withSecret(Input, Len, Secret, Secret Size)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH128_hash_t",
+      "docs": "It's important for performance that XXH3_hashLong is not inlined. Not sure\nwhy (uop cache maybe?), but the difference is large and easily measurable."
+    },
+    {
+      "id": "xxh-3-hash-long-128-b-with-seed",
+      "name": "XXH3_hashLong_128b_withSeed",
+      "category": "xxh3",
+      "signature": "XXH3_hashLong_128b_withSeed(Input, Len, Seed)",
+      "params": [
+        {
+          "name": "Input",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Len",
+          "type": "size_t"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        }
+      ],
+      "returnType": "XXH_NO_INLINE XXH128_hash_t",
+      "docs": "It's important for performance that XXH3_hashLong is not inlined. Not sure\nwhy (uop cache maybe?), but the difference is large and easily measurable."
     },
     {
       "id": "xxh-3-128-bits",
@@ -264,6 +1242,32 @@
         }
       ],
       "returnType": "XXH128_hash_t"
+    },
+    {
+      "id": "xxh-3-128-bits-reset-internal",
+      "name": "XXH3_128bits_reset_internal",
+      "category": "xxh3",
+      "signature": "XXH3_128bits_reset_internal(State Ptr, Seed, Secret, Secret Size)",
+      "params": [
+        {
+          "name": "State Ptr",
+          "type": "XXH3_state_t*"
+        },
+        {
+          "name": "Seed",
+          "type": "XXH64_hash_t"
+        },
+        {
+          "name": "Secret",
+          "type": "xxh_u8*"
+        },
+        {
+          "name": "Secret Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "===   XXH3 128-bit streaming   ==="
     },
     {
       "id": "xxh-3-128-bits-reset",

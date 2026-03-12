@@ -1,0 +1,196 @@
+{
+  "id": "mesh-dijkstra",
+  "label": "MeshDijkstra",
+  "includepath": "Parameterization/MeshDijkstra.h",
+  "includes": [
+    "VectorTypes",
+    "MatrixTypes",
+    "BoxTypes",
+    "FrameTypes",
+    "IndexPriorityQueue",
+    "DynamicVector"
+  ],
+  "functions": [
+    {
+      "id": "invalid-distance",
+      "name": "InvalidDistance",
+      "category": "MeshDijkstra",
+      "signature": "InvalidDistance()",
+      "params": [],
+      "returnType": "Double",
+      "docs": "@return distance value that indicates invalid or uncomputed distance"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "MeshDijkstra",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset internal data structures but keep allocated memory"
+    },
+    {
+      "id": "compute-to-max-distance",
+      "name": "ComputeToMaxDistance",
+      "category": "MeshDijkstra",
+      "signature": "ComputeToMaxDistance(Target, Seed Points In, Compute To Max Distance In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        },
+        {
+          "name": "Seed Points In",
+          "type": "TArray<FSeedPoint>&"
+        },
+        {
+          "name": "Compute To Max Distance In",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "FSeedPoint defines a seed point passed to the various compute methods below"
+    },
+    {
+      "id": "compute-to-target-point",
+      "name": "ComputeToTargetPoint",
+      "category": "MeshDijkstra",
+      "signature": "ComputeToTargetPoint(Target, Seed Points In, Target Point ID, Compute To Max Distance In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        },
+        {
+          "name": "Seed Points In",
+          "type": "TArray<FSeedPoint>&"
+        },
+        {
+          "name": "Target Point ID",
+          "type": "Int"
+        },
+        {
+          "name": "Compute To Max Distance In",
+          "type": "Double",
+          "default": "TNumericLimits<double>::Max()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Computes graph distances outwards from seed points to all points that are less/equal to ComputeToMaxDistance from the seed, or until TargetPointID is reached.\nThis is useful for finding shortest paths between two points\n@param SeedPointsIn seed points used to initialize computation, ie geodesics propagate out from this point set\n@param TargetPointID the target point, computation stops when this point is reached\n@param ComputeToMaxDistance target graph-distance radius, will not compute/set distances on points with graph-distance larger than this"
+    },
+    {
+      "id": "get-max-graph-distance",
+      "name": "GetMaxGraphDistance",
+      "category": "MeshDijkstra",
+      "signature": "GetMaxGraphDistance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "@return the maximum graph distance encountered during the computation"
+    },
+    {
+      "id": "get-max-graph-distance-point-id",
+      "name": "GetMaxGraphDistancePointID",
+      "category": "MeshDijkstra",
+      "signature": "GetMaxGraphDistancePointID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return vertex id associated with the maximum graph distance returned by GetMaxGraphDistance()"
+    },
+    {
+      "id": "get-seed-external-id-for-point-set-id",
+      "name": "GetSeedExternalIDForPointSetID",
+      "category": "MeshDijkstra",
+      "signature": "GetSeedExternalIDForPointSetID(Target, Point ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        },
+        {
+          "name": "Point ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the ExternalID of the SeedPoint that is closest to PointID, or -1 if PointID does not have a valid graph distance"
+    },
+    {
+      "id": "has-distance",
+      "name": "HasDistance",
+      "category": "MeshDijkstra",
+      "signature": "HasDistance(Target, Point ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        },
+        {
+          "name": "Point ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the distance for index PointID was calculated"
+    },
+    {
+      "id": "get-distance",
+      "name": "GetDistance",
+      "category": "MeshDijkstra",
+      "signature": "GetDistance(Target, Point ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        },
+        {
+          "name": "Point ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "@return the distance calculated for index PointID"
+    },
+    {
+      "id": "find-path-to-nearest-seed",
+      "name": "FindPathToNearestSeed",
+      "category": "MeshDijkstra",
+      "signature": "FindPathToNearestSeed(Target, Point ID, Path To Seed Out, Max Length)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMeshDijkstra*"
+        },
+        {
+          "name": "Point ID",
+          "type": "Int"
+        },
+        {
+          "name": "Path To Seed Out",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Max Length",
+          "type": "Int",
+          "default": "100000"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Find path from a point to the nearest seed point\n@param PointID starting point, assumption is that we have computed dijkstra to this point\n@param PathToSeedOut path is returned here, includes PointID and seed point as last element\n@param MaxLength if PathToSeedOut grows beyond this length, we abort the search\n@return true if valid path was found"
+    }
+  ]
+}

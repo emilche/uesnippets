@@ -1,0 +1,706 @@
+{
+  "id": "dynamic-mesh-overlay",
+  "label": "DynamicMeshOverlay",
+  "includepath": "DynamicMesh/DynamicMeshOverlay.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "Set",
+    "DynamicMesh3",
+    "GeometryTypes",
+    "IndexTypes",
+    "InfoTypes",
+    "IntVectorTypes",
+    "UnrealMathSSE",
+    "Vector",
+    "Vector2D",
+    "Vector4",
+    "AssertionMacros",
+    "Function",
+    "UnrealTemplate",
+    "CompactMaps",
+    "DynamicVector",
+    "RefCountVector",
+    "SmallListSet",
+    "VectorTypes"
+  ],
+  "functions": [
+    {
+      "id": "get-parent-mesh",
+      "name": "GetParentMesh",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetParentMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "FDynamicMesh3*",
+      "docs": "@return the parent mesh for this overlay"
+    },
+    {
+      "id": "copy",
+      "name": "Copy",
+      "category": "DynamicMeshOverlay",
+      "signature": "Copy(Target, Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Copy",
+          "type": "TDynamicMeshOverlay<RealType,ElementSize>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set this overlay to contain the same arrays as the copy overlay"
+    },
+    {
+      "id": "compact-copy",
+      "name": "CompactCopy",
+      "category": "DynamicMeshOverlay",
+      "signature": "CompactCopy(Target, Compact Maps, Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Compact Maps",
+          "type": "FCompactMaps&"
+        },
+        {
+          "name": "Copy",
+          "type": "TDynamicMeshOverlay<RealType,ElementSize>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the Copy overlay to a compact rep, also updating parent references based on the CompactMaps"
+    },
+    {
+      "id": "compact-in-place",
+      "name": "CompactInPlace",
+      "category": "DynamicMeshOverlay",
+      "signature": "CompactInPlace(Target, Compact Maps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Compact Maps",
+          "type": "FCompactMaps&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compact overlay and update links to parent based on CompactMaps"
+    },
+    {
+      "id": "append",
+      "name": "Append",
+      "category": "DynamicMeshOverlay",
+      "signature": "Append(Target, To Append, Append Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "To Append",
+          "type": "TDynamicMeshOverlay&"
+        },
+        {
+          "name": "Append Info",
+          "type": "FDynamicMesh3::FAppendInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "append-defaulted",
+      "name": "AppendDefaulted",
+      "category": "DynamicMeshOverlay",
+      "signature": "AppendDefaulted(Target, Append Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Append Info",
+          "type": "FDynamicMesh3::FAppendInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-elements",
+      "name": "ClearElements",
+      "category": "DynamicMeshOverlay",
+      "signature": "ClearElements(Target, Triangles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangles",
+          "type": "EnumerableIntType&"
+        }
+      ],
+      "returnType": "template<EnumerableIntType> void",
+      "docs": "Discard elements for given triangles."
+    },
+    {
+      "id": "element-count",
+      "name": "ElementCount",
+      "category": "DynamicMeshOverlay",
+      "signature": "ElementCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the number of in-use Elements in the overlay"
+    },
+    {
+      "id": "max-element-id",
+      "name": "MaxElementID",
+      "category": "DynamicMeshOverlay",
+      "signature": "MaxElementID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the maximum element index in the overlay. This may be larger than the count if Elements have been deleted."
+    },
+    {
+      "id": "is-element",
+      "name": "IsElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "IsElement(Target, V ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "V ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this element index is in use"
+    },
+    {
+      "id": "is-compact",
+      "name": "IsCompact",
+      "category": "DynamicMeshOverlay",
+      "signature": "IsCompact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the elements are compact"
+    },
+    {
+      "id": "element-indices-itr",
+      "name": "ElementIndicesItr",
+      "category": "DynamicMeshOverlay",
+      "signature": "ElementIndicesItr(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "element_iterator",
+      "docs": "@return enumerator for valid element indices suitable for use with range-based for"
+    },
+    {
+      "id": "set-parent-vertex",
+      "name": "SetParentVertex",
+      "category": "DynamicMeshOverlay",
+      "signature": "SetParentVertex(Target, Element Index, Parent Vertex Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element Index",
+          "type": "Int"
+        },
+        {
+          "name": "Parent Vertex Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-set-triangle",
+      "name": "IsSetTriangle",
+      "category": "DynamicMeshOverlay",
+      "signature": "IsSetTriangle(Target, TID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "TID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this triangle was set"
+    },
+    {
+      "id": "begin-unsafe-elements-insert",
+      "name": "BeginUnsafeElementsInsert",
+      "category": "DynamicMeshOverlay",
+      "signature": "BeginUnsafeElementsInsert(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call this before a set of unsafe InsertVertex() calls"
+    },
+    {
+      "id": "end-unsafe-elements-insert",
+      "name": "EndUnsafeElementsInsert",
+      "category": "DynamicMeshOverlay",
+      "signature": "EndUnsafeElementsInsert(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call after a set of unsafe InsertVertex() calls to rebuild free list"
+    },
+    {
+      "id": "get-element-fa4c17",
+      "name": "GetElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetElement(Target, Element ID, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "RealType*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the element at a given index"
+    },
+    {
+      "id": "get-element-at-vertex-77ba1d",
+      "name": "GetElementAtVertex",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetElementAtVertex(Target, Triangle ID, Vertex ID, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "AsType&"
+        }
+      ],
+      "returnType": "template<AsType> void",
+      "docs": "Get the Element value associated with a vertex of a triangle.\n@param TriangleID ID of a triangle containing the Element\n@param VertexID ID of the Element's parent vertex\n@param Data Value contained at the Element"
+    },
+    {
+      "id": "get-parent-vertex",
+      "name": "GetParentVertex",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetParentVertex(Target, Element ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the parent vertex id for the element at a given index"
+    },
+    {
+      "id": "get-triangle",
+      "name": "GetTriangle",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetTriangle(Target, Triangle ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIndex3i",
+      "docs": "Get the element index tuple for a triangle"
+    },
+    {
+      "id": "get-triangle-if-valid",
+      "name": "GetTriangleIfValid",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetTriangleIfValid(Target, Triangle ID, Triangle Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Triangle Out",
+          "type": "FIndex3i&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If the triangle is set to valid element indices, return the indices in TriangleOut and return true, otherwise return false"
+    },
+    {
+      "id": "set-element-fa1ba1",
+      "name": "SetElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "SetElement(Target, Element ID, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "RealType*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the element at a given index"
+    },
+    {
+      "id": "triangle-has-element",
+      "name": "TriangleHasElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "TriangleHasElement(Target, Triangle ID, Element ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if triangle contains element"
+    },
+    {
+      "id": "get-tri-bary-interpolate",
+      "name": "GetTriBaryInterpolate",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetTriBaryInterpolate(Target, Triangle ID, Bary Coords, Data Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Bary Coords",
+          "type": "AsType*"
+        },
+        {
+          "name": "Data Out",
+          "type": "AsType*"
+        }
+      ],
+      "returnType": "template<AsType> void",
+      "docs": "Compute interpolated parameter value inside triangle using barycentric coordinates\n@param TriangleID index of triangle\n@param BaryCoords 3 barycentric coordinates inside triangle\n@param DataOut resulting interpolated overlay parameter value (of size ElementSize)"
+    },
+    {
+      "id": "get-byte-count",
+      "name": "GetByteCount",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetByteCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        }
+      ],
+      "returnType": "SIZE_T"
+    },
+    {
+      "id": "t-dynamic-mesh-vector-overlay-a8e1a8",
+      "name": "TDynamicMeshVectorOverlay",
+      "category": "DynamicMeshOverlay",
+      "signature": "TDynamicMeshVectorOverlay(Target, Element Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element Size",
+          "type": ") : TDynamicMeshOverlay<RealType,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "TDynamicMeshVectorOverlay is an convenient extension of TDynamicMeshOverlay that adds\na specific N-element Vector type to the template, and adds accessor functions\nthat convert between that N-element vector type and the N-element arrays used by TDynamicMeshOverlay."
+    },
+    {
+      "id": "t-dynamic-mesh-vector-overlay-e0e8f2",
+      "name": "TDynamicMeshVectorOverlay",
+      "category": "DynamicMeshOverlay",
+      "signature": "TDynamicMeshVectorOverlay(Target, Parent Mesh)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Parent Mesh",
+          "type": "FDynamicMesh3* parentMesh ) : TDynamicMeshOverlay<RealType,ElementSize> ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "append-element",
+      "name": "AppendElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "AppendElement(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Value",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Append a new Element to the overlay"
+    },
+    {
+      "id": "get-element-877c92",
+      "name": "GetElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetElement(Target, Element ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "VectorType",
+      "docs": "Get Element at a specific ID"
+    },
+    {
+      "id": "get-element-866066",
+      "name": "GetElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetElement(Target, Element ID, V)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "V",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get Element at a specific ID"
+    },
+    {
+      "id": "get-element-at-vertex-c5a520",
+      "name": "GetElementAtVertex",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetElementAtVertex(Target, Triangle ID, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "VectorType",
+      "docs": "Get the Element value associated with a vertex of a triangle."
+    },
+    {
+      "id": "get-element-at-vertex-8c6d15",
+      "name": "GetElementAtVertex",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetElementAtVertex(Target, Triangle ID, Vertex ID, V)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "V",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the Element value associated with a vertex of a triangle."
+    },
+    {
+      "id": "get-tri-element",
+      "name": "GetTriElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetTriElement(Target, Triangle ID, Tri Vertex Index, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "Tri Vertex Index",
+          "type": "Int"
+        },
+        {
+          "name": "Value",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the Element associated with a vertex of a triangle\n@param TriVertexIndex index of vertex in triangle, valid values are 0,1,2"
+    },
+    {
+      "id": "get-tri-elements",
+      "name": "GetTriElements",
+      "category": "DynamicMeshOverlay",
+      "signature": "GetTriElements(Target, Triangle ID, A, B, C)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Triangle ID",
+          "type": "Int"
+        },
+        {
+          "name": "A",
+          "type": "VectorType&"
+        },
+        {
+          "name": "B",
+          "type": "VectorType&"
+        },
+        {
+          "name": "C",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the three Elements associated with a triangle"
+    },
+    {
+      "id": "set-element-35b0db",
+      "name": "SetElement",
+      "category": "DynamicMeshOverlay",
+      "signature": "SetElement(Target, Element ID, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicMeshOverlay*"
+        },
+        {
+          "name": "Element ID",
+          "type": "Int"
+        },
+        {
+          "name": "Value",
+          "type": "VectorType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set Element at a specific ID"
+    }
+  ]
+}

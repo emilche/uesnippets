@@ -1,0 +1,40 @@
+{
+  "id": "class-viewer-filter",
+  "label": "ClassViewerFilter",
+  "includepath": "ClassViewerFilter.h",
+  "includes": [
+    "Array",
+    "Set",
+    "CoreMinimal",
+    "CoreTypes",
+    "Delegate",
+    "EngineTypes",
+    "Text",
+    "Attribute",
+    "ClassViewerSettings",
+    "SharedPointer",
+    "NameTypes",
+    "SoftObjectPath",
+    "TopLevelAssetPath"
+  ],
+  "functions": [
+    {
+      "id": "get-filter-options",
+      "name": "GetFilterOptions",
+      "category": "ClassViewerFilter",
+      "signature": "GetFilterOptions(Target, Out Filter Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IClassViewerFilter*"
+        },
+        {
+          "name": "Out Filter Options",
+          "type": "TArray<TSharedRef<FClassViewerFilterOption>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Can be optionally implemented to gather additional filter flags. If present, these\nwill be added into the View Options menu where they can be toggled on/off by the user.\nExample:\nIn the following case, we define a custom filter option to allow the user to toggle the entire filter on/off. This is\nsynced with a global config setting (MyFilterConfigSettings->bIsCustomFilterEnabled) that is checked at filtering time.\nvoid FMyCustomClassFilter::GetFilterOptions(TArray<TSharedRef<FClassViewerFilterOption>>& OutFilterOptions)\n{\nTSharedRef<FClassViewerFilterOption> MyFilterOption = MakeShared<FClassViewerFilterOption>();\nMyFilterOption->bEnabled = MyFilterConfigSettings->bIsCustomFilterEnabled;\nMyFilterOption->LabelText = LOCTEXT(\"MyCustomFilterOptionLabel\", \"My Custom Filter\");\nMyFilterOption->ToolTipText = LOCTEXT(\"MyCustomFilterOptionToolTip\", \"Enable or disable my custom class filter.\");\nMyFilterOption->OnOptionChanged = FOnClassViewerFilterOptionChanged::CreateSP(this, &FMyCustomClassFilter::OnOptionChanged);\nOutFilterOptions.Add(MyFilterOption);\n}\nvoid FMyCustomClassFilter::OnOptionChanged(bool bIsEnabled)\n{\n// Updates the filter's config setting whenever the user changes the option.\nMyFilterConfigSettings->bIsCustomFilterEnabled = bIsEnabled;\n}\nbool FMyCustomClassFilter::IsClassAllowed(...)\n{\nif(!MyFilterConfigSettings->bIsCustomFilterEnabled)\n{\n// Filter is disabled; always allow the class.\nreturn true;\n}\n// ...\n}\n@param OutFilterOptions\t\tOn output, contains the set of options to be added into the filter menu.\nThe Class Viewer requires these to be allocated so that each option can\nbe safely referenced by each menu item widget in the View Options menu."
+    }
+  ]
+}

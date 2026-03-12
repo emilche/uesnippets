@@ -43,6 +43,38 @@
       "docs": "Reinitializes render resources at a new feature level."
     },
     {
+      "id": "init-rhi",
+      "name": "InitRHI",
+      "category": "RenderResource",
+      "signature": "InitRHI(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListBase&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes the RHI resources used by this resource.\nCalled when entering the state where both the resource and the RHI have been initialized.\nThis is only called by the rendering thread."
+    },
+    {
+      "id": "release-rhi",
+      "name": "ReleaseRHI",
+      "category": "RenderResource",
+      "signature": "ReleaseRHI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Releases the RHI resources used by this resource.\nCalled when leaving the state where both the resource and the RHI have been initialized.\nThis is only called by the rendering thread."
+    },
+    {
       "id": "init-resource",
       "name": "InitResource",
       "category": "RenderResource",
@@ -93,7 +125,121 @@
       "docs": "If the resource's RHI resources have been initialized, then release and reinitialize it.  Otherwise, do nothing.\nThis is only called by the rendering thread."
     },
     {
-      "id": "begin-init-resource",
+      "id": "get-friendly-name",
+      "name": "GetFriendlyName",
+      "category": "RenderResource",
+      "signature": "GetFriendlyName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "@return The resource's friendly name.  Typically a UObject name."
+    },
+    {
+      "id": "is-initialized",
+      "name": "IsInitialized",
+      "category": "RenderResource",
+      "signature": "IsInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-list-index",
+      "name": "GetListIndex",
+      "category": "RenderResource",
+      "signature": "GetListIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-init-phase",
+      "name": "GetInitPhase",
+      "category": "RenderResource",
+      "signature": "GetInitPhase(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "EInitPhase"
+    },
+    {
+      "id": "set-owner-name",
+      "name": "SetOwnerName",
+      "category": "RenderResource",
+      "signature": "SetOwnerName(Target, In Owner Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "In Owner Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "SetOwnerName should be called before BeginInitResource for the owner name to be successfully tracked."
+    },
+    {
+      "id": "get-owner-name",
+      "name": "GetOwnerName",
+      "category": "RenderResource",
+      "signature": "GetOwnerName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-resource-name",
+      "name": "SetResourceName",
+      "category": "RenderResource",
+      "signature": "SetResourceName(Target, In Resource Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "In Resource Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-resource-name",
+      "name": "GetResourceName",
+      "category": "RenderResource",
+      "signature": "GetResourceName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "begin-init-resource-0084e3",
       "name": "BeginInitResource",
       "category": "RenderResource",
       "signature": "BeginInitResource(Target, Resource, Render Command Pipe)",
@@ -114,6 +260,32 @@
       ],
       "returnType": "Void",
       "docs": "Sends a message to the rendering thread to initialize a resource.\nThis is called in the game thread."
+    },
+    {
+      "id": "begin-init-resource-025a87",
+      "name": "BeginInitResource",
+      "category": "RenderResource",
+      "signature": "BeginInitResource(Target, Owner Name, Resource, Render Command Pipe)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "Owner Name",
+          "type": "Name"
+        },
+        {
+          "name": "Resource",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "Render Command Pipe",
+          "type": "FRenderCommandPipe*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "begin-update-resource-rhi",
@@ -238,6 +410,61 @@
       "docs": "Number of mip-levels in the texture."
     },
     {
+      "id": "calc-mip-bias",
+      "name": "CalcMipBias",
+      "category": "RenderResource",
+      "signature": "CalcMipBias(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipBiasFade*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Calculates the interpolated mip-bias based on the current time.\n@return\t\t\t\tInterpolated mip-bias value"
+    },
+    {
+      "id": "is-fading",
+      "name": "IsFading",
+      "category": "RenderResource",
+      "signature": "IsFading(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipBiasFade*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether the mip-bias is still interpolating.\n@return\t\t\t\ttrue if the mip-bias is still interpolating"
+    },
+    {
+      "id": "f-texture",
+      "name": "FTexture",
+      "category": "RenderResource",
+      "signature": "FTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A textures resource."
+    },
+    {
+      "id": "get-texture-rhi",
+      "name": "GetTextureRHI",
+      "category": "RenderResource",
+      "signature": "GetTextureRHI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "FTextureRHIRef&"
+    },
+    {
       "id": "get-size-x",
       "name": "GetSizeX",
       "category": "RenderResource",
@@ -245,7 +472,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexture*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "UInt",
@@ -259,7 +486,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexture*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "UInt",
@@ -273,52 +500,39 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexture*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "UInt",
       "docs": "Returns the depth of the texture in pixels."
     },
     {
-      "id": "release-rhi",
-      "name": "ReleaseRHI",
+      "id": "f-texture-with-srv",
+      "name": "FTextureWithSRV",
       "category": "RenderResource",
-      "signature": "ReleaseRHI(Target)",
+      "signature": "FTextureWithSRV(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FTexture*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "Void",
-      "docs": "Releases the RHI resources used by this resource.\nCalled when leaving the state where both the resource and the RHI have been initialized.\nThis is only called by the rendering thread."
+      "docs": "A textures resource that includes an SRV."
     },
     {
-      "id": "get-friendly-name",
-      "name": "GetFriendlyName",
+      "id": "f-texture-reference",
+      "name": "FTextureReference",
       "category": "RenderResource",
-      "signature": "GetFriendlyName(Target)",
+      "signature": "FTextureReference(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FTexture*"
+          "type": "FRenderResource*"
         }
       ],
-      "returnType": "String",
-      "docs": "@return The resource's friendly name.  Typically a UObject name."
-    },
-    {
-      "id": "get-or-create-sampler-state",
-      "name": "GetOrCreateSamplerState",
-      "category": "RenderResource",
-      "signature": "GetOrCreateSamplerState(Initializer)",
-      "params": [
-        {
-          "name": "Initializer",
-          "type": "FSamplerStateInitializerRHI&"
-        }
-      ],
-      "returnType": "FRHISamplerState*"
+      "returnType": "Void",
+      "docs": "SRV that views the entire texture"
     },
     {
       "id": "get-last-render-time",
@@ -328,7 +542,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTextureReference*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "Double",
@@ -342,11 +556,25 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTextureReference*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "Void",
       "docs": "Invalidates the last render time."
+    },
+    {
+      "id": "is-initialized-game-thread",
+      "name": "IsInitialized_GameThread",
+      "category": "RenderResource",
+      "signature": "IsInitialized_GameThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the texture reference has been initialized from the game thread."
     },
     {
       "id": "begin-init-game-thread",
@@ -356,7 +584,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTextureReference*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "Void",
@@ -370,29 +598,38 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTextureReference*"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "Void",
       "docs": "Kicks off the release process on the game thread."
     },
     {
-      "id": "init-rhi",
-      "name": "InitRHI",
+      "id": "f-vertex-buffer",
+      "name": "FVertexBuffer",
       "category": "RenderResource",
-      "signature": "InitRHI(Target, RHI Cmd List)",
+      "signature": "FVertexBuffer(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FTextureReference*"
-        },
-        {
-          "name": "RHI Cmd List",
-          "type": "FRHICommandListBase&"
+          "type": "FRenderResource*"
         }
       ],
       "returnType": "Void",
-      "docs": "Initializes the RHI resources used by this resource.\nCalled when entering the state where both the resource and the RHI have been initialized.\nThis is only called by the rendering thread."
+      "docs": "A vertex buffer resource"
+    },
+    {
+      "id": "get-rhi",
+      "name": "GetRHI",
+      "category": "RenderResource",
+      "signature": "GetRHI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "FBufferRHIRef&"
     },
     {
       "id": "set-rhi",
@@ -402,7 +639,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FVertexBuffer*"
+          "type": "FRenderResource*"
         },
         {
           "name": "Buffer RHI",
@@ -410,6 +647,109 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "f-vertex-buffer-with-srv",
+      "name": "FVertexBufferWithSRV",
+      "category": "RenderResource",
+      "signature": "FVertexBufferWithSRV(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-index-buffer",
+      "name": "FIndexBuffer",
+      "category": "RenderResource",
+      "signature": "FIndexBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "SRV that views the entire texture"
+    },
+    {
+      "id": "f-buffer-with-rdg-132f5e",
+      "name": "FBufferWithRDG",
+      "category": "RenderResource",
+      "signature": "FBufferWithRDG(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-buffer-with-rdg-5e9dce",
+      "name": "FBufferWithRDG",
+      "category": "RenderResource",
+      "signature": "FBufferWithRDG(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "Other",
+          "type": "FBufferWithRDG&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "t-global-resource-6dcb9b",
+      "name": "TGlobalResource",
+      "category": "RenderResource",
+      "signature": "TGlobalResource(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to declare a render resource that is initialized/released by static initialization/destruction."
+    },
+    {
+      "id": "t-global-resource-06089e",
+      "name": "TGlobalResource",
+      "category": "RenderResource",
+      "signature": "TGlobalResource(Target, In Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "In Args",
+          "type": "Args . . . InArgs ) : ResourceType ("
+        }
+      ],
+      "returnType": "template<. . . Args>",
+      "docs": "Initialization constructor: 1 parameter."
+    },
+    {
+      "id": "release-global-resource",
+      "name": "ReleaseGlobalResource",
+      "category": "RenderResource",
+      "signature": "ReleaseGlobalResource(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRenderResource*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Release the global resource."
     }
   ]
 }

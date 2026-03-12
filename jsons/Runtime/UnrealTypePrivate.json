@@ -8,21 +8,89 @@
   ],
   "functions": [
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "get-owner-property",
+      "name": "GetOwnerProperty",
       "category": "UnrealTypePrivate",
-      "signature": "Serialize(Target, Ar)",
+      "signature": "GetOwnerProperty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProperty*"
+        }
+      ],
+      "returnType": "UProperty*",
+      "docs": "Returns the first UProperty in this property's Outer chain that does not have a UProperty for an Outer"
+    },
+    {
+      "id": "has-any-property-flags",
+      "name": "HasAnyPropertyFlags",
+      "category": "UnrealTypePrivate",
+      "signature": "HasAnyPropertyFlags(Target, Flags To Check)",
       "params": [
         {
           "name": "Target",
           "type": "UProperty*"
         },
         {
-          "name": "Ar",
-          "type": "FArchive&"
+          "name": "Flags To Check",
+          "type": "UInt64"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Bool"
+    },
+    {
+      "id": "has-all-property-flags",
+      "name": "HasAllPropertyFlags",
+      "category": "UnrealTypePrivate",
+      "signature": "HasAllPropertyFlags(Target, Flags To Check)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProperty*"
+        },
+        {
+          "name": "Flags To Check",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Used to safely check whether all of the passed in flags are set. This is required\nas PropertyFlags currently is a 64 bit data type and bool is a 32 bit data type so\nsimply using PropertyFlags&CPF_MyFlagBiggerThanMaxInt won't work correctly when\nassigned directly to an bool.\n@param FlagsToCheck\tObject flags to check for\n@return true if all of the passed in flags are set (including no flags passed in), false otherwise"
+    },
+    {
+      "id": "is-editor-only-property",
+      "name": "IsEditorOnlyProperty",
+      "category": "UnrealTypePrivate",
+      "signature": "IsEditorOnlyProperty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProperty*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Editor-only properties are those that only are used with the editor is present or cannot be removed from serialisation.\nEditor-only properties include: EditorOnly properties\nProperties that cannot be removed from serialisation are:\nBoolean properties (may affect GCC_BITFIELD_MAGIC computation)\nNative properties (native serialisation)"
+    },
+    {
+      "id": "container-ptr-to-value-ptr",
+      "name": "ContainerPtrToValuePtr",
+      "category": "UnrealTypePrivate",
+      "signature": "ContainerPtrToValuePtr(Target, Container Ptr, Array Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UProperty*"
+        },
+        {
+          "name": "Container Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "Array Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<ValueType> ValueType*"
     },
     {
       "id": "get-associated-f-field",
@@ -50,23 +118,6 @@
         {
           "name": "In Field",
           "type": "FField*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
-      "category": "UnrealTypePrivate",
-      "signature": "AddReferencedObjects(In This, Collector)",
-      "params": [
-        {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
         }
       ],
       "returnType": "Void"
@@ -100,17 +151,18 @@
       "docs": "Sets the bitfield/bool type and size.\nThis function must be called before UBoolProperty can be used.\n@param InSize size of the bitfield/bool type.\n@param bIsNativeBool true if this property represents C++ bool type."
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
+      "id": "is-native-bool",
+      "name": "IsNativeBool",
       "category": "UnrealTypePrivate",
-      "signature": "BeginDestroy(Target)",
+      "signature": "IsNativeBool(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "UObjectPropertyBase*"
+          "type": "UBoolProperty*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Bool",
+      "docs": "If the return value is true this UBoolProperty represents C++ bool type."
     },
     {
       "id": "set-property-class",
@@ -145,7 +197,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Setter function for this property's MetaClass member. Favor this function\nwhilst loading (since, to handle circular dependencies, we defer some\nclass loads and use a placeholder class instead). It properly handles\ndeferred loading placeholder classes (so they can properly be replaced\nlater).\n@param  NewMetaClass    The MetaClass you want this property set with."
+      "docs": "Setter function for this property's MetaClass member. Favor this function\nwhilst loading (since, to handle circular dependencies, we defer some\nclass loads and use a placeholder class instead). It properly handles\ndeferred loading placeholder classes (so they can properly be replaced\nlater).\n@param  NewMetaClass    The MetaClass you want this property set with.",
+      "supportedTargets": [
+        "UClassProperty*",
+        "USoftClassProperty*"
+      ]
     },
     {
       "id": "set-interface-class",

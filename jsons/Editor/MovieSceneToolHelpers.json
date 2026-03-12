@@ -1,0 +1,221 @@
+{
+  "id": "movie-scene-tool-helpers",
+  "label": "MovieSceneToolHelpers",
+  "includepath": "MovieSceneToolHelpers.h",
+  "includes": [
+    "CoreMinimal",
+    "Guid",
+    "Attribute",
+    "SWidget",
+    "RichCurve",
+    "InterpCurvePoint",
+    "MovieSceneObjectBindingID",
+    "MovieSceneObjectBindingIDPicker",
+    "ISequencer",
+    "TokenizedMessage",
+    "MovieSceneTranslator",
+    "MovieSceneSpawnable",
+    "MovieSceneCaptureSettings",
+    "KeyParams",
+    "SEnumCombo",
+    "AnimSequence",
+    "INodeAndChannelMappings",
+    "MovieSceneChannelProxy",
+    "MovieSceneSection"
+  ],
+  "functions": [
+    {
+      "id": "get-channel-values",
+      "name": "GetChannelValues",
+      "category": "MovieSceneToolHelpers",
+      "signature": "GetChannelValues(Start Index, End Index, Sections, Absolute Sections, Frame Time)",
+      "params": [
+        {
+          "name": "Start Index",
+          "type": "Int"
+        },
+        {
+          "name": "End Index",
+          "type": "Int"
+        },
+        {
+          "name": "Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Absolute Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Frame Time",
+          "type": "FFrameNumber&"
+        }
+      ],
+      "returnType": "template<ChannelType,CurveValueType> TArray<CurveValueType>",
+      "docs": "Get the channel values at the specified time with the specified sections, will get\nthe channels from within the specified start and end indices\n@param StartIndex Start Index to get values from\n@param EndIndex End Index to get values from, should be no greater than the number of channels -1\n@param Sections List of non-absolute(additive and override) sections to evaluate. Note this may not be all of the sections in the track,\nbut just a subset, which allows us to evaluate up to a certain point in the track.\n@param AbsoluteSections List of absolute channels to evaluate\n@param FrameTime Frame to evaluate\n@return Returns the total channel value of those sections for each channel. Remember if OverrideChannelIndex is set this will just be one channel."
+    },
+    {
+      "id": "merge-value",
+      "name": "MergeValue",
+      "category": "MovieSceneToolHelpers",
+      "signature": "MergeValue(In Out Value, Channels, Frame, Section Channel Index, Sections, Absolute Sections, Other Sections, Override Channel Index, Merge Algorithm)",
+      "params": [
+        {
+          "name": "In Out Value",
+          "type": "CurveValueType&"
+        },
+        {
+          "name": "Channels",
+          "type": "TArray<ChannelType*>&"
+        },
+        {
+          "name": "Frame",
+          "type": "FFrameNumber&"
+        },
+        {
+          "name": "Section Channel Index",
+          "type": "Int"
+        },
+        {
+          "name": "Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Absolute Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Other Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Override Channel Index",
+          "type": "Int"
+        },
+        {
+          "name": "Merge Algorithm",
+          "type": "FChannelMergeAlgorithm"
+        }
+      ],
+      "returnType": "template<ChannelType,CurveValueType> bool",
+      "docs": "Merge the value based upon the specified merge algorithm using cached parameters\nFor the algorithm to be relaible it should be done per section blending type.\n@param InOutValue  Current Value you want to merge with the other sections.\n@param Channels  Set of channels of this type that we will merge together onto the first specified one.\n@param Frame  Current Frame to merge\n@param SectionChannelIndex  The index of the channel of this type in the sections.\n@param Sections Set of corresponding sections for each channel specified.\n@param AbsoluteSections Set of absoluate sections for each channel specified.\n@param OtherSections Set of non-absolute sections for each channel specified.\n@param OverrideChanneIndex ChannelIndex for an override merge.\n@param MergeAlgorithm The algorithm to use to blend the channels together.\n@return Returns true if successful."
+    },
+    {
+      "id": "merge-channels",
+      "name": "MergeChannels",
+      "category": "MovieSceneToolHelpers",
+      "signature": "MergeChannels(Section Channel Index, Channels, Sections, Range, Merge Algorithm, Track Sections, Increment)",
+      "params": [
+        {
+          "name": "Section Channel Index",
+          "type": "Int"
+        },
+        {
+          "name": "Channels",
+          "type": "TArray<ChannelType*>&"
+        },
+        {
+          "name": "Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameNumber>&"
+        },
+        {
+          "name": "Merge Algorithm",
+          "type": "FChannelMergeAlgorithm"
+        },
+        {
+          "name": "Track Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Increment",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "template<ChannelType> bool",
+      "docs": "Merge the set of passed in channels from each section at the specified section channel index.\nFor the algorithm to be relaible it should be done per section blending type.\n@param SectionChannelIndex  The index of the channel of this type in the sections.\n@param Channels  Set of channels of this type that we will merge together onto the first specified one.\n@param Sections Set of corresponding sections for each channel specified.\n@param Range Range of time over which we will merge\n@param MergeAlgorithm The algorithm to use to blend the channels together\n@param TrackSections Sections in this track\n@param Increment Optional increment index, if specfied we bake over the range using the increment value, otherwise by default we just merge onto the existing keys\n@return Returns true if successful"
+    },
+    {
+      "id": "merge-sections-aca2d6",
+      "name": "MergeSections",
+      "category": "MovieSceneToolHelpers",
+      "signature": "MergeSections(Base Section, Top Section, Start Index, End Index, Range, Track Sections, Increment)",
+      "params": [
+        {
+          "name": "Base Section",
+          "type": "UMovieSceneSection*"
+        },
+        {
+          "name": "Top Section",
+          "type": "UMovieSceneSection*"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int"
+        },
+        {
+          "name": "End Index",
+          "type": "Int"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameNumber>&"
+        },
+        {
+          "name": "Track Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Increment",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "template<ChannelType> bool",
+      "docs": "Merge the TopSection onto the BaseSection. This function should be used when merging\na mix of Override/Additive and Absolute section Blend Types.\n@param BaseSection  The section to merge onto\n@param TopSection  The section we will merge from\n@param StartIndex Start Index of the channels we are merging\n@param EndIndex End Index of the channels we are merging, should be no greater than the number of channels -1\n@param Range Range of time over which we will merge  Control Rig sections and don't want to merge the last weight float channel\n@param TrackSections Sections in this track\n@param Increment Optional increment index, if specfied we bake over the range using the increment value, otherwise by default we just merge onto the existing keys\n@return Returns true if successful"
+    },
+    {
+      "id": "merge-sections-8336d3",
+      "name": "MergeSections",
+      "category": "MovieSceneToolHelpers",
+      "signature": "MergeSections(Base Section, Absolute Sections, Additive Sections, Start Index, End Index, Range, Increment)",
+      "params": [
+        {
+          "name": "Base Section",
+          "type": "UMovieSceneSection*"
+        },
+        {
+          "name": "Absolute Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Additive Sections",
+          "type": "TArray<UMovieSceneSection*>&"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int"
+        },
+        {
+          "name": "End Index",
+          "type": "Int"
+        },
+        {
+          "name": "Range",
+          "type": "TRange<FFrameNumber>&"
+        },
+        {
+          "name": "Increment",
+          "type": "Int*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "template<ChannelType> bool",
+      "docs": "Merge the following set of sections. Should be used when blending just Absolute with additive sections. If Merging with\noverrides, use the above MergeSections function\n@param BaseSection  The section to merge onto\n@param AbsoluteSections  Set of absolute functions to merge\n@param AddditveSections  Set of Additive functions to merge\n@param StartIndex Start Index of the channels we are merging\n@param EndIndex End Index of the channels we are merging, should be no greater than the number of channels -1\n@param Range Range of time over which we will merge Control Rig sections and don't want to merge the last weight float channel\n@param Increment Optional increment index, if specfied we bake over the range using the increment value, otherwise by default we just merge onto the existing keys\n@return Returns true if successful"
+    }
+  ]
+}

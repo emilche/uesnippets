@@ -12,6 +12,100 @@
   ],
   "functions": [
     {
+      "id": "alloc",
+      "name": "Alloc",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "Alloc(Target, Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FConcurrencySlots*"
+        },
+        {
+          "name": "Slot",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "Release(Target, Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FConcurrencySlots*"
+        },
+        {
+          "name": "Slot",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-pimpl-2d2510",
+      "name": "FPimpl",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "FPimpl(Target, In Max Concurrency, In Max Concurrency, In Task Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskConcurrencyLimiter*"
+        },
+        {
+          "name": "In Max Concurrency",
+          "type": "UInt"
+        },
+        {
+          "name": "In Max Concurrency",
+          "type": "ETaskPriority InTaskPriority ) : ConcurrencySlots ("
+        },
+        {
+          "name": "In Task Priority",
+          "type": "TaskPriority ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-pimpl-129399",
+      "name": "FPimpl",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "FPimpl(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskConcurrencyLimiter*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "push",
+      "name": "Push",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "Push(Target, Debug Name, Task Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskConcurrencyLimiter*"
+        },
+        {
+          "name": "Debug Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Task Function",
+          "type": "TaskFunctionType&&"
+        }
+      ],
+      "returnType": "template<TaskFunctionType> void",
+      "docs": "Push a new task.\n@param DebugName    Helps to identify the task in debugger and profiler.\n@param TaskFunction A callable with a slot parameter, usually a lambda but can be also a functor object\nor a pointer to a function. The slot parameter is an index in [0..max_concurrency) range,\nunique at any moment of time, that can be used in user code to index a fixed-size buffer.\nSee `TaskConcurrencyLimiterStressTest()` for an example."
+    },
+    {
       "id": "wait",
       "name": "Wait",
       "category": "TaskConcurrencyLimiter",
@@ -19,28 +113,84 @@
       "params": [
         {
           "name": "Target",
-          "type": "FPimpl*"
+          "type": "FTaskConcurrencyLimiter*"
         },
         {
           "name": "Timeout",
           "type": "FTimespan"
         }
       ],
-      "returnType": "Bool"
+      "returnType": "Bool",
+      "docs": "Waits for task's completion with timeout.\n@param  Timeout Maximum amount of time to wait for tasks to finish before returning.\n@return true if all tasks are completed, false otherwise.\n@note   A wait is satisfied once the internal task counter reaches 0 and is never reset\nafterward when more tasks are added. A new FTaskConcurrencyLimiter can be used\nfor such a use case."
     },
     {
-      "id": "add-work-item",
-      "name": "AddWorkItem",
+      "id": "process-queue",
+      "name": "ProcessQueue",
       "category": "TaskConcurrencyLimiter",
-      "signature": "AddWorkItem(Target, Task)",
+      "signature": "ProcessQueue(Target, Concurrency Slot, Skip First Wake Up)",
       "params": [
         {
           "name": "Target",
-          "type": "FPimpl*"
+          "type": "FTaskConcurrencyLimiter*"
         },
         {
-          "name": "Task",
-          "type": "LowLevelTasks::FTask*"
+          "name": "Concurrency Slot",
+          "type": "UInt"
+        },
+        {
+          "name": "Skip First Wake Up",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-queue-from-worker",
+      "name": "ProcessQueueFromWorker",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "ProcessQueueFromWorker(Target, Concurrency Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskConcurrencyLimiter*"
+        },
+        {
+          "name": "Concurrency Slot",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "process-queue-from-push",
+      "name": "ProcessQueueFromPush",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "ProcessQueueFromPush(Target, Concurrency Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskConcurrencyLimiter*"
+        },
+        {
+          "name": "Concurrency Slot",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "complete-work-item",
+      "name": "CompleteWorkItem",
+      "category": "TaskConcurrencyLimiter",
+      "signature": "CompleteWorkItem(Target, Concurrency Slot)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTaskConcurrencyLimiter*"
+        },
+        {
+          "name": "Concurrency Slot",
+          "type": "UInt"
         }
       ],
       "returnType": "Void"

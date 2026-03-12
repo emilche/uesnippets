@@ -42,6 +42,20 @@
       "docs": "Clears the skip update overlaps flag. This should be called any time a change to state would prevent the result of UpdateOverlaps. For example attachment, changing collision settings, etc..."
     },
     {
+      "id": "should-skip-update-overlaps",
+      "name": "ShouldSkipUpdateOverlaps",
+      "category": "SceneComponent",
+      "signature": "ShouldSkipUpdateOverlaps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If true, we can use the old computed overlaps"
+    },
+    {
       "id": "get-should-update-physics-volume",
       "name": "GetShouldUpdatePhysicsVolume",
       "category": "SceneComponent",
@@ -83,17 +97,18 @@
       "docs": "@return true if grouped component movement can be used, set by s.GroupedComponentMovement.Enable"
     },
     {
-      "id": "on-rep-transform",
-      "name": "OnRep_Transform",
+      "id": "get-relative-rotation-cache",
+      "name": "GetRelativeRotationCache",
       "category": "SceneComponent",
-      "signature": "OnRep_Transform(Target)",
+      "signature": "GetRelativeRotationCache(Target)",
       "params": [
         {
           "name": "Target",
           "type": "USceneComponent*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "FRotationConversionCache&",
+      "docs": "Get the RelativeRotationCache."
     },
     {
       "id": "set-relative-rotation-exact",
@@ -129,7 +144,7 @@
       "docs": "Set the rotation of the component relative to its parent and force RelativeRotation to be equal to new rotation.\nThis allows us to set and save Rotators with angles out side the normalized range, Note that doing so may break the\nRotatorCache so use with care.\n@param NewRotation\t\tNew rotation of the component relative to its parent. We will force RelativeRotation to this value.\n@param SweepHitResult\tHit result from any impact if sweep is true.\n@param bSweep\t\t\tWhether we sweep to the destination (currently not supported for rotation).\n@param bTeleport\t\t\tWhether we teleport the physics state (if physics collision is enabled for this object).\nIf true, physics velocity for this object is unchanged (so ragdoll parts are not affected by change in location).\nIf false, physics velocity is updated based on the change in position (affecting ragdoll parts)."
     },
     {
-      "id": "set-relative-location",
+      "id": "set-relative-location-bdef94",
       "name": "SetRelativeLocation",
       "category": "Transformation",
       "signature": "SetRelativeLocation(Target, New Location, Sweep, Sweep Hit Result, Teleport)",
@@ -329,7 +344,7 @@
       "docs": "Set the non-uniform scale of the component relative to its parent"
     },
     {
-      "id": "add-relative-location",
+      "id": "add-relative-location-e937bc",
       "name": "AddRelativeLocation",
       "category": "Transformation",
       "signature": "AddRelativeLocation(Target, Delta Location, Sweep, Sweep Hit Result, Teleport)",
@@ -1339,39 +1354,6 @@
       "docs": "Backwards compatibility: Used to convert old-style EAttachLocation to new-style EAttachmentRules"
     },
     {
-      "id": "k-2-attach-to",
-      "name": "K2_AttachTo",
-      "category": "Transformation",
-      "signature": "K2_AttachTo(Target, In Parent, In Socket Name, Attach Type, Weld Simulated Bodies)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "In Parent",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "In Socket Name",
-          "type": "Name",
-          "default": "NAME_None"
-        },
-        {
-          "name": "Attach Type",
-          "type": "EAttachLocation::Type",
-          "default": "EAttachLocation::KeepRelativeOffset"
-        },
-        {
-          "name": "Weld Simulated Bodies",
-          "type": "Bool",
-          "default": "true"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "DEPRECATED - Use AttachToComponent() instead"
-    },
-    {
       "id": "attach-to-component-be1a5d",
       "name": "AttachToComponent",
       "category": "SceneComponent",
@@ -1712,20 +1694,6 @@
       "docs": "Returns full material property path and UObject owner property object\nPath examples:\nMaterial property path with array element and inner struct Materials[0].InnerStruct.Material\nMaterial property path with array element Materials[0]\nSimple material property path Materials\n@param ElementIndex\t\t- The element to access the material of.\n@param OutOwner\t\t\t- Property UObject owner.\n@param OutPropertyPath\t- Full material property path.\n@param OutProperty\t\t- Material Property.\n@return true if that was successfully resolved and component has material"
     },
     {
-      "id": "on-visibility-changed",
-      "name": "OnVisibilityChanged",
-      "category": "SceneComponent",
-      "signature": "OnVisibilityChanged(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Overridable internal function to respond to changes in the visibility of the component."
-    },
-    {
       "id": "toggle-visibility",
       "name": "ToggleVisibility",
       "category": "Rendering",
@@ -1841,6 +1809,42 @@
       "returnType": "Void"
     },
     {
+      "id": "should-create-render-state",
+      "name": "ShouldCreateRenderState",
+      "category": "SceneComponent",
+      "signature": "ShouldCreateRenderState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "update-component-to-world",
+      "name": "UpdateComponentToWorld",
+      "category": "SceneComponent",
+      "signature": "UpdateComponentToWorld(Target, Update Transform Flags, Teleport)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Update Transform Flags",
+          "type": "EUpdateTransformFlags",
+          "default": "EUpdateTransformFlags::None"
+        },
+        {
+          "name": "Teleport",
+          "type": "ETeleportType",
+          "default": "ETeleportType::None"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "destroy-component",
       "name": "DestroyComponent",
       "category": "SceneComponent",
@@ -1923,19 +1927,6 @@
       "returnType": "FBox"
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
-      "category": "SceneComponent",
-      "signature": "BeginDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "is-post-load-thread-safe",
       "name": "IsPostLoadThreadSafe",
       "category": "SceneComponent",
@@ -1988,40 +1979,6 @@
       "returnType": "Void"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "SceneComponent",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "add-referenced-objects-e0a576",
-      "name": "AddReferencedObjects",
-      "category": "SceneComponent",
-      "signature": "AddReferencedObjects(In This, Collector)",
-      "params": [
-        {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "is-data-valid",
       "name": "IsDataValid",
       "category": "SceneComponent",
@@ -2056,40 +2013,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "SceneComponent",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-chain-property",
-      "name": "PostEditChangeChainProperty",
-      "category": "SceneComponent",
-      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedChainEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "can-edit-change",
       "name": "CanEditChange",
       "category": "SceneComponent",
@@ -2105,38 +2028,6 @@
         }
       ],
       "returnType": "Bool"
-    },
-    {
-      "id": "internal-set-world-location-and-rotation",
-      "name": "InternalSetWorldLocationAndRotation",
-      "category": "SceneComponent",
-      "signature": "InternalSetWorldLocationAndRotation(Target, New Location, New Quat, No Physics, Teleport)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "New Location",
-          "type": "FVector"
-        },
-        {
-          "name": "New Quat",
-          "type": "FQuat&"
-        },
-        {
-          "name": "No Physics",
-          "type": "Bool",
-          "default": "false"
-        },
-        {
-          "name": "Teleport",
-          "type": "ETeleportType",
-          "default": "ETeleportType::None"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Internal helper, for use from MoveComponent().  Special codepath since the normal setters call MoveComponent.\n@return: true if location or rotation was changed."
     },
     {
       "id": "move-component",
@@ -2179,45 +2070,120 @@
       "returnType": "Bool"
     },
     {
-      "id": "move-component-impl",
-      "name": "MoveComponentImpl",
+      "id": "on-attachment-changed",
+      "name": "OnAttachmentChanged",
       "category": "SceneComponent",
-      "signature": "MoveComponentImpl(Target, Delta, New Rotation, Sweep, Hit, Move Flags, Teleport)",
+      "signature": "OnAttachmentChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when AttachParent changes, to allow the scene to update its attachment state."
+    },
+    {
+      "id": "get-component-location",
+      "name": "GetComponentLocation",
+      "category": "SceneComponent",
+      "signature": "GetComponentLocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Return location of the component, in world space"
+    },
+    {
+      "id": "get-component-rotation",
+      "name": "GetComponentRotation",
+      "category": "SceneComponent",
+      "signature": "GetComponentRotation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FRotator",
+      "docs": "Return rotation of the component, in world space"
+    },
+    {
+      "id": "get-component-quat",
+      "name": "GetComponentQuat",
+      "category": "SceneComponent",
+      "signature": "GetComponentQuat(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FQuat",
+      "docs": "Return rotation quaternion of the component, in world space"
+    },
+    {
+      "id": "get-component-scale",
+      "name": "GetComponentScale",
+      "category": "SceneComponent",
+      "signature": "GetComponentScale(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Return scale of the component, in world space"
+    },
+    {
+      "id": "set-component-to-world",
+      "name": "SetComponentToWorld",
+      "category": "SceneComponent",
+      "signature": "SetComponentToWorld(Target, New Component To World)",
       "params": [
         {
           "name": "Target",
           "type": "USceneComponent*"
         },
         {
-          "name": "Delta",
-          "type": "FVector&"
-        },
-        {
-          "name": "New Rotation",
-          "type": "FQuat&"
-        },
-        {
-          "name": "Sweep",
-          "type": "Bool"
-        },
-        {
-          "name": "Hit",
-          "type": "FHitResult*",
-          "default": "NULL"
-        },
-        {
-          "name": "Move Flags",
-          "type": "EMoveComponentFlags",
-          "default": "MOVECOMP_NoFlags"
-        },
-        {
-          "name": "Teleport",
-          "type": "ETeleportType",
-          "default": "ETeleportType::None"
+          "name": "New Component To World",
+          "type": "FTransform&"
         }
       ],
-      "returnType": "Bool",
-      "docs": "Override this method for custom behavior for MoveComponent"
+      "returnType": "Void",
+      "docs": "Sets the cached component to world directly. This should be used very rarely."
+    },
+    {
+      "id": "get-component-to-world",
+      "name": "GetComponentToWorld",
+      "category": "SceneComponent",
+      "signature": "GetComponentToWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FTransform&",
+      "docs": "Get the current component-to-world transform for this component\nTODO: probably deprecate this in favor of GetComponentTransform"
+    },
+    {
+      "id": "get-component-transform",
+      "name": "GetComponentTransform",
+      "category": "SceneComponent",
+      "signature": "GetComponentTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FTransform&",
+      "docs": "Get the current component-to-world transform for this component"
     },
     {
       "id": "update-child-transforms",
@@ -2262,6 +2228,20 @@
       "docs": "Calculate the bounds of the component. Default behavior is a bounding box/sphere of zero size."
     },
     {
+      "id": "calc-local-bounds",
+      "name": "CalcLocalBounds",
+      "category": "SceneComponent",
+      "signature": "CalcLocalBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FBoxSphereBounds",
+      "docs": "Calculate the local bounds of the component. Default behavior is calling CalcBounds with an identity transform."
+    },
+    {
       "id": "calc-bounding-cylinder",
       "name": "CalcBoundingCylinder",
       "category": "SceneComponent",
@@ -2296,6 +2276,20 @@
       ],
       "returnType": "Void",
       "docs": "Update the Bounds of the component."
+    },
+    {
+      "id": "should-collide-when-placing",
+      "name": "ShouldCollideWhenPlacing",
+      "category": "SceneComponent",
+      "signature": "ShouldCollideWhenPlacing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If true, bounds should be used when placing component/actor in level. Does not affect spawning."
     },
     {
       "id": "update-physics-volume",
@@ -2422,24 +2416,6 @@
       "docs": "Looking at various values of the component, determines if this\ncomponent should be added to the scene\n@return true if the component is visible and should be added to the scene, false otherwise"
     },
     {
-      "id": "post-edit-component-move",
-      "name": "PostEditComponentMove",
-      "category": "SceneComponent",
-      "signature": "PostEditComponentMove(Target, Finished)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "USceneComponent*"
-        },
-        {
-          "name": "Finished",
-          "type": "Bool"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Called when this component is moved in the editor"
-    },
-    {
       "id": "get-num-uncached-static-lighting-interactions",
       "name": "GetNumUncachedStaticLightingInteractions",
       "category": "SceneComponent",
@@ -2452,6 +2428,24 @@
       ],
       "returnType": "Int",
       "docs": "Returns number of lighting interactions that need to be recalculated"
+    },
+    {
+      "id": "pre-feature-level-change",
+      "name": "PreFeatureLevelChange",
+      "category": "SceneComponent",
+      "signature": "PreFeatureLevelChange(Target, Pending Feature Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Pending Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to update any visuals needed for a feature level change"
     },
     {
       "id": "set-relative-location-and-rotation",
@@ -2639,6 +2633,48 @@
       "docs": "Returns the form of collision for this component"
     },
     {
+      "id": "is-collision-enabled",
+      "name": "IsCollisionEnabled",
+      "category": "SceneComponent",
+      "signature": "IsCollisionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Utility to see if there is any form of collision (query or physics) enabled on this component."
+    },
+    {
+      "id": "is-query-collision-enabled",
+      "name": "IsQueryCollisionEnabled",
+      "category": "SceneComponent",
+      "signature": "IsQueryCollisionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Utility to see if there is any query collision enabled on this component."
+    },
+    {
+      "id": "is-physics-collision-enabled",
+      "name": "IsPhysicsCollisionEnabled",
+      "category": "SceneComponent",
+      "signature": "IsPhysicsCollisionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Utility to see if there is any physics collision enabled on this component."
+    },
+    {
       "id": "get-collision-response-to-channel",
       "name": "GetCollisionResponseToChannel",
       "category": "SceneComponent",
@@ -2807,6 +2843,28 @@
       "docs": "Find the world-space location and rotation of the given named socket.\nIf the socket is not found, then it returns the component's location and rotation in world space.\n@param InSocketName the name of the socket to find\n@param OutLocation (out) set to the world space location of the socket\n@param OutRotation (out) set to the world space rotation of the socket\n@return whether or not the socket was found"
     },
     {
+      "id": "can-attach-as-child",
+      "name": "CanAttachAsChild",
+      "category": "SceneComponent",
+      "signature": "CanAttachAsChild(Target, Child Component, Socket Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Child Component",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Socket Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Called to see if it's possible to attach another scene component as a child.\nNote: This can be called on template component as well!"
+    },
+    {
       "id": "get-placement-extent",
       "name": "GetPlacementExtent",
       "category": "SceneComponent",
@@ -2819,6 +2877,57 @@
       ],
       "returnType": "FBoxSphereBounds",
       "docs": "Get the extent used when placing this component in the editor, used for 'pulling back' hit."
+    },
+    {
+      "id": "propagate-lighting-scenario-change",
+      "name": "PropagateLightingScenarioChange",
+      "category": "SceneComponent",
+      "signature": "PropagateLightingScenarioChange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates any visuals after the lighting has changed"
+    },
+    {
+      "id": "is-precomputed-lighting-valid",
+      "name": "IsPrecomputedLightingValid",
+      "category": "SceneComponent",
+      "signature": "IsPrecomputedLightingValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True if our precomputed lighting is up to date"
+    },
+    {
+      "id": "get-relative-location-property-name",
+      "name": "GetRelativeLocationPropertyName",
+      "category": "SceneComponent",
+      "signature": "GetRelativeLocationPropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for RelativeLocation.\nThis exists so subclasses don't need to have direct access to the RelativeLocation property so it\ncan be made private later."
+    },
+    {
+      "id": "get-relative-location",
+      "name": "GetRelativeLocation",
+      "category": "SceneComponent",
+      "signature": "GetRelativeLocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Gets the literal value of RelativeLocation.\nNote, this may be an absolute location if this is a root component (not attached to anything) or\nwhen IsUsingAbsoluteLocation returns true.\nThis exists so subclasses don't need to have direct access to the RelativeLocation property so it\ncan be made private later."
     },
     {
       "id": "get-relative-location-direct-mutable",
@@ -2853,6 +2962,29 @@
       "docs": "Sets the value of RelativeLocation without causing other side effects to this instance.\nYou should not use this method. The standard SetRelativeLocation variants should be used."
     },
     {
+      "id": "get-relative-rotation-property-name",
+      "name": "GetRelativeRotationPropertyName",
+      "category": "SceneComponent",
+      "signature": "GetRelativeRotationPropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for RelativeRotation.\nThis exists so subclasses don't need to have direct access to the RelativeRotation property so it\ncan be made private later."
+    },
+    {
+      "id": "get-relative-rotation",
+      "name": "GetRelativeRotation",
+      "category": "SceneComponent",
+      "signature": "GetRelativeRotation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FRotator",
+      "docs": "Gets the literal value of RelativeRotation.\nNote, this may be an absolute rotation if this is a root component (not attached to anything) or\nwhen GetAbsoluteRotation returns true.\nThis exists so subclasses don't need to have direct access to the RelativeRotation property so it\ncan be made private later."
+    },
+    {
       "id": "get-relative-rotation-direct-mutable",
       "name": "GetRelativeRotation_DirectMutable",
       "category": "SceneComponent",
@@ -2883,6 +3015,29 @@
       ],
       "returnType": "Void",
       "docs": "Sets the value of RelativeRotation without causing other side effects to this instance.\nYou should not use this method. The standard SetRelativeRotation variants should be used."
+    },
+    {
+      "id": "get-relative-scale-3-d-property-name",
+      "name": "GetRelativeScale3DPropertyName",
+      "category": "SceneComponent",
+      "signature": "GetRelativeScale3DPropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for RelativeScale3D.\nThis exists so subclasses don't need to have direct access to the RelativeScale3D property so it\ncan be made private later."
+    },
+    {
+      "id": "get-relative-scale-3-d",
+      "name": "GetRelativeScale3D",
+      "category": "SceneComponent",
+      "signature": "GetRelativeScale3D(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Gets the literal value of RelativeScale3D.\nNote, this may be an absolute scale if this is a root component (not attached to anything) or\nwhen GetAbsoluteScale3D returns true.\nThis exists so subclasses don't need to have direct access to the RelativeScale3D property so it\ncan be made private later."
     },
     {
       "id": "get-relative-scale-3-d-direct-mutable",
@@ -2917,6 +3072,47 @@
       "docs": "Sets the value of RelativeScale3D without causing other side effects to this instance.\nYou should not use this method. The standard SetRelativeScale3D variants should be used."
     },
     {
+      "id": "set-relative-transform-direct",
+      "name": "SetRelativeTransform_Direct",
+      "category": "SceneComponent",
+      "signature": "SetRelativeTransform_Direct(Target, New Relative Transform)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "New Relative Transform",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper function to set the location, rotation, and scale without causing other side effects to this instance.\nYou should not use this method. The standard SetRelativeTransform variants should be used."
+    },
+    {
+      "id": "get-absolute-location-property-name",
+      "name": "GetAbsoluteLocationPropertyName",
+      "category": "SceneComponent",
+      "signature": "GetAbsoluteLocationPropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for bAbsoluteLocation.\nThis exists so subclasses don't need to have direct access to the bAbsoluteLocation property so it\ncan be made private later."
+    },
+    {
+      "id": "is-using-absolute-location",
+      "name": "IsUsingAbsoluteLocation",
+      "category": "SceneComponent",
+      "signature": "IsUsingAbsoluteLocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the literal value of bAbsoluteLocation.\nThis exists so subclasses don't need to have direct access to the bAbsoluteLocation property so it\ncan be made private later."
+    },
+    {
       "id": "set-using-absolute-location",
       "name": "SetUsingAbsoluteLocation",
       "category": "SceneComponent",
@@ -2933,6 +3129,29 @@
       ],
       "returnType": "Void",
       "docs": "Sets the value of bAbsoluteLocation without causing other side effects to this instance."
+    },
+    {
+      "id": "get-absolute-rotation-property-name",
+      "name": "GetAbsoluteRotationPropertyName",
+      "category": "SceneComponent",
+      "signature": "GetAbsoluteRotationPropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for bAbsoluteRotation.\nThis exists so subclasses don't need to have direct access to the bAbsoluteRotation property so it\ncan be made private later."
+    },
+    {
+      "id": "is-using-absolute-rotation",
+      "name": "IsUsingAbsoluteRotation",
+      "category": "SceneComponent",
+      "signature": "IsUsingAbsoluteRotation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the literal value of bAbsoluteRotation.\nThis exists so subclasses don't need to have direct access to the bAbsoluteRotation property so it\ncan be made private later."
     },
     {
       "id": "set-using-absolute-rotation",
@@ -2953,6 +3172,29 @@
       "docs": "Sets the value of bAbsoluteRotation without causing other side effects to this instance."
     },
     {
+      "id": "get-absolute-scale-property-name",
+      "name": "GetAbsoluteScalePropertyName",
+      "category": "SceneComponent",
+      "signature": "GetAbsoluteScalePropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for bAbsoluteScale.\nThis exists so subclasses don't need to have direct access to the bAbsoluteScale property so it\ncan be made private later."
+    },
+    {
+      "id": "is-using-absolute-scale",
+      "name": "IsUsingAbsoluteScale",
+      "category": "SceneComponent",
+      "signature": "IsUsingAbsoluteScale(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the literal value of bAbsoluteScale.\nThis exists so subclasses don't need to have direct access to the bReplicates property so it\ncan be made private later.\n'"
+    },
+    {
       "id": "set-using-absolute-scale",
       "name": "SetUsingAbsoluteScale",
       "category": "SceneComponent",
@@ -2971,6 +3213,29 @@
       "docs": "Sets the value of bAbsoluteScale without causing other side effects to this instance."
     },
     {
+      "id": "get-visible-property-name",
+      "name": "GetVisiblePropertyName",
+      "category": "SceneComponent",
+      "signature": "GetVisiblePropertyName()",
+      "params": [],
+      "returnType": "Name",
+      "docs": "Gets the property name for bVisible.\nThis exists so subclasses don't need to have direct access to the bVisible property so it\ncan be made private later."
+    },
+    {
+      "id": "get-visible-flag",
+      "name": "GetVisibleFlag",
+      "category": "SceneComponent",
+      "signature": "GetVisibleFlag(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets the literal value of bVisible.\nThis exists so subclasses don't need to have direct access to the bVisible property so it\ncan be made private later.\nIsVisible and IsVisibleInEditor are preferred in most cases because they respect virtual behavior."
+    },
+    {
       "id": "set-visible-flag",
       "name": "SetVisibleFlag",
       "category": "SceneComponent",
@@ -2987,6 +3252,106 @@
       ],
       "returnType": "Void",
       "docs": "Sets the value of bVisible without causing other side effects to this instance.\nToggleVisible and SetVisibility are preferred in most cases because they respect virtual behavior and side effects."
+    },
+    {
+      "id": "get-mobility",
+      "name": "GetMobility",
+      "category": "SceneComponent",
+      "signature": "GetMobility(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "EComponentMobility::Type",
+      "docs": "Return the Mobility of this component."
+    },
+    {
+      "id": "get-attach-children",
+      "name": "GetAttachChildren",
+      "category": "SceneComponent",
+      "signature": "GetAttachChildren(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "TArray<TObjectPtr<USceneComponent>>&",
+      "docs": "Get the SceneComponents that are attached to this component."
+    },
+    {
+      "id": "conditional-update-component-to-world",
+      "name": "ConditionalUpdateComponentToWorld",
+      "category": "SceneComponent",
+      "signature": "ConditionalUpdateComponentToWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call UpdateComponentToWorld if bComponentToWorldUpdated is false."
+    },
+    {
+      "id": "set-relative-location-6c2903",
+      "name": "SetRelativeLocation",
+      "category": "SceneComponent",
+      "signature": "SetRelativeLocation(Target, New Location, Sweep, Out Sweep Hit Result, Teleport)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "New Location",
+          "type": "FVector"
+        },
+        {
+          "name": "Sweep",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Sweep Hit Result",
+          "type": "FHitResult*"
+        },
+        {
+          "name": "Teleport",
+          "type": "ETeleportType"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-relative-location-6ae4de",
+      "name": "AddRelativeLocation",
+      "category": "SceneComponent",
+      "signature": "AddRelativeLocation(Target, Delta Location, Sweep, Out Sweep Hit Result, Teleport)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        },
+        {
+          "name": "Delta Location",
+          "type": "FVector"
+        },
+        {
+          "name": "Sweep",
+          "type": "Bool"
+        },
+        {
+          "name": "Out Sweep Hit Result",
+          "type": "FHitResult*"
+        },
+        {
+          "name": "Teleport",
+          "type": "ETeleportType"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "contains-data",
@@ -3040,21 +3405,46 @@
       "returnType": "Void"
     },
     {
-      "id": "add-referenced-objects-50710e",
-      "name": "AddReferencedObjects",
+      "id": "get-current-scoped-movement",
+      "name": "GetCurrentScopedMovement",
       "category": "SceneComponent",
-      "signature": "AddReferencedObjects(Target, Collector)",
+      "signature": "GetCurrentScopedMovement(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FSceneComponentInstanceData*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
+          "type": "USceneComponent*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "FScopedMovementUpdate*",
+      "docs": "Delegate called when this component is moved"
+    },
+    {
+      "id": "is-deferring-movement-updates",
+      "name": "IsDeferringMovementUpdates",
+      "category": "SceneComponent",
+      "signature": "IsDeferringMovementUpdates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if movement is currently within the scope of an FScopedMovementUpdate."
+    },
+    {
+      "id": "has-grouped-movement-updates",
+      "name": "HasGroupedMovementUpdates",
+      "category": "SceneComponent",
+      "signature": "HasGroupedMovementUpdates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USceneComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if this component is part of a grouped movement update that will apply later"
     }
   ]
 }

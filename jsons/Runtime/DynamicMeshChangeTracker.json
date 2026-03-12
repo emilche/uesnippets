@@ -215,6 +215,24 @@
       "docs": "Store the final state of a triangle"
     },
     {
+      "id": "attach-attribute-changes",
+      "name": "AttachAttributeChanges",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "AttachAttributeChanges(Target, Attrib Changes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshChange*"
+        },
+        {
+          "name": "Attrib Changes",
+          "type": "TUniquePtr<FDynamicMeshAttributeChangeSet>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Attach an attribute change set to this mesh change, which will the be applied/reverted automatically"
+    },
+    {
       "id": "apply-b44f6d",
       "name": "Apply",
       "category": "DynamicMeshChangeTracker",
@@ -248,7 +266,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Do (limited) sanity checks on this MeshChange to ensure it is well-formed"
+      "docs": "Do (limited) sanity checks on this MeshChange to ensure it is well-formed",
+      "supportedTargets": [
+        "FDynamicMeshChange*",
+        "FDynamicMeshChangeTracker*"
+      ]
     },
     {
       "id": "has-saved-vertex",
@@ -343,7 +365,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Start tracking a change"
+      "docs": "Start tracking a change",
+      "supportedTargets": [
+        "FDynamicMeshAttributeSetChangeTracker*",
+        "FDynamicMeshChangeTracker*"
+      ]
     },
     {
       "id": "end-change",
@@ -357,7 +383,11 @@
         }
       ],
       "returnType": "TUniquePtr<FDynamicMeshAttributeChangeSet>",
-      "docs": "End the change transaction and get the resulting change object"
+      "docs": "End the change transaction and get the resulting change object",
+      "supportedTargets": [
+        "FDynamicMeshAttributeSetChangeTracker*",
+        "FDynamicMeshChangeTracker*"
+      ]
     },
     {
       "id": "save-initial-triangle-efdf53",
@@ -425,9 +455,32 @@
         },
         {
           "name": "Vertex I Ds",
-          "type": "TSet<int>&"
+          "type": "TArray<int>&"
         }
       ],
+      "returnType": "Void",
+      "docs": "store the final state of a set of vertices"
+    },
+    {
+      "id": "f-dynamic-mesh-change-tracker-dd27e6",
+      "name": "FDynamicMeshChangeTracker",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "FDynamicMeshChangeTracker(Mesh)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "FDynamicMesh3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "FDynamicMeshChangeTracker tracks changes to a FDynamicMesh and returns a\nFDynamicMeshChange instance that represents this change and allows it to be reverted/reapplied.\nThis is the top-level class you likely want to use to track mesh changes.\nCall BeginChange() before making any changes to the mesh, then call SaveVertex()\nand SaveTriangle() before modifying the respective elements. Then call EndChange()\nto construct a FDynamicMeshChange that represents the mesh delta.\n@warning Currently only vertices that are part of saved triangles will be stored in the emitted FMeshChange!"
+    },
+    {
+      "id": "f-dynamic-mesh-change-tracker-0fe39e",
+      "name": "FDynamicMeshChangeTracker",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "FDynamicMeshChangeTracker()",
+      "params": [],
       "returnType": "Void"
     },
     {
@@ -453,10 +506,94 @@
       "docs": "Save necessary information about a triangle before it is modified"
     },
     {
-      "id": "save-vertex",
-      "name": "SaveVertex",
+      "id": "save-edge",
+      "name": "SaveEdge",
       "category": "DynamicMeshChangeTracker",
-      "signature": "SaveVertex(Target, Vertex ID)",
+      "signature": "SaveEdge(Target, Edge ID, Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshChangeTracker*"
+        },
+        {
+          "name": "Edge ID",
+          "type": "Int"
+        },
+        {
+          "name": "Vertices",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Save necessary information about an edge before it is modified"
+    },
+    {
+      "id": "save-vertices",
+      "name": "SaveVertices",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "SaveVertices(Target, Vertex I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshChangeTracker*"
+        },
+        {
+          "name": "Vertex I Ds",
+          "type": "EnumerableType"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Save necessary information about a set of vertices before they are modified"
+    },
+    {
+      "id": "save-triangles",
+      "name": "SaveTriangles",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "SaveTriangles(Target, Triangle I Ds, Save Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshChangeTracker*"
+        },
+        {
+          "name": "Triangle I Ds",
+          "type": "EnumerableType"
+        },
+        {
+          "name": "Save Vertices",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Save necessary information about a set of triangles before they are modified"
+    },
+    {
+      "id": "save-triangles-and-neighbour-tris",
+      "name": "SaveTrianglesAndNeighbourTris",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "SaveTrianglesAndNeighbourTris(Target, Triangle I Ds, Save Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshChangeTracker*"
+        },
+        {
+          "name": "Triangle I Ds",
+          "type": "EnumerableType"
+        },
+        {
+          "name": "Save Vertices",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Save necessary information about a set of triangles before they are modified, and also include any direct triangle neighbours"
+    },
+    {
+      "id": "save-vertex-one-ring-triangles-da70bc",
+      "name": "SaveVertexOneRingTriangles",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "SaveVertexOneRingTriangles(Target, Vertex ID, Save Vertices)",
       "params": [
         {
           "name": "Target",
@@ -465,10 +602,36 @@
         {
           "name": "Vertex ID",
           "type": "Int"
+        },
+        {
+          "name": "Save Vertices",
+          "type": "Bool"
         }
       ],
       "returnType": "Void",
-      "docs": "Save necessary information about a vertex before it is modified"
+      "docs": "Save necessary information about a set of triangles in one-ring of a vertex"
+    },
+    {
+      "id": "save-vertex-one-ring-triangles-c26eda",
+      "name": "SaveVertexOneRingTriangles",
+      "category": "DynamicMeshChangeTracker",
+      "signature": "SaveVertexOneRingTriangles(Target, Vertex I Ds, Save Vertices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshChangeTracker*"
+        },
+        {
+          "name": "Vertex I Ds",
+          "type": "EnumerableType"
+        },
+        {
+          "name": "Save Vertices",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<EnumerableType> void",
+      "docs": "Save necessary information about a set of triangles in one-rings of a set of vertices"
     }
   ]
 }

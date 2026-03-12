@@ -1,0 +1,451 @@
+{
+  "id": "movie-scene-entity-builder",
+  "label": "MovieSceneEntityBuilder",
+  "includepath": "EntitySystem/MovieSceneEntityBuilder.h",
+  "includes": [
+    "MovieSceneEntityIDs",
+    "MovieSceneEntitySystemTypes",
+    "MovieSceneEntityManager",
+    "MovieSceneComponentRegistry",
+    "MovieSceneEntityFactory",
+    "MovieSceneMutualComponentInclusivity",
+    "IntegerSequence",
+    "initializer_list"
+  ],
+  "functions": [
+    {
+      "id": "add-1528ce",
+      "name": "Add",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Add(Target, Type I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTypelessMutation*"
+        },
+        {
+          "name": "Type I Ds",
+          "type": "std::initializer_list<FComponentTypeID>"
+        }
+      ],
+      "returnType": "FTypelessMutation&",
+      "docs": "Specifies a mask of components to add and remove from an entity"
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Remove(Target, Type I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTypelessMutation*"
+        },
+        {
+          "name": "Type I Ds",
+          "type": "std::initializer_list<FComponentTypeID>"
+        }
+      ],
+      "returnType": "FTypelessMutation&",
+      "docs": "Direct this mutation to remove the specified component types to an entity"
+    },
+    {
+      "id": "remove-all",
+      "name": "RemoveAll",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "RemoveAll(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTypelessMutation*"
+        }
+      ],
+      "returnType": "FTypelessMutation&",
+      "docs": "Direct this mutation to remove all components from the entity"
+    },
+    {
+      "id": "sizeof",
+      "name": "sizeof",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "sizeof()",
+      "params": [],
+      "returnType": "template<. . . T> struct TEntityBuilder : TEntityBuilderImpl<TMakeIntegerSequence<int,",
+      "docs": "TEntityBuilder is a utility class that can be used to marshal type-safe component data into entites, either on construction or mutation of an existing entity.\nIt is a general purpose utility that should not be used for high-performance code, but is useful for one-off changes to entity component structures\nIn general, this type is intended to be used declaratively, and will forward its state to the final function call (to prevent a copy of the payload data)\nExample usage:\nTComponentTypeID<float> FloatComponent1 = ...;\nTComponentTypeID<float> FloatComponent2 = ...;\nTComponentTypeID<FMovieSceneFloatChannel> FloatChannel = ...;\nFMovieSceneFloatChannel NewChannelType;\nNewChannelType.SetDefault(1.f);\nauto EntityBuilder = FEntityBuilder()\n.AddDefaulted(FloatComponent1)\n.AddDefaulted(FloatComponent2)\n.Add(FloatChannel, MoveTemp(NewChannelType));\n// Create a new entity with 2 defaulted floats, and a float channel with a default of 1.f\nFMovieSceneEntityID NewEntity = CopyTemp(EntityBuilder).CreateEntity(EntityManager);\n// Add the data to an existing entity - will invalidate the entity builder\nEntityBuilder.MutateExisting(EntityManager, Existing);"
+    },
+    {
+      "id": "create",
+      "name": "Create",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Create(Target, Entity Manager)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        }
+      ],
+      "returnType": "FMovieSceneEntityID"
+    },
+    {
+      "id": "generate-type",
+      "name": "GenerateType",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "GenerateType(Target, Entity Manager, Out Mask, Out Add Mutual Components)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Out Mask",
+          "type": "FComponentMask&"
+        },
+        {
+          "name": "Out Add Mutual Components",
+          "type": "Bool&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Initialize(Target, Entity Manager, Entity)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity",
+          "type": "FEntityInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "create-entity",
+      "name": "CreateEntity",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "CreateEntity(Target, Entity Manager, New Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "New Type",
+          "type": "FComponentMask",
+          "default": "FComponentMask()"
+        }
+      ],
+      "returnType": "FMovieSceneEntityID",
+      "docs": "Create a new entity using this builder's definition by moving the payload components into the new entity.\n@note Will invalidate this instance of TEntityBuilder so its payload cannot be used again.\n@param EntityManager The entity manager to create the entity within. All component types *must* relate to this class.\n@param NewType       (Optional) An additional base type to use for the new entity. Any component types not stored by this builder will be default-constructed.\n@return The created entity's ID"
+    },
+    {
+      "id": "replace-entity",
+      "name": "ReplaceEntity",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "ReplaceEntity(Target, Entity Manager, In Out Entity ID, New Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Out Entity ID",
+          "type": "FMovieSceneEntityID&"
+        },
+        {
+          "name": "New Type",
+          "type": "FComponentMask",
+          "default": "FComponentMask()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Replace the components of an entity with this builder's definition.\n@note Will invalidate this instance of TEntityBuilder so its payload cannot be used again.\n@param EntityManager The entity manager that houses EntityID. All component types *must* relate to this class.\n@param EntityID      The entity ID to replace\n@param NewType       (Optional) An additional base type to use for the new entity. Any component types not stored by this builder will be default-constructed."
+    },
+    {
+      "id": "mutate-existing",
+      "name": "MutateExisting",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "MutateExisting(Target, Entity Manager, Entity ID, Base)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "Entity ID",
+          "type": "FMovieSceneEntityID"
+        },
+        {
+          "name": "Base",
+          "type": "FTypelessMutation&",
+          "default": "FTypelessMutation()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mutate an existing entity using this instance's payload and an additional mask of components.\n@note Will invalidate this instance of TEntityBuilder so its payload cannot be used again.\n@param EntityManager The entity manager that houses EntityID. All component types *must* relate to this class.\n@param EntityID      The entity to mutate\n@param Base          (Optional) An additional base mutation to apply while modifying this entity"
+    },
+    {
+      "id": "create-or-update",
+      "name": "CreateOrUpdate",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "CreateOrUpdate(Target, Entity Manager, In Out Entity ID, Base)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TEntityBuilderImpl*"
+        },
+        {
+          "name": "Entity Manager",
+          "type": "FEntityManager*"
+        },
+        {
+          "name": "In Out Entity ID",
+          "type": "FMovieSceneEntityID&"
+        },
+        {
+          "name": "Base",
+          "type": "FTypelessMutation&",
+          "default": "FTypelessMutation().RemoveAll()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mutate an existing entity using this instance's payload and an additional mask of components.\n@note Will invalidate this instance of TEntityBuilder so its payload cannot be used again.\n@param EntityManager The entity manager that houses EntityID. All component types *must* relate to this class.\n@param EntityID      The entity to mutate\n@param Base          (Optional) An additional base mutation to apply while modifying this entity"
+    },
+    {
+      "id": "accumulate-mask",
+      "name": "AccumulateMask",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AccumulateMask(Target, Out Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAddMany*"
+        },
+        {
+          "name": "Out Mask",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FAddMany*",
+        "FAdd*",
+        "FAddConditional*"
+      ]
+    },
+    {
+      "id": "apply",
+      "name": "Apply",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Apply(Target, Allocation, Component Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAddMany*"
+        },
+        {
+          "name": "Allocation",
+          "type": "FEntityAllocation*"
+        },
+        {
+          "name": "Component Offset",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FAddMany*",
+        "FAdd*",
+        "FAddConditional*",
+        "TAdd*",
+        "TAddConditional*"
+      ]
+    },
+    {
+      "id": "mutate-type",
+      "name": "MutateType",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "MutateType(Target, Current)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTypelessMutation*"
+        },
+        {
+          "name": "Current",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "FComponentMask",
+      "docs": "Combine our masks into the specified pre-existing mask"
+    },
+    {
+      "id": "add-defaulted",
+      "name": "AddDefaulted",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddDefaulted(Component Type)",
+      "params": [
+        {
+          "name": "Component Type",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "TEntityBuilder<FAdd> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Add the specified default-constructed component type to the entity\n@param ComponentType  A valid component type or tag ID to add. Must be valid.\n@return A new builder that includes the new component"
+    },
+    {
+      "id": "add-many",
+      "name": "AddMany",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddMany(In Components To Add)",
+      "params": [
+        {
+          "name": "In Components To Add",
+          "type": "FComponentMask&"
+        }
+      ],
+      "returnType": "TEntityBuilder<FAddMany> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Add all the specified default-constructed component type to the entity\n@param InComponentsToAdd  A (possibly empty) component mask that defines all the components to add\n@return A new builder that includes the new component"
+    },
+    {
+      "id": "add-tag",
+      "name": "AddTag",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddTag(Tag Type)",
+      "params": [
+        {
+          "name": "Tag Type",
+          "type": "FComponentTypeID"
+        }
+      ],
+      "returnType": "TEntityBuilder<FAdd> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Add the specified tag to the entity. Equivalent to AddDefaulted.\n@param Tag  A valid component tag ID to add. Must be valid.\n@return A new builder that includes the new component"
+    },
+    {
+      "id": "add-defaulted-conditional",
+      "name": "AddDefaultedConditional",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddDefaultedConditional(Tag Type, Condition)",
+      "params": [
+        {
+          "name": "Tag Type",
+          "type": "FComponentTypeID"
+        },
+        {
+          "name": "Condition",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TEntityBuilder<FAddConditional> TEntityBuilderImpl<TIntegerSequence<int>"
+    },
+    {
+      "id": "add-tag-conditional",
+      "name": "AddTagConditional",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddTagConditional(Tag Type, Condition)",
+      "params": [
+        {
+          "name": "Tag Type",
+          "type": "FComponentTypeID"
+        },
+        {
+          "name": "Condition",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TEntityBuilder<FAddConditional> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Add the specified tag to the entity if a condition is met\n@param Tag         A valid component tag ID to add. Must be valid.\n@param bCondition  Condition specifying whether this tag should be added or not\n@return A new builder that includes the new component"
+    },
+    {
+      "id": "add-4f7f2c",
+      "name": "Add",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Add(Component Type, In Payload)",
+      "params": [
+        {
+          "name": "Component Type",
+          "type": "TComponentTypeID<U>"
+        },
+        {
+          "name": "In Payload",
+          "type": "PayloadType&&"
+        }
+      ],
+      "returnType": "template<U,PayloadType> TEntityBuilder<TAdd<U>> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Add a component to the entity with a specific value\n@param ComponentType  The component type ID to add to the entity. Must be valid.\n@param InPayload      User-specified data to forward into the component\n@return A new builder that includes the new component and payload"
+    },
+    {
+      "id": "add-conditional",
+      "name": "AddConditional",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddConditional(Component Type, In Payload, Condition)",
+      "params": [
+        {
+          "name": "Component Type",
+          "type": "TComponentTypeID<U>"
+        },
+        {
+          "name": "In Payload",
+          "type": "PayloadType&&"
+        },
+        {
+          "name": "Condition",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<U,PayloadType> TEntityBuilder<TAddConditional<U>> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Conditionally add a component to the entity with a specific value\n@param ComponentType  The component type ID to add to the entity. Must be valid if bCondition is true.\n@param InPayload      User-specified data to forward into the component\n@param bCondition     Condition specifying whether this component should be added or not\n@return A new builder that includes the new component and payload"
+    },
+    {
+      "id": "append",
+      "name": "Append",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "Append(In Other)",
+      "params": [
+        {
+          "name": "In Other",
+          "type": "U&&"
+        }
+      ],
+      "returnType": "template<U> TEntityBuilder<U> TEntityBuilderImpl<TIntegerSequence<int>",
+      "docs": "Append another component type to this builder\n@return A new builder that includes the new component"
+    },
+    {
+      "id": "add-mutual-components",
+      "name": "AddMutualComponents",
+      "category": "MovieSceneEntityBuilder",
+      "signature": "AddMutualComponents()",
+      "params": [],
+      "returnType": "template<. . . T,int . . . Indices> TEntityBuilder<T . . .> TEntityBuilderImpl<TIntegerSequence<int,Indices . . .>,T . . .",
+      "docs": "Add any mutual components defined by the entity factory"
+    }
+  ]
+}

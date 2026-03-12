@@ -7,6 +7,83 @@
   ],
   "functions": [
     {
+      "id": "lex-to-string",
+      "name": "LexToString",
+      "category": "NetAnalyticsTypes",
+      "signature": "LexToString(Value)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "FDelinquencyNameTimePair&"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "get-set-key",
+      "name": "GetSetKey",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetSetKey(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "ElementInitType"
+        }
+      ],
+      "returnType": "KeyInitType"
+    },
+    {
+      "id": "matches",
+      "name": "Matches",
+      "category": "NetAnalyticsTypes",
+      "signature": "Matches(LHS, RHS)",
+      "params": [
+        {
+          "name": "LHS",
+          "type": "KeyInitType"
+        },
+        {
+          "name": "RHS",
+          "type": "KeyInitType"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-key-hash",
+      "name": "GetKeyHash",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetKeyHash(Key)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "KeyInitType"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "emplace",
+      "name": "Emplace",
+      "category": "NetAnalyticsTypes",
+      "signature": "Emplace(Target, Name, Time Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelinquencyAnalytics*"
+        },
+        {
+          "name": "Name",
+          "type": "Name"
+        },
+        {
+          "name": "Time Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "add",
       "name": "Add",
       "category": "NetAnalyticsTypes",
@@ -25,6 +102,58 @@
       "docs": "Adds the event to the delinquency tracking, by accumulating its time into total time,\nand updating any existing events to choose the one with the highest time.\nWhen NumberOfTopOffendersToTrack == 0, we will just track the set of all events as well as the total time.\nWhen NumberOfTopOffendersToTrack > 0, we will track the set, total time, and also maintain sorted list\n(highest to lowest) of events that occurred.\nBy setting NumberOfTopOffendersToTrack to 0, users can manage their own lists of \"TopOffenders\", or\notherwise avoid the per add overhead of this tracking."
     },
     {
+      "id": "get-top-offenders",
+      "name": "GetTopOffenders",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetTopOffenders(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelinquencyAnalytics*"
+        }
+      ],
+      "returnType": "TArray<FDelinquencyNameTimePair>&"
+    },
+    {
+      "id": "get-all-delinquents",
+      "name": "GetAllDelinquents",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetAllDelinquents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelinquencyAnalytics*"
+        }
+      ],
+      "returnType": "TSet<FDelinquencyNameTimePair,FDelinquencyKeyFuncs>&"
+    },
+    {
+      "id": "get-total-time",
+      "name": "GetTotalTime",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetTotalTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelinquencyAnalytics*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-number-of-top-offenders-to-track",
+      "name": "GetNumberOfTopOffendersToTrack",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfTopOffendersToTrack(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelinquencyAnalytics*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
       "id": "reset",
       "name": "Reset",
       "category": "NetAnalyticsTypes",
@@ -36,7 +165,14 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Resets the state of tracking."
+      "docs": "Resets the state of tracking.",
+      "supportedTargets": [
+        "FDelinquencyAnalytics*",
+        "FNetAsyncLoadDelinquencyAnalytics*",
+        "FNetQueuedActorDelinquencyAnalytics*",
+        "FNetConnectionSaturationAnalytics*",
+        "FNetConnectionPacketAnalytics*"
+      ]
     },
     {
       "id": "count-bytes",
@@ -53,7 +189,227 @@
           "type": "FArchive&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FDelinquencyAnalytics*",
+        "FNetAsyncLoadDelinquencyAnalytics*",
+        "FNetQueuedActorDelinquencyAnalytics*"
+      ]
+    },
+    {
+      "id": "get-number-of-tracked-frames",
+      "name": "GetNumberOfTrackedFrames",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfTrackedFrames(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionSaturationAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The total number of frames that we have currently tracked.",
+      "supportedTargets": [
+        "FNetConnectionSaturationAnalytics*",
+        "FNetConnectionPacketAnalytics*"
+      ]
+    },
+    {
+      "id": "get-number-of-saturated-frames",
+      "name": "GetNumberOfSaturatedFrames",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfSaturatedFrames(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionSaturationAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The number of frames we have reported as saturated."
+    },
+    {
+      "id": "get-longest-run-of-saturated-frames",
+      "name": "GetLongestRunOfSaturatedFrames",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetLongestRunOfSaturatedFrames(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionSaturationAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The longest number of consecutive frames that we have been saturated."
+    },
+    {
+      "id": "get-number-of-replications",
+      "name": "GetNumberOfReplications",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfReplications(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionSaturationAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The number of times we have tried to replicate data on this connection\n(UNetDriver::ServerReplicateActors / UReplicationGraph::ServerReplicateActors)"
+    },
+    {
+      "id": "get-number-of-saturated-replications",
+      "name": "GetNumberOfSaturatedReplications",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfSaturatedReplications(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionSaturationAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The number of times we have been pre-empted from replicating all data, due to saturation."
+    },
+    {
+      "id": "get-longest-run-of-saturated-replications",
+      "name": "GetLongestRunOfSaturatedReplications",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetLongestRunOfSaturatedReplications(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionSaturationAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The longest number of consecutive replication attempts where we were pre-empted due to saturation."
+    },
+    {
+      "id": "get-longest-run-of-dropped-in-packets",
+      "name": "GetLongestRunOfDroppedInPackets",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetLongestRunOfDroppedInPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionPacketAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Longest number of consecutive dropped incoming packets that was tracked."
+    },
+    {
+      "id": "get-longest-run-of-dropped-out-packets",
+      "name": "GetLongestRunOfDroppedOutPackets",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetLongestRunOfDroppedOutPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionPacketAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Longest number of consecutive outgoing packets that was tracked."
+    },
+    {
+      "id": "get-number-of-frames-with-bursts-of-packet-loss",
+      "name": "GetNumberOfFramesWithBurstsOfPacketLoss",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfFramesWithBurstsOfPacketLoss(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionPacketAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Number of frames where we saw bursts of packet loss."
+    },
+    {
+      "id": "get-number-of-frames-with-no-packets",
+      "name": "GetNumberOfFramesWithNoPackets",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetNumberOfFramesWithNoPackets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionPacketAnalytics*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "The total number of frames where we were not notified of any packets (ACK, NAK, in or out)."
+    },
+    {
+      "id": "get-bursty-packet-loss-per-second",
+      "name": "GetBurstyPacketLossPerSecond",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetBurstyPacketLossPerSecond(Target, Duration Sec)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetConnectionPacketAnalytics*"
+        },
+        {
+          "name": "Duration Sec",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "get-loss-percentage",
+      "name": "GetLossPercentage",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetLossPercentage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPacketLossData*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Calculates the current packet loss along with a rolling average of the past X updates\nConstructed with the number of samples you want to average over time."
+    },
+    {
+      "id": "get-avg-loss-percentage",
+      "name": "GetAvgLossPercentage",
+      "category": "NetAnalyticsTypes",
+      "signature": "GetAvgLossPercentage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPacketLossData*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "The average loss percentage over the previous X StatPeriods"
+    },
+    {
+      "id": "update-loss",
+      "name": "UpdateLoss",
+      "category": "NetAnalyticsTypes",
+      "signature": "UpdateLoss(Target, Nb Packets Lost, Total Packets, Sample Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPacketLossData*"
+        },
+        {
+          "name": "Nb Packets Lost",
+          "type": "Int"
+        },
+        {
+          "name": "Total Packets",
+          "type": "Int"
+        },
+        {
+          "name": "Sample Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the packet loss based on total and lost packets"
     }
   ]
 }

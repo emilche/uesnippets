@@ -9,6 +9,54 @@
   ],
   "functions": [
     {
+      "id": "get-adjusted-component-to-world-render-thread",
+      "name": "GetAdjustedComponentToWorld_RenderThread",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "GetAdjustedComponentToWorld_RenderThread(Target, View, Current Component To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IViewBasedTransformAdjuster*"
+        },
+        {
+          "name": "View",
+          "type": "ISceneViewInterface&"
+        },
+        {
+          "name": "Current Component To World",
+          "type": "FTransform&"
+        }
+      ],
+      "returnType": "FTransform",
+      "docs": "If an adjuster is used by a render proxy, it will use this endpoint for getting the transform.\nThis allows an adjuster to be potentially shared between game and render threads. Of course,\na component might instead choose to create a new adjuster whenever the render proxy is recreated,\nand recreate the proxy whenever any relevant parameters change.",
+      "supportedTargets": [
+        "IViewBasedTransformAdjuster*",
+        "FSubGizmoTransformAdjuster*"
+      ]
+    },
+    {
+      "id": "update-world-local-state",
+      "name": "UpdateWorldLocalState",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "UpdateWorldLocalState(Target, World In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IViewBasedTransformAdjuster*"
+        },
+        {
+          "name": "World In",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Not every adjuster will care about the world/local setting, but it is useful for the\na component that uses it to be able to blindly pass this information down without\ncaring about the type of adjuster.",
+      "supportedTargets": [
+        "IViewBasedTransformAdjuster*",
+        "FSubGizmoTransformAdjuster*"
+      ]
+    },
+    {
       "id": "get-view-independent-bounds",
       "name": "GetViewIndependentBounds",
       "category": "ViewBasedTransformAdjusters",
@@ -16,7 +64,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FSimpleConstantViewScaleAdjuster*"
+          "type": "IViewBasedTransformAdjuster*"
         },
         {
           "name": "Local To World",
@@ -28,7 +76,13 @@
         }
       ],
       "returnType": "FBoxSphereBounds",
-      "docs": "Returns the transform that should be returned by a USceneComponent CalcBounds method, which\ncan't know about the view. Although the default is to return the original bounds, any adjuster\nthat scales the mesh arbitrarily large will probably need to return infinite bounds, whereas\nan adjuster that only changes orienation must account for any possible orientation.\nNote that returning infinite bounds causes the relevant components to no longer be frustum-culled,\nbut this is acceptible for gizmos, which are typically few and on-screen."
+      "docs": "Returns the transform that should be returned by a USceneComponent CalcBounds method, which\ncan't know about the view. Although the default is to return the original bounds, any adjuster\nthat scales the mesh arbitrarily large will probably need to return infinite bounds, whereas\nan adjuster that only changes orienation must account for any possible orientation.\nNote that returning infinite bounds causes the relevant components to no longer be frustum-culled,\nbut this is acceptible for gizmos, which are typically few and on-screen.",
+      "supportedTargets": [
+        "IViewBasedTransformAdjuster*",
+        "FSimpleConstantViewScaleAdjuster*",
+        "FSubGizmoTransformAdjuster*",
+        "FConstantViewRelativeTransformAdjuster*"
+      ]
     },
     {
       "id": "set-gizmo-origin-transform",
@@ -47,6 +101,40 @@
       ],
       "returnType": "Void",
       "docs": "Update the transform of the gizmo origin relative to this component. This is safe to do even if the\nadjuster is used by the render thread (the render-side update gets queued properly)."
+    },
+    {
+      "id": "set-mirror-based-on-octant",
+      "name": "SetMirrorBasedOnOctant",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "SetMirrorBasedOnOctant(Target, On)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSubGizmoTransformAdjuster*"
+        },
+        {
+          "name": "On",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-settings",
+      "name": "SetSettings",
+      "category": "ViewBasedTransformAdjusters",
+      "signature": "SetSettings(Target, Settings In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSubGizmoTransformAdjuster*"
+        },
+        {
+          "name": "Settings In",
+          "type": "FSettings&"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "add-transform-adjuster-642765",
@@ -110,29 +198,11 @@
           "type": "FTransform&"
         }
       ],
-      "returnType": "FTransform"
-    },
-    {
-      "id": "get-adjusted-component-to-world-render-thread",
-      "name": "GetAdjustedComponentToWorld_RenderThread",
-      "category": "ViewBasedTransformAdjusters",
-      "signature": "GetAdjustedComponentToWorld_RenderThread(Target, View, Current Component To World)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FSubGizmoTransformAdjuster*"
-        },
-        {
-          "name": "View",
-          "type": "ISceneViewInterface&"
-        },
-        {
-          "name": "Current Component To World",
-          "type": "FTransform&"
-        }
-      ],
       "returnType": "FTransform",
-      "docs": "If an adjuster is used by a render proxy, it will use this endpoint for getting the transform.\nThis allows an adjuster to be potentially shared between game and render threads. Of course,\na component might instead choose to create a new adjuster whenever the render proxy is recreated,\nand recreate the proxy whenever any relevant parameters change."
+      "supportedTargets": [
+        "FSubGizmoTransformAdjuster*",
+        "FConstantViewRelativeTransformAdjuster*"
+      ]
     }
   ]
 }

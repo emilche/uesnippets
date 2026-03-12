@@ -14,6 +14,33 @@
   ],
   "functions": [
     {
+      "id": "get-save-game-names",
+      "name": "GetSaveGameNames",
+      "category": "SaveGameSystem",
+      "signature": "GetSaveGameNames(Target, Found Saves, User Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ISaveGameSystem*"
+        },
+        {
+          "name": "Found Saves",
+          "type": "TArray<FString>&"
+        },
+        {
+          "name": "User Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets a list of all known saves.  This isn't possible on all platforms.",
+      "supportedTargets": [
+        "ISaveGameSystem*",
+        "FGenericSaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
+    },
+    {
       "id": "does-save-game-exist-async",
       "name": "DoesSaveGameExistAsync",
       "category": "SaveGameSystem",
@@ -37,7 +64,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Asyncronously checks if the named savegame exists. Default implementation runs blocking version on a background thread"
+      "docs": "Asyncronously checks if the named savegame exists. Default implementation runs blocking version on a background thread",
+      "supportedTargets": [
+        "ISaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "save-game-async",
@@ -71,7 +102,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Saves the named savegame asyncronously. Default implementation runs blocking version on a background thread"
+      "docs": "Saves the named savegame asyncronously. Default implementation runs blocking version on a background thread",
+      "supportedTargets": [
+        "ISaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "load-game-async",
@@ -101,7 +136,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Load the named savegame asyncronously. Default implementation runs blocking version on a background thread"
+      "docs": "Load the named savegame asyncronously. Default implementation runs blocking version on a background thread",
+      "supportedTargets": [
+        "ISaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "delete-game-async",
@@ -131,7 +170,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Delete the named savegame asyncronously. Default implementation runs blocking version on a background thread"
+      "docs": "Delete the named savegame asyncronously. Default implementation runs blocking version on a background thread",
+      "supportedTargets": [
+        "ISaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "get-save-game-names-async",
@@ -153,7 +196,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Gets a list of all known saves if the platform supports it. Default implementatino runs blocking version on a background thread"
+      "docs": "Gets a list of all known saves if the platform supports it. Default implementatino runs blocking version on a background thread",
+      "supportedTargets": [
+        "ISaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "init-async",
@@ -182,6 +229,20 @@
       "docs": "(Optional) initialise the save system for the given user. Useful if the platform may display UI on first use - this can be called as part of the user login flow, for example.\nIf this is not used, any UI may be displayed on the first use of the other save api functions"
     },
     {
+      "id": "does-save-system-support-multiple-users",
+      "name": "DoesSaveSystemSupportMultipleUsers",
+      "category": "SaveGameSystem",
+      "signature": "DoesSaveSystemSupportMultipleUsers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericSaveGameSystem*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Some save systems don't support more than one user, in those cases the game needs to avoid saving settings for anyone but the primary user."
+    },
+    {
       "id": "does-save-game-exist-with-result",
       "name": "DoesSaveGameExistWithResult",
       "category": "SaveGameSystem",
@@ -189,7 +250,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FBaseAsyncSaveGameSystem*"
+          "type": "FGenericSaveGameSystem*"
         },
         {
           "name": "Name",
@@ -201,21 +262,25 @@
         }
       ],
       "returnType": "ESaveExistsResult",
-      "docs": "Similar to DoesSaveGameExist, except returns a result code with more information."
+      "docs": "Similar to DoesSaveGameExist, except returns a result code with more information.",
+      "supportedTargets": [
+        "FGenericSaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
-      "id": "get-save-game-names",
-      "name": "GetSaveGameNames",
+      "id": "does-save-game-exist",
+      "name": "DoesSaveGameExist",
       "category": "SaveGameSystem",
-      "signature": "GetSaveGameNames(Target, Found Saves, User Index)",
+      "signature": "DoesSaveGameExist(Target, Name, User Index)",
       "params": [
         {
           "name": "Target",
-          "type": "FBaseAsyncSaveGameSystem*"
+          "type": "FGenericSaveGameSystem*"
         },
         {
-          "name": "Found Saves",
-          "type": "TArray<FString>&"
+          "name": "Name",
+          "type": "TCHAR*"
         },
         {
           "name": "User Index",
@@ -223,7 +288,7 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Gets a list of all known saves.  This isn't possible on all platforms."
+      "docs": "Return true if the named savegame exists (probably not useful with NativeUI"
     },
     {
       "id": "save-game",
@@ -233,7 +298,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FBaseAsyncSaveGameSystem*"
+          "type": "FGenericSaveGameSystem*"
         },
         {
           "name": "Attempt To Use UI",
@@ -253,7 +318,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Saves the game, blocking until complete. Platform may use FGameDelegates to get more information from the game"
+      "docs": "Saves the game, blocking until complete. Platform may use FGameDelegates to get more information from the game",
+      "supportedTargets": [
+        "FGenericSaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "load-game",
@@ -263,7 +332,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FBaseAsyncSaveGameSystem*"
+          "type": "FGenericSaveGameSystem*"
         },
         {
           "name": "Attempt To Use UI",
@@ -283,7 +352,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Loads the game, blocking until complete"
+      "docs": "Loads the game, blocking until complete",
+      "supportedTargets": [
+        "FGenericSaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     },
     {
       "id": "delete-game",
@@ -293,7 +366,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FBaseAsyncSaveGameSystem*"
+          "type": "FGenericSaveGameSystem*"
         },
         {
           "name": "Attempt To Use UI",
@@ -309,7 +382,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Delete an existing save game, blocking until complete"
+      "docs": "Delete an existing save game, blocking until complete",
+      "supportedTargets": [
+        "FGenericSaveGameSystem*",
+        "FBaseAsyncSaveGameSystem*"
+      ]
     }
   ]
 }

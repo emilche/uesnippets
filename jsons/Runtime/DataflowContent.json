@@ -24,6 +24,34 @@
       "returnType": "template<class T> TObjectPtr<T>"
     },
     {
+      "id": "invalidate-dataflow-contents",
+      "name": "InvalidateDataflowContents",
+      "category": "DataflowContent",
+      "signature": "InvalidateDataflowContents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IDataflowContentOwner*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Delegate member to be called in the invalidate"
+    },
+    {
+      "id": "is-construction-dirty",
+      "name": "IsConstructionDirty",
+      "category": "DataflowContent",
+      "signature": "IsConstructionDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Dirty - State Invalidation\nCheck if non-graph specific data has been changed, this usually requires a re-render"
+    },
+    {
       "id": "set-construction-dirty",
       "name": "SetConstructionDirty",
       "category": "DataflowContent",
@@ -39,6 +67,19 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "is-simulation-dirty",
+      "name": "IsSimulationDirty",
+      "category": "DataflowContent",
+      "signature": "IsSimulationDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "set-simulation-dirty",
@@ -81,6 +122,19 @@
       "docs": "LastModifiedTimestamp - State Invalidation\nDataflow timestamp accessors can be used to see if the EvaluationContext has been invalidated."
     },
     {
+      "id": "get-last-modified-timestamp",
+      "name": "GetLastModifiedTimestamp",
+      "category": "DataflowContent",
+      "signature": "GetLastModifiedTimestamp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        }
+      ],
+      "returnType": "UE::Dataflow::FTimestamp&"
+    },
+    {
       "id": "set-dataflow-context",
       "name": "SetDataflowContext",
       "category": "DataflowContent",
@@ -113,6 +167,28 @@
       "docs": "Rebuild the owner dependent datas"
     },
     {
+      "id": "add-content-objects",
+      "name": "AddContentObjects",
+      "category": "DataflowContent",
+      "signature": "AddContentObjects(Target, Collector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        },
+        {
+          "name": "Collector",
+          "type": "FReferenceCollector&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect reference objects for GC",
+      "supportedTargets": [
+        "UDataflowBaseContent*",
+        "UDataflowSkeletalContent*"
+      ]
+    },
+    {
       "id": "set-actor-properties",
       "name": "SetActorProperties",
       "category": "DataflowContent",
@@ -128,7 +204,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Set all the preview actor exposed properties"
+      "docs": "Set all the preview actor exposed properties",
+      "supportedTargets": [
+        "UDataflowBaseContent*",
+        "UDataflowSkeletalContent*"
+      ]
     },
     {
       "id": "set-dataflow-owner",
@@ -180,56 +260,154 @@
       "docs": "Data flow asset accessors (through the context)"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "set-dataflow-terminal",
+      "name": "SetDataflowTerminal",
       "category": "DataflowContent",
-      "signature": "Serialize(Target, Ar)",
+      "signature": "SetDataflowTerminal(Target, In Path)",
       "params": [
         {
           "name": "Target",
           "type": "UDataflowBaseContent*"
         },
         {
-          "name": "Ar",
-          "type": "FArchive&"
+          "name": "In Path",
+          "type": "String&"
         }
       ],
       "returnType": "Void",
-      "docs": "Content Serialization"
+      "docs": "Data flow terminal accessors"
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "get-dataflow-terminal",
+      "name": "GetDataflowTerminal",
       "category": "DataflowContent",
-      "signature": "AddReferencedObjects(In This, Collector)",
+      "signature": "GetDataflowTerminal(Target)",
       "params": [
         {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "String&"
     },
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
+      "id": "set-terminal-asset",
+      "name": "SetTerminalAsset",
       "category": "DataflowContent",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "signature": "SetTerminalAsset(Target, In Asset)",
       "params": [
         {
           "name": "Target",
           "type": "UDataflowBaseContent*"
         },
         {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
+          "name": "In Asset",
+          "type": "TObjectPtr<UObject>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Terminal asset accessors"
+    },
+    {
+      "id": "get-terminal-asset",
+      "name": "GetTerminalAsset",
+      "category": "DataflowContent",
+      "signature": "GetTerminalAsset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        }
+      ],
+      "returnType": "TObjectPtr<UObject>&"
+    },
+    {
+      "id": "set-preview-class",
+      "name": "SetPreviewClass",
+      "category": "DataflowContent",
+      "signature": "SetPreviewClass(Target, In Preview Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        },
+        {
+          "name": "In Preview Class",
+          "type": "TSubclassOf<AActor>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Preview class accessors"
+    },
+    {
+      "id": "get-preview-class",
+      "name": "GetPreviewClass",
+      "category": "DataflowContent",
+      "signature": "GetPreviewClass(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        }
+      ],
+      "returnType": "TSubclassOf<AActor>&"
+    },
+    {
+      "id": "is-saved",
+      "name": "IsSaved",
+      "category": "DataflowContent",
+      "signature": "IsSaved(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Context cache saving"
+    },
+    {
+      "id": "set-is-saved",
+      "name": "SetIsSaved",
+      "category": "DataflowContent",
+      "signature": "SetIsSaved(Target, In Saved)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        },
+        {
+          "name": "In Saved",
+          "type": "Bool"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "override-struct-property",
+      "name": "OverrideStructProperty",
+      "category": "DataflowContent",
+      "signature": "OverrideStructProperty(Target, Preview Actor, Property Value, Property Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowBaseContent*"
+        },
+        {
+          "name": "Preview Actor",
+          "type": "TObjectPtr<AActor>&"
+        },
+        {
+          "name": "Property Value",
+          "type": "StructType&"
+        },
+        {
+          "name": "Property Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "template<StructType> void",
+      "docs": "override struct properties from BP"
     },
     {
       "id": "can-edit-change",
@@ -247,24 +425,6 @@
         }
       ],
       "returnType": "Bool"
-    },
-    {
-      "id": "add-content-objects",
-      "name": "AddContentObjects",
-      "category": "DataflowContent",
-      "signature": "AddContentObjects(Target, Collector)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UDataflowSkeletalContent*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Collect reference objects for GC"
     },
     {
       "id": "set-skeletal-mesh",
@@ -290,6 +450,19 @@
       "docs": "Data flow skeletal mesh accessors"
     },
     {
+      "id": "get-skeletal-mesh",
+      "name": "GetSkeletalMesh",
+      "category": "DataflowContent",
+      "signature": "GetSkeletalMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowSkeletalContent*"
+        }
+      ],
+      "returnType": "TObjectPtr<USkeletalMesh>&"
+    },
+    {
       "id": "set-animation-asset",
       "name": "SetAnimationAsset",
       "category": "DataflowContent",
@@ -311,6 +484,19 @@
       ],
       "returnType": "Void",
       "docs": "Data flow animation asset accessors"
+    },
+    {
+      "id": "get-animation-asset",
+      "name": "GetAnimationAsset",
+      "category": "DataflowContent",
+      "signature": "GetAnimationAsset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UDataflowSkeletalContent*"
+        }
+      ],
+      "returnType": "TObjectPtr<UAnimationAsset>&"
     }
   ]
 }

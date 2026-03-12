@@ -1,0 +1,489 @@
+{
+  "id": "avoidance-manager",
+  "label": "AvoidanceManager",
+  "includepath": "AI/Navigation/AvoidanceManager.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "ObjectMacros",
+    "Object",
+    "EngineTypes",
+    "CoreMisc",
+    "ScriptMacros",
+    "AvoidanceManager.generated"
+  ],
+  "functions": [
+    {
+      "id": "should-be-ignored",
+      "name": "ShouldBeIgnored",
+      "category": "AvoidanceManager",
+      "signature": "ShouldBeIgnored(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNavAvoidanceData*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-ignore-group",
+      "name": "ShouldIgnoreGroup",
+      "category": "AvoidanceManager",
+      "signature": "ShouldIgnoreGroup(Target, Other Group Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNavAvoidanceData*"
+        },
+        {
+          "name": "Other Group Mask",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-object-count",
+      "name": "GetObjectCount",
+      "category": "AI",
+      "signature": "GetObjectCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of avoidance objects currently in the manager."
+    },
+    {
+      "id": "get-new-avoidance-uid",
+      "name": "GetNewAvoidanceUID",
+      "category": "AI",
+      "signature": "GetNewAvoidanceUID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get appropriate UID for use when reporting to this function or requesting RVO assistance."
+    },
+    {
+      "id": "register-movement-component",
+      "name": "RegisterMovementComponent",
+      "category": "AI",
+      "signature": "RegisterMovementComponent(Target, Movement Comp, Avoidance Weight)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Movement Comp",
+          "type": "UMovementComponent*"
+        },
+        {
+          "name": "Avoidance Weight",
+          "type": "Float",
+          "default": "0.5f"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Register with the given avoidance manager.\n@param AvoidanceWeight\tWhen avoiding each other, actors divert course in proportion to their relative weights. Range is 0.0 to 1.0. Special: at 1.0, actor will not divert course at all."
+    },
+    {
+      "id": "get-avoidance-object-for-uid",
+      "name": "GetAvoidanceObjectForUID",
+      "category": "AvoidanceManager",
+      "signature": "GetAvoidanceObjectForUID(Target, Avoidance UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FNavAvoidanceData*",
+      "docs": "Get your latest data."
+    },
+    {
+      "id": "get-avoidance-velocity-for-component",
+      "name": "GetAvoidanceVelocityForComponent",
+      "category": "AI",
+      "signature": "GetAvoidanceVelocityForComponent(Target, Movement Comp)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Movement Comp",
+          "type": "UMovementComponent*"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Calculate avoidance velocity for component (avoids collisions with the supplied component)"
+    },
+    {
+      "id": "get-avoidance-velocity-ignoring-uid",
+      "name": "GetAvoidanceVelocityIgnoringUID",
+      "category": "AvoidanceManager",
+      "signature": "GetAvoidanceVelocityIgnoringUID(Target, Avoidance Data, Delta Time, Ignore This UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance Data",
+          "type": "FNavAvoidanceData&"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Ignore This UID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Only use if you want manual velocity planning. Provide your AvoidanceUID in order to avoid colliding with yourself."
+    },
+    {
+      "id": "get-avoidance-velocity",
+      "name": "GetAvoidanceVelocity",
+      "category": "AvoidanceManager",
+      "signature": "GetAvoidanceVelocity(Target, Avoidance Data, Delta Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance Data",
+          "type": "FNavAvoidanceData&"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Only use if you want manual velocity planning. Will not ignore your own volume if you are registered."
+    },
+    {
+      "id": "update-rvo",
+      "name": "UpdateRVO",
+      "category": "AvoidanceManager",
+      "signature": "UpdateRVO(Target, Movement Comp)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Movement Comp",
+          "type": "UMovementComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the RVO avoidance data for the participating UMovementComponent"
+    },
+    {
+      "id": "override-to-max-weight",
+      "name": "OverrideToMaxWeight",
+      "category": "AvoidanceManager",
+      "signature": "OverrideToMaxWeight(Target, Avoidance UID, Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        },
+        {
+          "name": "Duration",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For Duration seconds, set this object to ignore all others."
+    },
+    {
+      "id": "is-debug-on-for-uid",
+      "name": "IsDebugOnForUID",
+      "category": "AvoidanceManager",
+      "signature": "IsDebugOnForUID(Target, Avoidance UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-debug-on-for-all",
+      "name": "IsDebugOnForAll",
+      "category": "AvoidanceManager",
+      "signature": "IsDebugOnForAll(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-debug-enabled",
+      "name": "IsDebugEnabled",
+      "category": "AvoidanceManager",
+      "signature": "IsDebugEnabled(Target, Avoidance UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "avoidance-debug-for-uid",
+      "name": "AvoidanceDebugForUID",
+      "category": "AvoidanceManager",
+      "signature": "AvoidanceDebugForUID(Target, Avoidance UID, Turn On)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        },
+        {
+          "name": "Turn On",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "avoidance-debug-for-all",
+      "name": "AvoidanceDebugForAll",
+      "category": "AvoidanceManager",
+      "signature": "AvoidanceDebugForAll(Target, Turn On)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Turn On",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "avoidance-system-toggle",
+      "name": "AvoidanceSystemToggle",
+      "category": "AvoidanceManager",
+      "signature": "AvoidanceSystemToggle(Turn On)",
+      "params": [
+        {
+          "name": "Turn On",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "handle-toggle-debug-all",
+      "name": "HandleToggleDebugAll",
+      "category": "AvoidanceManager",
+      "signature": "HandleToggleDebugAll(Target, Cmd, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Exec command handlers"
+    },
+    {
+      "id": "handle-toggle-avoidance",
+      "name": "HandleToggleAvoidance",
+      "category": "AvoidanceManager",
+      "signature": "HandleToggleAvoidance(Target, Cmd, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-nav-edge-provider",
+      "name": "SetNavEdgeProvider",
+      "category": "AvoidanceManager",
+      "signature": "SetNavEdgeProvider(Target, In Edge Provider)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "In Edge Provider",
+          "type": "INavEdgeProviderInterface*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-avoidance-object",
+      "name": "RemoveAvoidanceObject",
+      "category": "AvoidanceManager",
+      "signature": "RemoveAvoidanceObject(Target, Avoidance UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to manually mark data associated with given ID as 'dead' (and reusable)"
+    },
+    {
+      "id": "is-auto-purge-enabled",
+      "name": "IsAutoPurgeEnabled",
+      "category": "AvoidanceManager",
+      "signature": "IsAutoPurgeEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the avoidance objects are auto purged in RemoveOutdatedObjects"
+    },
+    {
+      "id": "remove-outdated-objects",
+      "name": "RemoveOutdatedObjects",
+      "category": "AvoidanceManager",
+      "signature": "RemoveOutdatedObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handle for efficient management of RemoveOutdatedObjects timer"
+    },
+    {
+      "id": "request-update-timer",
+      "name": "RequestUpdateTimer",
+      "category": "AvoidanceManager",
+      "signature": "RequestUpdateTimer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Try to set a timer for RemoveOutdatedObjects"
+    },
+    {
+      "id": "update-rvo-internal",
+      "name": "UpdateRVO_Internal",
+      "category": "AvoidanceManager",
+      "signature": "UpdateRVO_Internal(Target, Avoidance UID, Avoidance Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance UID",
+          "type": "Int"
+        },
+        {
+          "name": "Avoidance Data",
+          "type": "FNavAvoidanceData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This is called by our blueprint-accessible function after it has packed the data into an object."
+    },
+    {
+      "id": "get-avoidance-velocity-internal",
+      "name": "GetAvoidanceVelocity_Internal",
+      "category": "AvoidanceManager",
+      "signature": "GetAvoidanceVelocity_Internal(Target, Avoidance Data, Delta Time, Ignore This UID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAvoidanceManager*"
+        },
+        {
+          "name": "Avoidance Data",
+          "type": "FNavAvoidanceData&"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Ignore This UID",
+          "type": "Int*",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "This is called by our blueprint-accessible functions, and permits the user to ignore self, or not. Important in case the user isn't in the avoidance manager."
+    }
+  ]
+}

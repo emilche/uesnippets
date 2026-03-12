@@ -1,0 +1,210 @@
+{
+  "id": "media-object-pool",
+  "label": "MediaObjectPool",
+  "includepath": "MediaObjectPool.h",
+  "includes": [
+    "Array",
+    "Queue",
+    "ScopeLock",
+    "SharedPointer",
+    "UniquePtr"
+  ],
+  "functions": [
+    {
+      "id": "shutdown-poolable",
+      "name": "ShutdownPoolable",
+      "category": "MediaObjectPool",
+      "signature": "ShutdownPoolable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPoolable*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when the object added to the pool.\nOverride this method to clean up a poolable object\nwhen it is no longer used.\n@see InitializePoolable"
+    },
+    {
+      "id": "is-ready-for-reuse",
+      "name": "IsReadyForReuse",
+      "category": "MediaObjectPool",
+      "signature": "IsReadyForReuse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPoolable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Used to check if returned object is ready for reuse right away"
+    },
+    {
+      "id": "acquire",
+      "name": "Acquire",
+      "category": "MediaObjectPool",
+      "signature": "Acquire(Target, Alloc)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStorage*"
+        },
+        {
+          "name": "Alloc",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "ObjectType*",
+      "docs": "Acquire an object from the pool.\nbAlloc allows to chose if new object should be allocated and added to the pool.",
+      "supportedTargets": [
+        "TStorage*",
+        "TMediaObjectPool*"
+      ]
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "MediaObjectPool",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStorage*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of objects stored.",
+      "supportedTargets": [
+        "TStorage*",
+        "TMediaObjectPool*"
+      ]
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "category": "MediaObjectPool",
+      "signature": "Release(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStorage*"
+        },
+        {
+          "name": "Object",
+          "type": "ObjectType*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Return the given object to the pool.",
+      "supportedTargets": [
+        "TStorage*",
+        "TMediaObjectPool*"
+      ]
+    },
+    {
+      "id": "reserve",
+      "name": "Reserve",
+      "category": "MediaObjectPool",
+      "signature": "Reserve(Target, Num Objects)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStorage*"
+        },
+        {
+          "name": "Num Objects",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reserve the specified number of objects."
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "MediaObjectPool",
+      "signature": "Tick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStorage*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Regular tick call",
+      "supportedTargets": [
+        "TStorage*",
+        "TMediaObjectPool*"
+      ]
+    },
+    {
+      "id": "acquire-shared-eb0685",
+      "name": "AcquireShared",
+      "category": "MediaObjectPool",
+      "signature": "AcquireShared(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaObjectPool*"
+        }
+      ],
+      "returnType": "TSharedRef<ObjectType,ESPMode::ThreadSafe>",
+      "docs": "Acquire a shared object from the pool.\nShared objects do not need to be returned to the pool. They'll be\nreclaimed automatically when their reference count goes to zero.\n@return The shared object.\n@see Acquire, AcquireUnique, Reset, ToShared"
+    },
+    {
+      "id": "acquire-shared-56011b",
+      "name": "AcquireShared",
+      "category": "MediaObjectPool",
+      "signature": "AcquireShared(Target, Alloc)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaObjectPool*"
+        },
+        {
+          "name": "Alloc",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TSharedPtr<ObjectType,ESPMode::ThreadSafe>",
+      "docs": "Acquire a shared object from the pool.\nShared objects do not need to be returned to the pool. They'll be\nreclaimed automatically when their reference count goes to zero.\nbAlloc allows to chose if new object should be allocated and added to the pool.\n@return The shared object.\n@see Acquire, AcquireUnique, Reset, ToShared"
+    },
+    {
+      "id": "to-shared",
+      "name": "ToShared",
+      "category": "MediaObjectPool",
+      "signature": "ToShared(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaObjectPool*"
+        },
+        {
+          "name": "Object",
+          "type": "ObjectType*"
+        }
+      ],
+      "returnType": "TSharedRef<ObjectType,ESPMode::ThreadSafe>",
+      "docs": "Convert an object to a shared pooled object.\n@param Object The object to convert.\n@return The shared object.\n@see AcquireShared, ToUnique"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "MediaObjectPool",
+      "signature": "Reset(Target, Num Objects)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMediaObjectPool*"
+        },
+        {
+          "name": "Num Objects",
+          "type": "UInt",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the pool and reserve a specified number of objects.\n@param NumObjects Number of objects to reserve (default = 0).\n@see GetObject"
+    }
+  ]
+}

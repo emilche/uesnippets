@@ -1,0 +1,161 @@
+{
+  "id": "slate-rhi-post-buffer-processor",
+  "label": "SlateRHIPostBufferProcessor",
+  "includepath": "FX/SlateRHIPostBufferProcessor.h",
+  "includes": [
+    "TextureRenderTarget2D",
+    "PaintGeometry",
+    "RenderingCommon",
+    "SlateRenderer",
+    "Object",
+    "ObjectMacros",
+    "SlateRHIRenderingPolicyInterface",
+    "ScreenPass",
+    "SlateRHIPostBufferProcessor.generated"
+  ],
+  "functions": [
+    {
+      "id": "post-process-renderthread-cc3695",
+      "name": "PostProcess_Renderthread",
+      "category": "SlateRHIPostBufferProcessor",
+      "signature": "PostProcess_Renderthread(Target, Graph Builder, Input Texture, Output Texture)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateRHIPostBufferProcessorProxy*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Input Texture",
+          "type": "FScreenPassTexture&"
+        },
+        {
+          "name": "Output Texture",
+          "type": "FScreenPassTexture&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called on the render thread to run a post processing operation on the input texture and produce the output texture."
+    },
+    {
+      "id": "post-process-renderthread-4f64e8",
+      "name": "PostProcess_Renderthread",
+      "category": "SlateRHIPostBufferProcessor",
+      "signature": "PostProcess_Renderthread(Target, RHI Cmd List, Src, Dst, Src Rect, Dst Rect, In Rendering Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateRHIPostBufferProcessorProxy*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        },
+        {
+          "name": "Src",
+          "type": "FRHITexture*"
+        },
+        {
+          "name": "Dst",
+          "type": "FRHITexture*"
+        },
+        {
+          "name": "Src Rect",
+          "type": "FIntRect"
+        },
+        {
+          "name": "Dst Rect",
+          "type": "FIntRect"
+        },
+        {
+          "name": "In Rendering Policy",
+          "type": "FSlateRHIRenderingPolicyInterface"
+        }
+      ],
+      "returnType": "PRAGMA_DISABLE_DEPRECATION_WARNINGS void"
+    },
+    {
+      "id": "on-update-values-render-thread",
+      "name": "OnUpdateValuesRenderThread",
+      "category": "SlateRHIPostBufferProcessor",
+      "signature": "OnUpdateValuesRenderThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateRHIPostBufferProcessorProxy*"
+        }
+      ],
+      "returnType": "PRAGMA_ENABLE_DEPRECATION_WARNINGS void",
+      "docs": "Called when an post buffer update element is added to a renderbatch,\ngives proxies a chance to queue updates to their renderthread values based on the UObject processor.\nThese updates should likely be guarded by an 'FRenderCommandFence' to avoid duplicate updates"
+    },
+    {
+      "id": "set-owning-processor-object",
+      "name": "SetOwningProcessorObject",
+      "category": "SlateRHIPostBufferProcessor",
+      "signature": "SetOwningProcessorObject(Target, In Parent Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSlateRHIPostBufferProcessorProxy*"
+        },
+        {
+          "name": "In Parent Object",
+          "type": "USlateRHIPostBufferProcessor*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the UObject that we are a renderthread proxy for, useful for doing gamethread updates from the proxy"
+    },
+    {
+      "id": "post-process",
+      "name": "PostProcess",
+      "category": "SlateRHIPostBufferProcessor",
+      "signature": "PostProcess(Target, In View Info, In Viewport Texture, In Element Window Size, In Rendering Policy, In Slate Post Buffer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USlateRHIPostBufferProcessor*"
+        },
+        {
+          "name": "In View Info",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "In Viewport Texture",
+          "type": "FRenderResource*"
+        },
+        {
+          "name": "In Element Window Size",
+          "type": "FVector2D"
+        },
+        {
+          "name": "In Rendering Policy",
+          "type": "FSlateRHIRenderingPolicyInterface"
+        },
+        {
+          "name": "In Slate Post Buffer",
+          "type": "UTextureRenderTarget2D*"
+        }
+      ],
+      "returnType": "PRAGMA_DISABLE_DEPRECATION_WARNINGS void",
+      "docs": "Overridable postprocess for the given source scene backbuffer provided in 'Src' into 'Dst'\nYou must override this method. In your override, you should copy params before executing 'ENQUEUE_RENDER_COMMAND'.\nThis allows you to avoid render & game thread race conditions. See 'SlatePostBufferBlur' for example.\nAlso avoid capturing [this] in your override, to avoid possible GC issues with the processor instance.\n@param InViewInfo\t\t\t'FViewportInfo' resource used to get backbuffer in standalone\n@param InViewportTexture\t\t'FSlateRenderTargetRHI' resource used to get the 'BufferedRT' viewport texture used in PIE\n@param InElementWindowSize\tSize of window being rendered, used to determine if using stereo rendering or not.\n@param InRenderingPolicy\t\tSlate RHI RenderingPolicy\n@param InSlatePostBuffer\t\tTexture render target used for final output"
+    },
+    {
+      "id": "get-render-thread-proxy",
+      "name": "GetRenderThreadProxy",
+      "category": "SlateRHIPostBufferProcessor",
+      "signature": "GetRenderThreadProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "USlateRHIPostBufferProcessor*"
+        }
+      ],
+      "returnType": "PRAGMA_ENABLE_DEPRECATION_WARNINGS TSharedPtr<FSlateRHIPostBufferProcessorProxy>",
+      "docs": "Gets proxy for this post buffer processor, for execution on the renderthread"
+    }
+  ]
+}

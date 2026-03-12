@@ -1,0 +1,374 @@
+{
+  "id": "future",
+  "label": "Future",
+  "includepath": "Async/Future.h",
+  "includes": [
+    "CoreTypes",
+    "AssertionMacros",
+    "UnrealTemplate",
+    "Function",
+    "Timespan",
+    "SharedPointer",
+    "DateTime",
+    "Event",
+    "PooledSyncEvent",
+    "ScopeLock",
+    "Models",
+    "Requires",
+    "type_traits"
+  ],
+  "functions": [
+    {
+      "id": "is-complete",
+      "name": "IsComplete",
+      "category": "Future",
+      "signature": "IsComplete(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFutureState*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether the asynchronous result has been set.\n@return true if the result has been set, false otherwise.\n@see WaitFor"
+    },
+    {
+      "id": "wait-for",
+      "name": "WaitFor",
+      "category": "Future",
+      "signature": "WaitFor(Target, Duration)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFutureState*"
+        },
+        {
+          "name": "Duration",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Blocks the calling thread until the future result is available.\n@param Duration The maximum time span to wait for the future result.\n@return true if the result is available, false otherwise.\n@see IsComplete",
+      "supportedTargets": [
+        "FFutureState*",
+        "TFutureBase*"
+      ]
+    },
+    {
+      "id": "set-continuation",
+      "name": "SetContinuation",
+      "category": "Future",
+      "signature": "SetContinuation(Target, Continuation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFutureState*"
+        },
+        {
+          "name": "Continuation",
+          "type": "TUniqueFunction<void ( )>&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a continuation to be called on completion of the promise\n@param Continuation"
+    },
+    {
+      "id": "get-result",
+      "name": "GetResult",
+      "category": "Future",
+      "signature": "GetResult(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureState*"
+        }
+      ],
+      "returnType": "MutableResultType",
+      "docs": "Gets the result (will block the calling thread until the result is available).\n@return The result value.\n@see EmplaceResult"
+    },
+    {
+      "id": "emplace-result",
+      "name": "EmplaceResult",
+      "category": "Future",
+      "signature": "EmplaceResult(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureState*"
+        },
+        {
+          "name": "Args",
+          "type": "ArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgTypes> void",
+      "docs": "Sets the result and notifies any waiting threads.\n@param Args The arguments to forward to the constructor of the result.\n@see GetResult"
+    },
+    {
+      "id": "get-a169ea",
+      "name": "Get",
+      "category": "Future",
+      "signature": "Get(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureBase*"
+        }
+      ],
+      "returnType": "ConstResultType",
+      "docs": "Holds the asynchronous result.",
+      "supportedTargets": [
+        "TFutureBase*",
+        "TSharedFuture*"
+      ]
+    },
+    {
+      "id": "get-405820",
+      "name": "Get",
+      "category": "Future",
+      "signature": "Get(Target, Result Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureBase*"
+        },
+        {
+          "name": "Result Type",
+          "type": ") requires ( ! std::is_object_v<"
+        }
+      ],
+      "returnType": "ConstResultType"
+    },
+    {
+      "id": "is-ready",
+      "name": "IsReady",
+      "category": "Future",
+      "signature": "IsReady(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureBase*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether this future object has its value set.\n@return true if this future has a shared state and the value has been set, false otherwise.\n@see IsValid"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "Future",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureBase*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether this future object has a valid state.\n@return true if the state is valid, false otherwise.\n@see IsReady"
+    },
+    {
+      "id": "wait",
+      "name": "Wait",
+      "category": "Future",
+      "signature": "Wait(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Blocks the calling thread until the future result is available.\nNote that this method may block forever if the result is never set. Use\nthe WaitFor or WaitUntil methods to specify a maximum timeout for the wait.\n@see WaitFor, WaitUntil"
+    },
+    {
+      "id": "wait-until",
+      "name": "WaitUntil",
+      "category": "Future",
+      "signature": "WaitUntil(Target, Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFutureBase*"
+        },
+        {
+          "name": "Time",
+          "type": "FDateTime&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Blocks the calling thread until the future result is available or the specified time is hit.\n@param Time The time until to wait for the future result (in UTC).\n@return true if the result is available, false otherwise.\n@see Wait, WaitUntil"
+    },
+    {
+      "id": "get-mutable-b411c0",
+      "name": "GetMutable",
+      "category": "Future",
+      "signature": "GetMutable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        }
+      ],
+      "returnType": "MutableResultType",
+      "docs": "Gets the future's result.\n@return The result as a non-const reference, or the same reference if the future holds a reference, or void if the future holds a void.\n@note Not equivalent to std::future::get(). The future remains valid."
+    },
+    {
+      "id": "get-mutable-7b1b82",
+      "name": "GetMutable",
+      "category": "Future",
+      "signature": "GetMutable(Target, Result Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        },
+        {
+          "name": "Result Type",
+          "type": ") requires ( ! std::is_object_v<"
+        }
+      ],
+      "returnType": "MutableResultType"
+    },
+    {
+      "id": "consume",
+      "name": "Consume",
+      "category": "Future",
+      "signature": "Consume(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        }
+      ],
+      "returnType": "ResultType",
+      "docs": "Consumes the future's result and invalidates the future.\n@return The result.\n@note Equivalent to std::future::get(). Invalidates the future."
+    },
+    {
+      "id": "share",
+      "name": "Share",
+      "category": "Future",
+      "signature": "Share(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        }
+      ],
+      "returnType": "TSharedFuture<ResultType>",
+      "docs": "Moves this future's state into a shared future.\n@return The shared future object."
+    },
+    {
+      "id": "get-future",
+      "name": "GetFuture",
+      "category": "Future",
+      "signature": "GetFuture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPromise*"
+        }
+      ],
+      "returnType": "TFuture<ResultType>",
+      "docs": "Gets a TFuture object associated with the shared state of this promise.\n@return The TFuture object."
+    },
+    {
+      "id": "emplace-value",
+      "name": "EmplaceValue",
+      "category": "Future",
+      "signature": "EmplaceValue(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TPromise*"
+        },
+        {
+          "name": "Args",
+          "type": "ArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<. . . ArgTypes> void",
+      "docs": "Sets the promised result.\nThe result must be set only once. An assertion will\nbe triggered if this method is called a second time.\n@param Args The arguments to forward to the constructor of the result."
+    },
+    {
+      "id": "set-promise-value",
+      "name": "SetPromiseValue",
+      "category": "Future",
+      "signature": "SetPromiseValue(Target, Promise, Function, Param)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        },
+        {
+          "name": "Promise",
+          "type": "TPromise<ResultType>&"
+        },
+        {
+          "name": "Function",
+          "type": "Func&"
+        },
+        {
+          "name": "Param",
+          "type": "TFuture<ParamType>&&"
+        }
+      ],
+      "returnType": "template<Func,ParamType,ResultType> void",
+      "docs": "Holds the shared state object."
+    },
+    {
+      "id": "then",
+      "name": "Then",
+      "category": "Future",
+      "signature": "Then(Target, Continuation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        },
+        {
+          "name": "Continuation",
+          "type": "Func"
+        }
+      ],
+      "returnType": "template<ResultType> template<Func> auto TFutureBase<ResultType",
+      "docs": "Set a completion callback that will be called once the future completes\nor immediately if already completed\n@param Continuation a continuation taking an argument of type TFuture<ResultType>\n@return nothing at the moment but could return another future to allow future chaining"
+    },
+    {
+      "id": "next",
+      "name": "Next",
+      "category": "Future",
+      "signature": "Next(Target, Continuation)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        },
+        {
+          "name": "Continuation",
+          "type": "Func"
+        }
+      ],
+      "returnType": "template<ResultType> template<Func> auto TFutureBase<ResultType",
+      "docs": "Convenience wrapper for Then that\nset a completion callback that will be called once the future completes\nor immediately if already completed\n@param Continuation a continuation taking an argument of type ResultType\n@return nothing at the moment but could return another future to allow future chaining"
+    },
+    {
+      "id": "make-fulfilled-promise",
+      "name": "MakeFulfilledPromise",
+      "category": "Future",
+      "signature": "MakeFulfilledPromise(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFuture*"
+        },
+        {
+          "name": "Args",
+          "type": "ArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<ResultType,. . . ArgTypes> TPromise<ResultType>",
+      "docs": "Helper to create and immediately fulfill a promise"
+    }
+  ]
+}

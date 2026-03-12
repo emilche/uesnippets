@@ -1,0 +1,708 @@
+{
+  "id": "dynamic-vertex-skin-weights-attribute",
+  "label": "DynamicVertexSkinWeightsAttribute",
+  "includepath": "DynamicMesh/DynamicVertexSkinWeightsAttribute.h",
+  "includes": [
+    "DynamicMesh3",
+    "DynamicAttribute",
+    "BoneWeights",
+    "UnrealMemory",
+    "MemStack"
+  ],
+  "functions": [
+    {
+      "id": "get-parent",
+      "name": "GetParent",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "GetParent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        }
+      ],
+      "returnType": "ParentType*",
+      "docs": "@return the parent for this attribute"
+    },
+    {
+      "id": "make-copy",
+      "name": "MakeCopy",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "MakeCopy(Target, Parent In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Parent In",
+          "type": "ParentType*"
+        }
+      ],
+      "returnType": "TDynamicAttributeBase<ParentType>*"
+    },
+    {
+      "id": "copy",
+      "name": "Copy",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "Copy(Target, Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Copy",
+          "type": "TDynamicVertexSkinWeightsAttribute<ParentType>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set this overlay to contain the same arrays as the copy overlay"
+    },
+    {
+      "id": "make-compact-copy",
+      "name": "MakeCompactCopy",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "MakeCompactCopy(Target, Compact Maps, Parent Type In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Compact Maps",
+          "type": "FCompactMaps&"
+        },
+        {
+          "name": "Parent Type In",
+          "type": "ParentType*"
+        }
+      ],
+      "returnType": "TDynamicAttributeBase<ParentType>*"
+    },
+    {
+      "id": "compact-in-place",
+      "name": "CompactInPlace",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CompactInPlace(Target, Compact Maps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Compact Maps",
+          "type": "FCompactMaps&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "compact-copy",
+      "name": "CompactCopy",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CompactCopy(Target, Compact Maps, To Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Compact Maps",
+          "type": "FCompactMaps&"
+        },
+        {
+          "name": "To Copy",
+          "type": "TDynamicVertexSkinWeightsAttribute<ParentType>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "initialize",
+      "name": "Initialize",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "Initialize(Target, Initial Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Initial Value",
+          "type": "FBoneWeights",
+          "default": "{}"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize the attribute values to the given max vertex ID"
+    },
+    {
+      "id": "set-new-value",
+      "name": "SetNewValue",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "SetNewValue(Target, In New Vertex ID, In Bone Weights)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "In New Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "In Bone Weights",
+          "type": "FBoneWeights"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "reindex-bone-indices-to-skeleton",
+      "name": "ReindexBoneIndicesToSkeleton",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "ReindexBoneIndicesToSkeleton(Target, From Ref Skeleton, To Ref Skeleton)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "From Ref Skeleton",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "To Ref Skeleton",
+          "type": "TArray<FName>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Re-index bone indices of the skin weights from one reference skeleton (represented by an array of bone names)\nto another.\n@param FromRefSkeleton The reference skeleton that the current skin weights are indexed against.\n@param ToRefSkeleton The new reference skeleton that should be used to reindex the weights.\n@return true on success, false otherwise\n@note Reasons for failure are:\n- bone index of one of the bone weights is larger than the number of bones in FromRefSkeleton, meaning\nthe weights most likely were not computed with respect to the FromRefSkeleton.\n- one of the bone weights references a bone in FromRefSkeleton that doesn't exist in ToRefSkeleton.\n- ToRefSkeleton contains duplicates.\n@note FromRefSkeleton can contain bones that are not present in ToRefSkeleton as long as those bones are not\nreferenced by any of the weights."
+    },
+    {
+      "id": "get-bound-bone-indices",
+      "name": "GetBoundBoneIndices",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "GetBoundBoneIndices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        }
+      ],
+      "returnType": "TSet<int32>",
+      "docs": "Returns a list of all unique bone indices that are used by this skin weight attribute.\n\\return A unique list of bone indices used by all bone weights across all vertices."
+    },
+    {
+      "id": "copy-through-mapping",
+      "name": "CopyThroughMapping",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CopyThroughMapping(Target, Source, Mapping)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Source",
+          "type": "TDynamicAttributeBase<ParentType>*"
+        },
+        {
+          "name": "Mapping",
+          "type": "FMeshIndexMappings&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "append",
+      "name": "Append",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "Append(Target, Source, Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Source",
+          "type": "TDynamicAttributeBase<ParentType>&"
+        },
+        {
+          "name": "Info",
+          "type": "UE::Geometry::FDynamicMesh3::FAppendInfo&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "append-defaulted",
+      "name": "AppendDefaulted",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "AppendDefaulted(Target, Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Info",
+          "type": "UE::Geometry::FDynamicMesh3::FAppendInfo&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "copy-out",
+      "name": "CopyOut",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CopyOut(Target, Raw ID, Buffer, Buffer Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Raw ID",
+          "type": "Int"
+        },
+        {
+          "name": "Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Buffer Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "copy-in",
+      "name": "CopyIn",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CopyIn(Target, Raw ID, Buffer, Buffer Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Raw ID",
+          "type": "Int"
+        },
+        {
+          "name": "Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Buffer Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-value-d0ed89",
+      "name": "GetValue",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "GetValue(Target, Vertex ID, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "FBoneWeights&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the element at a given index"
+    },
+    {
+      "id": "get-value-afca46",
+      "name": "GetValue",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "GetValue(Target, Vertex ID, Out Bones, Out Weights)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Out Bones",
+          "type": "TArray<BoneIndexType>&"
+        },
+        {
+          "name": "Out Weights",
+          "type": "TArray<BoneFloatWeightType>&"
+        }
+      ],
+      "returnType": "template<BoneIndexType,BoneFloatWeightType> void",
+      "docs": "Get the element at a given index via a pair of bone index and weight arrays.\nThe number of influences is equal to the array size."
+    },
+    {
+      "id": "set-value-303e22",
+      "name": "SetValue",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "SetValue(Target, Vertex ID, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Data",
+          "type": "FBoneWeights&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the element at a given index"
+    },
+    {
+      "id": "set-value-72ff05",
+      "name": "SetValue",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "SetValue(Target, Vertex ID, In Bones, In Weights, In Num Entries)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "In Bones",
+          "type": "TArray<BoneIndexType>&"
+        },
+        {
+          "name": "In Weights",
+          "type": "TArray<BoneFloatWeightType>&"
+        },
+        {
+          "name": "In Num Entries",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<BoneIndexType,BoneFloatWeightType> void",
+      "docs": "Set the element at a given index"
+    },
+    {
+      "id": "copy-value",
+      "name": "CopyValue",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CopyValue(Target, From Vertex ID, To Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "From Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "To Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy the attribute value at FromVertexID to ToVertexID"
+    },
+    {
+      "id": "on-split-edge",
+      "name": "OnSplitEdge",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnSplitEdge(Target, Split Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Split Info",
+          "type": "FDynamicMesh3::FEdgeSplitInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect an edge split in the parent"
+    },
+    {
+      "id": "on-flip-edge",
+      "name": "OnFlipEdge",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnFlipEdge(Target, Flip Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Flip Info",
+          "type": "FDynamicMesh3::FEdgeFlipInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect an edge flip in the parent"
+    },
+    {
+      "id": "on-collapse-edge",
+      "name": "OnCollapseEdge",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnCollapseEdge(Target, Collapse Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Collapse Info",
+          "type": "FDynamicMesh3::FEdgeCollapseInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect an edge collapse in the parent"
+    },
+    {
+      "id": "resize-attrib-store-if-needed",
+      "name": "ResizeAttribStoreIfNeeded",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "ResizeAttribStoreIfNeeded(Target, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-new-vertex",
+      "name": "OnNewVertex",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnNewVertex(Target, Vertex ID, Inserted)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        },
+        {
+          "name": "Inserted",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-poke-triangle",
+      "name": "OnPokeTriangle",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnPokeTriangle(Target, Poke Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Poke Info",
+          "type": "FDynamicMesh3::FPokeTriangleInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect a face poke in the parent"
+    },
+    {
+      "id": "on-merge-edges",
+      "name": "OnMergeEdges",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnMergeEdges(Target, Merge Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Merge Info",
+          "type": "FDynamicMesh3::FMergeEdgesInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect an edge merge in the parent"
+    },
+    {
+      "id": "on-merge-vertices",
+      "name": "OnMergeVertices",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnMergeVertices(Target, Merge Info)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Merge Info",
+          "type": "FDynamicMesh3::FMergeVerticesInfo&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect a vertex merge in the parent"
+    },
+    {
+      "id": "on-split-vertex",
+      "name": "OnSplitVertex",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "OnSplitVertex(Target, Split Info, Triangles To Update)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Split Info",
+          "type": "FDynamicMesh3::FVertexSplitInfo&"
+        },
+        {
+          "name": "Triangles To Update",
+          "type": "TArrayView<int>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the overlay to reflect a vertex split in the parent"
+    },
+    {
+      "id": "new-blank-change",
+      "name": "NewBlankChange",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "NewBlankChange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        }
+      ],
+      "returnType": "TUniquePtr<TDynamicAttributeChangeBase<ParentType>>"
+    },
+    {
+      "id": "check-validity",
+      "name": "CheckValidity",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "CheckValidity(Target, Allow Nonmanifold, Fail Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Allow Nonmanifold",
+          "type": "Bool"
+        },
+        {
+          "name": "Fail Mode",
+          "type": "EValidityCheckFailMode"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check validity of attribute\n@param bAllowNonmanifold Accept non-manifold topology as valid. Note that this should almost always be true for attributes; non-manifold overlays are generally valid.\n@param FailMode Desired behavior if mesh is found invalid"
+    },
+    {
+      "id": "get-byte-count",
+      "name": "GetByteCount",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "GetByteCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        }
+      ],
+      "returnType": "SIZE_T"
+    },
+    {
+      "id": "save-initial-vertex",
+      "name": "SaveInitialVertex",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "SaveInitialVertex(Target, Attribute, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Attribute",
+          "type": "TDynamicAttributeBase<ParentType>*"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<ParentType> void TDynamicVertexSkinWeightsAttributeChange<ParentType"
+    },
+    {
+      "id": "store-all-final-vertices",
+      "name": "StoreAllFinalVertices",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "StoreAllFinalVertices(Target, Attribute, Vertex I Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Attribute",
+          "type": "TDynamicAttributeBase<ParentType>*"
+        },
+        {
+          "name": "Vertex I Ds",
+          "type": "TSet<int>&"
+        }
+      ],
+      "returnType": "template<ParentType> void TDynamicVertexSkinWeightsAttributeChange<ParentType"
+    },
+    {
+      "id": "apply",
+      "name": "Apply",
+      "category": "DynamicVertexSkinWeightsAttribute",
+      "signature": "Apply(Target, Attribute, Revert)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TDynamicVertexSkinWeightsAttribute*"
+        },
+        {
+          "name": "Attribute",
+          "type": "TDynamicAttributeBase<ParentType>*"
+        },
+        {
+          "name": "Revert",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<ParentType> bool TDynamicVertexSkinWeightsAttributeChange<ParentType"
+    }
+  ]
+}

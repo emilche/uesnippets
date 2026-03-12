@@ -23,7 +23,7 @@
   ],
   "functions": [
     {
-      "id": "triangulate",
+      "id": "triangulate-d4c609",
       "name": "Triangulate",
       "category": "Delaunay2",
       "signature": "Triangulate(Target, Vertices, Edges)",
@@ -44,6 +44,60 @@
       ],
       "returnType": "Bool",
       "docs": "Compute an (optionally constrained) Delaunay triangulation.\nNote this clears any previously-held triangulation data, and triangulates the passed-in vertices (and optional edges) from scratch\n@return false if triangulation failed"
+    },
+    {
+      "id": "triangulate-80dc19",
+      "name": "Triangulate",
+      "category": "Delaunay2",
+      "signature": "Triangulate(Target, Polygon, Triangles Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Polygon",
+          "type": "TPolygon2<RealType>&"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<FIndex3i>*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "template<RealType> bool"
+    },
+    {
+      "id": "triangulate-5fc888",
+      "name": "Triangulate",
+      "category": "Delaunay2",
+      "signature": "Triangulate(Target, General Polygon, Triangles Out, Vertices Out, Fallback To Generalized Winding)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "General Polygon",
+          "type": "TGeneralPolygon2<RealType>&"
+        },
+        {
+          "name": "Triangles Out",
+          "type": "TArray<FIndex3i>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Vertices Out",
+          "type": "TArray<TVector2<RealType>>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Fallback To Generalized Winding",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "template<RealType> bool"
     },
     {
       "id": "constrain-edges",
@@ -100,6 +154,29 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-filled-triangles-97fa71",
+      "name": "GetFilledTriangles",
+      "category": "Delaunay2",
+      "signature": "GetFilledTriangles(Target, Edges, Fill Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        },
+        {
+          "name": "Edges",
+          "type": "TArrayView<FIndex2i>"
+        },
+        {
+          "name": "Fill Mode",
+          "type": "EFillMode",
+          "default": "EFillMode::PositiveWinding"
+        }
+      ],
+      "returnType": "TArray<FIndex3i>",
+      "docs": "Return the triangles that are inside the given edges, removing the outer boundary triangles\nIf a Winding-Number-based fill mode is used, assumes edges are oriented and tracks the winding number across edges\n@param Edges\t\t\t\t\t\tThe array of edges that were already constrained in the triangulation (by a previous call to Triangulate or ConstrainEdges)\n@param FillMode\t\t\t\t\tStrategy to use to define which triangles to include in the output\n@return\t\t\t\t\t\t\tA subset of the triangulation that is 'inside' the given edges, as defined by the FillMode"
     },
     {
       "id": "get-filled-triangles-6aa549",
@@ -184,6 +261,19 @@
       ],
       "returnType": "Bool",
       "docs": "Get (by reference) the triangles that are inside the given edges, removing the outside-boundary triangles and the inside-hole triangles\n@param TrianglesOut\t\t\t\t\tWill be filled with a subset of the triangulation that is 'inside' the given edges, as defined by the FillMode\n@param BoundaryEdges\t\t\t\t\tConstrained edges in the triangulation that define the boundary of the desired shape\n@param HoleEdges\t\t\t\t\t\tConstrained edges in the triangulation that define inner holes of the desired shape\n@return\t\t\t\t\t\t\t\ttrue if any result was successfully computed (including an empty result).\nCurrently only returns false if Triangulate() has not been called yet."
+    },
+    {
+      "id": "is-constrained",
+      "name": "IsConstrained",
+      "category": "Delaunay2",
+      "signature": "IsConstrained(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "is-delaunay",
@@ -324,6 +414,63 @@
       ],
       "returnType": "TArray<TArray<FVector2d>>",
       "docs": "Get Voronoi diagram cells as dual of the Delaunay triangulation.  You must call Triangulate() before calling this.\n@param Vertices\t\t\tVertices of the Delaunay triangulation, to be used as the sites of the Voronoi diagram\n@param bIncludeBoundary\tIf true, include the cells on the boundary of the diagram.  These cells are conceptually infinite, but will be clipped to a bounding box.\n@param ClipBounds\t\tIf non-empty, all Voronoi diagram cells will be clipped to this rectangle.\n@param ExpandBounds\t\tAmount to expand the clipping bounds beyond the Bounds argument (or the bounding box of non-boundary Voronoi cells, if Bounds was empty)\n@return\t\t\t\t\tThe cells of each Voronoi site, or an empty array if the Triangulation was not yet computed"
+    },
+    {
+      "id": "compute-voronoi-cells",
+      "name": "ComputeVoronoiCells",
+      "category": "Delaunay2",
+      "signature": "ComputeVoronoiCells(Sites, Include Boundary, Clip Bounds, Expand Bounds)",
+      "params": [
+        {
+          "name": "Sites",
+          "type": "TArrayView<TVector2<RealType>>"
+        },
+        {
+          "name": "Include Boundary",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Clip Bounds",
+          "type": "TAxisAlignedBox2<RealType>",
+          "default": "FAxisAlignedBox2f::Empty()"
+        },
+        {
+          "name": "Expand Bounds",
+          "type": "RealType",
+          "default": "(RealType)0"
+        }
+      ],
+      "returnType": "template<RealType> TArray<TArray<TVector2<RealType>>>",
+      "docs": "Compute Voronoi diagram cells\n@param Sites\t\t\t\tPositions to use as the sites of the Voronoi diagram\n@param bIncludeBoundary\tIf true, include the cells on the boundary of the diagram.  These cells are conceptually infinite, but will be clipped to a bounding box.\n@param ClipBounds\t\tIf non-empty, all Voronoi diagram cells will be clipped to this rectangle.\n@param ExpandBounds\t\tAmount to expand the clipping bounds beyond the Bounds argument (or the bounding box of non-boundary Voronoi cells, if Bounds was empty)\n@return\t\t\t\t\tThe cells of each Voronoi site, or an empty array if the Triangulation was not yet computed"
+    },
+    {
+      "id": "get-result",
+      "name": "GetResult",
+      "category": "Delaunay2",
+      "signature": "GetResult(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        }
+      ],
+      "returnType": "EResult",
+      "docs": "@return Last triangulation result -- either Success, NotComputed, or a reason for failure"
+    },
+    {
+      "id": "can-compute-voronoi-cells",
+      "name": "CanComputeVoronoiCells",
+      "category": "Delaunay2",
+      "signature": "CanComputeVoronoiCells(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDelaunay2*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return Whether the triangulation result supports computing a Voronoi diagram -- i.e., if it was triangulated, or a collinear input"
     }
   ]
 }

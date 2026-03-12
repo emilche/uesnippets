@@ -15,12 +15,8 @@
       "id": "launch-task",
       "name": "LaunchTask",
       "category": "DerivedDataRequestOwner",
-      "signature": "LaunchTask(Target, Debug Name, Task Body)",
+      "signature": "LaunchTask(Debug Name, Task Body)",
       "params": [
-        {
-          "name": "Target",
-          "type": "IRequestOwner*"
-        },
         {
           "name": "Debug Name",
           "type": "TCHAR*"
@@ -34,16 +30,25 @@
       "docs": "Launches a task that executes the task body when scheduled.\nThe task inherits the current priority of this request owner.\nThe task is launched as a new request within this request owner.\n@note The debug name is not copied and must remain valid for the duration of the task."
     },
     {
+      "id": "f-request-owner",
+      "name": "FRequestOwner",
+      "category": "DerivedDataRequestOwner",
+      "signature": "FRequestOwner(Priority)",
+      "params": [
+        {
+          "name": "Priority",
+          "type": "EPriority"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A concrete request owner that also presents as a request.\nRequest owners may be moved but not copied, and cancel any outstanding requests on destruction\nunless KeepAlive has been called.\n@see IRequestOwner"
+    },
+    {
       "id": "keep-alive",
       "name": "KeepAlive",
       "category": "DerivedDataRequestOwner",
-      "signature": "KeepAlive(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        }
-      ],
+      "signature": "KeepAlive()",
+      "params": [],
       "returnType": "Void",
       "docs": "Keep requests in the owner alive until complete, even after destruction of the owner."
     },
@@ -51,13 +56,8 @@
       "id": "get-priority",
       "name": "GetPriority",
       "category": "DerivedDataRequestOwner",
-      "signature": "GetPriority(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        }
-      ],
+      "signature": "GetPriority()",
+      "params": [],
       "returnType": "EPriority",
       "docs": "Returns the priority that new requests are expected to inherit."
     },
@@ -65,12 +65,8 @@
       "id": "set-priority",
       "name": "SetPriority",
       "category": "DerivedDataRequestOwner",
-      "signature": "SetPriority(Target, Priority)",
+      "signature": "SetPriority(Priority)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        },
         {
           "name": "Priority",
           "type": "EPriority"
@@ -83,13 +79,8 @@
       "id": "cancel",
       "name": "Cancel",
       "category": "DerivedDataRequestOwner",
-      "signature": "Cancel(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        }
-      ],
+      "signature": "Cancel()",
+      "params": [],
       "returnType": "Void",
       "docs": "Cancel any active and future requests in the owner."
     },
@@ -97,13 +88,8 @@
       "id": "wait",
       "name": "Wait",
       "category": "DerivedDataRequestOwner",
-      "signature": "Wait(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        }
-      ],
+      "signature": "Wait()",
+      "params": [],
       "returnType": "Void",
       "docs": "Wait for any active and future requests or barriers in the owner."
     },
@@ -111,42 +97,76 @@
       "id": "poll",
       "name": "Poll",
       "category": "DerivedDataRequestOwner",
-      "signature": "Poll(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        }
-      ],
+      "signature": "Poll()",
+      "params": [],
       "returnType": "Bool",
       "docs": "Poll whether the owner has any active requests or barriers."
+    },
+    {
+      "id": "is-canceled",
+      "name": "IsCanceled",
+      "category": "DerivedDataRequestOwner",
+      "signature": "IsCanceled()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns whether the owner has been canceled, which new requests are expected to check."
+    },
+    {
+      "id": "i-request-owner",
+      "name": "IRequestOwner",
+      "category": "DerivedDataRequestOwner",
+      "signature": "IRequestOwner()",
+      "params": [],
+      "returnType": "operator",
+      "docs": "Access as a request owner."
     },
     {
       "id": "i-request",
       "name": "IRequest",
       "category": "DerivedDataRequestOwner",
-      "signature": "IRequest(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRequestOwner*"
-        }
-      ],
+      "signature": "IRequest()",
+      "params": [],
       "returnType": "operator",
       "docs": "Access as a request."
     },
     {
-      "id": "destroy",
-      "name": "Destroy",
+      "id": "get-flags",
+      "name": "GetFlags",
       "category": "DerivedDataRequestOwner",
-      "signature": "Destroy(Shared Owner)",
+      "signature": "GetFlags(Target)",
       "params": [
         {
-          "name": "Shared Owner",
-          "type": "IRequestOwner&"
+          "name": "Target",
+          "type": "FRequestBarrier*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "UE_INTERNAL ERequestBarrierFlags"
+    },
+    {
+      "id": "end",
+      "name": "End",
+      "category": "DerivedDataRequestOwner",
+      "signature": "End(Target, Request, Callback, Callback Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IRequestOwner*"
+        },
+        {
+          "name": "Request",
+          "type": "IRequest*"
+        },
+        {
+          "name": "Callback",
+          "type": "CallbackType&&"
+        },
+        {
+          "name": "Callback Args",
+          "type": "CallbackArgTypes&& . . ."
+        }
+      ],
+      "returnType": "template<CallbackType,. . . CallbackArgTypes> TRefCountPtr<IRequest>",
+      "docs": "End tracking of the request.\nBegins a barrier, ends the request, invokes the callback, then ends the barrier. Keeps its\nreference to the request until the callback has returned.\n@return The reference to the request that was held by the owner."
     }
   ]
 }

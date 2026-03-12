@@ -16,6 +16,71 @@
   ],
   "functions": [
     {
+      "id": "get-lod-group-for-streaming",
+      "name": "GetLODGroupForStreaming",
+      "category": "StreamableRenderAsset",
+      "signature": "GetLODGroupForStreaming(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get an integer representation of the LOD group"
+    },
+    {
+      "id": "calc-cumulative-lod-size",
+      "name": "CalcCumulativeLODSize",
+      "category": "StreamableRenderAsset",
+      "signature": "CalcCumulativeLODSize(Target, Num LO Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        },
+        {
+          "name": "Num LO Ds",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-mip-io-filename-hash",
+      "name": "GetMipIoFilenameHash",
+      "category": "StreamableRenderAsset",
+      "signature": "GetMipIoFilenameHash(Target, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FIoFilenameHash"
+    },
+    {
+      "id": "does-mip-data-exist",
+      "name": "DoesMipDataExist",
+      "category": "StreamableRenderAsset",
+      "signature": "DoesMipDataExist(Target, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "cancel-pending-streaming-request",
       "name": "CancelPendingStreamingRequest",
       "category": "StreamableRenderAsset",
@@ -47,6 +112,88 @@
       ],
       "returnType": "Bool",
       "docs": "Whether a stream in / out request is pending. Only one request can exists at anytime for a streamable asset. This also includes the resource initialization!"
+    },
+    {
+      "id": "stream-out",
+      "name": "StreamOut",
+      "category": "StreamableRenderAsset",
+      "signature": "StreamOut(Target, New Mip Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        },
+        {
+          "name": "New Mip Count",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Unload some mips from memory. Only usable if the asset is streamable.\n@param NewMipCount - The desired mip count after the mips are unloaded.\n@return Whether any mips were requested to be unloaded."
+    },
+    {
+      "id": "stream-in",
+      "name": "StreamIn",
+      "category": "StreamableRenderAsset",
+      "signature": "StreamIn(Target, New Mip Count, High Prio)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        },
+        {
+          "name": "New Mip Count",
+          "type": "Int"
+        },
+        {
+          "name": "High Prio",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Loads mips from disk to memory. Only usable if the asset is streamable.\n@param NewMipCount - The desired mip count after the mips are loaded.\n@param bHighPrio   - true if the load request is of high priority and must be issued before other asset requests.\n@return Whether any mips were resquested to be loaded."
+    },
+    {
+      "id": "invalidate-last-render-time-for-streaming",
+      "name": "InvalidateLastRenderTimeForStreaming",
+      "category": "StreamableRenderAsset",
+      "signature": "InvalidateLastRenderTimeForStreaming(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Invalidates per-asset last render time. Mainly used to opt in UnknownRefHeuristic\nduring LOD index calculation. See FStreamingRenderAsset::bUseUnknownRefHeuristic"
+    },
+    {
+      "id": "get-last-render-time-for-streaming",
+      "name": "GetLastRenderTimeForStreaming",
+      "category": "StreamableRenderAsset",
+      "signature": "GetLastRenderTimeForStreaming(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get the per-asset last render time. FLT_MAX means never use UnknownRefHeuristic\nand the asset will only keep non-streamable LODs when there is no instance/reference\nin the scene"
+    },
+    {
+      "id": "should-mip-levels-be-forced-resident",
+      "name": "ShouldMipLevelsBeForcedResident",
+      "category": "StreamableRenderAsset",
+      "signature": "ShouldMipLevelsBeForcedResident(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether miplevels should be forced resident.\n@return true if either transient or serialized override requests miplevels to be resident, false otherwise"
     },
     {
       "id": "register-mip-level-change-callback-a1fa63",
@@ -190,6 +337,62 @@
       "docs": "Tells the streaming system that it should force all mip-levels to be resident for a number of seconds.\n@param Seconds\t\t\t\t\tDuration in seconds\n@param CinematicTextureGroups\tBitfield indicating which texture groups that use extra high-resolution mips"
     },
     {
+      "id": "get-cached-lod-bias",
+      "name": "GetCachedLODBias",
+      "category": "StreamableRenderAsset",
+      "signature": "GetCachedLODBias(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the combined LOD bias based on texture LOD group and LOD bias.\nFunction name is legacy and incorrect, it is no longer cached\n@return\tLOD bias"
+    },
+    {
+      "id": "get-streamable-resource-state",
+      "name": "GetStreamableResourceState",
+      "category": "StreamableRenderAsset",
+      "signature": "GetStreamableResourceState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "FStreamableRenderResourceState&",
+      "docs": "Return the streaming state of the render resources. Mirrors the state and lowers cache misses. Cleared if there are no resources."
+    },
+    {
+      "id": "render-resource-supports-streaming",
+      "name": "RenderResourceSupportsStreaming",
+      "category": "StreamableRenderAsset",
+      "signature": "RenderResourceSupportsStreaming(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the current asset render resource is streamable from a gamethread timeline."
+    },
+    {
+      "id": "is-streamable",
+      "name": "IsStreamable",
+      "category": "StreamableRenderAsset",
+      "signature": "IsStreamable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the current asset render resource is streamable from a gamethread timeline."
+    },
+    {
       "id": "link-streaming",
       "name": "LinkStreaming",
       "category": "StreamableRenderAsset",
@@ -230,6 +433,19 @@
       ],
       "returnType": "Bool",
       "docs": "Whether all miplevels of this texture have been fully streamed in, LOD settings permitting. Note that if optional mips are not mounted it will always return false."
+    },
+    {
+      "id": "get-streaming-index",
+      "name": "GetStreamingIndex",
+      "category": "StreamableRenderAsset",
+      "signature": "GetStreamingIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "Int"
     },
     {
       "id": "wait-for-pending-init-or-streaming",
@@ -280,30 +496,47 @@
       "docs": "Wait for any pending operation and make sure that the asset streamer has performed requested ops on this asset."
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
+      "id": "get-render-asset-type",
+      "name": "GetRenderAssetType",
       "category": "StreamableRenderAsset",
-      "signature": "BeginDestroy(Target)",
+      "signature": "GetRenderAssetType(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "EStreamableRenderAssetType"
+    },
+    {
+      "id": "get-no-ref-streaming-lod-bias",
+      "name": "GetNoRefStreamingLODBias",
+      "category": "StreamableRenderAsset",
+      "signature": "GetNoRefStreamingLODBias(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        }
+      ],
+      "returnType": "FPerQualityLevelInt&"
+    },
+    {
+      "id": "set-no-ref-streaming-lod-bias",
+      "name": "SetNoRefStreamingLODBias",
+      "category": "StreamableRenderAsset",
+      "signature": "SetNoRefStreamingLODBias(Target, New Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UStreamableRenderAsset*"
+        },
+        {
+          "name": "New Value",
+          "type": "FPerQualityLevelInt"
         }
       ],
       "returnType": "Void"
-    },
-    {
-      "id": "is-ready-for-finish-destroy",
-      "name": "IsReadyForFinishDestroy",
-      "category": "StreamableRenderAsset",
-      "signature": "IsReadyForFinishDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UStreamableRenderAsset*"
-        }
-      ],
-      "returnType": "Bool"
     },
     {
       "id": "get-current-no-ref-streaming-lod-bias",

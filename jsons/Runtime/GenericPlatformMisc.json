@@ -263,6 +263,14 @@
       "docs": "Generic implementation for most platforms"
     },
     {
+      "id": "platform-init",
+      "name": "PlatformInit",
+      "category": "GenericPlatformMisc",
+      "signature": "PlatformInit()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
       "id": "add-network-listener",
       "name": "AddNetworkListener",
       "category": "GenericPlatformMisc",
@@ -287,6 +295,76 @@
         }
       ],
       "returnType": "Bool"
+    },
+    {
+      "id": "platform-handle-splash-screen",
+      "name": "PlatformHandleSplashScreen",
+      "category": "GenericPlatformMisc",
+      "signature": "PlatformHandleSplashScreen(Show Splash Screen)",
+      "params": [
+        {
+          "name": "Show Splash Screen",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to dismiss splash screen"
+    },
+    {
+      "id": "platform-tear-down",
+      "name": "PlatformTearDown",
+      "category": "GenericPlatformMisc",
+      "signature": "PlatformTearDown()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Called during AppExit(). Log, Config still exist at this point, but not much else does."
+    },
+    {
+      "id": "set-graceful-termination-handler",
+      "name": "SetGracefulTerminationHandler",
+      "category": "GenericPlatformMisc",
+      "signature": "SetGracefulTerminationHandler()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Set/restore the Console Interrupt (Control-C, Control-Break, Close) handler."
+    },
+    {
+      "id": "set-crash-handler",
+      "name": "SetCrashHandler",
+      "category": "GenericPlatformMisc",
+      "signature": "SetCrashHandler(Context)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "void (* CrashHandler ) ( FGenericCrashContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Installs handler for the unexpected (due to error) termination of the program,\nincluding, but not limited to, crashes."
+    },
+    {
+      "id": "get-crash-handling-type",
+      "name": "GetCrashHandlingType",
+      "category": "GenericPlatformMisc",
+      "signature": "GetCrashHandlingType()",
+      "params": [],
+      "returnType": "ECrashHandlingType",
+      "docs": "Gets the current crash handling type."
+    },
+    {
+      "id": "set-crash-handling-type",
+      "name": "SetCrashHandlingType",
+      "category": "GenericPlatformMisc",
+      "signature": "SetCrashHandlingType(Type)",
+      "params": [
+        {
+          "name": "Type",
+          "type": "ECrashHandlingType"
+        }
+      ],
+      "returnType": "ECrashHandlingType",
+      "docs": "Sets the type of crash handling done by the engine. Returns the new crash handling type. If disabling crash\nhandling make sure an alternative is active since threads that crash will just disappear."
     },
     {
       "id": "get-environment-variable",
@@ -319,6 +397,15 @@
       ],
       "returnType": "Void",
       "docs": "Sets an environment variable to the local process's environment\n@param VariableName The name of the variable (ie \"Path\")\n@param Value The string to set the variable to."
+    },
+    {
+      "id": "get-max-path-length",
+      "name": "GetMaxPathLength",
+      "category": "GenericPlatformMisc",
+      "signature": "GetMaxPathLength()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "Returns the maximum length of a path.\nNote that some platforms such as Windows make this a per-process configuration."
     },
     {
       "id": "get-external-app-max-path-length",
@@ -402,6 +489,24 @@
       "docs": "Submits a crash report to a central server (release builds only)"
     },
     {
+      "id": "is-remote-session",
+      "name": "IsRemoteSession",
+      "category": "GenericPlatformMisc",
+      "signature": "IsRemoteSession()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Check to see if the platform is being viewed remotely. In such a mode we should aim to minimize screen refresh to get the best performance on the remote viewer"
+    },
+    {
+      "id": "is-debugger-present",
+      "name": "IsDebuggerPresent",
+      "category": "GenericPlatformMisc",
+      "signature": "IsDebuggerPresent()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Return true if a debugger is present"
+    },
+    {
       "id": "get-process-diagnostics",
       "name": "GetProcessDiagnostics",
       "category": "GenericPlatformMisc",
@@ -409,6 +514,15 @@
       "params": [],
       "returnType": "EProcessDiagnosticFlags",
       "docs": "Returns non-zero if a performance-sensitive diagnostic, like a memory sanitizer, is detected for this process"
+    },
+    {
+      "id": "debug-break",
+      "name": "DebugBreak",
+      "category": "GenericPlatformMisc",
+      "signature": "DebugBreak()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Break into the debugger, if IsDebuggerPresent returns true, otherwise do nothing"
     },
     {
       "id": "get-cpu-vendor",
@@ -554,6 +668,105 @@
       "docs": "Retrieves information about the total number of bytes and number of free bytes for the specified disk path."
     },
     {
+      "id": "get-page-fault-stats",
+      "name": "GetPageFaultStats",
+      "category": "GenericPlatformMisc",
+      "signature": "GetPageFaultStats(Out Stats, Flags)",
+      "params": [
+        {
+          "name": "Out Stats",
+          "type": "FPageFaultStats&"
+        },
+        {
+          "name": "Flags",
+          "type": "EPageFaultFlags",
+          "default": "EPageFaultFlags::All"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets Page Fault stats covering the lifetime of the process\n@param OutStats\tOutputs the page fault stats\n@param Flags\t\tThe type of page fault stats to retrieve\n@return\t\t\tWhether or not stats were successfully retrieved"
+    },
+    {
+      "id": "get-blocking-io-stats",
+      "name": "GetBlockingIOStats",
+      "category": "GenericPlatformMisc",
+      "signature": "GetBlockingIOStats(Out Stats, Flags)",
+      "params": [
+        {
+          "name": "Out Stats",
+          "type": "FProcessIOStats&"
+        },
+        {
+          "name": "Flags",
+          "type": "EInputOutputFlags",
+          "default": "EInputOutputFlags::All"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets Blocking Input/Output stats covering the lifetime of the process\n@param OutStats\tOutputs the IO stats\n@param Flags\t\tThe type of IO stats to retrieve\n@return\t\t\tWhether or not stats were successfully retrieved"
+    },
+    {
+      "id": "get-context-switch-stats",
+      "name": "GetContextSwitchStats",
+      "category": "GenericPlatformMisc",
+      "signature": "GetContextSwitchStats(Out Stats, Flags)",
+      "params": [
+        {
+          "name": "Out Stats",
+          "type": "FContextSwitchStats&"
+        },
+        {
+          "name": "Flags",
+          "type": "EContextSwitchFlags",
+          "default": "EContextSwitchFlags::All"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets Context Switch stats covering the lifetime of the process\n@param OutStats\tOutputs the Context Switch stats\n@param Flags\t\tThe type of Context Switch stats to retrieve\n@return\t\t\tWhether or not stats were successfully retrieved"
+    },
+    {
+      "id": "supports-messaging",
+      "name": "SupportsMessaging",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsMessaging()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-cache-storage-available",
+      "name": "IsCacheStorageAvailable",
+      "category": "GenericPlatformMisc",
+      "signature": "IsCacheStorageAvailable()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "For platforms that support cache storage functionality, setting a directory for it when it's not available can result in errors.\nThis method's purpose is to be overridden in such platforms, with logic that checks if said cache is available.\nIn all other platforms without this constraint, it should return true by default."
+    },
+    {
+      "id": "supports-local-caching",
+      "name": "SupportsLocalCaching",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsLocalCaching()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "allow-local-caching",
+      "name": "AllowLocalCaching",
+      "category": "GenericPlatformMisc",
+      "signature": "AllowLocalCaching()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "supports-full-crash-dumps",
+      "name": "SupportsFullCrashDumps",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsFullCrashDumps()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Platform can generate a full-memory crashdump during crash handling."
+    },
+    {
       "id": "memory-barrier",
       "name": "MemoryBarrier",
       "category": "GenericPlatformMisc",
@@ -561,6 +774,50 @@
       "params": [],
       "returnType": "FORCENOINLINE void",
       "docs": "Enforces strict memory load/store ordering across the memory barrier call."
+    },
+    {
+      "id": "set-memory-warning-handler",
+      "name": "SetMemoryWarningHandler",
+      "category": "GenericPlatformMisc",
+      "signature": "SetMemoryWarningHandler(Context)",
+      "params": [
+        {
+          "name": "Context",
+          "type": "void (* Handler ) ( FGenericMemoryWarningContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set a handler to be called when there is a memory warning from the OS\n@param Handler\tThe handler to call"
+    },
+    {
+      "id": "has-memory-warning-handler",
+      "name": "HasMemoryWarningHandler",
+      "category": "GenericPlatformMisc",
+      "signature": "HasMemoryWarningHandler()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Determines if a warning handler has been set"
+    },
+    {
+      "id": "get-last-error",
+      "name": "GetLastError",
+      "category": "GenericPlatformMisc",
+      "signature": "GetLastError()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "set-last-error",
+      "name": "SetLastError",
+      "category": "GenericPlatformMisc",
+      "signature": "SetLastError(Error Code)",
+      "params": [
+        {
+          "name": "Error Code",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "raise-exception",
@@ -652,6 +909,77 @@
       "signature": "LogNameEventStatsInit()",
       "params": [],
       "returnType": "Void"
+    },
+    {
+      "id": "begin-enter-background-event",
+      "name": "BeginEnterBackgroundEvent",
+      "category": "GenericPlatformMisc",
+      "signature": "BeginEnterBackgroundEvent(Text)",
+      "params": [
+        {
+          "name": "Text",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Profiler enter background events. These are for timing backgrounding. Some platforms have a timeout for this"
+    },
+    {
+      "id": "end-enter-background-event",
+      "name": "EndEnterBackgroundEvent",
+      "category": "GenericPlatformMisc",
+      "signature": "EndEnterBackgroundEvent()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "init-tagged-storage",
+      "name": "InitTaggedStorage",
+      "category": "GenericPlatformMisc",
+      "signature": "InitTaggedStorage(Num Tags)",
+      "params": [
+        {
+          "name": "Num Tags",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Platform specific function for initializing storage of tagged memory buffers"
+    },
+    {
+      "id": "shutdown-tagged-storage",
+      "name": "ShutdownTaggedStorage",
+      "category": "GenericPlatformMisc",
+      "signature": "ShutdownTaggedStorage()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Platform specific function for freeing storage of tagged memory buffers"
+    },
+    {
+      "id": "tag-buffer",
+      "name": "TagBuffer",
+      "category": "GenericPlatformMisc",
+      "signature": "TagBuffer(Label, Category, Buffer, Buffer Size)",
+      "params": [
+        {
+          "name": "Label",
+          "type": "char*"
+        },
+        {
+          "name": "Category",
+          "type": "UInt"
+        },
+        {
+          "name": "Buffer",
+          "type": "void*"
+        },
+        {
+          "name": "Buffer Size",
+          "type": "size_t"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Platform specific function for tagging a memory buffer with a label. Helps see memory access in profilers"
     },
     {
       "id": "set-stored-values",
@@ -827,6 +1155,15 @@
       "docs": "Prints string to the default output"
     },
     {
+      "id": "is-local-print-thread-safe",
+      "name": "IsLocalPrintThreadSafe",
+      "category": "GenericPlatformMisc",
+      "signature": "IsLocalPrintThreadSafe()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Whether LocalPrint can be called from any thread without overlapping"
+    },
+    {
       "id": "has-separate-channel-for-debug-output",
       "name": "HasSeparateChannelForDebugOutput",
       "category": "GenericPlatformMisc",
@@ -959,6 +1296,52 @@
       "docs": "Show a message box if possible, otherwise print a message and return the default\n@param MsgType What sort of options are provided\n@param Text Specific message\n@param Caption String indicating the title of the message box\n@return Very strange convention...not really EAppReturnType, see implementation"
     },
     {
+      "id": "command-line-commands",
+      "name": "CommandLineCommands",
+      "category": "GenericPlatformMisc",
+      "signature": "CommandLineCommands()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Handles Game Explorer, Firewall and FirstInstall commands, typically from the installer\n@returns false if the game cannot continue."
+    },
+    {
+      "id": "is-64-bit-operating-system",
+      "name": "Is64bitOperatingSystem",
+      "category": "GenericPlatformMisc",
+      "signature": "Is64bitOperatingSystem()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Detects whether we're running in a 64-bit operating system.\n@return\ttrue if we're running in a 64-bit operating system"
+    },
+    {
+      "id": "is-valid-absolute-path-format",
+      "name": "IsValidAbsolutePathFormat",
+      "category": "GenericPlatformMisc",
+      "signature": "IsValidAbsolutePathFormat(Path)",
+      "params": [
+        {
+          "name": "Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks structure of the path against platform formatting requirements\nreturn true if path is formatted validly"
+    },
+    {
+      "id": "normalize-path",
+      "name": "NormalizePath",
+      "category": "GenericPlatformMisc",
+      "signature": "NormalizePath(In Path)",
+      "params": [
+        {
+          "name": "In Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Platform-specific normalization of path\nE.g. on Linux/Unix platforms, replaces ~ with user home directory, so ~/.config becomes /home/joe/.config (or /Users/Joe/.config)"
+    },
+    {
       "id": "get-default-path-separator",
       "name": "GetDefaultPathSeparator",
       "category": "GenericPlatformMisc",
@@ -975,6 +1358,15 @@
       "params": [],
       "returnType": "Bool",
       "docs": "Checks if platform wants to use a rendering thread on current device\n@return true if allowed, false if shouldn't use a separate rendering thread"
+    },
+    {
+      "id": "allow-audio-thread",
+      "name": "AllowAudioThread",
+      "category": "GenericPlatformMisc",
+      "signature": "AllowAudioThread()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Checks if platform wants to allow an audio thread on current device (note: does not imply it will, only if okay given other criteria met)\n@return true if allowed, false if shouldn't use a separate audio thread"
     },
     {
       "id": "allow-thread-heart-beat",
@@ -1029,6 +1421,24 @@
       "params": [],
       "returnType": "Int",
       "docs": "Return the number of worker threads we should spawn to service IO, NOT based on number of cores"
+    },
+    {
+      "id": "get-platform-specific-async-io-system",
+      "name": "GetPlatformSpecificAsyncIOSystem",
+      "category": "GenericPlatformMisc",
+      "signature": "GetPlatformSpecificAsyncIOSystem()",
+      "params": [],
+      "returnType": "struct FAsyncIOSystemBase*",
+      "docs": "Return the platform specific async IO system, or nullptr if the standard one should be used."
+    },
+    {
+      "id": "get-platform-features-module-name",
+      "name": "GetPlatformFeaturesModuleName",
+      "category": "GenericPlatformMisc",
+      "signature": "GetPlatformFeaturesModuleName()",
+      "params": [],
+      "returnType": "TCHAR*",
+      "docs": "Return the name of the platform features module. Can be nullptr if there are no extra features for this platform"
     },
     {
       "id": "root-dir",
@@ -1124,6 +1534,15 @@
       "params": [],
       "returnType": "String",
       "docs": "Return the CloudDir.  CloudDir can be per-user."
+    },
+    {
+      "id": "has-project-persistent-download-dir",
+      "name": "HasProjectPersistentDownloadDir",
+      "category": "GenericPlatformMisc",
+      "signature": "HasProjectPersistentDownloadDir()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Return true if the PersistentDownloadDir is available.\nOn some platforms, a writable directory might not be available by default.\nUsing this function allows handling that case early."
     },
     {
       "id": "check-persistent-download-storage-space-available",
@@ -1243,6 +1662,38 @@
       "docs": "Returns the platform specific interface for communication with processes running on the host pc.\n@return Returns the platform specific host communication interface."
     },
     {
+      "id": "os-execute",
+      "name": "OsExecute",
+      "category": "GenericPlatformMisc",
+      "signature": "OsExecute(Command Type, Command, Command Line)",
+      "params": [
+        {
+          "name": "Command Type",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Command",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Command Line",
+          "type": "TCHAR*",
+          "default": "NULL"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Has the OS execute a command and path pair (such as launch a browser)\n@param ComandType OS hint as to the type of command\n@param Command the command to execute\n@param CommandLine the commands to pass to the executable\n@return whether the command was successful or not"
+    },
+    {
+      "id": "is-packaged-for-distribution",
+      "name": "IsPackagedForDistribution",
+      "category": "GenericPlatformMisc",
+      "signature": "IsPackagedForDistribution()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "@return true if this build is meant for release to retail"
+    },
+    {
       "id": "get-sha-256-signature",
       "name": "GetSHA256Signature",
       "category": "GenericPlatformMisc",
@@ -1292,6 +1743,72 @@
       "docs": "Get the timezone identifier for this platform, or an empty string if the default timezone calculation will work.\n@note This should return either an Olson timezone (eg, \"America/Los_Angeles\") or an offset from GMT/UTC (eg, \"GMT-8:00\")."
     },
     {
+      "id": "exec",
+      "name": "Exec",
+      "category": "GenericPlatformMisc",
+      "signature": "Exec(In World, Cmd, Out)",
+      "params": [
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Out",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Platform-specific Exec function\n@param\tInWorld\t\tWorld context\n@param\tCmd\t\t\tThe command to execute\n@param\tOut\t\t\tThe output device to utilize\n@return\tbool\t\ttrue if command was processed, false if not"
+    },
+    {
+      "id": "get-file-manager-name",
+      "name": "GetFileManagerName",
+      "category": "GenericPlatformMisc",
+      "signature": "GetFileManagerName()",
+      "params": [],
+      "returnType": "Text",
+      "docs": "@return Get the name of the platform specific file manager (eg, Explorer on Windows, Finder on OS X)"
+    },
+    {
+      "id": "supports-multithreaded-file-handles",
+      "name": "SupportsMultithreadedFileHandles",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsMultithreadedFileHandles()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "@return Whether filehandles can be opened on one thread and read/written on another thread"
+    },
+    {
+      "id": "set-should-prompt-for-remote-debugging",
+      "name": "SetShouldPromptForRemoteDebugging",
+      "category": "GenericPlatformMisc",
+      "signature": "SetShouldPromptForRemoteDebugging(In Should Prompt)",
+      "params": [
+        {
+          "name": "In Should Prompt",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-should-prompt-for-remote-debug-on-ensure",
+      "name": "SetShouldPromptForRemoteDebugOnEnsure",
+      "category": "GenericPlatformMisc",
+      "signature": "SetShouldPromptForRemoteDebugOnEnsure(In Should Prompt)",
+      "params": [
+        {
+          "name": "In Should Prompt",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "is-ensure-allowed",
       "name": "IsEnsureAllowed",
       "category": "GenericPlatformMisc",
@@ -1319,6 +1836,79 @@
       "docs": "Ticks values that can be hotfixable in the config."
     },
     {
+      "id": "prompt-for-remote-debugging",
+      "name": "PromptForRemoteDebugging",
+      "category": "GenericPlatformMisc",
+      "signature": "PromptForRemoteDebugging(Is Ensure)",
+      "params": [
+        {
+          "name": "Is Ensure",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prefetch-8ef91e",
+      "name": "Prefetch",
+      "category": "GenericPlatformMisc",
+      "signature": "Prefetch(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prefetch-dbc016",
+      "name": "Prefetch",
+      "category": "GenericPlatformMisc",
+      "signature": "Prefetch(Ptr, Offset)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "Offset",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prefetch-block-0d89dd",
+      "name": "PrefetchBlock",
+      "category": "GenericPlatformMisc",
+      "signature": "PrefetchBlock(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "prefetch-block-ec3b0b",
+      "name": "PrefetchBlock",
+      "category": "GenericPlatformMisc",
+      "signature": "PrefetchBlock(Ptr, Num Bytes)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "Num Bytes",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "get-default-device-profile-name",
       "name": "GetDefaultDeviceProfileName",
       "category": "GenericPlatformMisc",
@@ -1326,6 +1916,52 @@
       "params": [],
       "returnType": "TCHAR*",
       "docs": "Gets the default profile name. Used if there is no device profile specified\n@return the default profile name."
+    },
+    {
+      "id": "get-battery-level",
+      "name": "GetBatteryLevel",
+      "category": "GenericPlatformMisc",
+      "signature": "GetBatteryLevel()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "Gets the current battery level.\n@return the battery level between 0 and 100."
+    },
+    {
+      "id": "set-brightness",
+      "name": "SetBrightness",
+      "category": "GenericPlatformMisc",
+      "signature": "SetBrightness(B Bright)",
+      "params": [
+        {
+          "name": "B Bright",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-brightness",
+      "name": "GetBrightness",
+      "category": "GenericPlatformMisc",
+      "signature": "GetBrightness()",
+      "params": [],
+      "returnType": "Float"
+    },
+    {
+      "id": "supports-brightness",
+      "name": "SupportsBrightness",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsBrightness()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-in-low-power-mode",
+      "name": "IsInLowPowerMode",
+      "category": "GenericPlatformMisc",
+      "signature": "IsInLowPowerMode()",
+      "params": [],
+      "returnType": "Bool"
     },
     {
       "id": "get-device-temperature-level",
@@ -1349,6 +1985,19 @@
       ],
       "returnType": "Void",
       "docs": "Allows a game/program/etc to control the game directory in a special place (for instance, monolithic programs that don't have .uprojects)"
+    },
+    {
+      "id": "set-override-game-dir",
+      "name": "SetOverrideGameDir",
+      "category": "GenericPlatformMisc",
+      "signature": "SetOverrideGameDir(In Override Dir)",
+      "params": [
+        {
+          "name": "In Override Dir",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "get-valid-target-platforms",
@@ -1393,6 +2042,78 @@
       "docs": "Converts from a FPlatformUserId to local user index\n@param LocalUserIndex\tA platform-allocated opaque user id\n@returns\t\t\t\t\tA valid logical index, or INDEX_NONE"
     },
     {
+      "id": "get-use-virtual-joysticks",
+      "name": "GetUseVirtualJoysticks",
+      "category": "GenericPlatformMisc",
+      "signature": "GetUseVirtualJoysticks()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns whether the platform wants to use a touch screen for virtual joysticks."
+    },
+    {
+      "id": "supports-touch-input",
+      "name": "SupportsTouchInput",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsTouchInput()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "supports-force-touch-input",
+      "name": "SupportsForceTouchInput",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsForceTouchInput()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-display-touch-interface-on-faking-touch-events",
+      "name": "ShouldDisplayTouchInterfaceOnFakingTouchEvents",
+      "category": "GenericPlatformMisc",
+      "signature": "ShouldDisplayTouchInterfaceOnFakingTouchEvents()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "desktop-touch-screen",
+      "name": "DesktopTouchScreen",
+      "category": "GenericPlatformMisc",
+      "signature": "DesktopTouchScreen()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "fullscreen-same-as-windowed-fullscreen",
+      "name": "FullscreenSameAsWindowedFullscreen",
+      "category": "GenericPlatformMisc",
+      "signature": "FullscreenSameAsWindowedFullscreen()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-volume-buttons-handled-by-system",
+      "name": "GetVolumeButtonsHandledBySystem",
+      "category": "GenericPlatformMisc",
+      "signature": "GetVolumeButtonsHandledBySystem()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns whether the volume buttons are handled by the system"
+    },
+    {
+      "id": "set-volume-buttons-handled-by-system",
+      "name": "SetVolumeButtonsHandledBySystem",
+      "category": "GenericPlatformMisc",
+      "signature": "SetVolumeButtonsHandledBySystem(Enabled)",
+      "params": [
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set whether the volume buttons are handled by the system"
+    },
+    {
       "id": "get-system-font-bytes",
       "name": "GetSystemFontBytes",
       "category": "GenericPlatformMisc",
@@ -1400,6 +2121,15 @@
       "params": [],
       "returnType": "TArray<uint8>",
       "docs": "@return Memory representing a true type or open type font provided by the platform as a default font for unreal to consume; empty array if the default font failed to load."
+    },
+    {
+      "id": "has-active-wi-fi-connection",
+      "name": "HasActiveWiFiConnection",
+      "category": "GenericPlatformMisc",
+      "signature": "HasActiveWiFiConnection()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns whether WiFi connection is currently active"
     },
     {
       "id": "get-network-connection-status",
@@ -1423,6 +2153,46 @@
       ],
       "returnType": "Void",
       "docs": "Updates the current status for the network connection"
+    },
+    {
+      "id": "get-network-connection-type",
+      "name": "GetNetworkConnectionType",
+      "category": "GenericPlatformMisc",
+      "signature": "GetNetworkConnectionType()",
+      "params": [],
+      "returnType": "ENetworkConnectionType",
+      "docs": "Returns whether WiFi connection is currently active"
+    },
+    {
+      "id": "ensure-network-if-necessary",
+      "name": "EnsureNetworkIfNecessary",
+      "category": "GenericPlatformMisc",
+      "signature": "EnsureNetworkIfNecessary()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-variable-hardware",
+      "name": "HasVariableHardware",
+      "category": "GenericPlatformMisc",
+      "signature": "HasVariableHardware()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns whether the platform has variable hardware (configurable/upgradeable system)."
+    },
+    {
+      "id": "has-platform-feature",
+      "name": "HasPlatformFeature",
+      "category": "GenericPlatformMisc",
+      "signature": "HasPlatformFeature(Feature Name)",
+      "params": [
+        {
+          "name": "Feature Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the given platform feature is currently available (for instance, Metal is only available in IOS8 and with A7 devices)"
     },
     {
       "id": "is-running-on-battery",
@@ -1615,6 +2385,86 @@
       "docs": "Returns activation protocol that's waiting to be broadcast"
     },
     {
+      "id": "should-disable-plugin-at-runtime",
+      "name": "ShouldDisablePluginAtRuntime",
+      "category": "GenericPlatformMisc",
+      "signature": "ShouldDisablePluginAtRuntime(Plugin Name)",
+      "params": [
+        {
+          "name": "Plugin Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Allows platform at runtime to disable unsupported plugins\n@param\tPluginName\tName of enabled plugin to consider\n@return\tbool\t\ttrue if plugin should be disabled"
+    },
+    {
+      "id": "prepare-mobile-haptics",
+      "name": "PrepareMobileHaptics",
+      "category": "GenericPlatformMisc",
+      "signature": "PrepareMobileHaptics(Type)",
+      "params": [
+        {
+          "name": "Type",
+          "type": "EMobileHapticsType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "For mobile devices, this will crank up a haptic engine for the specified type to be played later with TriggerMobileHaptics\nIf this is called again before Release, it will switch to this type"
+    },
+    {
+      "id": "trigger-mobile-haptics",
+      "name": "TriggerMobileHaptics",
+      "category": "GenericPlatformMisc",
+      "signature": "TriggerMobileHaptics()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "For mobile devices, this will kick the haptic type that was set in PrepareMobileHaptics. It can be called multiple times\nwith only a single call to Prepare"
+    },
+    {
+      "id": "release-mobile-haptics",
+      "name": "ReleaseMobileHaptics",
+      "category": "GenericPlatformMisc",
+      "signature": "ReleaseMobileHaptics()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "For mobile devices, this will shutdown the haptics, allowing system to put it to reset as needed"
+    },
+    {
+      "id": "share-url",
+      "name": "ShareURL",
+      "category": "GenericPlatformMisc",
+      "signature": "ShareURL(URL, Description, Location Hint X, Location Hint Y)",
+      "params": [
+        {
+          "name": "URL",
+          "type": "String&"
+        },
+        {
+          "name": "Description",
+          "type": "Text&"
+        },
+        {
+          "name": "Location Hint X",
+          "type": "Int"
+        },
+        {
+          "name": "Location Hint Y",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform a mobile-style sharing of a URL. Will use native UI to display sharing target"
+    },
+    {
+      "id": "supports-device-check-token",
+      "name": "SupportsDeviceCheckToken",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsDeviceCheckToken()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
       "id": "request-device-check-token",
       "name": "RequestDeviceCheckToken",
       "category": "GenericPlatformMisc",
@@ -1685,6 +2535,85 @@
       "returnType": "Void"
     },
     {
+      "id": "pump-messages-outside-main-loop",
+      "name": "PumpMessagesOutsideMainLoop",
+      "category": "GenericPlatformMisc",
+      "signature": "PumpMessagesOutsideMainLoop()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "pump-messages-for-slow-task",
+      "name": "PumpMessagesForSlowTask",
+      "category": "GenericPlatformMisc",
+      "signature": "PumpMessagesForSlowTask()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "pump-essential-app-messages",
+      "name": "PumpEssentialAppMessages",
+      "category": "GenericPlatformMisc",
+      "signature": "PumpEssentialAppMessages()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Pumps app messages only if there are essential keep-alive messages pending. This function called from time-sensitive\nparts of the code and should take minimal time if there are no essential messages waiting"
+    },
+    {
+      "id": "hide-platform-startup-screen",
+      "name": "HidePlatformStartupScreen",
+      "category": "GenericPlatformMisc",
+      "signature": "HidePlatformStartupScreen()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "use-hdr-by-default",
+      "name": "UseHDRByDefault",
+      "category": "GenericPlatformMisc",
+      "signature": "UseHDRByDefault()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "choose-hdr-device-and-color-gamut",
+      "name": "ChooseHDRDeviceAndColorGamut",
+      "category": "GenericPlatformMisc",
+      "signature": "ChooseHDRDeviceAndColorGamut(Device Id, Display Nit Level, Output Device, Color Gamut)",
+      "params": [
+        {
+          "name": "Device Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Display Nit Level",
+          "type": "UInt"
+        },
+        {
+          "name": "Output Device",
+          "type": "EDisplayOutputFormat&"
+        },
+        {
+          "name": "Color Gamut",
+          "type": "EDisplayColorGamut&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-chunk-id-from-pakchunk-index",
+      "name": "GetChunkIDFromPakchunkIndex",
+      "category": "GenericPlatformMisc",
+      "signature": "GetChunkIDFromPakchunkIndex(Pakchunk Index)",
+      "params": [
+        {
+          "name": "Pakchunk Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
       "id": "get-pak-filename-prefix",
       "name": "GetPakFilenamePrefix",
       "category": "GenericPlatformMisc",
@@ -1704,6 +2633,63 @@
         }
       ],
       "returnType": "Int"
+    },
+    {
+      "id": "expand-16-bit-indices-to-32-bit-on-load",
+      "name": "Expand16BitIndicesTo32BitOnLoad",
+      "category": "GenericPlatformMisc",
+      "signature": "Expand16BitIndicesTo32BitOnLoad()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-network-file-custom-data",
+      "name": "GetNetworkFileCustomData",
+      "category": "GenericPlatformMisc",
+      "signature": "GetNetworkFileCustomData(Out Custom Platform Data)",
+      "params": [
+        {
+          "name": "Out Custom Platform Data",
+          "type": "TMap<FString,FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns any platform-specific key-value data that needs to be sent to the network file server"
+    },
+    {
+      "id": "supports-backbuffer-sampling",
+      "name": "SupportsBackbufferSampling",
+      "category": "GenericPlatformMisc",
+      "signature": "SupportsBackbufferSampling()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-max-refresh-rate",
+      "name": "GetMaxRefreshRate",
+      "category": "GenericPlatformMisc",
+      "signature": "GetMaxRefreshRate()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "retrieves the current maximum refresh rate supported by the platform"
+    },
+    {
+      "id": "get-max-supported-refresh-rate",
+      "name": "GetMaxSupportedRefreshRate",
+      "category": "GenericPlatformMisc",
+      "signature": "GetMaxSupportedRefreshRate()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "retrieves the maximum refresh rate supported by the platform"
+    },
+    {
+      "id": "get-max-sync-interval",
+      "name": "GetMaxSyncInterval",
+      "category": "GenericPlatformMisc",
+      "signature": "GetMaxSyncInterval()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "Returns the platform's maximum allowed value for rhi.SyncInterval"
     },
     {
       "id": "get-config-rules-variable",
@@ -1747,6 +2733,20 @@
       "docs": "Returns true if this binary has been instrumented for collection of data needed for profile-guided optimization (PGO)\nThis value is not expected to change during the run-time"
     },
     {
+      "id": "start-new-pgo-collection",
+      "name": "StartNewPGOCollection",
+      "category": "GenericPlatformMisc",
+      "signature": "StartNewPGOCollection(Absolute File Name)",
+      "params": [
+        {
+          "name": "Absolute File Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "On platforms that support run-time PGI on/off, starts a new collection with a given file name.\n@param AbsoluteFileName File to put the collection into\n@return true if everything was successful"
+    },
+    {
       "id": "is-pgi-active",
       "name": "IsPGIActive",
       "category": "GenericPlatformMisc",
@@ -1764,6 +2764,15 @@
       "returnType": "String"
     },
     {
+      "id": "stop-pgo-collection-and-close-file",
+      "name": "StopPGOCollectionAndCloseFile",
+      "category": "GenericPlatformMisc",
+      "signature": "StopPGOCollectionAndCloseFile()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "On platforms that support run-time PGI on/off, stops the current collection and writes out the file (or completes its write).\nThe filename must have been given to the StartNewPGICollection() at the start of collection (it is needed in advance since the\ncollection process may stream to it).\n@return true if everything was successful"
+    },
+    {
       "id": "show-console-window",
       "name": "ShowConsoleWindow",
       "category": "GenericPlatformMisc",
@@ -1779,6 +2788,71 @@
       "params": [],
       "returnType": "Int",
       "docs": "For mobile devices, this function will return true if we wish to propagate the alpha to the backbuffer"
+    },
+    {
+      "id": "is-running-in-cloud",
+      "name": "IsRunningInCloud",
+      "category": "GenericPlatformMisc",
+      "signature": "IsRunningInCloud()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Return if the game is running on cloud server"
+    },
+    {
+      "id": "was-launched-streaming",
+      "name": "WasLaunchedStreaming",
+      "category": "GenericPlatformMisc",
+      "signature": "WasLaunchedStreaming()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Return true if the game is being streamed to a separate client device"
+    },
+    {
+      "id": "disable-screen-timeout",
+      "name": "DisableScreenTimeout",
+      "category": "GenericPlatformMisc",
+      "signature": "DisableScreenTimeout()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-screen-timeout",
+      "name": "EnableScreenTimeout",
+      "category": "GenericPlatformMisc",
+      "signature": "EnableScreenTimeout()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "setup-syscall-filters",
+      "name": "SetupSyscallFilters",
+      "category": "GenericPlatformMisc",
+      "signature": "SetupSyscallFilters()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Unix only function, but put a stub so we can call this for higher level code when we want to setup the Syscall Filters"
+    },
+    {
+      "id": "get-virtual-keyboard-input-height",
+      "name": "GetVirtualKeyboardInputHeight",
+      "category": "GenericPlatformMisc",
+      "signature": "GetVirtualKeyboardInputHeight()",
+      "params": [],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-platform-screen-warnings",
+      "name": "GetPlatformScreenWarnings",
+      "category": "GenericPlatformMisc",
+      "signature": "GetPlatformScreenWarnings(Platform Screen Warnings)",
+      "params": [
+        {
+          "name": "Platform Screen Warnings",
+          "type": "TArray<FText>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns any platform specific warning messages we want printed on screen"
     }
   ]
 }

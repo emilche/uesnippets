@@ -29,6 +29,60 @@
   ],
   "functions": [
     {
+      "id": "f-designer-changed-event-args",
+      "name": "FDesignerChangedEventArgs",
+      "category": "Widget",
+      "signature": "FDesignerChangedEventArgs(Target, False, F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "False",
+          "type": ") : bScreenPreview ("
+        },
+        {
+          "name": "F",
+          "type": "DpiScale ( 1 . 0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Event args that are sent whenever the designer is changed in some big way, allows for more accurate previews for\nwidgets that need to anticipate things about the size of the screen, or other similar device factors."
+    },
+    {
+      "id": "is-locked-in-designer",
+      "name": "IsLockedInDesigner",
+      "category": "Widget",
+      "signature": "IsLockedInDesigner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Stores a reference to the asset responsible for this widgets construction."
+    },
+    {
+      "id": "set-locked-in-designer",
+      "name": "SetLockedInDesigner",
+      "category": "Widget",
+      "signature": "SetLockedInDesigner(Target, New Locked In Designer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "New Locked In Designer",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@param bLockedInDesigner should this widget be locked"
+    },
+    {
       "id": "get-render-transform",
       "name": "GetRenderTransform",
       "category": "Widget",
@@ -419,21 +473,18 @@
       "docs": "Sets the visibility of the widget."
     },
     {
-      "id": "set-visibility-internal",
-      "name": "SetVisibilityInternal",
+      "id": "get-render-opacity",
+      "name": "GetRenderOpacity",
       "category": "Widget",
-      "signature": "SetVisibilityInternal(Target, In Visibility)",
+      "signature": "GetRenderOpacity(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UWidget*"
-        },
-        {
-          "name": "In Visibility",
-          "type": "ESlateVisibility"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Float",
+      "docs": "Gets the current visibility of the widget."
     },
     {
       "id": "set-render-opacity",
@@ -1037,7 +1088,7 @@
       "returnType": "Int"
     },
     {
-      "id": "broadcast-field-value-changed-f54590",
+      "id": "broadcast-field-value-changed",
       "name": "BroadcastFieldValueChanged",
       "category": "Widget",
       "signature": "BroadcastFieldValueChanged(Target, In Field Id)",
@@ -1096,21 +1147,50 @@
       "returnType": "Void"
     },
     {
-      "id": "broadcast-field-value-changed-057cf7",
-      "name": "BroadcastFieldValueChanged",
-      "category": "FieldNotify",
-      "signature": "BroadcastFieldValueChanged(Target, Field Id)",
+      "id": "take-widget",
+      "name": "TakeWidget",
+      "category": "Widget",
+      "signature": "TakeWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "TSharedRef<SWidget>",
+      "docs": "Gets the underlying slate widget or constructs it if it doesn't exist.  If you're looking to replace\nwhat slate widget gets constructed look for RebuildWidget.  For extremely special cases where you actually\nneed to change the GC Root widget of the constructed User Widget - you need to use TakeDerivedWidget\nyou must also take care to not call TakeWidget before calling TakeDerivedWidget, as that would put the wrong\nexpected wrapper around the resulting widget being constructed."
+    },
+    {
+      "id": "take-derived-widget",
+      "name": "TakeDerivedWidget",
+      "category": "Widget",
+      "signature": "TakeDerivedWidget(Target, Construct Method)",
       "params": [
         {
           "name": "Target",
           "type": "UWidget*"
         },
         {
-          "name": "Field Id",
-          "type": "FFieldNotificationId"
+          "name": "Construct Method",
+          "type": "ConstructMethodType"
         }
       ],
-      "returnType": "Void"
+      "returnType": "template<class WidgetType = SObjectWidget> TSharedRef<WidgetType>",
+      "docs": "Gets the underlying slate widget or constructs it if it doesn't exist.\n@param ConstructMethod allows the caller to specify a custom constructor that will be provided the\ndefault parameters we use to construct the slate widget, this allows the caller\nto construct derived types of SObjectWidget in cases where additional\nfunctionality at the slate level is desirable.\n@example\nclass SObjectWidgetCustom : public SObjectWidget, public IMixinBehavior\n{ }\nWidget->TakeDerivedWidget<SObjectWidgetCustom>( []( UUserWidget* Widget, TSharedRef<SWidget> Content ) {\nreturn SNew( SObjectWidgetCustom, Widget )\n[\nContent\n];\n});"
+    },
+    {
+      "id": "get-cached-widget",
+      "name": "GetCachedWidget",
+      "category": "Widget",
+      "signature": "GetCachedWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "TSharedPtr<SWidget>",
+      "docs": "Gets the last created widget does not recreate the gc container for the widget if one is needed."
     },
     {
       "id": "is-constructed",
@@ -1151,7 +1231,7 @@
           "type": "UWidget*"
         }
       ],
-      "returnType": "template<class TPlayerController = APlayerController> TPlayerController*",
+      "returnType": "APlayerController*",
       "docs": "Gets the player controller associated with this UI.\n@return The player controller that owns the UI."
     },
     {
@@ -1165,8 +1245,22 @@
           "type": "UWidget*"
         }
       ],
-      "returnType": "template<class T> T*",
+      "returnType": "ULocalPlayer*",
       "docs": "Gets the local player associated with this UI.\n@return The owning local player."
+    },
+    {
+      "id": "get-accessible-text",
+      "name": "GetAccessibleText",
+      "category": "Widget",
+      "signature": "GetAccessibleText(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Gets the accessible text from the underlying Slate accessible widget\n@return The accessible text of the underlying Slate accessible widget. Returns an empty text if\naccessibility is dsabled or the underlying accessible widget is invalid."
     },
     {
       "id": "get-accessible-summary-text",
@@ -1211,6 +1305,20 @@
       "docs": "Called by the owning user widget after the slate widget has been created.  After the entire widget tree\nhas been initialized, any widget reference that was needed to support navigating to another widget will\nnow be initialized and ready for usage."
     },
     {
+      "id": "is-design-time",
+      "name": "IsDesignTime",
+      "category": "Widget",
+      "signature": "IsDesignTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the widget is currently being displayed in the designer, it may want to display different data."
+    },
+    {
       "id": "set-designer-flags",
       "name": "SetDesignerFlags",
       "category": "Widget",
@@ -1227,6 +1335,65 @@
       ],
       "returnType": "Void",
       "docs": "Sets the designer flags on the widget."
+    },
+    {
+      "id": "get-designer-flags",
+      "name": "GetDesignerFlags",
+      "category": "Widget",
+      "signature": "GetDesignerFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "EWidgetDesignFlags",
+      "docs": "Gets the designer flags currently set on the widget."
+    },
+    {
+      "id": "has-any-designer-flags",
+      "name": "HasAnyDesignerFlags",
+      "category": "Widget",
+      "signature": "HasAnyDesignerFlags(Target, Flags To Check)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Flags To Check",
+          "type": "EWidgetDesignFlags"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Tests if any of the flags exist on this widget."
+    },
+    {
+      "id": "is-preview-time",
+      "name": "IsPreviewTime",
+      "category": "Widget",
+      "signature": "IsPreviewTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-display-label",
+      "name": "GetDisplayLabel",
+      "category": "Widget",
+      "signature": "GetDisplayLabel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "String&",
+      "docs": "Returns the friendly name of the widget to display in the editor"
     },
     {
       "id": "set-display-label",
@@ -1277,6 +1444,43 @@
       ],
       "returnType": "Void",
       "docs": "Sets the category name of the widget"
+    },
+    {
+      "id": "validate-compiled-defaults",
+      "name": "ValidateCompiledDefaults",
+      "category": "Widget",
+      "signature": "ValidateCompiledDefaults(Target, Compile Log)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Compile Log",
+          "type": "IWidgetCompilerLog&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called at the end of Widget Blueprint compilation.\nAllows UMG elements to evaluate their default states and determine whether they are acceptable.\nTo trigger compilation failure, add an error to the log. Warnings and notes will be visible, but will not cause compiles to fail."
+    },
+    {
+      "id": "modify",
+      "name": "Modify",
+      "category": "Widget",
+      "signature": "Modify(Target, Always Mark Dirty)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Always Mark Dirty",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Mark this object as modified, also mark the slot as modified."
     },
     {
       "id": "is-child-of",
@@ -1389,19 +1593,6 @@
       "returnType": "UWorld*"
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
-      "category": "Widget",
-      "signature": "BeginDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UWidget*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "finish-destroy",
       "name": "FinishDestroy",
       "category": "Widget",
@@ -1415,21 +1606,44 @@
       "returnType": "Void"
     },
     {
-      "id": "pre-save",
-      "name": "PreSave",
+      "id": "can-safely-route-event",
+      "name": "CanSafelyRouteEvent",
       "category": "Widget",
-      "signature": "PreSave(Target, Object Save Context)",
+      "signature": "CanSafelyRouteEvent(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UWidget*"
-        },
-        {
-          "name": "Object Save Context",
-          "type": "FObjectPreSaveContext"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Bool"
+    },
+    {
+      "id": "can-safely-route-paint",
+      "name": "CanSafelyRoutePaint",
+      "category": "Widget",
+      "signature": "CanSafelyRoutePaint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-generated-name",
+      "name": "IsGeneratedName",
+      "category": "Widget",
+      "signature": "IsGeneratedName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Is the label generated or provided by the user?"
     },
     {
       "id": "get-label-metadata",
@@ -1502,21 +1716,32 @@
       "docs": "Called by the palette after constructing a new widget."
     },
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
+      "id": "on-creation-from-palette",
+      "name": "OnCreationFromPalette",
       "category": "Widget",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
+      "signature": "OnCreationFromPalette(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UWidget*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "Called after constructing a new widget from the palette.\nAllows the widget to perform interesting default setup that we don't want to be UObject Defaults."
+    },
+    {
+      "id": "connect-editor-data",
+      "name": "ConnectEditorData",
+      "category": "Widget",
+      "signature": "ConnectEditorData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows general fixups and connections only used at editor time."
     },
     {
       "id": "is-visible-in-designer",
@@ -1550,6 +1775,109 @@
       "name": "DeselectByDesigner",
       "category": "Widget",
       "signature": "DeselectByDesigner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-designer-changed",
+      "name": "OnDesignerChanged",
+      "category": "Widget",
+      "signature": "OnDesignerChanged(Target, Event Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Event Args",
+          "type": "FDesignerChangedEventArgs&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-selected-by-designer",
+      "name": "OnSelectedByDesigner",
+      "category": "Widget",
+      "signature": "OnSelectedByDesigner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-deselected-by-designer",
+      "name": "OnDeselectedByDesigner",
+      "category": "Widget",
+      "signature": "OnDeselectedByDesigner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-descendant-selected-by-designer",
+      "name": "OnDescendantSelectedByDesigner",
+      "category": "Widget",
+      "signature": "OnDescendantSelectedByDesigner(Target, Descendant Widget)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Descendant Widget",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-descendant-deselected-by-designer",
+      "name": "OnDescendantDeselectedByDesigner",
+      "category": "Widget",
+      "signature": "OnDescendantDeselectedByDesigner(Target, Descendant Widget)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Descendant Widget",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-begin-edit-by-designer",
+      "name": "OnBeginEditByDesigner",
+      "category": "Widget",
+      "signature": "OnBeginEditByDesigner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-end-edit-by-designer",
+      "name": "OnEndEditByDesigner",
+      "category": "Widget",
+      "signature": "OnEndEditByDesigner(Target)",
       "params": [
         {
           "name": "Target",
@@ -1623,17 +1951,275 @@
       "returnType": "String"
     },
     {
-      "id": "get-visibility-in-designer",
-      "name": "GetVisibilityInDesigner",
+      "id": "is-editor-widget",
+      "name": "IsEditorWidget",
       "category": "Widget",
-      "signature": "GetVisibilityInDesigner(Target)",
+      "signature": "IsEditorWidget(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UWidget*"
         }
       ],
-      "returnType": "EVisibility"
+      "returnType": "Bool"
+    },
+    {
+      "id": "on-binding-changed",
+      "name": "OnBindingChanged",
+      "category": "Widget",
+      "signature": "OnBindingChanged(Target, Property)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Property",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "broadcast-binary-post-state-change",
+      "name": "BroadcastBinaryPostStateChange",
+      "category": "Widget",
+      "signature": "BroadcastBinaryPostStateChange(Target, State Change, In Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "State Change",
+          "type": "FWidgetStateBitfield&"
+        },
+        {
+          "name": "In Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcast a binary state post change\n@param StateChange bitfield marking states that should be changed\n@param bInValue true if marked states should be enabled, false otherwise"
+    },
+    {
+      "id": "broadcast-enum-post-state-change",
+      "name": "BroadcastEnumPostStateChange",
+      "category": "Widget",
+      "signature": "BroadcastEnumPostStateChange(Target, State Change)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "State Change",
+          "type": "FWidgetStateBitfield&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Broadcast an enum state post change\n@param StateChange bitfield marking states that should be changed"
+    },
+    {
+      "id": "rebuild-widget",
+      "name": "RebuildWidget",
+      "category": "Widget",
+      "signature": "RebuildWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "TSharedRef<SWidget>",
+      "docs": "Function implemented by all subclasses of UWidget is called when the underlying SWidget needs to be constructed."
+    },
+    {
+      "id": "on-widget-rebuilt",
+      "name": "OnWidgetRebuilt",
+      "category": "Widget",
+      "signature": "OnWidgetRebuilt(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Function called after the underlying SWidget is constructed."
+    },
+    {
+      "id": "rebuild-design-widget",
+      "name": "RebuildDesignWidget",
+      "category": "Widget",
+      "signature": "RebuildDesignWidget(Target, Content)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Content",
+          "type": "TSharedRef<SWidget>"
+        }
+      ],
+      "returnType": "TSharedRef<SWidget>"
+    },
+    {
+      "id": "create-designer-outline",
+      "name": "CreateDesignerOutline",
+      "category": "Widget",
+      "signature": "CreateDesignerOutline(Target, Content)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Content",
+          "type": "TSharedRef<SWidget>"
+        }
+      ],
+      "returnType": "TSharedRef<SWidget>"
+    },
+    {
+      "id": "get-display-name-base",
+      "name": "GetDisplayNameBase",
+      "category": "Widget",
+      "signature": "GetDisplayNameBase(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Gets the base name used to generate the display label/name of this widget."
+    },
+    {
+      "id": "update-render-transform",
+      "name": "UpdateRenderTransform",
+      "category": "Widget",
+      "signature": "UpdateRenderTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "synchronize-accessible-data",
+      "name": "SynchronizeAccessibleData",
+      "category": "Widget",
+      "signature": "SynchronizeAccessibleData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy all accessible properties to the AccessibleWidgetData object"
+    },
+    {
+      "id": "convert-float-to-optional-float",
+      "name": "ConvertFloatToOptionalFloat",
+      "category": "Widget",
+      "signature": "ConvertFloatToOptionalFloat(Target, In Float)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "In Float",
+          "type": "TAttribute<float>"
+        }
+      ],
+      "returnType": "TOptional<float>"
+    },
+    {
+      "id": "convert-linear-color-to-slate-color",
+      "name": "ConvertLinearColorToSlateColor",
+      "category": "Widget",
+      "signature": "ConvertLinearColorToSlateColor(Target, In Linear Color)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "In Linear Color",
+          "type": "TAttribute<FLinearColor>"
+        }
+      ],
+      "returnType": "FSlateColor"
+    },
+    {
+      "id": "set-navigation-rule-internal",
+      "name": "SetNavigationRuleInternal",
+      "category": "Widget",
+      "signature": "SetNavigationRuleInternal(Target, Direction, Rule, Widget To Focus, In Widget, In Custom Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        },
+        {
+          "name": "Direction",
+          "type": "EUINavigation"
+        },
+        {
+          "name": "Rule",
+          "type": "EUINavigationRule"
+        },
+        {
+          "name": "Widget To Focus",
+          "type": "Name",
+          "default": "NAME_None"
+        },
+        {
+          "name": "In Widget",
+          "type": "UWidget*",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Custom Delegate",
+          "type": "FCustomWidgetNavigationDelegate",
+          "default": "FCustomWidgetNavigationDelegate()"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-accessible-widget",
+      "name": "GetAccessibleWidget",
+      "category": "Widget",
+      "signature": "GetAccessibleWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "TSharedPtr<SWidget>",
+      "docs": "Gets the widget that accessibility properties should synchronize to."
+    },
+    {
+      "id": "verify-synchronize-properties",
+      "name": "VerifySynchronizeProperties",
+      "category": "Widget",
+      "signature": "VerifySynchronizeProperties(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UWidget*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Did we route the synchronize properties call?"
     }
   ]
 }

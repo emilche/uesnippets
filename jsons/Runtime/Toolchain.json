@@ -40,6 +40,74 @@
       "docs": "--- Parser --------------------------------\nThe parser is responsible for ingesting a source file, parsing and tokenizing it, and\ngenerating an abstract syntax tree (Vst) for the rest of the compiler to consume.  It\nshould not need to worry about semantics, just syntax"
     },
     {
+      "id": "is-compile-failure",
+      "name": "IsCompileFailure",
+      "category": "Toolchain",
+      "signature": "IsCompileFailure(Target, E)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "E",
+          "type": "ECompilerResult"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool"
+    },
+    {
+      "id": "is-aborted-compile",
+      "name": "IsAbortedCompile",
+      "category": "Toolchain",
+      "signature": "IsAbortedCompile(Target, E)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "E",
+          "type": "ECompilerResult"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool"
+    },
+    {
+      "id": "is-compile-incomplete",
+      "name": "IsCompileIncomplete",
+      "category": "Toolchain",
+      "signature": "IsCompileIncomplete(Target, E)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "E",
+          "type": "ECompilerResult"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool"
+    },
+    {
+      "id": "is-compile-complete",
+      "name": "IsCompileComplete",
+      "category": "Toolchain",
+      "signature": "IsCompileComplete(Target, E)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "E",
+          "type": "ECompilerResult"
+        }
+      ],
+      "returnType": "ULANG_FORCEINLINE bool"
+    },
+    {
       "id": "has-failure",
       "name": "HasFailure",
       "category": "Toolchain",
@@ -47,10 +115,36 @@
       "params": [
         {
           "name": "Target",
-          "type": "SBuildResults*"
+          "type": "CToolchain*"
         }
       ],
       "returnType": "Bool"
+    },
+    {
+      "id": "build-project",
+      "name": "BuildProject",
+      "category": "Toolchain",
+      "signature": "BuildProject(Target, Source Project, Build Context, Program Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Source Project",
+          "type": "CSourceProject&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Program Context",
+          "type": "SProgramContext&"
+        }
+      ],
+      "returnType": "SBuildResults",
+      "docs": "Compiler+Linker toolchain\n************************************************************************"
     },
     {
       "id": "parse-snippet",
@@ -245,6 +339,116 @@
       "docs": "Run linker (not currently used)"
     },
     {
+      "id": "get-parser",
+      "name": "GetParser",
+      "category": "Toolchain",
+      "signature": "GetParser(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TOptional<TSRef<IParserPass>>&",
+      "docs": "Accessors for the various stages of the compiler.  Most users will never actually need\nto grab these stages individual, but in the cases where you need to do partial compilation,\nthey can be useful to manually run"
+    },
+    {
+      "id": "get-post-vst-filters",
+      "name": "GetPostVstFilters",
+      "category": "Toolchain",
+      "signature": "GetPostVstFilters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TSRefArray<IPostVstFilter>&"
+    },
+    {
+      "id": "get-semantic-analyzer",
+      "name": "GetSemanticAnalyzer",
+      "category": "Toolchain",
+      "signature": "GetSemanticAnalyzer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TOptional<TSRef<ISemanticAnalyzerPass>>&"
+    },
+    {
+      "id": "get-post-semantic-analysis-filters",
+      "name": "GetPostSemanticAnalysisFilters",
+      "category": "Toolchain",
+      "signature": "GetPostSemanticAnalysisFilters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TSRefArray<IPostSemanticAnalysisFilter>&"
+    },
+    {
+      "id": "get-post-ir-filters",
+      "name": "GetPostIrFilters",
+      "category": "Toolchain",
+      "signature": "GetPostIrFilters(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TSRefArray<IPostIrFilter>&"
+    },
+    {
+      "id": "get-assembler",
+      "name": "GetAssembler",
+      "category": "Toolchain",
+      "signature": "GetAssembler(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TOptional<TSRef<IAssemblerPass>>&"
+    },
+    {
+      "id": "get-project-vst",
+      "name": "GetProjectVst",
+      "category": "Toolchain",
+      "signature": "GetProjectVst(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        }
+      ],
+      "returnType": "TSPtr<Verse::Vst::Project>&"
+    },
+    {
+      "id": "set-project-vst",
+      "name": "SetProjectVst",
+      "category": "Toolchain",
+      "signature": "SetProjectVst(Target, New Project)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "New Project",
+          "type": "TSRef<Verse::Vst::Project>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Directly sets the cached VST project to the new project specified.\nWarning: doing this will cause the previously cached VST project's destructor to be called,\nwhich means that any AST nodes that still hold references to the VST nodes within will now\nhave those references be invalidated. The only time you should use this is if you don't care\nabout the previous VST project anymore and its accompanying AST either.\n@param NewProject    The new project to store."
+    },
+    {
       "id": "take-localization-info",
       "name": "TakeLocalizationInfo",
       "category": "Toolchain",
@@ -269,6 +473,44 @@
         }
       ],
       "returnType": "TArray<FSolLocalizationInfo>"
+    },
+    {
+      "id": "c-toolchain",
+      "name": "CToolchain",
+      "category": "Toolchain",
+      "signature": "CToolchain(Params)",
+      "params": [
+        {
+          "name": "Params",
+          "type": "SToolchainParams&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "build-ordered-package-list",
+      "name": "BuildOrderedPackageList",
+      "category": "Toolchain",
+      "signature": "BuildOrderedPackageList(Target, Source Project, Build Context, Out Ordered Package List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CToolchain*"
+        },
+        {
+          "name": "Source Project",
+          "type": "CSourceProject&"
+        },
+        {
+          "name": "Build Context",
+          "type": "SBuildContext&"
+        },
+        {
+          "name": "Out Ordered Package List",
+          "type": "TArray<SOrderedPackage>&"
+        }
+      ],
+      "returnType": "Bool"
     }
   ]
 }

@@ -66,33 +66,6 @@
       "docs": "Fix legacy content that created the Id from non-unique Guids.\nRun on objects created before FUE5MainStreamObjectVersion::VirtualizedBulkDataHaveUniqueGuids"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "EditorBulkData",
-      "signature": "Serialize(Target, Ar, Owner, Allow Register)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FEditorBulkData*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        },
-        {
-          "name": "Owner",
-          "type": "UObject*"
-        },
-        {
-          "name": "Allow Register",
-          "type": "Bool",
-          "default": "true"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Used to serialize the bulkdata to/from a FArchive\n@param Ar\tThe archive to serialize the bulkdata.\n@param Owner\tThe UObject that contains the bulkdata object, if this is a nullptr then the bulkdata will\nassume that it must serialize the payload immediately to memory as it will not be able to\nidentify it's package path.\n@param bAllowRegistry Legacy parameter to skip registration when loading BulkData we know we will need to\nmodify the identifier of. Should always be true for non-legacy serialization."
-    },
-    {
       "id": "reset",
       "name": "Reset",
       "category": "EditorBulkData",
@@ -171,6 +144,34 @@
       "docs": "Returns an unique identifier for the content of the payload."
     },
     {
+      "id": "get-payload-size",
+      "name": "GetPayloadSize",
+      "category": "EditorBulkData",
+      "signature": "GetPayloadSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorBulkData*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Returns the size of the payload in bytes."
+    },
+    {
+      "id": "has-payload-data",
+      "name": "HasPayloadData",
+      "category": "EditorBulkData",
+      "signature": "HasPayloadData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the bulkdata object contains a valid payload greater than zero bytes in size."
+    },
+    {
       "id": "does-payload-need-loading",
       "name": "DoesPayloadNeedLoading",
       "category": "EditorBulkData",
@@ -196,7 +197,11 @@
         }
       ],
       "returnType": "TFuture<FSharedBuffer>",
-      "docs": "Returns an immutable FCompressedBuffer reference to the payload data."
+      "docs": "Returns an immutable FCompressedBuffer reference to the payload data.",
+      "supportedTargets": [
+        "FEditorBulkData*",
+        "FSharedBufferWithID*"
+      ]
     },
     {
       "id": "get-compressed-payload",
@@ -337,6 +342,20 @@
       "docs": "Set this BulkData into Torn-Off mode. It will no longer register with the BulkDataRegistry, even if\ncopied from another BulkData, and it will pass on this flag to any BulkData copied/moved from it.\nUse Reset() to remove this state. Torn-off BulkDatas share the guid with the BulkData they copy from."
     },
     {
+      "id": "copy-torn-off",
+      "name": "CopyTornOff",
+      "category": "EditorBulkData",
+      "signature": "CopyTornOff(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorBulkData*"
+        }
+      ],
+      "returnType": "FEditorBulkData",
+      "docs": "Make a torn-off copy of this bulk data."
+    },
+    {
       "id": "serialize-for-registry",
       "name": "SerializeForRegistry",
       "category": "EditorBulkData",
@@ -367,6 +386,20 @@
       ],
       "returnType": "Bool",
       "docs": "Return true if the bulkdata has a source location that persists between editor processes (package file or virtualization)."
+    },
+    {
+      "id": "has-placeholder-payload-id",
+      "name": "HasPlaceholderPayloadId",
+      "category": "EditorBulkData",
+      "signature": "HasPlaceholderPayloadId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEditorBulkData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return whether the BulkData has legacy payload id that needs to be updated from loaded payload before it can be used in DDC."
     },
     {
       "id": "is-memory-only-payload",

@@ -152,6 +152,38 @@
       "docs": "Check if there is an active Tool on the given Side\n@param Side which Side to check\n@return true if there is an active Tool on that side"
     },
     {
+      "id": "get-tool-switch-mode",
+      "name": "GetToolSwitchMode",
+      "category": "InteractiveToolManager",
+      "signature": "GetToolSwitchMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "EToolManagerToolSwitchMode",
+      "docs": "Get the current setting for how to deactivate an already-active tool if switching directly to\nanother tool."
+    },
+    {
+      "id": "set-tool-switch-mode",
+      "name": "SetToolSwitchMode",
+      "category": "InteractiveToolManager",
+      "signature": "SetToolSwitchMode(Target, Tool Switch Mode In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        },
+        {
+          "name": "Tool Switch Mode In",
+          "type": "EToolManagerToolSwitchMode"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the behavior for how to deactivate an already-active tool if ActivateTool is called while\nHasActiveTool is true.\nNote: a higher level system could choose to enforce its preferences for this behavior by querying\nHasActiveTool and making sure to shut down the previous tool before calling ActivateTool.\nHowever it is convenient to be able to set the behavior at the tool manager level."
+    },
+    {
       "id": "has-any-active-tool",
       "name": "HasAnyActiveTool",
       "category": "InteractiveToolManager",
@@ -498,6 +530,34 @@
       "docs": "A Tool (or other code) can call this function to request that the Tool be deactivated.\nThe Tool must be active. By default, ::DeactivateTool() wil be called. However if some\nexternal code has bound to the OnToolShutdownRequest delegate, the request will be\nforwarded to that function first (::DeactivateTool() will still be called if it returns false)\nIf this function is called during InteractiveTool::Setup(), the Tool invocation will be aborted,\nie the Tool will be immediately shutdown with EToolShutdownType::Cancel, and never become \"Active\"/etc.\nNote also that in this case the shutdown request *will not* be forwarded to the OnToolShutdownRequest delegate.\n@param bShowUnexpectedShutdownMessage if this was an unexpected shutdown, passing true here, along with a non-empty UnexpectedShutdownMessage, will result in OnToolUnexpectedShutdownMessage being called\n@param UnexpectedShutdownMessage message provided by the caller meant to explain why the Tool has unexpectedly been shut down"
     },
     {
+      "id": "get-context-queries-api",
+      "name": "GetContextQueriesAPI",
+      "category": "InteractiveToolManager",
+      "signature": "GetContextQueriesAPI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "IToolsContextQueriesAPI*",
+      "docs": "PostActiveToolShutdownRequest() will broadcast this delegate with a Message if bShowUnexpectedShutdownMessage=true.\nIf the shutdown was during Tool Setup/startup, bWasDuringToolSetup will be passed as true"
+    },
+    {
+      "id": "get-context-transactions-api",
+      "name": "GetContextTransactionsAPI",
+      "category": "InteractiveToolManager",
+      "signature": "GetContextTransactionsAPI(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInteractiveToolManager*"
+        }
+      ],
+      "returnType": "IToolsContextTransactionsAPI*",
+      "docs": "@return current IToolsContextTransactionsAPI"
+    },
+    {
       "id": "get-paired-gizmo-manager",
       "name": "GetPairedGizmoManager",
       "category": "InteractiveToolManager",
@@ -539,7 +599,12 @@
           "type": "UObject*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FBeginToolChange*",
+        "FActivateToolChange*",
+        "FToolChangeWrapperChange*"
+      ]
     },
     {
       "id": "has-expired",
@@ -556,7 +621,12 @@
           "type": "UObject*"
         }
       ],
-      "returnType": "Bool"
+      "returnType": "Bool",
+      "supportedTargets": [
+        "FBeginToolChange*",
+        "FActivateToolChange*",
+        "FToolChangeWrapperChange*"
+      ]
     },
     {
       "id": "to-string",
@@ -569,7 +639,12 @@
           "type": "FBeginToolChange*"
         }
       ],
-      "returnType": "String"
+      "returnType": "String",
+      "supportedTargets": [
+        "FBeginToolChange*",
+        "FActivateToolChange*",
+        "FToolChangeWrapperChange*"
+      ]
     },
     {
       "id": "apply",
@@ -587,7 +662,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "FBeginToolChange is used by UInteractiveToolManager to back out of a Tool on Undo.\nNo action is taken on Redo, ie we do not re-start the Tool on Redo."
+      "docs": "FBeginToolChange is used by UInteractiveToolManager to back out of a Tool on Undo.\nNo action is taken on Redo, ie we do not re-start the Tool on Redo.",
+      "supportedTargets": [
+        "FActivateToolChange*",
+        "FToolChangeWrapperChange*"
+      ]
     }
   ]
 }

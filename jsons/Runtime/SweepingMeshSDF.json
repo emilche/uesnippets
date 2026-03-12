@@ -1,0 +1,417 @@
+{
+  "id": "sweeping-mesh-sdf",
+  "label": "SweepingMeshSDF",
+  "includepath": "Implicit/SweepingMeshSDF.h",
+  "includes": [
+    "MathUtil",
+    "MeshQueries",
+    "IndexUtil",
+    "MeshAABBTree3",
+    "DenseGrid3",
+    "ParallelFor",
+    "ScopeLock",
+    "GridInterpolant",
+    "NumericLimits"
+  ],
+  "functions": [
+    {
+      "id": "unit-cell-size",
+      "name": "UnitCellSize",
+      "category": "SweepingMeshSDF",
+      "signature": "UnitCellSize()",
+      "params": [],
+      "returnType": "CellSizeType",
+      "docs": "Compute discretely-sampled (ie gridded) signed distance field for a mesh\nThe basic approach is, first compute exact Distances in a narrow band, and then\nextend out to rest of Grid using fast \"sweeping\" (ie like a distance transform).\nThe resulting unsigned Grid is then signed using ray-intersection counting, which\nis also computed on the Grid, so no BVH is necessary\nIf you set ComputeMode to NarrowBandOnly, result is a narrow-band signed distance field.\nThis is quite a bit faster as the sweeping is the most computationally-intensive step.\nYou can optionally provide a spatial data structure to allow faster computation of\nnarrow-band Distances; this is most beneficial if we want a wider band\nCaveats:\n- the \"narrow band\" is based on triangle bounding boxes, so it is not necessarily\nthat \"narrow\" if you have large triangles on a diagonal to Grid axes\nTODO: a number of utility function could & should be shared between this and CachingMeshSDF!\nThis code is based on the implementation found at https://github.com/christopherbatty/SDFGen"
+    },
+    {
+      "id": "set-cell-size",
+      "name": "SetCellSize",
+      "category": "SweepingMeshSDF",
+      "signature": "SetCellSize(Target, In Cell Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "In Cell Size",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "bool",
+      "name": "bool",
+      "category": "SweepingMeshSDF",
+      "signature": "bool(Target, Cancel F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "Cancel F",
+          "type": ")>",
+          "default": "[]("
+        }
+      ],
+      "returnType": "TFunction<",
+      "docs": "if this function returns true, we should abort calculation"
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "SweepingMeshSDF",
+      "signature": "Empty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Empty out all computed result data (leaves input data alone)"
+    },
+    {
+      "id": "make-interpolant",
+      "name": "MakeInterpolant",
+      "category": "SweepingMeshSDF",
+      "signature": "MakeInterpolant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        }
+      ],
+      "returnType": "template<InterpolantRealType = double> TTriLinearGridInterpolant<FDenseGrid3f,InterpolantRealType,bScalarCellSize>"
+    },
+    {
+      "id": "should-use-spatial",
+      "name": "ShouldUseSpatial",
+      "category": "SweepingMeshSDF",
+      "signature": "ShouldUseSpatial(Exact Cells, Cell Size, Avg Edge Len)",
+      "params": [
+        {
+          "name": "Exact Cells",
+          "type": "Int"
+        },
+        {
+          "name": "Cell Size",
+          "type": "Double"
+        },
+        {
+          "name": "Avg Edge Len",
+          "type": "Double"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Encodes heuristic for deciding whether it will be faster to use\n- NarrowBand_SpatialFloodFill\n- Or NarrowBandOnly\nThe heuristic is to use the Spatial method unless you have relatively long edges relative to the width\nof the narrow band.  For a 1-cell wide band, or one where few triangles interact w/ each cell in the band\nthe spatial overhead will probably not be worthwhile.\nTODO: test and tune this ..."
+    },
+    {
+      "id": "validate",
+      "name": "Validate",
+      "category": "SweepingMeshSDF",
+      "signature": "Validate(Target, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "compute-ea745e",
+      "name": "Compute",
+      "category": "SweepingMeshSDF",
+      "signature": "Compute(Target, Bounds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "Bounds",
+          "type": "FAxisAlignedBox3d"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute the SDF enclosing the given bounds, with a 'safe' buffer zone\n@param Bounds Bounding box for the mesh data (passed as param it is usually already available, depending on TriangleMeshType and whether an AABB tree was provided)\n@return false if cancelled or failed (e.g. due to invalid arguments); true otherwise"
+    },
+    {
+      "id": "compute-203353",
+      "name": "Compute",
+      "category": "SweepingMeshSDF",
+      "signature": "Compute(Target, In Grid Origin, In Dimensions)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "In Grid Origin",
+          "type": "FVector3f"
+        },
+        {
+          "name": "In Dimensions",
+          "type": "FVector3i"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compute the SDF with exactly specified grid origin and dimensions\n@param InGridOrigin Origin of the output grid\n@param InDimensions Dimensions of the output grid\n@return false if cancelled or failed (e.g. due to invalid arguments); true otherwise"
+    },
+    {
+      "id": "dimensions",
+      "name": "Dimensions",
+      "category": "SweepingMeshSDF",
+      "signature": "Dimensions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        }
+      ],
+      "returnType": "FVector3i"
+    },
+    {
+      "id": "get-closest-tri-grid",
+      "name": "GetClosestTriGrid",
+      "category": "SweepingMeshSDF",
+      "signature": "GetClosestTriGrid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        }
+      ],
+      "returnType": "FDenseGrid3i&"
+    },
+    {
+      "id": "get-intersections-grid",
+      "name": "GetIntersectionsGrid",
+      "category": "SweepingMeshSDF",
+      "signature": "GetIntersectionsGrid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        }
+      ],
+      "returnType": "FDenseGrid3i&"
+    },
+    {
+      "id": "at",
+      "name": "At",
+      "category": "SweepingMeshSDF",
+      "signature": "At(Target, I, J, K)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "I",
+          "type": "Int"
+        },
+        {
+          "name": "J",
+          "type": "Int"
+        },
+        {
+          "name": "K",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "cell-center",
+      "name": "CellCenter",
+      "category": "SweepingMeshSDF",
+      "signature": "CellCenter(Target, I, J, K)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "I",
+          "type": "Int"
+        },
+        {
+          "name": "J",
+          "type": "Int"
+        },
+        {
+          "name": "K",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FVector3f"
+    },
+    {
+      "id": "get-value",
+      "name": "GetValue",
+      "category": "SweepingMeshSDF",
+      "signature": "GetValue(Target, Idx)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TSweepingMeshSDF*"
+        },
+        {
+          "name": "Idx",
+          "type": "FVector3i"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "point-in-triangle-2-d",
+      "name": "PointInTriangle2d",
+      "category": "SweepingMeshSDF",
+      "signature": "PointInTriangle2d(X 0, Y 0, X 1, Y 1, X 2, Y 2, X 3, Y 3, A, B, C)",
+      "params": [
+        {
+          "name": "X 0",
+          "type": "Double"
+        },
+        {
+          "name": "Y 0",
+          "type": "Double"
+        },
+        {
+          "name": "X 1",
+          "type": "Double"
+        },
+        {
+          "name": "Y 1",
+          "type": "Double"
+        },
+        {
+          "name": "X 2",
+          "type": "Double"
+        },
+        {
+          "name": "Y 2",
+          "type": "Double"
+        },
+        {
+          "name": "X 3",
+          "type": "Double"
+        },
+        {
+          "name": "Y 3",
+          "type": "Double"
+        },
+        {
+          "name": "A",
+          "type": "Double&"
+        },
+        {
+          "name": "B",
+          "type": "Double&"
+        },
+        {
+          "name": "C",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "point-segment-distance",
+      "name": "PointSegmentDistance",
+      "category": "SweepingMeshSDF",
+      "signature": "PointSegmentDistance(X 0, X 1, X 2)",
+      "params": [
+        {
+          "name": "X 0",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "X 1",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "X 2",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "point-triangle-distance",
+      "name": "PointTriangleDistance",
+      "category": "SweepingMeshSDF",
+      "signature": "PointTriangleDistance(X 0, X 1, X 2, X 3)",
+      "params": [
+        {
+          "name": "X 0",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "X 1",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "X 2",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "X 3",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "get-dim",
+      "name": "GetDim",
+      "category": "SweepingMeshSDF",
+      "signature": "GetDim(Cell Size, Axis)",
+      "params": [
+        {
+          "name": "Cell Size",
+          "type": "CellSizeTyped"
+        },
+        {
+          "name": "Axis",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "get-diag-length",
+      "name": "GetDiagLength",
+      "category": "SweepingMeshSDF",
+      "signature": "GetDiagLength(Cell Size)",
+      "params": [
+        {
+          "name": "Cell Size",
+          "type": "CellSizeType"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "SweepingMeshSDF",
+      "signature": "IsValid(Cell Size)",
+      "params": [
+        {
+          "name": "Cell Size",
+          "type": "CellSizeType"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

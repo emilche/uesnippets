@@ -191,27 +191,18 @@
       "returnType": "Void"
     },
     {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
+      "id": "redraw-requested",
+      "name": "RedrawRequested",
       "category": "GameViewportClient",
-      "signature": "PostInitProperties(Target)",
+      "signature": "RedrawRequested(Target, In Viewport)",
       "params": [
         {
           "name": "Target",
           "type": "UGameViewportClient*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
-      "category": "GameViewportClient",
-      "signature": "BeginDestroy(Target)",
-      "params": [
+        },
         {
-          "name": "Target",
-          "type": "UGameViewportClient*"
+          "name": "In Viewport",
+          "type": "FViewport*"
         }
       ],
       "returnType": "Void"
@@ -493,23 +484,6 @@
       "returnType": "Void"
     },
     {
-      "id": "received-focus",
-      "name": "ReceivedFocus",
-      "category": "GameViewportClient",
-      "signature": "ReceivedFocus(Target, Viewport)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UGameViewportClient*"
-        },
-        {
-          "name": "Viewport",
-          "type": "FViewport*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "is-focused",
       "name": "IsFocused",
       "category": "GameViewportClient",
@@ -612,6 +586,19 @@
       "returnType": "Void"
     },
     {
+      "id": "requires-hit-proxy-storage",
+      "name": "RequiresHitProxyStorage",
+      "category": "GameViewportClient",
+      "signature": "RequiresHitProxyStorage(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "is-ortho",
       "name": "IsOrtho",
       "category": "GameViewportClient",
@@ -684,29 +671,26 @@
       "returnType": "Void"
     },
     {
-      "id": "exec-runtime",
-      "name": "Exec_Runtime",
+      "id": "finalize-views",
+      "name": "FinalizeViews",
       "category": "GameViewportClient",
-      "signature": "Exec_Runtime(Target, In World, Cmd, Ar)",
+      "signature": "FinalizeViews(Target, View Family, Player View Map)",
       "params": [
         {
           "name": "Target",
           "type": "UGameViewportClient*"
         },
         {
-          "name": "In World",
-          "type": "UWorld*"
+          "name": "View Family",
+          "type": "FSceneViewFamily*"
         },
         {
-          "name": "Cmd",
-          "type": "TCHAR*"
-        },
-        {
-          "name": "Ar",
-          "type": "FOutputDevice&"
+          "name": "Player View Map",
+          "type": "TMap<ULocalPlayer*,FSceneView*>&"
         }
       ],
-      "returnType": "Bool"
+      "returnType": "Void",
+      "docs": "make any adjustments to the views after they've been completely set up"
     },
     {
       "id": "remap-controller-input",
@@ -1569,6 +1553,34 @@
       "docs": "Assigns the viewport game layer manager for this viewport client.  Should only be called when first created."
     },
     {
+      "id": "get-game-layer-manager",
+      "name": "GetGameLayerManager",
+      "category": "GameViewportClient",
+      "signature": "GetGameLayerManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "TSharedPtr<IGameLayerManager>",
+      "docs": "Gets the layer manager for the UI."
+    },
+    {
+      "id": "get-window",
+      "name": "GetWindow",
+      "category": "GameViewportClient",
+      "signature": "GetWindow(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "TSharedPtr<SWindow>",
+      "docs": "Returns access to this viewport's Slate window"
+    },
+    {
       "id": "set-drop-detail",
       "name": "SetDropDetail",
       "category": "GameViewportClient",
@@ -1701,6 +1713,20 @@
       "docs": "Initialize the game viewport.\n@param OutError - If an error occurs, returns the error description.\n@return False if an error occurred, true if the viewport was initialized successfully."
     },
     {
+      "id": "get-current-splitscreen-configuration",
+      "name": "GetCurrentSplitscreenConfiguration",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentSplitscreenConfiguration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "ESplitScreenType::Type",
+      "docs": "@return Returns the splitscreen type that is currently being used"
+    },
+    {
       "id": "update-active-splitscreen-type",
       "name": "UpdateActiveSplitscreenType",
       "category": "GameViewportClient",
@@ -1745,6 +1771,20 @@
       ],
       "returnType": "Void",
       "docs": "Allows game code to disable splitscreen (useful when in menus)"
+    },
+    {
+      "id": "is-splitscreen-force-disabled",
+      "name": "IsSplitscreenForceDisabled",
+      "category": "GameViewportClient",
+      "signature": "IsSplitscreenForceDisabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines whether splitscreen is forced to be turned off"
     },
     {
       "id": "get-subtitle-region",
@@ -2152,6 +2192,223 @@
       "docs": "Make sure all navigation objects have appropriate path rendering components set.  Called when EngineShowFlags.Navigation is set."
     },
     {
+      "id": "on-screenshot-captured",
+      "name": "OnScreenshotCaptured",
+      "category": "GameViewportClient",
+      "signature": "OnScreenshotCaptured()",
+      "params": [],
+      "returnType": "FOnScreenshotCaptured&",
+      "docs": "Accessor for delegate called when a screenshot is captured"
+    },
+    {
+      "id": "on-viewport-rendered",
+      "name": "OnViewportRendered",
+      "category": "GameViewportClient",
+      "signature": "OnViewportRendered()",
+      "params": [],
+      "returnType": "FOnViewportRendered&",
+      "docs": "Accessor for delegate called when a viewport is rendered"
+    },
+    {
+      "id": "on-close-requested",
+      "name": "OnCloseRequested",
+      "category": "GameViewportClient",
+      "signature": "OnCloseRequested(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnCloseRequested&",
+      "docs": "Accessor for the delegate called when a viewport is asked to close."
+    },
+    {
+      "id": "on-window-close-requested",
+      "name": "OnWindowCloseRequested",
+      "category": "GameViewportClient",
+      "signature": "OnWindowCloseRequested(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnWindowCloseRequested&",
+      "docs": "Accessor for the delegate called when the window owning the viewport is asked to close."
+    },
+    {
+      "id": "on-viewport-created",
+      "name": "OnViewportCreated",
+      "category": "GameViewportClient",
+      "signature": "OnViewportCreated()",
+      "params": [],
+      "returnType": "FSimpleMulticastDelegate&",
+      "docs": "Accessor for the delegate called when the game viewport is created."
+    },
+    {
+      "id": "on-player-added",
+      "name": "OnPlayerAdded",
+      "category": "GameViewportClient",
+      "signature": "OnPlayerAdded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnGameViewportClientPlayerAction&"
+    },
+    {
+      "id": "on-player-removed",
+      "name": "OnPlayerRemoved",
+      "category": "GameViewportClient",
+      "signature": "OnPlayerRemoved(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnGameViewportClientPlayerAction&"
+    },
+    {
+      "id": "on-begin-draw",
+      "name": "OnBeginDraw",
+      "category": "GameViewportClient",
+      "signature": "OnBeginDraw(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FSimpleMulticastDelegate&"
+    },
+    {
+      "id": "on-drawn",
+      "name": "OnDrawn",
+      "category": "GameViewportClient",
+      "signature": "OnDrawn(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FSimpleMulticastDelegate&"
+    },
+    {
+      "id": "on-end-draw",
+      "name": "OnEndDraw",
+      "category": "GameViewportClient",
+      "signature": "OnEndDraw(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FSimpleMulticastDelegate&"
+    },
+    {
+      "id": "on-tick",
+      "name": "OnTick",
+      "category": "GameViewportClient",
+      "signature": "OnTick(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnGameViewportTick&"
+    },
+    {
+      "id": "on-navigation-override",
+      "name": "OnNavigationOverride",
+      "category": "GameViewportClient",
+      "signature": "OnNavigationOverride(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FCustomNavigationHandler&",
+      "docs": "Set an override handler for navigation."
+    },
+    {
+      "id": "on-override-input-key",
+      "name": "OnOverrideInputKey",
+      "category": "GameViewportClient",
+      "signature": "OnOverrideInputKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOverrideInputKeyHandler&",
+      "docs": "Set an override handler for input key handling, can be used for things like press start screen"
+    },
+    {
+      "id": "on-override-input-axis",
+      "name": "OnOverrideInputAxis",
+      "category": "GameViewportClient",
+      "signature": "OnOverrideInputAxis(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOverrideInputAxisHandler&",
+      "docs": "Set an override handler for input axis handling"
+    },
+    {
+      "id": "on-input-key",
+      "name": "OnInputKey",
+      "category": "GameViewportClient",
+      "signature": "OnInputKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnInputKeySignature&",
+      "docs": "Gets broadcast delegate for input key, happens in addition to player controller input"
+    },
+    {
+      "id": "on-input-axis",
+      "name": "OnInputAxis",
+      "category": "GameViewportClient",
+      "signature": "OnInputAxis(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnInputAxisSignature&",
+      "docs": "Gets broadcast delegate for input axis, happens in addition to player controller input"
+    },
+    {
+      "id": "get-engine-show-flags",
+      "name": "GetEngineShowFlags",
+      "category": "GameViewportClient",
+      "signature": "GetEngineShowFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FEngineShowFlags*",
+      "docs": "Return the engine show flags for this viewport"
+    },
+    {
       "id": "set-view-mode",
       "name": "SetViewMode",
       "category": "GameViewportClient",
@@ -2214,6 +2471,20 @@
       "docs": "@return @true if this viewport is currently being used for simulate in editors"
     },
     {
+      "id": "should-dpi-scale-scene-canvas",
+      "name": "ShouldDPIScaleSceneCanvas",
+      "category": "GameViewportClient",
+      "signature": "ShouldDPIScaleSceneCanvas(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "FViewport interface"
+    },
+    {
       "id": "get-use-mouse-for-touch",
       "name": "GetUseMouseForTouch",
       "category": "GameViewportClient",
@@ -2225,6 +2496,246 @@
         }
       ],
       "returnType": "Bool"
+    },
+    {
+      "id": "set-current-buffer-visualization-mode",
+      "name": "SetCurrentBufferVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "SetCurrentBufferVisualizationMode(Target, New Buffer Visualization Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "New Buffer Visualization Mode",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-buffer-visualization-mode",
+      "name": "GetCurrentBufferVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentBufferVisualizationMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-current-nanite-visualization-mode",
+      "name": "SetCurrentNaniteVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "SetCurrentNaniteVisualizationMode(Target, New Nanite Visualization Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "New Nanite Visualization Mode",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-nanite-visualization-mode",
+      "name": "GetCurrentNaniteVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentNaniteVisualizationMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-current-lumen-visualization-mode",
+      "name": "SetCurrentLumenVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "SetCurrentLumenVisualizationMode(Target, New Lumen Visualization Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "New Lumen Visualization Mode",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-lumen-visualization-mode",
+      "name": "GetCurrentLumenVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentLumenVisualizationMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-current-substrate-visualization-mode",
+      "name": "SetCurrentSubstrateVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "SetCurrentSubstrateVisualizationMode(Target, New Substrate Visualization Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "New Substrate Visualization Mode",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-substrate-visualization-mode",
+      "name": "GetCurrentSubstrateVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentSubstrateVisualizationMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-current-groom-visualization-mode",
+      "name": "SetCurrentGroomVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "SetCurrentGroomVisualizationMode(Target, New Groom Visualization Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "New Groom Visualization Mode",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-groom-visualization-mode",
+      "name": "GetCurrentGroomVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentGroomVisualizationMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-current-virtual-shadow-map-visualization-mode",
+      "name": "SetCurrentVirtualShadowMapVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "SetCurrentVirtualShadowMapVisualizationMode(Target, New Virtual Shadow Map Visualization Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "New Virtual Shadow Map Visualization Mode",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-current-virtual-shadow-map-visualization-mode",
+      "name": "GetCurrentVirtualShadowMapVisualizationMode",
+      "category": "GameViewportClient",
+      "signature": "GetCurrentVirtualShadowMapVisualizationMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-suppress-transition-message",
+      "name": "SetSuppressTransitionMessage",
+      "category": "GameViewportClient",
+      "signature": "SetSuppressTransitionMessage(Target, Suppress)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "Suppress",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The show flags used by the viewport's players."
+    },
+    {
+      "id": "get-stat-unit-data",
+      "name": "GetStatUnitData",
+      "category": "GameViewportClient",
+      "signature": "GetStatUnitData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FStatUnitData*",
+      "docs": "Get a ptr to the stat unit data for this viewport"
+    },
+    {
+      "id": "get-stat-hitches-data",
+      "name": "GetStatHitchesData",
+      "category": "GameViewportClient",
+      "signature": "GetStatHitchesData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FStatHitchesData*",
+      "docs": "Get a ptr to the stat unit data for this viewport"
+    },
+    {
+      "id": "get-enabled-stats",
+      "name": "GetEnabledStats",
+      "category": "GameViewportClient",
+      "signature": "GetEnabledStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "TArray<FString>*",
+      "docs": "Get a ptr to the enabled stats list"
     },
     {
       "id": "set-enabled-stats",
@@ -2243,6 +2754,56 @@
       ],
       "returnType": "Void",
       "docs": "Sets all the stats that should be enabled for the viewport\n@param InEnabledStats\tStats to enable"
+    },
+    {
+      "id": "is-stat-enabled",
+      "name": "IsStatEnabled",
+      "category": "GameViewportClient",
+      "signature": "IsStatEnabled(Target, In Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "In Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether a specific stat is enabled for this viewport\n@param\tInName\tName of the stat to check"
+    },
+    {
+      "id": "set-ignore-input",
+      "name": "SetIgnoreInput",
+      "category": "GameViewportClient",
+      "signature": "SetIgnoreInput(Target, Ignore)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "Ignore",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set whether to ignore input."
+    },
+    {
+      "id": "ignore-input",
+      "name": "IgnoreInput",
+      "category": "GameViewportClient",
+      "signature": "IgnoreInput(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether we should ignore input."
     },
     {
       "id": "set-mouse-capture-mode",
@@ -2289,6 +2850,34 @@
       ],
       "returnType": "Bool",
       "docs": "Gets whether or not the viewport captures the Mouse on launch of the application\nTechnically this controls capture on the first window activate, so in situations\nwhere the application is launched but isn't activated the effect is delayed until\nactivation."
+    },
+    {
+      "id": "lock-during-capture",
+      "name": "LockDuringCapture",
+      "category": "GameViewportClient",
+      "signature": "LockDuringCapture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets whether or not the cursor is locked to the viewport when the viewport captures the mouse"
+    },
+    {
+      "id": "should-always-lock-mouse",
+      "name": "ShouldAlwaysLockMouse",
+      "category": "GameViewportClient",
+      "signature": "ShouldAlwaysLockMouse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets whether or not the cursor should always be locked to the viewport"
     },
     {
       "id": "set-mouse-lock-mode",
@@ -2341,6 +2930,20 @@
       "docs": "Sets whether or not the cursor is hidden when the viewport captures the mouse"
     },
     {
+      "id": "hide-cursor-during-capture",
+      "name": "HideCursorDuringCapture",
+      "category": "GameViewportClient",
+      "signature": "HideCursorDuringCapture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets whether or not the cursor is hidden when the viewport captures the mouse"
+    },
+    {
       "id": "on-query-popup-method",
       "name": "OnQueryPopupMethod",
       "category": "GameViewportClient",
@@ -2375,6 +2978,66 @@
       ],
       "returnType": "Bool",
       "docs": "Optionally do custom handling of a navigation."
+    },
+    {
+      "id": "set-use-software-cursor-widgets",
+      "name": "SetUseSoftwareCursorWidgets",
+      "category": "GameViewportClient",
+      "signature": "SetUseSoftwareCursorWidgets(Target, In Use Software Cursor Widgets)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        },
+        {
+          "name": "In Use Software Cursor Widgets",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets whether or not the software cursor widgets are used.\nIf no software cursor widgets are set this setting has no meaningful effect."
+    },
+    {
+      "id": "get-is-using-software-cursor-widgets",
+      "name": "GetIsUsingSoftwareCursorWidgets",
+      "category": "GameViewportClient",
+      "signature": "GetIsUsingSoftwareCursorWidgets(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get whether or not the viewport is currently using software cursor"
+    },
+    {
+      "id": "on-game-viewport-input-key",
+      "name": "OnGameViewportInputKey",
+      "category": "GameViewportClient",
+      "signature": "OnGameViewportInputKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnGameViewportInputKey&",
+      "docs": "Accessor for delegate called when a game viewport received input key"
+    },
+    {
+      "id": "on-toggle-fullscreen",
+      "name": "OnToggleFullscreen",
+      "category": "GameViewportClient",
+      "signature": "OnToggleFullscreen(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UGameViewportClient*"
+        }
+      ],
+      "returnType": "FOnToggleFullscreen&",
+      "docs": "Accessor for delegate called when the engine toggles fullscreen"
     },
     {
       "id": "set-display-configuration",
@@ -2571,20 +3234,6 @@
         }
       ],
       "returnType": "EViewStatusForScreenPercentage"
-    },
-    {
-      "id": "reset-hardware-cursor-states",
-      "name": "ResetHardwareCursorStates",
-      "category": "GameViewportClient",
-      "signature": "ResetHardwareCursorStates(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UGameViewportClient*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Resets the platform type shape to nullptr, to restore it to the OS default."
     }
   ]
 }

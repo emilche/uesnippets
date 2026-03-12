@@ -30,6 +30,38 @@
       "docs": "set new number of lists"
     },
     {
+      "id": "reset",
+      "name": "Reset",
+      "category": "SmallListSet",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset to initial state"
+    },
+    {
+      "id": "is-allocated",
+      "name": "IsAllocated",
+      "category": "SmallListSet",
+      "signature": "IsAllocated(Target, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if a list has been allocated at the given ListIndex"
+    },
+    {
       "id": "allocate-at",
       "name": "AllocateAt",
       "category": "SmallListSet",
@@ -132,6 +164,42 @@
       "docs": "Remove all elements from the list at ListIndex"
     },
     {
+      "id": "get-count",
+      "name": "GetCount",
+      "category": "SmallListSet",
+      "signature": "GetCount(Target, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the size of the list at ListIndex"
+    },
+    {
+      "id": "first",
+      "name": "First",
+      "category": "SmallListSet",
+      "signature": "First(Target, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return the first item in the list at ListIndex\n@warning does not check for zero-size-list!"
+    },
+    {
       "id": "contains",
       "name": "Contains",
       "category": "SmallListSet",
@@ -154,43 +222,364 @@
       "docs": "Search for the given Value in list at ListIndex\n@return true if found"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "find",
+      "name": "Find",
       "category": "SmallListSet",
-      "signature": "Serialize(Target, Ar, Compact Data, Use Compression)",
+      "signature": "Find(Target, List Index, Predicate Func, Invalid Value)",
       "params": [
         {
           "name": "Target",
           "type": "FSmallListSet*"
         },
         {
-          "name": "Ar",
-          "type": "FArchive&"
+          "name": "List Index",
+          "type": "Int"
         },
         {
-          "name": "Compact Data",
-          "type": "Bool"
+          "name": "Predicate Func",
+          "type": "IntToBoolFunc&"
         },
         {
-          "name": "Use Compression",
-          "type": "Bool"
+          "name": "Invalid Value",
+          "type": "Int",
+          "default": "-1"
+        }
+      ],
+      "returnType": "template<IntToBoolFunc> int32",
+      "docs": "Search the list at ListIndex for a value where PredicateFunc(value) returns true\n@return the found value, or the InvalidValue argument if not found"
+    },
+    {
+      "id": "replace",
+      "name": "Replace",
+      "category": "SmallListSet",
+      "signature": "Replace(Target, List Index, Predicate Func, New Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        },
+        {
+          "name": "Predicate Func",
+          "type": "IntToBoolFunc&"
+        },
+        {
+          "name": "New Value",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<IntToBoolFunc> bool",
+      "docs": "Search the list at ListIndex for a value where PredicateFunc(value) returns true, and replace it with NewValue\n@return true if the value was found and replaced"
+    },
+    {
+      "id": "enumerate",
+      "name": "Enumerate",
+      "category": "SmallListSet",
+      "signature": "Enumerate(Target, List Index, Apply Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        },
+        {
+          "name": "Apply Func",
+          "type": "IntToVoidFunc&"
+        }
+      ],
+      "returnType": "template<IntToVoidFunc> void",
+      "docs": "Call ApplyFunc on each element of the list at ListIndex"
+    },
+    {
+      "id": "base-value-iterator-d3af23",
+      "name": "BaseValueIterator",
+      "category": "SmallListSet",
+      "signature": "BaseValueIterator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
         }
       ],
       "returnType": "Void",
-      "docs": "Serialize FSmallListSet to an archive.\n@param Ar Archive to serialize with\n@param bCompactData Only serialize unique data and/or recompute redundant data when loading.\n@param bUseCompression Use compression to serialize data; the resulting size will likely be smaller but serialization will take significantly longer."
+      "docs": "BaseValueIterator is a base class for ValueIterator and MappedValueIterator below."
     },
     {
-      "id": "allocate-block",
-      "name": "AllocateBlock",
+      "id": "goto-next-overflow",
+      "name": "GotoNextOverflow",
       "category": "SmallListSet",
-      "signature": "AllocateBlock(Target)",
+      "signature": "GotoNextOverflow(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FSmallListSet*"
         }
       ],
-      "returnType": "Int"
+      "returnType": "Void"
+    },
+    {
+      "id": "base-value-iterator-0afdd2",
+      "name": "BaseValueIterator",
+      "category": "SmallListSet",
+      "signature": "BaseValueIterator(Target, List Set In, List Index, Is End)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Set In",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        },
+        {
+          "name": "Is End",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-to-end",
+      "name": "SetToEnd",
+      "category": "SmallListSet",
+      "signature": "SetToEnd(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "value-iterator",
+      "name": "ValueIterator",
+      "category": "SmallListSet",
+      "signature": "ValueIterator(Target, Base Value Iterator)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "Base Value Iterator",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ValueIterator iterates over the values of a small list"
+    },
+    {
+      "id": "begin-values",
+      "name": "BeginValues",
+      "category": "SmallListSet",
+      "signature": "BeginValues(Target, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "ValueIterator",
+      "docs": "@return iterator for start of list at ListIndex"
+    },
+    {
+      "id": "end-values",
+      "name": "EndValues",
+      "category": "SmallListSet",
+      "signature": "EndValues(Target, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "ValueIterator",
+      "docs": "@return iterator for end of list at ListIndex"
+    },
+    {
+      "id": "value-enumerable-aa79eb",
+      "name": "ValueEnumerable",
+      "category": "SmallListSet",
+      "signature": "ValueEnumerable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "ValueEnumerable is an object that provides begin/end semantics for a small list, suitable for use with a range-based for loop"
+    },
+    {
+      "id": "value-enumerable-808dc2",
+      "name": "ValueEnumerable",
+      "category": "SmallListSet",
+      "signature": "ValueEnumerable(Target, List Set In, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Set In",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin",
+      "name": "begin",
+      "category": "SmallListSet",
+      "signature": "begin(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        }
+      ],
+      "returnType": "FSmallListSet::ValueIterator",
+      "supportedTargets": [
+        "FSmallListSet*",
+        "MappedValueEnumerable*"
+      ]
+    },
+    {
+      "id": "end",
+      "name": "end",
+      "category": "SmallListSet",
+      "signature": "end(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        }
+      ],
+      "returnType": "FSmallListSet::ValueIterator",
+      "supportedTargets": [
+        "FSmallListSet*",
+        "MappedValueEnumerable*"
+      ]
+    },
+    {
+      "id": "values",
+      "name": "Values",
+      "category": "SmallListSet",
+      "signature": "Values(Target, List Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "ValueEnumerable",
+      "docs": "@return a value enumerable for the given ListIndex"
+    },
+    {
+      "id": "begin-mapped-values",
+      "name": "BeginMappedValues",
+      "category": "SmallListSet",
+      "signature": "BeginMappedValues(Target, List Index, Map Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        },
+        {
+          "name": "Map Func",
+          "type": "TFunction<int32 ( int32 )>&"
+        }
+      ],
+      "returnType": "MappedValueIterator",
+      "docs": "@return iterator for start of list at ListIndex, with given value mapping function"
+    },
+    {
+      "id": "end-mapped-values",
+      "name": "EndMappedValues",
+      "category": "SmallListSet",
+      "signature": "EndMappedValues(Target, List Index, Map Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        },
+        {
+          "name": "Map Func",
+          "type": "TFunction<int32 ( int32 )>&"
+        }
+      ],
+      "returnType": "MappedValueIterator",
+      "docs": "@return iterator for end of list at ListIndex, with given value mapping function"
+    },
+    {
+      "id": "mapped-values",
+      "name": "MappedValues",
+      "category": "SmallListSet",
+      "signature": "MappedValues(Target, List Index, Map Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        },
+        {
+          "name": "List Index",
+          "type": "Int"
+        },
+        {
+          "name": "Map Func",
+          "type": "TFunction<int32 ( int32 )>"
+        }
+      ],
+      "returnType": "MappedValueEnumerable",
+      "docs": "@return a value enumerable for the given ListIndex, with the given value mapping function"
+    },
+    {
+      "id": "get-byte-count",
+      "name": "GetByteCount",
+      "category": "SmallListSet",
+      "signature": "GetByteCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSmallListSet*"
+        }
+      ],
+      "returnType": "SIZE_T"
     }
   ]
 }

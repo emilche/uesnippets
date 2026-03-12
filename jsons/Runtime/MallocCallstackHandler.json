@@ -79,6 +79,286 @@
       ],
       "returnType": "Void",
       "docs": "Free"
+    },
+    {
+      "id": "quantize-size",
+      "name": "QuantizeSize",
+      "category": "MallocCallstackHandler",
+      "signature": "QuantizeSize(Target, Count, Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "SIZE_T",
+      "docs": "For some allocators this will return the actual size that should be requested to eliminate\ninternal fragmentation. The return value will always be >= Count. This can be used to grow\nand shrink containers to optimal sizes.\nThis call is always fast and thread safe with no locking."
+    },
+    {
+      "id": "get-allocation-size",
+      "name": "GetAllocationSize",
+      "category": "MallocCallstackHandler",
+      "signature": "GetAllocationSize(Target, Original, Size Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        },
+        {
+          "name": "Original",
+          "type": "void*"
+        },
+        {
+          "name": "Size Out",
+          "type": "SIZE_T&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If possible determine the size of the memory allocated at the given address\n@param Original - Pointer to memory we are checking the size of\n@param SizeOut - If possible, this value is set to the size of the passed in pointer\n@return true if succeeded"
+    },
+    {
+      "id": "trim",
+      "name": "Trim",
+      "category": "MallocCallstackHandler",
+      "signature": "Trim(Target, Trim Thread Caches)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        },
+        {
+          "name": "Trim Thread Caches",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Releases as much memory as possible. Must be called from the main thread."
+    },
+    {
+      "id": "setup-tls-caches-on-current-thread",
+      "name": "SetupTLSCachesOnCurrentThread",
+      "category": "MallocCallstackHandler",
+      "signature": "SetupTLSCachesOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set up TLS caches on the current thread. These are the threads that we can trim."
+    },
+    {
+      "id": "mark-tls-caches-as-used-on-current-thread",
+      "name": "MarkTLSCachesAsUsedOnCurrentThread",
+      "category": "MallocCallstackHandler",
+      "signature": "MarkTLSCachesAsUsedOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark TLS caches for the current thread as used. Thread has woken up to do some processing and needs its TLS caches back."
+    },
+    {
+      "id": "mark-tls-caches-as-unused-on-current-thread",
+      "name": "MarkTLSCachesAsUnusedOnCurrentThread",
+      "category": "MallocCallstackHandler",
+      "signature": "MarkTLSCachesAsUnusedOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark TLS caches for current thread as unused. Typically before going to sleep. These are the threads that we can trim without waking them up."
+    },
+    {
+      "id": "clear-and-disable-tls-caches-on-current-thread",
+      "name": "ClearAndDisableTLSCachesOnCurrentThread",
+      "category": "MallocCallstackHandler",
+      "signature": "ClearAndDisableTLSCachesOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the TLS caches on the current thread and disables any future caching."
+    },
+    {
+      "id": "initialize-stats-metadata",
+      "name": "InitializeStatsMetadata",
+      "category": "MallocCallstackHandler",
+      "signature": "InitializeStatsMetadata(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initializes stats metadata. We need to do this as soon as possible, but cannot be done in the constructor\ndue to the FName::StaticInit"
+    },
+    {
+      "id": "update-stats",
+      "name": "UpdateStats",
+      "category": "MallocCallstackHandler",
+      "signature": "UpdateStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called once per frame, gathers and sets all memory allocator statistics into the corresponding stats. MUST BE THREAD SAFE."
+    },
+    {
+      "id": "get-allocator-stats",
+      "name": "GetAllocatorStats",
+      "category": "MallocCallstackHandler",
+      "signature": "GetAllocatorStats(Target, Out Stats)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        },
+        {
+          "name": "Out Stats",
+          "type": "FGenericMemoryStats&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes allocator stats from the last update into the specified destination."
+    },
+    {
+      "id": "dump-allocator-stats",
+      "name": "DumpAllocatorStats",
+      "category": "MallocCallstackHandler",
+      "signature": "DumpAllocatorStats(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dumps current allocator stats to the log."
+    },
+    {
+      "id": "validate-heap",
+      "name": "ValidateHeap",
+      "category": "MallocCallstackHandler",
+      "signature": "ValidateHeap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Validates the allocator's heap"
+    },
+    {
+      "id": "get-descriptive-name",
+      "name": "GetDescriptiveName",
+      "category": "MallocCallstackHandler",
+      "signature": "GetDescriptiveName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Gets descriptive name for logging purposes.\n@return pointer to human-readable malloc name"
+    },
+    {
+      "id": "on-malloc-initialized",
+      "name": "OnMallocInitialized",
+      "category": "MallocCallstackHandler",
+      "signature": "OnMallocInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-pre-fork",
+      "name": "OnPreFork",
+      "category": "MallocCallstackHandler",
+      "signature": "OnPreFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-post-fork",
+      "name": "OnPostFork",
+      "category": "MallocCallstackHandler",
+      "signature": "OnPostFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "MallocCallstackHandler",
+      "signature": "GetTypeHash(Target, In Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCallStackMapKey*"
+        },
+        {
+          "name": "In Key",
+          "type": "FCallStackMapKey&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "f-scope-disable-malloc-callstack-handler",
+      "name": "FScopeDisableMallocCallstackHandler",
+      "category": "MallocCallstackHandler",
+      "signature": "FScopeDisableMallocCallstackHandler(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMallocCallstackHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Disables the callstack handler for the current thread\nNeed to do this as we might allocate memory for the allocators tracking data, that can't be tracked!"
     }
   ]
 }

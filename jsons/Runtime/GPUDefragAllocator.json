@@ -1,0 +1,621 @@
+{
+  "id": "gpu-defrag-allocator",
+  "label": "GPUDefragAllocator",
+  "includepath": "GPUDefragAllocator.h",
+  "includes": [
+    "CoreMinimal",
+    "ThreadSafeCounter",
+    "Stats",
+    "OutputDeviceRedirector",
+    "IConsoleManager",
+    "List",
+    "LowLevelMemTracker",
+    "MemoryTrace"
+  ],
+  "functions": [
+    {
+      "id": "f-relocation-stats",
+      "name": "FRelocationStats",
+      "category": "GPUDefragAllocator",
+      "signature": "FRelocationStats(Target, Num Bytes Relocated)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Num Bytes Relocated",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Container for allocator relocation stats."
+    },
+    {
+      "id": "f-memory-chunk-480b3d",
+      "name": "FMemoryChunk",
+      "category": "GPUDefragAllocator",
+      "signature": "FMemoryChunk(Target, In Base, In Size, In Best Fit Allocator, Chunk To Insert After, In Base, In Size, False, In Best Fit Allocator, In Stat, False)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "In Base",
+          "type": "Byte*"
+        },
+        {
+          "name": "In Size",
+          "type": "Int64"
+        },
+        {
+          "name": "In Best Fit Allocator",
+          "type": "FGPUDefragAllocator&"
+        },
+        {
+          "name": "Chunk To Insert After",
+          "type": "FMemoryChunk*&"
+        },
+        {
+          "name": "In Base",
+          "type": "TStatId InStat ) : Base ("
+        },
+        {
+          "name": "In Size",
+          "type": "Size ("
+        },
+        {
+          "name": "False",
+          "type": "bIsAvailable ("
+        },
+        {
+          "name": "In Best Fit Allocator",
+          "type": "BestFitAllocator ("
+        },
+        {
+          "name": "In Stat",
+          "type": "Stat ("
+        },
+        {
+          "name": "False",
+          "type": "bTail ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Number of uint8s relocated, in total."
+    },
+    {
+      "id": "f-memory-chunk-66f269",
+      "name": "FMemoryChunk",
+      "category": "GPUDefragAllocator",
+      "signature": "FMemoryChunk(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unlinks/ removes the chunk from the linked lists it belongs to."
+    },
+    {
+      "id": "is-locked",
+      "name": "IsLocked",
+      "category": "GPUDefragAllocator",
+      "signature": "IsLocked(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "link",
+      "name": "Link",
+      "category": "GPUDefragAllocator",
+      "signature": "Link(Target, Chunk To Insert After)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Chunk To Insert After",
+          "type": "FMemoryChunk*&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inserts this chunk after the passed in one.\n@param\tChunkToInsertAfter\tChunk to insert after"
+    },
+    {
+      "id": "unlink",
+      "name": "Unlink",
+      "category": "GPUDefragAllocator",
+      "signature": "Unlink(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes itself for linked list."
+    },
+    {
+      "id": "unlink-free",
+      "name": "UnlinkFree",
+      "category": "GPUDefragAllocator",
+      "signature": "UnlinkFree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes itself for linked \"free\" list. Maint32ains the free-list order."
+    },
+    {
+      "id": "is-relocating",
+      "name": "IsRelocating",
+      "category": "GPUDefragAllocator",
+      "signature": "IsRelocating(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the Chunk is being asynchronously relocated due to reallocation or defrag."
+    },
+    {
+      "id": "get-available-size",
+      "name": "GetAvailableSize",
+      "category": "GPUDefragAllocator",
+      "signature": "GetAvailableSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Returns the number of uint8s that can be allocated from this chunk."
+    },
+    {
+      "id": "set-sync-index",
+      "name": "SetSyncIndex",
+      "category": "GPUDefragAllocator",
+      "signature": "SetSyncIndex(Target, In Sync Index, In Sync Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "In Sync Index",
+          "type": "UInt"
+        },
+        {
+          "name": "In Sync Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets the relocation sync index.\n@param InSyncIndex\tGPU synchronization identifier that can be compared with BestFitAllocator::CompletedSyncIndex\n@param InSyncSize\tNumber of uint8s that require GPU synchronization (starting from the beginning of the chunk)"
+    },
+    {
+      "id": "get-sync-index",
+      "name": "GetSyncIndex",
+      "category": "GPUDefragAllocator",
+      "signature": "GetSyncIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Returns the relocation sync index."
+    },
+    {
+      "id": "compare",
+      "name": "Compare",
+      "category": "GPUDefragAllocator",
+      "signature": "Compare(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FMemoryChunk*"
+        },
+        {
+          "name": "B",
+          "type": "FMemoryChunk*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Comparison function for Sort(), etc, based on increasing base address."
+    },
+    {
+      "id": "initialize-aa15c6",
+      "name": "Initialize",
+      "category": "GPUDefragAllocator",
+      "signature": "Initialize(Target, In Memory Base, In Memory Size, In Allocation Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "In Memory Base",
+          "type": "Byte*"
+        },
+        {
+          "name": "In Memory Size",
+          "type": "Int64"
+        },
+        {
+          "name": "In Allocation Alignment",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize this allocator with a preallocated block of memory.\n@param InMemoryBase\t\t\tBase address for the block of memory\n@param InMemorySize\t\t\tSize of the block of memory, in uint8s\n@param InAllocationAlignment\tAlignment for all allocations, in uint8s"
+    },
+    {
+      "id": "initialize-9db9b7",
+      "name": "Initialize",
+      "category": "GPUDefragAllocator",
+      "signature": "Initialize(Target, In Memory Base, In Memory Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "In Memory Base",
+          "type": "Byte*"
+        },
+        {
+          "name": "In Memory Size",
+          "type": "Int64"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-settings",
+      "name": "GetSettings",
+      "category": "GPUDefragAllocator",
+      "signature": "GetSettings(Target, Out Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Out Settings",
+          "type": "FSettings&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Returns the current allocator settings.\n@param OutSettings\t[out] Current allocator settings"
+    },
+    {
+      "id": "set-settings",
+      "name": "SetSettings",
+      "category": "GPUDefragAllocator",
+      "signature": "SetSettings(Target, In Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "In Settings",
+          "type": "FSettings&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets new allocator settings.\n@param InSettings\tNew allocator settings to replace the old ones."
+    },
+    {
+      "id": "is-initialized",
+      "name": "IsInitialized",
+      "category": "GPUDefragAllocator",
+      "signature": "IsInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether allocator has been initialized."
+    },
+    {
+      "id": "is-valid-pool-memory",
+      "name": "IsValidPoolMemory",
+      "category": "GPUDefragAllocator",
+      "signature": "IsValidPoolMemory(Target, Pointer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Pointer",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-memory-stats",
+      "name": "GetMemoryStats",
+      "category": "GPUDefragAllocator",
+      "signature": "GetMemoryStats(Target, Out Allocated Memory Size, Out Available Memory Size, Out Pending Memory Adjustment, Out Padding Waste Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Out Allocated Memory Size",
+          "type": "Int64&"
+        },
+        {
+          "name": "Out Available Memory Size",
+          "type": "Int64&"
+        },
+        {
+          "name": "Out Pending Memory Adjustment",
+          "type": "Int64&"
+        },
+        {
+          "name": "Out Padding Waste Size",
+          "type": "Int64&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves allocation stats.\n@param\tOutAllocatedMemorySize\t\t[out] Size of allocated memory\n@param\tOutAvailableMemorySize\t\t[out] Size of available memory\n@param\tOutPendingMemoryAdjustment\t[out] Size of pending allocation change (due to async reallocation)"
+    },
+    {
+      "id": "get-total-size",
+      "name": "GetTotalSize",
+      "category": "GPUDefragAllocator",
+      "signature": "GetTotalSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Int64"
+    },
+    {
+      "id": "get-blocked-cycles",
+      "name": "GetBlockedCycles",
+      "category": "GPUDefragAllocator",
+      "signature": "GetBlockedCycles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Returns the amount of time blocked by a platform fence since the beginning of the last call to Tick(), in appCycles."
+    },
+    {
+      "id": "in-benchmark-mode",
+      "name": "InBenchmarkMode",
+      "category": "GPUDefragAllocator",
+      "signature": "InBenchmarkMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether we're in benchmark mode or not."
+    },
+    {
+      "id": "is-aligned",
+      "name": "IsAligned",
+      "category": "GPUDefragAllocator",
+      "signature": "IsAligned(Ptr, Alignment)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "void*"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-allocation-alignment",
+      "name": "GetAllocationAlignment",
+      "category": "GPUDefragAllocator",
+      "signature": "GetAllocationAlignment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "is-allocation",
+      "name": "IsAllocation",
+      "category": "GPUDefragAllocator",
+      "signature": "IsAllocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the request is for a new allocation."
+    },
+    {
+      "id": "is-reallocation",
+      "name": "IsReallocation",
+      "category": "GPUDefragAllocator",
+      "signature": "IsReallocation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the request is for a reallocation."
+    },
+    {
+      "id": "is-canceled",
+      "name": "IsCanceled",
+      "category": "GPUDefragAllocator",
+      "signature": "IsCanceled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the request has been canceled."
+    },
+    {
+      "id": "has-completed",
+      "name": "HasCompleted",
+      "category": "GPUDefragAllocator",
+      "signature": "HasCompleted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the request has been completed."
+    },
+    {
+      "id": "has-started",
+      "name": "HasStarted",
+      "category": "GPUDefragAllocator",
+      "signature": "HasStarted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the allocator has started processing the request (true for completed requests as well)."
+    },
+    {
+      "id": "get-old-base-address",
+      "name": "GetOldBaseAddress",
+      "category": "GPUDefragAllocator",
+      "signature": "GetOldBaseAddress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Returns the original base address."
+    },
+    {
+      "id": "get-new-base-address",
+      "name": "GetNewBaseAddress",
+      "category": "GPUDefragAllocator",
+      "signature": "GetNewBaseAddress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Returns the new base address, or nullptr if the request hasn't started yet."
+    },
+    {
+      "id": "get-new-size",
+      "name": "GetNewSize",
+      "category": "GPUDefragAllocator",
+      "signature": "GetNewSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the requested new memory size (in uint8s)."
+    },
+    {
+      "id": "get-final-size",
+      "name": "GetFinalSize",
+      "category": "GPUDefragAllocator",
+      "signature": "GetFinalSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        }
+      ],
+      "returnType": "int64 FGPUDefragAllocator::",
+      "docs": "Returns the current size (in uint8s), or the final size if it has a reallocating request."
+    },
+    {
+      "id": "can-relocate",
+      "name": "CanRelocate",
+      "category": "GPUDefragAllocator",
+      "signature": "CanRelocate(Target, Chunk)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Chunk",
+          "type": "FMemoryChunk*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the specified chunk is allowed to relocate at this time.\nWill also call PlatformCanRelocate().\n@param Chunk\t\tChunk to check\n@return\t\t\ttrue if the allocation can be relocated at this time"
+    },
+    {
+      "id": "block-on-async-reallocation",
+      "name": "BlockOnAsyncReallocation",
+      "category": "GPUDefragAllocator",
+      "signature": "BlockOnAsyncReallocation(Target, Request)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGPUDefragAllocator*"
+        },
+        {
+          "name": "Request",
+          "type": "FAsyncReallocationRequest*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Blocks the calling thread until the specified request has been completed.\n@param Request\tRequest to wait for. Must be a valid request."
+    }
+  ]
+}

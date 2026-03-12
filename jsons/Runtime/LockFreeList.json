@@ -27,6 +27,14 @@
       "returnType": "Void"
     },
     {
+      "id": "test-critical-stall",
+      "name": "TestCriticalStall",
+      "category": "LockFreeList",
+      "signature": "TestCriticalStall()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
       "id": "lock-free-tag-counter-has-overflowed",
       "name": "LockFreeTagCounterHasOverflowed",
       "category": "LockFreeList",
@@ -78,6 +86,80 @@
       "returnType": "Void"
     },
     {
+      "id": "alloc",
+      "name": "Alloc",
+      "category": "LockFreeList",
+      "signature": "Alloc(Target, Count)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TLockFreeAllocOnceIndexedAllocator*"
+        },
+        {
+          "name": "Count",
+          "type": "UInt",
+          "default": "1"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-item",
+      "name": "GetItem",
+      "category": "LockFreeList",
+      "signature": "GetItem(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TLockFreeAllocOnceIndexedAllocator*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "nodiscard ] ] T*"
+    },
+    {
+      "id": "deref-link",
+      "name": "DerefLink",
+      "category": "LockFreeList",
+      "signature": "DerefLink(Ptr)",
+      "params": [
+        {
+          "name": "Ptr",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIndexedLockFreeLink*"
+    },
+    {
+      "id": "index-to-link",
+      "name": "IndexToLink",
+      "category": "LockFreeList",
+      "signature": "IndexToLink(Index)",
+      "params": [
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIndexedLockFreeLink*"
+    },
+    {
+      "id": "index-to-ptr",
+      "name": "IndexToPtr",
+      "category": "LockFreeList",
+      "signature": "IndexToPtr(Index)",
+      "params": [
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint32"
+    },
+    {
       "id": "alloc-lock-free-link",
       "name": "AllocLockFreeLink",
       "category": "LockFreeList",
@@ -97,6 +179,303 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "f-lock-free-pointer-list-lifo-root",
+      "name": "FLockFreePointerListLIFORoot",
+      "category": "LockFreeList",
+      "signature": "FLockFreePointerListLIFORoot()",
+      "params": [],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "LockFreeList",
+      "signature": "Reset()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Reset the list to the initial state. Not thread safe, but used for recycling when we know all users are gone."
+    },
+    {
+      "id": "push-847295",
+      "name": "Push",
+      "category": "LockFreeList",
+      "signature": "Push(Item)",
+      "params": [
+        {
+          "name": "Item",
+          "type": "TLinkPtr"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "push-if-2040d8",
+      "name": "PushIf",
+      "category": "LockFreeList",
+      "signature": "PushIf(Allocate If Ok To Push)",
+      "params": [
+        {
+          "name": "Allocate If Ok To Push",
+          "type": "TFunctionRef<TLinkPtr ( uint64 )>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "pop-90e41b",
+      "name": "Pop",
+      "category": "LockFreeList",
+      "signature": "Pop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLockFreePointerFIFOBase*"
+        }
+      ],
+      "returnType": "nodiscard ] ] T*",
+      "docs": "Pop an item from the list or return NULL if the list is empty.\n@return The popped item, if any."
+    },
+    {
+      "id": "pop-all-998492",
+      "name": "PopAll",
+      "category": "LockFreeList",
+      "signature": "PopAll()",
+      "params": [],
+      "returnType": "TLinkPtr"
+    },
+    {
+      "id": "pop-all-and-change-state-43d630",
+      "name": "PopAllAndChangeState",
+      "category": "LockFreeList",
+      "signature": "PopAllAndChangeState(State Change)",
+      "params": [
+        {
+          "name": "State Change",
+          "type": "TFunctionRef<uint64 ( uint64 )>"
+        }
+      ],
+      "returnType": "TLinkPtr"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "LockFreeList",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLockFreePointerFIFOBase*"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Check if the list is empty.\n@return true if the list is empty.\nCAUTION: This methods safety depends on external assumptions. For example, if another thread could add to the list at any time, the return value is no better than a best guess.\nAs typically used, the list is not being access concurrently when this is called."
+    },
+    {
+      "id": "get-state",
+      "name": "GetState",
+      "category": "LockFreeList",
+      "signature": "GetState()",
+      "params": [],
+      "returnType": "nodiscard ] ] uint64"
+    },
+    {
+      "id": "f-lock-free-pointer-list-lifo-base",
+      "name": "FLockFreePointerListLIFOBase",
+      "category": "LockFreeList",
+      "signature": "FLockFreePointerListLIFOBase()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "push-cc696f",
+      "name": "Push",
+      "category": "LockFreeList",
+      "signature": "Push(Target, In Payload)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLockFreePointerFIFOBase*"
+        },
+        {
+          "name": "In Payload",
+          "type": "T*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "push-if-3d129e",
+      "name": "PushIf",
+      "category": "LockFreeList",
+      "signature": "PushIf(In Payload, Ok To Push)",
+      "params": [
+        {
+          "name": "In Payload",
+          "type": "T*"
+        },
+        {
+          "name": "Ok To Push",
+          "type": "TFunctionRef<bool ( uint64 )>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "pop-all-d737f9",
+      "name": "PopAll",
+      "category": "LockFreeList",
+      "signature": "PopAll(Target, Out Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLockFreePointerFIFOBase*"
+        },
+        {
+          "name": "Out Container",
+          "type": "ContainerType&"
+        }
+      ],
+      "returnType": "template<ContainerType> void"
+    },
+    {
+      "id": "pop-all-and-apply",
+      "name": "PopAllAndApply",
+      "category": "LockFreeList",
+      "signature": "PopAllAndApply(In Functor)",
+      "params": [
+        {
+          "name": "In Functor",
+          "type": "FunctorType"
+        }
+      ],
+      "returnType": "template<FunctorType> void",
+      "docs": "Pop all items from the list and call a functor for each of them."
+    },
+    {
+      "id": "pop-all-and-change-state-d22b8d",
+      "name": "PopAllAndChangeState",
+      "category": "LockFreeList",
+      "signature": "PopAllAndChangeState(Out Container, State Change)",
+      "params": [
+        {
+          "name": "Out Container",
+          "type": "ContainerType&"
+        },
+        {
+          "name": "State Change",
+          "type": "TFunctionRef<uint64 ( uint64 )>"
+        }
+      ],
+      "returnType": "template<ContainerType> void"
+    },
+    {
+      "id": "push-87e084",
+      "name": "Push",
+      "category": "LockFreeList",
+      "signature": "Push(Target, In Payload, Priority)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallingTaskQueue*"
+        },
+        {
+          "name": "In Payload",
+          "type": "T*"
+        },
+        {
+          "name": "Priority",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "pop-f8d2d3",
+      "name": "Pop",
+      "category": "LockFreeList",
+      "signature": "Pop(Target, My Thread, Allow Stall)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStallingTaskQueue*"
+        },
+        {
+          "name": "My Thread",
+          "type": "Int"
+        },
+        {
+          "name": "Allow Stall",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "nodiscard ] ] T*"
+    },
+    {
+      "id": "push-3851eb",
+      "name": "Push",
+      "category": "LockFreeList",
+      "signature": "Push(New Item)",
+      "params": [
+        {
+          "name": "New Item",
+          "type": "T*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Push an item onto the head of the list.\n@param NewItem, the new item to push on the list, cannot be NULL."
+    },
+    {
+      "id": "pop-all-8e0f91",
+      "name": "PopAll",
+      "category": "LockFreeList",
+      "signature": "PopAll(Output)",
+      "params": [
+        {
+          "name": "Output",
+          "type": "ContainerType&"
+        }
+      ],
+      "returnType": "template<ContainerType> void",
+      "docs": "Pop all items from the list.\n@param Output The array to hold the returned items. Must be empty."
+    },
+    {
+      "id": "push-if-not-closed",
+      "name": "PushIfNotClosed",
+      "category": "LockFreeList",
+      "signature": "PushIfNotClosed(New Item)",
+      "params": [
+        {
+          "name": "New Item",
+          "type": "T*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Push an item onto the head of the list, unless the list is closed\n@param NewItem, the new item to push on the list, cannot be NULL\n@return true if the item was pushed on the list, false if the list was closed."
+    },
+    {
+      "id": "pop-all-and-close",
+      "name": "PopAllAndClose",
+      "category": "LockFreeList",
+      "signature": "PopAllAndClose(Output)",
+      "params": [
+        {
+          "name": "Output",
+          "type": "ContainerType&"
+        }
+      ],
+      "returnType": "template<ContainerType> void",
+      "docs": "Pop all items from the list and atomically close it.\n@param Output The array to hold the returned items. Must be empty."
+    },
+    {
+      "id": "is-closed",
+      "name": "IsClosed",
+      "category": "LockFreeList",
+      "signature": "IsClosed()",
+      "params": [],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Check if the list is closed\n@return true if the list is closed."
     }
   ]
 }

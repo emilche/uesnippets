@@ -22,6 +22,39 @@
   ],
   "functions": [
     {
+      "id": "on-remap-channel-key-time",
+      "name": "OnRemapChannelKeyTime",
+      "category": "MovieSceneChannelData",
+      "signature": "OnRemapChannelKeyTime(Target, Channel, Retimer, Previous Time, Current Time, In Out Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneChannelData*"
+        },
+        {
+          "name": "Channel",
+          "type": "FMovieSceneChannel*"
+        },
+        {
+          "name": "Retimer",
+          "type": "IRetimingInterface&"
+        },
+        {
+          "name": "Previous Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "Current Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "In Out Value",
+          "type": "ValueType&"
+        }
+      ],
+      "returnType": "template<ValueType> void"
+    },
+    {
       "id": "evaluate-time-5de9c2",
       "name": "EvaluateTime",
       "category": "MovieSceneChannelData",
@@ -124,6 +157,24 @@
       "docs": "Find the range of times that fall around PredicateTime +/- InTolerance up to a maximum\n@param InTimes        A sorted array of frame numbers\n@param PredicateTime  The time around which to search\n@param InTolerance    The tolerance range to search around PredicateTime with\n@param MaxNum         A maximum number of times to find, starting with those closest to the predicate time\n@param OutMin         The earliest index that met the conditions of the search\n@param OutMax         The latest index that met the conditions of the search"
     },
     {
+      "id": "get-times",
+      "name": "GetTimes",
+      "category": "MovieSceneChannelData",
+      "signature": "GetTimes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneChannelData*"
+        }
+      ],
+      "returnType": "TArrayView<FFrameNumber>",
+      "docs": "Base class channel data utility that provides a consistent interface to a sorted array of times and handles.\nComplete access should be through TMovieSceneChannelData that allows mutation of the data",
+      "supportedTargets": [
+        "FMovieSceneChannelData*",
+        "TMovieSceneChannelData*"
+      ]
+    },
+    {
       "id": "get-handle",
       "name": "GetHandle",
       "category": "MovieSceneChannelData",
@@ -180,7 +231,11 @@
         }
       ],
       "returnType": "Int",
-      "docs": "Attempt to find a key at a given time and tolerance\n@param InTime         The time at which to search\n@param InTolerance    A tolerance of frame numbers to allow either side of the specified time\n@return The index of the key closest to InTime and within InTolerance, or INDEX_NONE"
+      "docs": "Attempt to find a key at a given time and tolerance\n@param InTime         The time at which to search\n@param InTolerance    A tolerance of frame numbers to allow either side of the specified time\n@return The index of the key closest to InTime and within InTolerance, or INDEX_NONE",
+      "supportedTargets": [
+        "FMovieSceneChannelData*",
+        "TMovieSceneChannelData*"
+      ]
     },
     {
       "id": "find-keys",
@@ -228,7 +283,11 @@
         }
       ],
       "returnType": "TRange<FFrameNumber>",
-      "docs": "Compute the total time range of the channel data.\n@return The range of this channel data"
+      "docs": "Compute the total time range of the channel data.\n@return The range of this channel data",
+      "supportedTargets": [
+        "FMovieSceneChannelData*",
+        "TMovieSceneChannelData*"
+      ]
     },
     {
       "id": "change-frame-resolution",
@@ -317,6 +376,283 @@
       ],
       "returnType": "Void",
       "docs": "Offset the channel data by a given delta time\n@param DeltaTime     The time to offset by"
+    },
+    {
+      "id": "value-type",
+      "name": "ValueType",
+      "category": "MovieSceneChannelData",
+      "signature": "ValueType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        }
+      ],
+      "returnType": "operator TMovieSceneChannelData<",
+      "docs": "Conversion to a constant version of this class"
+    },
+    {
+      "id": "get-values",
+      "name": "GetValues",
+      "category": "MovieSceneChannelData",
+      "signature": "GetValues(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        }
+      ],
+      "returnType": "TArrayView<ValueType>",
+      "docs": "Read-only access to this channel's values"
+    },
+    {
+      "id": "add-key",
+      "name": "AddKey",
+      "category": "MovieSceneChannelData",
+      "signature": "AddKey(Target, In Time, In Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "In Value",
+          "type": "ParamType"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Add a new key at a given time\n@param InTime         The time at which to add the new key\n@param InValue        The value of the new key\n@return The index of the newly added key"
+    },
+    {
+      "id": "move-key",
+      "name": "MoveKey",
+      "category": "MovieSceneChannelData",
+      "signature": "MoveKey(Target, Key Index, New Time, Remove Duplicate Keys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "Key Index",
+          "type": "Int"
+        },
+        {
+          "name": "New Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "Remove Duplicate Keys",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Move the key at index KeyIndex to a new time\n@param KeyIndex       The index of the key to move\n@param NewTime        The time to move the key to\n@return The index of the key in its new position"
+    },
+    {
+      "id": "set-key-time",
+      "name": "SetKeyTime",
+      "category": "MovieSceneChannelData",
+      "signature": "SetKeyTime(Target, Key Index, In New Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "Key Index",
+          "type": "Int"
+        },
+        {
+          "name": "In New Time",
+          "type": "FFrameNumber"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Move the key at index KeyIndex to a new time\n@param KeyIndex       The index of the key to move\n@param NewTime        The time to move the key to\n@return The index of the key in its new position"
+    },
+    {
+      "id": "remap-times",
+      "name": "RemapTimes",
+      "category": "MovieSceneChannelData",
+      "signature": "RemapTimes(Target, Retimer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "Retimer",
+          "type": "UE::MovieScene::IRetimingInterface&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remap the times of all the keys in this channel using an abstract retimer\n@param Retimer         Custom retimer object that can convert from an old time to a new time"
+    },
+    {
+      "id": "remove-key",
+      "name": "RemoveKey",
+      "category": "MovieSceneChannelData",
+      "signature": "RemoveKey(Target, Key Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "Key Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove the key at a given index\n@param KeyIndex       The index of the key to remove"
+    },
+    {
+      "id": "update-or-add-key",
+      "name": "UpdateOrAddKey",
+      "category": "MovieSceneChannelData",
+      "signature": "UpdateOrAddKey(Target, In Time, In Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "In Value",
+          "type": "ParamType"
+        }
+      ],
+      "returnType": "FKeyHandle",
+      "docs": "Set the value of the key at InTime to InValue, adding a new key if necessary\n@param InTime         The time at which to add the new key\n@param InValue        The value of the new key\n@return The handle of the key"
+    },
+    {
+      "id": "update-or-add-keys",
+      "name": "UpdateOrAddKeys",
+      "category": "MovieSceneChannelData",
+      "signature": "UpdateOrAddKeys(Target, In Times, In Values)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Times",
+          "type": "TArrayView<FFrameNumber>"
+        },
+        {
+          "name": "In Values",
+          "type": "TArrayView<ValueType>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates keys with these times in the channel. Will add or insert any missing keys, and replace values of existing keys.\nThis assumes that the InTimes array is sorted, as it performs a tape merge to efficiently update the keys.\n@param InTimes Times to update\n@param InValues Values to update"
+    },
+    {
+      "id": "set-key-times",
+      "name": "SetKeyTimes",
+      "category": "MovieSceneChannelData",
+      "signature": "SetKeyTimes(Target, In Handles, In Key Times)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Handles",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "In Key Times",
+          "type": "TArrayView<FFrameNumber>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set key times for a number of keys in this channel data\n@param InHandles          Array of key handles that should have their times set\n@param InKeyTimes         Array of new times for each handle of the above array"
+    },
+    {
+      "id": "duplicate-keys",
+      "name": "DuplicateKeys",
+      "category": "MovieSceneChannelData",
+      "signature": "DuplicateKeys(Target, In Handles, Out New Handles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Handles",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "Out New Handles",
+          "type": "TArrayView<FKeyHandle>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Duplicate a number of keys within this channel data\n@param InHandles          Array of key handles that should be duplicated\n@param OutNewHandles      Array view to receive key handles for each duplicated key. Must exactly mathc the size of InHandles."
+    },
+    {
+      "id": "delete-keys",
+      "name": "DeleteKeys",
+      "category": "MovieSceneChannelData",
+      "signature": "DeleteKeys(Target, In Handles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Handles",
+          "type": "TArrayView<FKeyHandle>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Delete a number of keys from this channel data\n@param InHandles          Array of key handles that should be deleted"
+    },
+    {
+      "id": "delete-keys-from",
+      "name": "DeleteKeysFrom",
+      "category": "MovieSceneChannelData",
+      "signature": "DeleteKeysFrom(Target, In Time, Delete Keys Before)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        },
+        {
+          "name": "In Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "Delete Keys Before",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Delete keys before or after a specified time\n@param InTime\t\t\t\tDelete keys after this time\n@param bDeleteKeysBefore     Whether to delete keys before the specified time"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "MovieSceneChannelData",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMovieSceneChannelData*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Remove all the keys from this channel"
     }
   ]
 }

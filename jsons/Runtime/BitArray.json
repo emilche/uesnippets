@@ -1,0 +1,1918 @@
+{
+  "id": "bit-array",
+  "label": "BitArray",
+  "includepath": "Containers/BitArray.h",
+  "includes": [
+    "ContainerAllocationPolicies",
+    "CoreTypes",
+    "PlatformAtomics",
+    "UnrealMemory",
+    "UnrealMathUtility",
+    "AssertionMacros",
+    "EnumClassFlags",
+    "Archive",
+    "MemoryImageWriter",
+    "MemoryLayout",
+    "EnableIf",
+    "Invoke",
+    "UnrealTemplate",
+    "UnrealTypeTraits"
+  ],
+  "functions": [
+    {
+      "id": "get-and-clear-next-bit",
+      "name": "GetAndClearNextBit",
+      "category": "BitArray",
+      "signature": "GetAndClearNextBit(Mask)",
+      "params": [
+        {
+          "name": "Mask",
+          "type": "UInt&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Clears the next set bit in the mask and returns its index."
+    },
+    {
+      "id": "calculate-num-words",
+      "name": "CalculateNumWords",
+      "category": "BitArray",
+      "signature": "CalculateNumWords(Num Bits)",
+      "params": [
+        {
+          "name": "Num Bits",
+          "type": "Int"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "f-bit-reference",
+      "name": "FBitReference",
+      "category": "BitArray",
+      "signature": "FBitReference(Target, UE LIFETIMEBOUND, In Data, In Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "uint32& InData"
+        },
+        {
+          "name": "In Data",
+          "type": "uint32 InMask ) : Data ("
+        },
+        {
+          "name": "In Mask",
+          "type": "Mask ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to read/write a bit in the array as a bool."
+    },
+    {
+      "id": "bool",
+      "name": "bool",
+      "category": "BitArray",
+      "signature": "bool(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] operator",
+      "docs": "conversion to \"bool\" returning true if the iterator is valid.",
+      "supportedTargets": [
+        "TBitArray*",
+        "TWordIteratorBase*",
+        "TConstDualSetBitIterator*"
+      ]
+    },
+    {
+      "id": "atomic-set",
+      "name": "AtomicSet",
+      "category": "BitArray",
+      "signature": "AtomicSet(Target, New Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "New Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-const-bit-reference",
+      "name": "FConstBitReference",
+      "category": "BitArray",
+      "signature": "FConstBitReference(Target, UE LIFETIMEBOUND, In Data, In Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "uint32& InData"
+        },
+        {
+          "name": "In Data",
+          "type": "uint32 InMask ) : Data ("
+        },
+        {
+          "name": "In Mask",
+          "type": "Mask ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to read a bit in the array as a bool."
+    },
+    {
+      "id": "f-relative-bit-reference",
+      "name": "FRelativeBitReference",
+      "category": "BitArray",
+      "signature": "FRelativeBitReference(Target, Num Bits Per DWORD Log Two, Num Bits Per DWORD)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Num Bits Per DWORD Log Two",
+          "type": "int32 BitIndex ) : WordIndex ( BitIndex>>"
+        },
+        {
+          "name": "Num Bits Per DWORD",
+          "type": "Mask ( 1<<( BitIndex& ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to reference a bit in an unspecified bit array."
+    },
+    {
+      "id": "memmove-bits-word-order",
+      "name": "MemmoveBitsWordOrder",
+      "category": "BitArray",
+      "signature": "MemmoveBitsWordOrder(Dest Bits, Dest Offset, Source Bits, Source Offset, Num Bits)",
+      "params": [
+        {
+          "name": "Dest Bits",
+          "type": "UInt*"
+        },
+        {
+          "name": "Dest Offset",
+          "type": "Int"
+        },
+        {
+          "name": "Source Bits",
+          "type": "UInt*"
+        },
+        {
+          "name": "Source Offset",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy NumBits bits from the source pointer and offset into the dest pointer and offset.\nThis function is not suitable for general use because it uses a bit order that is specific to the uint32 internal storage of BitArray\nBits within each word are read or written in the current platform's mathematical bitorder (Data[0] & 0x1, Data[0] & 0x2, ... Data[0] & 0x100, ... Data[0] & 0x80000000, Data[1] & 0x1 ...\nCorrectly handles overlap between destination range and source range; the array of destination bits will be a copy of the source bits as they were before the copy started.\n@param DestBits The base location to which the bits are written.\n@param DestOffset The (word-order) bit within DestBits at which to start writing. Can be any value; offsets outside of [0,NumBitsPerDWORD) will be equivalent to modifying the DestBits pointer.\n@param SourceBits The base location from which the bits are read.\n@param SourceOffset The (word-order) bit within SourceBits at which to start reading. Can be any value; offsets outside of [0,NumBitsPerDWORD) will be equivalent to modifying the SourceBits pointer.\n@param NumBits Number of bits to copy. Must be >= 0."
+    },
+    {
+      "id": "modularize-word-offset",
+      "name": "ModularizeWordOffset",
+      "category": "BitArray",
+      "signature": "ModularizeWordOffset(Data, Offset)",
+      "params": [
+        {
+          "name": "Data",
+          "type": "UInt*&"
+        },
+        {
+          "name": "Offset",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Given Data and Offset that specify a specific bit in a specific word, modify Data and Offset so that they specify the same bit but that 0 <= Offset < NumBitsPerDWORD."
+    },
+    {
+      "id": "t-bit-array-024d07",
+      "name": "TBitArray",
+      "category": "BitArray",
+      "signature": "TBitArray(Num Bits, Num Bits Per DWORD)",
+      "params": [
+        {
+          "name": "Num Bits",
+          "type": ") :"
+        },
+        {
+          "name": "Num Bits Per DWORD",
+          "type": "MaxBits ( AllocatorInstance . GetInitialCapacity ( )*"
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "t-bit-array-cb1029",
+      "name": "TBitArray",
+      "category": "BitArray",
+      "signature": "TBitArray(Value, Num Bits Per DWORD)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "Num Bits Per DWORD",
+          "type": "int32 InNumBits ) : MaxBits ( AllocatorInstance . GetInitialCapacity ( )*"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Minimal initialization constructor.\n@param Value - The value to initial the bits to.\n@param InNumBits - The initial number of bits in the array."
+    },
+    {
+      "id": "t-bit-array-9e473f",
+      "name": "TBitArray",
+      "category": "BitArray",
+      "signature": "TBitArray(Other)",
+      "params": [
+        {
+          "name": "Other",
+          "type": "TBitArray&&"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Move constructor."
+    },
+    {
+      "id": "t-bit-array-4afddd",
+      "name": "TBitArray",
+      "category": "BitArray",
+      "signature": "TBitArray(Num Bits)",
+      "params": [
+        {
+          "name": "Num Bits",
+          "type": "TBitArray& Copy ) :"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Copy constructor."
+    },
+    {
+      "id": "get-max-words",
+      "name": "GetMaxWords",
+      "category": "BitArray",
+      "signature": "GetMaxWords(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint32"
+    },
+    {
+      "id": "get-last-word-mask",
+      "name": "GetLastWordMask",
+      "category": "BitArray",
+      "signature": "GetLastWordMask(Target, End Index Exclusive)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "End Index Exclusive",
+          "type": "Int"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint32"
+    },
+    {
+      "id": "set-words",
+      "name": "SetWords",
+      "category": "BitArray",
+      "signature": "SetWords(Words, Num Words, Value)",
+      "params": [
+        {
+          "name": "Words",
+          "type": "UInt*"
+        },
+        {
+          "name": "Num Words",
+          "type": "Int"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "move",
+      "name": "Move",
+      "category": "BitArray",
+      "signature": "Move(To Array, From Array)",
+      "params": [
+        {
+          "name": "To Array",
+          "type": "BitArrayType&"
+        },
+        {
+          "name": "From Array",
+          "type": "BitArrayType&"
+        }
+      ],
+      "returnType": "template<BitArrayType> void"
+    },
+    {
+      "id": "assign",
+      "name": "Assign",
+      "category": "BitArray",
+      "signature": "Assign(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Other",
+          "type": "TBitArray<OtherAllocator>&"
+        }
+      ],
+      "returnType": "template<OtherAllocator> void"
+    },
+    {
+      "id": "check-invariants",
+      "name": "CheckInvariants",
+      "category": "BitArray",
+      "signature": "CheckInvariants(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Checks the invariants of this class"
+    },
+    {
+      "id": "add-7f8fd0",
+      "name": "Add",
+      "category": "BitArray",
+      "signature": "Add(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Adds a bit to the array with the given value.\n@return The index of the added bit.",
+      "supportedTargets": [
+        "TBitArray*",
+        "TScriptBitArray*"
+      ]
+    },
+    {
+      "id": "add-acd839",
+      "name": "Add",
+      "category": "BitArray",
+      "signature": "Add(Target, Value, Num Bits To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "Num Bits To Add",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Adds multiple bits to the array with the given value.\n@return The index of the first added bit."
+    },
+    {
+      "id": "add-range",
+      "name": "AddRange",
+      "category": "BitArray",
+      "signature": "AddRange(Target, Read Bits, Num Bits To Add, Read Offset Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Read Bits",
+          "type": "InWordType*"
+        },
+        {
+          "name": "Num Bits To Add",
+          "type": "Int"
+        },
+        {
+          "name": "Read Offset Bits",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<InWordType> int32",
+      "docs": "Adds multiple bits read from the given pointer.\n@param ReadBits The address of sized integers to read the bits from.\nBits are read from ReadBits in the current platform's mathematical bitorder (ReadBits[0] & 0x1, ReadBits[0] & 0x2, ... ReadBits[0] & 0x100, ... ReadBits[0] & 0x80000000, ReadBits[1] & 0x1 ...\n@param NumBitsToAdd The number of bits to add. Must be >= 0.\n@param ReadOffsetBits Number of bits into ReadBits at which to start reading. Must be >= 0.\n@return The index of the first added bit."
+    },
+    {
+      "id": "add-uninitialized",
+      "name": "AddUninitialized",
+      "category": "BitArray",
+      "signature": "AddUninitialized(Target, Num Bits To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Num Bits To Add",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Inserts space for multiple bits at the end of the array.\nThe inserted bits are set to arbitrary values and should be written using SetRange or otherwise before being read.\n@param NumBitsToAdd The number of bits to add. Must be >= 0."
+    },
+    {
+      "id": "insert-d1e0d5",
+      "name": "Insert",
+      "category": "BitArray",
+      "signature": "Insert(Target, Value, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a bit with the given value at the given index in the array.\n@param Value The value of the bit to add\n@param Index - The index at which to add; must be 0 <= Index <= Num()."
+    },
+    {
+      "id": "insert-1563f7",
+      "name": "Insert",
+      "category": "BitArray",
+      "signature": "Insert(Target, Value, Index, Num Bits To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Add",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inserts multiple bits with the given value into the array, starting at the given Index.\n@param Value The value of the bits to add\n@param Index The index at which to add; must be 0 <= Index <= Num().\n@param NumBitsToAdd The number of bits to add. Must be >= 0."
+    },
+    {
+      "id": "insert-range",
+      "name": "InsertRange",
+      "category": "BitArray",
+      "signature": "InsertRange(Target, Read Bits, Index, Num Bits To Add, Read Offset Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Read Bits",
+          "type": "InWordType*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Add",
+          "type": "Int"
+        },
+        {
+          "name": "Read Offset Bits",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<InWordType> void",
+      "docs": "Inserts multiple bits read from the given pointer, starting at the given index.\n@param ReadBits The address of sized integers to read the bits from.\nBits are read from ReadBits in the current platform's mathematical bitorder (ReadBits[0] & 0x1, ReadBits[0] & 0x2, ... ReadBits[0] & 0x100, ... ReadBits[0] & 0x80000000, ReadBits[1] & 0x1 ...\n@param Index The index at which to add; must be 0 <= Index <= Num().\n@param NumBitsToAdd The number of bits to add. Must be >= 0.\n@param ReadOffsetBits Number of bits into ReadBits at which to start reading."
+    },
+    {
+      "id": "insert-uninitialized",
+      "name": "InsertUninitialized",
+      "category": "BitArray",
+      "signature": "InsertUninitialized(Target, Index, Num Bits To Add)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Add",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inserts space for multiple bits into the array, starting at the given index.\nThe inserted bits are set to arbitrary values and should be written using SetRange or otherwise before being read.\n@param Index The index at which to add; must be 0 <= Index <= Num().\n@param NumBitsToAdd The number of bits to add. Must be >= 0."
+    },
+    {
+      "id": "empty-baf0e0",
+      "name": "Empty",
+      "category": "BitArray",
+      "signature": "Empty(Target, Expected Num Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Expected Num Bits",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes all bits from the array, potentially leaving space allocated for an expected number of bits about to be added.\n@param ExpectedNumBits - The expected number of bits about to be added."
+    },
+    {
+      "id": "reserve",
+      "name": "Reserve",
+      "category": "BitArray",
+      "signature": "Reserve(Target, Number)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Number",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reserves memory such that the array can contain at least Number bits.\n@Number  The number of bits to reserve space for."
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "BitArray",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes all bits from the array retaining any space already allocated."
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "BitArray",
+      "signature": "Init(Target, Value, In Num Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "In Num Bits",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Resets the array's contents. Use TBitArray(bool bValue, int32 InNumBits) instead of default constructor and Init().\n@param Value - The value to initial the bits to.\n@param NumBits - The number of bits in the array."
+    },
+    {
+      "id": "set-num-uninitialized",
+      "name": "SetNumUninitialized",
+      "category": "BitArray",
+      "signature": "SetNumUninitialized(Target, In Num Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Num Bits",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets number of bits without initializing new bits."
+    },
+    {
+      "id": "set-num",
+      "name": "SetNum",
+      "category": "BitArray",
+      "signature": "SetNum(Target, In Num Bits, B Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Num Bits",
+          "type": "Int"
+        },
+        {
+          "name": "B Value",
+          "type": "ValueType"
+        }
+      ],
+      "returnType": "template<ValueType> FORCENOINLINE void",
+      "docs": "Sets the number of bits, initializing any potentially added bits to the given value."
+    },
+    {
+      "id": "set-range",
+      "name": "SetRange",
+      "category": "BitArray",
+      "signature": "SetRange(Target, Index, Num Bits To Set, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Set",
+          "type": "Int"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "FORCENOINLINE void",
+      "docs": "Sets or unsets a range of bits within the array.\n@param Index  The index of the first bit to set; must be 0 <= Index <= Num().\n@param NumBitsToSet The number of bits to set, must satisify Index + NumBitsToSet <= Num().\n@param  Value  The value to set the bits to."
+    },
+    {
+      "id": "set-range-from-range",
+      "name": "SetRangeFromRange",
+      "category": "BitArray",
+      "signature": "SetRangeFromRange(Target, Index, Num Bits To Set, Read Bits, Read Offset Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Set",
+          "type": "Int"
+        },
+        {
+          "name": "Read Bits",
+          "type": "InWordType*"
+        },
+        {
+          "name": "Read Offset Bits",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<InWordType> void",
+      "docs": "Sets range of bits within the TBitArray to the values read out of a pointer.\n@param Index  The index of the first bit to set; must be 0 <= Index <= Num().\n@param NumBitsToSet The number of bits to set, must satisify 0 <= NumBitsToSet && Index + NumBitsToSet <= Num().\n@param ReadBits The address of sized integers to read the bits from.\nBits are read from ReadBits in the current platform's mathematical bitorder (ReadBits[0] & 0x1, ReadBits[0] & 0x2, ... ReadBits[0] & 0x100, ... ReadBits[0] & 0x80000000, ReadBits[1] & 0x1 ...\n@param ReadOffsetBits Number of bits into ReadBits at which to start reading."
+    },
+    {
+      "id": "get-range",
+      "name": "GetRange",
+      "category": "BitArray",
+      "signature": "GetRange(Target, Index, Num Bits To Get, Write Bits, Write Offset Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Get",
+          "type": "Int"
+        },
+        {
+          "name": "Write Bits",
+          "type": "InWordType*"
+        },
+        {
+          "name": "Write Offset Bits",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<InWordType> void",
+      "docs": "Reads a range of bits within the array and writes them to the given pointer.\n@param Index  The index of the first bit to read; must be 0 <= Index <= Num().\n@param NumBitsToGet The number of bits to read, must satisify 0 <= NumBitsToGet && Index + NumBitsToGet <= Num().\n@param WriteBits The address of sized integers to write the bits to.\nBits are written into WriteBits in the current platform's mathematical bitorder (WriteBits[0] & 0x1, WriteBits[0] & 0x2, ... WriteBits[0] & 0x100, ... WriteBits[0] & 0x80000000, WriteBits[1] & 0x1 ...\n@param WriteOffsetBits Number of bits into WriteBits at which to start writing."
+    },
+    {
+      "id": "remove-at",
+      "name": "RemoveAt",
+      "category": "BitArray",
+      "signature": "RemoveAt(Target, Base Index, Num Bits To Remove)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Base Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Remove",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes bits from the array.\n@param BaseIndex - The index of the first bit to remove.\n@param NumBitsToRemove - The number of consecutive bits to remove."
+    },
+    {
+      "id": "remove-at-swap",
+      "name": "RemoveAtSwap",
+      "category": "BitArray",
+      "signature": "RemoveAtSwap(Target, Base Index, Num Bits To Remove)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Base Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Bits To Remove",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes bits from the array by swapping them with bits at the end of the array.\nThis is mainly implemented so that other code using TArray::RemoveSwap will have\nmatching indices.\n@param BaseIndex - The index of the first bit to remove.\n@param NumBitsToRemove - The number of consecutive bits to remove."
+    },
+    {
+      "id": "get-allocated-size",
+      "name": "GetAllocatedSize",
+      "category": "BitArray",
+      "signature": "GetAllocatedSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint32",
+      "docs": "Helper function to return the amount of memory allocated by this container\n@return number of bytes allocated by this container"
+    },
+    {
+      "id": "count-bytes",
+      "name": "CountBytes",
+      "category": "BitArray",
+      "signature": "CountBytes(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tracks the container's memory use through an archive."
+    },
+    {
+      "id": "find",
+      "name": "Find",
+      "category": "BitArray",
+      "signature": "Find(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Finds the first occurrence of the specified value (true/false) in the array, and returns the bit index.\nIf the specified value is not found, INDEX_NONE is returned.\n@param  bValue  The value (true/false) to search for.\n@return The index of the first occurrence of the specified value (true/false), or INDEX_NONE if not found."
+    },
+    {
+      "id": "find-last-from-impl",
+      "name": "FindLastFromImpl",
+      "category": "BitArray",
+      "signature": "FindLastFromImpl(Target, Value, End Index Exclusive)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "End Index Exclusive",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "find-from",
+      "name": "FindFrom",
+      "category": "BitArray",
+      "signature": "FindFrom(Target, Value, Start Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "Start Index",
+          "type": "IndexType"
+        }
+      ],
+      "returnType": "template<IndexType> [ [ nodiscard ] ] int32",
+      "docs": "Finds the first occurrence of the specified value (true/false) in the array, starting from the given bit index, and returns the bit index.\nIf the specified value is not found from the given index, INDEX_NONE is returned.\n@param  bValue      The value (true/false) to search for.\n@param  StartIndex  The index to start the search from.\n@pre StartIndex is expected to be in the inclusive range [0, Num()].\n@return The index of the first occurrence of the specified value (true/false) from StartIndex, or INDEX_NONE if not found."
+    },
+    {
+      "id": "find-last",
+      "name": "FindLast",
+      "category": "BitArray",
+      "signature": "FindLast(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Finds the last occurrence of the specified value (true/false) in the array, and returns the bit index.\nIf the specified value is not found, INDEX_NONE is returned.\n@param  bValue  The value (true/false) to search for.\n@return The index of the last occurrence of the specified value (true/false), or INDEX_NONE if not found."
+    },
+    {
+      "id": "find-last-from",
+      "name": "FindLastFrom",
+      "category": "BitArray",
+      "signature": "FindLastFrom(Target, Value, End Index Inclusive)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        },
+        {
+          "name": "End Index Inclusive",
+          "type": "IndexType"
+        }
+      ],
+      "returnType": "template<IndexType> [ [ nodiscard ] ] int32",
+      "docs": "EndIndexExclusive ="
+    },
+    {
+      "id": "contains",
+      "name": "Contains",
+      "category": "BitArray",
+      "signature": "Contains(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "EndIndexExclusive ="
+    },
+    {
+      "id": "find-and-set-first-zero-bit",
+      "name": "FindAndSetFirstZeroBit",
+      "category": "BitArray",
+      "signature": "FindAndSetFirstZeroBit(Target, Start Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Finds the first occurrence of a zero bit in the array and sets it to one, returning the bit index.\nIf there are no zero bits in the array, INDEX_NONE is returned.\n@param  StartIndex  The index to start the search from. Defaults to 0.\n@return The index of the first occurrence of a zero bit that was successfully set to one, or INDEX_NONE if not found."
+    },
+    {
+      "id": "find-and-set-last-zero-bit",
+      "name": "FindAndSetLastZeroBit",
+      "category": "BitArray",
+      "signature": "FindAndSetLastZeroBit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Finds the last occurrence of a zero bit in the array and sets it to one, returning the bit index.\nIf there are no zero bits in the array, INDEX_NONE is returned.\n@return The index of the last occurrence of a zero bit that was successfully set to one, or INDEX_NONE if not found."
+    },
+    {
+      "id": "bitwise-and",
+      "name": "BitwiseAND",
+      "category": "BitArray",
+      "signature": "BitwiseAND(A, B, In Flags)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TBitArray<AllocatorA>&"
+        },
+        {
+          "name": "B",
+          "type": "TBitArray<AllocatorB>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        }
+      ],
+      "returnType": "template<AllocatorA,AllocatorB> [ [ nodiscard ] ] TBitArray",
+      "docs": "Return the bitwise AND of two bit arrays. The resulting bit array will be sized according to InFlags."
+    },
+    {
+      "id": "combine-with-binary-op",
+      "name": "CombineWithBinaryOp",
+      "category": "BitArray",
+      "signature": "CombineWithBinaryOp(Target, In Other, In Flags, In Binary Op)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Other",
+          "type": "TBitArray<OtherAllocator>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        },
+        {
+          "name": "In Binary Op",
+          "type": "BinaryOpType&&"
+        }
+      ],
+      "returnType": "template<OtherAllocator,BinaryOpType> TBitArray&",
+      "docs": "Perform a custom bitwise operation on this bit array with another. This array receives the result and will be sized max(A.Num(), B.Num())."
+    },
+    {
+      "id": "combine-with-bitwise-and",
+      "name": "CombineWithBitwiseAND",
+      "category": "BitArray",
+      "signature": "CombineWithBitwiseAND(Target, In Other, In Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Other",
+          "type": "TBitArray<OtherAllocator>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        }
+      ],
+      "returnType": "template<OtherAllocator> TBitArray&",
+      "docs": "Perform a bitwise AND on this bit array with another. This array receives the result and will be sized max(A.Num(), B.Num())."
+    },
+    {
+      "id": "bitwise-or",
+      "name": "BitwiseOR",
+      "category": "BitArray",
+      "signature": "BitwiseOR(A, B, In Flags)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TBitArray<AllocatorA>&"
+        },
+        {
+          "name": "B",
+          "type": "TBitArray<AllocatorB>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        }
+      ],
+      "returnType": "template<AllocatorA,AllocatorB> [ [ nodiscard ] ] TBitArray",
+      "docs": "Return the bitwise OR of two bit arrays. The resulting bit array will be sized according to InFlags."
+    },
+    {
+      "id": "combine-with-bitwise-or",
+      "name": "CombineWithBitwiseOR",
+      "category": "BitArray",
+      "signature": "CombineWithBitwiseOR(Target, In Other, In Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Other",
+          "type": "TBitArray<OtherAllocator>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        }
+      ],
+      "returnType": "template<OtherAllocator> TBitArray&",
+      "docs": "Return the bitwise OR of two bit arrays. The resulting bit array will be sized according to InFlags."
+    },
+    {
+      "id": "bitwise-xor",
+      "name": "BitwiseXOR",
+      "category": "BitArray",
+      "signature": "BitwiseXOR(A, B, In Flags)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TBitArray<AllocatorA>&"
+        },
+        {
+          "name": "B",
+          "type": "TBitArray<AllocatorB>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        }
+      ],
+      "returnType": "template<AllocatorA,AllocatorB> [ [ nodiscard ] ] TBitArray",
+      "docs": "Return the bitwise XOR of two bit arrays. The resulting bit array will be sized according to InFlags."
+    },
+    {
+      "id": "combine-with-bitwise-xor",
+      "name": "CombineWithBitwiseXOR",
+      "category": "BitArray",
+      "signature": "CombineWithBitwiseXOR(Target, In Other, In Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Other",
+          "type": "TBitArray<OtherAllocator>&"
+        },
+        {
+          "name": "In Flags",
+          "type": "EBitwiseOperatorFlags"
+        }
+      ],
+      "returnType": "template<OtherAllocator> TBitArray&",
+      "docs": "Return the bitwise XOR of two bit arrays. The resulting bit array will be sized according to InFlags."
+    },
+    {
+      "id": "bitwise-not",
+      "name": "BitwiseNOT",
+      "category": "BitArray",
+      "signature": "BitwiseNOT(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Perform a bitwise NOT on all the bits in this array"
+    },
+    {
+      "id": "count-set-bits",
+      "name": "CountSetBits",
+      "category": "BitArray",
+      "signature": "CountSetBits(Target, From Index, To Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "From Index",
+          "type": "Int",
+          "default": "0"
+        },
+        {
+          "name": "To Index",
+          "type": "Int",
+          "default": "INDEX_NONE"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Count the number of set bits in this array  FromIndex <= bit < ToIndex"
+    },
+    {
+      "id": "compare-set-bits",
+      "name": "CompareSetBits",
+      "category": "BitArray",
+      "signature": "CompareSetBits(Target, Other, Missing Bit Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Other",
+          "type": "TBitArray<OtherAllocator>&"
+        },
+        {
+          "name": "Missing Bit Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<OtherAllocator> [ [ nodiscard ] ] bool",
+      "docs": "Returns true if Other contains all the same set bits as this, accounting for differences in length.\nSimilar to operator== but can handle different length arrays by zero or one-filling missing bits.\n@param Other The array to compare against\n@param bMissingBitValue The value to use for missing bits when considering bits that are outside the range of either array\n@return true if this array matches Other, including any missing bits, false otherwise"
+    },
+    {
+      "id": "pad-to-num",
+      "name": "PadToNum",
+      "category": "BitArray",
+      "signature": "PadToNum(Target, Desired Num, Pad Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Desired Num",
+          "type": "Int"
+        },
+        {
+          "name": "Pad Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Pad this bit array with the specified value to ensure that it is at least the specified length. Does nothing if Num() >= DesiredNum.\n@param DesiredNum The desired number of elements that should exist in the array.\n@param bPadValue  The value to pad with (0 or 1)\n@return The number of bits that were added to the array, or 0 if Num() >= DesiredNum."
+    },
+    {
+      "id": "is-valid-index-319a29",
+      "name": "IsValidIndex",
+      "category": "BitArray",
+      "signature": "IsValidIndex(Target, In Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "BitArray",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Returns true if the bit array is empty and contains no elements.\n@returns True if the bit array is empty.\n@see Num"
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "BitArray",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32"
+    },
+    {
+      "id": "max",
+      "name": "Max",
+      "category": "BitArray",
+      "signature": "Max(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32"
+    },
+    {
+      "id": "access-corresponding-bit",
+      "name": "AccessCorrespondingBit",
+      "category": "BitArray",
+      "signature": "AccessCorrespondingBit(Target, Relative Reference)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Relative Reference",
+          "type": "FRelativeBitReference&"
+        }
+      ],
+      "returnType": "nodiscard ] ] FBitReference"
+    },
+    {
+      "id": "f-iterator",
+      "name": "FIterator",
+      "category": "BitArray",
+      "signature": "FIterator(Target, UE LIFETIMEBOUND, Start Index, In Array, Start Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "TBitArray<Allocator>& InArray"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int",
+          "default": "0)\n\t\t:\tFRelativeBitReference(StartIndex)"
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        },
+        {
+          "name": "Start Index",
+          "type": "Index ("
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "BitArray iterator."
+    },
+    {
+      "id": "get-value",
+      "name": "GetValue",
+      "category": "BitArray",
+      "signature": "GetValue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FBitReference"
+    },
+    {
+      "id": "get-index",
+      "name": "GetIndex",
+      "category": "BitArray",
+      "signature": "GetIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "Index accessor.",
+      "supportedTargets": [
+        "TBitArray*",
+        "TWordIteratorBase*",
+        "TConstDualSetBitIterator*"
+      ]
+    },
+    {
+      "id": "f-reverse-iterator-99e4c8",
+      "name": "FReverseIterator",
+      "category": "BitArray",
+      "signature": "FReverseIterator(Target, Num, In Array, Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Num",
+          "type": "TBitArray<Allocator>& InArray UE_LIFETIMEBOUND ) : FRelativeBitReference ( InArray ."
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        },
+        {
+          "name": "Num",
+          "type": "Index ( InArray ."
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Reverse iterator."
+    },
+    {
+      "id": "f-reverse-iterator-1209a0",
+      "name": "FReverseIterator",
+      "category": "BitArray",
+      "signature": "FReverseIterator(Target, UE LIFETIMEBOUND, F Relative Bit Reference, In Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "TBitArray<Allocator>& InArray"
+        },
+        {
+          "name": "F Relative Bit Reference",
+          "type": "int32 StartIndex ) :"
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "f-const-iterator",
+      "name": "FConstIterator",
+      "category": "BitArray",
+      "signature": "FConstIterator(Target, UE LIFETIMEBOUND, Start Index, In Array, Start Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "TBitArray<Allocator>& InArray"
+        },
+        {
+          "name": "Start Index",
+          "type": "Int",
+          "default": "0)\n\t\t:\tFRelativeBitReference(StartIndex)"
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        },
+        {
+          "name": "Start Index",
+          "type": "Index ("
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Const BitArray iterator."
+    },
+    {
+      "id": "f-const-reverse-iterator-cb40a6",
+      "name": "FConstReverseIterator",
+      "category": "BitArray",
+      "signature": "FConstReverseIterator(Target, Num, In Array, Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Num",
+          "type": "TBitArray<Allocator>& InArray UE_LIFETIMEBOUND ) : FRelativeBitReference ( InArray ."
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        },
+        {
+          "name": "Num",
+          "type": "Index ( InArray ."
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "Const reverse iterator."
+    },
+    {
+      "id": "f-const-reverse-iterator-bf9a65",
+      "name": "FConstReverseIterator",
+      "category": "BitArray",
+      "signature": "FConstReverseIterator(Target, UE LIFETIMEBOUND, F Relative Bit Reference, In Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "TBitArray<Allocator>& InArray"
+        },
+        {
+          "name": "F Relative Bit Reference",
+          "type": "int32 StartIndex ) :"
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "get-data",
+      "name": "GetData",
+      "category": "BitArray",
+      "signature": "GetData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint32*"
+    },
+    {
+      "id": "get-word",
+      "name": "GetWord",
+      "category": "BitArray",
+      "signature": "GetWord(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TWordIteratorBase*"
+        }
+      ],
+      "returnType": "nodiscard ] ] uint32"
+    },
+    {
+      "id": "fill-missing-bits",
+      "name": "FillMissingBits",
+      "category": "BitArray",
+      "signature": "FillMissingBits(Target, In Missing Bits Fill)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TWordIteratorBase*"
+        },
+        {
+          "name": "In Missing Bits Fill",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-const-word-iterator-c95091",
+      "name": "FConstWordIterator",
+      "category": "BitArray",
+      "signature": "FConstWordIterator(Target, Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Num",
+          "type": "TBitArray<Allocator>& InArray UE_LIFETIMEBOUND ) : TWordIteratorBase<uint32> ( InArray . GetData ( ),0,InArray ."
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "f-const-word-iterator-508c6b",
+      "name": "FConstWordIterator",
+      "category": "BitArray",
+      "signature": "FConstWordIterator(Target, UE LIFETIMEBOUND, In Start Bit Index, In End Bit Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "TBitArray<Allocator>& InArray"
+        },
+        {
+          "name": "In Start Bit Index",
+          "type": "Int"
+        },
+        {
+          "name": "In End Bit Index",
+          "type": "int32 InEndBitIndex ) : TWordIteratorBase<uint32> ( InArray . GetData ( ),InStartBitIndex,"
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "f-word-iterator",
+      "name": "FWordIterator",
+      "category": "BitArray",
+      "signature": "FWordIterator(Target, Num)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Num",
+          "type": "TBitArray<Allocator>& InArray UE_LIFETIMEBOUND ) : TWordIteratorBase<uint32> ( InArray . GetData ( ),0,InArray ."
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "set-word",
+      "name": "SetWord",
+      "category": "BitArray",
+      "signature": "SetWord(Target, In Word)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "In Word",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin",
+      "name": "begin",
+      "category": "BitArray",
+      "signature": "begin(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIterator",
+      "docs": "Enables range-based for loops, DO NOT USE DIRECTLY."
+    },
+    {
+      "id": "end",
+      "name": "end",
+      "category": "BitArray",
+      "signature": "end(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FIterator"
+    },
+    {
+      "id": "rbegin",
+      "name": "rbegin",
+      "category": "BitArray",
+      "signature": "rbegin(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FReverseIterator"
+    },
+    {
+      "id": "rend",
+      "name": "rend",
+      "category": "BitArray",
+      "signature": "rend(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FReverseIterator"
+    },
+    {
+      "id": "realloc",
+      "name": "Realloc",
+      "category": "BitArray",
+      "signature": "Realloc(Target, Previous Num Bits)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Previous Num Bits",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FORCENOINLINE void"
+    },
+    {
+      "id": "set-bit-no-check",
+      "name": "SetBitNoCheck",
+      "category": "BitArray",
+      "signature": "SetBitNoCheck(Target, Index, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-partial-slack-bits",
+      "name": "ClearPartialSlackBits",
+      "category": "BitArray",
+      "signature": "ClearPartialSlackBits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the slack bits within the final partially relevant Word"
+    },
+    {
+      "id": "write-memory-image-bd5eeb",
+      "name": "WriteMemoryImage",
+      "category": "BitArray",
+      "signature": "WriteMemoryImage(Target, Writer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Writer",
+          "type": "FMemoryImageWriter&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "write-memory-image-8d63b4",
+      "name": "WriteMemoryImage",
+      "category": "BitArray",
+      "signature": "WriteMemoryImage(Writer, Object)",
+      "params": [
+        {
+          "name": "Writer",
+          "type": "FMemoryImageWriter&"
+        },
+        {
+          "name": "Object",
+          "type": "TBitArray&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "intrinsic-write-memory-image",
+      "name": "IntrinsicWriteMemoryImage",
+      "category": "BitArray",
+      "signature": "IntrinsicWriteMemoryImage(Target, Writer, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Writer",
+          "type": "FMemoryImageWriter&"
+        },
+        {
+          "name": "Object",
+          "type": "TBitArray<Allocator>&"
+        }
+      ],
+      "returnType": "template<Allocator> void"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "BitArray",
+      "signature": "GetTypeHash(Target, Bit Array)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "Bit Array",
+          "type": "TBitArray<Allocator>&"
+        }
+      ],
+      "returnType": "template<Allocator> [ [ nodiscard ] ] uint32"
+    },
+    {
+      "id": "t-const-set-bit-iterator-0f748e",
+      "name": "TConstSetBitIterator",
+      "category": "BitArray",
+      "signature": "TConstSetBitIterator(Target, F Relative Bit Reference, In Array, U)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "F Relative Bit Reference",
+          "type": "TBitArray<Allocator>& InArray UE_LIFETIMEBOUND ) :"
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        },
+        {
+          "name": "U",
+          "type": "UnvisitedBitMask ( ~ 0"
+        }
+      ],
+      "returnType": "nodiscard ] ]",
+      "docs": "An iterator which only iterates over set bits."
+    },
+    {
+      "id": "t-const-set-bit-iterator-2bd339",
+      "name": "TConstSetBitIterator",
+      "category": "BitArray",
+      "signature": "TConstSetBitIterator(Target, UE LIFETIMEBOUND, Start Index, In Array, Num Bits Per DWORD)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        },
+        {
+          "name": "UE LIFETIMEBOUND",
+          "type": "TBitArray<Allocator>& InArray"
+        },
+        {
+          "name": "Start Index",
+          "type": "int32 StartIndex ) : FRelativeBitReference ("
+        },
+        {
+          "name": "In Array",
+          "type": "Array ("
+        },
+        {
+          "name": "Num Bits Per DWORD",
+          "type": "UnvisitedBitMask ( ( ~ 0 U )<<( StartIndex& ( NumBitsPerDWORD - 1 ) ) ),CurrentBitIndex ( StartIndex ),BaseBitIndex ( StartIndex& ~ ("
+        }
+      ],
+      "returnType": "nodiscard ] ]"
+    },
+    {
+      "id": "find-first-set-bit",
+      "name": "FindFirstSetBit",
+      "category": "BitArray",
+      "signature": "FindFirstSetBit(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TBitArray*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Find the first set bit starting with the current bit, inclusive."
+    },
+    {
+      "id": "is-valid-index-55fa95",
+      "name": "IsValidIndex",
+      "category": "BitArray",
+      "signature": "IsValidIndex(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TScriptBitArray*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool"
+    },
+    {
+      "id": "move-assign",
+      "name": "MoveAssign",
+      "category": "BitArray",
+      "signature": "MoveAssign(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TScriptBitArray*"
+        },
+        {
+          "name": "Other",
+          "type": "DerivedType&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "empty-6f9655",
+      "name": "Empty",
+      "category": "BitArray",
+      "signature": "Empty(Target, Slack)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TScriptBitArray*"
+        },
+        {
+          "name": "Slack",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Void"
+    }
+  ]
+}

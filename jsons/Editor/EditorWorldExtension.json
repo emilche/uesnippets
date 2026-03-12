@@ -13,6 +13,57 @@
   ],
   "functions": [
     {
+      "id": "init",
+      "name": "Init",
+      "category": "EditorWorldExtension",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorWorldExtension*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialize extension"
+    },
+    {
+      "id": "shutdown",
+      "name": "Shutdown",
+      "category": "EditorWorldExtension",
+      "signature": "Shutdown(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorWorldExtension*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shut down extension when world is destroyed"
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "EditorWorldExtension",
+      "signature": "Tick(Target, Delta Seconds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorWorldExtension*"
+        },
+        {
+          "name": "Delta Seconds",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Give base class the chance to tick",
+      "supportedTargets": [
+        "UEditorWorldExtension*",
+        "UEditorWorldExtensionCollection*",
+        "UEditorWorldExtensionManager*"
+      ]
+    },
+    {
       "id": "input-key",
       "name": "InputKey",
       "category": "EditorWorldExtension",
@@ -40,7 +91,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Notifies all extensions of keyboard input"
+      "docs": "Notifies all extensions of keyboard input",
+      "supportedTargets": [
+        "UEditorWorldExtension*",
+        "UEditorWorldExtensionCollection*"
+      ]
     },
     {
       "id": "input-axis",
@@ -78,7 +133,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Notifies all extensions of axis movement"
+      "docs": "Notifies all extensions of axis movement",
+      "supportedTargets": [
+        "UEditorWorldExtension*",
+        "UEditorWorldExtensionCollection*"
+      ]
     },
     {
       "id": "get-world",
@@ -92,7 +151,11 @@
         }
       ],
       "returnType": "UWorld*",
-      "docs": "Gets the world owning this extension"
+      "docs": "Gets the world owning this extension",
+      "supportedTargets": [
+        "UEditorWorldExtension*",
+        "UEditorWorldExtensionCollection*"
+      ]
     },
     {
       "id": "get-last-editor-world",
@@ -106,7 +169,81 @@
         }
       ],
       "returnType": "UWorld*",
-      "docs": "Gets the world owning this extension's non-PIE valid actors when current world is a play world"
+      "docs": "Gets the world owning this extension's non-PIE valid actors when current world is a play world",
+      "supportedTargets": [
+        "UEditorWorldExtension*",
+        "UEditorWorldExtensionCollection*"
+      ]
+    },
+    {
+      "id": "spawn-transient-scene-actor-cbca31",
+      "name": "SpawnTransientSceneActor",
+      "category": "EditorWorldExtension",
+      "signature": "SpawnTransientSceneActor(Target, Actor Name, With Scene Component, In Object Flags, Valid For PIE)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorWorldExtension*"
+        },
+        {
+          "name": "Actor Name",
+          "type": "String&"
+        },
+        {
+          "name": "With Scene Component",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "In Object Flags",
+          "type": "EObjectFlags",
+          "default": "EObjectFlags::RF_Transient | EObjectFlags::RF_DuplicateTransient"
+        },
+        {
+          "name": "Valid For PIE",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "template<class T> T*",
+      "docs": "Spawns a transient actor that we can use in the current world of this extension (templated for convenience)"
+    },
+    {
+      "id": "spawn-transient-scene-actor-2fc9f3",
+      "name": "SpawnTransientSceneActor",
+      "category": "EditorWorldExtension",
+      "signature": "SpawnTransientSceneActor(Target, Actor Class, Actor Name, With Scene Component, In Object Flags, Valid For PIE)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEditorWorldExtension*"
+        },
+        {
+          "name": "Actor Class",
+          "type": "TSubclassOf<AActor>"
+        },
+        {
+          "name": "Actor Name",
+          "type": "String&"
+        },
+        {
+          "name": "With Scene Component",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "In Object Flags",
+          "type": "EObjectFlags",
+          "default": "EObjectFlags::RF_Transient | EObjectFlags::RF_DuplicateTransient"
+        },
+        {
+          "name": "Valid For PIE",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "AActor*",
+      "docs": "Spawns a transient actor that we can use in the current world of this extension"
     },
     {
       "id": "destroy-transient-actor",
@@ -191,28 +328,6 @@
       "docs": "Executes command"
     },
     {
-      "id": "transition-world",
-      "name": "TransitionWorld",
-      "category": "EditorWorldExtension",
-      "signature": "TransitionWorld(Target, New World, Transition State)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UEditorWorldExtension*"
-        },
-        {
-          "name": "New World",
-          "type": "UWorld*"
-        },
-        {
-          "name": "Transition State",
-          "type": "EEditorWorldExtensionTransitionState"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Reparent actors to a new world"
-    },
-    {
       "id": "add-extension-071831",
       "name": "AddExtension",
       "category": "EditorWorldExtension",
@@ -285,24 +400,6 @@
       "docs": "Find an extension based on the class\n@param\tEditorExtensionClass\tThe class to find an extension with\n@return\t\t\t\t\t\t\tThe first extension that is found based on class"
     },
     {
-      "id": "tick",
-      "name": "Tick",
-      "category": "EditorWorldExtension",
-      "signature": "Tick(Target, Delta Seconds)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UEditorWorldExtensionCollection*"
-        },
-        {
-          "name": "Delta Seconds",
-          "type": "Float"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Give base class the chance to tick"
-    },
-    {
       "id": "show-all-actors",
       "name": "ShowAllActors",
       "category": "EditorWorldExtension",
@@ -319,28 +416,6 @@
       ],
       "returnType": "Void",
       "docs": "Show or hide all the actors of extensions that belong to this collection."
-    },
-    {
-      "id": "set-world",
-      "name": "SetWorld",
-      "category": "EditorWorldExtension",
-      "signature": "SetWorld(Target, New World, Transition State)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UEditorWorldExtensionCollection*"
-        },
-        {
-          "name": "New World",
-          "type": "UWorld*"
-        },
-        {
-          "name": "Transition State",
-          "type": "EEditorWorldExtensionTransitionState"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Sets the world for this collection and gives every extension an opportunity to transition"
     },
     {
       "id": "get-editor-world-extensions",

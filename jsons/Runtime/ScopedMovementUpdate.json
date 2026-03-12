@@ -63,30 +63,286 @@
       "docs": "Add overlaps to the queued overlaps array. This is intended for use only by SceneComponent and its derived classes whenever movement is performed."
     },
     {
-      "id": "get-overlaps-at-end",
-      "name": "GetOverlapsAtEnd",
+      "id": "get-outer-deferred-scope",
+      "name": "GetOuterDeferredScope",
       "category": "ScopedMovementUpdate",
-      "signature": "GetOverlapsAtEnd(Target, Prim Component, Out End Overlaps, Transform Changed)",
+      "signature": "GetOuterDeferredScope(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "FScopedMovementUpdate*",
+      "docs": "Get the scope containing this scope. A scope only has an outer scope if they both defer updates."
+    },
+    {
+      "id": "is-deferring-updates",
+      "name": "IsDeferringUpdates",
+      "category": "ScopedMovementUpdate",
+      "signature": "IsDeferringUpdates(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return true if deferring updates, false if updates are applied immediately."
+    },
+    {
+      "id": "is-group-update",
+      "name": "IsGroupUpdate",
+      "category": "ScopedMovementUpdate",
+      "signature": "IsGroupUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return true if this movement update should be deferred and applied later in the frame as part of a larger group of components."
+    },
+    {
+      "id": "has-moved",
+      "name": "HasMoved",
+      "category": "ScopedMovementUpdate",
+      "signature": "HasMoved(Target, Check Transform)",
       "params": [
         {
           "name": "Target",
           "type": "FScopedMovementUpdate*"
         },
         {
-          "name": "Prim Component",
-          "type": "UPrimitiveComponent&"
+          "name": "Check Transform",
+          "type": "EHasMovedTransformOption"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether movement has occurred at all during this scope, optionally checking if the transform is different (since changing scale does not go through a move). RevertMove() sets this back to false."
+    },
+    {
+      "id": "has-pending-overlaps",
+      "name": "HasPendingOverlaps",
+      "category": "ScopedMovementUpdate",
+      "signature": "HasPendingOverlaps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if there are pending overlaps queued in this scope."
+    },
+    {
+      "id": "requires-overlaps-event-flag",
+      "name": "RequiresOverlapsEventFlag",
+      "category": "ScopedMovementUpdate",
+      "signature": "RequiresOverlapsEventFlag(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we require GetGenerateOverlapEvents() on both the moving object and the overlapped object to add them to the pending overlaps list.\nThese flags will still be required when dispatching calls to UpdateOverlaps(), but this allows some custom processing of queued overlaps that would be otherwise missed along the way."
+    },
+    {
+      "id": "get-pending-overlaps",
+      "name": "GetPendingOverlaps",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetPendingOverlaps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "FScopedMovementUpdate::TScopedOverlapInfoArray&",
+      "docs": "Returns the pending overlaps within this scope."
+    },
+    {
+      "id": "get-pending-blocking-hits",
+      "name": "GetPendingBlockingHits",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetPendingBlockingHits(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "FScopedMovementUpdate::TScopedBlockingHitArray&",
+      "docs": "Returns the list of pending blocking hits, which will be used for notifications once the move is committed."
+    },
+    {
+      "id": "append-blocking-hit-after-move",
+      "name": "AppendBlockingHitAfterMove",
+      "category": "ScopedMovementUpdate",
+      "signature": "AppendBlockingHitAfterMove(Target, Hit)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
         },
         {
-          "name": "Out End Overlaps",
-          "type": "TInlineOverlapInfoArray&"
+          "name": "Hit",
+          "type": "FHitResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add blocking hit that will get processed once the move is committed. This is intended for use only by SceneComponent and its derived classes."
+    },
+    {
+      "id": "keep-current-overlaps-after-rotation",
+      "name": "KeepCurrentOverlapsAfterRotation",
+      "category": "ScopedMovementUpdate",
+      "signature": "KeepCurrentOverlapsAfterRotation(Target, Sweep)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
         },
         {
-          "name": "Transform Changed",
+          "name": "Sweep",
           "type": "Bool"
         }
       ],
-      "returnType": "TOptional<TOverlapArrayView>",
-      "docs": "Fills in the list of overlaps at the end location (in EndOverlaps). Returns pointer to the list, or null if it can't be computed."
+      "returnType": "Void",
+      "docs": "Keep current pending overlaps after a move but make note that there was movement (just a symmetric rotation)."
+    },
+    {
+      "id": "invalidate-current-overlaps",
+      "name": "InvalidateCurrentOverlaps",
+      "category": "ScopedMovementUpdate",
+      "signature": "InvalidateCurrentOverlaps(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clear overlap state at current location, we don't know what it is."
+    },
+    {
+      "id": "force-overlap-update",
+      "name": "ForceOverlapUpdate",
+      "category": "ScopedMovementUpdate",
+      "signature": "ForceOverlapUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Force full overlap update once this scope finishes."
+    },
+    {
+      "id": "set-has-teleported",
+      "name": "SetHasTeleported",
+      "category": "ScopedMovementUpdate",
+      "signature": "SetHasTeleported(Target, In Teleport Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        },
+        {
+          "name": "In Teleport Type",
+          "type": "ETeleportType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Registers that this move is a teleport"
+    },
+    {
+      "id": "get-teleport-type",
+      "name": "GetTeleportType",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetTeleportType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "ETeleportType",
+      "docs": "The type of teleport which this scoped move should use to determine overlaps."
+    },
+    {
+      "id": "get-has-moved",
+      "name": "GetHasMoved",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetHasMoved(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "True if this scoped movement resulted in the component being moved"
+    },
+    {
+      "id": "get-final-overlap-candidates-index",
+      "name": "GetFinalOverlapCandidatesIndex",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetFinalOverlapCandidatesIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "If not INDEX_NONE, overlaps at this index and beyond in PendingOverlaps are at the final destination"
+    },
+    {
+      "id": "get-overlap-state",
+      "name": "GetOverlapState",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetOverlapState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "FScopedMovementUpdate::EOverlapState",
+      "docs": "The current overlap state of this scoped move."
+    },
+    {
+      "id": "get-initial-transform",
+      "name": "GetInitialTransform",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetInitialTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "FTransform&",
+      "docs": "The initial transform when this scoped movement began."
+    },
+    {
+      "id": "get-owner",
+      "name": "GetOwner",
+      "category": "ScopedMovementUpdate",
+      "signature": "GetOwner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FScopedMovementUpdate*"
+        }
+      ],
+      "returnType": "USceneComponent*",
+      "docs": "The owning scene component this scoped movement is modifying."
     }
   ]
 }

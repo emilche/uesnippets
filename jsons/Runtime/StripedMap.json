@@ -1,0 +1,501 @@
+{
+  "id": "striped-map",
+  "label": "StripedMap",
+  "includepath": "Containers/StripedMap.h",
+  "includes": [
+    "CoreTypes",
+    "Map",
+    "SharedLock",
+    "SharedMutex",
+    "UniqueLock",
+    "TransactionallySafeRWLock",
+    "ScopeRWLock"
+  ],
+  "functions": [
+    {
+      "id": "find-and-apply-d056fd",
+      "name": "FindAndApply",
+      "category": "StripedMap",
+      "signature": "FindAndApply(Target, In Key, In Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        },
+        {
+          "name": "In Function",
+          "type": "FunctionType&&"
+        }
+      ],
+      "returnType": "template<FunctionType> bool",
+      "docs": "Calls a function when the value is found while holding a lock on the map.\nBest for more complex types that you don't want to wrap under TSharedPtr\nand where returning a copy would be wasteful.\n@param InKey       The key to look for.\n@param InFunction  The function to call on the value (if found).\n@return true if the map contains the key and a value was found."
+    },
+    {
+      "id": "find-and-apply-93cb0f",
+      "name": "FindAndApply",
+      "category": "StripedMap",
+      "signature": "FindAndApply(Target, In Key, In Update Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        },
+        {
+          "name": "In Update Function",
+          "type": "UpdateFunctionType&&"
+        }
+      ],
+      "returnType": "template<UpdateFunctionType> bool",
+      "docs": "Calls a function to update a value if it has been found.\n@param InKey             The key to check for.\n@param InUpdateFunction  The function to call on the value (if found).\n@return true if the map contains the key and a value was found."
+    },
+    {
+      "id": "contains",
+      "name": "Contains",
+      "category": "StripedMap",
+      "signature": "Contains(Target, In Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Check if map contains the specified key.\n@param InKey The key to check for.\n@return true if the map contains the key."
+    },
+    {
+      "id": "emplace",
+      "name": "Emplace",
+      "category": "StripedMap",
+      "signature": "Emplace(Target, In Key, In Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "InitKeyType&&"
+        },
+        {
+          "name": "In Value",
+          "type": "InitValueType&&"
+        }
+      ],
+      "returnType": "template<InitKeyType = KeyType,InitValueType = ValueType> void",
+      "docs": "Sets the value associated with a key.\n@param InKey The key to associate the value with.\n@param InValue The value to associate with the key."
+    },
+    {
+      "id": "add",
+      "name": "Add",
+      "category": "StripedMap",
+      "signature": "Add(Target, In Key, In Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "In Value",
+          "type": "ValueType&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the value associated with a key.\n@param InKey The key to associate the value with.\n@param InValue The value to associate with the key."
+    },
+    {
+      "id": "find-or-produce",
+      "name": "FindOrProduce",
+      "category": "StripedMap",
+      "signature": "FindOrProduce(Target, In Key, In Produce Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "In Produce Function",
+          "type": "ProduceFunctionType&&"
+        }
+      ],
+      "returnType": "template<ProduceFunctionType> ValueType",
+      "docs": "Finds or produce a value associated with the key.\n@param InKey             The key to look for.\n@param InProduceFunction The function to call to produce a new value if the key is missing.\n@return a copy the value associated with the key."
+    },
+    {
+      "id": "find-or-produce-and-apply",
+      "name": "FindOrProduceAndApply",
+      "category": "StripedMap",
+      "signature": "FindOrProduceAndApply(Target, In Key, In Produce Function, In Apply Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "In Produce Function",
+          "type": "ProduceFunctionType&&"
+        },
+        {
+          "name": "In Apply Function",
+          "type": "ApplyFunctionType&&"
+        }
+      ],
+      "returnType": "template<ProduceFunctionType,ApplyFunctionType> void",
+      "docs": "Calls ProduceFunction to produce a value if the key is missing, then calls ApplyFunction on the value.\n@param InKey             The key to look for.\n@param InProduceFunction The function to call to produce a new value associated with the key.\n@param InApplyFunction   The function to call with the const value reference when the key is found or has been produced."
+    },
+    {
+      "id": "find-or-try-produce-and-apply",
+      "name": "FindOrTryProduceAndApply",
+      "category": "StripedMap",
+      "signature": "FindOrTryProduceAndApply(Target, In Key, In Try Produce Function, In Apply Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "In Try Produce Function",
+          "type": "TryProduceFunctionType&&"
+        },
+        {
+          "name": "In Apply Function",
+          "type": "ApplyFunctionType&&"
+        }
+      ],
+      "returnType": "template<TryProduceFunctionType,ApplyFunctionType> bool",
+      "docs": "Calls TryProduceFunction to produce a value if the key is missing, then calls ApplyFunction on the value if one exists.\n@param InKey                The key to look for.\n@param InTryProduceFunction The function to call to produce a new value associated with the key.\n@param InApplyFunction      The function to call with the const value reference when the key is found or has been produced.\n@return true if a value was found or produced, false if TryProduceFunction failed."
+    },
+    {
+      "id": "find-or-produce-and-apply-for-write",
+      "name": "FindOrProduceAndApplyForWrite",
+      "category": "StripedMap",
+      "signature": "FindOrProduceAndApplyForWrite(Target, In Key, In Produce Function, In Apply Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "In Produce Function",
+          "type": "ProduceFunctionType&&"
+        },
+        {
+          "name": "In Apply Function",
+          "type": "ApplyFunctionType&&"
+        }
+      ],
+      "returnType": "template<ProduceFunctionType,ApplyFunctionType> void",
+      "docs": "Calls ProduceFunction to produce a value if the key is missing, then calls ApplyFunction on the value.\n@param InKey             The key to look for.\n@param InProduceFunction The function to call to produce a new value associated with the key.\n@param InApplyFunction   The function to call with the value reference when the key is found or has been produced."
+    },
+    {
+      "id": "find-or-try-produce-and-apply-for-write",
+      "name": "FindOrTryProduceAndApplyForWrite",
+      "category": "StripedMap",
+      "signature": "FindOrTryProduceAndApplyForWrite(Target, In Key, In Try Produce Function, In Apply Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyType&"
+        },
+        {
+          "name": "In Try Produce Function",
+          "type": "TryProduceFunctionType&&"
+        },
+        {
+          "name": "In Apply Function",
+          "type": "ApplyFunctionType&&"
+        }
+      ],
+      "returnType": "template<TryProduceFunctionType,ApplyFunctionType> bool",
+      "docs": "Calls TryProduceFunction to produce a value if the key is missing, then calls ApplyFunction on the value if one exists.\n@param InKey                The key to look for.\n@param InTryProduceFunction The function to call to produce a new value associated with the key.\n@param InApplyFunction      The function to call with the value reference when the key is found or has been produced.\n@return true if a value was found or produced, false if TryProduceFunction failed."
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "category": "StripedMap",
+      "signature": "Remove(Target, In Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Remove all value associations for a key.\n@param InKey The key to remove associated values for.\n@return The number of values that were associated with the key."
+    },
+    {
+      "id": "remove-by-hash",
+      "name": "RemoveByHash",
+      "category": "StripedMap",
+      "signature": "RemoveByHash(Target, In Key Hash, In Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key Hash",
+          "type": "UInt"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "See Remove() and class documentation section on ByHash() functions"
+    },
+    {
+      "id": "remove-if-6aa704",
+      "name": "RemoveIf",
+      "category": "StripedMap",
+      "signature": "RemoveIf(Target, In Key, In Predicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        },
+        {
+          "name": "In Predicate",
+          "type": "PredicateType&&"
+        }
+      ],
+      "returnType": "template<PredicateType> int32",
+      "docs": "Removes only the element associated by the key if the predicate returns true.\n@param InKey        The key to remove associated values for.\n@param InPredicate  The predicate to call to determine if a value should be removed.\n@return The number of values that were removed."
+    },
+    {
+      "id": "remove-if-e2b14d",
+      "name": "RemoveIf",
+      "category": "StripedMap",
+      "signature": "RemoveIf(Target, In Predicate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Predicate",
+          "type": "PredicateType&&"
+        }
+      ],
+      "returnType": "template<PredicateType> int32",
+      "docs": "Removes all elements where the predicate returns true.\n@param InPredicate  The predicate to call to determine if a pair should be removed.\n@return The number of pairs that were removed."
+    },
+    {
+      "id": "remove-and-copy-value",
+      "name": "RemoveAndCopyValue",
+      "category": "StripedMap",
+      "signature": "RemoveAndCopyValue(Target, In Key, Out Removed Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        },
+        {
+          "name": "Out Removed Value",
+          "type": "ValueType&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remove the pair with the specified key and copies the value\nthat was removed to the ref parameter\n@param InKey The key to search for\n@param OutRemovedValue If found, the value that was removed (not modified if the key was not found)\n@return whether or not the key was found"
+    },
+    {
+      "id": "find-and-remove-checked",
+      "name": "FindAndRemoveChecked",
+      "category": "StripedMap",
+      "signature": "FindAndRemoveChecked(Target, In Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Key",
+          "type": "KeyConstPointerType"
+        }
+      ],
+      "returnType": "ValueType",
+      "docs": "Find a pair with the specified key, removes it from the map, and returns the value part of the pair.\nIf no pair was found, an exception is thrown.\n@param InKey The key to search for\n@return      The value that was removed"
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "StripedMap",
+      "signature": "Empty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes all elements from the map."
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "StripedMap",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Efficiently empties out the map but preserves all allocations and capacities"
+    },
+    {
+      "id": "shrink",
+      "name": "Shrink",
+      "category": "StripedMap",
+      "signature": "Shrink(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shrinks the pair set to avoid slack."
+    },
+    {
+      "id": "compact",
+      "name": "Compact",
+      "category": "StripedMap",
+      "signature": "Compact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Compacts the pair set to remove holes"
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "StripedMap",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int32",
+      "docs": "@return The number of elements in the map."
+    },
+    {
+      "id": "for-each",
+      "name": "ForEach",
+      "category": "StripedMap",
+      "signature": "ForEach(Target, In Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "In Function",
+          "type": "FunctionType&&"
+        }
+      ],
+      "returnType": "template<FunctionType> void",
+      "docs": "Calls a function on all elements of the map with exclusive access (elements can be modified).\n@param InFunction The callback to run on each Pair of the map."
+    },
+    {
+      "id": "get-keys",
+      "name": "GetKeys",
+      "category": "StripedMap",
+      "signature": "GetKeys(Target, Out Keys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMapBase*"
+        },
+        {
+          "name": "Out Keys",
+          "type": "TArray<KeyType,Allocator>&"
+        }
+      ],
+      "returnType": "template<Allocator> int32",
+      "docs": "Get the unique keys contained within this map.\n@param OutKeys Upon return, contains the set of unique keys in this map.\n@return The number of unique keys in the map."
+    },
+    {
+      "id": "multi-find",
+      "name": "MultiFind",
+      "category": "StripedMap",
+      "signature": "MultiFind(Target, In Key, Out Values, Maintain Order)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TStripedMultiMap*"
+        },
+        {
+          "name": "In Key",
+          "type": "Super::KeyConstPointerType"
+        },
+        {
+          "name": "Out Values",
+          "type": "TArray<ValueType,Allocator>&"
+        },
+        {
+          "name": "Maintain Order",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "template<Allocator> void",
+      "docs": "A wrapper over a TMap class with additional thread-safety guarantees and contention reduction."
+    }
+  ]
+}

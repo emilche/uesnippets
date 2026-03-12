@@ -16,6 +16,56 @@
   ],
   "functions": [
     {
+      "id": "set-mesh",
+      "name": "SetMesh",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "SetMesh(Target, Move Mesh)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Move Mesh",
+          "type": "UE::Geometry::FDynamicMesh3&&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "initialize the internal mesh from a DynamicMesh"
+    },
+    {
+      "id": "get-mesh",
+      "name": "GetMesh",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "GetMesh(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "FDynamicMesh3*",
+      "docs": "@return pointer to internal mesh\n@warning avoid usage of this function, access via GetDynamicMesh() instead"
+    },
+    {
+      "id": "process-mesh",
+      "name": "ProcessMesh",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "ProcessMesh(Target, Process Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Process Func",
+          "type": "TFunctionRef<void ( UE::Geometry::FDynamicMesh3& )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allow external code to read the internal mesh."
+    },
+    {
       "id": "get-dynamic-mesh",
       "name": "GetDynamicMesh",
       "category": "Dynamic Mesh Component",
@@ -28,6 +78,78 @@
       ],
       "returnType": "UDynamicMesh*",
       "docs": "@return the child UDynamicMesh"
+    },
+    {
+      "id": "notify-mesh-updated",
+      "name": "NotifyMeshUpdated",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "NotifyMeshUpdated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call this if you update the mesh via GetMesh()\n@todo should provide a function that calls a lambda to modify the mesh, and only return const mesh pointer"
+    },
+    {
+      "id": "apply-change",
+      "name": "ApplyChange",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "ApplyChange(Target, Change, Revert)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Change",
+          "type": "FMeshVertexChange*"
+        },
+        {
+          "name": "Revert",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply a vertex deformation change to the internal mesh  (implements IMeshVertexCommandChangeTarget)"
+    },
+    {
+      "id": "apply-transform",
+      "name": "ApplyTransform",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "ApplyTransform(Target, Transform, Invert)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Transform",
+          "type": "FTransform3d&"
+        },
+        {
+          "name": "Invert",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply a transform to the mesh"
+    },
+    {
+      "id": "notify-material-set-updated",
+      "name": "NotifyMaterialSetUpdated",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "NotifyMaterialSetUpdated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Subclass must implement this to notify allocated proxies of updated materials"
     },
     {
       "id": "set-enable-wireframe-render-pass",
@@ -318,6 +440,24 @@
       "docs": "@return active override render material for the given MaterialIndex"
     },
     {
+      "id": "set-secondary-render-material",
+      "name": "SetSecondaryRenderMaterial",
+      "category": "Dynamic Mesh Component",
+      "signature": "SetSecondaryRenderMaterial(Target, Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set an active secondary render material."
+    },
+    {
       "id": "clear-secondary-render-material",
       "name": "ClearSecondaryRenderMaterial",
       "category": "Dynamic Mesh Component",
@@ -330,6 +470,20 @@
       ],
       "returnType": "Void",
       "docs": "Clear any active secondary render material"
+    },
+    {
+      "id": "has-secondary-render-material",
+      "name": "HasSecondaryRenderMaterial",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "HasSecondaryRenderMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if a secondary render material is set"
     },
     {
       "id": "get-secondary-render-material",
@@ -378,6 +532,24 @@
       "docs": "@return true if secondary buffers are currently set to be visible"
     },
     {
+      "id": "set-override-wireframe-render-material",
+      "name": "SetOverrideWireframeRenderMaterial",
+      "category": "Dynamic Mesh Component",
+      "signature": "SetOverrideWireframeRenderMaterial(Target, Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set an active wireframe override render Material"
+    },
+    {
       "id": "clear-override-wireframe-render-material",
       "name": "ClearOverrideWireframeRenderMaterial",
       "category": "Dynamic Mesh Component",
@@ -390,6 +562,20 @@
       ],
       "returnType": "Void",
       "docs": "Clear any active wireframe override render material"
+    },
+    {
+      "id": "has-override-wireframe-render-material",
+      "name": "HasOverrideWireframeRenderMaterial",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "HasOverrideWireframeRenderMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if a active wireframe override render material is set"
     },
     {
       "id": "get-override-wireframe-render-material",
@@ -406,6 +592,24 @@
       "docs": "@return active wireframe override render material"
     },
     {
+      "id": "set-override-secondary-wireframe-render-material",
+      "name": "SetOverrideSecondaryWireframeRenderMaterial",
+      "category": "Dynamic Mesh Component",
+      "signature": "SetOverrideSecondaryWireframeRenderMaterial(Target, Material)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "Material",
+          "type": "UMaterialInterface*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set an active secondary wireframe override render material"
+    },
+    {
       "id": "clear-override-secondary-wireframe-render-material",
       "name": "ClearOverrideSecondaryWireframeRenderMaterial",
       "category": "Dynamic Mesh Component",
@@ -418,6 +622,20 @@
       ],
       "returnType": "Void",
       "docs": "Clear any active secondary wireframe override render material"
+    },
+    {
+      "id": "has-override-secondary-wireframe-render-material",
+      "name": "HasOverrideSecondaryWireframeRenderMaterial",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "HasOverrideSecondaryWireframeRenderMaterial(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if a active secondary wireframe override render material is set"
     },
     {
       "id": "get-override-secondary-wireframe-render-material",
@@ -466,21 +684,35 @@
       "docs": "@return true if raytracing support is currently enabled"
     },
     {
-      "id": "on-rendering-state-changed",
-      "name": "OnRenderingStateChanged",
+      "id": "allow-fast-update",
+      "name": "AllowFastUpdate",
       "category": "BaseDynamicMeshComponent",
-      "signature": "OnRenderingStateChanged(Target, Force Immedate Rebuild)",
+      "signature": "AllowFastUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-mesh-draw-path",
+      "name": "SetMeshDrawPath",
+      "category": "Dynamic Mesh Component",
+      "signature": "SetMeshDrawPath(Target, New Draw Path)",
       "params": [
         {
           "name": "Target",
           "type": "UBaseDynamicMeshComponent*"
         },
         {
-          "name": "Force Immedate Rebuild",
-          "type": "Bool"
+          "name": "New Draw Path",
+          "type": "EDynamicMeshDrawPath"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "Set the mesh rendering to use the static or dynamic draw path"
     },
     {
       "id": "get-mesh-draw-path",
@@ -495,6 +727,24 @@
       ],
       "returnType": "EDynamicMeshDrawPath",
       "docs": "@return Whether the mesh renders using the static or dynamic draw path"
+    },
+    {
+      "id": "set-distance-field-mode",
+      "name": "SetDistanceFieldMode",
+      "category": "Dynamic Mesh Component",
+      "signature": "SetDistanceFieldMode(Target, New Dist Field Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        },
+        {
+          "name": "New Dist Field Mode",
+          "type": "EDynamicMeshComponentDistanceFieldMode"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Configure Distance Field computation mode"
     },
     {
       "id": "get-distance-field-mode",
@@ -522,6 +772,19 @@
         }
       ],
       "returnType": "PRAGMA_ENABLE_DEPRECATION_WARNINGS protected : void"
+    },
+    {
+      "id": "get-num-materials",
+      "name": "GetNumMaterials",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "GetNumMaterials(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UBaseDynamicMeshComponent*"
+        }
+      ],
+      "returnType": "Int"
     },
     {
       "id": "get-material",
@@ -665,23 +928,6 @@
       "returnType": "UMaterialInterface*"
     },
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "BaseDynamicMeshComponent",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UBaseDynamicMeshComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "set-default-wireframe-material",
       "name": "SetDefaultWireframeMaterial",
       "category": "BaseDynamicMeshComponent",
@@ -710,12 +956,20 @@
       "docs": "Set the vertex color material used for all BaseDynamicMeshComponent-derived Components"
     },
     {
-      "id": "initialize-default-materials",
-      "name": "InitializeDefaultMaterials",
+      "id": "get-default-wireframe-material-render-thread",
+      "name": "GetDefaultWireframeMaterial_RenderThread",
       "category": "BaseDynamicMeshComponent",
-      "signature": "InitializeDefaultMaterials()",
+      "signature": "GetDefaultWireframeMaterial_RenderThread()",
       "params": [],
-      "returnType": "Void"
+      "returnType": "UMaterialInterface*"
+    },
+    {
+      "id": "get-default-vertex-color-material-render-thread",
+      "name": "GetDefaultVertexColorMaterial_RenderThread",
+      "category": "BaseDynamicMeshComponent",
+      "signature": "GetDefaultVertexColorMaterial_RenderThread()",
+      "params": [],
+      "returnType": "UMaterialInterface*"
     }
   ]
 }

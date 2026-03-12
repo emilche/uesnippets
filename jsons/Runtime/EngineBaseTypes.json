@@ -15,6 +15,24 @@
   ],
   "functions": [
     {
+      "id": "get",
+      "name": "Get",
+      "category": "EngineBaseTypes",
+      "signature": "Get(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickPrerequisite*"
+        }
+      ],
+      "returnType": "struct FTickFunction*",
+      "docs": "Return the tick function, if it is still valid. Can be null if the tick function was null or the containing UObject has been garbage collected.",
+      "supportedTargets": [
+        "FTickPrerequisite*",
+        "FTickFunction*"
+      ]
+    },
+    {
       "id": "register-tick-function",
       "name": "RegisterTickFunction",
       "category": "EngineBaseTypes",
@@ -47,6 +65,20 @@
       "docs": "Removes the tick function from the primary list of tick functions. *"
     },
     {
+      "id": "is-tick-function-registered",
+      "name": "IsTickFunctionRegistered",
+      "category": "EngineBaseTypes",
+      "signature": "IsTickFunctionRegistered(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "See if the tick function is currently registered"
+    },
+    {
       "id": "set-tick-function-enable",
       "name": "SetTickFunctionEnable",
       "category": "EngineBaseTypes",
@@ -63,6 +95,20 @@
       ],
       "returnType": "Void",
       "docs": "Enables or disables this tick function. *"
+    },
+    {
+      "id": "is-tick-function-enabled",
+      "name": "IsTickFunctionEnabled",
+      "category": "EngineBaseTypes",
+      "signature": "IsTickFunctionEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the tick function is currently enabled"
     },
     {
       "id": "update-tick-interval-and-cool-down",
@@ -139,6 +185,34 @@
       "docs": "If bDispatchManually is set, attempt to start the task based on some event during a frame.\nIt will return true if it worked, which may have executed immediately or may be waiting for a prerequisite."
     },
     {
+      "id": "get-actual-tick-group",
+      "name": "GetActualTickGroup",
+      "category": "EngineBaseTypes",
+      "signature": "GetActualTickGroup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        }
+      ],
+      "returnType": "TEnumAsByte<enum ETickingGroup>",
+      "docs": "Gets the action tick group that this function will be elligible to start in.\nOnly valid after StartFrame has been called through the end of the frame."
+    },
+    {
+      "id": "get-actual-end-tick-group",
+      "name": "GetActualEndTickGroup",
+      "category": "EngineBaseTypes",
+      "signature": "GetActualEndTickGroup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        }
+      ],
+      "returnType": "TEnumAsByte<enum ETickingGroup>",
+      "docs": "Gets the action tick group that this function will be required to end in.\nOnly valid after StartFrame has been called through the end of the frame."
+    },
+    {
       "id": "add-prerequisite",
       "name": "AddPrerequisite",
       "category": "EngineBaseTypes",
@@ -199,6 +273,34 @@
       ],
       "returnType": "Void",
       "docs": "Sets this function to hipri and all prerequisites recursively\n@param bInHighPriority - priority to set"
+    },
+    {
+      "id": "get-prerequisites",
+      "name": "GetPrerequisites",
+      "category": "EngineBaseTypes",
+      "signature": "GetPrerequisites(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        }
+      ],
+      "returnType": "TArray<struct FTickPrerequisite>&",
+      "docs": "@return a reference to prerequisites for this tick function."
+    },
+    {
+      "id": "get-last-tick-game-time",
+      "name": "GetLastTickGameTime",
+      "category": "EngineBaseTypes",
+      "signature": "GetLastTickGameTime(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "For actively registered tick functions with an interval, return the last time it ticked.\nFor unregistered or non-interval functions it will return -1;"
     },
     {
       "id": "execute-nested-tick",
@@ -339,6 +441,47 @@
       "docs": "Abstract function to describe this tick. Used to print messages about illegal cycles in the dependency graph *"
     },
     {
+      "id": "diagnostic-context",
+      "name": "DiagnosticContext",
+      "category": "EngineBaseTypes",
+      "signature": "DiagnosticContext(Target, Detailed)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        },
+        {
+          "name": "Detailed",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Function to give a 'context' for this tick, used for grouped active tick reporting",
+      "supportedTargets": [
+        "FTickFunction*",
+        "FActorTickFunction*",
+        "FActorComponentTickFunction*"
+      ]
+    },
+    {
+      "id": "for-each-nested-tick",
+      "name": "ForEachNestedTick",
+      "category": "EngineBaseTypes",
+      "signature": "ForEachNestedTick(Target, In Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTickFunction*"
+        },
+        {
+          "name": "In Func",
+          "type": "TFunctionRef<void ( FTickFunction& )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "To properly expose nested/batched tick functions to the logging and debugging systems of the tick manager,\noverride this to execute InFunc for every nested tick function that would be executed as part of this tick."
+    },
+    {
       "id": "execute-tick-b26872",
       "name": "ExecuteTick",
       "category": "EngineBaseTypes",
@@ -366,7 +509,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "AActor  that is the target of this tick *"
+      "docs": "AActor  that is the target of this tick *",
+      "supportedTargets": [
+        "FActorTickFunction*",
+        "FActorComponentTickFunction*"
+      ]
     },
     {
       "id": "diagnostic-message-d69ce8",
@@ -380,25 +527,11 @@
         }
       ],
       "returnType": "String",
-      "docs": "Abstract function to describe this tick. Used to print messages about illegal cycles in the dependency graph *"
-    },
-    {
-      "id": "diagnostic-context",
-      "name": "DiagnosticContext",
-      "category": "EngineBaseTypes",
-      "signature": "DiagnosticContext(Target, Detailed)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FActorTickFunction*"
-        },
-        {
-          "name": "Detailed",
-          "type": "Bool"
-        }
-      ],
-      "returnType": "Name",
-      "docs": "Function to give a 'context' for this tick, used for grouped active tick reporting"
+      "docs": "Abstract function to describe this tick. Used to print messages about illegal cycles in the dependency graph *",
+      "supportedTargets": [
+        "FActorTickFunction*",
+        "FActorComponentTickFunction*"
+      ]
     },
     {
       "id": "add-struct-referenced-objects",
@@ -416,7 +549,47 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Exposes references to GC system"
+      "docs": "Exposes references to GC system",
+      "supportedTargets": [
+        "FActorTickFunction*",
+        "FActorComponentTickFunction*"
+      ]
+    },
+    {
+      "id": "to-string-57d97c",
+      "name": "ToString",
+      "category": "EngineBaseTypes",
+      "signature": "ToString(Target, Lag Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEngineBaseTypes*"
+        },
+        {
+          "name": "Lag Type",
+          "type": "ENetworkLagState::Type"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "The net driver is operating normally or it is not possible to tell if it is lagging"
+    },
+    {
+      "id": "to-string-0ae706",
+      "name": "ToString",
+      "category": "EngineBaseTypes",
+      "signature": "ToString(Target, Failure Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEngineBaseTypes*"
+        },
+        {
+          "name": "Failure Type",
+          "type": "ETravelFailure::Type"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "No level found in the loaded package"
     },
     {
       "id": "static-init",
@@ -613,7 +786,7 @@
       "docs": "Remove an option from the URL"
     },
     {
-      "id": "to-string",
+      "id": "to-string-de41ec",
       "name": "ToString",
       "category": "EngineBaseTypes",
       "signature": "ToString(Target, Fully Qualified)",
@@ -646,6 +819,20 @@
       "docs": "Prepares the Host and Port values into a standards compliant string"
     },
     {
+      "id": "get-view-mode-display-name",
+      "name": "GetViewModeDisplayName",
+      "category": "EngineBaseTypes",
+      "signature": "GetViewModeDisplayName(View Mode Index)",
+      "params": [
+        {
+          "name": "View Mode Index",
+          "type": "EViewModeIndex"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Get the display name associated with a particular EViewModeIndex"
+    },
+    {
       "id": "get-view-mode-display-icon",
       "name": "GetViewModeDisplayIcon",
       "category": "EngineBaseTypes",
@@ -670,6 +857,36 @@
         }
       ],
       "returnType": "FSlateIcon"
+    },
+    {
+      "id": "to-string-f7a82f",
+      "name": "ToString",
+      "category": "EngineBaseTypes",
+      "signature": "ToString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEngineBaseTypes*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "set-from-string",
+      "name": "SetFromString",
+      "category": "EngineBaseTypes",
+      "signature": "SetFromString(Target, In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEngineBaseTypes*"
+        },
+        {
+          "name": "In",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

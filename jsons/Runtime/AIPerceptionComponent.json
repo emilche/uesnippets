@@ -17,6 +17,125 @@
   ],
   "functions": [
     {
+      "id": "get-last-stimulus-location",
+      "name": "GetLastStimulusLocation",
+      "category": "AIPerceptionComponent",
+      "signature": "GetLastStimulusLocation(Target, Optional Age)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        },
+        {
+          "name": "Optional Age",
+          "type": "Float*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Retrieves last known location. Active (last reported as \"successful\")\nstimuli are preferred."
+    },
+    {
+      "id": "has-any-known-stimulus",
+      "name": "HasAnyKnownStimulus",
+      "category": "AIPerceptionComponent",
+      "signature": "HasAnyKnownStimulus(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "it includes both currently live (visible) stimulus, as well as \"remembered\" ones"
+    },
+    {
+      "id": "has-any-current-stimulus-d6056f",
+      "name": "HasAnyCurrentStimulus",
+      "category": "AIPerceptionComponent",
+      "signature": "HasAnyCurrentStimulus(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates currently live (visible) stimulus from any sense"
+    },
+    {
+      "id": "get-stimulus-location",
+      "name": "GetStimulusLocation",
+      "category": "AIPerceptionComponent",
+      "signature": "GetStimulusLocation(Target, Sense)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        },
+        {
+          "name": "Sense",
+          "type": "FAISenseID"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Retrieves location of the last sensed stimuli for a given sense\n@param Sense\tThe AISenseID of the sense\n@return Location of the last sensed stimuli or FAISystem::InvalidLocation if given sense has never registered related Target actor or if last stimuli has expired."
+    },
+    {
+      "id": "get-receiver-location",
+      "name": "GetReceiverLocation",
+      "category": "AIPerceptionComponent",
+      "signature": "GetReceiverLocation(Target, Sense)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        },
+        {
+          "name": "Sense",
+          "type": "FAISenseID"
+        }
+      ],
+      "returnType": "FVector",
+      "docs": "Retrieves receiver location of the last sense stimuli for a given sense\n@param Sense\tThe AISenseID of the sense\n@return Location of the receiver for the last sensed stimuli or FAISystem::InvalidLocation if given sense has never registered related Target actor or last stimuli has expired."
+    },
+    {
+      "id": "has-known-stimulus-of-sense",
+      "name": "HasKnownStimulusOfSense",
+      "category": "AIPerceptionComponent",
+      "signature": "HasKnownStimulusOfSense(Target, Sense)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        },
+        {
+          "name": "Sense",
+          "type": "FAISenseID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates a currently active or \"remembered\" stimuli for a given sense\n@param Sense\tThe AISenseID of the sense\n@return True if a target has been registered (even if not currently sensed) for the given sense and the stimuli is not expired."
+    },
+    {
+      "id": "is-sense-active",
+      "name": "IsSenseActive",
+      "category": "AIPerceptionComponent",
+      "signature": "IsSenseActive(Target, Sense)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FActorPerceptionInfo*"
+        },
+        {
+          "name": "Sense",
+          "type": "FAISenseID"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates a currently active stimuli for a given sense\n@param Sense\tThe AISenseID of the sense\n@return True if a target is still sensed for the given sense and the stimuli is not expired."
+    },
+    {
       "id": "merge",
       "name": "Merge",
       "category": "AIPerceptionComponent",
@@ -35,17 +154,55 @@
       "docs": "takes all \"newer\" info from Other and absorbs it"
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
+      "id": "f-actor-perception-blueprint-info",
+      "name": "FActorPerceptionBlueprintInfo",
       "category": "AIPerceptionComponent",
-      "signature": "BeginDestroy(Target)",
+      "signature": "FActorPerceptionBlueprintInfo(Target, Nullptr, False, False)",
       "params": [
         {
           "name": "Target",
           "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Nullptr",
+          "type": ") : Target ("
+        },
+        {
+          "name": "False",
+          "type": "bIsHostile ("
+        },
+        {
+          "name": "False",
+          "type": "bIsFriendly ("
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "f-stimulus-to-process",
+      "name": "FStimulusToProcess",
+      "category": "AIPerceptionComponent",
+      "signature": "FStimulusToProcess(Target, In Source, In Source, In Stimulus)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "In Source",
+          "type": "AActor*"
+        },
+        {
+          "name": "In Source",
+          "type": "FAIStimulus& InStimulus ) : Source ("
+        },
+        {
+          "name": "In Stimulus",
+          "type": "Stimulus ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@todo this field is misnamed. It's an allow list."
     },
     {
       "id": "on-register",
@@ -142,6 +299,19 @@
       "returnType": "AActor*"
     },
     {
+      "id": "get-perception-filter",
+      "name": "GetPerceptionFilter",
+      "category": "AIPerceptionComponent",
+      "signature": "GetPerceptionFilter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "FPerceptionChannelAllowList"
+    },
+    {
       "id": "get-team-identifier",
       "name": "GetTeamIdentifier",
       "category": "AIPerceptionComponent",
@@ -153,6 +323,19 @@
         }
       ],
       "returnType": "FGenericTeamId"
+    },
+    {
+      "id": "get-listener-id",
+      "name": "GetListenerId",
+      "category": "AIPerceptionComponent",
+      "signature": "GetListenerId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "FPerceptionListenerID"
     },
     {
       "id": "get-actor-location",
@@ -170,6 +353,49 @@
         }
       ],
       "returnType": "FVector"
+    },
+    {
+      "id": "get-actor-info",
+      "name": "GetActorInfo",
+      "category": "AIPerceptionComponent",
+      "signature": "GetActorInfo(Target, Actor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor&"
+        }
+      ],
+      "returnType": "FActorPerceptionInfo*"
+    },
+    {
+      "id": "get-perceptual-data-iterator",
+      "name": "GetPerceptualDataIterator",
+      "category": "AIPerceptionComponent",
+      "signature": "GetPerceptualDataIterator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "FActorPerceptionContainer::TIterator"
+    },
+    {
+      "id": "get-perceptual-data-const-iterator",
+      "name": "GetPerceptualDataConstIterator",
+      "category": "AIPerceptionComponent",
+      "signature": "GetPerceptualDataConstIterator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "FActorPerceptionContainer::TConstIterator"
     },
     {
       "id": "get-hostile-actors",
@@ -266,7 +492,33 @@
       "returnType": "Void"
     },
     {
-      "id": "get-sense-config",
+      "id": "get-dominant-sense-id",
+      "name": "GetDominantSenseID",
+      "category": "AIPerceptionComponent",
+      "signature": "GetDominantSenseID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "FAISenseID"
+    },
+    {
+      "id": "get-dominant-sense",
+      "name": "GetDominantSense",
+      "category": "AIPerceptionComponent",
+      "signature": "GetDominantSense(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "TSubclassOf<UAISense>"
+    },
+    {
+      "id": "get-sense-config-d6404e",
       "name": "GetSenseConfig",
       "category": "AIPerceptionComponent",
       "signature": "GetSenseConfig(Target, Sense ID)",
@@ -281,6 +533,19 @@
         }
       ],
       "returnType": "UAISenseConfig*"
+    },
+    {
+      "id": "get-sense-config-655cad",
+      "name": "GetSenseConfig",
+      "category": "AIPerceptionComponent",
+      "signature": "GetSenseConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "template<T,= std::enable_if_t<std::is_base_of_v<UAISenseConfig,T>>> T*"
     },
     {
       "id": "configure-sense",
@@ -347,6 +612,27 @@
       ],
       "returnType": "Void",
       "docs": "Allows toggling senses on and off"
+    },
+    {
+      "id": "update-perception-whitelist",
+      "name": "UpdatePerceptionWhitelist",
+      "category": "AIPerceptionComponent",
+      "signature": "UpdatePerceptionWhitelist(Target, Channel, New Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Channel",
+          "type": "FAISenseID"
+        },
+        {
+          "name": "New Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "register-stimulus",
@@ -466,7 +752,7 @@
       "returnType": "Bool"
     },
     {
-      "id": "has-any-current-stimulus",
+      "id": "has-any-current-stimulus-d6d347",
       "name": "HasAnyCurrentStimulus",
       "category": "AIPerceptionComponent",
       "signature": "HasAnyCurrentStimulus(Target, Source)",
@@ -680,6 +966,167 @@
       ],
       "returnType": "Bool",
       "docs": "Returns if a sense is active. Note that this works only if given sense has been\nalready configured for this component instance"
+    },
+    {
+      "id": "get-perceptual-data",
+      "name": "GetPerceptualData",
+      "category": "AIPerceptionComponent",
+      "signature": "GetPerceptualData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "FActorPerceptionContainer&"
+    },
+    {
+      "id": "clean-up",
+      "name": "CleanUp",
+      "category": "AIPerceptionComponent",
+      "signature": "CleanUp(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "called to clean up on owner's end play or destruction"
+    },
+    {
+      "id": "remove-dead-data",
+      "name": "RemoveDeadData",
+      "category": "AIPerceptionComponent",
+      "signature": "RemoveDeadData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "refresh-stimulus",
+      "name": "RefreshStimulus",
+      "category": "AIPerceptionComponent",
+      "signature": "RefreshStimulus(Target, Stimulus Store, New Stimulus)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Stimulus Store",
+          "type": "FAIStimulus&"
+        },
+        {
+          "name": "New Stimulus",
+          "type": "FAIStimulus&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates the stimulus entry in StimulusStore, if NewStimulus is more recent or stronger"
+    },
+    {
+      "id": "conditionally-store-successful-stimulus",
+      "name": "ConditionallyStoreSuccessfulStimulus",
+      "category": "AIPerceptionComponent",
+      "signature": "ConditionallyStoreSuccessfulStimulus(Target, Stimulus Store, New Stimulus)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Stimulus Store",
+          "type": "FAIStimulus&"
+        },
+        {
+          "name": "New Stimulus",
+          "type": "FAIStimulus&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Updates the stimulus entry in StimulusStore, if NewStimulus is more recent or stronger\n@return whether the detected change in stimulus values should be considered a \"perception change\"\n(and, in consequence, emit appropriate notifications) - defaults to `false`"
+    },
+    {
+      "id": "handle-expired-stimulus",
+      "name": "HandleExpiredStimulus",
+      "category": "AIPerceptionComponent",
+      "signature": "HandleExpiredStimulus(Target, Stimulus Store)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Stimulus Store",
+          "type": "FAIStimulus&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@note no need to call super implementation, it's there just for some validity checking"
+    },
+    {
+      "id": "register-sense-config",
+      "name": "RegisterSenseConfig",
+      "category": "AIPerceptionComponent",
+      "signature": "RegisterSenseConfig(Target, Sense Config, AI Perception Sys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Sense Config",
+          "type": "UAISenseConfig&"
+        },
+        {
+          "name": "AI Perception Sys",
+          "type": "UAIPerceptionSystem&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "store-listener-id",
+      "name": "StoreListenerId",
+      "category": "AIPerceptionComponent",
+      "signature": "StoreListenerId(Target, In Listener Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "In Listener Id",
+          "type": "FPerceptionListenerID"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-max-stimulus-age",
+      "name": "SetMaxStimulusAge",
+      "category": "AIPerceptionComponent",
+      "signature": "SetMaxStimulusAge(Target, Sense Id, Max Age)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAIPerceptionComponent*"
+        },
+        {
+          "name": "Sense Id",
+          "type": "FAISenseID"
+        },
+        {
+          "name": "Max Age",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

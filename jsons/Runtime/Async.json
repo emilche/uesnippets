@@ -24,6 +24,109 @@
   ],
   "functions": [
     {
+      "id": "set-promise",
+      "name": "SetPromise",
+      "category": "Async",
+      "signature": "SetPromise(Promise, Callable)",
+      "params": [
+        {
+          "name": "Promise",
+          "type": "TPromise<ResultType>&"
+        },
+        {
+          "name": "Callable",
+          "type": "CallableType&&"
+        }
+      ],
+      "returnType": "template<ResultType,CallableType> void",
+      "docs": "Enumerates available asynchronous execution methods."
+    },
+    {
+      "id": "get-subsequents-mode",
+      "name": "GetSubsequentsMode",
+      "category": "Async",
+      "signature": "GetSubsequentsMode()",
+      "params": [],
+      "returnType": "ESubsequentsMode::Type",
+      "docs": "Gets the mode for tracking subsequent tasks.\n@return Always track subsequent tasks."
+    },
+    {
+      "id": "do-task",
+      "name": "DoTask",
+      "category": "Async",
+      "signature": "DoTask(Target, Current Thread, My Completion Graph Event)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncGraphTask*"
+        },
+        {
+          "name": "Current Thread",
+          "type": "ENamedThreads::Type"
+        },
+        {
+          "name": "My Completion Graph Event",
+          "type": "FGraphEventRef&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Performs the actual task.\n@param CurrentThread The thread that this task is executing on.\n@param MyCompletionGraphEvent The completion event."
+    },
+    {
+      "id": "get-desired-thread",
+      "name": "GetDesiredThread",
+      "category": "Async",
+      "signature": "GetDesiredThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncGraphTask*"
+        }
+      ],
+      "returnType": "ENamedThreads::Type",
+      "docs": "Returns the name of the thread that this task should run on.\n@return Always run on any thread."
+    },
+    {
+      "id": "get-future",
+      "name": "GetFuture",
+      "category": "Async",
+      "signature": "GetFuture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncGraphTask*"
+        }
+      ],
+      "returnType": "TFuture<ResultType>",
+      "docs": "Gets the future that will hold the asynchronous result.\n@return A TFuture object."
+    },
+    {
+      "id": "do-threaded-work",
+      "name": "DoThreadedWork",
+      "category": "Async",
+      "signature": "DoThreadedWork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncQueuedWork*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "abandon",
+      "name": "Abandon",
+      "category": "Async",
+      "signature": "Abandon(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TAsyncQueuedWork*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "get-next",
       "name": "GetNext",
       "category": "Async",
@@ -31,6 +134,86 @@
       "params": [],
       "returnType": "Int",
       "docs": "The promise to assign the result to."
+    },
+    {
+      "id": "async",
+      "name": "Async",
+      "category": "Async",
+      "signature": "Async(Execution, Callable, Completion Callback)",
+      "params": [
+        {
+          "name": "Execution",
+          "type": "EAsyncExecution"
+        },
+        {
+          "name": "Callable",
+          "type": "CallableType&&"
+        },
+        {
+          "name": "Completion Callback",
+          "type": "TUniqueFunction<void ( )>",
+          "default": "nullptr) -> TFuture<decltype(Forward<CallableType>(Callable)()"
+        }
+      ],
+      "returnType": "template<CallableType> auto",
+      "docs": "Execute a given function asynchronously.\nUsage examples:\n// using global function\nint TestFunc()\n{\nreturn 123;\n}\nTUniqueFunction<int()> Task = TestFunc();\nauto Result = Async(EAsyncExecution::Thread, Task);\n// using lambda\nTUniqueFunction<int()> Task = []()\n{\nreturn 123;\n}\nauto Result = Async(EAsyncExecution::Thread, Task);\n// using inline lambda\nauto Result = Async(EAsyncExecution::Thread, []() {\nreturn 123;\n}\n@param CallableType The type of callable object.\n@param Execution The execution method to use, i.e. on Task Graph or in a separate thread.\n@param Function The function to execute.\n@param CompletionCallback An optional callback function that is executed when the function completed execution.\n@return A TFuture object that will receive the return value from the function."
+    },
+    {
+      "id": "async-pool",
+      "name": "AsyncPool",
+      "category": "Async",
+      "signature": "AsyncPool(Thread Pool, Callable, Completion Callback, In Queued Work Priority)",
+      "params": [
+        {
+          "name": "Thread Pool",
+          "type": "FQueuedThreadPool&"
+        },
+        {
+          "name": "Callable",
+          "type": "CallableType&&"
+        },
+        {
+          "name": "Completion Callback",
+          "type": "TUniqueFunction<void ( )>",
+          "default": "nullptr"
+        },
+        {
+          "name": "In Queued Work Priority",
+          "type": "EQueuedWorkPriority",
+          "default": "EQueuedWorkPriority::Normal) -> TFuture<decltype(Forward<CallableType>(Callable)()"
+        }
+      ],
+      "returnType": "template<CallableType> auto",
+      "docs": "Execute a given function asynchronously on the specified thread pool.\n@param CallableType The type of callable object.\n@param ThreadPool The thread pool to execute on.\n@param Function The function to execute.\n@param CompletionCallback An optional callback function that is executed when the function completed execution.\n@result A TFuture object that will receive the return value from the function."
+    },
+    {
+      "id": "async-thread",
+      "name": "AsyncThread",
+      "category": "Async",
+      "signature": "AsyncThread(Callable, Stack Size, Thread Pri, Completion Callback)",
+      "params": [
+        {
+          "name": "Callable",
+          "type": "CallableType&&"
+        },
+        {
+          "name": "Stack Size",
+          "type": "UInt",
+          "default": "0"
+        },
+        {
+          "name": "Thread Pri",
+          "type": "EThreadPriority",
+          "default": "TPri_Normal"
+        },
+        {
+          "name": "Completion Callback",
+          "type": "TUniqueFunction<void ( )>",
+          "default": "nullptr) -> TFuture<decltype(Forward<CallableType>(Callable)()"
+        }
+      ],
+      "returnType": "template<CallableType> auto",
+      "docs": "Execute a given function asynchronously using a separate thread.\n@param CallableType The type of callable object.\n@param Function The function to execute.\n@param StackSize stack space to allocate for the new thread\n@param ThreadPri thread priority\n@param CompletionCallback An optional callback function that is executed when the function completed execution.\n@result A TFuture object that will receive the return value from the function."
     },
     {
       "id": "async-task",
@@ -49,6 +232,15 @@
       ],
       "returnType": "Void",
       "docs": "Convenience function for executing code asynchronously on the Task Graph.\n@param Thread The name of the thread to run on.\n@param Function The function to execute."
+    },
+    {
+      "id": "run",
+      "name": "Run",
+      "category": "Async",
+      "signature": "Run()",
+      "params": [],
+      "returnType": "template<ResultType> uint32 TAsyncRunnable<ResultType",
+      "docs": "Inline functions\n***************************************************************************"
     }
   ]
 }

@@ -17,6 +17,92 @@
   ],
   "functions": [
     {
+      "id": "set-dirty",
+      "name": "SetDirty",
+      "category": "PrimitiveSceneInfo",
+      "signature": "SetDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FIndirectLightingCacheAllocation*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add factor for calculating UVs from position."
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "PrimitiveSceneInfo",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FIndirectLightingCacheAllocation*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-parameters",
+      "name": "SetParameters",
+      "category": "PrimitiveSceneInfo",
+      "signature": "SetParameters(Target, In Min Texel, In Allocation Texel Size, In Scale, In Add, In Min UV, In Max UV, In Point Sample, In Unbuilt Preview)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FIndirectLightingCacheAllocation*"
+        },
+        {
+          "name": "In Min Texel",
+          "type": "FIntVector"
+        },
+        {
+          "name": "In Allocation Texel Size",
+          "type": "Int"
+        },
+        {
+          "name": "In Scale",
+          "type": "FVector"
+        },
+        {
+          "name": "In Add",
+          "type": "FVector"
+        },
+        {
+          "name": "In Min UV",
+          "type": "FVector"
+        },
+        {
+          "name": "In Max UV",
+          "type": "FVector"
+        },
+        {
+          "name": "In Point Sample",
+          "type": "Bool"
+        },
+        {
+          "name": "In Unbuilt Preview",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "needs-indirect-lighting-cache-buffer-update",
+      "name": "NeedsIndirectLightingCacheBufferUpdate",
+      "category": "PrimitiveSceneInfo",
+      "signature": "NeedsIndirectLightingCacheBufferUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "return true if we need to call LazyUpdateForRendering"
+    },
+    {
       "id": "request-uniform-buffer-update",
       "name": "RequestUniformBufferUpdate",
       "category": "PrimitiveSceneInfo",
@@ -50,6 +136,25 @@
       "docs": "Adds a request to update GPU scene representation."
     },
     {
+      "id": "mark-gpu-state-dirty",
+      "name": "MarkGPUStateDirty",
+      "category": "PrimitiveSceneInfo",
+      "signature": "MarkGPUStateDirty(Target, Primitive Dirty State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "Primitive Dirty State",
+          "type": "EPrimitiveDirtyState",
+          "default": "EPrimitiveDirtyState::ChangedAll"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Marks the primitive UB as needing updated and requests a GPU scene update"
+    },
+    {
       "id": "refresh-nanite-raster-bins",
       "name": "RefreshNaniteRasterBins",
       "category": "PrimitiveSceneInfo",
@@ -62,6 +167,75 @@
       ],
       "returnType": "Void",
       "docs": "Refreshes a primitive's references to raster bins. To be called after changes that might have invalidated them."
+    },
+    {
+      "id": "get-index",
+      "name": "GetIndex",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Retrieves the index of the primitive in the scene's primitives array.\nThis index is only valid until a primitive is added to or removed from\nthe scene!"
+    },
+    {
+      "id": "get-index-address",
+      "name": "GetIndexAddress",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetIndexAddress(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int*",
+      "docs": "Retrieves the address of the primitives index into in the scene's primitives array.\nThis address is only for reference purposes"
+    },
+    {
+      "id": "is-index-valid",
+      "name": "IsIndexValid",
+      "category": "PrimitiveSceneInfo",
+      "signature": "IsIndexValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Simple comparison against the invalid values used before/after scene add/remove."
+    },
+    {
+      "id": "get-persistent-index",
+      "name": "GetPersistentIndex",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetPersistentIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "FPersistentPrimitiveIndex",
+      "docs": "Persistent index of the primitive in the range [0, FScene::GetMaxPersistentPrimitiveIndex() ). Where the max is never higher than the high watermark of the primitives in the scene.\nThis index remains stable for the life-time of the primitive in the scene (i.e., same as PrimitiveSceneInfo and Proxy - between FScene::AddPrimitive / FScene::RemovePrimitive).\nThe intended use is to enable tracking primitive data over time in renderer systems using direct indexing, e.g., for efficiently storing a bit per primitive.\nDirect indexing also facilitates easy GPU-reflection and access of the persistent data, where it can be accessed as e.g., GetPrimitiveData(...).PersistentPrimitiveIndex.\nIt is allocated using FScene::PersistentPrimitiveIdAllocator from a range with holes that is kept as compact as possible up to the high-water mark of the scene primitives.\nDue to persistence this maximum can be substantially larger than the current number of Primitives at times, but never worse than the high-watermark.\nIn the future, the index will likely be refactored to persist for the lifetime of the component (to facilitate tracking data past proxy re-creates).\nNote: It is not currently used to index any of the current FScene primitive arrays (use PackedIndex), though this is intended to change."
+    },
+    {
+      "id": "mark-indirect-lighting-cache-buffer-dirty",
+      "name": "MarkIndirectLightingCacheBufferDirty",
+      "category": "PrimitiveSceneInfo",
+      "signature": "MarkIndirectLightingCacheBufferDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "get-static-meshes-lod-range",
@@ -104,6 +278,84 @@
       "docs": "Will output the FMeshBatch associated with the specified LODIndex."
     },
     {
+      "id": "get-instance-scene-data-offset",
+      "name": "GetInstanceSceneDataOffset",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetInstanceSceneDataOffset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-instance-scene-data-entries",
+      "name": "GetNumInstanceSceneDataEntries",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetNumInstanceSceneDataEntries(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-instance-payload-data-offset",
+      "name": "GetInstancePayloadDataOffset",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetInstancePayloadDataOffset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-instance-payload-data-stride",
+      "name": "GetInstancePayloadDataStride",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetInstancePayloadDataStride(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-lightmap-data-offset",
+      "name": "GetLightmapDataOffset",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetLightmapDataOffset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-lightmap-data-entries",
+      "name": "GetNumLightmapDataEntries",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetNumLightmapDataEntries(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
       "id": "update-static-lighting-buffer",
       "name": "UpdateStaticLightingBuffer",
       "category": "PrimitiveSceneInfo",
@@ -116,6 +368,20 @@
       ],
       "returnType": "Int",
       "docs": "Updates static lighting uniform buffer, returns the number of entries needed for GPUScene"
+    },
+    {
+      "id": "get-runtime-virtual-texture-lod-info",
+      "name": "GetRuntimeVirtualTextureLodInfo",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetRuntimeVirtualTextureLodInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "FPrimitiveRuntimeVirtualTextureLodInfo&",
+      "docs": "Get the packed LodInfo."
     },
     {
       "id": "get-static-ray-tracing-geometry",
@@ -169,6 +435,174 @@
       "returnType": "FRHIRayTracingGeometry*"
     },
     {
+      "id": "get-static-ray-tracing-geometry-num",
+      "name": "GetStaticRayTracingGeometryNum",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetStaticRayTracingGeometryNum(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-cached-ray-tracing-geometry",
+      "name": "GetCachedRayTracingGeometry",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetCachedRayTracingGeometry(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "FRayTracingGeometry*"
+    },
+    {
+      "id": "should-cache-shadow-as-static",
+      "name": "ShouldCacheShadowAsStatic",
+      "category": "PrimitiveSceneInfo",
+      "signature": "ShouldCacheShadowAsStatic(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-mdc-id-info",
+      "name": "GetMDCIdInfo",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetMDCIdInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "FMeshDrawCommandPrimitiveIdInfo"
+    },
+    {
+      "id": "needs-update-static-meshes",
+      "name": "NeedsUpdateStaticMeshes",
+      "category": "PrimitiveSceneInfo",
+      "signature": "NeedsUpdateStaticMeshes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "needs-uniform-buffer-update",
+      "name": "NeedsUniformBufferUpdate",
+      "category": "PrimitiveSceneInfo",
+      "signature": "NeedsUniformBufferUpdate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "update-uniform-buffer",
+      "name": "UpdateUniformBuffer",
+      "category": "PrimitiveSceneInfo",
+      "signature": "UpdateUniformBuffer(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "conditional-update-uniform-buffer",
+      "name": "ConditionalUpdateUniformBuffer",
+      "category": "PrimitiveSceneInfo",
+      "signature": "ConditionalUpdateUniformBuffer(Target, RHI Cmd List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-deferred-update-static-meshes",
+      "name": "BeginDeferredUpdateStaticMeshes",
+      "category": "PrimitiveSceneInfo",
+      "signature": "BeginDeferredUpdateStaticMeshes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-deferred-update-static-meshes-without-visibility-check",
+      "name": "BeginDeferredUpdateStaticMeshesWithoutVisibilityCheck",
+      "category": "PrimitiveSceneInfo",
+      "signature": "BeginDeferredUpdateStaticMeshesWithoutVisibilityCheck(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-needs-uniform-buffer-update",
+      "name": "SetNeedsUniformBufferUpdate",
+      "category": "PrimitiveSceneInfo",
+      "signature": "SetNeedsUniformBufferUpdate(Target, In Needs Uniform Buffer Update)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "In Needs Uniform Buffer Update",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-instance-data-buffers",
+      "name": "HasInstanceDataBuffers",
+      "category": "PrimitiveSceneInfo",
+      "signature": "HasInstanceDataBuffers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "get-instance-scene-data-buffers",
       "name": "GetInstanceSceneDataBuffers",
       "category": "PrimitiveSceneInfo",
@@ -181,6 +615,164 @@
       ],
       "returnType": "FInstanceSceneDataBuffers*",
       "docs": "Waits for (potential) instance update to produce the data, to avoid a sync, use GetInstanceDataHeader()."
+    },
+    {
+      "id": "get-scene-data",
+      "name": "GetSceneData",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetSceneData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "FPrimitiveSceneInfoData*",
+      "docs": "Returns the primitive scene data for this proxy."
+    },
+    {
+      "id": "get-ray-tracing-lod-data-num",
+      "name": "GetRayTracingLODDataNum",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetRayTracingLODDataNum(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Let FScene have direct access to the Id."
+    },
+    {
+      "id": "get-ray-tracing-lod-data",
+      "name": "GetRayTracingLODData",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetRayTracingLODData(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FRayTracingLODData&"
+    },
+    {
+      "id": "get-cached-ray-tracing-instance",
+      "name": "GetCachedRayTracingInstance",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetCachedRayTracingInstance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        }
+      ],
+      "returnType": "FRayTracingGeometryInstance&"
+    },
+    {
+      "id": "set-ray-tracing-lod-data",
+      "name": "SetRayTracingLODData",
+      "category": "PrimitiveSceneInfo",
+      "signature": "SetRayTracingLODData(Target, LOD Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "LOD Data",
+          "type": "TArray<FRayTracingLODData>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-cached-ray-tracing-instance-world-bounds",
+      "name": "UpdateCachedRayTracingInstanceWorldBounds",
+      "category": "PrimitiveSceneInfo",
+      "signature": "UpdateCachedRayTracingInstanceWorldBounds(Target, New Primitive Local To World)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPrimitiveSceneInfo*"
+        },
+        {
+          "name": "New Primitive Local To World",
+          "type": "FMatrix&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Updates cached world bounds in CachedRayTracingInstance"
+    },
+    {
+      "id": "get-bounding-box",
+      "name": "GetBoundingBox",
+      "category": "PrimitiveSceneInfo",
+      "signature": "GetBoundingBox(Primitive Scene Info Compact)",
+      "params": [
+        {
+          "name": "Primitive Scene Info Compact",
+          "type": "FPrimitiveSceneInfoCompact&"
+        }
+      ],
+      "returnType": "FCompactBoxSphereBounds&",
+      "docs": "Defines how the primitive is stored in the scene's primitive octree."
+    },
+    {
+      "id": "are-elements-equal",
+      "name": "AreElementsEqual",
+      "category": "PrimitiveSceneInfo",
+      "signature": "AreElementsEqual(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FPrimitiveSceneInfoCompact&"
+        },
+        {
+          "name": "B",
+          "type": "FPrimitiveSceneInfoCompact&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-element-id",
+      "name": "SetElementId",
+      "category": "PrimitiveSceneInfo",
+      "signature": "SetElementId(Element, Id)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "FPrimitiveSceneInfoCompact&"
+        },
+        {
+          "name": "Id",
+          "type": "FOctreeElementId2"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-offset",
+      "name": "ApplyOffset",
+      "category": "PrimitiveSceneInfo",
+      "signature": "ApplyOffset(Element, Offset)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "FPrimitiveSceneInfoCompact&"
+        },
+        {
+          "name": "Offset",
+          "type": "FVector"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

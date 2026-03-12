@@ -1,0 +1,315 @@
+{
+  "id": "instance-culling-load-balancer",
+  "label": "InstanceCullingLoadBalancer",
+  "includepath": "InstanceCullingLoadBalancer.h",
+  "includes": [
+    "Platform",
+    "RenderGraphDefinitions",
+    "RendererInterface",
+    "ShaderParameterMacros",
+    "RenderGraphUtils"
+  ],
+  "functions": [
+    {
+      "id": "pack-batch",
+      "name": "PackBatch",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "PackBatch(Target, First Item, Num Items)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceCullingLoadBalancerBase*"
+        },
+        {
+          "name": "First Item",
+          "type": "UInt"
+        },
+        {
+          "name": "Num Items",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FPackedBatch"
+    },
+    {
+      "id": "pack-item",
+      "name": "PackItem",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "PackItem(Target, Instance Data Offset, Num Instances, Payload, Batch Prefix Sum)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceCullingLoadBalancerBase*"
+        },
+        {
+          "name": "Instance Data Offset",
+          "type": "UInt"
+        },
+        {
+          "name": "Num Instances",
+          "type": "UInt"
+        },
+        {
+          "name": "Payload",
+          "type": "UInt"
+        },
+        {
+          "name": "Batch Prefix Sum",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FPackedItem"
+    },
+    {
+      "id": "add-pass",
+      "name": "AddPass",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "AddPass(Target, Graph Builder, Pass Name, Compute Shader, Parameters)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceCullingLoadBalancerBase*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Pass Name",
+          "type": "FRDGEventName&&"
+        },
+        {
+          "name": "Compute Shader",
+          "type": "TShaderRef<TShaderClass>&"
+        },
+        {
+          "name": "Parameters",
+          "type": "TShaderClass::FParameters*"
+        }
+      ],
+      "returnType": "template<TShaderClass> FRDGPassRef",
+      "docs": "Helper function to add a pass to run a CS using the loadbalancer, automatically sets the parameters and dispatch dimensions.\nExpects \"LoadBalancerParameters\" in the Parameters struct."
+    },
+    {
+      "id": "get-wrapped-cs-group-count-3811db",
+      "name": "GetWrappedCsGroupCount",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "GetWrappedCsGroupCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceCullingLoadBalancerBase*"
+        }
+      ],
+      "returnType": "FIntVector"
+    },
+    {
+      "id": "reserve-storage",
+      "name": "ReserveStorage",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "ReserveStorage(Target, Num Batches, Num Items)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        },
+        {
+          "name": "Num Batches",
+          "type": "Int"
+        },
+        {
+          "name": "Num Items",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Helper to build the needed data to run per-instance operation on the GPU in a balanced way"
+    },
+    {
+      "id": "add",
+      "name": "Add",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "Add(Target, Instance Data Offset, Num Instance Data Entries, Payload)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        },
+        {
+          "name": "Instance Data Offset",
+          "type": "UInt"
+        },
+        {
+          "name": "Num Instance Data Entries",
+          "type": "UInt"
+        },
+        {
+          "name": "Payload",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add a span of instances to be processed."
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "IsEmpty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "upload",
+      "name": "Upload",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "Upload(Target, Graph Builder, Num Groups Per Batch)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Num Groups Per Batch",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "FGPUData"
+    },
+    {
+      "id": "upload-finalized",
+      "name": "UploadFinalized",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "UploadFinalized(Target, Graph Builder, Num Groups Per Batch)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        },
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Num Groups Per Batch",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "FGPUData",
+      "docs": "Const variant that assumes the batches have already been finalized"
+    },
+    {
+      "id": "finalize-batches",
+      "name": "FinalizeBatches",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "FinalizeBatches(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call when finished adding work items to the balancer to flush any in-progress batches."
+    },
+    {
+      "id": "get-wrapped-cs-group-count-b8d2a5",
+      "name": "GetWrappedCsGroupCount",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "GetWrappedCsGroupCount(Target, Num Groups Per Batch)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        },
+        {
+          "name": "Num Groups Per Batch",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "FIntVector",
+      "docs": "Returns a 3D group count that is large enough to generate one group per batch using FComputeShaderUtils::GetGroupCountWrapped.\nUse GetUnWrappedDispatchGroupId in the shader to retrieve the linear index.\nNOTE: NumGroupsPerBatch must be consistent with the value passed to Upload"
+    },
+    {
+      "id": "get-batches",
+      "name": "GetBatches",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "GetBatches(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        }
+      ],
+      "returnType": "TArray<FPackedBatch,AllocatorType>&"
+    },
+    {
+      "id": "get-items",
+      "name": "GetItems",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "GetItems(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        }
+      ],
+      "returnType": "TArray<FPackedItem,AllocatorType>&"
+    },
+    {
+      "id": "get-total-num-instances",
+      "name": "GetTotalNumInstances",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "GetTotalNumInstances(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "append-data",
+      "name": "AppendData",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "AppendData(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        },
+        {
+          "name": "Other",
+          "type": "TInstanceCullingLoadBalancer<AllocatorType>&"
+        }
+      ],
+      "returnType": "template<AllocatorType> void"
+    },
+    {
+      "id": "has-single-instance-items-only",
+      "name": "HasSingleInstanceItemsOnly",
+      "category": "InstanceCullingLoadBalancer",
+      "signature": "HasSingleInstanceItemsOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TInstanceCullingLoadBalancer*"
+        }
+      ],
+      "returnType": "Bool"
+    }
+  ]
+}

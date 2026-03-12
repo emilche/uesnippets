@@ -126,6 +126,124 @@
       "docs": "TryMalloc - like MallocZeroed(), but may return a nullptr result if the allocation\nrequest cannot be satisfied."
     },
     {
+      "id": "quantize-size",
+      "name": "QuantizeSize",
+      "category": "MemoryBase",
+      "signature": "QuantizeSize(Target, Count, Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        },
+        {
+          "name": "Count",
+          "type": "SIZE_T"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "SIZE_T",
+      "docs": "For some allocators this will return the actual size that should be requested to eliminate\ninternal fragmentation. The return value will always be >= Count. This can be used to grow\nand shrink containers to optimal sizes.\nThis call is always fast and threadsafe with no locking."
+    },
+    {
+      "id": "get-allocation-size",
+      "name": "GetAllocationSize",
+      "category": "MemoryBase",
+      "signature": "GetAllocationSize(Target, Original, Size Out)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        },
+        {
+          "name": "Original",
+          "type": "void*"
+        },
+        {
+          "name": "Size Out",
+          "type": "SIZE_T&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If possible determine the size of the memory allocated at the given address\n@param Original - Pointer to memory we are checking the size of\n@param SizeOut - If possible, this value is set to the size of the passed in pointer\n@return true if succeeded"
+    },
+    {
+      "id": "trim",
+      "name": "Trim",
+      "category": "MemoryBase",
+      "signature": "Trim(Target, Trim Thread Caches)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        },
+        {
+          "name": "Trim Thread Caches",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Releases as much memory as possible. Must be called from the main thread."
+    },
+    {
+      "id": "setup-tls-caches-on-current-thread",
+      "name": "SetupTLSCachesOnCurrentThread",
+      "category": "MemoryBase",
+      "signature": "SetupTLSCachesOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set up TLS caches on the current thread. These are the threads that we can trim."
+    },
+    {
+      "id": "mark-tls-caches-as-used-on-current-thread",
+      "name": "MarkTLSCachesAsUsedOnCurrentThread",
+      "category": "MemoryBase",
+      "signature": "MarkTLSCachesAsUsedOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark TLS caches for the current thread as used. Thread has woken up to do some processing and needs its TLS caches back."
+    },
+    {
+      "id": "mark-tls-caches-as-unused-on-current-thread",
+      "name": "MarkTLSCachesAsUnusedOnCurrentThread",
+      "category": "MemoryBase",
+      "signature": "MarkTLSCachesAsUnusedOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark TLS caches for current thread as unused. Typically before going to sleep. These are the threads that we can trim without waking them up."
+    },
+    {
+      "id": "clear-and-disable-tls-caches-on-current-thread",
+      "name": "ClearAndDisableTLSCachesOnCurrentThread",
+      "category": "MemoryBase",
+      "signature": "ClearAndDisableTLSCachesOnCurrentThread(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the TLS caches on the current thread and disables any future caching."
+    },
+    {
       "id": "initialize-stats-metadata",
       "name": "InitializeStatsMetadata",
       "category": "MemoryBase",
@@ -138,6 +256,32 @@
       ],
       "returnType": "Void",
       "docs": "Initializes stats metadata. We need to do this as soon as possible, but cannot be done in the constructor\ndue to the FName::StaticInit"
+    },
+    {
+      "id": "exec",
+      "name": "Exec",
+      "category": "MemoryBase",
+      "signature": "Exec(Target, In World, Cmd, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Cmd",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handles any commands passed in on the command line"
     },
     {
       "id": "update-stats",
@@ -170,6 +314,122 @@
       ],
       "returnType": "Void",
       "docs": "Writes allocator stats from the last update into the specified destination."
+    },
+    {
+      "id": "dump-allocator-stats",
+      "name": "DumpAllocatorStats",
+      "category": "MemoryBase",
+      "signature": "DumpAllocatorStats(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        },
+        {
+          "name": "Ar",
+          "type": "FOutputDevice&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dumps current allocator stats to the log."
+    },
+    {
+      "id": "validate-heap",
+      "name": "ValidateHeap",
+      "category": "MemoryBase",
+      "signature": "ValidateHeap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Validates the allocator's heap"
+    },
+    {
+      "id": "get-descriptive-name",
+      "name": "GetDescriptiveName",
+      "category": "MemoryBase",
+      "signature": "GetDescriptiveName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "TCHAR*",
+      "docs": "Gets descriptive name for logging purposes.\n@return pointer to human-readable malloc name"
+    },
+    {
+      "id": "on-malloc-initialized",
+      "name": "OnMallocInitialized",
+      "category": "MemoryBase",
+      "signature": "OnMallocInitialized(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notifies the malloc implementation that initialization of all allocators in GMalloc is complete, so it's safe to initialize any extra features that require \"regular\" allocations"
+    },
+    {
+      "id": "on-pre-fork",
+      "name": "OnPreFork",
+      "category": "MemoryBase",
+      "signature": "OnPreFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notifies the malloc implementation that the process is about to fork. May be used to trim caches etc."
+    },
+    {
+      "id": "on-post-fork",
+      "name": "OnPostFork",
+      "category": "MemoryBase",
+      "signature": "OnPostFork(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notifies the malloc implementation that the process has forked so we can try and avoid dirtying pre-fork pages."
+    },
+    {
+      "id": "get-immediately-freeable-cached-memory-size",
+      "name": "GetImmediatelyFreeableCachedMemorySize",
+      "category": "MemoryBase",
+      "signature": "GetImmediatelyFreeableCachedMemorySize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Returns the amount of free memory cached by the allocator that can be returned to the system in case of a memory shortage"
+    },
+    {
+      "id": "get-total-free-cached-memory-size",
+      "name": "GetTotalFreeCachedMemorySize",
+      "category": "MemoryBase",
+      "signature": "GetTotalFreeCachedMemorySize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMalloc*"
+        }
+      ],
+      "returnType": "UInt64",
+      "docs": "Returns the amount of total free memory cached by the allocator.\nThis includes memory that can be returned to the system in case of a memory shortage, see GetImmediatelyFreeableCachedMemorySize()\nas well as any memory that can't be returned back to the kernel, but can be used to satisfy some of the allocation requirements."
     }
   ]
 }

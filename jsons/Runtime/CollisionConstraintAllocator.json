@@ -15,7 +15,25 @@
   ],
   "functions": [
     {
-      "id": "create-constraint",
+      "id": "get-current-epoch",
+      "name": "GetCurrentEpoch",
+      "category": "CollisionConstraintAllocator",
+      "signature": "GetCurrentEpoch(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionContextAllocator*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "The current epoch used to determine if a collision is up to date",
+      "supportedTargets": [
+        "FCollisionContextAllocator*",
+        "FCollisionConstraintAllocator*"
+      ]
+    },
+    {
+      "id": "create-constraint-775764",
       "name": "CreateConstraint",
       "category": "CollisionConstraintAllocator",
       "signature": "CreateConstraint(Target, Particle 0, Implicit 0, Shape 0, Simplicial 0, Shape Relative Transform 0, Particle 1, Implicit 1, Shape 1, Simplicial 1, Shape Relative Transform 1, Cull Distance, Use Manifold, Shape Pair Type)",
@@ -81,6 +99,247 @@
       "docs": "Create a constraint (called by the MidPhase)"
     },
     {
+      "id": "create-constraint-6dd0db",
+      "name": "CreateConstraint",
+      "category": "CollisionConstraintAllocator",
+      "signature": "CreateConstraint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionContextAllocator*"
+        }
+      ],
+      "returnType": "FPBDCollisionConstraintPtr",
+      "docs": "Create an uninitialized collision constraint (public only for use by Resim which overwrites it with a saved constraint)"
+    },
+    {
+      "id": "activate-constraint",
+      "name": "ActivateConstraint",
+      "category": "CollisionConstraintAllocator",
+      "signature": "ActivateConstraint(Target, Constraint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionContextAllocator*"
+        },
+        {
+          "name": "Constraint",
+          "type": "FPBDCollisionConstraint*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the constraint as Active - it will be added to the graph and solved this tick.\nNOTE: The definitive active constraints list is compiled after the parallel phase\nis complete (FCollisionConstraintAllocator::ProcessNewConstraints)."
+    },
+    {
+      "id": "get-mid-phase",
+      "name": "GetMidPhase",
+      "category": "CollisionConstraintAllocator",
+      "signature": "GetMidPhase(Target, Particle 0, Particle 1, Search Particle Performance Hint, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionContextAllocator*"
+        },
+        {
+          "name": "Particle 0",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Particle 1",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Search Particle Performance Hint",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Context",
+          "type": "FCollisionContext&"
+        }
+      ],
+      "returnType": "FParticlePairMidPhase*",
+      "docs": "Return a midphase for a particle pair.\nThis wil create a new midphase if the particle pairs were not recently overlapping, or return an\nexisting one if they were.\n@note Nothing outside of thie allocator should hold a pointer to the midphase, or any constraints\nit creates for more than the duration of the tick. Except the IslandManager :|"
+    },
+    {
+      "id": "find-mid-phase",
+      "name": "FindMidPhase",
+      "category": "CollisionConstraintAllocator",
+      "signature": "FindMidPhase(Target, Particle 0, Particle 1, Search Particle Performance Hint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionContextAllocator*"
+        },
+        {
+          "name": "Particle 0",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Particle 1",
+          "type": "FGeometryParticleHandle*"
+        },
+        {
+          "name": "Search Particle Performance Hint",
+          "type": "FGeometryParticleHandle*"
+        }
+      ],
+      "returnType": "FParticlePairMidPhase*",
+      "docs": "Return a midphase for a particle pair if it already exists, otherwise return null"
+    },
+    {
+      "id": "set-collision-container",
+      "name": "SetCollisionContainer",
+      "category": "CollisionConstraintAllocator",
+      "signature": "SetCollisionContainer(Target, In Collision Container)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "In Collision Container",
+          "type": "FPBDCollisionConstraints*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-max-contexts",
+      "name": "SetMaxContexts",
+      "category": "CollisionConstraintAllocator",
+      "signature": "SetMaxContexts(Target, Max Contexts)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Max Contexts",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-context-allocator",
+      "name": "GetContextAllocator",
+      "category": "CollisionConstraintAllocator",
+      "signature": "GetContextAllocator(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FCollisionContextAllocator*"
+    },
+    {
+      "id": "get-constraints",
+      "name": "GetConstraints",
+      "category": "CollisionConstraintAllocator",
+      "signature": "GetConstraints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "TArrayView<FPBDCollisionConstraint*>",
+      "docs": "@brief The set of collision constraints for the current tick (created or reinstated)\n@note Some elements may be null (constraints that have been deleted)\n@note This is not thread-safe and should not be used during the collision detection phase (i.e., when the list is being built)"
+    },
+    {
+      "id": "get-ccd-constraints",
+      "name": "GetCCDConstraints",
+      "category": "CollisionConstraintAllocator",
+      "signature": "GetCCDConstraints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "TArrayView<FPBDCollisionConstraint*>",
+      "docs": "@brief The set of sweep collision constraints for the current tick (created or reinstated)\n@note Some elements may be null (constraints that have been explicitly deleted)\n@note This is not thread-safe and should not be used during the collision detection phase (i.e., when the list is being built)"
+    },
+    {
+      "id": "get-const-constraints",
+      "name": "GetConstConstraints",
+      "category": "CollisionConstraintAllocator",
+      "signature": "GetConstConstraints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "TArrayView<FPBDCollisionConstraint*>",
+      "docs": "@brief The set of collision constraints for the current tick (created or reinstated)\n@note Some elements may be null (constraints that have been explicitly deleted)\n@note This is not thread-safe and should not be used during the collision detection phase (i.e., when the list is being built)"
+    },
+    {
+      "id": "is-constraint-expired",
+      "name": "IsConstraintExpired",
+      "category": "CollisionConstraintAllocator",
+      "signature": "IsConstraintExpired(Target, Constraint)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Constraint",
+          "type": "FPBDCollisionConstraint&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Has the constraint expired. An expired constraint is one that was not refreshed this tick.\n@note Sleeping constrainst will report they are expired, but they should not be deleted until awoken.\nWe deliberately don't check the sleeping flag here because it adds a cache miss. This function\nshould be called only when you already know the sleep state (or you must also check IsSleeping())"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "CollisionConstraintAllocator",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Destroy all constraints"
+    },
+    {
+      "id": "begin-frame",
+      "name": "BeginFrame",
+      "category": "CollisionConstraintAllocator",
+      "signature": "BeginFrame(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Called at the start of the frame to clear the frame's active collision list.\n@todo(chaos): This is only required because of the way events work (see AdvanceOneTimeStepTask::DoWork)"
+    },
+    {
+      "id": "begin-detect-collisions",
+      "name": "BeginDetectCollisions",
+      "category": "CollisionConstraintAllocator",
+      "signature": "BeginDetectCollisions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Called at the start of the tick to prepare for collision detection.\nResets the list of active contacts."
+    },
+    {
       "id": "end-detect-collisions",
       "name": "EndDetectCollisions",
       "category": "CollisionConstraintAllocator",
@@ -95,6 +354,20 @@
       "docs": "@brief Called after collision detection to clean up\nPrunes unused contacts"
     },
     {
+      "id": "prune-expired-items",
+      "name": "PruneExpiredItems",
+      "category": "CollisionConstraintAllocator",
+      "signature": "PruneExpiredItems(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Called each tick after the graph is updated to remove unused collisions"
+    },
+    {
       "id": "process-new-mid-phases",
       "name": "ProcessNewMidPhases",
       "category": "CollisionConstraintAllocator",
@@ -107,6 +380,56 @@
       ],
       "returnType": "Void",
       "docs": "Collect all the midphases created on the context allocators (probably on multiple threads) and register them"
+    },
+    {
+      "id": "process-injected-constraints",
+      "name": "ProcessInjectedConstraints",
+      "category": "CollisionConstraintAllocator",
+      "signature": "ProcessInjectedConstraints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief If we add new constraints after collision detection, do what needs to be done to add them to the system"
+    },
+    {
+      "id": "add-resim-constraints",
+      "name": "AddResimConstraints",
+      "category": "CollisionConstraintAllocator",
+      "signature": "AddResimConstraints(Target, In Constraints, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "In Constraints",
+          "type": "TArray<FPBDCollisionConstraint>&"
+        },
+        {
+          "name": "Context",
+          "type": "FCollisionContext"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Add a set of pre-built constraints and build required internal mapping data\nThis is used by the resim cache when restoring constraints after a desync"
+    },
+    {
+      "id": "sort-constraints-handles",
+      "name": "SortConstraintsHandles",
+      "category": "CollisionConstraintAllocator",
+      "signature": "SortConstraintsHandles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Sort all the constraints for better solver stability"
     },
     {
       "id": "remove-particle",
@@ -125,6 +448,163 @@
       ],
       "returnType": "Void",
       "docs": "@brief Destroy all collision and caches involving the particle\nCalled when a particle is destroyed or disabled (not sleeping)."
+    },
+    {
+      "id": "visit-const-collisions",
+      "name": "VisitConstCollisions",
+      "category": "CollisionConstraintAllocator",
+      "signature": "VisitConstCollisions(Target, Visitor, Visit Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Visitor",
+          "type": "TLambda&"
+        },
+        {
+          "name": "Visit Flags",
+          "type": "ECollisionVisitorFlags&",
+          "default": "ECollisionVisitorFlags::VisitDefault"
+        }
+      ],
+      "returnType": "template<TLambda> void",
+      "docs": "@brief Iterate over all collisions (read-only), including sleeping ones\nVisitor signature: ECollisionVisitorResult(const FPBDCollisionConstraint&)"
+    },
+    {
+      "id": "visit-collisions-23e550",
+      "name": "VisitCollisions",
+      "category": "CollisionConstraintAllocator",
+      "signature": "VisitCollisions(Target, Visitor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Visitor",
+          "type": "TLambda&"
+        }
+      ],
+      "returnType": "template<TLambda> void",
+      "docs": "@brief Iterate over all collisions (write-enabled), including sleeping ones\nVisitor signature: ECollisionVisitorResult(FPBDCollisionConstraint&)"
+    },
+    {
+      "id": "visit-mid-phases-4ca633",
+      "name": "VisitMidPhases",
+      "category": "CollisionConstraintAllocator",
+      "signature": "VisitMidPhases(Target, Visitor)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Visitor",
+          "type": "TLambda&"
+        }
+      ],
+      "returnType": "template<TLambda> void",
+      "docs": "@brief Iterate over all midphases\nVisitor signature: ECollisionVisitorResult(FParticlePairMidPhase&)"
+    },
+    {
+      "id": "set-is-deterministic",
+      "name": "SetIsDeterministic",
+      "category": "CollisionConstraintAllocator",
+      "signature": "SetIsDeterministic(Target, In Is Deterministic)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "In Is Deterministic",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Enable/Disable determinism (extra sorting steps after collision detection)"
+    },
+    {
+      "id": "collision-visitor-should-visit",
+      "name": "CollisionVisitorShouldVisit",
+      "category": "CollisionConstraintAllocator",
+      "signature": "CollisionVisitorShouldVisit(Target, Constraint, Visit Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionConstraintAllocator*"
+        },
+        {
+          "name": "Constraint",
+          "type": "FPBDCollisionConstraint*"
+        },
+        {
+          "name": "Visit Flags",
+          "type": "ECollisionVisitorFlags"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "visit-collisions-8acc0e",
+      "name": "VisitCollisions",
+      "category": "CollisionConstraintAllocator",
+      "signature": "VisitCollisions(Target, Visitor, Visit Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FParticlePairMidPhase*"
+        },
+        {
+          "name": "Visitor",
+          "type": "TLambda&"
+        },
+        {
+          "name": "Visit Flags",
+          "type": "ECollisionVisitorFlags"
+        }
+      ],
+      "returnType": "template<TLambda> ECollisionVisitorResult",
+      "supportedTargets": [
+        "FParticlePairMidPhase*",
+        "FParticleCollisions*"
+      ]
+    },
+    {
+      "id": "visit-mid-phases-6a6484",
+      "name": "VisitMidPhases",
+      "category": "CollisionConstraintAllocator",
+      "signature": "VisitMidPhases(Target, Lambda)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FParticleCollisions*"
+        },
+        {
+          "name": "Lambda",
+          "type": "TLambda&"
+        }
+      ],
+      "returnType": "template<TLambda> ECollisionVisitorResult"
+    },
+    {
+      "id": "visit-const-mid-phases",
+      "name": "VisitConstMidPhases",
+      "category": "CollisionConstraintAllocator",
+      "signature": "VisitConstMidPhases(Target, Lambda)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FParticleCollisions*"
+        },
+        {
+          "name": "Lambda",
+          "type": "TLambda&"
+        }
+      ],
+      "returnType": "template<TLambda> ECollisionVisitorResult"
     }
   ]
 }

@@ -1,0 +1,393 @@
+{
+  "id": "instance-data-update-utils",
+  "label": "InstanceDataUpdateUtils",
+  "includepath": "InstanceDataUpdateUtils.h",
+  "includes": [
+    "CoreTypes",
+    "UnrealMemory",
+    "UnrealMathUtility",
+    "Array",
+    "RenderingThread",
+    "RenderTransform",
+    "InstanceDataSceneProxy",
+    "InstanceDataManager",
+    "InstanceUpdateChangeSet"
+  ],
+  "functions": [
+    {
+      "id": "scatter-d9a8c2",
+      "name": "Scatter",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "Scatter(Delta, Out Dest, Dest Num Elements, In Source, Index Remap, Element Stride)",
+      "params": [
+        {
+          "name": "Delta",
+          "type": "DeltaType&"
+        },
+        {
+          "name": "Out Dest",
+          "type": "TArray<ValueType>&"
+        },
+        {
+          "name": "Dest Num Elements",
+          "type": "Int"
+        },
+        {
+          "name": "In Source",
+          "type": "TArray<ValueType>&&"
+        },
+        {
+          "name": "Index Remap",
+          "type": "IndexRemapType&"
+        },
+        {
+          "name": "Element Stride",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "template<DeltaType,ValueType,IndexRemapType> void",
+      "docs": "Write InSource that was previously gathered using the above methods to the final destination array OutDest\nusing the same delta information.\nIf there is no delta and the index remap is identity, it performs a move of the source data to the final array, saving a malloc & copy."
+    },
+    {
+      "id": "scatter-634e4c",
+      "name": "Scatter",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "Scatter(Has Data, Delta, Dest Data, Num Out Elements, In Data, Index Remap, Element Stride)",
+      "params": [
+        {
+          "name": "Has Data",
+          "type": "Bool"
+        },
+        {
+          "name": "Delta",
+          "type": "DeltaType&"
+        },
+        {
+          "name": "Dest Data",
+          "type": "TArray<ValueType>&"
+        },
+        {
+          "name": "Num Out Elements",
+          "type": "Int"
+        },
+        {
+          "name": "In Data",
+          "type": "TArray<ValueType>&&"
+        },
+        {
+          "name": "Index Remap",
+          "type": "IndexRemapType&"
+        },
+        {
+          "name": "Element Stride",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "template<DeltaType,ValueType,IndexRemapType> void",
+      "docs": "Also takes a flag to optionally reset the array in case the attribute is disabled"
+    },
+    {
+      "id": "gather",
+      "name": "Gather",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "Gather(Delta, Out Dest, In Source, Element Stride)",
+      "params": [
+        {
+          "name": "Delta",
+          "type": "DeltaType&"
+        },
+        {
+          "name": "Out Dest",
+          "type": "TArray<ValueType>&"
+        },
+        {
+          "name": "In Source",
+          "type": "InValueArrayType&"
+        },
+        {
+          "name": "Element Stride",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "template<DeltaType,ValueType,InValueArrayType> void",
+      "docs": "Gather the needed values from InSource to OutDest, according to the delta.\nIf there is no delta, it will perform a bulk copy."
+    },
+    {
+      "id": "is-identity",
+      "name": "IsIdentity",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "IsIdentity()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Uses an array to remap the source index, leaving the destination index unchanged."
+    },
+    {
+      "id": "remap-dest-index",
+      "name": "RemapDestIndex",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "RemapDestIndex(Index)",
+      "params": [
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remap",
+      "name": "Remap",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "Remap(Src Index, Dst Index)",
+      "params": [
+        {
+          "name": "Src Index",
+          "type": "Int&"
+        },
+        {
+          "name": "Dst Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-src-index-remap",
+      "name": "FSrcIndexRemap",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "FSrcIndexRemap(In Index Remap)",
+      "params": [
+        {
+          "name": "In Index Remap",
+          "type": "TArray<int32>& InIndexRemap ) : IndexRemap ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "cond-move",
+      "name": "CondMove",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "CondMove(Condition, Data, From Index, To Index, Num Elements)",
+      "params": [
+        {
+          "name": "Condition",
+          "type": "Bool"
+        },
+        {
+          "name": "Data",
+          "type": "TArray<ValueType>&"
+        },
+        {
+          "name": "From Index",
+          "type": "Int"
+        },
+        {
+          "name": "To Index",
+          "type": "Int"
+        },
+        {
+          "name": "Num Elements",
+          "type": "Int",
+          "default": "1"
+        }
+      ],
+      "returnType": "template<ValueType> void",
+      "docs": "Helper function to conditionally move a single element"
+    },
+    {
+      "id": "f-render-transform-vector-register",
+      "name": "FRenderTransformVectorRegister",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "FRenderTransformVectorRegister(Render Transform)",
+      "params": [
+        {
+          "name": "Render Transform",
+          "type": "FRenderTransform&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Vector register version of FRenderTransform, used to preload the primitive to world transform into registers"
+    },
+    {
+      "id": "vector-matrix-multiply",
+      "name": "VectorMatrixMultiply",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "VectorMatrixMultiply(Local To Primitive, Primitive To World)",
+      "params": [
+        {
+          "name": "Local To Primitive",
+          "type": "FRenderTransform&"
+        },
+        {
+          "name": "Primitive To World",
+          "type": "FRenderTransformVectorRegister&"
+        }
+      ],
+      "returnType": "FRenderTransform"
+    },
+    {
+      "id": "apply-transform-updates",
+      "name": "ApplyTransformUpdates",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "ApplyTransformUpdates(Delta Range, Index Remap, Primitive To Relative World, Instance Transforms, Post Update Num Transforms, Out Instance To Primitive Relative)",
+      "params": [
+        {
+          "name": "Delta Range",
+          "type": "DeltaType&"
+        },
+        {
+          "name": "Index Remap",
+          "type": "IndexRemapType&"
+        },
+        {
+          "name": "Primitive To Relative World",
+          "type": "FRenderTransform&"
+        },
+        {
+          "name": "Instance Transforms",
+          "type": "TArray<FRenderTransform>&"
+        },
+        {
+          "name": "Post Update Num Transforms",
+          "type": "Int"
+        },
+        {
+          "name": "Out Instance To Primitive Relative",
+          "type": "TArray<FRenderTransform>&"
+        }
+      ],
+      "returnType": "template<DeltaType,IndexRemapType> void",
+      "docs": "Helper function to apply transform update that selectively performs Orthogonalize only if the primitive transform has any non-uniform scale."
+    },
+    {
+      "id": "get-local-bounds-pad-extent",
+      "name": "GetLocalBoundsPadExtent",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "GetLocalBoundsPadExtent(Local To World, Pad Amount)",
+      "params": [
+        {
+          "name": "Local To World",
+          "type": "FRenderTransform&"
+        },
+        {
+          "name": "Pad Amount",
+          "type": "Float"
+        }
+      ],
+      "returnType": "FVector3f"
+    },
+    {
+      "id": "update-id-mapping",
+      "name": "UpdateIdMapping",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "UpdateIdMapping(Change Set, Index Remap, Out Instance Id Index Map)",
+      "params": [
+        {
+          "name": "Change Set",
+          "type": "FInstanceUpdateChangeSet&"
+        },
+        {
+          "name": "Index Remap",
+          "type": "IndexRemapType&"
+        },
+        {
+          "name": "Out Instance Id Index Map",
+          "type": "FInstanceIdIndexMap&"
+        }
+      ],
+      "returnType": "template<IndexRemapType> void"
+    },
+    {
+      "id": "apply-attribute-changes",
+      "name": "ApplyAttributeChanges",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "ApplyAttributeChanges(Change Set, Index Remap, Proxy Data)",
+      "params": [
+        {
+          "name": "Change Set",
+          "type": "FInstanceUpdateChangeSet&"
+        },
+        {
+          "name": "Index Remap",
+          "type": "IndexRemapType&"
+        },
+        {
+          "name": "Proxy Data",
+          "type": "FInstanceSceneDataBuffers::FWriteView&"
+        }
+      ],
+      "returnType": "template<IndexRemapType> void"
+    },
+    {
+      "id": "begin-instance-data-update-task",
+      "name": "BeginInstanceDataUpdateTask",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "BeginInstanceDataUpdateTask(Instance Data Update Task Info, Task Lambda, In Instance Data Buffer Header)",
+      "params": [
+        {
+          "name": "Instance Data Update Task Info",
+          "type": "FInstanceDataUpdateTaskInfo&"
+        },
+        {
+          "name": "Task Lambda",
+          "type": "TaskLambdaType&&"
+        },
+        {
+          "name": "In Instance Data Buffer Header",
+          "type": "FInstanceDataBufferHeader&"
+        }
+      ],
+      "returnType": "template<TaskLambdaType> void"
+    },
+    {
+      "id": "dispatch-instance-data-update-task",
+      "name": "DispatchInstanceDataUpdateTask",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "DispatchInstanceDataUpdateTask(Is Unattached, Instance Data Proxy, Instance Data Buffer Header, Task Lambda)",
+      "params": [
+        {
+          "name": "Is Unattached",
+          "type": "Bool"
+        },
+        {
+          "name": "Instance Data Proxy",
+          "type": "TSharedPtr<ProxyType,ESPMode::ThreadSafe>&"
+        },
+        {
+          "name": "Instance Data Buffer Header",
+          "type": "FInstanceDataBufferHeader&"
+        },
+        {
+          "name": "Task Lambda",
+          "type": "TaskLambdaType&&"
+        }
+      ],
+      "returnType": "template<ProxyType,TaskLambdaType> void"
+    },
+    {
+      "id": "build-optimized-spatial-hash-order",
+      "name": "BuildOptimizedSpatialHashOrder",
+      "category": "InstanceDataUpdateUtils",
+      "signature": "BuildOptimizedSpatialHashOrder(Num Instances, Min Level, Get World Space Instance Sphere)",
+      "params": [
+        {
+          "name": "Num Instances",
+          "type": "Int"
+        },
+        {
+          "name": "Min Level",
+          "type": "Int"
+        },
+        {
+          "name": "Get World Space Instance Sphere",
+          "type": "GetWorldSpaceInstanceSphereFuncType&&"
+        }
+      ],
+      "returnType": "template<GetWorldSpaceInstanceSphereFuncType> void"
+    }
+  ]
+}

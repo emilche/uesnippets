@@ -21,12 +21,705 @@
   ],
   "functions": [
     {
-      "id": "validate-priorities",
-      "name": "ValidatePriorities",
+      "id": "f-virtual-texture-producer-handle-d9b822",
+      "name": "FVirtualTextureProducerHandle",
       "category": "VirtualTexturing",
-      "signature": "ValidatePriorities()",
+      "signature": "FVirtualTextureProducerHandle(U)",
+      "params": [
+        {
+          "name": "U",
+          "type": ") : PackedValue ( 0"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-virtual-texture-producer-handle-53bafa",
+      "name": "FVirtualTextureProducerHandle",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureProducerHandle(In Packed Value)",
+      "params": [
+        {
+          "name": "In Packed Value",
+          "type": "uint32 InPackedValue ) : PackedValue ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-virtual-texture-producer-handle-0a0ed8",
+      "name": "FVirtualTextureProducerHandle",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureProducerHandle(In Index, In Index, In Magic)",
+      "params": [
+        {
+          "name": "In Index",
+          "type": "UInt"
+        },
+        {
+          "name": "In Index",
+          "type": "uint32 InMagic ) : Index ("
+        },
+        {
+          "name": "In Magic",
+          "type": "Magic ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "VirtualTexturing",
+      "signature": "IsValid()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-null",
+      "name": "IsNull",
+      "category": "VirtualTexturing",
+      "signature": "IsNull()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-type-hash-4d44a6",
+      "name": "GetTypeHash",
+      "category": "VirtualTexturing",
+      "signature": "GetTypeHash(Target, Description)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FAllocatedVTDescription*"
+        },
+        {
+          "name": "Description",
+          "type": "FAllocatedVTDescription&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "fvt-producer-description",
+      "name": "FVTProducerDescription",
+      "category": "VirtualTexturing",
+      "signature": "FVTProducerDescription()",
       "params": [],
       "returnType": "Void"
+    },
+    {
+      "id": "render-finalize",
+      "name": "RenderFinalize",
+      "category": "VirtualTexturing",
+      "signature": "RenderFinalize(Graph Builder, Scene Rendering Context)",
+      "params": [
+        {
+          "name": "Graph Builder",
+          "type": "FRDGBuilder&"
+        },
+        {
+          "name": "Scene Rendering Context",
+          "type": "ISceneRenderer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A Finalizer is an object that does the final work of filling the physical textures.\nThe work for all finalizers is scheduled at a specific point in the frame where we can write to the physical texture without hazards, and\nwhere the virtual texture page tables are also updated.\nThe finalizer work may be split into two parts.\nRenderFinalize() does not write to the physical texture, but can read from virtual textures. This is a phase that allows any\npage rendering which may need to sample virtual textures. Runtime virtual textures and material systems require this.\nFinalise() must write to the physical textures, but cannot sample from them.\nAll finalizers need to implement Finalize() but only ones that need to sample virtual textures need to implement RenderFinalize()."
+    },
+    {
+      "id": "vt-request-page-status-has-data",
+      "name": "VTRequestPageStatus_HasData",
+      "category": "VirtualTexturing",
+      "signature": "VTRequestPageStatus_HasData(In Status)",
+      "params": [
+        {
+          "name": "In Status",
+          "type": "EVTRequestPageStatus"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "The request is invalid and no data will ever be available"
+    },
+    {
+      "id": "fvt-request-page-result",
+      "name": "FVTRequestPageResult",
+      "category": "VirtualTexturing",
+      "signature": "FVTRequestPageResult(In Status, In Handle, In Status)",
+      "params": [
+        {
+          "name": "In Status",
+          "type": "EVTRequestPageStatus",
+          "default": "EVTRequestPageStatus::Invalid"
+        },
+        {
+          "name": "In Handle",
+          "type": "UInt64",
+          "default": "0u) : Handle(InHandle)"
+        },
+        {
+          "name": "In Status",
+          "type": "Status ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "i-virtual-texture",
+      "name": "IVirtualTexture",
+      "category": "VirtualTexturing",
+      "signature": "IVirtualTexture()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "This is the interface that can produce tiles of virtual texture data\nThis can be extended to represent different ways of generating VT, such as disk streaming, runtime compositing, or whatever\nIt's provided to the renderer module"
+    },
+    {
+      "id": "get-local-mip-bias",
+      "name": "GetLocalMipBias",
+      "category": "VirtualTexturing",
+      "signature": "GetLocalMipBias(V Level, V Address)",
+      "params": [
+        {
+          "name": "V Level",
+          "type": "Byte"
+        },
+        {
+          "name": "V Address",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Gives a localized mip bias for the given local vAddress.\nThis is used to implement sparse VTs, the bias is number of mip levels to add to reach a resident page\nMust be thread-safe, may be called from any thread\n@param vLevel The mipmap level to check\n@param vAddress Virtual address to check\n@return Mip bias to be added to vLevel to reach a resident page at the given address"
+    },
+    {
+      "id": "gather-produce-page-data-tasks-ce9297",
+      "name": "GatherProducePageDataTasks",
+      "category": "VirtualTexturing",
+      "signature": "GatherProducePageDataTasks(Producer Handle, In Out Tasks)",
+      "params": [
+        {
+          "name": "Producer Handle",
+          "type": "FVirtualTextureProducerHandle&"
+        },
+        {
+          "name": "In Out Tasks",
+          "type": "FGraphEventArray&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect all task graph events."
+    },
+    {
+      "id": "gather-produce-page-data-tasks-6d5c50",
+      "name": "GatherProducePageDataTasks",
+      "category": "VirtualTexturing",
+      "signature": "GatherProducePageDataTasks(Request Handle, In Out Tasks)",
+      "params": [
+        {
+          "name": "Request Handle",
+          "type": "UInt64"
+        },
+        {
+          "name": "In Out Tasks",
+          "type": "FGraphEventArray&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect all task graph events related to a request."
+    },
+    {
+      "id": "dump-to-console",
+      "name": "DumpToConsole",
+      "category": "VirtualTexturing",
+      "signature": "DumpToConsole(Verbose)",
+      "params": [
+        {
+          "name": "Verbose",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Dump any type specific debug info."
+    },
+    {
+      "id": "on-requests-completed",
+      "name": "OnRequestsCompleted",
+      "category": "VirtualTexturing",
+      "signature": "OnRequestsCompleted()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Called on every virtual texture system update once all requests are completed, if bNotifyCompleted is enabled."
+    },
+    {
+      "id": "i-allocated-virtual-texture-bb850d",
+      "name": "IAllocatedVirtualTexture",
+      "category": "VirtualTexturing",
+      "signature": "IAllocatedVirtualTexture(In Desc, In Block Width In Tiles, In Block Height In Tiles, In Width In Blocks, In Height In Blocks, In Desc, In Block Width In Tiles, In Block Height In Tiles, In Width In Blocks, In Height In Blocks, In Depth In Tiles, U, False, U Int 32, U, U, U, U, U)",
+      "params": [
+        {
+          "name": "In Desc",
+          "type": "FAllocatedVTDescription&"
+        },
+        {
+          "name": "In Block Width In Tiles",
+          "type": "UInt"
+        },
+        {
+          "name": "In Block Height In Tiles",
+          "type": "UInt"
+        },
+        {
+          "name": "In Width In Blocks",
+          "type": "UInt"
+        },
+        {
+          "name": "In Height In Blocks",
+          "type": "UInt"
+        },
+        {
+          "name": "In Desc",
+          "type": "uint32 InDepthInTiles ) : Description ("
+        },
+        {
+          "name": "In Block Width In Tiles",
+          "type": "BlockWidthInTiles ("
+        },
+        {
+          "name": "In Block Height In Tiles",
+          "type": "BlockHeightInTiles ("
+        },
+        {
+          "name": "In Width In Blocks",
+          "type": "WidthInBlocks ("
+        },
+        {
+          "name": "In Height In Blocks",
+          "type": "HeightInBlocks ("
+        },
+        {
+          "name": "In Depth In Tiles",
+          "type": "DepthInTiles ("
+        },
+        {
+          "name": "U",
+          "type": "FrameDeleted ( 0"
+        },
+        {
+          "name": "False",
+          "type": "bIsWaitingToMap ("
+        },
+        {
+          "name": "U Int 32",
+          "type": "PageTableFormat ( EVTPageTableFormat::"
+        },
+        {
+          "name": "U",
+          "type": "SpaceID ( ~ 0"
+        },
+        {
+          "name": "U",
+          "type": "MaxLevel ( 0"
+        },
+        {
+          "name": "U",
+          "type": "VirtualAddress ( ~ 0"
+        },
+        {
+          "name": "U",
+          "type": "VirtualPageX ( ~ 0"
+        },
+        {
+          "name": "U",
+          "type": "VirtualPageY ( ~ 0"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This interface represents a chunk of VT data allocated and owned by the renderer module, backed by both a page table texture, and a physical texture cache for each layer.\nBoth page table and physical texture may be shared amongst many different allocated virtual textures.\nAny method that deals with physical texture requires an explicit LayerIndex parameter to identify the physical texture in question,\nmethods that don't have LayerIndex parameter refer to properties shared by all textures using the given page table\nThese are created with IRendererModule::AllocateVirtualTexture, and destroyed with IRendererModule::DestroyVirtualTexture\nThey must be allocated from render thread, but may be destroyed from any thread"
+    },
+    {
+      "id": "get-description",
+      "name": "GetDescription",
+      "category": "VirtualTexturing",
+      "signature": "GetDescription()",
+      "params": [],
+      "returnType": "FAllocatedVTDescription&"
+    },
+    {
+      "id": "get-producer-handle-cd2267",
+      "name": "GetProducerHandle",
+      "category": "VirtualTexturing",
+      "signature": "GetProducerHandle(In Layer Index)",
+      "params": [
+        {
+          "name": "In Layer Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FVirtualTextureProducerHandle&"
+    },
+    {
+      "id": "get-virtual-tile-size",
+      "name": "GetVirtualTileSize",
+      "category": "VirtualTexturing",
+      "signature": "GetVirtualTileSize()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-tile-border-size",
+      "name": "GetTileBorderSize",
+      "category": "VirtualTexturing",
+      "signature": "GetTileBorderSize()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-physical-tile-size",
+      "name": "GetPhysicalTileSize",
+      "category": "VirtualTexturing",
+      "signature": "GetPhysicalTileSize()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-num-texture-layers",
+      "name": "GetNumTextureLayers",
+      "category": "VirtualTexturing",
+      "signature": "GetNumTextureLayers()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-dimensions",
+      "name": "GetDimensions",
+      "category": "VirtualTexturing",
+      "signature": "GetDimensions()",
+      "params": [],
+      "returnType": "Byte"
+    },
+    {
+      "id": "get-width-in-blocks",
+      "name": "GetWidthInBlocks",
+      "category": "VirtualTexturing",
+      "signature": "GetWidthInBlocks()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-height-in-blocks",
+      "name": "GetHeightInBlocks",
+      "category": "VirtualTexturing",
+      "signature": "GetHeightInBlocks()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-block-width-in-tiles",
+      "name": "GetBlockWidthInTiles",
+      "category": "VirtualTexturing",
+      "signature": "GetBlockWidthInTiles()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-block-height-in-tiles",
+      "name": "GetBlockHeightInTiles",
+      "category": "VirtualTexturing",
+      "signature": "GetBlockHeightInTiles()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-width-in-tiles",
+      "name": "GetWidthInTiles",
+      "category": "VirtualTexturing",
+      "signature": "GetWidthInTiles()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-height-in-tiles",
+      "name": "GetHeightInTiles",
+      "category": "VirtualTexturing",
+      "signature": "GetHeightInTiles()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-depth-in-tiles",
+      "name": "GetDepthInTiles",
+      "category": "VirtualTexturing",
+      "signature": "GetDepthInTiles()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-width-in-pixels",
+      "name": "GetWidthInPixels",
+      "category": "VirtualTexturing",
+      "signature": "GetWidthInPixels()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-height-in-pixels",
+      "name": "GetHeightInPixels",
+      "category": "VirtualTexturing",
+      "signature": "GetHeightInPixels()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-depth-in-pixels",
+      "name": "GetDepthInPixels",
+      "category": "VirtualTexturing",
+      "signature": "GetDepthInPixels()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-space-id",
+      "name": "GetSpaceID",
+      "category": "VirtualTexturing",
+      "signature": "GetSpaceID()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-virtual-address",
+      "name": "GetVirtualAddress",
+      "category": "VirtualTexturing",
+      "signature": "GetVirtualAddress()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-virtual-page-x",
+      "name": "GetVirtualPageX",
+      "category": "VirtualTexturing",
+      "signature": "GetVirtualPageX()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-virtual-page-y",
+      "name": "GetVirtualPageY",
+      "category": "VirtualTexturing",
+      "signature": "GetVirtualPageY()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-max-level",
+      "name": "GetMaxLevel",
+      "category": "VirtualTexturing",
+      "signature": "GetMaxLevel()",
+      "params": [],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-page-table-format",
+      "name": "GetPageTableFormat",
+      "category": "VirtualTexturing",
+      "signature": "GetPageTableFormat()",
+      "params": [],
+      "returnType": "EVTPageTableFormat"
+    },
+    {
+      "id": "i-allocated-virtual-texture-c38bdf",
+      "name": "IAllocatedVirtualTexture",
+      "category": "VirtualTexturing",
+      "signature": "IAllocatedVirtualTexture()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "i-adaptive-virtual-texture",
+      "name": "IAdaptiveVirtualTexture",
+      "category": "VirtualTexturing",
+      "signature": "IAdaptiveVirtualTexture()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-virtual-texture-local-tile-9be621",
+      "name": "FVirtualTextureLocalTile",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureLocalTile()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Describes an adaptive virtual texture."
+    },
+    {
+      "id": "f-virtual-texture-local-tile-9951cf",
+      "name": "FVirtualTextureLocalTile",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureLocalTile(In Producer Handle, In Local V Address, Packed Value, In Local V Address, In Local V Level)",
+      "params": [
+        {
+          "name": "In Producer Handle",
+          "type": "FVirtualTextureProducerHandle&"
+        },
+        {
+          "name": "In Local V Address",
+          "type": "UInt"
+        },
+        {
+          "name": "Packed Value",
+          "type": "uint8 InLocal_vLevel ) : PackedProducerHandle ( InProducerHandle ."
+        },
+        {
+          "name": "In Local V Address",
+          "type": "Local_vAddress ("
+        },
+        {
+          "name": "In Local V Level",
+          "type": "Local_vLevel ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-virtual-texture-local-tile-e7062c",
+      "name": "FVirtualTextureLocalTile",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureLocalTile(In Packed Value)",
+      "params": [
+        {
+          "name": "In Packed Value",
+          "type": "uint64 InPackedValue ) : PackedValue ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-producer-handle-0ef261",
+      "name": "GetProducerHandle",
+      "category": "VirtualTexturing",
+      "signature": "GetProducerHandle()",
+      "params": [],
+      "returnType": "FVirtualTextureProducerHandle"
+    },
+    {
+      "id": "get-type-hash-74cf1a",
+      "name": "GetTypeHash",
+      "category": "VirtualTexturing",
+      "signature": "GetTypeHash(T)",
+      "params": [
+        {
+          "name": "T",
+          "type": "FVirtualTextureLocalTile&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "get-murmur-hash",
+      "name": "GetMurmurHash",
+      "category": "VirtualTexturing",
+      "signature": "GetMurmurHash()",
+      "params": [],
+      "returnType": "UInt16"
+    },
+    {
+      "id": "f-virtual-texture-local-tile-request-dd6cc1",
+      "name": "FVirtualTextureLocalTileRequest",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureLocalTileRequest()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Identifies a VT tile request : a VT tile, along with priority information for processing this request"
+    },
+    {
+      "id": "f-virtual-texture-local-tile-request-43bbc7",
+      "name": "FVirtualTextureLocalTileRequest",
+      "category": "VirtualTexturing",
+      "signature": "FVirtualTextureLocalTileRequest(In Tile, In Producer Priority, Packed Value, In Producer Priority, In Invalidate Priority)",
+      "params": [
+        {
+          "name": "In Tile",
+          "type": "FVirtualTextureLocalTile&"
+        },
+        {
+          "name": "In Producer Priority",
+          "type": "EVTProducerPriority"
+        },
+        {
+          "name": "Packed Value",
+          "type": "EVTInvalidatePriority InInvalidatePriority ) : TilePackedValue ( InTile ."
+        },
+        {
+          "name": "In Producer Priority",
+          "type": "ProducerPriority ( static_cast<uint64> ("
+        },
+        {
+          "name": "In Invalidate Priority",
+          "type": "InvalidatePriority ( static_cast<uint64> ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-tile",
+      "name": "GetTile",
+      "category": "VirtualTexturing",
+      "signature": "GetTile()",
+      "params": [],
+      "returnType": "FVirtualTextureLocalTile"
+    },
+    {
+      "id": "get-producer-priority",
+      "name": "GetProducerPriority",
+      "category": "VirtualTexturing",
+      "signature": "GetProducerPriority()",
+      "params": [],
+      "returnType": "EVTProducerPriority"
+    },
+    {
+      "id": "get-invalidate-priority",
+      "name": "GetInvalidatePriority",
+      "category": "VirtualTexturing",
+      "signature": "GetInvalidatePriority()",
+      "params": [],
+      "returnType": "EVTInvalidatePriority"
+    },
+    {
+      "id": "merge-with",
+      "name": "MergeWith",
+      "category": "VirtualTexturing",
+      "signature": "MergeWith(In Other)",
+      "params": [
+        {
+          "name": "In Other",
+          "type": "FVirtualTextureLocalTileRequest&"
+        }
+      ],
+      "returnType": "FVirtualTextureLocalTileRequest&"
+    },
+    {
+      "id": "get-identity",
+      "name": "GetIdentity",
+      "category": "VirtualTexturing",
+      "signature": "GetIdentity()",
+      "params": [],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "add-or-merge-tile-request",
+      "name": "AddOrMergeTileRequest",
+      "category": "VirtualTexturing",
+      "signature": "AddOrMergeTileRequest(In Tile Request, Tile Requests)",
+      "params": [
+        {
+          "name": "In Tile Request",
+          "type": "FVirtualTextureLocalTileRequest&"
+        },
+        {
+          "name": "Tile Requests",
+          "type": "TSet<FVirtualTextureLocalTileRequest>&"
+        }
+      ],
+      "returnType": "FVirtualTextureLocalTileRequest&",
+      "docs": "Helper function that tries to add a new FVirtualTextureLocalTileRequest to a TSet but, in case this tile is already in the set, merges it with the existing request :"
     }
   ]
 }

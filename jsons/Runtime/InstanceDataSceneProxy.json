@@ -11,6 +11,142 @@
   ],
   "functions": [
     {
+      "id": "is-identity",
+      "name": "IsIdentity",
+      "category": "InstanceDataSceneProxy",
+      "signature": "IsIdentity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the mapping is an identity mapping. I.e., each instance ID corresponds to the same index."
+    },
+    {
+      "id": "get-max-instance-id",
+      "name": "GetMaxInstanceId",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetMaxInstanceId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returms the upper bound on the instance ID represented as an integer, may be larger than the number of instances but is never larger than the max that has ever been allocated."
+    },
+    {
+      "id": "get-max-instance-index",
+      "name": "GetMaxInstanceIndex",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetMaxInstanceIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the maximum instance index (or rather the maximum valid number plus one), AKA the number of instances represented."
+    },
+    {
+      "id": "is-valid-id",
+      "name": "IsValidId",
+      "category": "InstanceDataSceneProxy",
+      "signature": "IsValidId(Target, Instance Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        },
+        {
+          "name": "Instance Id",
+          "type": "FPrimitiveInstanceId"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if InstanceId is in the mapped range AND ."
+    },
+    {
+      "id": "id-to-index",
+      "name": "IdToIndex",
+      "category": "InstanceDataSceneProxy",
+      "signature": "IdToIndex(Target, Instance Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        },
+        {
+          "name": "Instance Id",
+          "type": "FPrimitiveInstanceId"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Translate from FPrimitiveInstanceId to Index"
+    },
+    {
+      "id": "index-to-id",
+      "name": "IndexToId",
+      "category": "InstanceDataSceneProxy",
+      "signature": "IndexToId(Target, Instance Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        },
+        {
+          "name": "Instance Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FPrimitiveInstanceId",
+      "docs": "Translate from Index to FPrimitiveInstanceId"
+    },
+    {
+      "id": "set-invalid",
+      "name": "SetInvalid",
+      "category": "InstanceDataSceneProxy",
+      "signature": "SetInvalid(Target, Instance Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        },
+        {
+          "name": "Instance Id",
+          "type": "FPrimitiveInstanceId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the index mapping for the given InstanceId to INDEX_NONE."
+    },
+    {
+      "id": "update",
+      "name": "Update",
+      "category": "InstanceDataSceneProxy",
+      "signature": "Update(Target, Instance Id, Instance Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceIdIndexMap*"
+        },
+        {
+          "name": "Instance Id",
+          "type": "FPrimitiveInstanceId"
+        },
+        {
+          "name": "Instance Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Update the mapping from ID to index (and vice versa).\nDoes _not_ reset any previous mapping for the given ID."
+    },
+    {
       "id": "reset",
       "name": "Reset",
       "category": "InstanceDataSceneProxy",
@@ -65,24 +201,7 @@
       "docs": "Convert an implicit identity mapping to an explicit one, by filling in the mapping arrays.\nNot allowed to be called if the mapping is already explicit."
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "InstanceDataSceneProxy",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FInstanceIdIndexMap*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "rebuild-from-index-to-id-map-90415b",
+      "id": "rebuild-from-index-to-id-map",
       "name": "RebuildFromIndexToIdMap",
       "category": "InstanceDataSceneProxy",
       "signature": "RebuildFromIndexToIdMap(Target, In Index To Id Map, Max Instance Id)",
@@ -103,21 +222,91 @@
       "returnType": "Void"
     },
     {
-      "id": "rebuild-from-index-to-id-map-4a7e3e",
-      "name": "RebuildFromIndexToIdMap",
+      "id": "pack",
+      "name": "Pack",
       "category": "InstanceDataSceneProxy",
-      "signature": "RebuildFromIndexToIdMap(Target, Max Instance Id)",
+      "signature": "Pack(Hit Proxy Color, Selected)",
       "params": [
         {
-          "name": "Target",
-          "type": "FInstanceIdIndexMap*"
+          "name": "Hit Proxy Color",
+          "type": "FColor&"
         },
         {
-          "name": "Max Instance Id",
-          "type": "Int"
+          "name": "Selected",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "unpack",
+      "name": "Unpack",
+      "category": "InstanceDataSceneProxy",
+      "signature": "Unpack(Packed, Out Hit Proxy Color, Out Selected)",
+      "params": [
+        {
+          "name": "Packed",
+          "type": "UInt"
+        },
+        {
+          "name": "Out Hit Proxy Color",
+          "type": "FColor&"
+        },
+        {
+          "name": "Out Selected",
+          "type": "Bool&"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-flags",
+      "name": "GetFlags",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        }
+      ],
+      "returnType": "FInstanceDataFlags&"
+    },
+    {
+      "id": "get-num-instances",
+      "name": "GetNumInstances",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetNumInstances(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-custom-data-floats",
+      "name": "GetNumCustomDataFloats",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetNumCustomDataFloats(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "Int"
     },
     {
       "id": "calc-payload-data-stride",
@@ -250,6 +439,128 @@
       "returnType": "FMatrix"
     },
     {
+      "id": "is-instance-data-gpu-only",
+      "name": "IsInstanceDataGPUOnly",
+      "category": "InstanceDataSceneProxy",
+      "signature": "IsInstanceDataGPUOnly(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether instance data resides only in the GPU Scene, not backed by a copy in CPU memory."
+    },
+    {
+      "id": "get-instance-to-primitive-relative",
+      "name": "GetInstanceToPrimitiveRelative",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetInstanceToPrimitiveRelative(Target, Instance Index, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Instance Index",
+          "type": "Int"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "FRenderTransform"
+    },
+    {
+      "id": "get-prev-instance-to-primitive-relative",
+      "name": "GetPrevInstanceToPrimitiveRelative",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetPrevInstanceToPrimitiveRelative(Target, Instance Index, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Instance Index",
+          "type": "Int"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "FRenderTransform"
+    },
+    {
+      "id": "get-primitive-world-space-offset",
+      "name": "GetPrimitiveWorldSpaceOffset",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetPrimitiveWorldSpaceOffset(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "FVector&",
+      "docs": "Get the offset for the primitive-relative space used for transforms and bounds."
+    },
+    {
+      "id": "get-instance-visible",
+      "name": "GetInstanceVisible",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetInstanceVisible(Target, Instance Index, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Instance Index",
+          "type": "Int"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-primitive-to-relative-world",
+      "name": "GetPrimitiveToRelativeWorld",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetPrimitiveToRelativeWorld(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "FRenderTransform&"
+    },
+    {
       "id": "compute-instance-to-primitive-relative",
       "name": "ComputeInstanceToPrimitiveRelative",
       "category": "InstanceDataSceneProxy",
@@ -325,6 +636,58 @@
       "returnType": "Void"
     },
     {
+      "id": "begin-write-access",
+      "name": "BeginWriteAccess",
+      "category": "InstanceDataSceneProxy",
+      "signature": "BeginWriteAccess(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag"
+        }
+      ],
+      "returnType": "FWriteView"
+    },
+    {
+      "id": "end-write-access",
+      "name": "EndWriteAccess",
+      "category": "InstanceDataSceneProxy",
+      "signature": "EndWriteAccess(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-read-view",
+      "name": "GetReadView",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetReadView(Target, Access Tag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        },
+        {
+          "name": "Access Tag",
+          "type": "FAccessTag",
+          "default": "FAccessTag()"
+        }
+      ],
+      "returnType": "FReadView"
+    },
+    {
       "id": "set-immutable",
       "name": "SetImmutable",
       "category": "InstanceDataSceneProxy",
@@ -344,6 +707,32 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-immutable",
+      "name": "GetImmutable",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetImmutable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataBuffers*"
+        }
+      ],
+      "returnType": "FInstanceSceneDataImmutablePtr"
+    },
+    {
+      "id": "get-compressed-instance-spatial-hashes",
+      "name": "GetCompressedInstanceSpatialHashes",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetCompressedInstanceSpatialHashes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceSceneDataImmutable*"
+        }
+      ],
+      "returnType": "TArray<FInstanceSceneDataBuffers::FCompressedSpatialHashItem>&"
     },
     {
       "id": "update-default-instance",
@@ -381,17 +770,66 @@
       "docs": "Must call this before accessing the majority of the data in the instance data buffers."
     },
     {
-      "id": "inc-stat-counters",
-      "name": "IncStatCounters",
+      "id": "ge-instance-scene-data-buffers",
+      "name": "GeInstanceSceneDataBuffers",
       "category": "InstanceDataSceneProxy",
-      "signature": "IncStatCounters(Target)",
+      "signature": "GeInstanceSceneDataBuffers(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FInstanceDataSceneProxy*"
         }
       ],
+      "returnType": "FInstanceSceneDataBuffers*"
+    },
+    {
+      "id": "get-update-task-info",
+      "name": "GetUpdateTaskInfo",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetUpdateTaskInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceDataSceneProxy*"
+        }
+      ],
+      "returnType": "FInstanceDataUpdateTaskInfo*",
+      "docs": "Implement to provide syncable task info, if this returns a nullptr it is required that GeInstanceSceneDataBuffers() performs any needed synchronization."
+    },
+    {
+      "id": "debug-draw-instance-changes",
+      "name": "DebugDrawInstanceChanges",
+      "category": "InstanceDataSceneProxy",
+      "signature": "DebugDrawInstanceChanges(Target, Debug PDI, Scene Depth Priority Group)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceDataSceneProxy*"
+        },
+        {
+          "name": "Debug PDI",
+          "type": "FPrimitiveDrawInterface*"
+        },
+        {
+          "name": "Scene Depth Priority Group",
+          "type": "ESceneDepthPriorityGroup"
+        }
+      ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-legacy-instance-buffer",
+      "name": "GetLegacyInstanceBuffer",
+      "category": "InstanceDataSceneProxy",
+      "signature": "GetLegacyInstanceBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FInstanceDataSceneProxy*"
+        }
+      ],
+      "returnType": "FStaticMeshInstanceBuffer*",
+      "docs": "Workaround to support the ISMC non GPU scene rendering path."
     }
   ]
 }

@@ -10,6 +10,87 @@
   ],
   "functions": [
     {
+      "id": "to-uint-16",
+      "name": "ToUint16",
+      "category": "ReliableNetBlobQueue",
+      "signature": "ToUint16(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSequence*"
+        }
+      ],
+      "returnType": "UInt16"
+    },
+    {
+      "id": "to-uint-64",
+      "name": "ToUint64",
+      "category": "ReliableNetBlobQueue",
+      "signature": "ToUint64(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReplicationRecord*"
+        }
+      ],
+      "returnType": "UInt64"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReplicationRecord*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-unsent-blob-count",
+      "name": "GetUnsentBlobCount",
+      "category": "ReliableNetBlobQueue",
+      "signature": "GetUnsentBlobCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Returns the number of blobs that have not yet been sent."
+    },
+    {
+      "id": "has-unsent-blobs",
+      "name": "HasUnsentBlobs",
+      "category": "ReliableNetBlobQueue",
+      "signature": "HasUnsentBlobs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if there are unsent blobs. There may still be unacked blobs even if there are no unsent ones."
+    },
+    {
+      "id": "is-all-sent-and-acked",
+      "name": "IsAllSentAndAcked",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsAllSentAndAcked(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether all blobs have been sent and acknowledged as received."
+    },
+    {
       "id": "is-safe-to-destroy",
       "name": "IsSafeToDestroy",
       "category": "ReliableNetBlobQueue",
@@ -164,28 +245,6 @@
       "docs": "Deserializes blobs with object using their respective DeserializeWithObject() method.\n@return The number of blobs that were deserialized.\n@see SerializeWithObject"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "ReliableNetBlobQueue",
-      "signature": "Serialize(Target, Context, Out Record)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FReliableNetBlobQueue*"
-        },
-        {
-          "name": "Context",
-          "type": "FNetSerializationContext&"
-        },
-        {
-          "name": "Out Record",
-          "type": "FReplicationRecord&"
-        }
-      ],
-      "returnType": "UInt",
-      "docs": "Serializes as many blobs as possible using their respective Serialize() method.\n@param Context A FNetSerializationContext.\n@param OutRecord The record to pass to CommitReplicationRecord() if a packet containing the serialized data was sent.\n@return The number of blobs that were serialized."
-    },
-    {
       "id": "deserialize",
       "name": "Deserialize",
       "category": "ReliableNetBlobQueue",
@@ -242,6 +301,241 @@
       ],
       "returnType": "Void",
       "docs": "For each packet for which CommitReplicationRecord() was called ProcessPacketDeliveryStatus() needs\nto be called in the same order when it's known whether the packet was delivered or not.\n@param Status Whether the packet was delivered or not or if the record should simply be discarded due to closing a connection.\n@param Record The record that was obtained via a Serialize/SerializeWithObject call and passed to CommitReplicationRecord.\n@see CommitReplicationRecord"
+    },
+    {
+      "id": "is-send-window-full",
+      "name": "IsSendWindowFull",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsSendWindowFull(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the send window is full or not."
+    },
+    {
+      "id": "sequence-to-index",
+      "name": "SequenceToIndex",
+      "category": "ReliableNetBlobQueue",
+      "signature": "SequenceToIndex(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "is-index-acked",
+      "name": "IsIndexAcked",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsIndexAcked(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-sequence-acked",
+      "name": "IsSequenceAcked",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsSequenceAcked(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-index-is-acked",
+      "name": "SetIndexIsAcked",
+      "category": "ReliableNetBlobQueue",
+      "signature": "SetIndexIsAcked(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-sequence-is-acked",
+      "name": "SetSequenceIsAcked",
+      "category": "ReliableNetBlobQueue",
+      "signature": "SetSequenceIsAcked(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-index-is-acked",
+      "name": "ClearIndexIsAcked",
+      "category": "ReliableNetBlobQueue",
+      "signature": "ClearIndexIsAcked(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-index-sent",
+      "name": "IsIndexSent",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsIndexSent(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-sequence-sent",
+      "name": "IsSequenceSent",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsSequenceSent(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-index-is-sent",
+      "name": "SetIndexIsSent",
+      "category": "ReliableNetBlobQueue",
+      "signature": "SetIndexIsSent(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-sequence-is-sent",
+      "name": "SetSequenceIsSent",
+      "category": "ReliableNetBlobQueue",
+      "signature": "SetSequenceIsSent(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-index-is-sent",
+      "name": "ClearIndexIsSent",
+      "category": "ReliableNetBlobQueue",
+      "signature": "ClearIndexIsSent(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Index",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clear-sequence-is-sent",
+      "name": "ClearSequenceIsSent",
+      "category": "ReliableNetBlobQueue",
+      "signature": "ClearSequenceIsSent(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-valid-receive-sequence",
+      "name": "IsValidReceiveSequence",
+      "category": "ReliableNetBlobQueue",
+      "signature": "IsValidReceiveSequence(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FReliableNetBlobQueue*"
+        },
+        {
+          "name": "Seq",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
     }
   ]
 }

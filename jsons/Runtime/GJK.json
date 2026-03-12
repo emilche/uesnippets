@@ -1,0 +1,1310 @@
+{
+  "id": "gjk",
+  "label": "GJK",
+  "includepath": "Chaos/GJK.h",
+  "includes": [
+    "Box",
+    "Capsule",
+    "EPA",
+    "GJKShape",
+    "ImplicitObjectScaled",
+    "Simplex",
+    "Sphere",
+    "VectorRegister",
+    "VectorUtility",
+    "SimplexVectorized",
+    "EPAVectorized",
+    "ChaosCheck",
+    "ChaosLog"
+  ],
+  "functions": [
+    {
+      "id": "get-radius",
+      "name": "GetRadius",
+      "category": "GJK",
+      "signature": "GetRadius(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "get-margin",
+      "name": "GetMargin",
+      "category": "GJK",
+      "signature": "GetMargin(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "get-radiusf",
+      "name": "GetRadiusf",
+      "category": "GJK",
+      "signature": "GetRadiusf(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "get-marginf",
+      "name": "GetMarginf",
+      "category": "GJK",
+      "signature": "GetMarginf(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        }
+      ],
+      "returnType": "FRealSingle"
+    },
+    {
+      "id": "support-function-252916",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(Target, V)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        },
+        {
+          "name": "V",
+          "type": "VectorRegister4Float"
+        }
+      ],
+      "returnType": "VectorRegister4Float"
+    },
+    {
+      "id": "support-function-3765a7",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(Target, V, In Margin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        },
+        {
+          "name": "V",
+          "type": "VectorRegister4Float"
+        },
+        {
+          "name": "In Margin",
+          "type": "FRealSingle"
+        }
+      ],
+      "returnType": "VectorRegister4Float"
+    },
+    {
+      "id": "support-function-d16e08",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(Target, A To B Rotation, B To A Rotation, V)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGeomGJKHelperSIMD*"
+        },
+        {
+          "name": "A To B Rotation",
+          "type": "VectorRegister4Float"
+        },
+        {
+          "name": "B To A Rotation",
+          "type": "VectorRegister4Float"
+        },
+        {
+          "name": "V",
+          "type": "VectorRegister4Float"
+        }
+      ],
+      "returnType": "VectorRegister4Float"
+    },
+    {
+      "id": "check-gjk-iteration-limit",
+      "name": "CheckGJKIterationLimit",
+      "category": "GJK",
+      "signature": "CheckGJKIterationLimit(Num Iterations, A, B)",
+      "params": [
+        {
+          "name": "Num Iterations",
+          "type": "Int"
+        },
+        {
+          "name": "A",
+          "type": "ConvexTypeA&"
+        },
+        {
+          "name": "B",
+          "type": "ConvexTypeB&"
+        }
+      ],
+      "returnType": "template<ConvexTypeA,ConvexTypeB> bool"
+    },
+    {
+      "id": "calculate-query-margins",
+      "name": "CalculateQueryMargins",
+      "category": "GJK",
+      "signature": "CalculateQueryMargins(A, B, Out Margin A, Out Margin B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "Out Margin A",
+          "type": "T&"
+        },
+        {
+          "name": "Out Margin B",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<TGeometryA,TGeometryB,T> void"
+    },
+    {
+      "id": "gjk-intersection-f40251",
+      "name": "GJKIntersection",
+      "category": "GJK",
+      "signature": "GJKIntersection(A, B, B To ATM, In Thickness A, Initial Dir)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA& RESTRICT"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB& RESTRICT"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "T",
+          "default": "0"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<T,3>&",
+          "default": "TVector<T, 3>(1, 0, 0)"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> bool",
+      "docs": "Determines if two convex geometries overlap.\n@param A The first geometry\n@param B The second geometry\n@param BToATM The transform of B in A's local space\n@param ThicknessA The amount of geometry inflation for Geometry A(for example if the surface distance of two geometries with thickness 0 would be 2, a thickness of 0.5 would give a distance of 1.5)\n@param InitialDir The first direction we use to search the CSO\n@return True if the geometries overlap, False otherwise"
+    },
+    {
+      "id": "gjk-intersection-simd-d55bc4",
+      "name": "GJKIntersectionSimd",
+      "category": "GJK",
+      "signature": "GJKIntersectionSimd(A, B, Translation, Rotation, In Thickness A, Initial Dir)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA& RESTRICT"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB& RESTRICT"
+        },
+        {
+          "name": "Translation",
+          "type": "VectorRegister4Float&"
+        },
+        {
+          "name": "Rotation",
+          "type": "VectorRegister4Float&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "FRealSingle"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "VectorRegister4Float&"
+        }
+      ],
+      "returnType": "template<TGeometryA,TGeometryB> bool"
+    },
+    {
+      "id": "gjk-intersection-simd-18b381",
+      "name": "GJKIntersectionSimd",
+      "category": "GJK",
+      "signature": "GJKIntersectionSimd(A, B, Epsilon Scale, Translation, Rotation, In Thickness A, Initial Dir)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FGeomGJKHelperSIMD& RESTRICT"
+        },
+        {
+          "name": "B",
+          "type": "FGeomGJKHelperSIMD& RESTRICT"
+        },
+        {
+          "name": "Epsilon Scale",
+          "type": "FRealSingle"
+        },
+        {
+          "name": "Translation",
+          "type": "VectorRegister4Float&"
+        },
+        {
+          "name": "Rotation",
+          "type": "VectorRegister4Float&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "FRealSingle"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "VectorRegister4Float&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "gjk-intersection-5d716f",
+      "name": "GJKIntersection",
+      "category": "GJK",
+      "signature": "GJKIntersection(A, B, Epsilon Scale, B To ATM, In Thickness A, Initial Dir)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FGeomGJKHelperSIMD& RESTRICT"
+        },
+        {
+          "name": "B",
+          "type": "FGeomGJKHelperSIMD& RESTRICT"
+        },
+        {
+          "name": "Epsilon Scale",
+          "type": "FReal"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "T",
+          "default": "0"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<T,3>&",
+          "default": "TVector<T, 3>(1, 0, 0)"
+        }
+      ],
+      "returnType": "template<T> bool"
+    },
+    {
+      "id": "gjk-intersection-same-space-simd",
+      "name": "GJKIntersectionSameSpaceSimd",
+      "category": "GJK",
+      "signature": "GJKIntersectionSameSpaceSimd(A, B, In Thickness A, Initial Dir)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "FRealSingle"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "VectorRegister4Float&"
+        }
+      ],
+      "returnType": "template<TGeometryA,TGeometryB> bool",
+      "docs": "Determines if two convex geometries in the same space overlap\nIMPORTANT: the two convex geometries must be in the same space!\n@param A The first geometry\n@param B The second geometry\n@param ThicknessA The amount of geometry inflation for Geometry A(for example if the surface distance of two geometries with thickness 0 would be 2, a thickness of 0.5 would give a distance of 1.5)\n@param InitialDir The first direction we use to search the CSO (Must be normalized)\n@param ThicknessB The amount of geometry inflation for Geometry B(for example if the surface distance of two geometries with thickness 0 would be 2, a thickness of 0.5 would give a distance of 1.5)\n@return True if the geometries overlap, False otherwise"
+    },
+    {
+      "id": "tgjk-simplex-data",
+      "name": "TGJKSimplexData",
+      "category": "GJK",
+      "signature": "TGJKSimplexData(Num Verts)",
+      "params": [
+        {
+          "name": "Num Verts",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "@brief Internal simplex data for GJK that can also be stored for warm-starting subsequent calls\n@tparam T the number type (float or double)\n@see GJKPenetrationWarmStartable"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "GJK",
+      "signature": "Reset()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "save",
+      "name": "Save",
+      "category": "GJK",
+      "signature": "Save(In Simplex I Ds)",
+      "params": [
+        {
+          "name": "In Simplex I Ds",
+          "type": "FSimplex"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "restore",
+      "name": "Restore",
+      "category": "GJK",
+      "signature": "Restore(B To ATM, Out Simplex I Ds, Out Simplex, Out V, Out Distance, Epsilon)",
+      "params": [
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Out Simplex I Ds",
+          "type": "FSimplex&"
+        },
+        {
+          "name": "Out Simplex",
+          "type": "TVec3<T>"
+        },
+        {
+          "name": "Out V",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Distance",
+          "type": "T&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "restore-2",
+      "name": "Restore2",
+      "category": "GJK",
+      "signature": "Restore2(B To ATM, Out Num Verts, Out Simplex, Out V, Out Distance, Epsilon)",
+      "params": [
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Out Num Verts",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Simplex",
+          "type": "TVec3<T>"
+        },
+        {
+          "name": "Out V",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Distance",
+          "type": "T&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-geom-gjk-helper",
+      "name": "FGeomGJKHelper",
+      "category": "GJK",
+      "signature": "FGeomGJKHelper(Geom, T, Get Marginf)",
+      "params": [
+        {
+          "name": "Geom",
+          "type": "T& Geom ) : Geometry (&"
+        },
+        {
+          "name": "T",
+          "type": "Func (& SupportCore<"
+        },
+        {
+          "name": "Get Marginf",
+          "type": "Margin ( Geom ."
+        }
+      ],
+      "returnType": "template<class T>"
+    },
+    {
+      "id": "support-function-63b2af",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(V, Vertex Index)",
+      "params": [
+        {
+          "name": "V",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "FVector"
+    },
+    {
+      "id": "support-function-3769da",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(V, Out Support Delta, Vertex Index)",
+      "params": [
+        {
+          "name": "V",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Out Support Delta",
+          "type": "FReal*"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "FVector"
+    },
+    {
+      "id": "support-function-3ace17",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(A To B Rotation, V, Out Support Delta, Vertex Index)",
+      "params": [
+        {
+          "name": "A To B Rotation",
+          "type": "FRotation3&"
+        },
+        {
+          "name": "V",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Out Support Delta",
+          "type": "FReal*"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "FVector"
+    },
+    {
+      "id": "support-function-24d8fe",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(B To ATM, A To B Rotation, V, Vertex Index)",
+      "params": [
+        {
+          "name": "B To ATM",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "A To B Rotation",
+          "type": "FRotation3&"
+        },
+        {
+          "name": "V",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "FVector"
+    },
+    {
+      "id": "support-function-a25381",
+      "name": "SupportFunction",
+      "category": "GJK",
+      "signature": "SupportFunction(B To ATM, A To B Rotation, V, Out Support Delta, Vertex Index)",
+      "params": [
+        {
+          "name": "B To ATM",
+          "type": "FRigidTransform3&"
+        },
+        {
+          "name": "A To B Rotation",
+          "type": "FRotation3&"
+        },
+        {
+          "name": "V",
+          "type": "FVec3&"
+        },
+        {
+          "name": "Out Support Delta",
+          "type": "FReal*"
+        },
+        {
+          "name": "Vertex Index",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "FVector"
+    },
+    {
+      "id": "gjk-penetration-warm-startable",
+      "name": "GJKPenetrationWarmStartable",
+      "category": "GJK",
+      "signature": "GJKPenetrationWarmStartable(A, B, B To ATM, Out Penetration, Out Closest A, Out Closest B, Out Normal A, Out Normal B, Out Vertex A, Out Vertex B, In Out Simplex Data, Out Max Support Delta, Epsilon, EPA Epsilon)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Out Penetration",
+          "type": "T&"
+        },
+        {
+          "name": "Out Closest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Vertex A",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Vertex B",
+          "type": "Int&"
+        },
+        {
+          "name": "In Out Simplex Data",
+          "type": "TGJKSimplexData<T>&"
+        },
+        {
+          "name": "Out Max Support Delta",
+          "type": "T&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "T(1.e-3)"
+        },
+        {
+          "name": "EPA Epsilon",
+          "type": "T",
+          "default": "T(1.e-2)"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> bool",
+      "docs": "@brief Calculate the penetration data for two shapes using GJK and a warm-start buffer.\n@tparam T Number type (float or double)\n@tparam TGeometryA The first shape type\n@tparam TGeometryB The second shape type\n@param A The first shape\n@param B The second shape\n@param BToATM A transform from B-local space to A-local space\n@param OutPenetration The overlap distance (+ve for overlap, -ve for separation)\n@param OutClosestA The closest point on A, in A-local space\n@param OutClosestB The closest point on B, in B-local space\n@param OutNormalA The contact normal pointing away from A in A-local space\n@param OutNormalB The contact normal pointing away from A in B-local space\n@param OutVertexA The closest vertex on A\n@param OutVertexB The closest vertex on B\n@param SimplexData In/out simplex data used to initialize and update GJK. Can be stored to improve convergence on subsequent calls for \"small\" changes in relative rotation.\n@param OutMaxContactDelta The maximum error in the contact position as a result of using a margin. This is the difference between the core shape + margin and the outer shape on the supporting vertices\n@param Epsilon The separation distance below which GJK aborts and switches to EPA\n@return true if the results are populated (always for this implementation, but @see EPA())\nThe WarmStartData is an input and output parameter. If the function is called with\na small change in BToATM there's it will converge much faster, usually in 1 iteration\nfor polygonal shapes.\n@note This version returns OutClosestB in B's local space, compated to GJKPenetration where all output is in the space of A\n@todo(chaos): convert GJKPenetration() to use this version (but see note above)"
+    },
+    {
+      "id": "gjk-penetration-warm-startable-2",
+      "name": "GJKPenetrationWarmStartable2",
+      "category": "GJK",
+      "signature": "GJKPenetrationWarmStartable2(A, B, B To ATM, Out Penetration, Out Closest A, Out Closest B, Out Normal A, Out Normal B, Out Vertex A, Out Vertex B, In Out Simplex Data, Out Max Support Delta, Epsilon, EPA Epsilon)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Out Penetration",
+          "type": "T&"
+        },
+        {
+          "name": "Out Closest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Vertex A",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Vertex B",
+          "type": "Int&"
+        },
+        {
+          "name": "In Out Simplex Data",
+          "type": "TGJKSimplexData<T>&"
+        },
+        {
+          "name": "Out Max Support Delta",
+          "type": "T&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "T(1.e-3)"
+        },
+        {
+          "name": "EPA Epsilon",
+          "type": "T",
+          "default": "T(1.e-2)"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> bool"
+    },
+    {
+      "id": "gjk-penetration-same-space",
+      "name": "GJKPenetrationSameSpace",
+      "category": "GJK",
+      "signature": "GJKPenetrationSameSpace(A, B, Out Penetration, Out Closest A, Out Closest B, Out Normal, Out Vertex A, Out Vertex B, Out Max Support Delta, Initial Dir, Epsilon, EPA Epsilon)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "Out Penetration",
+          "type": "T&"
+        },
+        {
+          "name": "Out Closest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Vertex A",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Vertex B",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Max Support Delta",
+          "type": "T&"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "T(1.e-3)"
+        },
+        {
+          "name": "EPA Epsilon",
+          "type": "T",
+          "default": "T(1.e-2)"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> bool",
+      "docs": "@brief Calculate the penetration data for two shapes using GJK, assuming both shapes are already in the same space.\nThis is intended for use with triangles which have been transformed into the space of the convex shape.\n@tparam T\n@tparam TGeometryA First geometry type\n@tparam TGeometryB Second geometry type. Usually FTriangle\n@param A First geometry\n@param B Second geometry (usually triangle)\n@param OutPenetration penetration depth (negative for separation)\n@param OutClosestA Closest point on A\n@param OutClosestB Closest point on B\n@param OutNormal Contact normal (points from A to B)\n@param OutVertexA The closest vertex on A\n@param OutVertexB The closest vertex on B\n@param OutMaxSupportDelta When the convex has a margin, an upper bounds on the distance from the contact point to the vertex on the outer hull\n@param Epsilon GJK tolerance\n@param EPAEpsilon EPA tolerance\n@return true always"
+    },
+    {
+      "id": "gjk-penetration-same-space-2",
+      "name": "GJKPenetrationSameSpace2",
+      "category": "GJK",
+      "signature": "GJKPenetrationSameSpace2(A, B, Out Penetration, Out Closest A, Out Closest B, Out Normal, Out Vertex A, Out Vertex B, Out Max Support Delta, Initial Dir, Epsilon, EPA Epsilon)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "Out Penetration",
+          "type": "T&"
+        },
+        {
+          "name": "Out Closest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Vertex A",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Vertex B",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Max Support Delta",
+          "type": "T&"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "T(1.e-3)"
+        },
+        {
+          "name": "EPA Epsilon",
+          "type": "T",
+          "default": "T(1.e-2)"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> bool"
+    },
+    {
+      "id": "gjk-penetration-impl",
+      "name": "GJKPenetrationImpl",
+      "category": "GJK",
+      "signature": "GJKPenetrationImpl(A, B, B To ATM, Out Penetration, Out Closest A, Out Closest B, Out Normal, Out Closest Vertex Index A, Out Closest Vertex Index B, In Thickness A, In Thickness B, Initial Dir, Epsilon)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FGeomGJKHelper&"
+        },
+        {
+          "name": "B",
+          "type": "FGeomGJKHelper&"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Out Penetration",
+          "type": "T&"
+        },
+        {
+          "name": "Out Closest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest Vertex Index A",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Closest Vertex Index B",
+          "type": "Int&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "T",
+          "default": "0.0f"
+        },
+        {
+          "name": "In Thickness B",
+          "type": "T",
+          "default": "0.0f"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<T,3>&",
+          "default": "TVector<T, 3>(1, 0, 0)"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "1.e-3f"
+        }
+      ],
+      "returnType": "template<bool bNegativePenetrationAllowed = false,T> bool"
+    },
+    {
+      "id": "gjk-penetration",
+      "name": "GJKPenetration",
+      "category": "GJK",
+      "signature": "GJKPenetration(A, B, B To ATM, Out Penetration, Out Closest A, Out Closest B, Out Normal, Out Closest Vertex Index A, Out Closest Vertex Index B, In Thickness A, In Thickness B, Initial Dir, Epsilon)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Out Penetration",
+          "type": "T&"
+        },
+        {
+          "name": "Out Closest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Closest Vertex Index A",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Closest Vertex Index B",
+          "type": "Int&"
+        },
+        {
+          "name": "In Thickness A",
+          "type": "T",
+          "default": "0.0f"
+        },
+        {
+          "name": "In Thickness B",
+          "type": "T",
+          "default": "0.0f"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<T,3>&",
+          "default": "TVector<T, 3>(1, 0, 0)"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "1.e-3f"
+        }
+      ],
+      "returnType": "template<bool bNegativePenetrationAllowed = false,T,TGeometryA,TGeometryB> bool"
+    },
+    {
+      "id": "gjk-raycast",
+      "name": "GJKRaycast",
+      "category": "GJK",
+      "signature": "GJKRaycast(A, B, Start TM, Ray Dir, Ray Length, Out Time, Out Position, Out Normal, Thickness A, Initial Dir, Thickness B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "Start TM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Ray Dir",
+          "type": "TVector<T,3>&"
+        },
+        {
+          "name": "Ray Length",
+          "type": "T"
+        },
+        {
+          "name": "Out Time",
+          "type": "T&"
+        },
+        {
+          "name": "Out Position",
+          "type": "TVector<T,3>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVector<T,3>&"
+        },
+        {
+          "name": "Thickness A",
+          "type": "T",
+          "default": "0"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<T,3>&",
+          "default": "TVector<T, 3>(1, 0, 0)"
+        },
+        {
+          "name": "Thickness B",
+          "type": "T",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> bool",
+      "docs": "Sweeps one geometry against the other\n@A The first geometry\n@B The second geometry\n@StartTM B's starting configuration in A's local space\n@RayDir The ray's direction (normalized)\n@RayLength The ray's length\n@OutTime The time along the ray when the objects first overlap\n@OutPosition The first point of impact (in A's local space) when the objects first overlap. Invalid if time of impact is 0\n@OutNormal The impact normal (in A's local space) when the objects first overlap. Invalid if time of impact is 0\n@ThicknessA The amount of geometry inflation for Geometry A (for example if the surface distance of two geometries with thickness 0 would be 2, a thickness of 0.5 would give a distance of 1.5)\n@InitialDir The first direction we use to search the CSO\n@ThicknessB The amount of geometry inflation for Geometry B (for example if the surface distance of two geometries with thickness 0 would be 2, a thickness of 0.5 would give a distance of 1.5)\n@return True if the geometries overlap during the sweep, False otherwise\n@note If A overlaps B at the start of the ray (\"initial overlap\" condition) then this function returns true, and sets OutTime = 0, but does not set any other output variables."
+    },
+    {
+      "id": "gjk-raycast-2-impl-simd",
+      "name": "GJKRaycast2ImplSimd",
+      "category": "GJK",
+      "signature": "GJKRaycast2ImplSimd(A, B, B To A Rotation, Start Point, Ray Dir, Ray Length, Out Time, Out Position, Out Normal, Compute MTD, Initial Dir)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FGeomGJKHelperSIMD& RESTRICT"
+        },
+        {
+          "name": "B",
+          "type": "FGeomGJKHelperSIMD& RESTRICT"
+        },
+        {
+          "name": "B To A Rotation",
+          "type": "T&"
+        },
+        {
+          "name": "Start Point",
+          "type": "T&"
+        },
+        {
+          "name": "Ray Dir",
+          "type": "T&"
+        },
+        {
+          "name": "Ray Length",
+          "type": "FRealSingle"
+        },
+        {
+          "name": "Out Time",
+          "type": "FRealSingle&"
+        },
+        {
+          "name": "Out Position",
+          "type": "T&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "T&"
+        },
+        {
+          "name": "Compute MTD",
+          "type": "Bool"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<T> bool",
+      "docs": "Sweeps one geometry against the other\n@A The first geometry\n@B The second geometry\n@BToARotation B's starting rotation in A's local space\n@StartPoint B's starting position in A's local space\n@RayDir The ray's direction (normalized)\n@RayLength The ray's length\n@OutTime The time along the ray when the objects first overlap\n@OutPosition The first point of impact (in A's local space) when the objects first overlap. Invalid if time of impact is 0\n@OutNormal The impact normal (in A's local space) when the objects first overlap. Invalid if time of impact is 0\n@bComputeMTD If there is an initial overlap, this will compute the output info from the overlap info.\n@InitialDir The first direction we use to search the CSO\n@return True if the geometries overlap during the sweep, False otherwise\n@note If A overlaps B at the start of the ray (\"initial overlap\" condition) then this function returns true, and sets OutTime = 0, but does not set any other output variables unless bComputeMTD is true."
+    },
+    {
+      "id": "gjk-raycast-2-impl",
+      "name": "GJKRaycast2Impl",
+      "category": "GJK",
+      "signature": "GJKRaycast2Impl(A, B, Start TM, Ray Dir, Ray Length, Out Time, Out Position, Out Normal, Given Thickness A, Compute MTD, Initial Dir, Given Thickness B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "FGeomGJKHelperSIMD&"
+        },
+        {
+          "name": "B",
+          "type": "FGeomGJKHelperSIMD&"
+        },
+        {
+          "name": "Start TM",
+          "type": "TRigidTransform<FReal,3>&"
+        },
+        {
+          "name": "Ray Dir",
+          "type": "TVector<FReal,3>&"
+        },
+        {
+          "name": "Ray Length",
+          "type": "FReal"
+        },
+        {
+          "name": "Out Time",
+          "type": "FReal&"
+        },
+        {
+          "name": "Out Position",
+          "type": "TVector<FReal,3>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVector<FReal,3>&"
+        },
+        {
+          "name": "Given Thickness A",
+          "type": "FReal"
+        },
+        {
+          "name": "Compute MTD",
+          "type": "Bool"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<FReal,3>&"
+        },
+        {
+          "name": "Given Thickness B",
+          "type": "FReal"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "gjk-raycast-2",
+      "name": "GJKRaycast2",
+      "category": "GJK",
+      "signature": "GJKRaycast2(A, B, Start TM, Ray Dir, Ray Length, Out Time, Out Position, Out Normal, Given Thickness A, Compute MTD, Initial Dir, Given Thickness B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "Start TM",
+          "type": "TRigidTransform<T,3>&"
+        },
+        {
+          "name": "Ray Dir",
+          "type": "TVector<T,3>&"
+        },
+        {
+          "name": "Ray Length",
+          "type": "T"
+        },
+        {
+          "name": "Out Time",
+          "type": "T&"
+        },
+        {
+          "name": "Out Position",
+          "type": "TVector<T,3>&"
+        },
+        {
+          "name": "Out Normal",
+          "type": "TVector<T,3>&"
+        },
+        {
+          "name": "Given Thickness A",
+          "type": "T",
+          "default": "0"
+        },
+        {
+          "name": "Compute MTD",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Initial Dir",
+          "type": "TVector<T,3>&",
+          "default": "TVector<T, 3>(1, 0, 0)"
+        },
+        {
+          "name": "Given Thickness B",
+          "type": "T",
+          "default": "0"
+        }
+      ],
+      "returnType": "template<T = FReal,TGeometryA,TGeometryB> bool"
+    },
+    {
+      "id": "gjk-distance-initial-v",
+      "name": "GJKDistanceInitialV",
+      "category": "GJK",
+      "signature": "GJKDistanceInitialV(A, B, B To ATM)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> TVector<T,3>"
+    },
+    {
+      "id": "gjk-distance-initial-v-from-relative-transform",
+      "name": "GJKDistanceInitialVFromRelativeTransform",
+      "category": "GJK",
+      "signature": "GJKDistanceInitialVFromRelativeTransform(A, B, B To ATM)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "B To ATM",
+          "type": "TRigidTransform<T,3>&"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> TVector<T,3>"
+    },
+    {
+      "id": "gjk-distance-initial-v-from-direction",
+      "name": "GJKDistanceInitialVFromDirection",
+      "category": "GJK",
+      "signature": "GJKDistanceInitialVFromDirection(A, B, Direction)",
+      "params": [
+        {
+          "name": "A",
+          "type": "TGeometryA&"
+        },
+        {
+          "name": "B",
+          "type": "TGeometryB&"
+        },
+        {
+          "name": "Direction",
+          "type": "TVec3<T>"
+        }
+      ],
+      "returnType": "template<T,TGeometryA,TGeometryB> TVec3<T>",
+      "docs": "Can be used to generate the initial support direction for use with GJKDistance. Returns a point on the Minkowski Sum\nsurface opposite to the direction of the supplied Direction. This is usually a good guess for the initial direction\nbut it calls SupportCore on both shapes which in O(N) in the number of vertices, and there are often faster alternatives\nif you know the type of shapes you are dealing with (e.g., return the vectors between the centers of the two convex shapes).\nIf you do roll your own function, make sure that the vector returned is in or on the Minkowski sum (and don't just use a unit\nvector along some direction for example) or GJKDistance may early-exit with an inaccurate result."
+    },
+    {
+      "id": "gjk-distance",
+      "name": "GJKDistance",
+      "category": "GJK",
+      "signature": "GJKDistance(A, B, Initial V, Out Distance, Out Nearest A, Out Nearest B, Out Normal A, Epsilon, Max Its)",
+      "params": [
+        {
+          "name": "A",
+          "type": "GJKShapeTypeA&"
+        },
+        {
+          "name": "B",
+          "type": "GJKShapeTypeB&"
+        },
+        {
+          "name": "Initial V",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Distance",
+          "type": "T&"
+        },
+        {
+          "name": "Out Nearest A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Nearest B",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Out Normal A",
+          "type": "TVec3<T>&"
+        },
+        {
+          "name": "Epsilon",
+          "type": "T",
+          "default": "(T)1e-3"
+        },
+        {
+          "name": "Max Its",
+          "type": "Int",
+          "default": "16"
+        }
+      ],
+      "returnType": "template<T,GJKShapeTypeA,GJKShapeTypeB> EGJKDistanceResult",
+      "docs": "Find the distance and nearest points on two convex geometries A and B, if they do not overlap.\nThis is intended to be used with TGJKShape, TGJKCoreShape, TGJKShapeTransformed and TGJKCoreShapeTransformed\nand generally you will have a TGJKShape or TGJKCoreShape as A, and a Transformed version for B. The transform in\nB should transform a vector in B space to a vector in A space as all calculations are performed in the local-\nspace of object A.\nYou can also use this function when you have 2 shapes already in the same space to avoid transforms in the support\nfunction(s). In this case you would use the non-transform versions of TGJKShape and would need to transform the\nresults from the shared space to the space you desire.\nFor algorithm see \"A Fast and Robust GJK Implementation for Collision Detection of Convex Objects\", Gino Van Deb Bergen, 1999.\n@note This algorithm aborts if objects are overlapping and it does not initialize the out parameters.\n@param A The first object (usually TGJKShape or TGJKCoreShape)\n@param B The second object (usually TGJKShapeTransformed or TGJKCoreShapeTransformed)\n@param InitialV  Starting support direction that must be in or on the Minkowski Sum. See GJKDistanceInitialVFromDirection().\n@param OutDistance If result is not DeepContact, the minimum distance between A and B, otherwise not modified.\n@param OutNearestA If result is not DeepContact, the near point on A in local-space, otherwise not modified.\n@param OutNearestB If result is not DeepContact, the near point on B in local-space, otherwise not modified.\n@param Epsilon The algorithm terminates when the iterative distance reduction gets below this threshold.\n@param MaxIts A limit on the number of iterations. Results may be approximate if this is too low.\n@return EGJKDistanceResult - see comments on the enum"
+    }
+  ]
+}

@@ -1,0 +1,903 @@
+{
+  "id": "metal-irconverter-runtime",
+  "label": "metal_irconverter_runtime",
+  "includepath": "metal_irconverter_runtime.h",
+  "includes": [
+    "cstdint",
+    "sstream",
+    "cstring",
+    "stdbool",
+    "stdint",
+    "string",
+    "ir_tessellator_tables",
+    "ir_raytracing"
+  ],
+  "functions": [
+    {
+      "id": "ir-runtime-create-append-buffer-view",
+      "name": "IRRuntimeCreateAppendBufferView",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeCreateAppendBufferView(Device, Append Buffer, Append Buffer Offset, Initial Counter Value, Out Buffer View)",
+      "params": [
+        {
+          "name": "Device",
+          "type": "device_t"
+        },
+        {
+          "name": "Append Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Append Buffer Offset",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Initial Counter Value",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Out Buffer View",
+          "type": "IRBufferView*"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Create a BufferView instance representing an append/consume buffer.\nAppend/consume buffers provide storage and an atomic insert/remove operation. This function takes an\ninput buffer for storage, creates the atomic counter, and bundles them together in a BufferView,\nproviding a convenient abstraction to use the input Metal buffer as an append/consume buffer.\n@param device device that allocates the atomic counter.\n@param appendBuffer a Metal buffer to use for backing storage of the append/consume buffer.\n@param appendBufferOffset an optional buffer into the appendBuffer. May be zero.\n@param initialCounterValue initial value for the atomic counter of the append/consume buffer.\n@param outBufferView output parameter into which this function writes the append buffer implementation details.\nUse function IRDescriptorTableSetBufferView() to bind an append/consume buffer to a descriptor table."
+    },
+    {
+      "id": "ir-runtime-get-append-buffer-count",
+      "name": "IRRuntimeGetAppendBufferCount",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeGetAppendBufferCount(Buffer View)",
+      "params": [
+        {
+          "name": "Buffer View",
+          "type": "IRBufferView*"
+        }
+      ],
+      "returnType": "IR_INLINE uint32_t",
+      "docs": "Obtain the count of an append/consume buffer.\n@note the backing MTLBuffer needs to have MTLStorageModeShared storage mode.\n@param bufferView buffer view representing the append/consume buffer for which to retrieve the counter.\n@return the current count of the append/consume buffer. This function doesn't cause a GPU-CPU sync."
+    },
+    {
+      "id": "ir-descriptor-table-get-buffer-metadata",
+      "name": "IRDescriptorTableGetBufferMetadata",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRDescriptorTableGetBufferMetadata(View)",
+      "params": [
+        {
+          "name": "View",
+          "type": "IRBufferView*"
+        }
+      ],
+      "returnType": "IR_INLINE uint64_t",
+      "docs": "Obtain encoded metadata from a buffer view description.\n@param view the view description to encode into the produced metadata."
+    },
+    {
+      "id": "ir-descriptor-table-set-buffer",
+      "name": "IRDescriptorTableSetBuffer",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRDescriptorTableSetBuffer(Entry, Gpu Va, Metadata)",
+      "params": [
+        {
+          "name": "Entry",
+          "type": "IRDescriptorTableEntry*"
+        },
+        {
+          "name": "Gpu Va",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Metadata",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Encode a buffer into the argument buffer.\n@param entry the pointer to the descriptor table entry to encode the buffer reference into.\n@param gpu_va the GPU address of the buffer to encode.\n@param metadata the metadata corresponding to the buffer view."
+    },
+    {
+      "id": "ir-descriptor-table-set-buffer-view",
+      "name": "IRDescriptorTableSetBufferView",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRDescriptorTableSetBufferView(Entry, Buffer View)",
+      "params": [
+        {
+          "name": "Entry",
+          "type": "IRDescriptorTableEntry*"
+        },
+        {
+          "name": "Buffer View",
+          "type": "IRBufferView*"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Encode a buffer into the argument buffer.\nUse this function to encode a buffer that may also include a reference as a texture from a shader.\n@param entry the pointer to the descriptor table entry to encode the buffer reference into.\n@param bufferView the buffer view description."
+    },
+    {
+      "id": "ir-descriptor-table-set-texture",
+      "name": "IRDescriptorTableSetTexture",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRDescriptorTableSetTexture(Entry, Argument, Min LOD Clamp, Metadata)",
+      "params": [
+        {
+          "name": "Entry",
+          "type": "IRDescriptorTableEntry*"
+        },
+        {
+          "name": "Argument",
+          "type": "texture_t"
+        },
+        {
+          "name": "Min LOD Clamp",
+          "type": "Float"
+        },
+        {
+          "name": "Metadata",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Encode a texture into the argument buffer.\n@param entry the pointer to the descriptor table entry to encode the texture reference into.\n@param argument the Metal texture to encode.\n@param minLODClamp the minimum LOD clamp for the texture.\n@param metadata the metadata needs to be zero."
+    },
+    {
+      "id": "ir-descriptor-table-set-sampler",
+      "name": "IRDescriptorTableSetSampler",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRDescriptorTableSetSampler(Entry, Argument, Lod Bias)",
+      "params": [
+        {
+          "name": "Entry",
+          "type": "IRDescriptorTableEntry*"
+        },
+        {
+          "name": "Argument",
+          "type": "sampler_t"
+        },
+        {
+          "name": "Lod Bias",
+          "type": "Float"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Encode a sampler into the argument buffer.\nThe sampler needs to support argument buffers (supportsArgumentBuffers=YES).\n@param entry the pointer to the descriptor table entry to encode the sampler reference into.\n@param argument the Metal sampler to encode.\n@param lodBias the mip LOD bias for the sampler."
+    },
+    {
+      "id": "ir-metal-index-to-ir-index",
+      "name": "IRMetalIndexToIRIndex",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRMetalIndexToIRIndex(Index Type)",
+      "params": [
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        }
+      ],
+      "returnType": "IR_INLINE uint16_t"
+    },
+    {
+      "id": "ir-runtime-draw-primitives-2ddb4f",
+      "name": "IRRuntimeDrawPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawPrimitives(Enc, Primitive Type, Vertex Start, Vertex Count, Instance Count, Base Instance)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Vertex Start",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Vertex Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Base Instance",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw primitives providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the primitive type to draw.\n@param vertexStart the vertex start.\n@param vertexCount the vertex count.\n@param instanceCount the number of instances to draw.\n@param baseInstance the first instance number."
+    },
+    {
+      "id": "ir-runtime-draw-primitives-bbc94a",
+      "name": "IRRuntimeDrawPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawPrimitives(Enc, Primitive Type, Vertex Start, Vertex Count, Instance Count)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Vertex Start",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Vertex Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw primitives providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the primitive type to draw.\n@param vertexStart the vertex start.\n@param vertexCount the vertex count.\n@param instanceCount the number of instances to draw."
+    },
+    {
+      "id": "ir-runtime-draw-primitives-8c8cba",
+      "name": "IRRuntimeDrawPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawPrimitives(Enc, Primitive Type, Vertex Start, Vertex Count)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Vertex Start",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Vertex Count",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw primitives providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the primitive type to draw.\n@param vertexStart the vertex start.\n@param vertexCount the vertex count."
+    },
+    {
+      "id": "ir-runtime-draw-primitives-d1de1c",
+      "name": "IRRuntimeDrawPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawPrimitives(Enc, Primitive Type, Indirect Buffer, Indirect Buffer Offset)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Indirect Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Indirect Buffer Offset",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw primitives indirect providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the type of primitives that the vertices assemble into.\n@param indirectBuffer the buffer from which the device reads draw call arguments as the MTLDrawPrimitivesIndirectArguments structure lays out.\n@param indirectBufferOffset the byte offset within indirectBuffer to start reading arguments from. This needs to be a multiple of 4 bytes."
+    },
+    {
+      "id": "ir-runtime-draw-indexed-primitives-136b1d",
+      "name": "IRRuntimeDrawIndexedPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawIndexedPrimitives(Enc, Primitive Type, Index Count, Index Type, Index Buffer, Index Buffer Offset, Instance Count, Base Vertex, Base Instance)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Index Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Index Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Index Buffer Offset",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Base Vertex",
+          "type": "int64_t"
+        },
+        {
+          "name": "Base Instance",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw indexed primitives providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the type of primitive that the vertices assemble into.\n@param indexCount for each instance the number of indices to read from the index buffer.\n@param indexType the data type of the indices.\n@param indexBuffer a buffer that contains indices to the vertices.\n@param indexBufferOffset the byte offset within indexBuffer to start reading indices from.\n@param instanceCount the number of instances to draw.\n@param baseVertex the first vertex to draw.\n@param baseInstance the first instance to draw."
+    },
+    {
+      "id": "ir-runtime-draw-indexed-primitives-7f8bb0",
+      "name": "IRRuntimeDrawIndexedPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawIndexedPrimitives(Enc, Primitive Type, Index Count, Index Type, Index Buffer, Index Buffer Offset, Instance Count)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Index Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Index Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Index Buffer Offset",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw indexed primitives providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the type of primitive that the vertices assemble into.\n@param indexCount for each instance the number of indices to read from the index buffer.\n@param indexType the data type of the indices.\n@param indexBuffer a buffer that contains indices to the vertices.\n@param indexBufferOffset byte offset within indexBuffer to start reading indices from.\n@param instanceCount the number of instances to draw."
+    },
+    {
+      "id": "ir-runtime-draw-indexed-primitives-786636",
+      "name": "IRRuntimeDrawIndexedPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawIndexedPrimitives(Enc, Primitive Type, Index Count, Index Type, Index Buffer, Index Buffer Offset)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Index Count",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Index Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Index Buffer Offset",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw indexed primitives providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the type of primitive that the vertices are assembled into.\n@param indexCount for each instance the number of indices to read from the index buffer.\n@param indexType the data type of the indices.\n@param indexBuffer a buffer that contains indices to the vertices.\n@param indexBufferOffset the byte offset within indexBuffer to start reading indices from."
+    },
+    {
+      "id": "ir-runtime-draw-indexed-primitives-d819e2",
+      "name": "IRRuntimeDrawIndexedPrimitives",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawIndexedPrimitives(Enc, Primitive Type, Index Type, Index Buffer, Index Buffer Offset, Indirect Buffer, Indirect Buffer Offset)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "primitivetype_t"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Index Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Index Buffer Offset",
+          "type": "uint64_t"
+        },
+        {
+          "name": "Indirect Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Indirect Buffer Offset",
+          "type": "uint64_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw indexed primitives indirect providing draw call parameter information to the vertex stage.\n@param enc the render command encoder.\n@param primitiveType the type of the primitive that the vertices assemble into.\n@param indexBuffer the buffer that contains indices to the vertices.\n@param indexBufferOffset the byte offset within indexBuffer to start reading indices from.\n@param indirectBuffer the buffer object from which the device reads draw call arguments as the MTLDrawIndexedPrimitivesIndirectArguments structure lays out.\n@param indirectBufferOffset the byte offset within indirectBuffer to start reading arguments from. This needs to be a multiple of 4 bytes."
+    },
+    {
+      "id": "ir-runtime-primitive-type-vertex-count",
+      "name": "IRRuntimePrimitiveTypeVertexCount",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimePrimitiveTypeVertexCount(Primitive Type)",
+      "params": [
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        }
+      ],
+      "returnType": "IR_INLINE uint32_t"
+    },
+    {
+      "id": "ir-runtime-primitive-type-vertex-overlap",
+      "name": "IRRuntimePrimitiveTypeVertexOverlap",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimePrimitiveTypeVertexOverlap(Primitive Type)",
+      "params": [
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        }
+      ],
+      "returnType": "IR_INLINE uint32_t"
+    },
+    {
+      "id": "ir-runtime-calculate-draw-info-for-gs-emulation",
+      "name": "IRRuntimeCalculateDrawInfoForGSEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeCalculateDrawInfoForGSEmulation(Primitive Type, Index Type, Vertex Size In Bytes, Max Input Primitives Per Mesh Threadgroup, Instance Count)",
+      "params": [
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Vertex Size In Bytes",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Max Input Primitives Per Mesh Threadgroup",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE IRRuntimeDrawInfo"
+    },
+    {
+      "id": "ir-runtime-calculate-object-tg-count-for-tessellation-and-geometry-emulation",
+      "name": "IRRuntimeCalculateObjectTgCountForTessellationAndGeometryEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeCalculateObjectTgCountForTessellationAndGeometryEmulation(Vertex Or Index Count, Object Threadgroup Vertex Stride, Primitive Type, Instance Count)",
+      "params": [
+        {
+          "name": "Vertex Or Index Count",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Object Threadgroup Vertex Stride",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE mtlsize_t",
+      "docs": "to be filled out by the caller"
+    },
+    {
+      "id": "ir-runtime-calculate-threadgroup-size-for-geometry",
+      "name": "IRRuntimeCalculateThreadgroupSizeForGeometry",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeCalculateThreadgroupSizeForGeometry(Primitive Type, Max Input Primitives Per Mesh Threadgroup, Object Threadgroup Vertex Stride, Object Threadgroup Size, Mesh Threadgroup Size)",
+      "params": [
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Max Input Primitives Per Mesh Threadgroup",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Object Threadgroup Vertex Stride",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Object Threadgroup Size",
+          "type": "uint32_t*"
+        },
+        {
+          "name": "Mesh Threadgroup Size",
+          "type": "uint32_t*"
+        }
+      ],
+      "returnType": "IR_INLINE void"
+    },
+    {
+      "id": "ir-runtime-calculate-threadgroup-size-for-tessellation-and-geometry",
+      "name": "IRRuntimeCalculateThreadgroupSizeForTessellationAndGeometry",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeCalculateThreadgroupSizeForTessellationAndGeometry(Patches Per Object Threadgroup, Max Object Threads Per Patch, Max Input Primitives Per Mesh Threadgroup, Object Threadgroup Size, Mesh Threadgroup Size)",
+      "params": [
+        {
+          "name": "Patches Per Object Threadgroup",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Max Object Threads Per Patch",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Max Input Primitives Per Mesh Threadgroup",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Object Threadgroup Size",
+          "type": "uint32_t*"
+        },
+        {
+          "name": "Mesh Threadgroup Size",
+          "type": "uint32_t*"
+        }
+      ],
+      "returnType": "IR_INLINE void"
+    },
+    {
+      "id": "ir-runtime-draw-indexed-primitives-geometry-emulation",
+      "name": "IRRuntimeDrawIndexedPrimitivesGeometryEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawIndexedPrimitivesGeometryEmulation(Enc, Primitive Type, Index Type, Index Buffer, Geometry Pipeline Config, Instance Count, Index Count Per Instance, Start Index, Base Vertex, Base Instance)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Index Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Geometry Pipeline Config",
+          "type": "IRRuntimeGeometryPipelineConfig"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Index Count Per Instance",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Start Index",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Vertex",
+          "type": "Int"
+        },
+        {
+          "name": "Base Instance",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw indexed primitives using an emulated geometry pipeline.\nYou need to bind your vertex arrays and strides before issuing this call.\nBind a buffer with IRRuntimeVertexBuffers at index 0 for the object stage,\nYou need to manually flag residency for all referenced vertex buffers and for the index buffer."
+    },
+    {
+      "id": "ir-runtime-draw-primitives-geometry-emulation",
+      "name": "IRRuntimeDrawPrimitivesGeometryEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawPrimitivesGeometryEmulation(Enc, Primitive Type, Geometry Pipeline Config, Instance Count, Vertex Count Per Instance, Base Vertex, Base Instance)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Geometry Pipeline Config",
+          "type": "IRRuntimeGeometryPipelineConfig"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Vertex Count Per Instance",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Vertex",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Instance",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw non-indexed primitives using an emulated geometry pipeline.\nYou need to bind your vertex arrays and strides before issuing this call.\nBind a buffer with IRRuntimeVertexBuffers at index 0 for the object stage,\nYou need to manually flag residency for all referenced vertex buffers."
+    },
+    {
+      "id": "ir-tessellator-threadgroup-vertex-overlap",
+      "name": "IRTessellatorThreadgroupVertexOverlap",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRTessellatorThreadgroupVertexOverlap(Tessellator Output Primitive)",
+      "params": [
+        {
+          "name": "Tessellator Output Primitive",
+          "type": "IRRuntimeTessellatorOutputPrimitive"
+        }
+      ],
+      "returnType": "IR_INLINE uint16_t"
+    },
+    {
+      "id": "ir-runtime-calculate-draw-info-for-gsts-emulation",
+      "name": "IRRuntimeCalculateDrawInfoForGSTSEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeCalculateDrawInfoForGSTSEmulation(Primitive Type, Index Type, Tessellator Output Primitive, Gs Max Input Primitives Per Mesh Threadgroup, Hs Patches Per Object Threadgroup, Hs Input Control Points Per Patch, Hs Object Threads Per Patch, Gs Instance Count)",
+      "params": [
+        {
+          "name": "Primitive Type",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Tessellator Output Primitive",
+          "type": "IRRuntimeTessellatorOutputPrimitive"
+        },
+        {
+          "name": "Gs Max Input Primitives Per Mesh Threadgroup",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Hs Patches Per Object Threadgroup",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Hs Input Control Points Per Patch",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Hs Object Threads Per Patch",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Gs Instance Count",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE IRRuntimeDrawInfo"
+    },
+    {
+      "id": "ir-runtime-draw-indexed-patches-tessellation-emulation",
+      "name": "IRRuntimeDrawIndexedPatchesTessellationEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawIndexedPatchesTessellationEmulation(Enc, Primitive Topology, Index Type, Index Buffer, Tessellation Pipeline Config, Instance Count, Index Count Per Instance, Base Instance, Base Vertex, Start Index)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Topology",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Index Type",
+          "type": "indextype_t"
+        },
+        {
+          "name": "Index Buffer",
+          "type": "buffer_t"
+        },
+        {
+          "name": "Tessellation Pipeline Config",
+          "type": "IRRuntimeTessellationPipelineConfig"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Index Count Per Instance",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Instance",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Vertex",
+          "type": "int32_t"
+        },
+        {
+          "name": "Start Index",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "* Draw indexed primitives using an emulated geometry/tessellation pipeline.\nYou need to bind your vertex arrays and strides before issuing this call.\nBind a buffer with IRRuntimeVertexBuffers at index 0 for the object stage,\nYou need to manually flag residency for all referenced vertex buffers and for the index buffer."
+    },
+    {
+      "id": "ir-runtime-draw-patches-tessellation-emulation",
+      "name": "IRRuntimeDrawPatchesTessellationEmulation",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeDrawPatchesTessellationEmulation(Enc, Primitive Topology, Tessellation Pipeline Config, Instance Count, Vertex Count Per Instance, Base Instance, Base Vertex)",
+      "params": [
+        {
+          "name": "Enc",
+          "type": "renderencoder_t"
+        },
+        {
+          "name": "Primitive Topology",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Tessellation Pipeline Config",
+          "type": "IRRuntimeTessellationPipelineConfig"
+        },
+        {
+          "name": "Instance Count",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Vertex Count Per Instance",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Instance",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Base Vertex",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE void",
+      "docs": "Draw non-indexed primitives using an emulated geometry/tessellation pipeline.\nYou need to bind your vertex arrays and strides before issuing this call.\nBind a buffer with IRRuntimeVertexBuffers at index 0 for the object stage,\nYou need to manually flag residency for all referenced vertex buffers."
+    },
+    {
+      "id": "ir-runtime-validate-tessellation-pipeline",
+      "name": "IRRuntimeValidateTessellationPipeline",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeValidateTessellationPipeline(Hs Tessellator Output Primitive, Gs Input Primitive, Hs Output Control Point Size, Ds Input Control Point Size, Hs Patch Constants Size, Ds Patch Constants Size, Hs Output Control Point Count, Ds Input Control Point Count)",
+      "params": [
+        {
+          "name": "Hs Tessellator Output Primitive",
+          "type": "IRRuntimeTessellatorOutputPrimitive"
+        },
+        {
+          "name": "Gs Input Primitive",
+          "type": "IRRuntimePrimitiveType"
+        },
+        {
+          "name": "Hs Output Control Point Size",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Ds Input Control Point Size",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Hs Patch Constants Size",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Ds Patch Constants Size",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Hs Output Control Point Count",
+          "type": "uint32_t"
+        },
+        {
+          "name": "Ds Input Control Point Count",
+          "type": "uint32_t"
+        }
+      ],
+      "returnType": "IR_INLINE bool",
+      "docs": "Validate that the hull domain and tessellation stages are compatible from their reflection data.\n@param hsTessellatorOutputPrimitive the tessellator's output primitive which needs to match the geometry stage's input primitive. You can cast this parameter from IRTessellatorOutputPrimitive.\n@param gsInputPrimitive the input primitive type of the geometry stage. This value needs to match the hsTessellatorOutputPrimitive. You can cast this parameter from IRInputPrimitive.\n@param hsOutputControlPointSize the size of the point output from the hull stage. This value needs to match the input point size of the domain stage.\n@param dsInputControlPointSize the size of the input point to the domain stage. This value needs to match the point size output from the hull stage.\n@param hsPatchConstantsSize the size of the constants output from the hull stage. This value needs to match the size of the input constants to the domain stage.\n@param dsPatchConstantsSize the size of the input constants to the domain stage. This value needs to match the size of the constants output from the hull stage.\n@param hsOutputControlPointCount the number of control points output from the hull stage. This value needs to match the number of input control points to the domain stage.\n@param dsInputControlPointCount the number of input control points to the domain stage. This value needs to match the number of control points output from the hull stage."
+    },
+    {
+      "id": "ir-runtime-new-geometry-emulation-pipeline",
+      "name": "IRRuntimeNewGeometryEmulationPipeline",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeNewGeometryEmulationPipeline(Device, Descriptor, Ios)",
+      "params": [
+        {
+          "name": "Device",
+          "type": "device_t"
+        },
+        {
+          "name": "Descriptor",
+          "type": "IRGeometryEmulationPipelineDescriptor*"
+        },
+        {
+          "name": "Ios",
+          "type": "nserror_t* error ) API_AVAILABLE ( macosx ( 1 4 ),"
+        }
+      ],
+      "returnType": "IR_INLINE renderpipelinestate_t",
+      "docs": "Create a new mesh pipeline suitable for emulating a render pipeline with a geometry stage.\n@param device the device to use for creating the new pipeline.\n@param descriptor an object describing the origin libraries and function names to create the pipeline.\n@param error an output error object containing details about any error encountered during the creation process.\n@return a new mesh render pipeline or nil on error."
+    },
+    {
+      "id": "ir-runtime-new-geometry-tessellation-emulation-pipeline",
+      "name": "IRRuntimeNewGeometryTessellationEmulationPipeline",
+      "category": "metal_irconverter_runtime",
+      "signature": "IRRuntimeNewGeometryTessellationEmulationPipeline(Device, Descriptor, Ios)",
+      "params": [
+        {
+          "name": "Device",
+          "type": "device_t"
+        },
+        {
+          "name": "Descriptor",
+          "type": "IRGeometryTessellationEmulationPipelineDescriptor*"
+        },
+        {
+          "name": "Ios",
+          "type": "nserror_t* error ) API_AVAILABLE ( macosx ( 1 4 ),"
+        }
+      ],
+      "returnType": "IR_INLINE renderpipelinestate_t",
+      "docs": "Create a new mesh pipeline suitable for emulating a render pipeline with a hull stage, a domain stage, and a geometry stage.\n@note You may optionally not provide a geometry shader as part of your tessellation pipeline by setting the decriptor parameter's\ngeometryLibrary member to NULL, and providing a geometryFunctionName of kIRTrianglePassthroughGeometryShader, kIRLinePassthroughGeometryShader,\nor kIRPointPassthroughGeometryShader, depending on the primitive topology of draw calls that use the pipeline.\n@param device the device to use for creating the new pipeline.\n@param descriptor an object describing the origin libraries and function names to create the pipeline.\n@param error an output error object containing details about any error encountered during the creation process.\n@return a new mesh render pipeline or nil on error."
+    }
+  ]
+}

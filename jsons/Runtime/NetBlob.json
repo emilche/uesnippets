@@ -13,6 +13,49 @@
   ],
   "functions": [
     {
+      "id": "f-quantized-blob-state-9adb64",
+      "name": "FQuantizedBlobState",
+      "category": "NetBlob",
+      "signature": "FQuantizedBlobState(Target, Size, Alignment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt"
+        },
+        {
+          "name": "Alignment",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-state-buffer",
+      "name": "GetStateBuffer",
+      "category": "NetBlob",
+      "signature": "GetStateBuffer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "Byte*"
+    },
+    {
+      "id": "f-net-blob",
+      "name": "FNetBlob",
+      "category": "NetBlob",
+      "signature": "FNetBlob()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Construct a NetBlob with reference count zero."
+    },
+    {
       "id": "set-state",
       "name": "SetState",
       "category": "NetBlob",
@@ -33,6 +76,48 @@
       ],
       "returnType": "Void",
       "docs": "Set the blob state. Use when there's a descriptor to avoid having to override serialization functions."
+    },
+    {
+      "id": "get-creation-info",
+      "name": "GetCreationInfo",
+      "category": "NetBlob",
+      "signature": "GetCreationInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "FNetBlobCreationInfo&",
+      "docs": "Returns the FNetBlobCreationInfo."
+    },
+    {
+      "id": "is-reliable",
+      "name": "IsReliable",
+      "category": "NetBlob",
+      "signature": "IsReliable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the blob is reliably sent or not."
+    },
+    {
+      "id": "get-replication-state-descriptor",
+      "name": "GetReplicationStateDescriptor",
+      "category": "NetBlob",
+      "signature": "GetReplicationStateDescriptor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "FReplicationStateDescriptor*",
+      "docs": "Returns the FReplicationStateDescriptor if there is one. It's recommended to use a descriptor instead of overriding the serialization methods."
     },
     {
       "id": "serialize-creation-info",
@@ -115,24 +200,6 @@
       "docs": "Deserialize a blob that was serialized with SerializeWithObject."
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "NetBlob",
-      "signature": "Serialize(Target, Context)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FNetBlob*"
-        },
-        {
-          "name": "Context",
-          "type": "FNetSerializationContext&"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Serialize the blob."
-    },
-    {
       "id": "deserialize",
       "name": "Deserialize",
       "category": "NetBlob",
@@ -173,6 +240,20 @@
       "docs": "Collect object references from quantized data"
     },
     {
+      "id": "add-ref",
+      "name": "AddRef",
+      "category": "NetBlob",
+      "signature": "AddRef(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds a reference. A blob is created with reference count zero."
+    },
+    {
       "id": "release",
       "name": "Release",
       "category": "NetBlob",
@@ -185,6 +266,254 @@
       ],
       "returnType": "Void",
       "docs": "Removes a reference. When the reference count reaches zero the blob will be deleted. A blob is created with reference count zero."
+    },
+    {
+      "id": "get-ref-count",
+      "name": "GetRefCount",
+      "category": "NetBlob",
+      "signature": "GetRefCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the reference count.  A blob is created with reference count zero."
+    },
+    {
+      "id": "has-exports",
+      "name": "HasExports",
+      "category": "NetBlob",
+      "signature": "HasExports(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the blob has additional exports to add."
+    },
+    {
+      "id": "call-get-net-object-reference-exports",
+      "name": "CallGetNetObjectReferenceExports",
+      "category": "NetBlob",
+      "signature": "CallGetNetObjectReferenceExports(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "TArrayView<FNetObjectReference>",
+      "docs": "Retrieve the object references that need to be exported."
+    },
+    {
+      "id": "call-get-net-token-exports",
+      "name": "CallGetNetTokenExports",
+      "category": "NetBlob",
+      "signature": "CallGetNetTokenExports(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "TArrayView<FNetToken>",
+      "docs": "Retrieve NetToken that needs to be exported."
+    },
+    {
+      "id": "serialize-blob",
+      "name": "SerializeBlob",
+      "category": "NetBlob",
+      "signature": "SerializeBlob(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the state if there's a valid descriptor and state buffer."
+    },
+    {
+      "id": "deserialize-blob",
+      "name": "DeserializeBlob",
+      "category": "NetBlob",
+      "signature": "DeserializeBlob(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Deserializes the state if there's a valid descriptor and state buffer."
+    },
+    {
+      "id": "f-net-object-attachment",
+      "name": "FNetObjectAttachment",
+      "category": "NetBlob",
+      "signature": "FNetObjectAttachment(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The CreationInfo that was passed to the constructor."
+    },
+    {
+      "id": "get-net-object-reference",
+      "name": "GetNetObjectReference",
+      "category": "NetBlob",
+      "signature": "GetNetObjectReference(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "FNetObjectReference&"
+    },
+    {
+      "id": "get-target-object-reference",
+      "name": "GetTargetObjectReference",
+      "category": "NetBlob",
+      "signature": "GetTargetObjectReference(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "FNetObjectReference&"
+    },
+    {
+      "id": "serialize-object-reference",
+      "name": "SerializeObjectReference",
+      "category": "NetBlob",
+      "signature": "SerializeObjectReference(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the owner and subobject reference."
+    },
+    {
+      "id": "deserialize-object-reference",
+      "name": "DeserializeObjectReference",
+      "category": "NetBlob",
+      "signature": "DeserializeObjectReference(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes the owner and subobject reference."
+    },
+    {
+      "id": "serialize-sub-object-reference",
+      "name": "SerializeSubObjectReference",
+      "category": "NetBlob",
+      "signature": "SerializeSubObjectReference(Target, Context, Ref Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Ref Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Serializes only the subobject reference and assumes the passed NetHandle is the owner."
+    },
+    {
+      "id": "deserialize-sub-object-reference",
+      "name": "DeserializeSubObjectReference",
+      "category": "NetBlob",
+      "signature": "DeserializeSubObjectReference(Target, Context, Ref Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        },
+        {
+          "name": "Context",
+          "type": "FNetSerializationContext&"
+        },
+        {
+          "name": "Ref Handle",
+          "type": "FNetRefHandle"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Deserializes a subobject reference that was serialized using SerializeSubObjectReference with the same NetHandle."
+    },
+    {
+      "id": "f-quantized-blob-state-a95e5a",
+      "name": "FQuantizedBlobState",
+      "category": "NetBlob",
+      "signature": "FQuantizedBlobState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetBlob*"
+        }
+      ],
+      "returnType": "FNetBlob::FQuantizedBlobState::~",
+      "docs": "Information typically passed to a FNetBlob at creation time.\nFlags will not be serialized unless the FNetBlob derived class chooses to do so."
+    },
+    {
+      "id": "set-net-object-reference",
+      "name": "SetNetObjectReference",
+      "category": "NetBlob",
+      "signature": "SetNetObjectReference(Target, In Queue Owner Reference, In Target Object Reference)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetObjectAttachment*"
+        },
+        {
+          "name": "In Queue Owner Reference",
+          "type": "FNetObjectReference&"
+        },
+        {
+          "name": "In Target Object Reference",
+          "type": "FNetObjectReference&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the owner and subobject references."
     }
   ]
 }

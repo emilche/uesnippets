@@ -20,6 +20,66 @@
   ],
   "functions": [
     {
+      "id": "get-index",
+      "name": "GetIndex",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleUser*"
+        }
+      ],
+      "returnType": "FAccessibleUserIndex",
+      "docs": "Returns the unique index that identifies this accessible user."
+    },
+    {
+      "id": "get-focused-accessible-widget",
+      "name": "GetFocusedAccessibleWidget",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetFocusedAccessibleWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleUser*"
+        }
+      ],
+      "returnType": "TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the accessible widget the accessible user is currently focused on. If no accessible widget is focused, nullptr is returned.\n@see IAccessibleWidget"
+    },
+    {
+      "id": "set-focused-accessible-widget",
+      "name": "SetFocusedAccessibleWidget",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SetFocusedAccessibleWidget(Target, In Widget)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleUser*"
+        },
+        {
+          "name": "In Widget",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Sets which accessible widget the accessible user is currently focused on.\nNote: This function is meant to directly set the widget an accessible user is focused on, bypassing all of the focus change accessible events.\nThis should only be used by FGenericAccessibleMessageHandler and its subclasses to update the  the accessible focus for an accessible user.\nMost of the time, you want to use IAccessibleWidget::SetUserFocus to request an accessible widget be focused on by a user. It raises the appropriate accessible events\nso listeners for accessible events can do the appropriate event handling for the focus change event.\n@param InWidget The widget this accessible user will be focused on.\n@return True if the passed in widget was successfully set. Else returns false."
+    },
+    {
+      "id": "clear-focused-accessible-widget",
+      "name": "ClearFocusedAccessibleWidget",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "ClearFocusedAccessibleWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleUser*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clear the accessible focused widget."
+    },
+    {
       "id": "register-user",
       "name": "RegisterUser",
       "category": "GenericAccessibleInterfaces",
@@ -134,6 +194,421 @@
       "docs": "Returns an array of all accessible users that are currently registered with the accessible registry."
     },
     {
+      "id": "get-primary-user-index",
+      "name": "GetPrimaryUserIndex",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetPrimaryUserIndex()",
+      "params": [],
+      "returnType": "FAccessibleUserIndex",
+      "docs": "Returns the index of the primary accessible user.\nThe primary accessible user should correspond to the default input source that every application should have. This user should also be the primary cursor user.\nE.g On desktop platforms, that would correspond to the keyboard user."
+    },
+    {
+      "id": "is-checkable",
+      "name": "IsCheckable",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "IsCheckable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleActivatable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether this widget can be toggled between various check states\n@return true if this widget supports being in different states"
+    },
+    {
+      "id": "get-checked-state",
+      "name": "GetCheckedState",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetCheckedState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleActivatable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If IsCheckable() is true, this gets the current state that the widget is in.\n//todo: return ECheckState\n@return true if the current state is considered \"on\" or \"checked\""
+    },
+    {
+      "id": "is-password",
+      "name": "IsPassword",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "IsPassword(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleProperty*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if this text is storing password data, indicating that it may need special handling to presenting itself to the user.\n@return true if the text is storing a password or otherwise senstive data that should be hidden."
+    },
+    {
+      "id": "get-step-size",
+      "name": "GetStepSize",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetStepSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleProperty*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "How much the value should increase/decrease when the user attempts to modify the value using UI controls.\nNote: This should always return a positive value. The caller is responsible for negating it when attempting to decrease.\n@return A number suggesting how much to modify GetValue() by when the user wants to increase/decrease the value."
+    },
+    {
+      "id": "get-maximum",
+      "name": "GetMaximum",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetMaximum(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleProperty*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "The maximum allowed value for this property. This should only be used if GetStepSize is not 0.\n@return The maximum value that this property can be assigned when using step sizes."
+    },
+    {
+      "id": "get-minimum",
+      "name": "GetMinimum",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetMinimum(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleProperty*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "The minimum allowed value for this property. This should only be used if GetStepSize is not 0.\n@return The minimum value that this property can be assigned when using step sizes."
+    },
+    {
+      "id": "get-value-as-variant",
+      "name": "GetValueAsVariant",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetValueAsVariant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleProperty*"
+        }
+      ],
+      "returnType": "FVariant",
+      "docs": "The current value stored by the widget as a FVariant. Used on platforms where the type of the value is important for accessibility methods\nsuch as on Mac. .\n@return An FVariant that holds the widget's current value and type of value."
+    },
+    {
+      "id": "set-value",
+      "name": "SetValue",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SetValue(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleProperty*"
+        },
+        {
+          "name": "Value",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the value stored by the widget. While this function accepts a String, there is no way to know\nwhat the underlying data is stored as. The platform layer must retain some additional information\nabout what kind of widget this is, and ensure it's being called with valid arguments.\n@param Value The new value to assign to the widget, which may need to be converted before assigning to a variable."
+    },
+    {
+      "id": "can-support-multi-selection",
+      "name": "CanSupportMultiSelection",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "CanSupportMultiSelection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleTable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check if the table can select more than one element at a time.\n@return True if the table can support selection for more than one element at a time. Else false."
+    },
+    {
+      "id": "is-selection-required",
+      "name": "IsSelectionRequired",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "IsSelectionRequired(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleTable*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if the table must have an element selected at all times.\n@return True if an element of the table must be selected at all times, else false"
+    },
+    {
+      "id": "add-to-selection",
+      "name": "AddToSelection",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AddToSelection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleTableRow*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds this table row to the list of selected items in the owning table"
+    },
+    {
+      "id": "remove-from-selection",
+      "name": "RemoveFromSelection",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "RemoveFromSelection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleTableRow*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes this table row from the list of selected items in the owning table"
+    },
+    {
+      "id": "is-selected",
+      "name": "IsSelected",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "IsSelected(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleTableRow*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if this table row is currently selected in the owning table.\n@return True if this table row is currently selected in the owning table. Else false"
+    },
+    {
+      "id": "get-owning-table",
+      "name": "GetOwningTable",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetOwningTable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleTableRow*"
+        }
+      ],
+      "returnType": "TSharedPtr<IAccessibleWidget>",
+      "docs": "Get the accessible table that owns this accessible table row.\nNOTE: This should always return a valid pointer in concrete classes. An accessible table row must ALWAYS have an accessible table as an owner.\n@return The owning table"
+    },
+    {
+      "id": "search-for-ancestor-from",
+      "name": "SearchForAncestorFrom",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SearchForAncestorFrom(Source, Predicate)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType"
+        }
+      ],
+      "returnType": "template<PredicateType> TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the first instance of an ancestor from a source widget that satisfies a search criteria.\nIf the passed in source widget does not have any ancestors or if there are no ancestors that satisfy the search criteria, nullptr is returned.\nThe search criteria can be either a functor or lambda that acts as a predicate. It must return a bool and take in a const TSharedRef<IAccessibleWidget>& as an argument.\n@param Source The accessible widget to start searching from.\n@param SearchCriteria A predicate that takes a const TSharedRef<IAccessibleWidget>& as an argument and returns true if the passed in widget satisfies the search criteria. When an accessible widget that satisfies the SearchCriteria is found, it is returned by the function.\n@return The first instance of an ancestor from the source widget that satisfies the search criteria."
+    },
+    {
+      "id": "search-for-next-sibling-from",
+      "name": "SearchForNextSiblingFrom",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SearchForNextSiblingFrom(Source, Predicate)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType"
+        }
+      ],
+      "returnType": "template<PredicateType> TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the first instance of a next sibling from a source widget that satisfies a search criteria.\nIf the passed in source widget does not have any next siblings or if there are no next siblings that satisfy the search criteria, nullptr is returned.\nThe search criteria can be either a functor or lambda that acts as a predicate. It must return a bool and take in a const TSharedRef<IAccessibleWidget>& as an argument.\n@param Source The accessible widget to start searching from.\n@param SearchCriteria A predicate that takes a const TSharedRef<IAccessibleWidget>& as an argument and returns true if the passed in widget satisfies the search criteria. When an accessible widget that satisfies the SearchCriteria is found, it is returned by the function.\n@return The first instance of a next sibling from the source widget that satisfies the search criteria."
+    },
+    {
+      "id": "search-for-previous-sibling-from",
+      "name": "SearchForPreviousSiblingFrom",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SearchForPreviousSiblingFrom(Source, Predicate)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType"
+        }
+      ],
+      "returnType": "template<PredicateType> TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the first instance of a previous sibling from a source widget that satisfies a search criteria.\nIf the passed in source widget does not have any previous siblings or if there are no previous siblings that satisfy the search criteria, nullptr is returned.\nThe search criteria can be either a functor or lambda that acts as a predicate. It must return a bool and take in a const TSharedRef<IAccessibleWidget>& as an argument.\n@param Source The accessible widget to start searching from.\n@param SearchCriteria A predicate that takes a const TSharedRef<IAccessibleWidget>& as an argument and returns true if the passed in widget satisfies the search criteria. When an accessible widget that satisfies the SearchCriteria is found, it is returned by the function.\n@return The first instance of a previous sibling from the source widget that satisfies the search criteria."
+    },
+    {
+      "id": "search-for-next-widget-in-hierarchy-from",
+      "name": "SearchForNextWidgetInHierarchyFrom",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SearchForNextWidgetInHierarchyFrom(Source, Predicate)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType"
+        }
+      ],
+      "returnType": "template<PredicateType> TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the first instance of a next widget in the accessible hierarchy from a source widget that satisfies a search criteria.\nIf the passed in source widget does not have any next widgets or if there are no next widgets that satisfy the search criteria, nullptr is returned.\nThe search criteria can be either a functor or lambda that acts as a predicate. It must return a bool and take in a const TSharedRef<IAccessibleWidget>& as an argument.\n@param Source The accessible widget to start searching from.\n@param SearchCriteria A predicate that takes a const TSharedRef<IAccessibleWidget>& as an argument and returns true if the passed in widget satisfies the search criteria. When an accessible widget that satisfies the SearchCriteria is found, it is returned by the function.\n@return The first instance of a next widget from the source widget that satisfies the search criteria."
+    },
+    {
+      "id": "search-for-previous-widget-in-hierarchy-from",
+      "name": "SearchForPreviousWidgetInHierarchyFrom",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SearchForPreviousWidgetInHierarchyFrom(Source, Predicate)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType"
+        }
+      ],
+      "returnType": "template<PredicateType> TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the first instance of a previous widget in the accessible hierarchy from a source widget that satisfies a search criteria.\nIf the passed in source widget does not have any previous widgets or if there are no previous widgets that satisfy the search criteria, nullptr is returned.\nThe search criteria can be either a functor or lambda that acts as a predicate. It must return a bool and take in a const TSharedRef<IAccessibleWidget>& as an argument.\n@param Source The accessible widget to start searching from.\n@param SearchCriteria A predicate that takes a const TSharedRef<IAccessibleWidget>& as an argument and returns true if the passed in widget satisfies the search criteria. When an accessible widget that satisfies the SearchCriteria is found, it is returned by the function.\n@return The first instance of a previous widget from the source widget that satisfies the search criteria."
+    },
+    {
+      "id": "search-for-first-child-from",
+      "name": "SearchForFirstChildFrom",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SearchForFirstChildFrom(Source, Predicate)",
+      "params": [
+        {
+          "name": "Source",
+          "type": "TSharedRef<IAccessibleWidget>&"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateType"
+        }
+      ],
+      "returnType": "template<PredicateType> TSharedPtr<IAccessibleWidget>",
+      "docs": "Returns the first instance of a child from a source widget that satisfies a search criteria.\nIf the passed in source widget does not have any children or if there are no children that satisfy the search criteria, nullptr is returned.\nThe search criteria can be either a functor or lambda that acts as a predicate. It must return a bool and take in a const TSharedRef<IAccessibleWidget>& as an argument.\n@param Source The accessible widget to start searching from.\n@param SearchCriteria A predicate that takes a const TSharedRef<IAccessibleWidget>& as an argument and returns true if the passed in widget satisfies the search criteria. When an accessible widget that satisfies the SearchCriteria is found, it is returned by the function.\n@return The first child from the source widget that satisfies the search criteria."
+    },
+    {
+      "id": "to-string",
+      "name": "ToString",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "ToString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Returns a string representation of this widget. Primarily used for debugging."
+    },
+    {
+      "id": "as-window",
+      "name": "AsWindow",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AsWindow(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "IAccessibleWindow*",
+      "docs": "Attempt to cast this to an IAccessibleWindow\n@return 'this' as an IAccessibleWindow if possible, otherwise nullptr"
+    },
+    {
+      "id": "as-activatable",
+      "name": "AsActivatable",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AsActivatable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "IAccessibleActivatable*",
+      "docs": "Attempt to cast this to an IAccessibleActivatable\n@return 'this' as an IAccessibleActivatable if possible, otherwise nullptr"
+    },
+    {
+      "id": "as-property",
+      "name": "AsProperty",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AsProperty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "IAccessibleProperty*",
+      "docs": "Attempt to cast this to an IAccessibleProperty\n@return 'this' as an IAccessibleProperty if possible, otherwise nullptr"
+    },
+    {
+      "id": "as-text",
+      "name": "AsText",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AsText(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "IAccessibleText*",
+      "docs": "Attempt to cast this to an IAccessibleText\n@return 'this' as an IAccessibleText if possible, otherwise nullptr"
+    },
+    {
+      "id": "as-table",
+      "name": "AsTable",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AsTable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "IAccessibleTable*",
+      "docs": "Attempt to cast this to an IAccessibleTable\n@return 'this' as an IAccessibleTable if possible, otherwise nullptr"
+    },
+    {
+      "id": "as-table-row",
+      "name": "AsTableRow",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "AsTableRow(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAccessibleWidget*"
+        }
+      ],
+      "returnType": "IAccessibleTableRow*",
+      "docs": "Attempt to cast this to an IAccessibleTableRow\n@return 'this' as an IAccessibleTableRow if possible, otherwise nullptr"
+    },
+    {
       "id": "application-is-accessible",
       "name": "ApplicationIsAccessible",
       "category": "GenericAccessibleInterfaces",
@@ -146,6 +621,20 @@
       ],
       "returnType": "Bool",
       "docs": "Subclasses should return true to indicate that they support accessibility.\n@return true if the application intends to return valid accessible widgets when queried."
+    },
+    {
+      "id": "is-active",
+      "name": "IsActive",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "IsActive(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks if accessibility is enabled in the application. Usually this happens when screen-reading software is turned on.\nNote: On some platforms, there is no way to deactivate this after enabling it.\n@return The last value SetActive() was called with."
     },
     {
       "id": "set-active",
@@ -164,6 +653,188 @@
       ],
       "returnType": "Void",
       "docs": "Notify the application to start or stop processing accessible messages from the platform layer.\n@param bActive Whether to enable to disable the message handler."
+    },
+    {
+      "id": "get-accessible-window",
+      "name": "GetAccessibleWindow",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetAccessibleWindow(Target, In Window)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "In Window",
+          "type": "TSharedRef<FGenericWindow>&"
+        }
+      ],
+      "returnType": "TSharedPtr<IAccessibleWidget>",
+      "docs": "Creates or retrieves an accessible object for a native OS window.\ntodo: Behavior for non-native windows (virtual or others) is currently undefined.\n@param InWindow The native window to find the accessible window for\n@return The accessible object corresponding to the supplied native window"
+    },
+    {
+      "id": "get-accessible-window-id",
+      "name": "GetAccessibleWindowId",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetAccessibleWindowId(Target, In Window)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "In Window",
+          "type": "TSharedRef<FGenericWindow>&"
+        }
+      ],
+      "returnType": "AccessibleWidgetId",
+      "docs": "Creates or retrieves the identifier for an accessible object for a native OS window.\ntodo: Behavior for non-native windows (virtual or others) is currently undefined.\n@param InWindow The native window to find the accessible window for\n@return The identifier for the accessible window created"
+    },
+    {
+      "id": "get-accessible-widget-from-id",
+      "name": "GetAccessibleWidgetFromId",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetAccessibleWidgetFromId(Target, Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "Id",
+          "type": "AccessibleWidgetId"
+        }
+      ],
+      "returnType": "TSharedPtr<IAccessibleWidget>",
+      "docs": "Retrieves an accessible widget that matches the given identifier.\n@param Id The identifier for the widget to get.\n@return The widget that matches this identifier, or nullptr if the widget does not exist."
+    },
+    {
+      "id": "raise-event",
+      "name": "RaiseEvent",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "RaiseEvent(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "Args",
+          "type": "FAccessibleEventArgs&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Push an event from an accessible widget back to the platform layer.\n@param Args The arguments to be passed to the accessible event delegate.\n@see FAccessibleEventArgs"
+    },
+    {
+      "id": "set-accessible-event-delegate",
+      "name": "SetAccessibleEventDelegate",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SetAccessibleEventDelegate(Target, Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "Delegate",
+          "type": "FAccessibleEvent&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign a function to be called whenever an accessible event is raised.\n@param Delegate The delegate to execute when an event is raised."
+    },
+    {
+      "id": "unbind-accessible-event-delegate",
+      "name": "UnbindAccessibleEventDelegate",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "UnbindAccessibleEventDelegate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unbinds the delegate called during accessible events if it is bound."
+    },
+    {
+      "id": "run-in-thread",
+      "name": "RunInThread",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "RunInThread(Target, Function, Wait For Completion, Thread)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "Function",
+          "type": "TFunction<void ( )>&"
+        },
+        {
+          "name": "Wait For Completion",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Thread",
+          "type": "ENamedThreads::Type",
+          "default": "ENamedThreads::GameThread"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request a function to be run in a particular thread.\nPrimarily used to service accessibility requests from the OS thread about accessible Slate widget data in the game thread.\n@param Function The function to execute in the game thread.\n@bWaitForCompletion If true, the function will block until the requested Function completes executing on the requested Thread\n@param Thread The thread to run the Function in."
+    },
+    {
+      "id": "make-accessible-announcement",
+      "name": "MakeAccessibleAnnouncement",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "MakeAccessibleAnnouncement(Target, Announcement String)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "Announcement String",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request a string to be announced to the user.\nNote: Currently only supported on Win10, Mac, iOS. If requests are made too close together,\nearlier announcement requests will get stomped by later announcements on certain platforms."
+    },
+    {
+      "id": "get-accessible-user-registry",
+      "name": "GetAccessibleUserRegistry",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "GetAccessibleUserRegistry(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        }
+      ],
+      "returnType": "FGenericAccessibleUserRegistry&",
+      "docs": "Retrieves the accessible user registry. This is the means of retrieving, registering and interacting with accessible useres in the rest of the application."
+    },
+    {
+      "id": "set-accessible-user-registry",
+      "name": "SetAccessibleUserRegistry",
+      "category": "GenericAccessibleInterfaces",
+      "signature": "SetAccessibleUserRegistry(Target, In Accessible User Registry)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGenericAccessibleMessageHandler*"
+        },
+        {
+          "name": "In Accessible User Registry",
+          "type": "TSharedRef<FGenericAccessibleUserRegistry>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets a new accessible user registry for the application.\nNote: As of now, none of the registered users will carry over to the new accessible user manager. It is up to the caller to unregister all currently registered users and\nregister them with the new accessible user registry.   ."
     }
   ]
 }

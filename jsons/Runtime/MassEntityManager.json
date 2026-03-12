@@ -20,21 +20,17 @@
   ],
   "functions": [
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "get-referencer-name",
+      "name": "GetReferencerName",
       "category": "MassEntityManager",
-      "signature": "AddReferencedObjects(Target, Collector)",
+      "signature": "GetReferencerName(Target)",
       "params": [
         {
           "name": "Target",
           "type": "FMassEntityManager*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "String"
     },
     {
       "id": "get-resource-size-ex",
@@ -442,7 +438,7 @@
       "docs": "The main use-case for this function is to create a blank FEntityCreationContext and hold on to it while creating\na bunch of entities (with multiple calls to BatchCreate* and/or BatchBuild*) and modifying them (with mutating batched API)\nwhile not causing multiple Observers to trigger. All the observers will be triggered at one go, once the FEntityCreationContext\ninstance gets destroyed.\n!Important note: the \"Creation Context\" is a specialized wrapper for an \"Observers Lock\" (@see GetOrMakeObserversLock).\nAs long as the creation context is alive all the operations will be assumed to affect the newly created entities.\nThe consequence of that is operations performed on already existing entities won't be tracked, as long\nas the creation context is alive.\nNote that you can hold a FMassObserverManager::FObserverLock instance while the creation lock gets destroyed, the\nobservers lock is a lower-level concept than the creation context.\n@return the existing (if valid) or a newly created creation context"
     },
     {
-      "id": "batch-create-reserved-entities",
+      "id": "batch-create-reserved-entities-8c81ff",
       "name": "BatchCreateReservedEntities",
       "category": "MassEntityManager",
       "signature": "BatchCreateReservedEntities(Target, Archetype Handle, Shared Fragment Values, Reserved Entities)",
@@ -468,7 +464,28 @@
       "docs": "A version of CreateEntity that's creating a number of entities (Count) in one go\n@param ArchetypeHandle you want this entity to be\n@param SharedFragmentValues to be associated with the entities\n@param ReservedEntities a list of reserved entities that have not yet been assigned to an archetype.\n@return a creation context that will notify all the interested observers about newly created fragments once the context is released"
     },
     {
-      "id": "batch-create-entities",
+      "id": "batch-create-reserved-entities-09053e",
+      "name": "BatchCreateReservedEntities",
+      "category": "MassEntityManager",
+      "signature": "BatchCreateReservedEntities(Target, Archetype Handle, Out Entities)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Archetype Handle",
+          "type": "FMassArchetypeHandle&"
+        },
+        {
+          "name": "Out Entities",
+          "type": "TConstArrayView<FMassEntityHandle>"
+        }
+      ],
+      "returnType": "TSharedRef<FEntityCreationContext>"
+    },
+    {
+      "id": "batch-create-entities-42e460",
       "name": "BatchCreateEntities",
       "category": "MassEntityManager",
       "signature": "BatchCreateEntities(Target, Archetype Handle, Shared Fragment Values, Count, In Out Entities)",
@@ -496,6 +513,31 @@
       ],
       "returnType": "TSharedRef<FEntityCreationContext>",
       "docs": "A version of CreateEntity that's creating a number of entities (Count) in one go\n@param ArchetypeHandle you want this entity to be\n@param SharedFragmentValues to be associated with the entities\n@param Count number of entities to create\n@param InOutEntities the newly created entities are appended to given array, i.e. the pre-existing content of OutEntities won't be affected by the call\n@return a creation context that will notify all the interested observers about newly created fragments once the context is released"
+    },
+    {
+      "id": "batch-create-entities-de0865",
+      "name": "BatchCreateEntities",
+      "category": "MassEntityManager",
+      "signature": "BatchCreateEntities(Target, Archetype Handle, Count, In Out Entities)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Archetype Handle",
+          "type": "FMassArchetypeHandle&"
+        },
+        {
+          "name": "Count",
+          "type": "Int"
+        },
+        {
+          "name": "In Out Entities",
+          "type": "TArray<FMassEntityHandle>&"
+        }
+      ],
+      "returnType": "TSharedRef<FEntityCreationContext>"
     },
     {
       "id": "destroy-entity",
@@ -1416,6 +1458,24 @@
       "returnType": "Void"
     },
     {
+      "id": "is-entity-active",
+      "name": "IsEntityActive",
+      "category": "MassEntityManager",
+      "signature": "IsEntityActive(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return whether the given handle represents a valid and built entity\n(i.e., the handle is valid and the entity represent has been constructed already)"
+    },
+    {
       "id": "is-entity-valid",
       "name": "IsEntityValid",
       "category": "MassEntityManager",
@@ -1506,6 +1566,218 @@
       "docs": "Asserts that IsEntityBuilt"
     },
     {
+      "id": "get-fragment-data-checked",
+      "name": "GetFragmentDataChecked",
+      "category": "MassEntityManager",
+      "signature": "GetFragmentDataChecked(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "template<FragmentType> FragmentType&"
+    },
+    {
+      "id": "get-fragment-data-ptr",
+      "name": "GetFragmentDataPtr",
+      "category": "MassEntityManager",
+      "signature": "GetFragmentDataPtr(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "template<FragmentType> FragmentType*"
+    },
+    {
+      "id": "get-fragment-data-struct",
+      "name": "GetFragmentDataStruct",
+      "category": "MassEntityManager",
+      "signature": "GetFragmentDataStruct(Target, Entity Handle, Fragment Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        },
+        {
+          "name": "Fragment Type",
+          "type": "UScriptStruct*"
+        }
+      ],
+      "returnType": "FStructView"
+    },
+    {
+      "id": "get-const-shared-fragment-data-ptr",
+      "name": "GetConstSharedFragmentDataPtr",
+      "category": "MassEntityManager",
+      "signature": "GetConstSharedFragmentDataPtr(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "template<ConstSharedFragmentType> ConstSharedFragmentType*"
+    },
+    {
+      "id": "get-const-shared-fragment-data-checked",
+      "name": "GetConstSharedFragmentDataChecked",
+      "category": "MassEntityManager",
+      "signature": "GetConstSharedFragmentDataChecked(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "template<ConstSharedFragmentType> ConstSharedFragmentType&"
+    },
+    {
+      "id": "get-const-shared-fragment-data-struct",
+      "name": "GetConstSharedFragmentDataStruct",
+      "category": "MassEntityManager",
+      "signature": "GetConstSharedFragmentDataStruct(Target, Entity Handle, Const Shared Fragment Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        },
+        {
+          "name": "Const Shared Fragment Type",
+          "type": "UScriptStruct*"
+        }
+      ],
+      "returnType": "FConstStructView"
+    },
+    {
+      "id": "get-shared-fragments-of-type",
+      "name": "GetSharedFragmentsOfType",
+      "category": "MassEntityManager",
+      "signature": "GetSharedFragmentsOfType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "template<SharedFragmentType> TConstArrayView<FSharedStruct>"
+    },
+    {
+      "id": "get-shared-fragment-data-ptr",
+      "name": "GetSharedFragmentDataPtr",
+      "category": "MassEntityManager",
+      "signature": "GetSharedFragmentDataPtr(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "template<SharedFragmentType> SharedFragmentType*"
+    },
+    {
+      "id": "get-shared-fragment-data-checked",
+      "name": "GetSharedFragmentDataChecked",
+      "category": "MassEntityManager",
+      "signature": "GetSharedFragmentDataChecked(Target, Entity Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        }
+      ],
+      "returnType": "template<SharedFragmentType> SharedFragmentType&"
+    },
+    {
+      "id": "get-shared-fragment-data-struct",
+      "name": "GetSharedFragmentDataStruct",
+      "category": "MassEntityManager",
+      "signature": "GetSharedFragmentDataStruct(Target, Entity Handle, Shared Fragment Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        },
+        {
+          "name": "Shared Fragment Type",
+          "type": "UScriptStruct*"
+        }
+      ],
+      "returnType": "FConstStructView"
+    },
+    {
+      "id": "get-element-data-struct",
+      "name": "GetElementDataStruct",
+      "category": "MassEntityManager",
+      "signature": "GetElementDataStruct(Target, Entity Handle, Fragment Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Entity Handle",
+          "type": "FMassEntityHandle"
+        },
+        {
+          "name": "Fragment Type",
+          "type": "TNotNull<UScriptStruct*>"
+        }
+      ],
+      "returnType": "template<T> FConstStructView"
+    },
+    {
+      "id": "get-archetype-data-version",
+      "name": "GetArchetypeDataVersion",
+      "category": "MassEntityManager",
+      "signature": "GetArchetypeDataVersion(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
       "id": "create-execution-context",
       "name": "CreateExecutionContext",
       "category": "MassEntityManager",
@@ -1522,6 +1794,46 @@
       ],
       "returnType": "FMassExecutionContext",
       "docs": "Creates and initializes a FMassExecutionContext instance."
+    },
+    {
+      "id": "new-processing-scope",
+      "name": "NewProcessingScope",
+      "category": "MassEntityManager",
+      "signature": "NewProcessingScope(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "FScopedProcessing"
+    },
+    {
+      "id": "is-processing",
+      "name": "IsProcessing",
+      "category": "MassEntityManager",
+      "signature": "IsProcessing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates whether there are processors out there performing operations on this instance of MassEntityManager.\nUsed to ensure that mutating operations (like entity destruction) are not performed while processors are running,\nwhich rely on the assumption that the data layout doesn't change during calculations."
+    },
+    {
+      "id": "defer",
+      "name": "Defer",
+      "category": "MassEntityManager",
+      "signature": "Defer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "FMassCommandBuffer&"
     },
     {
       "id": "flush-commands-47c5a4",
@@ -1573,6 +1885,208 @@
       "docs": "Depending on the current state of Manager's command buffer the function will either move all the commands out of\nInOutCommandBuffer into the main command buffer or append it to the list of command buffers waiting to be flushed.\n@note as a consequence of the call InOutCommandBuffer can get its contents emptied due some of the underlying code using Move semantics"
     },
     {
+      "id": "get-or-create-const-shared-fragment-by-hash",
+      "name": "GetOrCreateConstSharedFragmentByHash",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateConstSharedFragmentByHash(Target, Hash, Fragment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Hash",
+          "type": "UInt"
+        },
+        {
+          "name": "Fragment",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<T> FConstSharedStruct&"
+    },
+    {
+      "id": "get-or-create-shared-fragment-by-hash",
+      "name": "GetOrCreateSharedFragmentByHash",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateSharedFragmentByHash(Target, Hash, In Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Hash",
+          "type": "UInt"
+        },
+        {
+          "name": "In Args",
+          "type": "TArgs&& . . ."
+        }
+      ],
+      "returnType": "template<T,. . . TArgs> FSharedStruct&"
+    },
+    {
+      "id": "get-or-create-const-shared-fragment-cb0584",
+      "name": "GetOrCreateConstSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateConstSharedFragment(Target, Fragment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Fragment",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<T> FConstSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when an instance of the desired const shared fragment type is available and\nthat can be used directly to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\ne.g.,\nUSTRUCT()\nstruct FIntConstSharedFragment : public FMassConstSharedFragment\n{\nGENERATED_BODY()\nUPROPERTY()\nint32 Value = 0;\n};\nFIntConstSharedFragment Fragment;\nFragment.Value = 123;\nconst FConstSharedStruct SharedStruct = EntityManager.GetOrCreateConstSharedFragment(Fragment);\n@params Fragment Instance of the desired fragment type\n@return FConstSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-shared-fragment-0e7088",
+      "name": "GetOrCreateSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateSharedFragment(Target, Fragment)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Fragment",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<T> FSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when an instance of the desired shared fragment type is available and\nthat can be used directly to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\ne.g.,\nUSTRUCT()\nstruct FIntSharedFragment : public FMassSharedFragment\n{\nGENERATED_BODY()\nUPROPERTY()\nint32 Value = 0;\n};\nFIntSharedFragment Fragment;\nFragment.Value = 123;\nconst FSharedStruct SharedStruct = EntityManager.GetOrCreateSharedFragment(Fragment);\n@params Fragment Instance of the desired fragment type\n@return FSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-const-shared-fragment-013c5c",
+      "name": "GetOrCreateConstSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateConstSharedFragment(Target, In Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "In Args",
+          "type": "TArgs&& . . ."
+        }
+      ],
+      "returnType": "template<T,. . . TArgs> FConstSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when values can be provided as constructor arguments for the desired const shared fragment type and\nthat can be used directly to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\ne.g.,\nUSTRUCT()\nstruct FIntConstSharedFragment : public FMassConstSharedFragment\n{\nGENERATED_BODY()\nFIntConstSharedFragment(const int32 InValue) : Value(InValue) {}\nUPROPERTY()\nint32 Value = 0;\n};\nconst FConstSharedStruct SharedStruct = EntityManager.GetOrCreateConstSharedFragment<FIntConstSharedFragment>(123);\n@params InArgs List of arguments provided to the constructor of the desired fragment type\n@return FConstSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-shared-fragment-ad04a2",
+      "name": "GetOrCreateSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateSharedFragment(Target, In Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "In Args",
+          "type": "TArgs&& . . ."
+        }
+      ],
+      "returnType": "template<T,. . . TArgs> FSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when values can be provided as constructor arguments for the desired shared fragment type and\nthat can be used directly to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\ne.g.,\nUSTRUCT()\nstruct FIntSharedFragment : public FMassSharedFragment\n{\nGENERATED_BODY()\nFIntSharedFragment(const int32 InValue) : Value(InValue) {}\nUPROPERTY()\nint32 Value = 0;\n};\nconst FSharedStruct SharedStruct = EntityManager.GetOrCreateSharedFragment<FIntSharedFragment>(123);\n@params InArgs List of arguments provided to the constructor of the desired fragment type\n@return FSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-const-shared-fragment-d8a9fa",
+      "name": "GetOrCreateConstSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateConstSharedFragment(Target, In Script Struct, In Struct Memory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "In Script Struct",
+          "type": "UScriptStruct&"
+        },
+        {
+          "name": "In Struct Memory",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "FConstSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when the reflection data and the memory of an instance of the desired const shared fragment type\nis available and that can be used directly to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\ne.g.,\nFSharedStruct SharedStruct = EntityManager.GetOrCreateConstSharedFragment(*StructView.GetScriptStruct(), StructView.GetMemory());\n@params InScriptStruct Reflection data structure associated to the desired fragment type\n@params InStructMemory Actual data of the desired fragment type\n@return FConstSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-shared-fragment-2e609b",
+      "name": "GetOrCreateSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateSharedFragment(Target, In Script Struct, In Struct Memory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "In Script Struct",
+          "type": "UScriptStruct&"
+        },
+        {
+          "name": "In Struct Memory",
+          "type": "Byte*"
+        }
+      ],
+      "returnType": "FSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when the reflection data and the memory of an instance of the desired shared fragment type\nis available and that can be used directly to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\ne.g.,\nFSharedStruct SharedStruct = EntityManager.GetOrCreateSharedFragment(*StructView.GetScriptStruct(), StructView.GetMemory());\n@params InScriptStruct Reflection data structure associated to the desired fragment type\n@params InStructMemory Actual data of the desired fragment type\n@return FSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-const-shared-fragment-4bfba1",
+      "name": "GetOrCreateConstSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateConstSharedFragment(Target, Hashing Helper Struct, In Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Hashing Helper Struct",
+          "type": "FConstStructView"
+        },
+        {
+          "name": "In Args",
+          "type": "TArgs&& . . ."
+        }
+      ],
+      "returnType": "template<T,. . . TArgs> FConstSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when a different struct should be used to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\nand values can be provided as constructor arguments for the desired const shared fragment type\ne.g.,\nUSTRUCT()\nstruct FIntConstSharedFragmentParams\n{\nGENERATED_BODY()\nFIntConstSharedFragmentParams(const int32 InValue) : Value(InValue) {}\nUPROPERTY()\nint32 Value = 0;\n};\nUSTRUCT()\nstruct FIntConstSharedFragment : public FMassConstSharedFragment\n{\nGENERATED_BODY()\nFIntConstSharedFragment(const FIntConstSharedFragmentParams& InParams) : Value(InParams.Value) {}\nint32 Value = 0;\n};\nFIntConstSharedFragmentParams Params(123);\nconst FConstSharedStruct SharedStruct = EntityManager.GetOrCreateConstSharedFragment<FIntConstSharedFragment>(FConstStructView::Make(Params), Params);\n@params HashingHelperStruct Struct view passed to UE::StructUtils::GetStructCrc32 to compute the CRC\n@params InArgs List of arguments provided to the constructor of the desired fragment type\n@return FConstSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
+      "id": "get-or-create-shared-fragment-06122a",
+      "name": "GetOrCreateSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "GetOrCreateSharedFragment(Target, Hashing Helper Struct, In Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Hashing Helper Struct",
+          "type": "FConstStructView"
+        },
+        {
+          "name": "In Args",
+          "type": "TArgs&& . . ."
+        }
+      ],
+      "returnType": "template<T,. . . TArgs> FSharedStruct&",
+      "docs": "Returns or creates a shared struct associated to a given shared fragment set of values\nidentified internally by a CRC.\nUse this overload when a different struct should be used to compute a CRC (i.e., UE::StructUtils::GetStructCrc32)\nand values can be provided as constructor arguments for the desired shared fragment type\ne.g.,\nUSTRUCT()\nstruct FIntSharedFragmentParams\n{\nGENERATED_BODY()\nFInSharedFragmentParams(const int32 InValue) : Value(InValue) {}\nUPROPERTY()\nint32 Value = 0;\n};\nUSTRUCT()\nstruct FIntSharedFragment : public FMassSharedFragment\n{\nGENERATED_BODY()\nFIntSharedFragment(const FIntConstSharedFragmentParams& InParams) : Value(InParams.Value) {}\nint32 Value = 0;\n};\nFIntSharedFragmentParams Params(123);\nconst FSharedStruct SharedStruct = EntityManager.GetOrCreateSharedFragment<FIntSharedFragment>(FConstStructView::Make(Params), Params);\n@params HashingHelperStruct Struct view passed to UE::StructUtils::GetStructCrc32 to compute the CRC\n@params InArgs List of arguments provided to the constructor of the desired fragment type\n@return FSharedStruct to the matching, or newly created shared fragment"
+    },
+    {
       "id": "make-entity-builder",
       "name": "MakeEntityBuilder",
       "category": "MassEntityManager",
@@ -1585,6 +2099,59 @@
       ],
       "returnType": "nodiscard ] ] UE::Mass::FEntityBuilder",
       "docs": "ConstSharedFragment"
+    },
+    {
+      "id": "get-observer-manager",
+      "name": "GetObserverManager",
+      "category": "MassEntityManager",
+      "signature": "GetObserverManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "FMassObserverManager&"
+    },
+    {
+      "id": "get-on-new-archetype-event",
+      "name": "GetOnNewArchetypeEvent",
+      "category": "MassEntityManager",
+      "signature": "GetOnNewArchetypeEvent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "FOnNewArchetypeDelegate&"
+    },
+    {
+      "id": "get-world",
+      "name": "GetWorld",
+      "category": "MassEntityManager",
+      "signature": "GetWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "UWorld*",
+      "docs": "Fetches the world associated with the Owner.\n@note that it's ok for a given EntityManager to not have an owner or the owner not being part of a UWorld, depending on the use case"
+    },
+    {
+      "id": "get-owner",
+      "name": "GetOwner",
+      "category": "MassEntityManager",
+      "signature": "GetOwner(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "UObject*"
     },
     {
       "id": "set-debug-name",
@@ -1900,24 +2467,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "on-post-fork",
-      "name": "OnPostFork",
-      "category": "MassEntityManager",
-      "signature": "OnPostFork(Target, Role)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FMassEntityManager*"
-        },
-        {
-          "name": "Role",
-          "type": "EForkProcessRole"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Called on the child process upon process's forking"
-    },
-    {
       "id": "batch-set-entity-fragments-values-5d9e04",
       "name": "BatchSetEntityFragmentsValues",
       "category": "MassEntityManager",
@@ -1950,6 +2499,125 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "for-each-shared-fragment",
+      "name": "ForEachSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "ForEachSharedFragment(Target, Execute Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Execute Function",
+          "type": "TFunctionRef<void ( T& )>"
+        }
+      ],
+      "returnType": "template<UE::Mass::CConstSharedFragment T> void"
+    },
+    {
+      "id": "for-each-shared-fragment-conditional",
+      "name": "ForEachSharedFragmentConditional",
+      "category": "MassEntityManager",
+      "signature": "ForEachSharedFragmentConditional(Target, Condition Function, Execute Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Condition Function",
+          "type": "TFunctionRef<bool ( T& )>"
+        },
+        {
+          "name": "Execute Function",
+          "type": "TFunctionRef<void ( T& )>"
+        }
+      ],
+      "returnType": "template<UE::Mass::CConstSharedFragment T> void",
+      "docs": "SharedFragment"
+    },
+    {
+      "id": "for-each-const-shared-fragment",
+      "name": "ForEachConstSharedFragment",
+      "category": "MassEntityManager",
+      "signature": "ForEachConstSharedFragment(Target, Execute Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Execute Function",
+          "type": "TFunctionRef<void ( T& )>"
+        }
+      ],
+      "returnType": "template<UE::Mass::CConstSharedFragment T> void",
+      "docs": "SharedFragment"
+    },
+    {
+      "id": "for-each-const-shared-fragment-conditional",
+      "name": "ForEachConstSharedFragmentConditional",
+      "category": "MassEntityManager",
+      "signature": "ForEachConstSharedFragmentConditional(Target, Condition Function, Execute Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        },
+        {
+          "name": "Condition Function",
+          "type": "TFunctionRef<bool ( T& )>"
+        },
+        {
+          "name": "Execute Function",
+          "type": "TFunctionRef<void ( T& )>"
+        }
+      ],
+      "returnType": "template<UE::Mass::CConstSharedFragment T> void",
+      "docs": "ConstSharedFragment"
+    },
+    {
+      "id": "get-type-manager",
+      "name": "GetTypeManager",
+      "category": "MassEntityManager",
+      "signature": "GetTypeManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "UE::Mass::FTypeManager&"
+    },
+    {
+      "id": "is-during-entity-creation",
+      "name": "IsDuringEntityCreation",
+      "category": "MassEntityManager",
+      "signature": "IsDuringEntityCreation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-or-make-observers-lock",
+      "name": "GetOrMakeObserversLock",
+      "category": "MassEntityManager",
+      "signature": "GetOrMakeObserversLock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMassEntityManager*"
+        }
+      ],
+      "returnType": "TSharedRef<FMassObserverManager::FObserverLock>",
+      "docs": "Fetches the observers lock (as hosted by FMassObserverManager). If one is not currently active,\none will be created. While the lock is active all the observers notifications are suspended, and\nwill be sent out when FMassObserverManager::FObserverLock instance gets destroyed.\nLocking observers needs to be used when entities are being configured with multiple operations,\nand we want observers to be triggered only once all the operations are executed.\nNote that while the observers are locked we're unable to send \"Remove\" notifications, so once\nthe lock is released and the observers get notified, the data being removed won't be available anymore\n(which is a difference in behavior as compared to removal notifications while the observers are not locked)."
     }
   ]
 }

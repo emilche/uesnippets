@@ -1,0 +1,1088 @@
+{
+  "id": "generic-octree",
+  "label": "GenericOctree",
+  "includepath": "Math/GenericOctree.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "ContainerAllocationPolicies",
+    "CoreGlobals",
+    "CoreMinimal",
+    "CoreTypes",
+    "GenericOctreePublic",
+    "PlatformMisc",
+    "LogCategory",
+    "LogMacros",
+    "Box",
+    "BoxSphereBounds",
+    "MathFwd",
+    "UnrealMathSSE",
+    "UnrealMathUtility",
+    "Vector",
+    "Vector4",
+    "VectorRegister",
+    "AssertionMacros",
+    "EnableIf",
+    "Models",
+    "UnrealTemplate",
+    "UnrealTypeTraits",
+    "Channel",
+    "GenericOctree",
+    "stddef"
+  ],
+  "functions": [
+    {
+      "id": "get-box",
+      "name": "GetBox",
+      "category": "GenericOctree",
+      "signature": "GetBox(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBoxCenterAndExtent*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FBox",
+      "docs": "Converts to a FBox."
+    },
+    {
+      "id": "intersect",
+      "name": "Intersect",
+      "category": "GenericOctree",
+      "signature": "Intersect(Target, A, B)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBoxCenterAndExtent*"
+        },
+        {
+          "name": "A",
+          "type": "FBoxCenterAndExtent&"
+        },
+        {
+          "name": "B",
+          "type": "FBoxCenterAndExtent&"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Determines whether two boxes intersect.\nWarning: this operates on the W of the bounds positions!\n@return true if the boxes intersect, or false."
+    },
+    {
+      "id": "advance",
+      "name": "Advance",
+      "category": "GenericOctree",
+      "signature": "Advance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOctreeChildNodeRef*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Advances the reference to the next child node.  If this was the last node remain, Index will be 8 which represents null."
+    },
+    {
+      "id": "is-null",
+      "name": "IsNULL",
+      "category": "GenericOctree",
+      "signature": "IsNULL(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOctreeChildNodeRef*"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "@return true if the reference isn't set."
+    },
+    {
+      "id": "set-null",
+      "name": "SetNULL",
+      "category": "GenericOctree",
+      "signature": "SetNULL(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FOctreeChildNodeRef*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-octree-child-node-subset",
+      "name": "FOctreeChildNodeSubset",
+      "category": "GenericOctree",
+      "signature": "FOctreeChildNodeSubset(All Bits)",
+      "params": [
+        {
+          "name": "All Bits",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A subset of an octree node's children that intersect a bounding box."
+    },
+    {
+      "id": "f-octree-node-context-fa6ef5",
+      "name": "FOctreeNodeContext",
+      "category": "GenericOctree",
+      "signature": "FOctreeNodeContext()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "The context of an octree node, derived from the traversal of the tree."
+    },
+    {
+      "id": "f-octree-node-context-357330",
+      "name": "FOctreeNodeContext",
+      "category": "GenericOctree",
+      "signature": "FOctreeNodeContext(In In Cull Bits, In In Cull Bits, In Out Cull Bits)",
+      "params": [
+        {
+          "name": "In In Cull Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "In In Cull Bits",
+          "type": "uint32 InOutCullBits ) : InCullBits ("
+        },
+        {
+          "name": "In Out Cull Bits",
+          "type": "OutCullBits ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialization constructor, this one is used when we done care about the box anymore"
+    },
+    {
+      "id": "f-octree-node-context-10fea6",
+      "name": "FOctreeNodeContext",
+      "category": "GenericOctree",
+      "signature": "FOctreeNodeContext(In Bounds)",
+      "params": [
+        {
+          "name": "In Bounds",
+          "type": "FBoxCenterAndExtent& InBounds ) : Bounds ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialization constructor."
+    },
+    {
+      "id": "f-octree-node-context-722b6c",
+      "name": "FOctreeNodeContext",
+      "category": "GenericOctree",
+      "signature": "FOctreeNodeContext(In Bounds, In In Cull Bits, In Bounds, In In Cull Bits, In Out Cull Bits)",
+      "params": [
+        {
+          "name": "In Bounds",
+          "type": "FBoxCenterAndExtent&"
+        },
+        {
+          "name": "In In Cull Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "In Bounds",
+          "type": "uint32 InOutCullBits ) : Bounds ("
+        },
+        {
+          "name": "In In Cull Bits",
+          "type": "InCullBits ("
+        },
+        {
+          "name": "In Out Cull Bits",
+          "type": "OutCullBits ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialization constructor."
+    },
+    {
+      "id": "get-child-offset-vec",
+      "name": "GetChildOffsetVec",
+      "category": "GenericOctree",
+      "signature": "GetChildOffsetVec(I)",
+      "params": [
+        {
+          "name": "I",
+          "type": "Int"
+        }
+      ],
+      "returnType": "nodiscard ] ] VectorRegister"
+    },
+    {
+      "id": "get-child-context-ff15d3",
+      "name": "GetChildContext",
+      "category": "GenericOctree",
+      "signature": "GetChildContext(Child Ref)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        }
+      ],
+      "returnType": "nodiscard ] ] FOctreeNodeContext",
+      "docs": "Child node initialization constructor."
+    },
+    {
+      "id": "get-child-context-fef4dc",
+      "name": "GetChildContext",
+      "category": "GenericOctree",
+      "signature": "GetChildContext(Child Ref, Child Context)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        },
+        {
+          "name": "Child Context",
+          "type": "FOctreeNodeContext*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct a child context given the child ref. Optimized to remove all LHS."
+    },
+    {
+      "id": "get-child-context-0c89ea",
+      "name": "GetChildContext",
+      "category": "GenericOctree",
+      "signature": "GetChildContext(Child Ref, In In Cull Bits, In Out Cull Bits)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        },
+        {
+          "name": "In In Cull Bits",
+          "type": "UInt"
+        },
+        {
+          "name": "In Out Cull Bits",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "nodiscard ] ] FOctreeNodeContext",
+      "docs": "Child node initialization constructor."
+    },
+    {
+      "id": "is-leaf",
+      "name": "IsLeaf",
+      "category": "GenericOctree",
+      "signature": "IsLeaf(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNode*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "An octree."
+    },
+    {
+      "id": "push",
+      "name": "Push",
+      "category": "GenericOctree",
+      "signature": "Push(Target, Node Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFreeList*"
+        },
+        {
+          "name": "Node Index",
+          "type": "FNodeIndex"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pop",
+      "name": "Pop",
+      "category": "GenericOctree",
+      "signature": "Pop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFreeList*"
+        }
+      ],
+      "returnType": "FNodeIndex"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "GenericOctree",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFreeList*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "num",
+      "name": "Num",
+      "category": "GenericOctree",
+      "signature": "Num(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFreeList*"
+        }
+      ],
+      "returnType": "nodiscard ] ] int"
+    },
+    {
+      "id": "find-all-elements",
+      "name": "FindAllElements",
+      "category": "GenericOctree",
+      "signature": "FindAllElements(Target, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Func",
+          "type": "IterateAllElementsFunc&"
+        }
+      ],
+      "returnType": "template<IterateAllElementsFunc> void",
+      "docs": "this function will call the passed in function for all elements in the Octree in node by node in no specified order.\n@param Func - Function to call with each Element."
+    },
+    {
+      "id": "find-nodes-with-predicate",
+      "name": "FindNodesWithPredicate",
+      "category": "GenericOctree",
+      "signature": "FindNodesWithPredicate(Target, Predicate, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateFunc&"
+        },
+        {
+          "name": "Func",
+          "type": "IterateFunc&"
+        }
+      ],
+      "returnType": "template<PredicateFunc,IterateFunc> void",
+      "docs": "this function will traverse the Octree starting from the root in depth first order and the predicate can be used to implement custom culling for each node.\n@param Predicate - a Function when given the bounds of the currently traversed node that returns true if traversal should continue or false to skip that branch.\n@param Func - Function that will receive the node ID which can be stored and later used to get the elements using GetElementsForNode for all nodes that passed the predicate."
+    },
+    {
+      "id": "find-elements-with-predicate",
+      "name": "FindElementsWithPredicate",
+      "category": "GenericOctree",
+      "signature": "FindElementsWithPredicate(Target, Predicate, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Predicate",
+          "type": "PredicateFunc&"
+        },
+        {
+          "name": "Func",
+          "type": "IterateFunc&"
+        }
+      ],
+      "returnType": "template<PredicateFunc,IterateFunc> void",
+      "docs": "this function will traverse the Octree starting from the root in depth first order and the predicate can be used to implement custom culling for each node.\n@param Predicate - a Function when given the bounds of the currently traversed node that returns true if traversal should continue or false to skip that branch.\n@param Func - Function to call with each Element for nodes that passed the predicate."
+    },
+    {
+      "id": "find-elements-with-bounds-test",
+      "name": "FindElementsWithBoundsTest",
+      "category": "GenericOctree",
+      "signature": "FindElementsWithBoundsTest(Target, Box Bounds, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Box Bounds",
+          "type": "FBoxCenterAndExtent&"
+        },
+        {
+          "name": "Func",
+          "type": "IterateBoundsFunc&"
+        }
+      ],
+      "returnType": "template<IterateBoundsFunc> void",
+      "docs": "this function will traverse the Octree using a fast box-box intersection this should be the preferred way of traversing the tree.\n@param BoxBounds - the bounds to test if a node is traversed or skipped.\n@param Func - Function to call with each Element for nodes that passed bounds test."
+    },
+    {
+      "id": "find-first-element-with-bounds-test",
+      "name": "FindFirstElementWithBoundsTest",
+      "category": "GenericOctree",
+      "signature": "FindFirstElementWithBoundsTest(Target, Box Bounds, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Box Bounds",
+          "type": "FBoxCenterAndExtent&"
+        },
+        {
+          "name": "Func",
+          "type": "IterateBoundsFunc&"
+        }
+      ],
+      "returnType": "template<IterateBoundsFunc> FOctreeElementId2",
+      "docs": "this function will traverse the Octree using a fast box-box intersection and aborts traversal as soon as the Element function returns false.\n@param BoxBounds - the bounds to test if a node is traversed or skipped.\n@param Func - Function to call with each Element for nodes that passed bounds test.\n@return The ID of the found element. It's only valid until the next time the tree changes."
+    },
+    {
+      "id": "find-nearby-elements",
+      "name": "FindNearbyElements",
+      "category": "GenericOctree",
+      "signature": "FindNearbyElements(Target, Position, Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Position",
+          "type": "FVector&"
+        },
+        {
+          "name": "Func",
+          "type": "IterateBoundsFunc&"
+        }
+      ],
+      "returnType": "template<IterateBoundsFunc> void",
+      "docs": "this function will traverse the Octree using a tryint to find nearby nodes that contain any elements.\n@param Position - the position to look nearby.\n@param Func - Function to call with each Element for nodes that passed bounds test."
+    },
+    {
+      "id": "add-element-e41ad1",
+      "name": "AddElement",
+      "category": "GenericOctree",
+      "signature": "AddElement(Target, Element)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Element",
+          "type": "TCallTraits<ElementType>::ConstReference"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an element to the octree.\n@param Element - The element to add."
+    },
+    {
+      "id": "remove-element-c68945",
+      "name": "RemoveElement",
+      "category": "GenericOctree",
+      "signature": "RemoveElement(Target, Element Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Element Id",
+          "type": "FOctreeElementId2"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an element from the octree.\n@param ElementId - The element to remove from the octree."
+    },
+    {
+      "id": "destroy",
+      "name": "Destroy",
+      "category": "GenericOctree",
+      "signature": "Destroy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "this function resets the octree to empty."
+    },
+    {
+      "id": "get-element-by-id-ac8fd0",
+      "name": "GetElementById",
+      "category": "GenericOctree",
+      "signature": "GetElementById(Target, Element Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Element Id",
+          "type": "FOctreeElementId2"
+        }
+      ],
+      "returnType": "nodiscard ] ] ElementType&",
+      "docs": "Accesses an octree element by ID."
+    },
+    {
+      "id": "is-valid-element-id-24b6dd",
+      "name": "IsValidElementId",
+      "category": "GenericOctree",
+      "signature": "IsValidElementId(Target, Element Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Element Id",
+          "type": "FOctreeElementId2"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "check if a FOctreeElementId2 is valid.\n@param ElementId - The ElementId to check."
+    },
+    {
+      "id": "get-elements-for-node",
+      "name": "GetElementsForNode",
+      "category": "GenericOctree",
+      "signature": "GetElementsForNode(Target, Node Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Node Index",
+          "type": "FNodeIndex"
+        }
+      ],
+      "returnType": "nodiscard ] ] TArrayView<ElementType>",
+      "docs": "return all elements for a given node.\n@param NodeIndex - The the index of the node can be obtained using FindNodesWithPredicate."
+    },
+    {
+      "id": "dump-stats",
+      "name": "DumpStats",
+      "category": "GenericOctree",
+      "signature": "DumpStats(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes stats for the octree to the log."
+    },
+    {
+      "id": "get-size-bytes",
+      "name": "GetSizeBytes",
+      "category": "GenericOctree",
+      "signature": "GetSizeBytes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        }
+      ],
+      "returnType": "nodiscard ] ] SIZE_T"
+    },
+    {
+      "id": "get-node-level-extent",
+      "name": "GetNodeLevelExtent",
+      "category": "GenericOctree",
+      "signature": "GetNodeLevelExtent(Target, Level)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "Level",
+          "type": "Int"
+        }
+      ],
+      "returnType": "nodiscard ] ] FReal"
+    },
+    {
+      "id": "get-root-bounds",
+      "name": "GetRootBounds",
+      "category": "GenericOctree",
+      "signature": "GetRootBounds(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        }
+      ],
+      "returnType": "nodiscard ] ] FBoxCenterAndExtent"
+    },
+    {
+      "id": "shrink-elements",
+      "name": "ShrinkElements",
+      "category": "GenericOctree",
+      "signature": "ShrinkElements(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-offset-69b47e",
+      "name": "ApplyOffset",
+      "category": "GenericOctree",
+      "signature": "ApplyOffset(Target, In Offset, Global Octree)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TOctree2*"
+        },
+        {
+          "name": "In Offset",
+          "type": "FVector&"
+        },
+        {
+          "name": "Global Octree",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Apply an arbitrary offset to all elements in the tree\nInOffset - offset to apply\nbGlobalOctree - hint that this octree is used as a boundless global volume,\nso only content will be shifted but not origin of the octree"
+    },
+    {
+      "id": "f-node-95f179",
+      "name": "FNode",
+      "category": "GenericOctree",
+      "signature": "FNode(In Parent, True)",
+      "params": [
+        {
+          "name": "In Parent",
+          "type": "FNode* InParent ) : Parent ("
+        },
+        {
+          "name": "True",
+          "type": "bIsLeaf ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "An octree."
+    },
+    {
+      "id": "f-node-0e9781",
+      "name": "FNode",
+      "category": "GenericOctree",
+      "signature": "FNode()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor."
+    },
+    {
+      "id": "get-element-it",
+      "name": "GetElementIt",
+      "category": "GenericOctree",
+      "signature": "GetElementIt()",
+      "params": [],
+      "returnType": "nodiscard ] ] ElementConstIt"
+    },
+    {
+      "id": "has-child",
+      "name": "HasChild",
+      "category": "GenericOctree",
+      "signature": "HasChild(Child Ref)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool"
+    },
+    {
+      "id": "get-child",
+      "name": "GetChild",
+      "category": "GenericOctree",
+      "signature": "GetChild(Child Ref)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        }
+      ],
+      "returnType": "nodiscard ] ] FNode*"
+    },
+    {
+      "id": "get-element-count",
+      "name": "GetElementCount",
+      "category": "GenericOctree",
+      "signature": "GetElementCount()",
+      "params": [],
+      "returnType": "nodiscard ] ] int32"
+    },
+    {
+      "id": "get-inclusive-element-count",
+      "name": "GetInclusiveElementCount",
+      "category": "GenericOctree",
+      "signature": "GetInclusiveElementCount()",
+      "params": [],
+      "returnType": "nodiscard ] ] int32"
+    },
+    {
+      "id": "get-elements",
+      "name": "GetElements",
+      "category": "GenericOctree",
+      "signature": "GetElements()",
+      "params": [],
+      "returnType": "nodiscard ] ] ElementArrayType&"
+    },
+    {
+      "id": "apply-offset-d66b30",
+      "name": "ApplyOffset",
+      "category": "GenericOctree",
+      "signature": "ApplyOffset(In Offset)",
+      "params": [
+        {
+          "name": "In Offset",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-node-reference-f911bc",
+      "name": "FNodeReference",
+      "category": "GenericOctree",
+      "signature": "FNodeReference(NULL)",
+      "params": [
+        {
+          "name": "NULL",
+          "type": ") : Node ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The elements in this node."
+    },
+    {
+      "id": "f-node-reference-e2e2de",
+      "name": "FNodeReference",
+      "category": "GenericOctree",
+      "signature": "FNodeReference(In Node, In Node, In Context)",
+      "params": [
+        {
+          "name": "In Node",
+          "type": "FNode*"
+        },
+        {
+          "name": "In Node",
+          "type": "FOctreeNodeContext& InContext ) : Node ("
+        },
+        {
+          "name": "In Context",
+          "type": "Context ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialization constructor."
+    },
+    {
+      "id": "push-child-bf79c0",
+      "name": "PushChild",
+      "category": "GenericOctree",
+      "signature": "PushChild(Child Ref)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "An octree node iterator."
+    },
+    {
+      "id": "push-child-968d5e",
+      "name": "PushChild",
+      "category": "GenericOctree",
+      "signature": "PushChild(Child Ref, Fully Inside View, Fully Outside View)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        },
+        {
+          "name": "Fully Inside View",
+          "type": "UInt"
+        },
+        {
+          "name": "Fully Outside View",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Pushes a child of the current node onto the stack of nodes to visit."
+    },
+    {
+      "id": "push-child-5686cc",
+      "name": "PushChild",
+      "category": "GenericOctree",
+      "signature": "PushChild(Child Ref, Context)",
+      "params": [
+        {
+          "name": "Child Ref",
+          "type": "FOctreeChildNodeRef"
+        },
+        {
+          "name": "Context",
+          "type": "FOctreeNodeContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Pushes a child of the current node onto the stack of nodes to visit."
+    },
+    {
+      "id": "has-pending-nodes",
+      "name": "HasPendingNodes",
+      "category": "GenericOctree",
+      "signature": "HasPendingNodes()",
+      "params": [],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Checks if there are any nodes left to iterate over."
+    },
+    {
+      "id": "t-const-iterator-47ab8e",
+      "name": "TConstIterator",
+      "category": "GenericOctree",
+      "signature": "TConstIterator(Root Node Context)",
+      "params": [
+        {
+          "name": "Root Node Context",
+          "type": "TOctree_DEPRECATED& Tree ) : CurrentNode ( FNodeReference (& Tree . RootNode,Tree ."
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts iterating at the root of an octree."
+    },
+    {
+      "id": "t-const-iterator-c7fbd6",
+      "name": "TConstIterator",
+      "category": "GenericOctree",
+      "signature": "TConstIterator(Node, Context)",
+      "params": [
+        {
+          "name": "Node",
+          "type": "FNode&"
+        },
+        {
+          "name": "Context",
+          "type": "FOctreeNodeContext& Context ) : CurrentNode ( FNodeReference (& Node,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Starts iterating at a particular node of an octree."
+    },
+    {
+      "id": "get-current-node",
+      "name": "GetCurrentNode",
+      "category": "GenericOctree",
+      "signature": "GetCurrentNode()",
+      "params": [],
+      "returnType": "nodiscard ] ] FNode&"
+    },
+    {
+      "id": "get-current-context",
+      "name": "GetCurrentContext",
+      "category": "GenericOctree",
+      "signature": "GetCurrentContext()",
+      "params": [],
+      "returnType": "nodiscard ] ] FOctreeNodeContext&"
+    },
+    {
+      "id": "has-pending-elements",
+      "name": "HasPendingElements",
+      "category": "GenericOctree",
+      "signature": "HasPendingElements(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConstElementBoxIterator*"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Checks if there are any elements left to iterate over."
+    },
+    {
+      "id": "get-current-element",
+      "name": "GetCurrentElement",
+      "category": "GenericOctree",
+      "signature": "GetCurrentElement(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConstElementBoxIterator*"
+        }
+      ],
+      "returnType": "nodiscard ] ] ElementType&"
+    },
+    {
+      "id": "add-element-2f9edc",
+      "name": "AddElement",
+      "category": "GenericOctree",
+      "signature": "AddElement(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "TTypeTraits<ElementType>::ConstInitType"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an element to the octree.\n@param Element - The element to add.\n@return An identifier for the element in the octree."
+    },
+    {
+      "id": "remove-element-3199fe",
+      "name": "RemoveElement",
+      "category": "GenericOctree",
+      "signature": "RemoveElement(Element Id)",
+      "params": [
+        {
+          "name": "Element Id",
+          "type": "FOctreeElementId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Removes an element from the octree.\n@param ElementId - The element to remove from the octree."
+    },
+    {
+      "id": "get-element-by-id-b274bb",
+      "name": "GetElementById",
+      "category": "GenericOctree",
+      "signature": "GetElementById(Element Id)",
+      "params": [
+        {
+          "name": "Element Id",
+          "type": "FOctreeElementId"
+        }
+      ],
+      "returnType": "nodiscard ] ] ElementType&",
+      "docs": "Accesses an octree element by ID."
+    },
+    {
+      "id": "is-valid-element-id-ddf701",
+      "name": "IsValidElementId",
+      "category": "GenericOctree",
+      "signature": "IsValidElementId(Element Id)",
+      "params": [
+        {
+          "name": "Element Id",
+          "type": "FOctreeElementId"
+        }
+      ],
+      "returnType": "nodiscard ] ] bool",
+      "docs": "Checks if given ElementId represents a valid Octree element"
+    },
+    {
+      "id": "t-octree-deprecated-f8bef8",
+      "name": "TOctree_DEPRECATED",
+      "category": "GenericOctree",
+      "signature": "TOctree_DEPRECATED(In Origin, NULL, In Extent, Max Node Depth)",
+      "params": [
+        {
+          "name": "In Origin",
+          "type": "FVector&"
+        },
+        {
+          "name": "NULL",
+          "type": "FReal InExtent ) : RootNode ("
+        },
+        {
+          "name": "In Extent",
+          "type": "RootNodeContext ( FBoxCenterAndExtent ( InOrigin,FVector ( InExtent,InExtent,"
+        },
+        {
+          "name": "Max Node Depth",
+          "type": "MinLeafExtent ( InExtent* FMath::Pow ( ( 1 . 0 f + 1 . 0 f / ( FReal ) FOctreeNodeContext::LoosenessDenominator ) / 2 . 0 f,FReal ( OctreeSemantics::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialization constructor."
+    },
+    {
+      "id": "t-octree-deprecated-d762af",
+      "name": "TOctree_DEPRECATED",
+      "category": "GenericOctree",
+      "signature": "TOctree_DEPRECATED(Nullptr)",
+      "params": [
+        {
+          "name": "Nullptr",
+          "type": ") : RootNode ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "DO NOT USE. This constructor is for internal usage only for hot-reload purposes."
+    },
+    {
+      "id": "set-octree-memory-usage",
+      "name": "SetOctreeMemoryUsage",
+      "category": "GenericOctree",
+      "signature": "SetOctreeMemoryUsage(Octree, New Size)",
+      "params": [
+        {
+          "name": "Octree",
+          "type": "TOctree_DEPRECATED<ElementType,OctreeSemantics>*"
+        },
+        {
+          "name": "New Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The octree's root node."
+    },
+    {
+      "id": "add-element-to-node",
+      "name": "AddElementToNode",
+      "category": "GenericOctree",
+      "signature": "AddElementToNode(Element, In Node, In Context)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "TTypeTraits<ElementType>::ConstInitType"
+        },
+        {
+          "name": "In Node",
+          "type": "FNode&"
+        },
+        {
+          "name": "In Context",
+          "type": "FOctreeNodeContext&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Adds an element to a node or its children."
+    },
+    {
+      "id": "set-octree-semantics-element-id",
+      "name": "SetOctreeSemanticsElementId",
+      "category": "GenericOctree",
+      "signature": "SetOctreeSemanticsElementId(Element, Id)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "ElementType&"
+        },
+        {
+          "name": "Id",
+          "type": "FOctreeElementId"
+        }
+      ],
+      "returnType": "template<Semantics> void"
+    }
+  ]
+}

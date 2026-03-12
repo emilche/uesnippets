@@ -26,6 +26,14 @@
   ],
   "functions": [
     {
+      "id": "get-key-type-name",
+      "name": "GetKeyTypeName",
+      "category": "MovieSceneClipboard",
+      "signature": "GetKeyTypeName()",
+      "params": [],
+      "returnType": "template<T> FName"
+    },
+    {
       "id": "get-time",
       "name": "GetTime",
       "category": "MovieSceneClipboard",
@@ -56,6 +64,142 @@
       ],
       "returnType": "Void",
       "docs": "Set the time at which this key is defined"
+    },
+    {
+      "id": "get-value",
+      "name": "GetValue",
+      "category": "MovieSceneClipboard",
+      "signature": "GetValue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboardKey*"
+        }
+      ],
+      "returnType": "template<T> T",
+      "docs": "Get the value of this key as the specified type.\n@return the key as the templated type, or a default-constructed T where no conversion is possible"
+    },
+    {
+      "id": "try-get-value",
+      "name": "TryGetValue",
+      "category": "MovieSceneClipboard",
+      "signature": "TryGetValue(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboardKey*"
+        },
+        {
+          "name": "Value",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<T> bool",
+      "docs": "Attempt to get the value of this key as the specified type.\n@param InValue\tReference to receive the value\n@return true if the value was set, or false if no conversion between the source and T was possible"
+    },
+    {
+      "id": "find-conversion-to",
+      "name": "FindConversionTo",
+      "category": "MovieSceneClipboard",
+      "signature": "FindConversionTo(Target, Destination Type Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TKey*"
+        },
+        {
+          "name": "Destination Type Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FConversionFunction*",
+      "docs": "Find a conversion from this type to the specified destination type"
+    },
+    {
+      "id": "get-type-name",
+      "name": "GetTypeName",
+      "category": "MovieSceneClipboard",
+      "signature": "GetTypeName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TKey*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Get the name of this value type"
+    },
+    {
+      "id": "copy-to",
+      "name": "CopyTo",
+      "category": "MovieSceneClipboard",
+      "signature": "CopyTo(Target, Out Dest)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TKey*"
+        },
+        {
+          "name": "Out Dest",
+          "type": "TInlineValue<IKey,6 4>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy this value to another destination ptr"
+    },
+    {
+      "id": "is-key-of-type",
+      "name": "IsKeyOfType",
+      "category": "MovieSceneClipboard",
+      "signature": "IsKeyOfType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboardKeyTrack*"
+        }
+      ],
+      "returnType": "template<KeyType> bool",
+      "docs": "Check the type of the keys contained within this track"
+    },
+    {
+      "id": "add-key",
+      "name": "AddKey",
+      "category": "MovieSceneClipboard",
+      "signature": "AddKey(Target, Time, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboardKeyTrack*"
+        },
+        {
+          "name": "Time",
+          "type": "FFrameNumber"
+        },
+        {
+          "name": "Value",
+          "type": "KeyType"
+        }
+      ],
+      "returnType": "template<KeyType> void",
+      "docs": "Add a key of the specified type to this track. KeyType must match the type this track was constructed with"
+    },
+    {
+      "id": "iterate-keys",
+      "name": "IterateKeys",
+      "category": "MovieSceneClipboard",
+      "signature": "IterateKeys(Target, Iter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboardKeyTrack*"
+        },
+        {
+          "name": "Iter",
+          "type": "TFunctionRef<bool ( FMovieSceneClipboardKey& Key )>"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Iterate the keys contained within this track\n@param Iter\t\tPredicate function to call for every key in this track.\nreturn true to continue iteration, false to abort"
     },
     {
       "id": "get-name",
@@ -130,6 +274,72 @@
       ],
       "returnType": "FMovieSceneClipboard",
       "docs": "The environment to which this clipboard relates"
+    },
+    {
+      "id": "find-or-add-key-track",
+      "name": "FindOrAddKeyTrack",
+      "category": "MovieSceneClipboard",
+      "signature": "FindOrAddKeyTrack(Target, In Name, Parent Track)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboardBuilder*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        },
+        {
+          "name": "Parent Track",
+          "type": "UMovieSceneTrack&"
+        }
+      ],
+      "returnType": "template<KeyType> FMovieSceneClipboardKeyTrack&",
+      "docs": "Find or add a key track. Key tracks are group primarily by MovieSceneTrack instance, then by name\n@param InName\t\tThe name of this track (e.g. 'R', 'Location.X', etc)\n@param ParentTrack\tThe parent track within which this track resides\n@return A key track which can be populated with keys"
+    },
+    {
+      "id": "cast",
+      "name": "Cast",
+      "category": "MovieSceneClipboard",
+      "signature": "Cast(Value)",
+      "params": [
+        {
+          "name": "Value",
+          "type": "From&"
+        }
+      ],
+      "returnType": "To",
+      "docs": "Map of key tracks for a given moviescene track ptr"
+    },
+    {
+      "id": "define-explicit-conversion",
+      "name": "DefineExplicitConversion",
+      "category": "MovieSceneClipboard",
+      "signature": "DefineExplicitConversion(Target, In Conversion)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboard*"
+        },
+        {
+          "name": "In Conversion",
+          "type": "TFunction<To ( From& )>"
+        }
+      ],
+      "returnType": "template<From,To> void"
+    },
+    {
+      "id": "define-implicit-conversion",
+      "name": "DefineImplicitConversion",
+      "category": "MovieSceneClipboard",
+      "signature": "DefineImplicitConversion(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneClipboard*"
+        }
+      ],
+      "returnType": "template<From,To> void"
     }
   ]
 }

@@ -1,0 +1,266 @@
+{
+  "id": "cook-package-artifacts",
+  "label": "CookPackageArtifacts",
+  "includepath": "CookPackageArtifacts.h",
+  "includes": [
+    "AssetData",
+    "IAssetRegistry",
+    "CookDependency",
+    "CookImportsChecker",
+    "CookLogPrivate",
+    "Array",
+    "ArrayView",
+    "Map",
+    "UnrealString",
+    "DerivedDataBuildDefinition",
+    "IoHash",
+    "LogVerbosity",
+    "PackageWriter",
+    "Tuple",
+    "NameTypes"
+  ],
+  "functions": [
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "CookPackageArtifacts",
+      "signature": "IsValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "A list of dependencies that affect the build of a BuildResult. BuildResults can be a package load, a package save,\nor a system-specific set of data that is produced alongside the package load or save.\nIn the build operation for the cook of a package, the load of the package is recorded as a BuildResult with no\npayload (it has an implicit payload which is the loaded package as it exists in memory, but we do not store that\npayload in the oplog). The dependencies for that BuildResult are the most commonly used source for transitive build\ndependencies.\nThe second BuildResult in a package's cook is the bytes of the saved package. That BuildResult stores some of its\npayload - the package bytes - as a special payload which is not stored in the BuildResult itself, but rather is\nstored externally in the oplog. It stores the rest of its payload - the runtime dependencies - in the\nFPackageArtifacts. The BuildDependencies of the save BuildResult are used to decide whether the package can be\nincrementally skipped.\nSystem-specific BuildResults are not saved during the cook and each one must be recalculated on demand during the\ncook by each dependent package that incorporates their data, and stored in the package data of the owning package\nuntil it gets garbage collected and the data has to be recreated. The dependencies of that operation are stored in\nthe FPackageArtifacts for the owning package and can be used as a build dependency for the owning package and the\ndependent packages.\nTODO: Add a system to preserve build results along with the dependencies.",
+      "supportedTargets": [
+        "FBuildDependencySet*",
+        "FPackageArtifacts*"
+      ]
+    },
+    {
+      "id": "get-name",
+      "name": "GetName",
+      "category": "CookPackageArtifacts",
+      "signature": "GetName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Name of the build result owning the DependencySet, used for lookup by transitive build dependencies."
+    },
+    {
+      "id": "set-name",
+      "name": "SetName",
+      "category": "CookPackageArtifacts",
+      "signature": "SetName(Target, In Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-dependencies",
+      "name": "GetDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "GetDependencies(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        }
+      ],
+      "returnType": "TArray<FCookDependency>&",
+      "docs": "The list of dependencies in the BuildDependencySet."
+    },
+    {
+      "id": "set-normalized-dependencies",
+      "name": "SetNormalizedDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "SetNormalizedDependencies(Target, In Dependencies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        },
+        {
+          "name": "In Dependencies",
+          "type": "TArray<FCookDependency>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When constructing the set, the dependencies must be normalized - rules processed, sorted, made unique\nby the caller before being set into the BuildDependencySet."
+    },
+    {
+      "id": "store-current-key",
+      "name": "StoreCurrentKey",
+      "category": "CookPackageArtifacts",
+      "signature": "StoreCurrentKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Copy CurrentKey into StoredKey, called after SetNormalizedDependencies before Save."
+    },
+    {
+      "id": "set-valid",
+      "name": "SetValid",
+      "category": "CookPackageArtifacts",
+      "signature": "SetValid(Target, In Valid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        },
+        {
+          "name": "In Valid",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Sets IsValid to the given argument, called after all values have been written by the Caller before Save"
+    },
+    {
+      "id": "get-transitive-dependencies",
+      "name": "GetTransitiveDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "GetTransitiveDependencies(Target, Out Dependencies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName,AllocatorType>&"
+        }
+      ],
+      "returnType": "template<AllocatorType> void",
+      "docs": "Helper function to filter GetDependencies for the transitive build dependencies."
+    },
+    {
+      "id": "get-stored-key",
+      "name": "GetStoredKey",
+      "category": "CookPackageArtifacts",
+      "signature": "GetStoredKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        }
+      ],
+      "returnType": "FIoHash&",
+      "docs": "Return the Key that was hashed from the BuildDependencySet in the cookprocess that created it.",
+      "supportedTargets": [
+        "FBuildDependencySet*",
+        "FPackageArtifacts*"
+      ]
+    },
+    {
+      "id": "get-current-key",
+      "name": "GetCurrentKey",
+      "category": "CookPackageArtifacts",
+      "signature": "GetCurrentKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FBuildDependencySet*"
+        }
+      ],
+      "returnType": "FIoHash&",
+      "docs": "Return the Key that was hashed from the BuildDependencySet in the current cookprocess.\nWill be the zero-hash if not yet calculated.",
+      "supportedTargets": [
+        "FBuildDependencySet*",
+        "FPackageArtifacts*"
+      ]
+    },
+    {
+      "id": "get-runtime-dependencies",
+      "name": "GetRuntimeDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "GetRuntimeDependencies(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageArtifacts*"
+        }
+      ],
+      "returnType": "TArray<FName>&",
+      "docs": "Get all of the runtime dependencies reported by the package, both script and content."
+    },
+    {
+      "id": "get-runtime-content-dependencies",
+      "name": "GetRuntimeContentDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "GetRuntimeContentDependencies(Target, Out Dependencies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageArtifacts*"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName,AllocatorType>&"
+        }
+      ],
+      "returnType": "template<AllocatorType> void",
+      "docs": "Return runtime dependencies reported by the package that are content packages; script packages are removed."
+    },
+    {
+      "id": "get-package-name",
+      "name": "GetPackageName",
+      "category": "CookPackageArtifacts",
+      "signature": "GetPackageName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageArtifacts*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "get-build-dependencies",
+      "name": "GetBuildDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "GetBuildDependencies(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageArtifacts*"
+        }
+      ],
+      "returnType": "TArray<FCookDependency>&"
+    },
+    {
+      "id": "get-transitive-build-dependencies",
+      "name": "GetTransitiveBuildDependencies",
+      "category": "CookPackageArtifacts",
+      "signature": "GetTransitiveBuildDependencies(Target, Out Dependencies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FPackageArtifacts*"
+        },
+        {
+          "name": "Out Dependencies",
+          "type": "TArray<FName,AllocatorType>&"
+        }
+      ],
+      "returnType": "template<AllocatorType> void"
+    }
+  ]
+}

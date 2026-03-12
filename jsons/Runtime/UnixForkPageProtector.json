@@ -1,0 +1,180 @@
+{
+  "id": "unix-fork-page-protector",
+  "label": "UnixForkPageProtector",
+  "includepath": "UnixForkPageProtector.h",
+  "includes": [
+    "CoreTypes",
+    "PlatformMemory",
+    "Map",
+    "mman"
+  ],
+  "functions": [
+    {
+      "id": "emplace",
+      "name": "Emplace",
+      "category": "UnixForkPageProtector",
+      "signature": "Emplace(Target, Elem)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UnixLowLevelDynamicArray*"
+        },
+        {
+          "name": "Elem",
+          "type": "T&&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin",
+      "name": "begin",
+      "category": "UnixForkPageProtector",
+      "signature": "begin(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UnixLowLevelDynamicArray*"
+        }
+      ],
+      "returnType": "T*"
+    },
+    {
+      "id": "end",
+      "name": "end",
+      "category": "UnixForkPageProtector",
+      "signature": "end(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UnixLowLevelDynamicArray*"
+        }
+      ],
+      "returnType": "T*"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "UnixForkPageProtector",
+      "signature": "Get(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UnixLowLevelDynamicArray*"
+        },
+        {
+          "name": "Index",
+          "type": "SIZE_T"
+        }
+      ],
+      "returnType": "T&"
+    },
+    {
+      "id": "get-size",
+      "name": "GetSize",
+      "category": "UnixForkPageProtector",
+      "signature": "GetSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UnixLowLevelDynamicArray*"
+        }
+      ],
+      "returnType": "SIZE_T"
+    },
+    {
+      "id": "add-memory-region",
+      "name": "AddMemoryRegion",
+      "category": "UnixForkPageProtector",
+      "signature": "AddMemoryRegion(Target, Address, Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FForkPageProtector*"
+        },
+        {
+          "name": "Address",
+          "type": "void*"
+        },
+        {
+          "name": "Size",
+          "type": "UInt64"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "These functions are used on the parent to collect memory regions, as well as keep track of ones that were freed"
+    },
+    {
+      "id": "free-memory-region",
+      "name": "FreeMemoryRegion",
+      "category": "UnixForkPageProtector",
+      "signature": "FreeMemoryRegion(Target, Address)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FForkPageProtector*"
+        },
+        {
+          "name": "Address",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "protect-memory-regions",
+      "name": "ProtectMemoryRegions",
+      "category": "UnixForkPageProtector",
+      "signature": "ProtectMemoryRegions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FForkPageProtector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This should be used right after fork protect all the memory regions collected above\nsome may be missed, further consideration may be needed here"
+    },
+    {
+      "id": "un-protect-memory-regions",
+      "name": "UnProtectMemoryRegions",
+      "category": "UnixForkPageProtector",
+      "signature": "UnProtectMemoryRegions(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FForkPageProtector*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This should be used if all pages need to be reset to being unprotected"
+    },
+    {
+      "id": "handle-new-crash-address",
+      "name": "HandleNewCrashAddress",
+      "category": "UnixForkPageProtector",
+      "signature": "HandleNewCrashAddress(Target, Crash Address)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FForkPageProtector*"
+        },
+        {
+          "name": "Crash Address",
+          "type": "void*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This function should only be called in the signal handler *after* the ProtectMemoryRegions function has been called\nGiven a CrashAddress we will move that addresses page back to READ/WRITE\nAs well as store information about the current callstack and other data\nReturns ture if the CrashAddress was handle\nif false this means some internal error or the same CrashAddress was sent twice in a row"
+    },
+    {
+      "id": "override-g-malloc",
+      "name": "OverrideGMalloc",
+      "category": "UnixForkPageProtector",
+      "signature": "OverrideGMalloc()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Overrides GMalloc with our own allocator so we don't stomp on possible protected pages when allocating"
+    }
+  ]
+}

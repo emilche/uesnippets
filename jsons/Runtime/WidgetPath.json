@@ -13,6 +13,23 @@
   ],
   "functions": [
     {
+      "id": "is-match",
+      "name": "IsMatch",
+      "category": "WidgetPath",
+      "signature": "IsMatch(Target, In Widget)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FWidgetMatcher*"
+        },
+        {
+          "name": "In Widget",
+          "type": "TSharedRef<SWidget>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "get-path-down-to",
       "name": "GetPathDownTo",
       "category": "WidgetPath",
@@ -31,6 +48,24 @@
       "docs": "@param MarkerWidget Copy the path up to and including this widget\n@return a copy of the widget path down to and including the MarkerWidget. If the MarkerWidget is not found in the path, return an invalid path."
     },
     {
+      "id": "get-virtual-pointer-position",
+      "name": "GetVirtualPointerPosition",
+      "category": "WidgetPath",
+      "signature": "GetVirtualPointerPosition(Target, Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FWidgetPath*"
+        },
+        {
+          "name": "Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TOptional<FVirtualPointerPosition>",
+      "docs": "Get the virtual representation of the mouse at each level in the widget path."
+    },
+    {
       "id": "contains-widget",
       "name": "ContainsWidget",
       "category": "WidgetPath",
@@ -46,7 +81,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "@return true if the WidgetToFind is in this WidgetPath, false otherwise."
+      "docs": "@return true if the WidgetToFind is in this WidgetPath, false otherwise.",
+      "supportedTargets": [
+        "FWidgetPath*",
+        "FWeakWidgetPath*"
+      ]
     },
     {
       "id": "find-arranged-widget",
@@ -122,7 +161,11 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "A valid path has at least one widget in it"
+      "docs": "A valid path has at least one widget in it",
+      "supportedTargets": [
+        "FWidgetPath*",
+        "FWeakWidgetPath*"
+      ]
     },
     {
       "id": "to-string",
@@ -137,6 +180,71 @@
       ],
       "returnType": "String",
       "docs": "Builds a string representation of the widget path."
+    },
+    {
+      "id": "extend-path-to",
+      "name": "ExtendPathTo",
+      "category": "WidgetPath",
+      "signature": "ExtendPathTo(Target, Matcher, Visibility Filter, Search Purpose)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FWidgetPath*"
+        },
+        {
+          "name": "Matcher",
+          "type": "MatcherType&"
+        },
+        {
+          "name": "Visibility Filter",
+          "type": "EVisibility",
+          "default": "EVisibility::Visible"
+        },
+        {
+          "name": "Search Purpose",
+          "type": "EWidgetPathSearchPurpose",
+          "default": "EWidgetPathSearchPurpose::Standard"
+        }
+      ],
+      "returnType": "template<MatcherType> bool",
+      "docs": "Extend the current path such that it reaches some widget that qualifies as a Match\nThe widget to match must be a descendant of the last widget currently in the path.\n@param  Matcher          Some struct that has a \"bool IsMatch( const TSharedRef<const SWidget>& InWidget ) const\" method\n@param  VisibilityFilter\tWidgets must have this type of visibility to be included the path\n@param  SearchPurpose\tWhat is the purpose for extending the path\n@return true if successful; false otherwise."
+    },
+    {
+      "id": "generate-path-to-widget",
+      "name": "GeneratePathToWidget",
+      "category": "WidgetPath",
+      "signature": "GeneratePathToWidget(Target, Matcher, From Widget, Navigation Type, Visibility Filter, Search Purpose)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FWidgetPath*"
+        },
+        {
+          "name": "Matcher",
+          "type": "MatcherType&"
+        },
+        {
+          "name": "From Widget",
+          "type": "FArrangedWidget&"
+        },
+        {
+          "name": "Navigation Type",
+          "type": "EUINavigation",
+          "default": "EUINavigation::Next"
+        },
+        {
+          "name": "Visibility Filter",
+          "type": "EVisibility",
+          "default": "EVisibility::Visible"
+        },
+        {
+          "name": "Search Purpose",
+          "type": "EWidgetPathSearchPurpose",
+          "default": "EWidgetPathSearchPurpose::Standard"
+        }
+      ],
+      "returnType": "template<MatcherType> FArrangedChildren",
+      "docs": "Generate a path from FromWidget to WidgetToFind. The path will not include FromWidget.\n@param  Matcher          Some struct that has a \"bool IsMatch( const TSharedRef<const SWidget>& InWidget ) const\" method\n@param  FromWidget       Widget from which we a building a path.AddItem*\n@param  VisibilityFilter\tWidgets must have this type of visibility to be included the path\n@param  SearchPurpose\tWhat is the purpose for generating the path\n@return A path from FromWidget to WidgetToFind; will not include FromWidget."
     },
     {
       "id": "move-focus",
@@ -164,6 +272,24 @@
       ],
       "returnType": "Bool",
       "docs": "Move focus either forward on backward in the path level specified by PathLevel.\nThat is, this movement of focus will modify the subtree under Widgets(PathLevel).\n@param PathLevel\t\t\t\t\tThe level in this WidgetPath whose focus to move.\n@param MoveDirectin\t\t\t\tMove focus forward or backward?\n@param bSearchFromPathWidget\t\tif set false the search for the next will simply start at the beginning or end of the list of children dependant on the direction\n@return true if the focus moved successfully, false if we were unable to move focus"
+    },
+    {
+      "id": "get-last-widget",
+      "name": "GetLastWidget",
+      "category": "WidgetPath",
+      "signature": "GetLastWidget(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FWidgetPath*"
+        }
+      ],
+      "returnType": "TSharedRef<SWidget>",
+      "docs": "Get the last (leaf-most) widget in this path; assumes path is valid",
+      "supportedTargets": [
+        "FWidgetPath*",
+        "FWeakWidgetPath*"
+      ]
     },
     {
       "id": "to-widget-path-1025a6",

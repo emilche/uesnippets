@@ -26,6 +26,32 @@
   ],
   "functions": [
     {
+      "id": "notify-binding-update",
+      "name": "NotifyBindingUpdate",
+      "category": "MovieSceneEvaluationState",
+      "signature": "NotifyBindingUpdate(Target, In Binding Id, In Sequence ID, Bound Objects)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IObjectBindingNotifyPlaybackCapability*"
+        },
+        {
+          "name": "In Binding Id",
+          "type": "FGuid&"
+        },
+        {
+          "name": "In Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Bound Objects",
+          "type": "TArrayView<TWeakObjectPtr<>>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a specific object binding has changed."
+    },
+    {
       "id": "get-binding-override",
       "name": "GetBindingOverride",
       "category": "MovieSceneEvaluationState",
@@ -205,7 +231,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Invalidate any object bindings for objects that have been destroyed"
+      "docs": "Invalidate any object bindings for objects that have been destroyed",
+      "supportedTargets": [
+        "FMovieSceneObjectCache*",
+        "FMovieSceneEvaluationState*"
+      ]
     },
     {
       "id": "invalidate-032fe8",
@@ -245,7 +275,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Invalidate the object bindings for a specific object binding ID in the specified sequence ID.\nIf the sequence ID matches this one, then we will look for the guid in this sequence.\nIf it does not, then we will see if any of our object bindings reference that one, and if so, they will be invalidated.\n@param InGuid\t\t\tThe object binding ID to invalidate bindings for"
+      "docs": "Invalidate the object bindings for a specific object binding ID in the specified sequence ID.\nIf the sequence ID matches this one, then we will look for the guid in this sequence.\nIf it does not, then we will see if any of our object bindings reference that one, and if so, they will be invalidated.\n@param InGuid\t\t\tThe object binding ID to invalidate bindings for",
+      "supportedTargets": [
+        "FMovieSceneObjectCache*",
+        "FMovieSceneEvaluationState*"
+      ]
     },
     {
       "id": "invalidate-if-valid",
@@ -304,6 +338,38 @@
       ],
       "returnType": "Void",
       "docs": "Sets the binding to either active or inactive. Inactive bindings will invalidate and not resolve while inactive.\n@param InGuid\t\t\tThe object binding ID\n@param bActive\t\t    Where to activate or deactivate the binding."
+    },
+    {
+      "id": "get-sequence",
+      "name": "GetSequence",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetSequence(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        }
+      ],
+      "returnType": "UMovieSceneSequence*",
+      "docs": "Get the sequence that this cache relates to"
+    },
+    {
+      "id": "get-serial-number",
+      "name": "GetSerialNumber",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetSerialNumber(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneObjectCache*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the current serial number of this cache",
+      "supportedTargets": [
+        "FMovieSceneObjectCache*",
+        "FMovieSceneEvaluationState*"
+      ]
     },
     {
       "id": "find-bound-objects-4e306a",
@@ -433,7 +499,55 @@
           "type": "TArray<FMovieSceneObjectBindingID>*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FMovieSceneObjectCache*",
+        "FMovieSceneEvaluationState*"
+      ]
+    },
+    {
+      "id": "get-set-key",
+      "name": "GetSetKey",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetSetKey(Element)",
+      "params": [
+        {
+          "name": "Element",
+          "type": "ElementInitType"
+        }
+      ],
+      "returnType": "KeyInitType",
+      "docs": "The sequence that we're caching objects for"
+    },
+    {
+      "id": "matches",
+      "name": "Matches",
+      "category": "MovieSceneEvaluationState",
+      "signature": "Matches(A, B)",
+      "params": [
+        {
+          "name": "A",
+          "type": "KeyInitType"
+        },
+        {
+          "name": "B",
+          "type": "KeyInitType"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-key-hash",
+      "name": "GetKeyHash",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetKeyHash(Key)",
+      "params": [
+        {
+          "name": "Key",
+          "type": "KeyInitType"
+        }
+      ],
+      "returnType": "UInt"
     },
     {
       "id": "assign-sequence",
@@ -576,6 +690,90 @@
       "docs": "Filter all the object bindings in this object cache that contain the specified predicate object\n@param PredicateObject\t\tThe object to filter by. Any bindings referencing this object will be added to the output array.\n@param Player\t\t\t\tThe movie scene player that is playing back the sequence\n@param OutBindings\t\t\t(mandatory) Array to populate with bindings that relate to the object"
     },
     {
+      "id": "find-object-cache",
+      "name": "FindObjectCache",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindObjectCache(Target, Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        }
+      ],
+      "returnType": "FMovieSceneObjectCache*",
+      "docs": "Find an object cache pertaining to the specified sequence\n@param InSequenceID\t\tThe sequence ID to lookup"
+    },
+    {
+      "id": "get-object-cache",
+      "name": "GetObjectCache",
+      "category": "MovieSceneEvaluationState",
+      "signature": "GetObjectCache(Target, Sequence ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        }
+      ],
+      "returnType": "FMovieSceneObjectCache&",
+      "docs": "Get an object cache pertaining to the specified sequence\n@param InSequenceID\t\tThe sequence ID to lookup"
+    },
+    {
+      "id": "find-bound-objects-0a563e",
+      "name": "FindBoundObjects",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindBoundObjects(Target, Object Binding ID, Sequence ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Object Binding ID",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Sequence ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "TArrayView<TWeakObjectPtr<>>",
+      "docs": "Locate objects bound to the specified object guid, in the specified sequence\n@note: Objects lists are cached internally until they are invalidate.\n@param ObjectBindingID \t\tThe object to resolve\n@param SequenceID \t\t\tID of the sequence to resolve for\n@return Iterable list of weak object pointers pertaining to the specified GUID"
+    },
+    {
+      "id": "find-bound-objects-3f470e",
+      "name": "FindBoundObjects",
+      "category": "MovieSceneEvaluationState",
+      "signature": "FindBoundObjects(Target, Operand, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvaluationState*"
+        },
+        {
+          "name": "Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "TArrayView<TWeakObjectPtr<>>",
+      "docs": "Locate objects bound to the specified sequence operand\n@note: Objects lists are cached internally until they are invalidate.\n@param Operand \t\t\tThe movie scene operand to resolve\n@return Iterable list of weak object pointers pertaining to the specified GUID"
+    },
+    {
       "id": "get-binding-activation-2b4b05",
       "name": "GetBindingActivation",
       "category": "MovieSceneEvaluationState",
@@ -640,20 +838,6 @@
       ],
       "returnType": "Void",
       "docs": "Forcably clear all object caches"
-    },
-    {
-      "id": "get-serial-number",
-      "name": "GetSerialNumber",
-      "category": "MovieSceneEvaluationState",
-      "signature": "GetSerialNumber(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FMovieSceneEvaluationState*"
-        }
-      ],
-      "returnType": "UInt",
-      "docs": "Get the current serial number of this cache"
     },
     {
       "id": "initialize",

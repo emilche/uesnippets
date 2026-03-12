@@ -24,7 +24,7 @@
   ],
   "functions": [
     {
-      "id": "find-spawned-object",
+      "id": "find-spawned-object-4d7847",
       "name": "FindSpawnedObject",
       "category": "MovieSceneSpawnRegister",
       "signature": "FindSpawnedObject(Target, Binding Id, Template ID, Binding Index)",
@@ -112,6 +112,24 @@
       ],
       "returnType": "Bool",
       "docs": "Destroy a specific previously spawned object\n@param BindingId\t\tID of the object to destroy\n@param TemplateID \tIdentifier for the current template we're evaluating\n@param Player \t\tMovie scene player that is ultimately responsible for destroying the object\n@param BindingIndex \tFor level sequences using custom spawnable bindings, the index of the binding reference.\n@return True if an object was destroyed, false otherwise\nThe version without the binding index is to support old clients of the previous API"
+    },
+    {
+      "id": "destroy-object-directly",
+      "name": "DestroyObjectDirectly",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "DestroyObjectDirectly(Target, In Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "In Object",
+          "type": "UObject&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destroy a specific previously spawned object, where its binding ID and sequence ID is not known.\n@note Should only be used for restoring pre-animated state, or where it is otherwise impossible to call DestroySpawnedObject\n@param InObject\t\tthe object to destroy"
     },
     {
       "id": "destroy-objects-by-predicate-db6f1b",
@@ -214,6 +232,81 @@
       ],
       "returnType": "Void",
       "docs": "Called when the current time has moved beyond the specified sequence's play range"
+    },
+    {
+      "id": "find-spawned-object-2d5048",
+      "name": "FindSpawnedObject",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "FindSpawnedObject(Target, Binding Id, Template ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Binding Id",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Template ID",
+          "type": "FMovieSceneSequenceIDRef"
+        }
+      ],
+      "returnType": "TWeakObjectPtr<>"
+    },
+    {
+      "id": "spawn-object-6b97c1",
+      "name": "SpawnObject",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "SpawnObject(Target, Binding Id, Movie Scene, Template, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Binding Id",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Movie Scene",
+          "type": "UMovieScene&"
+        },
+        {
+          "name": "Template",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "UObject*"
+    },
+    {
+      "id": "destroy-spawned-object-21e276",
+      "name": "DestroySpawnedObject",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "DestroySpawnedObject(Target, Binding Id, Template ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Binding Id",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Template ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "Bool"
     },
     {
       "id": "spawn-object-e43e81",
@@ -371,6 +464,141 @@
       "returnType": "Void"
     },
     {
+      "id": "can-spawn-object",
+      "name": "CanSpawnObject",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "CanSpawnObject(Target, In Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "In Class",
+          "type": "UClass*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether this class is supported as a spawnable\n@param InClass The class\n@return Whether this class is supported as a spawnable"
+    },
+    {
+      "id": "create-new-spawnable-type",
+      "name": "CreateNewSpawnableType",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "CreateNewSpawnableType(Target, Source Object, Owner Movie Scene, Actor Factory)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Source Object",
+          "type": "UObject&"
+        },
+        {
+          "name": "Owner Movie Scene",
+          "type": "UMovieScene&"
+        },
+        {
+          "name": "Actor Factory",
+          "type": "UActorFactory*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "TValueOrError<FNewSpawnable,FText>",
+      "docs": "Create a new spawnable type from the given source object\n@param SourceObject\t\tThe source object to create the spawnable from\n@param OwnerMovieScene\tThe owner movie scene that this spawnable type should reside in\n@param ActorFactory      Optional actor factory to use to create spawnable type\n@return the new spawnable type, or error"
+    },
+    {
+      "id": "save-default-spawnable-state-2fe1ca",
+      "name": "SaveDefaultSpawnableState",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "SaveDefaultSpawnableState(Target, Guid, Binding Index, Template ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Binding Index",
+          "type": "Int"
+        },
+        {
+          "name": "Template ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to save the default state of the specified spawnable"
+    },
+    {
+      "id": "setup-defaults-for-spawnable",
+      "name": "SetupDefaultsForSpawnable",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "SetupDefaultsForSpawnable(Target, Spawned Object, Guid, Transform Data, Sequencer, Settings)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Spawned Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Transform Data",
+          "type": "TOptional<FTransformData>&"
+        },
+        {
+          "name": "Sequencer",
+          "type": "TSharedRef<ISequencer>"
+        },
+        {
+          "name": "Settings",
+          "type": "USequencerSettings*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Setup a new spawnable object with some default tracks and keys\n@param\tSpawnedObject\tThe newly spawned object. This may be NULL in the case of a spawnable that has not yet bneen spawned.\n@param\tGuid\t\t\tThe ID of the spawnable to setup defaults for\n@param\tTransformData\tThe transform of the object to be spawned. This will usually be valid in the case of converting a possessable to a spawnable.\n@param\tSequencer\t\tThe sequencer this spawnable was just created by\n@param\tSettings\t\tThe settings for this sequencer"
+    },
+    {
+      "id": "handle-convert-possessable-to-spawnable-827868",
+      "name": "HandleConvertPossessableToSpawnable",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "HandleConvertPossessableToSpawnable(Target, Old Object, Shared Playback State, Out Transform Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Old Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        },
+        {
+          "name": "Out Transform Data",
+          "type": "TOptional<FTransformData>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to handle cleanup of objects when we convert a possessable to a spawnable object\n@param\tOldObject\t\t\tThe old possessable object\n@param\tPlayer\t\tThe current player\n@param\tOutTransformData\tTransform data that can be used to recreate objects in the same location"
+    },
+    {
       "id": "can-convert-to-possessable",
       "name": "CanConvertToPossessable",
       "category": "MovieSceneSpawnRegister",
@@ -400,6 +628,31 @@
       ],
       "returnType": "Bool",
       "docs": "Check whether the specified binding can become a Possessable.\n@param BindingId\t\tID of the object to destroy\n@param TemplateID \tIdentifier for the current template we're evaluating\n@return whether the conversion from Spawnable to Possessable can occur."
+    },
+    {
+      "id": "save-default-spawnable-state-016f3d",
+      "name": "SaveDefaultSpawnableState",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "SaveDefaultSpawnableState(Target, Guid, Template ID, Shared Playback State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        },
+        {
+          "name": "Template ID",
+          "type": "FMovieSceneSequenceIDRef"
+        },
+        {
+          "name": "Shared Playback State",
+          "type": "TSharedRef<FSharedPlaybackState>"
+        }
+      ],
+      "returnType": "Void"
     },
     {
       "id": "save-default-spawnable-state-20264c",
@@ -452,7 +705,7 @@
       "returnType": "Void"
     },
     {
-      "id": "handle-convert-possessable-to-spawnable",
+      "id": "handle-convert-possessable-to-spawnable-33f894",
       "name": "HandleConvertPossessableToSpawnable",
       "category": "MovieSceneSpawnRegister",
       "signature": "HandleConvertPossessableToSpawnable(Target, Old Object, Player, Out Transform Data)",
@@ -500,6 +753,57 @@
         }
       ],
       "returnType": "UObject*"
+    },
+    {
+      "id": "can-convert-spawnable-to-possessable",
+      "name": "CanConvertSpawnableToPossessable",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "CanConvertSpawnableToPossessable(Target, Spawnable)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Spawnable",
+          "type": "FMovieSceneSpawnable&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "GetTypeHash(Target, Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneSpawnRegisterKey*"
+        },
+        {
+          "name": "Key",
+          "type": "FMovieSceneSpawnRegisterKey&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "destroy-spawned-object-9ead71",
+      "name": "DestroySpawnedObject",
+      "category": "MovieSceneSpawnRegister",
+      "signature": "DestroySpawnedObject(Target, Custom Spawnable Binding)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNullMovieSceneSpawnRegister*"
+        },
+        {
+          "name": "Custom Spawnable Binding",
+          "type": "UMovieSceneSpawnableBindingBase*"
+        }
+      ],
+      "returnType": "Void"
     }
   ]
 }

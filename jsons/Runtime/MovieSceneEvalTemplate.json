@@ -29,40 +29,232 @@
   ],
   "functions": [
     {
-      "id": "evaluate-easing",
-      "name": "EvaluateEasing",
+      "id": "requires-initialization",
+      "name": "RequiresInitialization",
       "category": "MovieSceneEvalTemplate",
-      "signature": "EvaluateEasing(Target, Current Time)",
+      "signature": "RequiresInitialization(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Check whether this template mandates Initialize being called.\nDefines whether a pointer to this track will be added to the initialization section of template evaluation.\n@return Boolean representing whether this template mandates Initialize being called"
+    },
+    {
+      "id": "get-completion-mode",
+      "name": "GetCompletionMode",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "GetCompletionMode(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        }
+      ],
+      "returnType": "EMovieSceneCompletionMode",
+      "docs": "Check whether we should restore any pre-animated state that was supplied by this template when it is no longer evaluated\n@note\t\t\t\t\tPre-animated state bound to evaluation templates is reference counted across all similar animation types for a given object.\nThis ensures that pre-animated state restores correctly for overlapping templates."
+    },
+    {
+      "id": "set-completion-mode",
+      "name": "SetCompletionMode",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "SetCompletionMode(Target, In Completion Mode)",
       "params": [
         {
           "name": "Target",
           "type": "FMovieSceneEvalTemplate*"
         },
         {
-          "name": "Current Time",
-          "type": "FFrameTime"
+          "name": "In Completion Mode",
+          "type": "EMovieSceneCompletionMode"
         }
       ],
-      "returnType": "Float",
-      "docs": "Evaluate this template's easing functions based on the specified time"
+      "returnType": "Void",
+      "docs": "Set this template's completion mode\n@note\t\t\t\t\tPre-animated state bound to evaluation templates is reference counted across all similar animation types for a given object.\nThis ensures that pre-animated state restores correctly for overlapping templates."
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "initialize",
+      "name": "Initialize",
       "category": "MovieSceneEvalTemplate",
-      "signature": "Serialize(Target, Ar)",
+      "signature": "Initialize(Target, Operand, Context, Persistent Data, Player)",
       "params": [
         {
           "name": "Target",
-          "type": "FMovieSceneEvalTemplatePtr*"
+          "type": "FMovieSceneEvalTemplate*"
         },
         {
-          "name": "Ar",
-          "type": "FArchive&"
+          "name": "Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Persistent Data",
+          "type": "FPersistentEvaluationData&"
+        },
+        {
+          "name": "Player",
+          "type": "IMovieScenePlayer&"
         }
       ],
-      "returnType": "Bool",
-      "docs": "Serialize the template"
+      "returnType": "Void",
+      "docs": "Initialize this template, copying any data required for evaluation into the specified state block.\n@note\t\t\t\t\tThis function is intended to allow pre-frame set up, and should avoid mutating any state.\nOnly called if EnableOverrides(RequiresInitializeFlag) has been called.\n@param Operand\t\t\tUnique handle to the operand on which we are to operate. May represent multiple objects. Resolve through IMovieScenePlayer::FindBoundObjects(Operand)\n@param Context\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param PersistentData\tPersistent data store which can be used to store arbitrary data pertaining to the current template that may be required in Evaluate(Swept)\n@param Player\t\t\tThe movie scene player currently playing back this sequence"
+    },
+    {
+      "id": "evaluate",
+      "name": "Evaluate",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "Evaluate(Target, Operand, Context, Persistent Data, Execution Tokens)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        },
+        {
+          "name": "Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Persistent Data",
+          "type": "FPersistentEvaluationData&"
+        },
+        {
+          "name": "Execution Tokens",
+          "type": "FMovieSceneExecutionTokens&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Evaluate this template, adding any execution tokens to the specified list\n@note\t\t\t\t\tOnly called when the containing template has an evaluation method of EEvaluationMethod::Static\nThis function should perform any expensive or costly evaluation logic required to calculate the final animated state.\nPotentially called on a thread, and as such has no access to the current evaluation environment.\n@param Operand\t\t\tUnique handle to the operand on which we are to operate. Only to be used as a reference, or forwarded throgh to an execution token.\n@param Context\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param PersistentData\tPersistent data store which can be used to access arbitrary data pertaining to the current template that should have been set up in initialize.\n@param ExecutionTokens\tStack of execution tokens that will be used to apply animated state to the environment at a later time."
+    },
+    {
+      "id": "evaluate-swept",
+      "name": "EvaluateSwept",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "EvaluateSwept(Target, Operand, Context, Swept Range, Persistent Data, Execution Tokens)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        },
+        {
+          "name": "Operand",
+          "type": "FMovieSceneEvaluationOperand&"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Swept Range",
+          "type": "TRange<FFrameNumber>&"
+        },
+        {
+          "name": "Persistent Data",
+          "type": "FPersistentEvaluationData&"
+        },
+        {
+          "name": "Execution Tokens",
+          "type": "FMovieSceneExecutionTokens&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Evaluate this template over the given swept range, adding any execution tokens to the specified list.\n@note \t\t\t\t\tOnly called when the containing template has an evaluation method of EEvaluationMethod::Swept\nThis function should perform any expensive or costly evaluation logic required to calculate the final animated state.\nPotentially called on a thread, and as such has no access to the current evaluation environment.\n@param Operand\t\t\tUnique handle to the operand on which we are to operate. Only to be used as a reference, or forwarded throgh to an execution token.\n@param Context\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param SweptRange\t\tThe range this is to be swept in this evaluation - always fully contained by the context's range\n@param PersistentData\tPersistent data store which can be used to access arbitrary data pertaining to the current template that should have been set up in initialize.\n@param ExecutionTokens\tStack of execution tokens that will be used to apply animated state to the environment at a later time."
+    },
+    {
+      "id": "interrogate-1137fc",
+      "name": "Interrogate",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "Interrogate(Target, Context, Container, Binding Override)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Container",
+          "type": "FMovieSceneInterrogationData&"
+        },
+        {
+          "name": "Binding Override",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Interrogate this template for its output. Should not have any side effects.\n@param Context\t\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param Container\t\t\t\tContainer to populate with the desired output from this track\n@param BindingOverride\t\tOptional binding to specify the object that is being animated by this track"
+    },
+    {
+      "id": "interrogate-3273e0",
+      "name": "Interrogate",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "Interrogate(Target, Context, Swept Range, Container, Binding Override)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        },
+        {
+          "name": "Context",
+          "type": "FMovieSceneContext&"
+        },
+        {
+          "name": "Swept Range",
+          "type": "TRange<FFrameNumber>"
+        },
+        {
+          "name": "Container",
+          "type": "FMovieSceneInterrogationData&"
+        },
+        {
+          "name": "Binding Override",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Interrogate this template for its output. Should not have any side effects.\n@param Context\t\t\t\tEvaluation context specifying the current evaluation time, sub sequence transform and other relevant information.\n@param SweptRange\t\t\tThe range to sweep, where this template evaluates with 'swept' evaluation\n@param Container\t\t\t\tContainer to populate with the desired output from this track\n@param BindingOverride\t\tOptional binding to specify the object that is being animated by this track"
+    },
+    {
+      "id": "set-source-section",
+      "name": "SetSourceSection",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "SetSourceSection(Target, In Source Section)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        },
+        {
+          "name": "In Source Section",
+          "type": "UMovieSceneSection*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the source section from which this template originated\n@param SourceSection \t\tThe source section"
+    },
+    {
+      "id": "get-source-section",
+      "name": "GetSourceSection",
+      "category": "MovieSceneEvalTemplate",
+      "signature": "GetSourceSection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMovieSceneEvalTemplate*"
+        }
+      ],
+      "returnType": "UMovieSceneSection*",
+      "docs": "Get the source section from which this template originated\n@return The source section from which this template originated"
     }
   ]
 }

@@ -21,36 +21,6 @@
   ],
   "functions": [
     {
-      "id": "init",
-      "name": "Init",
-      "category": "ConvexHull3",
-      "signature": "Init(Target, Num Points, Get Point Func, Filter Func, Epsilon)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "TExtremePoints3*"
-        },
-        {
-          "name": "Num Points",
-          "type": "Int"
-        },
-        {
-          "name": "Get Point Func",
-          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
-        },
-        {
-          "name": "Filter Func",
-          "type": "TFunctionRef<bool ( int32 )>"
-        },
-        {
-          "name": "Epsilon",
-          "type": "RealType",
-          "default": "TMathUtil<RealType>::Epsilon"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "compute-volume",
       "name": "ComputeVolume",
       "category": "ConvexHull3",
@@ -65,7 +35,7 @@
       "docs": "Calculate the Convex Hull of a 3D point set as a Triangle Mesh"
     },
     {
-      "id": "solve",
+      "id": "solve-7e6ca2",
       "name": "Solve",
       "category": "ConvexHull3",
       "signature": "Solve(Target, Num Points, Get Point Func, Filter Func)",
@@ -89,6 +59,113 @@
       ],
       "returnType": "Bool",
       "docs": "Generate convex hull as long as input is not degenerate\nIf input is degenerate, this will return false, and caller can call GetDimension()\nto determine whether the points were coplanar, collinear, or all the same point\n@param NumPoints Number of points to consider\n@param GetPointFunc Function providing array-style access into points\n@param FilterFunc Optional filter to include only a subset of the points in the output hull\n@return true if hull was generated, false if points span < 2 dimensions"
+    },
+    {
+      "id": "solve-a34d80",
+      "name": "Solve",
+      "category": "ConvexHull3",
+      "signature": "Solve(Target, Num Points, Get Point Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Num Points",
+          "type": "Int"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<TVector<RealType> ( int32 )>"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "solve-47d061",
+      "name": "Solve",
+      "category": "ConvexHull3",
+      "signature": "Solve(Target, Points, Filter Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Points",
+          "type": "TArrayView<VectorType>"
+        },
+        {
+          "name": "Filter Func",
+          "type": "TFunctionRef<bool ( int32 )>"
+        }
+      ],
+      "returnType": "template<VectorType> bool",
+      "docs": "Generate convex hull as long as input is not degenerate\nIf input is degenerate, this will return false, and caller can call GetDimension()\nto determine whether the points were collinear, or all the same point\n@param Points Array of points to consider\n@param FilterFunc Optional filter to include only a subset of the points in the output hull\n@return true if hull was generated, false if points span < 2 dimensions"
+    },
+    {
+      "id": "solve-88397d",
+      "name": "Solve",
+      "category": "ConvexHull3",
+      "signature": "Solve(Target, Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Points",
+          "type": "TArrayView<VectorType>"
+        }
+      ],
+      "returnType": "template<VectorType> bool",
+      "docs": "Generate convex hull as long as input is not degenerate\nIf input is degenerate, this will return false, and caller can call GetDimension()\nto determine whether the points were collinear, or all the same point\n@param Points Array of points to consider\n@return true if hull was generated, false if points span < 2 dimensions"
+    },
+    {
+      "id": "is-solution-available",
+      "name": "IsSolutionAvailable",
+      "category": "ConvexHull3",
+      "signature": "IsSolutionAvailable(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if convex hull is available"
+    },
+    {
+      "id": "get-triangles-3cf0e4",
+      "name": "GetTriangles",
+      "category": "ConvexHull3",
+      "signature": "GetTriangles(Target, Triangle Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Triangle Func",
+          "type": "TFunctionRef<void ( FIndex3i )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call TriangleFunc for each triangle of the Convex Hull. The triangles index into the point set passed to Solve()"
+    },
+    {
+      "id": "get-triangles-a0de41",
+      "name": "GetTriangles",
+      "category": "ConvexHull3",
+      "signature": "GetTriangles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "TArray<FIndex3i>&",
+      "docs": "@return convex hull triangles"
     },
     {
       "id": "get-faces",
@@ -180,6 +257,140 @@
       ],
       "returnType": "Void",
       "docs": "Get faces of the convex hull as convex polygons, simplifying the hull by merging near-coplanar faces and only keeping vertices that are on the corner of at least three merged faces\n@param OutPolygons\t\t\t\t\tPolygons of the convex hull faces, as arrays of indices into the original points\n@param GetPointFunc\t\t\t\t\tFunction providing array-style access into points\n@param FaceAngleToleranceInDegrees\tThe hull will be simplified by merging faces with less than this dihedral angle between them\n@param PlaneDistanceTolerance\t\tFaces will not merge unless all points on the face are within this distance of the combined (average) face plane\n@param OutPolygonNormals\t\t\t\tOptional array of normals for each polygon"
+    },
+    {
+      "id": "get-triangle-neighbors",
+      "name": "GetTriangleNeighbors",
+      "category": "ConvexHull3",
+      "signature": "GetTriangleNeighbors(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "TArray<FIndex3i>&",
+      "docs": "Only valid if bSaveTriangleNeighbors was true when Solve() was called\n@return Neighbors of each hull triangle, in edge order -- i.e., Nbr.A is the triangle across edge(Tri.A, Tri.B)"
+    },
+    {
+      "id": "move-triangles",
+      "name": "MoveTriangles",
+      "category": "ConvexHull3",
+      "signature": "MoveTriangles(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "TArray<FIndex3i>&&",
+      "docs": "@return convex hull triangles by a move"
+    },
+    {
+      "id": "get-as-halfspaces-491f6c",
+      "name": "GetAsHalfspaces",
+      "category": "ConvexHull3",
+      "signature": "GetAsHalfspaces(Target, Points)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Points",
+          "type": "TArrayView<VectorType>"
+        }
+      ],
+      "returnType": "template<VectorType> TArray<THalfspace3<RealType>>",
+      "docs": "Convert an already-computed convex hull into a halfspace representation\nFollowing the logic of ContainmentQueries3.h, all halfspaces are oriented \"outwards,\"\nso a point is inside the convex hull if it is outside of all halfspaces in the array\n@param Points Array of points to consider\n@return Array of halfspaces"
+    },
+    {
+      "id": "get-as-halfspaces-79886b",
+      "name": "GetAsHalfspaces",
+      "category": "ConvexHull3",
+      "signature": "GetAsHalfspaces(Target, Get Point Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        },
+        {
+          "name": "Get Point Func",
+          "type": "TFunctionRef<VectorType ( int32 )>"
+        }
+      ],
+      "returnType": "template<VectorType> TArray<THalfspace3<RealType>>",
+      "docs": "Convert an already-computed convex hull into a halfspace representation\nFollowing the logic of ContainmentQueries3.h, all halfspaces are oriented \"outwards,\"\nso a point is inside the convex hull if it is outside of all halfspaces in the array\n@param GetPointFunc Function providing array-style access into points\n@return Array of halfspaces"
+    },
+    {
+      "id": "empty",
+      "name": "Empty",
+      "category": "ConvexHull3",
+      "signature": "Empty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Empty any previously-computed convex hull data.  Frees the hull memory.\nNote: You do not need to call this before calling Generate() with new data."
+    },
+    {
+      "id": "get-dimension",
+      "name": "GetDimension",
+      "category": "ConvexHull3",
+      "signature": "GetDimension(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Number of dimensions spanned by the input points."
+    },
+    {
+      "id": "get-line",
+      "name": "GetLine",
+      "category": "ConvexHull3",
+      "signature": "GetLine(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "TLine3<RealType>&",
+      "docs": "@return If GetDimension() returns 1, this returns the line the data was on.  Otherwise result is not meaningful."
+    },
+    {
+      "id": "get-plane",
+      "name": "GetPlane",
+      "category": "ConvexHull3",
+      "signature": "GetPlane(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "TPlane3<RealType>&",
+      "docs": "@return If GetDimension() returns 2, this returns the plane the data was on.  Otherwise result is not meaningful."
+    },
+    {
+      "id": "get-num-hull-points",
+      "name": "GetNumHullPoints",
+      "category": "ConvexHull3",
+      "signature": "GetNumHullPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TConvexHull3*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "@return Number of points on the output hull"
     }
   ]
 }

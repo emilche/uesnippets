@@ -14,6 +14,62 @@
   ],
   "functions": [
     {
+      "id": "set-tangents",
+      "name": "SetTangents",
+      "category": "DynamicMeshBuilder",
+      "signature": "SetTangents(Target, In Tangent X, In Tangent Y, In Tangent Z)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshVertex*"
+        },
+        {
+          "name": "In Tangent X",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "In Tangent Y",
+          "type": "FVector3f&"
+        },
+        {
+          "name": "In Tangent Z",
+          "type": "FVector3f&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-tangent-y",
+      "name": "GetTangentY",
+      "category": "DynamicMeshBuilder",
+      "signature": "GetTangentY(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshVertex*"
+        }
+      ],
+      "returnType": "FVector3f"
+    },
+    {
+      "id": "get-index-buffer-size",
+      "name": "GetIndexBufferSize",
+      "category": "DynamicMeshBuilder",
+      "signature": "GetIndexBufferSize(Target, Num Elements)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshBuilder*"
+        },
+        {
+          "name": "Num Elements",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "This class provides the vertex/index allocator interface used by FDynamicMeshBuilder which is\nalready implemented internally with caching in mind but can be customized if needed."
+    },
+    {
       "id": "get-vertex-buffer-size",
       "name": "GetVertexBufferSize",
       "category": "DynamicMeshBuilder",
@@ -21,7 +77,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "Stride",
@@ -35,6 +91,19 @@
       "returnType": "Int"
     },
     {
+      "id": "f-dynamic-mesh-buffer-allocator",
+      "name": "FDynamicMeshBufferAllocator",
+      "category": "DynamicMeshBuilder",
+      "signature": "FDynamicMeshBufferAllocator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshBuilder*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "alloc-index-buffer-ea42ee",
       "name": "AllocIndexBuffer",
       "category": "DynamicMeshBuilder",
@@ -42,7 +111,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "RHI Cmd List",
@@ -63,7 +132,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "Index Buffer RHI",
@@ -80,7 +149,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "RHI Cmd List",
@@ -105,7 +174,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "Vertex Buffer RHI",
@@ -122,7 +191,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "Num Elements",
@@ -139,7 +208,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshBufferAllocator*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "Stride",
@@ -151,6 +220,49 @@
         }
       ],
       "returnType": "FBufferRHIRef"
+    },
+    {
+      "id": "f-dynamic-mesh-builder-d17186",
+      "name": "FDynamicMeshBuilder",
+      "category": "DynamicMeshBuilder",
+      "signature": "FDynamicMeshBuilder(In Feature Level, In Num Tex Coords, In Lightmap Coordinate Index, In Use 16 Bit Tex Coord, In Dynamic Mesh Buffer Allocator)",
+      "params": [
+        {
+          "name": "In Feature Level",
+          "type": "ERHIFeatureLevel::Type"
+        },
+        {
+          "name": "In Num Tex Coords",
+          "type": "UInt",
+          "default": "1"
+        },
+        {
+          "name": "In Lightmap Coordinate Index",
+          "type": "UInt",
+          "default": "0"
+        },
+        {
+          "name": "In Use 16 Bit Tex Coord",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "In Dynamic Mesh Buffer Allocator",
+          "type": "FDynamicMeshBufferAllocator*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A utility used to construct dynamically generated meshes, and render them to a FPrimitiveDrawInterface.\nNote: This is meant to be easy to use, not fast.  It moves the data around more than necessary, and requires dynamically allocating RHI\nresources.  Exercise caution."
+    },
+    {
+      "id": "f-dynamic-mesh-builder-1a052d",
+      "name": "FDynamicMeshBuilder",
+      "category": "DynamicMeshBuilder",
+      "signature": "FDynamicMeshBuilder()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Destructor."
     },
     {
       "id": "add-vertex-dc8566",
@@ -675,6 +787,20 @@
       "docs": "Draws the mesh to the given primitive draw interface.\n@param PDI - The primitive draw interface to draw the mesh on.\n@param LocalToWorld - The local to world transform to apply to the vertices of the mesh.\n@param FMaterialRenderProxy - The material instance to render on the mesh.\n@param DepthPriorityGroup - The depth priority group to render the mesh in.\n@param HitProxyId - Hit proxy to use for this mesh.  Use INDEX_NONE for no hit proxy."
     },
     {
+      "id": "f-dynamic-mesh-index-buffer-32",
+      "name": "FDynamicMeshIndexBuffer32",
+      "category": "DynamicMeshBuilder",
+      "signature": "FDynamicMeshIndexBuffer32(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshBuilder*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Index Buffer"
+    },
+    {
       "id": "init-rhi",
       "name": "InitRHI",
       "category": "DynamicMeshBuilder",
@@ -682,11 +808,24 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDynamicMeshIndexBuffer32*"
+          "type": "FDynamicMeshBuilder*"
         },
         {
           "name": "RHI Cmd List",
           "type": "FRHICommandListBase&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-dynamic-mesh-index-buffer-16",
+      "name": "FDynamicMeshIndexBuffer16",
+      "category": "DynamicMeshBuilder",
+      "signature": "FDynamicMeshIndexBuffer16(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FDynamicMeshBuilder*"
         }
       ],
       "returnType": "Void"

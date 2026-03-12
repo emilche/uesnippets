@@ -23,22 +23,62 @@
       "params": [
         {
           "name": "Target",
-          "type": "FEvolution*"
+          "type": "FSoftBodies*"
         }
       ],
       "returnType": "Void",
-      "docs": "Reset/empty everything."
+      "docs": "Reset/empty everything.",
+      "supportedTargets": [
+        "FSoftBodies*",
+        "FCollisionBodyRanges*",
+        "FGroups*"
+      ]
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "SoftsEvolution",
+      "signature": "Init(In Solver Mode, In Dt, In Num PBD Iterations, In Num Newton Iterations)",
+      "params": [
+        {
+          "name": "In Solver Mode",
+          "type": "ESolverMode"
+        },
+        {
+          "name": "In Dt",
+          "type": "FSolverReal"
+        },
+        {
+          "name": "In Num PBD Iterations",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Newton Iterations",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-evolution",
+      "name": "FEvolution",
+      "category": "SoftsEvolution",
+      "signature": "FEvolution(Properties)",
+      "params": [
+        {
+          "name": "Properties",
+          "type": "FCollectionPropertyConstFacade&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Solver can contain multiple \"Groups\". Groups do not interact with each other.\nThey may be in different spaces. They may be solved in parallel, completely independently of each other.\nThe only reason why they're in the same evolution is because they share the same solver\nsettings and step together in time.\nA Group can contain multiple \"SoftBodies\". SoftBodies can interact but have different\nconstraint rules/forces."
     },
     {
       "id": "advance-one-time-step",
       "name": "AdvanceOneTimeStep",
       "category": "SoftsEvolution",
-      "signature": "AdvanceOneTimeStep(Target, Dt, Time Dependent Iteration Multiplier)",
+      "signature": "AdvanceOneTimeStep(Dt, Time Dependent Iteration Multiplier)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Dt",
           "type": "FSolverReal"
@@ -52,41 +92,109 @@
       "docs": "Move forward in time"
     },
     {
+      "id": "add-group-array",
+      "name": "AddGroupArray",
+      "category": "SoftsEvolution",
+      "signature": "AddGroupArray(Array)",
+      "params": [
+        {
+          "name": "Array",
+          "type": "TArrayCollectionArrayBase*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add custom collection arrays"
+    },
+    {
+      "id": "add-particle-array",
+      "name": "AddParticleArray",
+      "category": "SoftsEvolution",
+      "signature": "AddParticleArray(Array)",
+      "params": [
+        {
+          "name": "Array",
+          "type": "TArrayCollectionArrayBase*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-collision-particle-array",
+      "name": "AddCollisionParticleArray",
+      "category": "SoftsEvolution",
+      "signature": "AddCollisionParticleArray(Array)",
+      "params": [
+        {
+          "name": "Array",
+          "type": "TArrayCollectionArrayBase*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-particles",
+      "name": "GetParticles",
+      "category": "SoftsEvolution",
+      "signature": "GetParticles()",
+      "params": [],
+      "returnType": "FSolverParticles&"
+    },
+    {
+      "id": "get-active-groups",
+      "name": "GetActiveGroups",
+      "category": "SoftsEvolution",
+      "signature": "GetActiveGroups()",
+      "params": [],
+      "returnType": "TSet<uint32>"
+    },
+    {
       "id": "get-active-groups-array",
       "name": "GetActiveGroupsArray",
       "category": "SoftsEvolution",
-      "signature": "GetActiveGroupsArray(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        }
-      ],
+      "signature": "GetActiveGroupsArray()",
+      "params": [],
       "returnType": "TArray<uint32>"
     },
     {
       "id": "num-active-particles",
       "name": "NumActiveParticles",
       "category": "SoftsEvolution",
-      "signature": "NumActiveParticles(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        }
-      ],
+      "signature": "NumActiveParticles()",
+      "params": [],
       "returnType": "Int"
     },
     {
-      "id": "add-soft-body",
-      "name": "AddSoftBody",
+      "id": "get-group-context",
+      "name": "GetGroupContext",
       "category": "SoftsEvolution",
-      "signature": "AddSoftBody(Target, Group Id, Num Particles, Enable)",
+      "signature": "GetGroupContext(Group Id)",
       "params": [
         {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
+          "name": "Group Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "FEvolutionGroupContext&"
+    },
+    {
+      "id": "get-group-context-for-soft-body",
+      "name": "GetGroupContextForSoftBody",
+      "category": "SoftsEvolution",
+      "signature": "GetGroupContextForSoftBody(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FEvolutionGroupContext&"
+    },
+    {
+      "id": "add-soft-body-7617c4",
+      "name": "AddSoftBody",
+      "category": "SoftsEvolution",
+      "signature": "AddSoftBody(Group Id, Num Particles, Enable)",
+      "params": [
         {
           "name": "Group Id",
           "type": "UInt"
@@ -107,12 +215,8 @@
       "id": "remove-soft-body",
       "name": "RemoveSoftBody",
       "category": "SoftsEvolution",
-      "signature": "RemoveSoftBody(Target, Soft Body Id)",
+      "signature": "RemoveSoftBody(Soft Body Id)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Soft Body Id",
           "type": "Int"
@@ -121,15 +225,37 @@
       "returnType": "Void"
     },
     {
+      "id": "get-soft-body-particle-num",
+      "name": "GetSoftBodyParticleNum",
+      "category": "SoftsEvolution",
+      "signature": "GetSoftBodyParticleNum(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-soft-body-group-id",
+      "name": "GetSoftBodyGroupId",
+      "category": "SoftsEvolution",
+      "signature": "GetSoftBodyGroupId(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
       "id": "set-soft-body-properties",
       "name": "SetSoftBodyProperties",
       "category": "SoftsEvolution",
-      "signature": "SetSoftBodyProperties(Target, Soft Body Id, Property Collection, Weight Maps)",
+      "signature": "SetSoftBodyProperties(Soft Body Id, Property Collection, Weight Maps)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Soft Body Id",
           "type": "Int"
@@ -149,12 +275,8 @@
       "id": "activate-soft-body",
       "name": "ActivateSoftBody",
       "category": "SoftsEvolution",
-      "signature": "ActivateSoftBody(Target, Soft Body Id, Activate)",
+      "signature": "ActivateSoftBody(Soft Body Id, Activate)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Soft Body Id",
           "type": "Int"
@@ -167,15 +289,89 @@
       "returnType": "Void"
     },
     {
+      "id": "is-soft-body-active",
+      "name": "IsSoftBodyActive",
+      "category": "SoftsEvolution",
+      "signature": "IsSoftBodyActive(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-soft-body-particles",
+      "name": "GetSoftBodyParticles",
+      "category": "SoftsEvolution",
+      "signature": "GetSoftBodyParticles(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FSolverParticlesRange&"
+    },
+    {
+      "id": "get-group-soft-bodies",
+      "name": "GetGroupSoftBodies",
+      "category": "SoftsEvolution",
+      "signature": "GetGroupSoftBodies(Group Id)",
+      "params": [
+        {
+          "name": "Group Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "TArray<int32>&"
+    },
+    {
+      "id": "get-group-active-soft-bodies",
+      "name": "GetGroupActiveSoftBodies",
+      "category": "SoftsEvolution",
+      "signature": "GetGroupActiveSoftBodies(Group Id)",
+      "params": [
+        {
+          "name": "Group Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "TSet<int32>&"
+    },
+    {
+      "id": "get-last-linear-solve-iterations",
+      "name": "GetLastLinearSolveIterations",
+      "category": "SoftsEvolution",
+      "signature": "GetLastLinearSolveIterations(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-last-linear-solve-error",
+      "name": "GetLastLinearSolveError",
+      "category": "SoftsEvolution",
+      "signature": "GetLastLinearSolveError(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FSolverReal"
+    },
+    {
       "id": "add-collision-particle-range",
       "name": "AddCollisionParticleRange",
       "category": "SoftsEvolution",
-      "signature": "AddCollisionParticleRange(Target, Group Id, Num Particles, Enable)",
+      "signature": "AddCollisionParticleRange(Group Id, Num Particles, Enable)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Group Id",
           "type": "UInt"
@@ -196,12 +392,8 @@
       "id": "remove-collision-particle-range",
       "name": "RemoveCollisionParticleRange",
       "category": "SoftsEvolution",
-      "signature": "RemoveCollisionParticleRange(Target, Collision Range Id)",
+      "signature": "RemoveCollisionParticleRange(Collision Range Id)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Collision Range Id",
           "type": "Int"
@@ -213,12 +405,8 @@
       "id": "activate-collision-particle-range",
       "name": "ActivateCollisionParticleRange",
       "category": "SoftsEvolution",
-      "signature": "ActivateCollisionParticleRange(Target, Collision Range Id, Enable)",
+      "signature": "ActivateCollisionParticleRange(Collision Range Id, Enable)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Collision Range Id",
           "type": "Int"
@@ -231,15 +419,24 @@
       "returnType": "Void"
     },
     {
+      "id": "get-group-active-collision-particle-ranges",
+      "name": "GetGroupActiveCollisionParticleRanges",
+      "category": "SoftsEvolution",
+      "signature": "GetGroupActiveCollisionParticleRanges(Group Id)",
+      "params": [
+        {
+          "name": "Group Id",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "TSet<int32>&"
+    },
+    {
       "id": "get-active-collision-particles",
       "name": "GetActiveCollisionParticles",
       "category": "SoftsEvolution",
-      "signature": "GetActiveCollisionParticles(Target, Group Id)",
+      "signature": "GetActiveCollisionParticles(Group Id)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Group Id",
           "type": "UInt"
@@ -248,21 +445,591 @@
       "returnType": "TArray<FSolverCollisionParticlesRange>"
     },
     {
+      "id": "is-valid-collision-particle-range",
+      "name": "IsValidCollisionParticleRange",
+      "category": "SoftsEvolution",
+      "signature": "IsValidCollisionParticleRange(Collision Range Id)",
+      "params": [
+        {
+          "name": "Collision Range Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-collision-particle-range",
+      "name": "GetCollisionParticleRange",
+      "category": "SoftsEvolution",
+      "signature": "GetCollisionParticleRange(Collision Range Id)",
+      "params": [
+        {
+          "name": "Collision Range Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FSolverCollisionParticlesRange&"
+    },
+    {
+      "id": "set-kinematic-update-function",
+      "name": "SetKinematicUpdateFunction",
+      "category": "SoftsEvolution",
+      "signature": "SetKinematicUpdateFunction(Func)",
+      "params": [
+        {
+          "name": "Func",
+          "type": "KinematicUpdateFunc"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-collision-kinematic-update-function",
+      "name": "SetCollisionKinematicUpdateFunction",
+      "category": "SoftsEvolution",
+      "signature": "SetCollisionKinematicUpdateFunction(Func)",
+      "params": [
+        {
+          "name": "Func",
+          "type": "CollisionKinematicUpdateFunc"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-pre-substep-parallel-init-range",
+      "name": "AllocatePreSubstepParallelInitRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePreSubstepParallelInitRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add Ranges to allocate space for your rules."
+    },
+    {
+      "id": "allocate-pbd-external-force-rules-range",
+      "name": "AllocatePBDExternalForceRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePBDExternalForceRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-post-initial-guess-parallel-init-range",
+      "name": "AllocatePostInitialGuessParallelInitRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePostInitialGuessParallelInitRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-pre-substep-constraint-rules-range",
+      "name": "AllocatePreSubstepConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePreSubstepConstraintRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-per-iteration-pbd-constraint-rules-range",
+      "name": "AllocatePerIterationPBDConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePerIterationPBDConstraintRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-per-iteration-collision-pbd-constraint-rules-range",
+      "name": "AllocatePerIterationCollisionPBDConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePerIterationCollisionPBDConstraintRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-per-iteration-post-collisions-pbd-constraint-rules-range",
+      "name": "AllocatePerIterationPostCollisionsPBDConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePerIterationPostCollisionsPBDConstraintRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-update-linear-system-rules-range",
+      "name": "AllocateUpdateLinearSystemRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocateUpdateLinearSystemRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-update-linear-system-collisions-rules-range",
+      "name": "AllocateUpdateLinearSystemCollisionsRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocateUpdateLinearSystemCollisionsRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-post-substep-constraint-rules-range",
+      "name": "AllocatePostSubstepConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "AllocatePostSubstepConstraintRulesRange(Soft Body Id, Num Rules)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-pre-substep-parallel-init-range",
+      "name": "GetPreSubstepParallelInitRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPreSubstepParallelInitRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<ParallelInitFunc>"
+    },
+    {
+      "id": "get-pbd-external-force-rules-range",
+      "name": "GetPBDExternalForceRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPBDExternalForceRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<PBDConstraintRuleFunc>"
+    },
+    {
+      "id": "get-post-initial-guess-parallel-init-range",
+      "name": "GetPostInitialGuessParallelInitRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPostInitialGuessParallelInitRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<ParallelInitFunc>"
+    },
+    {
+      "id": "get-pre-substep-constraint-rules-range",
+      "name": "GetPreSubstepConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPreSubstepConstraintRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<ConstraintRuleFunc>"
+    },
+    {
+      "id": "get-per-iteration-pbd-constraint-rules-range",
+      "name": "GetPerIterationPBDConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPerIterationPBDConstraintRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<PBDConstraintRuleFunc>"
+    },
+    {
+      "id": "get-per-iteration-collision-pbd-constraint-rules-range",
+      "name": "GetPerIterationCollisionPBDConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPerIterationCollisionPBDConstraintRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<PBDCollisionConstraintRuleFunc>"
+    },
+    {
+      "id": "get-per-iteration-post-collisions-pbd-constraint-rules-range",
+      "name": "GetPerIterationPostCollisionsPBDConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPerIterationPostCollisionsPBDConstraintRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<PBDConstraintRuleFunc>"
+    },
+    {
+      "id": "get-update-linear-system-rules-range",
+      "name": "GetUpdateLinearSystemRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetUpdateLinearSystemRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<UpdateLinearSystemFunc>"
+    },
+    {
+      "id": "get-update-linear-system-collisions-rules-range",
+      "name": "GetUpdateLinearSystemCollisionsRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetUpdateLinearSystemCollisionsRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<UpdateLinearSystemCollisionsFunc>"
+    },
+    {
+      "id": "get-post-substep-constraint-rules-range",
+      "name": "GetPostSubstepConstraintRulesRange",
+      "category": "SoftsEvolution",
+      "signature": "GetPostSubstepConstraintRulesRange(Soft Body Id)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayView<ConstraintRuleFunc>"
+    },
+    {
+      "id": "get-time",
+      "name": "GetTime",
+      "category": "SoftsEvolution",
+      "signature": "GetTime()",
+      "params": [],
+      "returnType": "FSolverReal",
+      "docs": "Solver settings"
+    },
+    {
+      "id": "get-iterations",
+      "name": "GetIterations",
+      "category": "SoftsEvolution",
+      "signature": "GetIterations()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-max-iterations",
+      "name": "GetMaxIterations",
+      "category": "SoftsEvolution",
+      "signature": "GetMaxIterations()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-used-iterations",
+      "name": "GetNumUsedIterations",
+      "category": "SoftsEvolution",
+      "signature": "GetNumUsedIterations()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-disable-time-dependent-num-iterations",
+      "name": "GetDisableTimeDependentNumIterations",
+      "category": "SoftsEvolution",
+      "signature": "GetDisableTimeDependentNumIterations()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-do-quasistatics",
+      "name": "GetDoQuasistatics",
+      "category": "SoftsEvolution",
+      "signature": "GetDoQuasistatics()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-disable-time-dependent-num-iterations",
+      "name": "SetDisableTimeDependentNumIterations",
+      "category": "SoftsEvolution",
+      "signature": "SetDisableTimeDependentNumIterations(Disable)",
+      "params": [
+        {
+          "name": "Disable",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "set-solver-properties",
       "name": "SetSolverProperties",
       "category": "SoftsEvolution",
-      "signature": "SetSolverProperties(Target, Property Collection)",
+      "signature": "SetSolverProperties(Property Collection)",
       "params": [
-        {
-          "name": "Target",
-          "type": "FEvolution*"
-        },
         {
           "name": "Property Collection",
           "type": "FCollectionPropertyConstFacade&"
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "add-range-3fba3e",
+      "name": "AddRange",
+      "category": "SoftsEvolution",
+      "signature": "AddRange(In Array, In Range Size)",
+      "params": [
+        {
+          "name": "In Array",
+          "type": "TArray<ElementType>&"
+        },
+        {
+          "name": "In Range Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "TArrayRange"
+    },
+    {
+      "id": "is-valid",
+      "name": "IsValid",
+      "category": "SoftsEvolution",
+      "signature": "IsValid()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-const-array-view",
+      "name": "GetConstArrayView",
+      "category": "SoftsEvolution",
+      "signature": "GetConstArrayView()",
+      "params": [],
+      "returnType": "TConstArrayView<ElementType>"
+    },
+    {
+      "id": "get-array-view",
+      "name": "GetArrayView",
+      "category": "SoftsEvolution",
+      "signature": "GetArrayView()",
+      "params": [],
+      "returnType": "TArrayView<ElementType>"
+    },
+    {
+      "id": "is-empty",
+      "name": "IsEmpty",
+      "category": "SoftsEvolution",
+      "signature": "IsEmpty()",
+      "params": [],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-range-size",
+      "name": "GetRangeSize",
+      "category": "SoftsEvolution",
+      "signature": "GetRangeSize()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "add-soft-body-4f0d52",
+      "name": "AddSoftBody",
+      "category": "SoftsEvolution",
+      "signature": "AddSoftBody(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FSoftBodies*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "add-range-c2176c",
+      "name": "AddRange",
+      "category": "SoftsEvolution",
+      "signature": "AddRange(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCollisionBodyRanges*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "add-groups-to-size",
+      "name": "AddGroupsToSize",
+      "category": "SoftsEvolution",
+      "signature": "AddGroupsToSize(Target, Desired Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGroups*"
+        },
+        {
+          "name": "Desired Size",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-properties",
+      "name": "SetProperties",
+      "category": "SoftsEvolution",
+      "signature": "SetProperties(Target, Property Collection, In XPBD Initial Guess)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FLinearSystemParameters*"
+        },
+        {
+          "name": "Property Collection",
+          "type": "FCollectionPropertyConstFacade&"
+        },
+        {
+          "name": "In XPBD Initial Guess",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "allocate-rules",
+      "name": "AllocateRules",
+      "category": "SoftsEvolution",
+      "signature": "AllocateRules(Soft Body Id, Num Rules, Rule Array)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Num Rules",
+          "type": "Int"
+        },
+        {
+          "name": "Rule Array",
+          "type": "TArrayCollectionArray<TArray<RuleFunc>>&"
+        }
+      ],
+      "returnType": "template<RuleFunc> void"
+    },
+    {
+      "id": "get-rules",
+      "name": "GetRules",
+      "category": "SoftsEvolution",
+      "signature": "GetRules(Soft Body Id, Rule Array)",
+      "params": [
+        {
+          "name": "Soft Body Id",
+          "type": "Int"
+        },
+        {
+          "name": "Rule Array",
+          "type": "TArrayCollectionArray<TArray<RuleFunc>>&"
+        }
+      ],
+      "returnType": "template<RuleFunc> TArrayView<RuleFunc>"
     }
   ]
 }

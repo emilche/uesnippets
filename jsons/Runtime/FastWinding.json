@@ -1,0 +1,309 @@
+{
+  "id": "fast-winding",
+  "label": "FastWinding",
+  "includepath": "Spatial/FastWinding.h",
+  "includes": [
+    "MathUtil",
+    "MeshQueries",
+    "MeshAABBTree3",
+    "MeshCaches",
+    "MatrixTypes",
+    "ParallelTransformReduce"
+  ],
+  "functions": [
+    {
+      "id": "compute-coeffs-serial",
+      "name": "ComputeCoeffsSerial",
+      "category": "FastWinding",
+      "signature": "ComputeCoeffsSerial(Mesh, Triangles, Tri Cache, P, R, Order 1, Order 2)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Triangles",
+          "type": "IterableTriangleIndices&"
+        },
+        {
+          "name": "Tri Cache",
+          "type": "FMeshTriInfoCache&"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "R",
+          "type": "Double&"
+        },
+        {
+          "name": "Order 1",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Order 2",
+          "type": "FMatrix3d&"
+        }
+      ],
+      "returnType": "template<class TriangleMeshType,class IterableTriangleIndices> void",
+      "docs": "Formulas for triangle winding number approximation"
+    },
+    {
+      "id": "compute-coeffs",
+      "name": "ComputeCoeffs",
+      "category": "FastWinding",
+      "signature": "ComputeCoeffs(Mesh, Triangle Set, Tri Cache, P, R, Order 1, Order 2, Num Tasks)",
+      "params": [
+        {
+          "name": "Mesh",
+          "type": "TriangleMeshType&"
+        },
+        {
+          "name": "Triangle Set",
+          "type": "TSet<int>&"
+        },
+        {
+          "name": "Tri Cache",
+          "type": "FMeshTriInfoCache&"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "R",
+          "type": "Double&"
+        },
+        {
+          "name": "Order 1",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Order 2",
+          "type": "FMatrix3d&"
+        },
+        {
+          "name": "Num Tasks",
+          "type": "Int",
+          "default": "16"
+        }
+      ],
+      "returnType": "template<class TriangleMeshType> void",
+      "docs": "precompute constant coefficients of triangle winding number approximation (evaluated in parallel for large sets of triangles)\nP: 'Center' of expansion for Triangles (area-weighted centroid avg)\nR: max distance from P to Triangles\nOrder1: first-order vector coeff\nOrder2: second-order matrix coeff\nTriCache: precomputed triangle centroid/normal/area"
+    },
+    {
+      "id": "evaluate-order-1-approx",
+      "name": "EvaluateOrder1Approx",
+      "category": "FastWinding",
+      "signature": "EvaluateOrder1Approx(Center, Order 1 Coeff, Q)",
+      "params": [
+        {
+          "name": "Center",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Order 1 Coeff",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Q",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Evaluate first-order FWN approximation at point Q, relative to Center c"
+    },
+    {
+      "id": "evaluate-order-2-approx",
+      "name": "EvaluateOrder2Approx",
+      "category": "FastWinding",
+      "signature": "EvaluateOrder2Approx(Center, Order 1 Coeff, Order 2 Coeff, Q)",
+      "params": [
+        {
+          "name": "Center",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Order 1 Coeff",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Order 2 Coeff",
+          "type": "FMatrix3d&"
+        },
+        {
+          "name": "Q",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Evaluate second-order FWN approximation at point Q, relative to Center c"
+    },
+    {
+      "id": "order-1-approx",
+      "name": "Order1Approx",
+      "category": "FastWinding",
+      "signature": "Order1Approx(T, P, XN, XA, Q)",
+      "params": [
+        {
+          "name": "T",
+          "type": "FTriangle3d&"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "XN",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "XA",
+          "type": "Double"
+        },
+        {
+          "name": "Q",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "order-2-approx",
+      "name": "Order2Approx",
+      "category": "FastWinding",
+      "signature": "Order2Approx(T, P, XN, XA, Q)",
+      "params": [
+        {
+          "name": "T",
+          "type": "FTriangle3d&"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "XN",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "XA",
+          "type": "Double"
+        },
+        {
+          "name": "Q",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double"
+    },
+    {
+      "id": "set-tree",
+      "name": "SetTree",
+      "category": "FastWinding",
+      "signature": "SetTree(Target, Tree To Ref, Auto Build)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFastWindingTree*"
+        },
+        {
+          "name": "Tree To Ref",
+          "type": "TMeshAABBTree3<TriangleMeshType>*"
+        },
+        {
+          "name": "Auto Build",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-tree",
+      "name": "GetTree",
+      "category": "FastWinding",
+      "signature": "GetTree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFastWindingTree*"
+        }
+      ],
+      "returnType": "TMeshAABBTree3<TriangleMeshType>*"
+    },
+    {
+      "id": "build",
+      "name": "Build",
+      "category": "FastWinding",
+      "signature": "Build(Target, Force Rebuild)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFastWindingTree*"
+        },
+        {
+          "name": "Force Rebuild",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-built",
+      "name": "IsBuilt",
+      "category": "FastWinding",
+      "signature": "IsBuilt(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFastWindingTree*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "fast-winding-number",
+      "name": "FastWindingNumber",
+      "category": "FastWinding",
+      "signature": "FastWindingNumber(Target, P)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFastWindingTree*"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Fast approximation of winding number using far-field approximations.\nOn a closed mesh the winding number will be 1 or more inside (depending on number of \"winds\").\nOutside a closed mesh the winding number will be zero.\nOn an open mesh, the above holds near the mesh but in the \"hole\" areas the value will smoothly blend from 1 to 0 over a band of width dependent on the hole extent"
+    },
+    {
+      "id": "is-inside",
+      "name": "IsInside",
+      "category": "FastWinding",
+      "signature": "IsInside(Target, P, Winding Iso Threshold)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TFastWindingTree*"
+        },
+        {
+          "name": "P",
+          "type": "FVector3d&"
+        },
+        {
+          "name": "Winding Iso Threshold",
+          "type": "Double",
+          "default": "0.5"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if fast winding number at point P is greater than winding threshold (default 0.5)"
+    }
+  ]
+}

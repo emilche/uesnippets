@@ -1,0 +1,743 @@
+{
+  "id": "calling-conv-lower",
+  "label": "CallingConvLower",
+  "includepath": "CallingConvLower.h",
+  "includes": [
+    "SmallVector",
+    "MachineFrameInfo",
+    "MachineFunction",
+    "CallingConv",
+    "MCRegisterInfo",
+    "TargetCallingConv"
+  ],
+  "functions": [
+    {
+      "id": "get-custom-reg",
+      "name": "getCustomReg",
+      "category": "CallingConvLower",
+      "signature": "getCustomReg(Val No, Val VT, Reg No, Loc VT, HTP)",
+      "params": [
+        {
+          "name": "Val No",
+          "type": "unsigned"
+        },
+        {
+          "name": "Val VT",
+          "type": "MVT"
+        },
+        {
+          "name": "Reg No",
+          "type": "unsigned"
+        },
+        {
+          "name": "Loc VT",
+          "type": "MVT"
+        },
+        {
+          "name": "HTP",
+          "type": "LocInfo"
+        }
+      ],
+      "returnType": "CCValAssign"
+    },
+    {
+      "id": "get-mem",
+      "name": "getMem",
+      "category": "CallingConvLower",
+      "signature": "getMem(Val No, Val VT, Offset, Loc VT, HTP)",
+      "params": [
+        {
+          "name": "Val No",
+          "type": "unsigned"
+        },
+        {
+          "name": "Val VT",
+          "type": "MVT"
+        },
+        {
+          "name": "Offset",
+          "type": "unsigned"
+        },
+        {
+          "name": "Loc VT",
+          "type": "MVT"
+        },
+        {
+          "name": "HTP",
+          "type": "LocInfo"
+        }
+      ],
+      "returnType": "CCValAssign"
+    },
+    {
+      "id": "get-custom-mem",
+      "name": "getCustomMem",
+      "category": "CallingConvLower",
+      "signature": "getCustomMem(Val No, Val VT, Offset, Loc VT, HTP)",
+      "params": [
+        {
+          "name": "Val No",
+          "type": "unsigned"
+        },
+        {
+          "name": "Val VT",
+          "type": "MVT"
+        },
+        {
+          "name": "Offset",
+          "type": "unsigned"
+        },
+        {
+          "name": "Loc VT",
+          "type": "MVT"
+        },
+        {
+          "name": "HTP",
+          "type": "LocInfo"
+        }
+      ],
+      "returnType": "CCValAssign"
+    },
+    {
+      "id": "get-pending",
+      "name": "getPending",
+      "category": "CallingConvLower",
+      "signature": "getPending(Val No, Val VT, Loc VT, HTP, Extra Info)",
+      "params": [
+        {
+          "name": "Val No",
+          "type": "unsigned"
+        },
+        {
+          "name": "Val VT",
+          "type": "MVT"
+        },
+        {
+          "name": "Loc VT",
+          "type": "MVT"
+        },
+        {
+          "name": "HTP",
+          "type": "LocInfo"
+        },
+        {
+          "name": "Extra Info",
+          "type": "unsigned",
+          "default": "0"
+        }
+      ],
+      "returnType": "CCValAssign"
+    },
+    {
+      "id": "convert-to-reg",
+      "name": "convertToReg",
+      "category": "CallingConvLower",
+      "signature": "convertToReg(Target, Reg No)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        },
+        {
+          "name": "Reg No",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "convert-to-mem",
+      "name": "convertToMem",
+      "category": "CallingConvLower",
+      "signature": "convertToMem(Target, Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        },
+        {
+          "name": "Offset",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-val-no",
+      "name": "getValNo",
+      "category": "CallingConvLower",
+      "signature": "getValNo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-val-vt",
+      "name": "getValVT",
+      "category": "CallingConvLower",
+      "signature": "getValVT(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "MVT"
+    },
+    {
+      "id": "is-reg-loc",
+      "name": "isRegLoc",
+      "category": "CallingConvLower",
+      "signature": "isRegLoc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-mem-loc",
+      "name": "isMemLoc",
+      "category": "CallingConvLower",
+      "signature": "isMemLoc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "needs-custom",
+      "name": "needsCustom",
+      "category": "CallingConvLower",
+      "signature": "needsCustom(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-loc-reg",
+      "name": "getLocReg",
+      "category": "CallingConvLower",
+      "signature": "getLocReg(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-loc-mem-offset",
+      "name": "getLocMemOffset",
+      "category": "CallingConvLower",
+      "signature": "getLocMemOffset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-extra-info",
+      "name": "getExtraInfo",
+      "category": "CallingConvLower",
+      "signature": "getExtraInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-loc-vt",
+      "name": "getLocVT",
+      "category": "CallingConvLower",
+      "signature": "getLocVT(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "MVT"
+    },
+    {
+      "id": "get-loc-info",
+      "name": "getLocInfo",
+      "category": "CallingConvLower",
+      "signature": "getLocInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "LocInfo"
+    },
+    {
+      "id": "is-ext-in-loc",
+      "name": "isExtInLoc",
+      "category": "CallingConvLower",
+      "signature": "isExtInLoc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "is-upper-bits-in-loc",
+      "name": "isUpperBitsInLoc",
+      "category": "CallingConvLower",
+      "signature": "isUpperBitsInLoc(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCValAssign*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-loc",
+      "name": "addLoc",
+      "category": "CallingConvLower",
+      "signature": "addLoc(Target, V)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "V",
+          "type": "CCValAssign&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-context",
+      "name": "getContext",
+      "category": "CallingConvLower",
+      "signature": "getContext(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "LLVMContext&"
+    },
+    {
+      "id": "get-machine-function",
+      "name": "getMachineFunction",
+      "category": "CallingConvLower",
+      "signature": "getMachineFunction(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "MachineFunction&"
+    },
+    {
+      "id": "get-calling-conv",
+      "name": "getCallingConv",
+      "category": "CallingConvLower",
+      "signature": "getCallingConv(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "CallingConv::ID"
+    },
+    {
+      "id": "is-var-arg",
+      "name": "isVarArg",
+      "category": "CallingConvLower",
+      "signature": "isVarArg(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-next-stack-offset",
+      "name": "getNextStackOffset",
+      "category": "CallingConvLower",
+      "signature": "getNextStackOffset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "is-allocated",
+      "name": "isAllocated",
+      "category": "CallingConvLower",
+      "signature": "isAllocated(Target, Reg)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Reg",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-first-unallocated",
+      "name": "getFirstUnallocated",
+      "category": "CallingConvLower",
+      "signature": "getFirstUnallocated(Target, Regs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Regs",
+          "type": "ArrayRef<MCPhysReg>"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-reg-59b0dc",
+      "name": "AllocateReg",
+      "category": "CallingConvLower",
+      "signature": "AllocateReg(Target, Reg)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Reg",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-reg-342e50",
+      "name": "AllocateReg",
+      "category": "CallingConvLower",
+      "signature": "AllocateReg(Target, Reg, Shadow Reg)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Reg",
+          "type": "unsigned"
+        },
+        {
+          "name": "Shadow Reg",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-reg-4ee017",
+      "name": "AllocateReg",
+      "category": "CallingConvLower",
+      "signature": "AllocateReg(Target, Regs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Regs",
+          "type": "ArrayRef<MCPhysReg>"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-reg-block",
+      "name": "AllocateRegBlock",
+      "category": "CallingConvLower",
+      "signature": "AllocateRegBlock(Target, Regs, Regs Required)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Regs",
+          "type": "ArrayRef<uint16_t>"
+        },
+        {
+          "name": "Regs Required",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-reg-5dd21b",
+      "name": "AllocateReg",
+      "category": "CallingConvLower",
+      "signature": "AllocateReg(Target, Regs, Shadow Regs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Regs",
+          "type": "ArrayRef<MCPhysReg>"
+        },
+        {
+          "name": "Shadow Regs",
+          "type": "MCPhysReg*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-stack-157dfc",
+      "name": "AllocateStack",
+      "category": "CallingConvLower",
+      "signature": "AllocateStack(Target, Size, Align)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Size",
+          "type": "unsigned"
+        },
+        {
+          "name": "Align",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-stack-5885d8",
+      "name": "AllocateStack",
+      "category": "CallingConvLower",
+      "signature": "AllocateStack(Target, Size, Align, Shadow Reg)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Size",
+          "type": "unsigned"
+        },
+        {
+          "name": "Align",
+          "type": "unsigned"
+        },
+        {
+          "name": "Shadow Reg",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "allocate-stack-f767c9",
+      "name": "AllocateStack",
+      "category": "CallingConvLower",
+      "signature": "AllocateStack(Target, Size, Align, Shadow Regs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Size",
+          "type": "unsigned"
+        },
+        {
+          "name": "Align",
+          "type": "unsigned"
+        },
+        {
+          "name": "Shadow Regs",
+          "type": "ArrayRef<MCPhysReg>"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-in-regs-params-count",
+      "name": "getInRegsParamsCount",
+      "category": "CallingConvLower",
+      "signature": "getInRegsParamsCount(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-in-regs-params-processed",
+      "name": "getInRegsParamsProcessed",
+      "category": "CallingConvLower",
+      "signature": "getInRegsParamsProcessed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "unsigned"
+    },
+    {
+      "id": "get-in-regs-param-info",
+      "name": "getInRegsParamInfo",
+      "category": "CallingConvLower",
+      "signature": "getInRegsParamInfo(Target, In Regs Param Record Index, Begin Reg, End Reg)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "In Regs Param Record Index",
+          "type": "unsigned"
+        },
+        {
+          "name": "Begin Reg",
+          "type": "unsigned&"
+        },
+        {
+          "name": "End Reg",
+          "type": "unsigned&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "add-in-regs-param-info",
+      "name": "addInRegsParamInfo",
+      "category": "CallingConvLower",
+      "signature": "addInRegsParamInfo(Target, Reg Begin, Reg End)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        },
+        {
+          "name": "Reg Begin",
+          "type": "unsigned"
+        },
+        {
+          "name": "Reg End",
+          "type": "unsigned"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "next-in-regs-param",
+      "name": "nextInRegsParam",
+      "category": "CallingConvLower",
+      "signature": "nextInRegsParam(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "clear-by-val-regs-info",
+      "name": "clearByValRegsInfo",
+      "category": "CallingConvLower",
+      "signature": "clearByValRegsInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "rewind-by-val-regs-info",
+      "name": "rewindByValRegsInfo",
+      "category": "CallingConvLower",
+      "signature": "rewindByValRegsInfo(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-call-or-prologue",
+      "name": "getCallOrPrologue",
+      "category": "CallingConvLower",
+      "signature": "getCallOrPrologue(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "ParmContext"
+    },
+    {
+      "id": "get-pending-locs",
+      "name": "getPendingLocs",
+      "category": "CallingConvLower",
+      "signature": "getPendingLocs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "CCState*"
+        }
+      ],
+      "returnType": "SmallVectorImpl<llvm::CCValAssign>&"
+    }
+  ]
+}

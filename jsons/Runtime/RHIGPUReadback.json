@@ -9,6 +9,59 @@
   ],
   "functions": [
     {
+      "id": "is-ready-4a45c7",
+      "name": "IsReady",
+      "category": "RHIGPUReadback",
+      "signature": "IsReady(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUMemoryReadback*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates if the data is in place and ready to be read."
+    },
+    {
+      "id": "is-ready-c42328",
+      "name": "IsReady",
+      "category": "RHIGPUReadback",
+      "signature": "IsReady(Target, GPU Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUMemoryReadback*"
+        },
+        {
+          "name": "GPU Mask",
+          "type": "FRHIGPUMask"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Indicates if the data is in place and ready to be read on a subset of GPUs."
+    },
+    {
+      "id": "wait",
+      "name": "Wait",
+      "category": "RHIGPUReadback",
+      "signature": "Wait(Target, RHI Cmd List, GPU Mask)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUMemoryReadback*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandListImmediate&"
+        },
+        {
+          "name": "GPU Mask",
+          "type": "FRHIGPUMask"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "enqueue-copy-b2f3df",
       "name": "EnqueueCopy",
       "category": "RHIGPUReadback",
@@ -16,7 +69,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FRHIGPUBufferReadback*"
+          "type": "FRHIGPUMemoryReadback*"
         },
         {
           "name": "RHI Cmd List",
@@ -33,52 +86,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Copy the current state of the resource to the readback data.\n@param RHICmdList The command list to enqueue the copy request on.\n@param SourceBuffer The buffer holding the source data.\n@param NumBytes The number of bytes to copy. If 0, this will copy the entire buffer."
-    },
-    {
-      "id": "lock-9f8c59",
-      "name": "Lock",
-      "category": "RHIGPUReadback",
-      "signature": "Lock(Target, Num Bytes)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRHIGPUBufferReadback*"
-        },
-        {
-          "name": "Num Bytes",
-          "type": "UInt"
-        }
-      ],
-      "returnType": "void*",
-      "docs": "Returns the CPU accessible pointer that backs this staging buffer.\n@param NumBytes The maximum number of bytes the host will read from this pointer.\n@returns A CPU accessible pointer to the backing buffer."
-    },
-    {
-      "id": "unlock",
-      "name": "Unlock",
-      "category": "RHIGPUReadback",
-      "signature": "Unlock(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRHIGPUBufferReadback*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Signals that the host is finished reading from the backing buffer."
-    },
-    {
-      "id": "get-gpu-size-bytes",
-      "name": "GetGPUSizeBytes",
-      "category": "RHIGPUReadback",
-      "signature": "GetGPUSizeBytes(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FRHIGPUBufferReadback*"
-        }
-      ],
-      "returnType": "UInt64"
+      "docs": "Copy the current state of the resource to the readback data.\n@param RHICmdList The command list to enqueue the copy request on.\n@param SourceBuffer The buffer holding the source data.\n@param NumBytes The number of bytes to copy. If 0, this will copy the entire buffer.",
+      "supportedTargets": [
+        "FRHIGPUMemoryReadback*",
+        "FRHIGPUBufferReadback*"
+      ]
     },
     {
       "id": "enqueue-copy-871afc",
@@ -88,7 +100,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FRHIGPUTextureReadback*"
+          "type": "FRHIGPUMemoryReadback*"
         },
         {
           "name": "RHI Cmd List",
@@ -111,7 +123,120 @@
           "type": "FIntVector&"
         }
       ],
+      "returnType": "Void",
+      "supportedTargets": [
+        "FRHIGPUMemoryReadback*",
+        "FRHIGPUTextureReadback*"
+      ]
+    },
+    {
+      "id": "enqueue-copy-35a21f",
+      "name": "EnqueueCopy",
+      "category": "RHIGPUReadback",
+      "signature": "EnqueueCopy(Target, RHI Cmd List, Source Texture, Rect)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUMemoryReadback*"
+        },
+        {
+          "name": "RHI Cmd List",
+          "type": "FRHICommandList&"
+        },
+        {
+          "name": "Source Texture",
+          "type": "FRHITexture*"
+        },
+        {
+          "name": "Rect",
+          "type": "FResolveRect",
+          "default": "FResolveRect()"
+        }
+      ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-last-copy-gpu-mask",
+      "name": "GetLastCopyGPUMask",
+      "category": "RHIGPUReadback",
+      "signature": "GetLastCopyGPUMask(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUMemoryReadback*"
+        }
+      ],
+      "returnType": "FRHIGPUMask&"
+    },
+    {
+      "id": "get-name",
+      "name": "GetName",
+      "category": "RHIGPUReadback",
+      "signature": "GetName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUMemoryReadback*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "lock-9f8c59",
+      "name": "Lock",
+      "category": "RHIGPUReadback",
+      "signature": "Lock(Target, Num Bytes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUBufferReadback*"
+        },
+        {
+          "name": "Num Bytes",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Returns the CPU accessible pointer that backs this staging buffer.\n@param NumBytes The maximum number of bytes the host will read from this pointer.\n@returns A CPU accessible pointer to the backing buffer.",
+      "supportedTargets": [
+        "FRHIGPUBufferReadback*",
+        "FRHIGPUTextureReadback*"
+      ]
+    },
+    {
+      "id": "unlock",
+      "name": "Unlock",
+      "category": "RHIGPUReadback",
+      "signature": "Unlock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUBufferReadback*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Signals that the host is finished reading from the backing buffer.",
+      "supportedTargets": [
+        "FRHIGPUBufferReadback*",
+        "FRHIGPUTextureReadback*"
+      ]
+    },
+    {
+      "id": "get-gpu-size-bytes",
+      "name": "GetGPUSizeBytes",
+      "category": "RHIGPUReadback",
+      "signature": "GetGPUSizeBytes(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FRHIGPUBufferReadback*"
+        }
+      ],
+      "returnType": "UInt64",
+      "supportedTargets": [
+        "FRHIGPUBufferReadback*",
+        "FRHIGPUTextureReadback*"
+      ]
     },
     {
       "id": "lock-66b6a8",

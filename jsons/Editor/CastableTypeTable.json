@@ -12,6 +12,28 @@
   ],
   "functions": [
     {
+      "id": "make-type-table",
+      "name": "MakeTypeTable",
+      "category": "CastableTypeTable",
+      "signature": "MakeTypeTable(Unused, Type ID, In Name)",
+      "params": [
+        {
+          "name": "Unused",
+          "type": "void*"
+        },
+        {
+          "name": "Type ID",
+          "type": "UInt"
+        },
+        {
+          "name": "In Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "template<T> FCastableTypeTable*",
+      "docs": "Make a new type table for the templated type, ID and typename.\nThe new table is allocated using malloc and is intentionally leaked"
+    },
+    {
       "id": "find-type-by-name",
       "name": "FindTypeByName",
       "category": "CastableTypeTable",
@@ -24,6 +46,70 @@
       ],
       "returnType": "FCastableTypeTable*",
       "docs": "Attempt to locate a type table by its C++ name"
+    },
+    {
+      "id": "cast",
+      "name": "Cast",
+      "category": "CastableTypeTable",
+      "signature": "Cast(Target, Base Ptr, To Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTable*"
+        },
+        {
+          "name": "Base Ptr",
+          "type": "ICastable*"
+        },
+        {
+          "name": "To Type",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "void*",
+      "docs": "Use this type table to cast the specified base ptr to another type\n@note BasePtr must be an instance of the type specified by this type table, or the result is undefined.\n@return BasePtr casted to the type ID specified by ToType, or nullptr if the cast failed"
+    },
+    {
+      "id": "get-type-name",
+      "name": "GetTypeName",
+      "category": "CastableTypeTable",
+      "signature": "GetTypeName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTable*"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Retrieve the C++ type name that this type table relates to"
+    },
+    {
+      "id": "get-type-id",
+      "name": "GetTypeID",
+      "category": "CastableTypeTable",
+      "signature": "GetTypeID(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTable*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Retrieve the type ID for this type table.\nWarning: This type ID is not deterministic or stable across different processes and should not be saved persistently"
+    },
+    {
+      "id": "generate",
+      "name": "Generate",
+      "category": "CastableTypeTable",
+      "signature": "Generate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        }
+      ],
+      "returnType": "template<T> void",
+      "docs": "Utility class that generates a type table used for dynamic casting and instance of an ICastable object"
     },
     {
       "id": "commit",
@@ -46,6 +132,122 @@
       ],
       "returnType": "FCastableTypeTable*",
       "docs": "Commit this generator to its final form"
+    },
+    {
+      "id": "class-offset-from",
+      "name": "ClassOffsetFrom",
+      "category": "CastableTypeTable",
+      "signature": "ClassOffsetFrom()",
+      "params": [],
+      "returnType": "template<FromType,ToType> int16",
+      "docs": "Compute the ptr offset from one class to another in an inheritance hierarchy.\n@note: This can be negative for situations where multiple inheritance would put\nthe FromType class after the ToType in memory."
+    },
+    {
+      "id": "compute-start-offset",
+      "name": "ComputeStartOffset",
+      "category": "CastableTypeTable",
+      "signature": "ComputeStartOffset()",
+      "params": [],
+      "returnType": "template<T> int16",
+      "docs": "Compute the start offset from an ICastable type to the root of T\nThis offset is added to all other class offsets that are computed from T\nso that we can always cast from an ICastable* to the concrete types"
+    },
+    {
+      "id": "byte-size",
+      "name": "ByteSize",
+      "category": "CastableTypeTable",
+      "signature": "ByteSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
+      "id": "consume-implements-d1287f",
+      "name": "ConsumeImplements",
+      "category": "CastableTypeTable",
+      "signature": "ConsumeImplements(Target, Start Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        },
+        {
+          "name": "Start Offset",
+          "type": "Int16"
+        }
+      ],
+      "returnType": "template<StartClass,T,U = T::Implements> void"
+    },
+    {
+      "id": "consume-implements-11d782",
+      "name": "ConsumeImplements",
+      "category": "CastableTypeTable",
+      "signature": "ConsumeImplements(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        }
+      ],
+      "returnType": "template<StartClass> void"
+    },
+    {
+      "id": "consume-implements-impl",
+      "name": "ConsumeImplementsImpl",
+      "category": "CastableTypeTable",
+      "signature": "ConsumeImplementsImpl(Target, Types, Start Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        },
+        {
+          "name": "Types",
+          "type": "TImplements<"
+        },
+        {
+          "name": "Start Offset",
+          "type": "Int16"
+        }
+      ],
+      "returnType": "template<StartClass,. . . Types> void"
+    },
+    {
+      "id": "decltype",
+      "name": "decltype",
+      "category": "CastableTypeTable",
+      "signature": "decltype(Target, Start Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        },
+        {
+          "name": "Start Offset",
+          "type": "T::ID )> void AddStaticType ( T*,int16"
+        }
+      ],
+      "returnType": "template<StartClass,T,U ="
+    },
+    {
+      "id": "add-static-type",
+      "name": "AddStaticType",
+      "category": "CastableTypeTable",
+      "signature": "AddStaticType(Target, Start Offset)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCastableTypeTableGenerator*"
+        },
+        {
+          "name": "Start Offset",
+          "type": "Int16"
+        }
+      ],
+      "returnType": "template<StartClass> void"
     }
   ]
 }

@@ -1,0 +1,157 @@
+{
+  "id": "event-loop-timer",
+  "label": "EventLoopTimer",
+  "includepath": "EventLoop/EventLoopTimer.h",
+  "includes": [
+    "CoreTypes",
+    "EventLoopManagedStorage",
+    "Function",
+    "ScopeExit",
+    "Timespan",
+    "Stats"
+  ],
+  "functions": [
+    {
+      "id": "check-is-manager-thread",
+      "name": "CheckIsManagerThread",
+      "category": "EventLoopTimer",
+      "signature": "CheckIsManagerThread(Is Manager Thread)",
+      "params": [
+        {
+          "name": "Is Manager Thread",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "init",
+      "name": "Init",
+      "category": "EventLoopTimer",
+      "signature": "Init(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTimerManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Default traits for timer manager. Traits are used to implement functionality which can be\nmocked to allow testing the class.\nIn most cases the default traits can be used without modification."
+    },
+    {
+      "id": "get-next-timeout",
+      "name": "GetNextTimeout",
+      "category": "EventLoopTimer",
+      "signature": "GetNextTimeout(Target, Out Timeout)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTimerManager*"
+        },
+        {
+          "name": "Out Timeout",
+          "type": "FTimespan&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the remaining time since the last call to Tick before the next timer will fire.\nNOT thread safe.\n@param OutTimeout Time amount of time relative to TimerManagers' internal time until the next valid timer will run.\n@return true if a valid timer is currently set."
+    },
+    {
+      "id": "get-num-timers",
+      "name": "GetNumTimers",
+      "category": "EventLoopTimer",
+      "signature": "GetNumTimers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTimerManager*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Returns the total number of timers. Includes active timers and timers waiting to be rescheduled.\nNOT thread safe.\n@return the total number of timers."
+    },
+    {
+      "id": "set-timer",
+      "name": "SetTimer",
+      "category": "EventLoopTimer",
+      "signature": "SetTimer(Target, Callback, In Rate, Inb Repeat, In First Delay)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTimerManager*"
+        },
+        {
+          "name": "Callback",
+          "type": "FTimerCallback&&"
+        },
+        {
+          "name": "In Rate",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Inb Repeat",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "In First Delay",
+          "type": "TOptional<FTimespan>",
+          "default": "TOptional<FTimespan>()"
+        }
+      ],
+      "returnType": "FTimerHandle",
+      "docs": "Set a new timer. The timer callback will be triggered from within the call to Tick,\nwhich may occur on a different thread from the one which set the timer.\nThread safe.\n@param Callback Callback to call when timer fires.\n@param InRate The amount of time between set and firing.\n@param InbRepeat true to keep firing at Rate intervals, false to fire only once.\n@param InFirstDelay The time for the first iteration of a looping timer.\n@return handle to the registered timer."
+    },
+    {
+      "id": "clear-timer",
+      "name": "ClearTimer",
+      "category": "EventLoopTimer",
+      "signature": "ClearTimer(Target, In Handle, On Timer Cleared)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTimerManager*"
+        },
+        {
+          "name": "In Handle",
+          "type": "FTimerHandle&"
+        },
+        {
+          "name": "On Timer Cleared",
+          "type": "FOnTimerCleared&&",
+          "default": "FOnTimerCleared()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears a previously set timer.\nThread safe.\n@param InHandle The handle of the timer to clear.\n@param OnTimerCleared Callback to be fired when the timer has been removed. The callback will\nbe fired within the Tick method which may be a different thread from\nwhich the timer clear was requested."
+    },
+    {
+      "id": "has-pending-repeat-timer",
+      "name": "HasPendingRepeatTimer",
+      "category": "EventLoopTimer",
+      "signature": "HasPendingRepeatTimer(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TTimerManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether any timers are waiting to be rescheduled.\nNOT thread safe.\n@return true if a valid timer is waiting to be rescheduled."
+    },
+    {
+      "id": "tick",
+      "name": "Tick",
+      "category": "EventLoopTimer",
+      "signature": "Tick(Delta Time)",
+      "params": [
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "template<Traits> void TTimerManager<Traits",
+      "docs": "Accumulate the timer managers elapsed time and fire timers which have elapsed.\nNOT thread safe.\n@param DeltaTime The amount of time which has elapsed since the last call to Tick."
+    }
+  ]
+}

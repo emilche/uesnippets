@@ -16,6 +16,15 @@
   ],
   "functions": [
     {
+      "id": "u-asset-manager",
+      "name": "UAssetManager",
+      "category": "AssetManager",
+      "signature": "UAssetManager()",
+      "params": [],
+      "returnType": "Void",
+      "docs": "Constructor"
+    },
+    {
       "id": "is-valid",
       "name": "IsValid",
       "category": "AssetManager",
@@ -57,6 +66,15 @@
       "params": [],
       "returnType": "UAssetManager*",
       "docs": "Returns the current global singleton AssetManager if it has been constructed, null otherwise"
+    },
+    {
+      "id": "get-streamable-manager",
+      "name": "GetStreamableManager",
+      "category": "AssetManager",
+      "signature": "GetStreamableManager()",
+      "params": [],
+      "returnType": "FStreamableManager&",
+      "docs": "Accesses the StreamableManager used by this Asset Manager. Static for easy access"
     },
     {
       "id": "get-encryption-key-asset-tag-name",
@@ -254,10 +272,10 @@
       "returnType": "Void"
     },
     {
-      "id": "start-bulk-scanning",
-      "name": "StartBulkScanning",
+      "id": "stop-bulk-scanning",
+      "name": "StopBulkScanning",
       "category": "AssetManager",
-      "signature": "StartBulkScanning(Target)",
+      "signature": "StopBulkScanning(Target)",
       "params": [
         {
           "name": "Target",
@@ -265,7 +283,46 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Should only be called from PushBulkScanning() and override"
+      "docs": "Should only be called from PopBulkScanning() and override"
+    },
+    {
+      "id": "is-bulk-scanning",
+      "name": "IsBulkScanning",
+      "category": "AssetManager",
+      "signature": "IsBulkScanning(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "add-dynamic-asset",
+      "name": "AddDynamicAsset",
+      "category": "AssetManager",
+      "signature": "AddDynamicAsset(Target, Primary Asset Id, Asset Path, Bundle Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId&"
+        },
+        {
+          "name": "Asset Path",
+          "type": "FSoftObjectPath&"
+        },
+        {
+          "name": "Bundle Data",
+          "type": "FAssetBundleData&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Adds or updates a Dynamic asset, which is a runtime-specified asset that has no on disk representation, so has no FAssetData. But it can have bundle state and a path.\n@param FPrimaryAssetId\tType/Name of the asset. The type info will be created if it doesn't already exist\n@param AssetPath\t\t\tPath to the object representing this asset, this is optional for dynamic assets\n@param BundleData\t\tList of Name->asset paths that represent the possible bundle states for this asset\n@return\t\t\t\t\tTrue if added"
     },
     {
       "id": "recursively-expand-bundle-data",
@@ -481,6 +538,45 @@
       "docs": "Gets the in-memory UObject for a primary asset id, returning nullptr if it's not in memory. Will return blueprint class for blueprint assets. This works even if the asset wasn't loaded explicitly"
     },
     {
+      "id": "get-primary-asset-object-class",
+      "name": "GetPrimaryAssetObjectClass",
+      "category": "AssetManager",
+      "signature": "GetPrimaryAssetObjectClass(Target, Primary Asset Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId&"
+        }
+      ],
+      "returnType": "template<class AssetType> TSubclassOf<AssetType>"
+    },
+    {
+      "id": "get-primary-asset-object-list",
+      "name": "GetPrimaryAssetObjectList",
+      "category": "AssetManager",
+      "signature": "GetPrimaryAssetObjectList(Target, Primary Asset Type, Object List)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Type",
+          "type": "FPrimaryAssetType"
+        },
+        {
+          "name": "Object List",
+          "type": "TArray<UObject*>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Gets list of all loaded objects for a primary asset type, returns true if any were found. Will return blueprint class for blueprint assets. This works even if the asset wasn't loaded explicitly"
+    },
+    {
       "id": "get-primary-asset-path",
       "name": "GetPrimaryAssetPath",
       "category": "AssetManager",
@@ -660,7 +756,7 @@
       "docs": "Gets list of all primary asset types infos"
     },
     {
-      "id": "load-primary-assets",
+      "id": "load-primary-assets-9e9d3b",
       "name": "LoadPrimaryAssets",
       "category": "AssetManager",
       "signature": "LoadPrimaryAssets(Target, Assets To Load, Load Bundles, Load Params, Location)",
@@ -691,7 +787,7 @@
       "docs": "Loads a list of Primary Assets. This will start an async load of those assets, calling callback on completion.\nThese assets will stay in memory until explicitly unloaded.\nYou can wait on the returned streamable request or poll as needed.\nIf there is no work to do, returned handle will be null and complete delegate will get called.\n@param AssetsToLoad\t\tList of primary assets to load\n@param LoadBundles\t\tList of bundles to load for those assets\n@param LoadParams\t\tContains callbacks and async load priority\n@param Location\t\t\t[optional] Is not intended for direct use, the parameter catches call site source location and passes it down to the streaming manager. See FStreamingManager.\n@return\t\t\t\t\tStreamable Handle that can be used to poll or wait. You do not need to keep this handle to stop the assets from being unloaded"
     },
     {
-      "id": "load-primary-asset",
+      "id": "load-primary-asset-41e18f",
       "name": "LoadPrimaryAsset",
       "category": "AssetManager",
       "signature": "LoadPrimaryAsset(Target, Asset To Load, Load Bundles, Load Params, Location)",
@@ -722,7 +818,7 @@
       "docs": "Single asset wrapper, see LoadPrimaryAssets"
     },
     {
-      "id": "load-primary-assets-with-type",
+      "id": "load-primary-assets-with-type-d0f56c",
       "name": "LoadPrimaryAssetsWithType",
       "category": "AssetManager",
       "signature": "LoadPrimaryAssetsWithType(Target, Primary Asset Type, Load Bundles, Load Params, Location)",
@@ -807,7 +903,7 @@
       "docs": "Loads all assets of a given type, useful for cooking"
     },
     {
-      "id": "change-bundle-state-for-primary-assets",
+      "id": "change-bundle-state-for-primary-assets-f9e12f",
       "name": "ChangeBundleStateForPrimaryAssets",
       "category": "AssetManager",
       "signature": "ChangeBundleStateForPrimaryAssets(Target, Assets To Change, Add Bundles, Remove Bundles, Remove All Bundles, Load Params, Location)",
@@ -846,7 +942,7 @@
       "docs": "Changes the bundle state of a set of loaded primary assets.\nYou can wait on the returned streamable request or poll as needed.\nIf there is no work to do, returned handle will be null and delegate will get called.\n@param AssetsToChange\tList of primary assets to change state of\n@param AddBundles\t\tList of bundles to add\n@param RemoveBundles\t\tExplicit list of bundles to remove\n@param RemoveAllBundles\tIf true, remove all existing bundles even if not in remove list\n@param LoadParams\t\tContains callbacks and async load priority\n@param Location\t\t\t[optional] Is not intended for direct use, the parameter catches call site source location and passes it down to the streaming manager. See FStreamingManager.\n@return\t\t\t\t\tStreamable Handle that can be used to poll or wait. You do not need to keep this handle to stop the assets from being unloaded"
     },
     {
-      "id": "change-bundle-state-for-matching-primary-assets",
+      "id": "change-bundle-state-for-matching-primary-assets-172332",
       "name": "ChangeBundleStateForMatchingPrimaryAssets",
       "category": "AssetManager",
       "signature": "ChangeBundleStateForMatchingPrimaryAssets(Target, New Bundles, Old Bundles, Load Params, Location)",
@@ -1029,7 +1125,7 @@
       "docs": "Fills in a array of unique object paths with the assets that need to be loaded, for a given Primary Asset and bundle list\n@param OutAssetLoadList\tTArray that will have asset paths added to it\n@param PrimaryAssetId\tAsset that would be loaded\n@param LoadBundles\t\tList of bundles to load for those assets\n@param bLoadRecursive\tIf true, this will call RecursivelyExpandBundleData and recurse into sub bundles of other primary assets loaded by a bundle reference\n@param bEnsureUniqueness Only unique items will be inserted in OutAssetLoadList\n@return\t\t\t\t\tTrue if primary asset id was found"
     },
     {
-      "id": "preload-primary-assets",
+      "id": "preload-primary-assets-53cd4c",
       "name": "PreloadPrimaryAssets",
       "category": "AssetManager",
       "signature": "PreloadPrimaryAssets(Target, Assets To Load, Load Bundles, Load Recursive, Load Params, Location)",
@@ -1099,7 +1195,7 @@
       "docs": "Downloads data for a set of assets in a specific bundle state, and returns a handle with a FStreamableDownloadCachePin.\nThe FStreamableDownloadCachePin must be kept active to hold the data in the download cache.\nDoes not load any assets.\n@param AssetsToLoad\t\tList of primary assets to load\n@param LoadBundles\t\tList of bundles to load for those assets\n@param bLoadRecursive\tIf true, this will call RecursivelyExpandBundleData and recurse into sub bundles of other primary assets loaded by a bundle reference\n@param LoadParams\t\tContains callbacks and download params. Download params are required.\n@param Location\t\t\t[optional] Is not intended for direct use, the parameter catches call site source location and passes it down to the streaming manager. See FStreamingManager.\n@return\t\t\t\t\tStreamable Handle"
     },
     {
-      "id": "load-asset-list",
+      "id": "load-asset-list-e291c0",
       "name": "LoadAssetList",
       "category": "AssetManager",
       "signature": "LoadAssetList(Target, Asset List, Load Params, Debug Name, Location)",
@@ -1982,32 +2078,6 @@
       "docs": "Returns a timer manager that is safe to use for asset loading actions. This will either be the editor or game instance one, or null during very early startup"
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
-      "category": "AssetManager",
-      "signature": "BeginDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UAssetManager*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
-      "category": "AssetManager",
-      "signature": "PostInitProperties(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UAssetManager*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "get-cached-primary-asset-encryption-key-guid",
       "name": "GetCachedPrimaryAssetEncryptionKeyGuid",
       "category": "AssetManager",
@@ -2195,6 +2265,32 @@
       "docs": "Gets package names to add to a DLC cook"
     },
     {
+      "id": "modify-dlc-base-packages",
+      "name": "ModifyDLCBasePackages",
+      "category": "AssetManager",
+      "signature": "ModifyDLCBasePackages(Target, Target Platform, Platform Based Packages, Packages To Clear Results)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        },
+        {
+          "name": "Platform Based Packages",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Packages To Clear Results",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows for game code to modify the base packages that have been read in from the DevelopmentAssetRegistry when performing a DLC cook.\nCan be used to modify which packages should be considered to be already cooked.\nAny packages within the PackagesToClearResults will have their cook results cleared and be cooked again if requested by the cooker."
+    },
+    {
       "id": "modify-cook-references",
       "name": "ModifyCookReferences",
       "category": "AssetManager",
@@ -2339,6 +2435,78 @@
       ],
       "returnType": "Bool",
       "docs": "For a given package and platform, return what Chunks it should be assigned to, games can override this as needed. Returns false if no information found\n@param PackageName Package to check chunks for\n@param TargetPlatform Can be used to do platform-specific chunking, this is null when previewing in the editor\n@param ExistingChunkList List of chunks that the asset was previously assigned to, may be empty\n@param OutChunkList List of chunks to actually assign this to\n@param OutOverrideChunkList List of chunks that were added due to override rules, not just normal primary asset rules. Tools use this for dependency checking"
+    },
+    {
+      "id": "get-chunk-encryption-key-guid",
+      "name": "GetChunkEncryptionKeyGuid",
+      "category": "AssetManager",
+      "signature": "GetChunkEncryptionKeyGuid(Target, In Chunk Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "In Chunk Id",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Retrieve the encryption key guid for a given chunk ID\n@param InChunkIndex - The chunk ID for which we are querying the encryption key guid\n@return If chunk ID is valid and references and encrypted chunk, returns the key guid. Otherwise, returns an empty guid"
+    },
+    {
+      "id": "get-encrypted-chunk-i-ds-for-package",
+      "name": "GetEncryptedChunkIDsForPackage",
+      "category": "AssetManager",
+      "signature": "GetEncryptedChunkIDsForPackage(Target, In Package Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "In Package Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "TSet<int32>",
+      "docs": "Get the encrypted chunk assignments for a give package. Only valid between PreSaveAssetRegistry and PostSaveAssetRegistry"
+    },
+    {
+      "id": "get-unique-asset-registry-name",
+      "name": "GetUniqueAssetRegistryName",
+      "category": "AssetManager",
+      "signature": "GetUniqueAssetRegistryName(Target, In Chunk Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "In Chunk Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Name",
+      "docs": "Determine if we should separate the asset registry for this chunk out into its own file and return the unique name that identifies it\n@param InChunkIndex Chunk index to check\n@returns The logical name of the chunk's asset registry, or NAME_None if it isn't required"
+    },
+    {
+      "id": "get-content-encryption-group-chunk-id",
+      "name": "GetContentEncryptionGroupChunkID",
+      "category": "AssetManager",
+      "signature": "GetContentEncryptionGroupChunkID(Target, In Group Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "In Group Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "For a given content encryption group name (as defined in the content encryption config that the project provides, return the relevant chunk ID"
     },
     {
       "id": "get-primary-asset-set-chunk-ids",
@@ -2489,7 +2657,7 @@
       "docs": "Refreshes cache of asset data for in memory object"
     },
     {
-      "id": "initialize-asset-bundles-from-metadata",
+      "id": "initialize-asset-bundles-from-metadata-99bab4",
       "name": "InitializeAssetBundlesFromMetadata",
       "category": "AssetManager",
       "signature": "InitializeAssetBundlesFromMetadata(Target, Struct, Struct Value, Asset Bundle, Debug Name)",
@@ -2520,6 +2688,118 @@
       "docs": "Initializes asset bundle data from a passed in struct or class, this will read the AssetBundles metadata off the UProperties. As an example this property definition:\nUPROPERTY(EditDefaultsOnly, Category=Data, meta = (AssetBundles = \"Client,Server\"))\nTSoftObjectPtr<UCurveTable> CurveTableReference;\nWould add the value of CurveTableReference to both the Client and Server asset bundles\n@param Struct\t\tUScriptStruct or UClass representing the property hierarchy\n@param StructValue\tLocation in memory of Struct or Object\n@param AssetBundle\tBundle that will be filled out"
     },
     {
+      "id": "initialize-asset-bundles-from-metadata-17a393",
+      "name": "InitializeAssetBundlesFromMetadata",
+      "category": "AssetManager",
+      "signature": "InitializeAssetBundlesFromMetadata(Target, Object, Asset Bundle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Asset Bundle",
+          "type": "FAssetBundleData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "UObject wrapper"
+    },
+    {
+      "id": "pre-save-asset-registry",
+      "name": "PreSaveAssetRegistry",
+      "category": "AssetManager",
+      "signature": "PreSaveAssetRegistry(Target, Target Platform, In Cooked Packages)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        },
+        {
+          "name": "In Cooked Packages",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called immediately before saving the asset registry during cooking"
+    },
+    {
+      "id": "post-save-asset-registry",
+      "name": "PostSaveAssetRegistry",
+      "category": "AssetManager",
+      "signature": "PostSaveAssetRegistry(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called immediately after saving the asset registry during cooking"
+    },
+    {
+      "id": "get-content-encryption-config",
+      "name": "GetContentEncryptionConfig",
+      "category": "AssetManager",
+      "signature": "GetContentEncryptionConfig(Target, Out Content Encryption Config)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Out Content Encryption Config",
+          "type": "FContentEncryptionConfig&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gathers information about which assets the game wishes to encrypt into named groups"
+    },
+    {
+      "id": "handle-cook-command",
+      "name": "HandleCookCommand",
+      "category": "AssetManager",
+      "signature": "HandleCookCommand(Target, Token)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Token",
+          "type": "FStringView"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Processes a command token as part of cooking.\n@param Token - The token to process.\n@return True if the token was processed, false otherwise."
+    },
+    {
+      "id": "get-pak-chunk-id-to-string-mapping",
+      "name": "GetPakChunkIdToStringMapping",
+      "category": "AssetManager",
+      "signature": "GetPakChunkIdToStringMapping(Target, Chunk Id String Override)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Chunk Id String Override",
+          "type": "TMap<int32,FString>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allows the asset manager to override the chunkID to be a string rather than integer value.\nUsed at cook time and runtime to determine how to map chunkids to the potential string override.\nThis does not update the internal asset registry number only the generated pak chunk file name.\nThe AssetRegistryGenerator will request this mapping during Chunk Generation time.\nAll strings must be be alpha numeric with no spaces.\nWhen overriding it's recommended to setup PlatformChunk mapping via the InstallBundle rules.\nWhen a pak chunk does not have a parseable number the default platform chunk will be 0 unless InstallBundle rules override that.\n@param ChunkIdStringOverride - Out parameter for the override information of a chunkID to string."
+    },
+    {
       "id": "get-pak-string-to-chunk-id-mapping",
       "name": "GetPakStringToChunkIdMapping",
       "category": "AssetManager",
@@ -2536,6 +2816,973 @@
       ],
       "returnType": "Void",
       "docs": "Helper to make it easy to get the ChunkId based on the string override for a pakchunk.\nsee \"GetPakChunkIdToStringMapping\" for more information\n@param ChunkIdStringOverride - Out parameter for getting the chunkID based on the string override."
+    },
+    {
+      "id": "get-asset-data-for-path-internal",
+      "name": "GetAssetDataForPathInternal",
+      "category": "AssetManager",
+      "signature": "GetAssetDataForPathInternal(Target, Asset Registry, Asset Path, Out Asset Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Asset Registry",
+          "type": "IAssetRegistry&"
+        },
+        {
+          "name": "Asset Path",
+          "type": "String&"
+        },
+        {
+          "name": "Out Asset Data",
+          "type": "OUT FAssetData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Internal helper function that attempts to get asset data from the specified path; Accounts for possibility of blueprint classes ending in _C"
+    },
+    {
+      "id": "try-update-cached-asset-data",
+      "name": "TryUpdateCachedAssetData",
+      "category": "AssetManager",
+      "signature": "TryUpdateCachedAssetData(Target, Primary Asset Id, New Asset Data, Allow Duplicates)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId&"
+        },
+        {
+          "name": "New Asset Data",
+          "type": "FAssetData&"
+        },
+        {
+          "name": "Allow Duplicates",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Updates the asset data cached on the name data; returns false if the asset is not a valid primary asset."
+    },
+    {
+      "id": "get-name-data",
+      "name": "GetNameData",
+      "category": "AssetManager",
+      "signature": "GetNameData(Target, Primary Asset Id, Check Redirector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId&"
+        },
+        {
+          "name": "Check Redirector",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "FPrimaryAssetData*",
+      "docs": "Returns the NameData for a specific type/name pair"
+    },
+    {
+      "id": "on-object-reference-list-invalidated",
+      "name": "OnObjectReferenceListInvalidated",
+      "category": "AssetManager",
+      "signature": "OnObjectReferenceListInvalidated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "call-pre-garbage-collect",
+      "name": "CallPreGarbageCollect",
+      "category": "AssetManager",
+      "signature": "CallPreGarbageCollect(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pre-garbage-collect",
+      "name": "PreGarbageCollect",
+      "category": "AssetManager",
+      "signature": "PreGarbageCollect(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "on-asset-state-change-completed-bef3e5",
+      "name": "OnAssetStateChangeCompleted",
+      "category": "AssetManager",
+      "signature": "OnAssetStateChangeCompleted(Target, Primary Asset Id, Bound Handle, Wrapped Delegate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId"
+        },
+        {
+          "name": "Bound Handle",
+          "type": "TSharedPtr<FStreamableHandle>"
+        },
+        {
+          "name": "Wrapped Delegate",
+          "type": "FStreamableDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an internal load handle finishes, handles setting to pending state"
+    },
+    {
+      "id": "notify-on-asset-state-change-completed",
+      "name": "NotifyOnAssetStateChangeCompleted",
+      "category": "AssetManager",
+      "signature": "NotifyOnAssetStateChangeCompleted(Target, Primary Asset Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an internal load handle finishes"
+    },
+    {
+      "id": "on-asset-state-change-completed-28cc1d",
+      "name": "OnAssetStateChangeCompleted",
+      "category": "AssetManager",
+      "signature": "OnAssetStateChangeCompleted(Target, Bound Handle, Primary Asset Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Bound Handle",
+          "type": "TSharedPtr<FStreamableHandle>"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when an internal load handle finishes, handles setting to pending state"
+    },
+    {
+      "id": "scan-primary-asset-types-from-config",
+      "name": "ScanPrimaryAssetTypesFromConfig",
+      "category": "AssetManager",
+      "signature": "ScanPrimaryAssetTypesFromConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Scans all asset types specified in DefaultGame"
+    },
+    {
+      "id": "scan-primary-asset-rules-from-config",
+      "name": "ScanPrimaryAssetRulesFromConfig",
+      "category": "AssetManager",
+      "signature": "ScanPrimaryAssetRulesFromConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to apply the primary asset rule overrides from config"
+    },
+    {
+      "id": "does-primary-asset-match-custom-override",
+      "name": "DoesPrimaryAssetMatchCustomOverride",
+      "category": "AssetManager",
+      "signature": "DoesPrimaryAssetMatchCustomOverride(Target, Primary Asset Id, Custom Override)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId"
+        },
+        {
+          "name": "Custom Override",
+          "type": "FPrimaryAssetRulesCustomOverride&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Sees if a specific primary asset passes the custom override filter, subclass this to handle FilterString"
+    },
+    {
+      "id": "post-initial-asset-scan",
+      "name": "PostInitialAssetScan",
+      "category": "AssetManager",
+      "signature": "PostInitialAssetScan(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after scanning is complete, either from FinishInitialLoading or after the AssetRegistry finishes"
+    },
+    {
+      "id": "is-path-excluded-from-scan",
+      "name": "IsPathExcludedFromScan",
+      "category": "AssetManager",
+      "signature": "IsPathExcludedFromScan(Target, Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if path should be excluded from primary asset scans, called from ShouldIncludeInAssetSearch and in the editor"
+    },
+    {
+      "id": "is-scanning-from-initial-config",
+      "name": "IsScanningFromInitialConfig",
+      "category": "AssetManager",
+      "signature": "IsScanningFromInitialConfig(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we're in the middle of handling the initial config, false if this is being called from something else like a plugin"
+    },
+    {
+      "id": "should-include-in-asset-search",
+      "name": "ShouldIncludeInAssetSearch",
+      "category": "AssetManager",
+      "signature": "ShouldIncludeInAssetSearch(Target, Asset Data, Search Rules)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Asset Data",
+          "type": "FAssetData&"
+        },
+        {
+          "name": "Search Rules",
+          "type": "FAssetManagerSearchRules&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Filter function that is called from SearchAssetRegistryPaths, returns true if asset data should be included in search results"
+    },
+    {
+      "id": "acquire-chunk-list",
+      "name": "AcquireChunkList",
+      "category": "AssetManager",
+      "signature": "AcquireChunkList(Target, Chunk List, Complete Delegate, Priority, Stalled Handle)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Chunk List",
+          "type": "TArray<int32>&"
+        },
+        {
+          "name": "Complete Delegate",
+          "type": "FAssetManagerAcquireResourceDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "EChunkPriority::Type"
+        },
+        {
+          "name": "Stalled Handle",
+          "type": "TSharedPtr<FStreamableHandle>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to start acquiring a list of chunks"
+    },
+    {
+      "id": "on-chunk-downloaded",
+      "name": "OnChunkDownloaded",
+      "category": "AssetManager",
+      "signature": "OnChunkDownloaded(Target, Chunk Id, Success)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Chunk Id",
+          "type": "UInt"
+        },
+        {
+          "name": "Success",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when a new chunk has been downloaded"
+    },
+    {
+      "id": "load-asset-list-internal",
+      "name": "LoadAssetListInternal",
+      "category": "AssetManager",
+      "signature": "LoadAssetListInternal(Target, Asset List, Delegate To Call, Priority, Debug Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Asset List",
+          "type": "TArray<FSoftObjectPath>&&"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegateWithHandle&&"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Debug Name",
+          "type": "String&&"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>",
+      "docs": "Called to load asset list"
+    },
+    {
+      "id": "should-set-manager-5c51a7",
+      "name": "ShouldSetManager",
+      "category": "AssetManager",
+      "signature": "ShouldSetManager(Target, Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Context",
+          "type": "UE::AssetRegistry::FShouldSetManagerContext&"
+        }
+      ],
+      "returnType": "EAssetSetManagerResult::Type",
+      "docs": "Function used during creating Management references to decide when to recurse and set references"
+    },
+    {
+      "id": "should-set-manager-3fdeeb",
+      "name": "ShouldSetManager",
+      "category": "AssetManager",
+      "signature": "ShouldSetManager(Target, Manager, Source, Target, Category, Properties, Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Manager",
+          "type": "FAssetIdentifier&"
+        },
+        {
+          "name": "Source",
+          "type": "FAssetIdentifier&"
+        },
+        {
+          "name": "Target",
+          "type": "FAssetIdentifier&"
+        },
+        {
+          "name": "Category",
+          "type": "UE::AssetRegistry::EDependencyCategory"
+        },
+        {
+          "name": "Properties",
+          "type": "UE::AssetRegistry::EDependencyProperty"
+        },
+        {
+          "name": "Flags",
+          "type": "EAssetSetManagerFlags::Type"
+        }
+      ],
+      "returnType": "EAssetSetManagerResult::Type"
+    },
+    {
+      "id": "on-asset-registry-files-loaded",
+      "name": "OnAssetRegistryFilesLoaded",
+      "category": "AssetManager",
+      "signature": "OnAssetRegistryFilesLoaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when asset registry is done loading off disk, will finish any deferred loads"
+    },
+    {
+      "id": "on-in-memory-asset-created",
+      "name": "OnInMemoryAssetCreated",
+      "category": "AssetManager",
+      "signature": "OnInMemoryAssetCreated(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles updating manager when a new asset is created"
+    },
+    {
+      "id": "on-in-memory-asset-deleted",
+      "name": "OnInMemoryAssetDeleted",
+      "category": "AssetManager",
+      "signature": "OnInMemoryAssetDeleted(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Handles updating manager if deleted object is relevant"
+    },
+    {
+      "id": "on-object-pre-save",
+      "name": "OnObjectPreSave",
+      "category": "AssetManager",
+      "signature": "OnObjectPreSave(Target, Object, Save Context)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Save Context",
+          "type": "FObjectPreSaveContext"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when object is saved"
+    },
+    {
+      "id": "on-asset-renamed",
+      "name": "OnAssetRenamed",
+      "category": "AssetManager",
+      "signature": "OnAssetRenamed(Target, New Data, Old Path)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "New Data",
+          "type": "FAssetData&"
+        },
+        {
+          "name": "Old Path",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When asset is renamed"
+    },
+    {
+      "id": "on-asset-removed",
+      "name": "OnAssetRemoved",
+      "category": "AssetManager",
+      "signature": "OnAssetRemoved(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Data",
+          "type": "FAssetData&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "When an asset is removed"
+    },
+    {
+      "id": "remove-primary-asset-id",
+      "name": "RemovePrimaryAssetId",
+      "category": "AssetManager",
+      "signature": "RemovePrimaryAssetId(Target, Primary Asset Id)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Id",
+          "type": "FPrimaryAssetId&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Try to remove an old asset identifier when it has been deleted/renamed"
+    },
+    {
+      "id": "gather-public-assets-for-package-bd9f8a",
+      "name": "GatherPublicAssetsForPackage",
+      "category": "AssetManager",
+      "signature": "GatherPublicAssetsForPackage(Target, Package Path, Packages To Cook)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "Name"
+        },
+        {
+          "name": "Packages To Cook",
+          "type": "TArray<FName>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Scans the respective PackagePath for public assets to include in PackagesToCook"
+    },
+    {
+      "id": "gather-public-assets-for-package-10b385",
+      "name": "GatherPublicAssetsForPackage",
+      "category": "AssetManager",
+      "signature": "GatherPublicAssetsForPackage(Target, Package Path, Assets To Cook)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Package Path",
+          "type": "Name"
+        },
+        {
+          "name": "Assets To Cook",
+          "type": "TSet<FSoftObjectPath>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Scans the respective PackagePath for public assets to include in AssetsToCook"
+    },
+    {
+      "id": "pre-begin-pie",
+      "name": "PreBeginPIE",
+      "category": "AssetManager",
+      "signature": "PreBeginPIE(Target, Start Simulate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Start Simulate",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called right before PIE starts, will refresh asset directory and can be overriden to preload assets"
+    },
+    {
+      "id": "end-pie",
+      "name": "EndPIE",
+      "category": "AssetManager",
+      "signature": "EndPIE(Target, Start Simulate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Start Simulate",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after PIE ends, resets loading state"
+    },
+    {
+      "id": "build-chunk-map-7595d1",
+      "name": "BuildChunkMap",
+      "category": "AssetManager",
+      "signature": "BuildChunkMap(Target, Packages To Update Chunks For)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Packages To Update Chunks For",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "TMap<int32,FAssetManagerChunkInfo>",
+      "docs": "Used by UpdateManagementDatabase to build the CachedChunkMap.\nShould return a new cachedChunkMap.\n@param PackagesToUpdateChunksFor - the packages needing chunk assignment as part of the management database update.\n@return a new CachedChunkMap to be used."
+    },
+    {
+      "id": "build-chunk-map-0ade9a",
+      "name": "BuildChunkMap",
+      "category": "AssetManager",
+      "signature": "BuildChunkMap(Target, Packages To Update Chunks For, Startup Packages, Package That Were Cooked)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Packages To Update Chunks For",
+          "type": "TSet<FName>&"
+        },
+        {
+          "name": "Startup Packages",
+          "type": "TSet<FName>&"
+        },
+        {
+          "name": "Package That Were Cooked",
+          "type": "TSet<FName>&"
+        }
+      ],
+      "returnType": "TMap<int32,FAssetManagerChunkInfo>",
+      "docs": "Used by UpdateManagementDatabase and at the end of the cook to build the CachedChunkMap.\nShould return a new cachedChunkMap.\n@param PackagesToUpdateChunksFor - the packages needing chunk assignment as part of the management database update.\n@param StartupPackages - All the known startup packages. When called from UpdateManagementDatabase, this will be empty.\n@param PackageThatWereCooked - All the known packages that were cooked. When called from UpdateManagementDatabase, this will be empty.\n@return a new CachedChunkMap to be used."
+    },
+    {
+      "id": "initialize-asset-bundles-from-metadata-recursive",
+      "name": "InitializeAssetBundlesFromMetadata_Recursive",
+      "category": "AssetManager",
+      "signature": "InitializeAssetBundlesFromMetadata_Recursive(Target, Struct, Struct Value, Asset Bundle, Debug Name, All Visited Struct Values)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Struct",
+          "type": "UStruct*"
+        },
+        {
+          "name": "Struct Value",
+          "type": "void*"
+        },
+        {
+          "name": "Asset Bundle",
+          "type": "FAssetBundleData&"
+        },
+        {
+          "name": "Debug Name",
+          "type": "Name"
+        },
+        {
+          "name": "All Visited Struct Values",
+          "type": "TSet<void*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Recursive handler for InitializeAssetBundlesFromMetadata"
+    },
+    {
+      "id": "load-primary-assets-7cc19c",
+      "name": "LoadPrimaryAssets",
+      "category": "AssetManager",
+      "signature": "LoadPrimaryAssets(Target, Assets To Load, Load Bundles, Delegate To Call, Priority, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Assets To Load",
+          "type": "TArray<FPrimaryAssetId>&"
+        },
+        {
+          "name": "Load Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>",
+      "docs": "Per-type asset information, cannot be accessed by children as it is defined in CPP file"
+    },
+    {
+      "id": "load-primary-asset-c1ffb1",
+      "name": "LoadPrimaryAsset",
+      "category": "AssetManager",
+      "signature": "LoadPrimaryAsset(Target, Asset To Load, Load Bundles, Delegate To Call, Priority, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Asset To Load",
+          "type": "FPrimaryAssetId&"
+        },
+        {
+          "name": "Load Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>"
+    },
+    {
+      "id": "load-primary-assets-with-type-9e0124",
+      "name": "LoadPrimaryAssetsWithType",
+      "category": "AssetManager",
+      "signature": "LoadPrimaryAssetsWithType(Target, Primary Asset Type, Load Bundles, Delegate To Call, Priority, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Primary Asset Type",
+          "type": "FPrimaryAssetType"
+        },
+        {
+          "name": "Load Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>"
+    },
+    {
+      "id": "change-bundle-state-for-primary-assets-46f440",
+      "name": "ChangeBundleStateForPrimaryAssets",
+      "category": "AssetManager",
+      "signature": "ChangeBundleStateForPrimaryAssets(Target, Assets To Change, Add Bundles, Remove Bundles, Remove All Bundles, Delegate To Call, Priority, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Assets To Change",
+          "type": "TArray<FPrimaryAssetId>&"
+        },
+        {
+          "name": "Add Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Remove Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Remove All Bundles",
+          "type": "Bool"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>"
+    },
+    {
+      "id": "change-bundle-state-for-matching-primary-assets-ed50ca",
+      "name": "ChangeBundleStateForMatchingPrimaryAssets",
+      "category": "AssetManager",
+      "signature": "ChangeBundleStateForMatchingPrimaryAssets(Target, New Bundles, Old Bundles, Delegate To Call, Priority, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "New Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Old Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>"
+    },
+    {
+      "id": "preload-primary-assets-eac521",
+      "name": "PreloadPrimaryAssets",
+      "category": "AssetManager",
+      "signature": "PreloadPrimaryAssets(Target, Assets To Load, Load Bundles, Load Recursive, Delegate To Call, Priority, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Assets To Load",
+          "type": "TArray<FPrimaryAssetId>&"
+        },
+        {
+          "name": "Load Bundles",
+          "type": "TArray<FName>&"
+        },
+        {
+          "name": "Load Recursive",
+          "type": "Bool"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>"
+    },
+    {
+      "id": "load-asset-list-a88ad6",
+      "name": "LoadAssetList",
+      "category": "AssetManager",
+      "signature": "LoadAssetList(Target, Asset List, Delegate To Call, Priority, Debug Name, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAssetManager*"
+        },
+        {
+          "name": "Asset List",
+          "type": "TArray<FSoftObjectPath>&"
+        },
+        {
+          "name": "Delegate To Call",
+          "type": "FStreamableDelegate"
+        },
+        {
+          "name": "Priority",
+          "type": "TAsyncLoadPriority"
+        },
+        {
+          "name": "Debug Name",
+          "type": "String&&"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation&&"
+        }
+      ],
+      "returnType": "TSharedPtr<FStreamableHandle>"
     }
   ]
 }

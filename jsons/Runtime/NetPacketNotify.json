@@ -1,0 +1,228 @@
+{
+  "id": "net-packet-notify",
+  "label": "NetPacketNotify",
+  "includepath": "Net/NetPacketNotify.h",
+  "includes": [
+    "EngineLogs",
+    "UnrealMemory",
+    "LogMacros",
+    "IsSigned",
+    "ResizableCircularQueue",
+    "SequenceNumber",
+    "SequenceHistory"
+  ],
+  "functions": [
+    {
+      "id": "ack-seq",
+      "name": "AckSeq",
+      "category": "NetPacketNotify",
+      "signature": "AckSeq(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        },
+        {
+          "name": "Seq",
+          "type": "SequenceNumberT"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Mark Seq as received and update current InSeq, missing sequence numbers will be marked as lost"
+    },
+    {
+      "id": "nak-seq",
+      "name": "NakSeq",
+      "category": "NetPacketNotify",
+      "signature": "NakSeq(Target, Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        },
+        {
+          "name": "Seq",
+          "type": "SequenceNumberT"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Explicitly mark Seq as not received and update current InSeq, additional missing sequence numbers will be marked as lost"
+    },
+    {
+      "id": "get-sequence-delta",
+      "name": "GetSequenceDelta",
+      "category": "NetPacketNotify",
+      "signature": "GetSequenceDelta(Target, Notification Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        },
+        {
+          "name": "Notification Data",
+          "type": "FNotificationHeader&"
+        }
+      ],
+      "returnType": "SequenceNumberT::DifferenceT",
+      "docs": "Gets the delta between the present sequence, and the sequence inside the specified header - if the delta is positive"
+    },
+    {
+      "id": "get-in-seq-history",
+      "name": "GetInSeqHistory",
+      "category": "NetPacketNotify",
+      "signature": "GetInSeqHistory(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "SequenceHistoryT&",
+      "docs": "Get the current SequenceHistory"
+    },
+    {
+      "id": "get-in-seq",
+      "name": "GetInSeq",
+      "category": "NetPacketNotify",
+      "signature": "GetInSeq(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "SequenceNumberT",
+      "docs": "Get the last received in sequence number"
+    },
+    {
+      "id": "get-in-ack-seq",
+      "name": "GetInAckSeq",
+      "category": "NetPacketNotify",
+      "signature": "GetInAckSeq(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "SequenceNumberT",
+      "docs": "Get the last received sequence number that we have accepted, InAckSeq cannot be larger than InSeq"
+    },
+    {
+      "id": "get-out-seq",
+      "name": "GetOutSeq",
+      "category": "NetPacketNotify",
+      "signature": "GetOutSeq(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "SequenceNumberT",
+      "docs": "Get the current outgoing sequence number"
+    },
+    {
+      "id": "get-out-ack-seq",
+      "name": "GetOutAckSeq",
+      "category": "NetPacketNotify",
+      "signature": "GetOutAckSeq(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "SequenceNumberT",
+      "docs": "Get the last outgoing sequence number acknowledged by remote"
+    },
+    {
+      "id": "can-send",
+      "name": "CanSend",
+      "category": "NetPacketNotify",
+      "signature": "CanSend(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "If we do have more unacknowledged sequence numbers in-flight than our maximum sendwindow we should not send more as the receiving end will not be able to detect if the sequence number has wrapped around"
+    },
+    {
+      "id": "is-waiting-for-sequence-history-flush",
+      "name": "IsWaitingForSequenceHistoryFlush",
+      "category": "NetPacketNotify",
+      "signature": "IsWaitingForSequenceHistoryFlush(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if we are currently waiting for a flush of the sequence window"
+    },
+    {
+      "id": "is-sequence-window-full",
+      "name": "IsSequenceWindowFull",
+      "category": "NetPacketNotify",
+      "signature": "IsSequenceWindowFull(Target, Safety Margin)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        },
+        {
+          "name": "Safety Margin",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "update",
+      "name": "Update",
+      "category": "NetPacketNotify",
+      "signature": "Update(Target, Notification Data, In Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        },
+        {
+          "name": "Notification Data",
+          "type": "FNotificationHeader&"
+        },
+        {
+          "name": "In Func",
+          "type": "Functor&&"
+        }
+      ],
+      "returnType": "template<class Functor> FNetPacketNotify::SequenceNumberT::DifferenceT",
+      "docs": "Update state of PacketNotification based on received header and invoke packet notifications for received acks.\n@param NotificationData\t\t\tThe header to update from\n@param InFunc\t\t\t\t\tA function in the format (void)(FNetPacketNotify::SequenceNumberT AckedSequence, bool bDelivered) to handle packet notifications.\n@return\t\t\t\t\t\t\tThe > 0 delta of the incoming seq if within half the seq number space. 0 if the received seq is outside current window ,or the ack seq received is invalid."
+    },
+    {
+      "id": "process-received-acks",
+      "name": "ProcessReceivedAcks",
+      "category": "NetPacketNotify",
+      "signature": "ProcessReceivedAcks(Target, Notification Data, In Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetPacketNotify*"
+        },
+        {
+          "name": "Notification Data",
+          "type": "FNotificationHeader&"
+        },
+        {
+          "name": "In Func",
+          "type": "Functor&&"
+        }
+      ],
+      "returnType": "template<class Functor> void"
+    }
+  ]
+}

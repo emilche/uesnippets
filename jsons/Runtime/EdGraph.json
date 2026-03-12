@@ -33,6 +33,19 @@
       "returnType": "Void"
     },
     {
+      "id": "get-blueprint",
+      "name": "GetBlueprint",
+      "category": "EdGraph",
+      "signature": "GetBlueprint(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FGraphReference*"
+        }
+      ],
+      "returnType": "class UBlueprint*"
+    },
+    {
       "id": "get-graph",
       "name": "GetGraph",
       "category": "EdGraph",
@@ -117,47 +130,17 @@
       "returnType": "Void"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "create-intermediate-node",
+      "name": "CreateIntermediateNode",
       "category": "EdGraph",
-      "signature": "Serialize(Target, Record)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UEdGraph*"
-        },
-        {
-          "name": "Record",
-          "type": "FStructuredArchiveRecord"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
-      "category": "EdGraph",
-      "signature": "PostInitProperties(Target)",
+      "signature": "CreateIntermediateNode(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UEdGraph*"
         }
       ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "EdGraph",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UEdGraph*"
-        }
-      ],
-      "returnType": "Void"
+      "returnType": "template<NodeClass> NodeClass*"
     },
     {
       "id": "add-node",
@@ -239,7 +222,7 @@
       "docs": "Remove a node from this graph\n@param NodeToRemove\t\tThe node to remove from this graph\n@param bBreakAllLinks\t\tIf true, all links will be broken on the given node. Editor only. Useful for moving nodes to a different graph.\n@param bAlwaysMarkDirty\t(Optional) If true, marks graph as dirtied upon removal.\n@return True if the node has been removed from the graph"
     },
     {
-      "id": "notify-graph-changed-aca4cd",
+      "id": "notify-graph-changed",
       "name": "NotifyGraphChanged",
       "category": "EdGraph",
       "signature": "NotifyGraphChanged(Target)",
@@ -295,6 +278,60 @@
       ],
       "returnType": "Void",
       "docs": "Move all nodes from this graph to another graph\n@param DestinationGraph\tThe graph to move the nodes too\n@param bIsLoading\t\tIf true, the node move is occurring during a blueprint load\n@param bInIsCompiling\tTRUE if the function is being called during compilation, this will eliminate some nodes that will not be compiled"
+    },
+    {
+      "id": "get-nodes-of-class-ex",
+      "name": "GetNodesOfClassEx",
+      "category": "EdGraph",
+      "signature": "GetNodesOfClassEx(Target, Out Nodes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Out Nodes",
+          "type": "TArray<ArrayElementType*>&"
+        }
+      ],
+      "returnType": "template<class MinRequiredType,class ArrayElementType> void",
+      "docs": "Finds all the nodes of a given minimum type in the graph"
+    },
+    {
+      "id": "get-nodes-of-class",
+      "name": "GetNodesOfClass",
+      "category": "EdGraph",
+      "signature": "GetNodesOfClass(Target, Out Nodes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Out Nodes",
+          "type": "TArray<MinRequiredType*>&"
+        }
+      ],
+      "returnType": "template<class MinRequiredType> void",
+      "docs": "Gets all the nodes in the graph of a given type"
+    },
+    {
+      "id": "get-all-children-graphs",
+      "name": "GetAllChildrenGraphs",
+      "category": "EdGraph",
+      "signature": "GetAllChildrenGraphs(Target, Graphs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Graphs",
+          "type": "TArray<UEdGraph*>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get all children graphs in the specified graph"
     },
     {
       "id": "get-outer-graph",
@@ -401,21 +438,106 @@
       "docs": "Remove a delegate listening for property changed notifications"
     },
     {
-      "id": "notify-graph-changed-eae99f",
-      "name": "NotifyGraphChanged",
+      "id": "f-graph-node-creator-3319bb",
+      "name": "FGraphNodeCreator",
       "category": "EdGraph",
-      "signature": "NotifyGraphChanged(Target, Action)",
+      "signature": "FGraphNodeCreator(Target, NULL, In Graph, False)",
       "params": [
         {
           "name": "Target",
           "type": "UEdGraph*"
         },
         {
-          "name": "Action",
-          "type": "FEdGraphEditAction&"
+          "name": "NULL",
+          "type": "UEdGraph& InGraph ) : Node ("
+        },
+        {
+          "name": "In Graph",
+          "type": "Graph ("
+        },
+        {
+          "name": "False",
+          "type": "bPlaced ("
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "docs": "A delegate that broadcasts a notification whenever the graph has changed."
+    },
+    {
+      "id": "create-node",
+      "name": "CreateNode",
+      "category": "EdGraph",
+      "signature": "CreateNode(Target, Select New Node, Node Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Select New Node",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Node Class",
+          "type": "TSubclassOf<NodeType>",
+          "default": "NodeType::StaticClass()"
+        }
+      ],
+      "returnType": "NodeType*",
+      "docs": "Create an empty placeable graph node"
+    },
+    {
+      "id": "create-user-invoked-node",
+      "name": "CreateUserInvokedNode",
+      "category": "EdGraph",
+      "signature": "CreateUserInvokedNode(Target, Select New Node, Node Class)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        },
+        {
+          "name": "Select New Node",
+          "type": "Bool",
+          "default": "true"
+        },
+        {
+          "name": "Node Class",
+          "type": "TSubclassOf<NodeType>",
+          "default": "NodeType::StaticClass()"
+        }
+      ],
+      "returnType": "NodeType*",
+      "docs": "Create an empty placeable graph node"
+    },
+    {
+      "id": "finalize",
+      "name": "Finalize",
+      "category": "EdGraph",
+      "signature": "Finalize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call to finalize the node's construction"
+    },
+    {
+      "id": "f-graph-node-creator-1f3367",
+      "name": "FGraphNodeCreator",
+      "category": "EdGraph",
+      "signature": "FGraphNodeCreator(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UEdGraph*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Destructor. Ensures that finalized was called"
     }
   ]
 }

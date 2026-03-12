@@ -1,0 +1,630 @@
+{
+  "id": "fast-array-serializer",
+  "label": "FastArraySerializer",
+  "includepath": "Net/Serialization/FastArraySerializer.h",
+  "includes": [
+    "CoreMinimal",
+    "Stats",
+    "ObjectMacros",
+    "Class",
+    "BitReader",
+    "NetworkGuid",
+    "CoreNet",
+    "ArrayView",
+    "GuidReferences",
+    "PushModel",
+    "NetCoreModule",
+    "IConsoleManager",
+    "EnableIf",
+    "CsvProfiler",
+    "FastArraySerializer.generated"
+  ],
+  "functions": [
+    {
+      "id": "net-delta-serialize",
+      "name": "NetDeltaSerialize",
+      "category": "FastArraySerializer",
+      "signature": "NetDeltaSerialize(Target, Delta Parms)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FExampleArray*"
+        },
+        {
+          "name": "Delta Parms",
+          "type": "FNetDeltaSerializeInfo&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Step 3: You MUST have a TArray named Items of the struct you made in step 1."
+    },
+    {
+      "id": "has-valid-fast-array-item-type",
+      "name": "HasValidFastArrayItemType",
+      "category": "FastArraySerializer",
+      "signature": "HasValidFastArrayItemType()",
+      "params": [],
+      "returnType": "Bool",
+      "docs": "Returns true if auto detected FastArrayItemType is a valid FastArrayItemType"
+    },
+    {
+      "id": "is-state-equal",
+      "name": "IsStateEqual",
+      "category": "FastArraySerializer",
+      "signature": "IsStateEqual(Target, Other State)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetFastTArrayBaseState*"
+        },
+        {
+          "name": "Other State",
+          "type": "INetDeltaBaseState*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "count-bytes",
+      "name": "CountBytes",
+      "category": "FastArraySerializer",
+      "signature": "CountBytes(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetFastTArrayBaseState*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pre-replicated-remove-8e4b15",
+      "name": "PreReplicatedRemove",
+      "category": "FastArraySerializer",
+      "signature": "PreReplicatedRemove(Target, In Array Serializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializerItem*"
+        },
+        {
+          "name": "In Array Serializer",
+          "type": "FFastArraySerializer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called right before deleting element during replication.\n@param InArraySerializer\tArray serializer that owns the item and has triggered the replication call\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "post-replicated-add-1f9902",
+      "name": "PostReplicatedAdd",
+      "category": "FastArraySerializer",
+      "signature": "PostReplicatedAdd(Target, In Array Serializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "In Array Serializer",
+          "type": "FFastArraySerializer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after adding and serializing a new element\n@param InArraySerializer\tArray serializer that owns the item and has triggered the replication call\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "post-replicated-change-b50b6d",
+      "name": "PostReplicatedChange",
+      "category": "FastArraySerializer",
+      "signature": "PostReplicatedChange(Target, In Array Serializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "In Array Serializer",
+          "type": "FFastArraySerializer&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after updating an existing element with new data\n@param InArraySerializer\tArray serializer that owns the item and has triggered the replication call\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "get-debug-string",
+      "name": "GetDebugString",
+      "category": "FastArraySerializer",
+      "signature": "GetDebugString(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "Called when logging LogNetFastTArray (log or lower verbosity)\n@param InArraySerializer\tArray serializer that owns the item and has triggered the replication call\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "f-fast-array-serializer",
+      "name": "FFastArraySerializer",
+      "category": "FastArraySerializer",
+      "signature": "FFastArraySerializer()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
+      "id": "mark-item-dirty",
+      "name": "MarkItemDirty",
+      "category": "FastArraySerializer",
+      "signature": "MarkItemDirty(Target, Item)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Item",
+          "type": "FFastArraySerializerItem&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "List of items that need to be re-serialized when the referenced objects are mapped"
+    },
+    {
+      "id": "mark-array-dirty",
+      "name": "MarkArrayDirty",
+      "category": "FastArraySerializer",
+      "signature": "MarkArrayDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "This must be called if you just remove something from the array"
+    },
+    {
+      "id": "increment-array-replication-key",
+      "name": "IncrementArrayReplicationKey",
+      "category": "FastArraySerializer",
+      "signature": "IncrementArrayReplicationKey(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "pre-replicated-remove-453c66",
+      "name": "PreReplicatedRemove",
+      "category": "FastArraySerializer",
+      "signature": "PreReplicatedRemove(Target, Removed Indices, Final Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Removed Indices",
+          "type": "TArrayView<int32>&"
+        },
+        {
+          "name": "Final Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called before removing elements and after the elements themselves are notified.  The indices are valid for this function call only!\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "post-replicated-add-6b4ffa",
+      "name": "PostReplicatedAdd",
+      "category": "FastArraySerializer",
+      "signature": "PostReplicatedAdd(Target, Added Indices, Final Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Added Indices",
+          "type": "TArrayView<int32>&"
+        },
+        {
+          "name": "Final Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after adding all new elements and after the elements themselves are notified.  The indices are valid for this function call only!\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "post-replicated-change-2f40be",
+      "name": "PostReplicatedChange",
+      "category": "FastArraySerializer",
+      "signature": "PostReplicatedChange(Target, Changed Indices, Final Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Changed Indices",
+          "type": "TArrayView<int32>&"
+        },
+        {
+          "name": "Final Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called after updating all existing elements with new data and after the elements themselves are notified. The indices are valid for this function call only!\nNOTE: intentionally not virtual; invoked via templated code, @see FExampleItemEntry"
+    },
+    {
+      "id": "should-write-fast-array-item",
+      "name": "ShouldWriteFastArrayItem",
+      "category": "FastArraySerializer",
+      "signature": "ShouldWriteFastArrayItem(Target, Item, Is Writing On Client)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Item",
+          "type": "Type&"
+        },
+        {
+          "name": "Is Writing On Client",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> bool",
+      "docs": "Helper function for FastArrayDeltaSerialize to consolidate the logic of whether to consider writing an item in a fast TArray during network serialization.\nFor client replay recording, we don't want to write any items that have been added to the array predictively."
+    },
+    {
+      "id": "set-delta-serialization-enabled",
+      "name": "SetDeltaSerializationEnabled",
+      "category": "FastArraySerializer",
+      "signature": "SetDeltaSerializationEnabled(Target, Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Enabled",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-delta-serialization-flags",
+      "name": "GetDeltaSerializationFlags",
+      "category": "FastArraySerializer",
+      "signature": "GetDeltaSerializationFlags(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "EFastArraySerializerDeltaFlags"
+    },
+    {
+      "id": "get-max-number-of-allowed-changes-per-update",
+      "name": "GetMaxNumberOfAllowedChangesPerUpdate",
+      "category": "FastArraySerializer",
+      "signature": "GetMaxNumberOfAllowedChangesPerUpdate()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-max-number-of-allowed-deletions-per-update",
+      "name": "GetMaxNumberOfAllowedDeletionsPerUpdate",
+      "category": "FastArraySerializer",
+      "signature": "GetMaxNumberOfAllowedDeletionsPerUpdate()",
+      "params": [],
+      "returnType": "Int"
+    },
+    {
+      "id": "cache-push-model-state",
+      "name": "CachePushModelState",
+      "category": "FastArraySerializer",
+      "signature": "CachePushModelState(Target, Object, Property Rep Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        },
+        {
+          "name": "Property Rep Index",
+          "type": "UInt16"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "call-post-replicated-receive-or-not-5c657f",
+      "name": "CallPostReplicatedReceiveOrNot",
+      "category": "FastArraySerializer",
+      "signature": "CallPostReplicatedReceiveOrNot(Target, Old Array Size)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Old Array Size",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<FastArrayType = SerializerType> TEnableIf<TModels_V<CPostReplicatedReceiveFuncable,FastArrayType,FFastArraySerializer::FPostReplicatedReceiveParameters>,void>::Type",
+      "docs": "Conditionally invoke PostReplicatedReceive method depending on if is defined or not"
+    },
+    {
+      "id": "call-post-replicated-receive-or-not-ffb697",
+      "name": "CallPostReplicatedReceiveOrNot",
+      "category": "FastArraySerializer",
+      "signature": "CallPostReplicatedReceiveOrNot(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "template<FastArrayType = SerializerType> TEnableIf<! TModels_V<CPostReplicatedReceiveFuncable,FastArrayType,FFastArraySerializer::FPostReplicatedReceiveParameters>,void>::Type"
+    },
+    {
+      "id": "conditional-rebuild-item-map",
+      "name": "ConditionalRebuildItemMap",
+      "category": "FastArraySerializer",
+      "signature": "ConditionalRebuildItemMap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> void FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Struct containing common header data that is written / read when serializing Fast Arrays."
+    },
+    {
+      "id": "calc-num-items-for-consideration",
+      "name": "CalcNumItemsForConsideration",
+      "category": "FastArraySerializer",
+      "signature": "CalcNumItemsForConsideration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> int32 FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Calculates the number of Items that actually need to be written."
+    },
+    {
+      "id": "conditional-log-serializer-state",
+      "name": "ConditionalLogSerializerState",
+      "category": "FastArraySerializer",
+      "signature": "ConditionalLogSerializerState(Target, Old ID To Key Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Old ID To Key Map",
+          "type": "TMap<int32,int32>*"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> void FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Conditionally logs the important state of the serializer. For debug purposes only."
+    },
+    {
+      "id": "conditional-create-new-delta-state",
+      "name": "ConditionalCreateNewDeltaState",
+      "category": "FastArraySerializer",
+      "signature": "ConditionalCreateNewDeltaState(Target, Old ID To Key Map, Base Replication Key)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Old ID To Key Map",
+          "type": "TMap<int32,int32>&"
+        },
+        {
+          "name": "Base Replication Key",
+          "type": "Int"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> bool FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Checks to see if the ArrayReplicationKey has changed, and if so creates a new DeltaState that\nis passed out to the caller.\nNote, this state may just be a copy of a previous state, or a brand new state.\n@return\tTrue if the keys were different and a state was created.\nFalse if the keys were the same, and we can skip serialization."
+    },
+    {
+      "id": "build-changed-and-deleted-buffers-from-default",
+      "name": "BuildChangedAndDeletedBuffersFromDefault",
+      "category": "FastArraySerializer",
+      "signature": "BuildChangedAndDeletedBuffersFromDefault(Target, New ID To Key Map, Changed Elements)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "New ID To Key Map",
+          "type": "TMap<int32,int32>&"
+        },
+        {
+          "name": "Changed Elements",
+          "type": "TArray<FFastArraySerializer_FastArrayDeltaSerialize_FIdxIDPair,TInlineAllocator<8>>&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> void FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Variant of BuildChangedAndDeletedBuffersFromDefault used when we initialize from the default state which we are not suppose to modify"
+    },
+    {
+      "id": "build-changed-and-deleted-buffers",
+      "name": "BuildChangedAndDeletedBuffers",
+      "category": "FastArraySerializer",
+      "signature": "BuildChangedAndDeletedBuffers(Target, New ID To Key Map, Old ID To Key Map, Changed Elements, Deleted Elements)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "New ID To Key Map",
+          "type": "TMap<int32,int32>&"
+        },
+        {
+          "name": "Old ID To Key Map",
+          "type": "TMap<int32,int32>*"
+        },
+        {
+          "name": "Changed Elements",
+          "type": "TArray<FFastArraySerializer_FastArrayDeltaSerialize_FIdxIDPair,TInlineAllocator<8>>&"
+        },
+        {
+          "name": "Deleted Elements",
+          "type": "TArray<int32,TInlineAllocator<8>>&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> void FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Iterates over the current set of properties, comparing their keys with our old state, to figure\nout which have changed and need to be serialized. Also populates a list of elements that are\nno longer in our list (by ID)."
+    },
+    {
+      "id": "write-delta-header",
+      "name": "WriteDeltaHeader",
+      "category": "FastArraySerializer",
+      "signature": "WriteDeltaHeader(Target, Header)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Header",
+          "type": "FFastArraySerializerHeader&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> void FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Writes out a FFastArraySerializerHeader"
+    },
+    {
+      "id": "read-delta-header",
+      "name": "ReadDeltaHeader",
+      "category": "FastArraySerializer",
+      "signature": "ReadDeltaHeader(Target, Header)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Header",
+          "type": "FFastArraySerializerHeader&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> bool FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Reads in a FFastArraySerializerHeader"
+    },
+    {
+      "id": "post-receive-cleanup",
+      "name": "PostReceiveCleanup",
+      "category": "FastArraySerializer",
+      "signature": "PostReceiveCleanup(Target, Header, Changed Indices, Added Indices, Guid Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Header",
+          "type": "FFastArraySerializerHeader&"
+        },
+        {
+          "name": "Changed Indices",
+          "type": "TArray<int32,TInlineAllocator<8>>&"
+        },
+        {
+          "name": "Added Indices",
+          "type": "TArray<int32,TInlineAllocator<8>>&"
+        },
+        {
+          "name": "Guid Map",
+          "type": "GuidMapType&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> template<GuidMapType> void FFastArraySerializer::TFastArraySerializeHelper<Type,SerializerType",
+      "docs": "Manages any cleanup work that needs to be done after receiving elements,\nsuch as looking for items that were implicitly deleted, removing all deleted items,\nfiring off any PostReceive / PostDeleted events, etc."
+    },
+    {
+      "id": "fast-array-delta-serialize",
+      "name": "FastArrayDeltaSerialize",
+      "category": "FastArraySerializer",
+      "signature": "FastArrayDeltaSerialize(Target, Items, Parms, Array Serializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Items",
+          "type": "TArray<Type>&"
+        },
+        {
+          "name": "Parms",
+          "type": "FNetDeltaSerializeInfo&"
+        },
+        {
+          "name": "Array Serializer",
+          "type": "SerializerType&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> bool",
+      "docs": "The function that implements Fast TArray Replication"
+    },
+    {
+      "id": "fast-array-delta-serialize-delta-serialize-structs",
+      "name": "FastArrayDeltaSerialize_DeltaSerializeStructs",
+      "category": "FastArraySerializer",
+      "signature": "FastArrayDeltaSerialize_DeltaSerializeStructs(Target, Items, Parms, Array Serializer)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFastArraySerializer*"
+        },
+        {
+          "name": "Items",
+          "type": "TArray<Type>&"
+        },
+        {
+          "name": "Parms",
+          "type": "FNetDeltaSerializeInfo&"
+        },
+        {
+          "name": "Array Serializer",
+          "type": "SerializerType&"
+        }
+      ],
+      "returnType": "template<Type,SerializerType> bool",
+      "docs": "Performs \"struct delta\" serialization on the items in the FastArraySerializer.\nThis method relies more directly on FRepLayout for management, and will only send properties\nthat have changed since the last update.\nThis is potentially more CPU intensive since we'll be doing comparisons, but should require less bandwidth.\nFor this method to work, the following **must** be true:\n- Your array of FFastArraySerializerItems must be a top level UPROPERTY within your FFastArraySerializer.\n- Your array of FFastArraySerializerItems must **not** be marked RepSkip.\n- Your array of FFastArraySerializerItems must be the **only** replicated array of FFastArraySerializerItems within the FastArraySerializer.\nNote, it's OK to have multiple arrays of items, as long as only one is replicated (all others **must** be marked RepSkip).\n- Your FFastArraySerializer must not be nested in a static array.\n- Your array of FFastArraySerializerItem must not be nested in a static array.\n@param Items\t\t\t\tArray of items owned by ArraySerializer.\n@param Parms\t\t\t\tSet of parms that dictate what serialization will do / return.\n@param ArraySerializer\tThe typed subclass of FFastArraySerializer that we're serializing."
+    }
+  ]
+}

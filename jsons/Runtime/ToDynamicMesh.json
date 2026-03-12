@@ -1,0 +1,282 @@
+{
+  "id": "to-dynamic-mesh",
+  "label": "ToDynamicMesh",
+  "includepath": "ToDynamicMesh.h",
+  "includes": [
+    "CoreMinimal",
+    "DynamicMesh3",
+    "DynamicMeshAttributeSet",
+    "DynamicMeshOverlay",
+    "DynamicVertexSkinWeightsAttribute",
+    "DynamicBoneAttribute",
+    "VectorTypes",
+    "Async"
+  ],
+  "functions": [
+    {
+      "id": "convert-d00c3c",
+      "name": "Convert",
+      "category": "ToDynamicMesh",
+      "signature": "Convert(Target, Mesh Out, Mesh In, Group ID Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMeshBase*"
+        },
+        {
+          "name": "Mesh Out",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Mesh In",
+          "type": "SrcMeshType&"
+        },
+        {
+          "name": "Group ID Function",
+          "type": "TFunctionRef<int32 ( SrcTriIDType& SrcTrID )>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "ToDynamicMesh",
+      "signature": "GetTypeHash(Target, Vector)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Vector",
+          "type": "TVertexAttr<AttrType>&"
+        }
+      ],
+      "returnType": "template<AttrType> uint32"
+    },
+    {
+      "id": "t-attr-welder-8bf17e",
+      "name": "TAttrWelder",
+      "category": "ToDynamicMesh",
+      "signature": "TAttrWelder(Target, Nullptr)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Nullptr",
+          "type": ") : Overlay ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "t-attr-welder-22c880",
+      "name": "TAttrWelder",
+      "category": "ToDynamicMesh",
+      "signature": "TAttrWelder(Target, Overlay In)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Overlay In",
+          "type": "OverlayType*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "find-or-add-unique",
+      "name": "FindOrAddUnique",
+      "category": "ToDynamicMesh",
+      "signature": "FindOrAddUnique(Target, Attr Value, Vertex ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Attr Value",
+          "type": "AttrType&"
+        },
+        {
+          "name": "Vertex ID",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "t-to-dynamic-mesh",
+      "name": "TToDynamicMesh",
+      "category": "ToDynamicMesh",
+      "signature": "TToDynamicMesh(My Base)",
+      "params": [
+        {
+          "name": "My Base",
+          "type": ") :"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Class used to convert a mesh with attributes (e.g. normals, uvs etc) to a FDynamicMesh3\nThe Source Mesh has to implement this interface\nstruct FSrcMeshInterface\n{\n// ID types:  must be castable to int32\ntypedef SrcVertIDType    VertIDType;\ntypedef SrcTriIDType     TriIDType;\ntypedef SrcUVIDType      UVIDType;\ntypedef SrcNormalIDType  NormalIDType;\ntypedef SrcColorIDType   ColorIDType\ntypedef SrcWedgeIDType   WedgeIDType;\n// accounting.\nint32 NumTris() const;\nint32 NumVerts() const;\nint32 NumUVLayers() const;\n// --\"Vertex Buffer\" info\nconst Iterable_VertIDType& GetVertIDs() const;\nconst FVector3d GetPosition(const VertIDType VtxID) const;\n// --\"Index Buffer\" info\nconst Iterable_TriIDType& GetTriIDs() const\n// return false if this TriID is not contained in mesh.\nbool GetTri(const TriIDType TriID, VertIDType& VID0, VertIDType& VID1, VertIDType& VID2) const;\nbool HasNormals() const;\nbool HasTangents() cosnt;\nbool HasBiTangents() const;\n// Each triangle corner is a wedge\nvoid GetWedgeID(const TriIDType& TriID, WedgeIDType& WID0, WedgeIDType& WID1, WedgeIDType& WID2) const;\n// attribute access per-wedge\n// NB:  ToDynamicMesh will attempt to weld identical attributes that are associated with the same vertex\nFVector2f GetWedgeUV(int32 UVLayerIndex, WedgeIDType WID) const;\nFVector3f GetWedgeNormal(WedgeIDType WID) const;\nFVector3f GetWedgeTangent(WedgeIDType WID) const;\nFVector3f GetWedgeBiTangent(WedgeIDType WID) const;\nFVector4f GetWedgeColor(WedgeIDType WID) const;\n// attribute access that exploits shared attributes.\n// each group of shared attributes presents itself as a mesh with its own attribute vertex buffer.\n// NB:  If the mesh has no shared Attr attributes, then Get{Attr}IDs() should return an empty array.\n// NB:  Get{Attr}Tri() functions should return false if the triangle is not set in the attribute mesh.\nconst TArray<UVIDType>& GetUVIDs(int32 LayerID) const;\nFVector2f GetUV(int32 LayerID, UVIDType UVID) const;\nbool GetUVTri(int32 LayerID, const TriIDType& TID, UVIDType& ID0, UVIDType& ID1, UVIDType& ID2) const;\nconst TArray<NormalIDType>& GetNormalIDs() const;\nFVector3f GetNormal(NormalIDType ID) const;\nbool GetNormalTri(const TriIDType& TID, NormalIDType& NID0, NormalIDType& NID1, NormalIDType& NID2) const;\nconst TArray<NormalIDType>& GetTangentIDs() const;\nFVector3f GetTangent(NormalIDType ID) const;\nbool GetTangentTri(const TriIDType& TID, NormalIDType& NID0, NormalIDType& NID1, NormalIDType& NID2) const;\nconst TArray<NormalIDType>& GetBiTangentIDs() const;\nFVector3f GetBiTangent(NormalIDType ID) const;\nbool GetBiTangentTri(const TriIDType& TID, NormalIDType& NID0, NormalIDType& NID1, NormalIDType& NID2) const;\nconst TArray<ColorIDType>& GetColorIDs() const;\nFVector4f GetColor(ColorIDType ID) const;\nbool GetColorTri(const TriIDType& TID, ColorIDType& NID0, ColorIDType& NID1, ColorIDType& NID2) const;\n// weight maps information\nint32 NumWeightMapLayers() const;\nfloat GetVertexWeight(int32 WeightMapIndex, int32 SrcVertID) const;\nFName GetWeightMapName(int32 WeightMapIndex) const;\n// skin weight attributes information\nint32 NumSkinWeightAttributes() const;\nUE::AnimationCore::FBoneWeights GetVertexSkinWeight(int32 SkinWeightAttributeIndex, VertIDType VtxID) const;\nFName GetSkinWeightAttributeName(int32 SkinWeightAttributeIndex) const;\n// bone attributes information\nint32 GetNumBones() const;\nFName GetBoneName(int32 BoneIdx) const;\nint32 GetBoneParentIndex(int32 BoneIdx) const;\nFTransform GetBonePose(int32 BoneIdx) const;\nFVector4f GetBoneColor(int32 BoneIdx) const;\n};"
+    },
+    {
+      "id": "convert-wo-attributes",
+      "name": "ConvertWOAttributes",
+      "category": "ToDynamicMesh",
+      "signature": "ConvertWOAttributes(Target, Mesh Out, Mesh In, Group ID Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Mesh Out",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Mesh In",
+          "type": "SrcMeshType&"
+        },
+        {
+          "name": "Group ID Function",
+          "type": "TFunctionRef<int32 ( SrcTriIDType& SrcTrID )>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "convert-a02182",
+      "name": "Convert",
+      "category": "ToDynamicMesh",
+      "signature": "Convert(Target, Mesh Out, Mesh In, Group ID Function, Material ID Function, Copy Tangents)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Mesh Out",
+          "type": "FDynamicMesh3&"
+        },
+        {
+          "name": "Mesh In",
+          "type": "SrcMeshType&"
+        },
+        {
+          "name": "Group ID Function",
+          "type": "TFunctionRef<int32 ( SrcTriIDType& SrcTrID )>"
+        },
+        {
+          "name": "Material ID Function",
+          "type": "TFunctionRef<int32 ( SrcTriIDType& SrcTrID )>"
+        },
+        {
+          "name": "Copy Tangents",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "populate-overlay-from-wedge-attr",
+      "name": "PopulateOverlayFromWedgeAttr",
+      "category": "ToDynamicMesh",
+      "signature": "PopulateOverlayFromWedgeAttr(Target, Overlay, Wedge Attrs, Tri To Wedges, Weld Identical Attrs)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Overlay",
+          "type": "TOverlayTraits<AttrType>::OverlayType*"
+        },
+        {
+          "name": "Wedge Attrs",
+          "type": "TFunctionRef<AttrType ( SrcWedgeIDType& WedgeID )>"
+        },
+        {
+          "name": "Tri To Wedges",
+          "type": "TFunctionRef<void ( SrcTriIDType& SrcTriID,SrcWedgeIDType& WID0,SrcWedgeIDType& WID1,SrcWedgeIDType& WID2 )>"
+        },
+        {
+          "name": "Weld Identical Attrs",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "template<AttrType> void"
+    },
+    {
+      "id": "populate-overlay-from-shared-attr",
+      "name": "PopulateOverlayFromSharedAttr",
+      "category": "ToDynamicMesh",
+      "signature": "PopulateOverlayFromSharedAttr(Target, Overlay, Src Attr I Ds, Shared Attr Values, Attr Tri Indices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Overlay",
+          "type": "TOverlayTraits<AttrType>::OverlayType*"
+        },
+        {
+          "name": "Src Attr I Ds",
+          "type": "TArray<SrcAttrIDType>&"
+        },
+        {
+          "name": "Shared Attr Values",
+          "type": "TFunctionRef<AttrType ( SrcAttrIDType& AttrID )>"
+        },
+        {
+          "name": "Attr Tri Indices",
+          "type": "TFunctionRef<bool ( SrcTriIDType& SrcTriID,SrcAttrIDType& AttrID0,SrcAttrIDType& AttrID1,SrcAttrIDType& AttrID2 )>"
+        }
+      ],
+      "returnType": "template<AttrType,SrcAttrIDType> void"
+    },
+    {
+      "id": "populate-overlay",
+      "name": "PopulateOverlay",
+      "category": "ToDynamicMesh",
+      "signature": "PopulateOverlay(Target, Overlay, Src Attr I Ds, Shared Attr Values, Attr Tri Indices, Wedge Attrs, Tri To Wedges)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TToDynamicMesh*"
+        },
+        {
+          "name": "Overlay",
+          "type": "TOverlayTraits<AttrType>::OverlayType*"
+        },
+        {
+          "name": "Src Attr I Ds",
+          "type": "TArray<SrcAttrIDType>&"
+        },
+        {
+          "name": "Shared Attr Values",
+          "type": "TFunctionRef<AttrType ( SrcAttrIDType& AttrID )>"
+        },
+        {
+          "name": "Attr Tri Indices",
+          "type": "TFunctionRef<bool ( SrcTriIDType& SrcTriID,SrcAttrIDType& AttrID0,SrcAttrIDType& AttrID1,SrcAttrIDType& AttrID2 )>"
+        },
+        {
+          "name": "Wedge Attrs",
+          "type": "TFunctionRef<AttrType ( SrcWedgeIDType& WegdeID )>"
+        },
+        {
+          "name": "Tri To Wedges",
+          "type": "TFunctionRef<void ( SrcTriIDType& SrcTriID,SrcWedgeIDType& WID0,SrcWedgeIDType& WID1,SrcWedgeIDType& WID2 )>"
+        }
+      ],
+      "returnType": "template<AttrType,SrcAttrIDType> void"
+    }
+  ]
+}

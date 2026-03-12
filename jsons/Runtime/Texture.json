@@ -39,6 +39,19 @@
       "returnType": "Int64"
     },
     {
+      "id": "is-hdr",
+      "name": "IsHDR",
+      "category": "Texture",
+      "signature": "IsHDR(Format)",
+      "params": [
+        {
+          "name": "Format",
+          "type": "ETextureSourceFormat"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "init-blocked-ce5e85",
       "name": "InitBlocked",
       "category": "Texture",
@@ -365,7 +378,7 @@
       "docs": "Force the GUID to change even if mip data has not been modified.\nThis should be avoided; typically let the data hash be used as guid to uniquely identify the data."
     },
     {
-      "id": "lock-mip-read-only",
+      "id": "lock-mip-read-only-5b1a7c",
       "name": "LockMipReadOnly",
       "category": "Texture",
       "signature": "LockMipReadOnly(Target, Block Index, Layer Index, Mip Index)",
@@ -391,7 +404,7 @@
       "docs": "Use FMipLock to encapsulate a locked mip"
     },
     {
-      "id": "lock-mip",
+      "id": "lock-mip-6dff80",
       "name": "LockMip",
       "category": "Texture",
       "signature": "LockMip(Target, Block Index, Layer Index, Mip Index)",
@@ -417,7 +430,7 @@
       "docs": "Lock a mip for editing.\nNote that Lock/Unlock for edit automatically does UseHashAsGuid."
     },
     {
-      "id": "unlock-mip",
+      "id": "unlock-mip-46c87b",
       "name": "UnlockMip",
       "category": "Texture",
       "signature": "UnlockMip(Target, Block Index, Layer Index, Mip Index)",
@@ -478,6 +491,55 @@
       "docs": "Retrieve a copy of the data for a particular mip.  Prefer GetMipImage."
     },
     {
+      "id": "get-mip-data-5f3318",
+      "name": "GetMipData",
+      "category": "Texture",
+      "signature": "GetMipData(Target, Out Mip Data, Mip Index, Image Wrapper Module)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Out Mip Data",
+          "type": "TArray64<uint8>&"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        },
+        {
+          "name": "Image Wrapper Module",
+          "type": "IImageWrapperModule*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Legacy API that defaults to LayerIndex 0.  Prefer GetMipImage."
+    },
+    {
+      "id": "get-mip-image",
+      "name": "GetMipImage",
+      "category": "Texture",
+      "signature": "GetMipImage(Target, Out Image, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Out Image",
+          "type": "FImage&"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve a copy of the MipData as an FImage"
+    },
+    {
       "id": "get-mip-data-0321da",
       "name": "GetMipData",
       "category": "Texture",
@@ -526,7 +588,7 @@
       "docs": "Get ImageInfo of one mip.  Does not require locking the mips, or accessing the payload data.\nReturns false if the requested indexes were out of bounds, true if successful and fills OutImageInfo. *"
     },
     {
-      "id": "calc-mip-size",
+      "id": "calc-mip-size-189510",
       "name": "CalcMipSize",
       "category": "Texture",
       "signature": "CalcMipSize(Target, Block Index, Layer Index, Mip Index)",
@@ -597,6 +659,25 @@
       "docs": "Computes the number of bytes per-pixel."
     },
     {
+      "id": "is-power-of-two",
+      "name": "IsPowerOfTwo",
+      "category": "Texture",
+      "signature": "IsPowerOfTwo(Target, Block Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Block Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Return true if the source XY size is power-of-2.  Does not check Z size for volumes."
+    },
+    {
       "id": "is-block-power-of-two",
       "name": "IsBlockPowerOfTwo",
       "category": "Texture",
@@ -639,7 +720,12 @@
         }
       ],
       "returnType": "Bool",
-      "docs": "Returns true if source art is available."
+      "docs": "Returns true if source art is available.",
+      "supportedTargets": [
+        "FTextureSource*",
+        "FMipData*",
+        "FMipLock*"
+      ]
     },
     {
       "id": "get-block",
@@ -734,6 +820,33 @@
       "docs": "Returns the compression format of the source data in string format for use with the UI."
     },
     {
+      "id": "get-source-compression",
+      "name": "GetSourceCompression",
+      "category": "Texture",
+      "signature": "GetSourceCompression(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "ETextureSourceCompressionFormat",
+      "docs": "Returns the compression format of the source data in enum format.\nNote \"compression\" here means the image format of the BulkData (eg. JPEG/PNG), not whether or not the BulkData has Oodle LZ Compression."
+    },
+    {
+      "id": "is-source-compressed",
+      "name": "IsSourceCompressed",
+      "category": "Texture",
+      "signature": "IsSourceCompressed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "remove-compression",
       "name": "RemoveCompression",
       "category": "Texture",
@@ -747,7 +860,7 @@
       "returnType": "Void"
     },
     {
-      "id": "get-gamma-space",
+      "id": "get-gamma-space-98052c",
       "name": "GetGammaSpace",
       "category": "Texture",
       "signature": "GetGammaSpace(Target, Layer Index)",
@@ -820,7 +933,11 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Support for copy/paste"
+      "docs": "Support for copy/paste",
+      "supportedTargets": [
+        "FTextureSource*",
+        "UTexture*"
+      ]
     },
     {
       "id": "import-custom-properties",
@@ -841,7 +958,25 @@
           "type": "FFeedbackContext*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Void",
+      "supportedTargets": [
+        "FTextureSource*",
+        "UTexture*"
+      ]
+    },
+    {
+      "id": "get-persistent-id",
+      "name": "GetPersistentId",
+      "category": "Texture",
+      "signature": "GetPersistentId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Trivial accessors. These will only give values for Block0 so may not be correct for UDIM/multi-block textures, use GetBlock() for this case."
     },
     {
       "id": "get-id",
@@ -856,6 +991,106 @@
       ],
       "returnType": "FGuid",
       "docs": "GetId() returns a hash of the Id member (data hash) and also the attributes of the Source.\n( GetId does not just return Id ) *"
+    },
+    {
+      "id": "get-size-x",
+      "name": "GetSizeX",
+      "category": "Texture",
+      "signature": "GetSizeX(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int64"
+    },
+    {
+      "id": "get-size-y",
+      "name": "GetSizeY",
+      "category": "Texture",
+      "signature": "GetSizeY(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int64"
+    },
+    {
+      "id": "get-num-slices",
+      "name": "GetNumSlices",
+      "category": "Texture",
+      "signature": "GetNumSlices(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int",
+      "supportedTargets": [
+        "FTextureSource*",
+        "UTexture*"
+      ]
+    },
+    {
+      "id": "get-num-mips",
+      "name": "GetNumMips",
+      "category": "Texture",
+      "signature": "GetNumMips(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-layers",
+      "name": "GetNumLayers",
+      "category": "Texture",
+      "signature": "GetNumLayers(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-num-blocks",
+      "name": "GetNumBlocks",
+      "category": "Texture",
+      "signature": "GetNumBlocks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-format",
+      "name": "GetFormat",
+      "category": "Texture",
+      "signature": "GetFormat(Target, Layer Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Layer Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "ETextureSourceFormat"
     },
     {
       "id": "is-cube-or-cube-array",
@@ -910,6 +1145,32 @@
       "returnType": "Int"
     },
     {
+      "id": "get-size-on-disk",
+      "name": "GetSizeOnDisk",
+      "category": "Texture",
+      "signature": "GetSizeOnDisk(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Int64"
+    },
+    {
+      "id": "has-payload-data",
+      "name": "HasPayloadData",
+      "category": "Texture",
+      "signature": "HasPayloadData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "reset",
       "name": "Reset",
       "category": "Texture",
@@ -954,6 +1215,46 @@
       "returnType": "FSharedBuffer"
     },
     {
+      "id": "is-bulk-data-loaded",
+      "name": "IsBulkDataLoaded",
+      "category": "Texture",
+      "signature": "IsBulkDataLoaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the texture's bulkdata payload is either already in memory or if the payload is 0 bytes in length. It will return false if the payload needs to load from disk"
+    },
+    {
+      "id": "load-bulk-data-with-file-reader",
+      "name": "LoadBulkDataWithFileReader",
+      "category": "Texture",
+      "signature": "LoadBulkDataWithFileReader(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "remove-bulk-data",
+      "name": "RemoveBulkData",
+      "category": "Texture",
+      "signature": "RemoveBulkData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "set-id",
       "name": "SetId",
       "category": "Texture",
@@ -974,6 +1275,148 @@
       ],
       "returnType": "Void",
       "docs": "Sets the GUID to use, and whether that GUID is actually a hash of some data."
+    },
+    {
+      "id": "calc-mip-size-3c4eb1",
+      "name": "CalcMipSize",
+      "category": "Texture",
+      "signature": "CalcMipSize(Target, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Int64"
+    },
+    {
+      "id": "lock-mip-read-only-ad3b6e",
+      "name": "LockMipReadOnly",
+      "category": "Texture",
+      "signature": "LockMipReadOnly(Target, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Byte*",
+      "docs": "Lock a mip for reading."
+    },
+    {
+      "id": "lock-mip-db646e",
+      "name": "LockMip",
+      "category": "Texture",
+      "signature": "LockMip(Target, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Byte*",
+      "docs": "Lock a mip for editing."
+    },
+    {
+      "id": "unlock-mip-ceae71",
+      "name": "UnlockMip",
+      "category": "Texture",
+      "signature": "UnlockMip(Target, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-owner",
+      "name": "SetOwner",
+      "category": "Texture",
+      "signature": "SetOwner(Target, In Owner)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        },
+        {
+          "name": "In Owner",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-null",
+      "name": "IsNull",
+      "category": "Texture",
+      "signature": "IsNull(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipAllocation*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the object contains no data"
+    },
+    {
+      "id": "get-size",
+      "name": "GetSize",
+      "category": "Texture",
+      "signature": "GetSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipAllocation*"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Returns the overall size of the data in bytes"
+    },
+    {
+      "id": "get-data-read-only",
+      "name": "GetDataReadOnly",
+      "category": "Texture",
+      "signature": "GetDataReadOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipAllocation*"
+        }
+      ],
+      "returnType": "FSharedBuffer&",
+      "docs": "Returns a FSharedBuffer that contains the current texture data but cannot be directly modified"
+    },
+    {
+      "id": "get-data-read-write",
+      "name": "GetDataReadWrite",
+      "category": "Texture",
+      "signature": "GetDataReadWrite(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipAllocation*"
+        }
+      ],
+      "returnType": "Byte*"
     },
     {
       "id": "get-mip-data-9ee8d5",
@@ -1059,6 +1502,96 @@
         }
       ],
       "returnType": "FSharedBuffer"
+    },
+    {
+      "id": "get-mip-data-image-view",
+      "name": "GetMipDataImageView",
+      "category": "Texture",
+      "signature": "GetMipDataImageView(Target, Block Index, Layer Index, Mip Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipData*"
+        },
+        {
+          "name": "Block Index",
+          "type": "Int"
+        },
+        {
+          "name": "Layer Index",
+          "type": "Int"
+        },
+        {
+          "name": "Mip Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "FImageView"
+    },
+    {
+      "id": "reset-data",
+      "name": "ResetData",
+      "category": "Texture",
+      "signature": "ResetData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipData*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-data",
+      "name": "GetData",
+      "category": "Texture",
+      "signature": "GetData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipData*"
+        }
+      ],
+      "returnType": "FSharedBuffer"
+    },
+    {
+      "id": "get-raw-data",
+      "name": "GetRawData",
+      "category": "Texture",
+      "signature": "GetRawData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipLock*"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "get-mutable-data",
+      "name": "GetMutableData",
+      "category": "Texture",
+      "signature": "GetMutableData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipLock*"
+        }
+      ],
+      "returnType": "void*"
+    },
+    {
+      "id": "get-data-size",
+      "name": "GetDataSize",
+      "category": "Texture",
+      "signature": "GetDataSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FMipLock*"
+        }
+      ],
+      "returnType": "Int64"
     },
     {
       "id": "compute-channel-linear-min-max",
@@ -1177,6 +1710,208 @@
       "docs": "Uses a hash as the GUID, useful to prevent creating new GUIDs on load for legacy assets.\nThis is automatically done by Init() and Mip Lock/Unlock.  New textures should always have the data hash as Id."
     },
     {
+      "id": "release-source-memory",
+      "name": "ReleaseSourceMemory",
+      "category": "Texture",
+      "signature": "ReleaseSourceMemory(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "has-had-bulk-data-cleared",
+      "name": "HasHadBulkDataCleared",
+      "category": "Texture",
+      "signature": "HasHadBulkDataCleared(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FTextureSource*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "f-texture-platform-data",
+      "name": "FTexturePlatformData",
+      "category": "Texture",
+      "signature": "FTexturePlatformData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "The keys for both types of fetches. We assume that uniqueness\nfor that is equivalent to uniqueness if we use both FetchFirst and FetchOrBuild. This\nis used as the key in to CookedPlatformData, as well as to determine if we need to recache.\nNote that since this is read on the game thread constantly in CachePlatformData, it\nmust be written to on the game thread to avoid false recaches."
+    },
+    {
+      "id": "set-packed-data",
+      "name": "SetPackedData",
+      "category": "Texture",
+      "signature": "SetPackedData(Target, In Num Slices, In Has Opt Data, In Cube Map, In Has Cpu Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "In Num Slices",
+          "type": "Int"
+        },
+        {
+          "name": "In Has Opt Data",
+          "type": "Bool"
+        },
+        {
+          "name": "In Cube Map",
+          "type": "Bool"
+        },
+        {
+          "name": "In Has Cpu Copy",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-has-opt-data",
+      "name": "GetHasOptData",
+      "category": "Texture",
+      "signature": "GetHasOptData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-opt-data",
+      "name": "SetOptData",
+      "category": "Texture",
+      "signature": "SetOptData(Target, Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Data",
+          "type": "FOptTexturePlatformData"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-has-cpu-copy",
+      "name": "GetHasCpuCopy",
+      "category": "Texture",
+      "signature": "GetHasCpuCopy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-has-cpu-copy",
+      "name": "SetHasCpuCopy",
+      "category": "Texture",
+      "signature": "SetHasCpuCopy(Target, In Has Cpu Copy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "In Has Cpu Copy",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-cubemap",
+      "name": "IsCubemap",
+      "category": "Texture",
+      "signature": "IsCubemap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-is-cubemap",
+      "name": "SetIsCubemap",
+      "category": "Texture",
+      "signature": "SetIsCubemap(Target, Cubemap)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Cubemap",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-num-slices",
+      "name": "SetNumSlices",
+      "category": "Texture",
+      "signature": "SetNumSlices(Target, Num Slices)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Num Slices",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-num-mips-in-tail",
+      "name": "GetNumMipsInTail",
+      "category": "Texture",
+      "signature": "GetNumMipsInTail(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-ext-data",
+      "name": "GetExtData",
+      "category": "Texture",
+      "signature": "GetExtData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
       "id": "try-inline-mip-data",
       "name": "TryInlineMipData",
       "category": "Texture",
@@ -1184,7 +1919,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexturePlatformData*"
+          "type": "UTexture*"
         },
         {
           "name": "First Mip To Load",
@@ -1207,7 +1942,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexturePlatformData*"
+          "type": "UTexture*"
         },
         {
           "name": "In Oodle Compressor",
@@ -1236,7 +1971,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexturePlatformData*"
+          "type": "UTexture*"
         }
       ],
       "returnType": "Int"
@@ -1249,7 +1984,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexturePlatformData*"
+          "type": "UTexture*"
         },
         {
           "name": "Layer Index",
@@ -1266,7 +2001,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTexturePlatformData*"
+          "type": "UTexture*"
         },
         {
           "name": "Mip Bias",
@@ -1284,11 +2019,68 @@
       "params": [
         {
           "name": "Target",
-          "type": "FTextureSourceColorSettings*"
+          "type": "UTexture*"
         }
       ],
       "returnType": "Void",
       "docs": "Update the chromaticity coordinates member variables based on the color space choice (unless custom)."
+    },
+    {
+      "id": "outdated-known-composite-texture-detected",
+      "name": "OutdatedKnownCompositeTextureDetected",
+      "category": "Texture",
+      "signature": "OutdatedKnownCompositeTextureDetected(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to track down when CompositeTexture has been modified for notification purpose.\nNOTE: Do not make a TObjectPtr or UPROPERTY as it would defeat the purpose."
+    },
+    {
+      "id": "notify-if-composite-texture-changed",
+      "name": "NotifyIfCompositeTextureChanged",
+      "category": "Texture",
+      "signature": "NotifyIfCompositeTextureChanged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "set-composite-texture",
+      "name": "SetCompositeTexture",
+      "category": "Texture",
+      "signature": "SetCompositeTexture(Target, In Composite Texture)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "In Composite Texture",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-composite-texture",
+      "name": "GetCompositeTexture",
+      "category": "Texture",
+      "signature": "GetCompositeTexture(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "UTexture*"
     },
     {
       "id": "are-downscale-properties-editable",
@@ -1398,6 +2190,28 @@
       "docs": "Return the ID for the texture source.\nIf the source isn't valid or editor data isn't available, returns false."
     },
     {
+      "id": "u-texture-403b07",
+      "name": "UTexture",
+      "category": "Texture",
+      "signature": "UTexture(Helper)",
+      "params": [
+        {
+          "name": "Helper",
+          "type": "FVTableHelper&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Used to record texture streamable state when cooking.\nThis a per-platform bool to record whether the PlatformData being cooked made streamable mips.\nKey is TargetPlatform->PlatformName"
+    },
+    {
+      "id": "u-texture-021fde",
+      "name": "UTexture",
+      "category": "Texture",
+      "signature": "UTexture()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
       "id": "set-resource",
       "name": "SetResource",
       "category": "Texture",
@@ -1428,19 +2242,6 @@
       ],
       "returnType": "FTextureResource*",
       "docs": "Get the texture's resource, can be NULL"
-    },
-    {
-      "id": "post-edit-import",
-      "name": "PostEditImport",
-      "category": "Texture",
-      "signature": "PostEditImport(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        }
-      ],
-      "returnType": "Void"
     },
     {
       "id": "get-texture-class-8981df",
@@ -1475,6 +2276,20 @@
       "docs": "Resets the resource for the texture."
     },
     {
+      "id": "update-resource",
+      "name": "UpdateResource",
+      "category": "Texture",
+      "signature": "UpdateResource(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Creates a new resource for the texture, and updates any cached references to the resource.\nIf you are deriving this function you should update your class to derive UpdateResourceWithParams as this\nfunction is intended to be a convenience function to access the ::None version of UpdateResourceWithParams and\nonly retains virtual to avoid breaking existing code."
+    },
+    {
       "id": "update-resource-with-params",
       "name": "UpdateResourceWithParams",
       "category": "Texture",
@@ -1490,7 +2305,34 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Forces any derived data fetch/rebuild to run on the calling thread."
+      "docs": "Forces the derived data for the texture to completely rebuild. Only applies to editor builds"
+    },
+    {
+      "id": "update-cached-lod-bias",
+      "name": "UpdateCachedLODBias",
+      "category": "Texture",
+      "signature": "UpdateCachedLODBias(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Cache the combined LOD bias based on texture LOD group and LOD bias."
+    },
+    {
+      "id": "get-cached-lod-bias",
+      "name": "GetCachedLODBias",
+      "category": "Texture",
+      "signature": "GetCachedLODBias(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Int"
     },
     {
       "id": "calculate-lod-bias",
@@ -1509,6 +2351,20 @@
       ],
       "returnType": "Int",
       "docs": "Calculate the combined LOD bias based on texture LOD group and LOD bias.\nCalculateLODBias(true) >= CalculateLODBias(false)\nCalculateLODBias(true) == CalculateLODBias(false) + NumCinematicMipLevels , except when a clamp was applied\n@return\tLOD bias"
+    },
+    {
+      "id": "is-currently-virtual-textured",
+      "name": "IsCurrentlyVirtualTextured",
+      "category": "Texture",
+      "signature": "IsCurrentlyVirtualTextured(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the texture is actually being rendered using virtual texturing right now.\nUnlike the 'VirtualTextureStreaming' property which reflects the user's desired state\nthis reflects the actual current state on the renderer depending on the platform, VT\ndata being built, project settings, ...."
     },
     {
       "id": "get-virtual-texture-build-settings",
@@ -1556,6 +2412,33 @@
       ],
       "returnType": "Bool",
       "docs": "Check the Project settings to see if VT is enabled.\nOptionally also checks the TargetPlatform. *"
+    },
+    {
+      "id": "get-running-platform-data",
+      "name": "GetRunningPlatformData",
+      "category": "Texture",
+      "signature": "GetRunningPlatformData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "FTexturePlatformData**",
+      "docs": "Textures that use the derived data cache must override this function and\nprovide a pointer to the linked list of platform data."
+    },
+    {
+      "id": "get-cooked-platform-data",
+      "name": "GetCookedPlatformData",
+      "category": "Texture",
+      "signature": "GetCookedPlatformData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "TMap<FString,FTexturePlatformData*>*"
     },
     {
       "id": "get-built-texture-size-7bcc64",
@@ -1619,6 +2502,74 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-built-texture-size-eddd8e",
+      "name": "GetBuiltTextureSize",
+      "category": "Texture",
+      "signature": "GetBuiltTextureSize(Target, Target Platform, Out Size X, Out Size Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Target Platform",
+          "type": "ITargetPlatform*"
+        },
+        {
+          "name": "Out Size X",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Size Y",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-built-texture-size-63e42b",
+      "name": "GetBuiltTextureSize",
+      "category": "Texture",
+      "signature": "GetBuiltTextureSize(Target, Target Platform Settings, Target Platform Controls, Out Size X, Out Size Y)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Target Platform Settings",
+          "type": "ITargetPlatformSettings*"
+        },
+        {
+          "name": "Target Platform Controls",
+          "type": "ITargetPlatformControls*"
+        },
+        {
+          "name": "Out Size X",
+          "type": "Int&"
+        },
+        {
+          "name": "Out Size Y",
+          "type": "Int&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "blueprint-get-built-texture-size",
+      "name": "Blueprint_GetBuiltTextureSize",
+      "category": "Rendering",
+      "signature": "Blueprint_GetBuiltTextureSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "FVector3f",
+      "docs": "Get the dimensions of the largest mip of the texture when built, accounting for LODBias and other constraints\nReturns the 3d size when built for the current platform.  Does not cause texture to get built."
     },
     {
       "id": "serialize-cooked-platform-data",
@@ -2035,6 +2986,85 @@
       "docs": "Get TextureFormatName with platform remaps and conditional prefix\nthis is the entry point API for getting the final texture format name\nOutFormats will be resized to the number of sub-flavors of the platform (typically just 1)\nOutFormats[i] gets an array of format names, one per layer"
     },
     {
+      "id": "get-gamma-space-8ba8ae",
+      "name": "GetGammaSpace",
+      "category": "Texture",
+      "signature": "GetGammaSpace(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "EGammaSpace"
+    },
+    {
+      "id": "get-texture-address-x",
+      "name": "GetTextureAddressX",
+      "category": "Texture",
+      "signature": "GetTextureAddressX(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "TextureAddress"
+    },
+    {
+      "id": "get-texture-address-y",
+      "name": "GetTextureAddressY",
+      "category": "Texture",
+      "signature": "GetTextureAddressY(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "TextureAddress"
+    },
+    {
+      "id": "get-texture-address-z",
+      "name": "GetTextureAddressZ",
+      "category": "Texture",
+      "signature": "GetTextureAddressZ(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "TextureAddress"
+    },
+    {
+      "id": "get-external-texture-guid",
+      "name": "GetExternalTextureGuid",
+      "category": "Texture",
+      "signature": "GetExternalTextureGuid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "FGuid",
+      "docs": "Access the GUID which defines this texture's resources externally through FExternalTextureRegistry"
+    },
+    {
+      "id": "is-compiling",
+      "name": "IsCompiling",
+      "category": "Texture",
+      "signature": "IsCompiling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "block-on-any-async-build",
       "name": "BlockOnAnyAsyncBuild",
       "category": "Texture",
@@ -2066,23 +3096,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "Texture",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "can-edit-change",
       "name": "CanEditChange",
       "category": "Texture",
@@ -2095,92 +3108,6 @@
         {
           "name": "In Property",
           "type": "FProperty*"
-        }
-      ],
-      "returnType": "Bool"
-    },
-    {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "Texture",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
-      "category": "Texture",
-      "signature": "PostInitProperties(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "Texture",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "pre-save",
-      "name": "PreSave",
-      "category": "Texture",
-      "signature": "PreSave(Target, Object Save Context)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        },
-        {
-          "name": "Object Save Context",
-          "type": "FObjectPreSaveContext"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
-      "category": "Texture",
-      "signature": "BeginDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "is-ready-for-finish-destroy",
-      "name": "IsReadyForFinishDestroy",
-      "category": "Texture",
-      "signature": "IsReadyForFinishDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UTexture*"
         }
       ],
       "returnType": "Bool"
@@ -2270,6 +3197,32 @@
         }
       ],
       "returnType": "Bool"
+    },
+    {
+      "id": "get-lod-group-for-streaming",
+      "name": "GetLODGroupForStreaming",
+      "category": "Texture",
+      "signature": "GetLODGroupForStreaming(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Int"
+    },
+    {
+      "id": "get-render-asset-type",
+      "name": "GetRenderAssetType",
+      "category": "Texture",
+      "signature": "GetRenderAssetType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "EStreamableRenderAssetType"
     },
     {
       "id": "get-mip-io-filename-hash",
@@ -2454,6 +3407,53 @@
       "docs": "Forces textures to recompute LOD settings and stream as needed.\n@returns true if the settings were applied, false if they couldn't be applied immediately."
     },
     {
+      "id": "has-hdr-source",
+      "name": "HasHDRSource",
+      "category": "Texture",
+      "signature": "HasHDRSource(Target, Layer Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Layer Index",
+          "type": "Int",
+          "default": "0"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Checks whether this texture has a high dynamic range (HDR) source.\n@return true if the texture has an HDR source, false otherwise."
+    },
+    {
+      "id": "is-normal-map",
+      "name": "IsNormalMap",
+      "category": "Texture",
+      "signature": "IsNormalMap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the compression type is a normal map compression type"
+    },
+    {
+      "id": "is-uncompressed",
+      "name": "IsUncompressed",
+      "category": "Texture",
+      "signature": "IsUncompressed(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if the texture has an uncompressed texture setting"
+    },
+    {
       "id": "is-cook-platform-tiling-disabled-ff5a5e",
       "name": "IsCookPlatformTilingDisabled",
       "category": "Texture",
@@ -2490,6 +3490,69 @@
       "docs": "Legacy function to support the old API, will call IsCookPlatformTilingDisabled with ITargetPlatformSettings"
     },
     {
+      "id": "calc-texture-memory-size-enum",
+      "name": "CalcTextureMemorySizeEnum",
+      "category": "Texture",
+      "signature": "CalcTextureMemorySizeEnum(Target, Enum)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Enum",
+          "type": "ETextureMipCount"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Calculates the size of this texture if it had MipCount miplevels streamed in.\nThis is the size in GPU memory of the built platformdata, accounting for LODBias, etc.\n@param\tEnum\tWhich mips to calculate size for.\n@return\tTotal size of all specified mips, in bytes.  Returns 0 for error."
+    },
+    {
+      "id": "get-lighting-guid",
+      "name": "GetLightingGuid",
+      "category": "Texture",
+      "signature": "GetLightingGuid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "FGuid&",
+      "docs": "Returns a unique identifier for this texture. Used by the lighting build and texture streamer."
+    },
+    {
+      "id": "set-lighting-guid-feec1e",
+      "name": "SetLightingGuid",
+      "category": "Texture",
+      "signature": "SetLightingGuid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assigns a new GUID to a texture. This will be called whenever a texture is created or changes.\nIn game, the GUIDs are only used by the texture streamer to link build data to actual textures,\nthat means new textures don't actually need GUIDs (see FStreamingTextureLevelContext)"
+    },
+    {
+      "id": "set-lighting-guid-8b1199",
+      "name": "SetLightingGuid",
+      "category": "Texture",
+      "signature": "SetLightingGuid(Target, Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "set-deterministic-lighting-guid",
       "name": "SetDeterministicLightingGuid",
       "category": "Texture",
@@ -2511,6 +3574,15 @@
       "params": [],
       "returnType": "class UEnum*",
       "docs": "Retrieves the pixel format enum for enum <-> string conversions."
+    },
+    {
+      "id": "get-static-min-texture-resident-mip-count",
+      "name": "GetStaticMinTextureResidentMipCount",
+      "category": "Texture",
+      "signature": "GetStaticMinTextureResidentMipCount()",
+      "params": [],
+      "returnType": "Int",
+      "docs": "Returns the minimum number of mips that must be resident in memory (cannot be streamed)."
     },
     {
       "id": "downsize-image-using-texture-settings",
@@ -2575,6 +3647,39 @@
       "params": [],
       "returnType": "Int",
       "docs": "Get the largest allowed dimension of non-VT texture\nthis is not for the current RHI (which may have a lower limit), this is for a Texture in general"
+    },
+    {
+      "id": "try-cancel-cache-platform-data",
+      "name": "TryCancelCachePlatformData",
+      "category": "Texture",
+      "signature": "TryCancelCachePlatformData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "The minimum number of mips that must be resident in memory (cannot be streamed)."
+    },
+    {
+      "id": "notify-materials",
+      "name": "NotifyMaterials",
+      "category": "Texture",
+      "signature": "NotifyMaterials(Target, Effect On Shaders)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UTexture*"
+        },
+        {
+          "name": "Effect On Shaders",
+          "type": "ENotifyMaterialsEffectOnShaders",
+          "default": "ENotifyMaterialsEffectOnShaders::Default"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notify any loaded material instances that the texture has changed."
     }
   ]
 }

@@ -10,6 +10,108 @@
   ],
   "functions": [
     {
+      "id": "find-show-flag-display-name",
+      "name": "FindShowFlagDisplayName",
+      "category": "ShowFlags",
+      "signature": "FindShowFlagDisplayName(In Name, Out Text)",
+      "params": [
+        {
+          "name": "In Name",
+          "type": "String&"
+        },
+        {
+          "name": "Out Text",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieve the localized display name for a named show flag"
+    },
+    {
+      "id": "find-show-flag-group",
+      "name": "FindShowFlagGroup",
+      "category": "ShowFlags",
+      "signature": "FindShowFlagGroup(Name)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "EShowFlagGroup",
+      "docs": "this function defines the grouping in the editor. If a flag is not defined here it's assumed to be a postprocess flag"
+    },
+    {
+      "id": "can-be-toggled-in-editor",
+      "name": "CanBeToggledInEditor",
+      "category": "ShowFlags",
+      "signature": "CanBeToggledInEditor(Name)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "disable-advanced-features",
+      "name": "DisableAdvancedFeatures",
+      "category": "ShowFlags",
+      "signature": "DisableAdvancedFeatures(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEngineShowFlags*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "enable-advanced-features",
+      "name": "EnableAdvancedFeatures",
+      "category": "ShowFlags",
+      "signature": "EnableAdvancedFeatures(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEngineShowFlags*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "disable-features-for-unlit",
+      "name": "DisableFeaturesForUnlit",
+      "category": "ShowFlags",
+      "signature": "DisableFeaturesForUnlit(Target, Allow Atmosphere)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEngineShowFlags*"
+        },
+        {
+          "name": "Allow Atmosphere",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "is-visualize-calibration-enabled",
+      "name": "IsVisualizeCalibrationEnabled",
+      "category": "ShowFlags",
+      "signature": "IsVisualizeCalibrationEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FEngineShowFlags*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "set-single-flag",
       "name": "SetSingleFlag",
       "category": "ShowFlags",
@@ -115,6 +217,24 @@
       "docs": "@param Name e.g. TEXT(\"EyeAdaptation\")\n@param CommaSeparatedNames leave 0 for normal purpose, is used internally for the grouping feature\n@return -1 if not found"
     },
     {
+      "id": "is-name-there",
+      "name": "IsNameThere",
+      "category": "ShowFlags",
+      "signature": "IsNameThere(Name, Comma Separated Names)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Comma Separated Names",
+          "type": "TCHAR*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@param Name e.g. TEXT(\"EyeAdaptation\")\n@param CommaSeparatedNames leave 0 for normal purpose, is used internally for the grouping feature\n@return success"
+    },
+    {
       "id": "find-name-by-index",
       "name": "FindNameByIndex",
       "category": "ShowFlags",
@@ -127,6 +247,45 @@
       ],
       "returnType": "String",
       "docs": "@param InIndex can be from FindIndexByName() or IterateAllFlags()\n@return empty string if not found, otherwise name of the flag e.g. FString(TEXT(\"PostProcessing\"))"
+    },
+    {
+      "id": "iterate-all-flags",
+      "name": "IterateAllFlags",
+      "category": "ShowFlags",
+      "signature": "IterateAllFlags(Sink)",
+      "params": [
+        {
+          "name": "Sink",
+          "type": "T&"
+        }
+      ],
+      "returnType": "template<class T> void",
+      "docs": "Allows to iterate through all flags (if you want to change or read the actual flag settings you need to pass in your own instance of FEngineShowFlags).\nUse this function instead of writing your own parser.\nimplement a class with\nbool OnEngineShowFlag(uint32 InIndex, const FString& InName)\nwhich should return true to parse further"
+    },
+    {
+      "id": "register-custom-show-flag",
+      "name": "RegisterCustomShowFlag",
+      "category": "ShowFlags",
+      "signature": "RegisterCustomShowFlag(Name, Default Enabled, Group, Display Name)",
+      "params": [
+        {
+          "name": "Name",
+          "type": "TCHAR*"
+        },
+        {
+          "name": "Default Enabled",
+          "type": "Bool"
+        },
+        {
+          "name": "Group",
+          "type": "EShowFlagGroup"
+        },
+        {
+          "name": "Display Name",
+          "type": "Text"
+        }
+      ],
+      "returnType": "ECustomShowFlag"
     },
     {
       "id": "iterate-custom-flags",
@@ -236,6 +395,44 @@
       ],
       "returnType": "EViewModeIndex",
       "docs": "Find the view mode that first to the set show flags (to be backward compatible, can be removed on day)."
+    },
+    {
+      "id": "is-enabled",
+      "name": "IsEnabled",
+      "category": "ShowFlags",
+      "signature": "IsEnabled(Target, Show Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCustomShowFlag*"
+        },
+        {
+          "name": "Show Flags",
+          "type": "FEngineShowFlags&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-enabled",
+      "name": "SetEnabled",
+      "category": "ShowFlags",
+      "signature": "SetEnabled(Target, Show Flags, Set)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TCustomShowFlag*"
+        },
+        {
+          "name": "Show Flags",
+          "type": "FEngineShowFlags&"
+        },
+        {
+          "name": "Set",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool"
     }
   ]
 }

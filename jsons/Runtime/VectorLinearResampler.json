@@ -8,6 +8,28 @@
   ],
   "functions": [
     {
+      "id": "source-frames-needed",
+      "name": "SourceFramesNeeded",
+      "category": "VectorLinearResampler",
+      "signature": "SourceFramesNeeded(Target, Output Frames Needed, Fixed Point Sample Rate)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FVectorLinearResampler*"
+        },
+        {
+          "name": "Output Frames Needed",
+          "type": "UInt"
+        },
+        {
+          "name": "Fixed Point Sample Rate",
+          "type": "UInt"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "FVectorLinearResampler\nPerforms a basic linear resampling using SIMD for optimization.\nAdvancing is done in fixed point - 65536 is a 1.0f sample rate.\nStereo requires a deinterleaved format.\nThe design is based on a \"pull\" model, assuming you need to fill a buffer from a source,\nrather than computing how much output you would need to resample a given input. If you need\nto do that, just run the resampler in chunks until you drain the input, appending to the\noutput as you go.\nUsage:\nFVectorLinearResample Resampler = {};\nuint32 FixedSampleRate = (uint32)(1.0f * 65536);\n// the example source buffer is assumed to be stereo deinterleaved with the\n// right channel directly after the left.\nfloat* SourceFrames = 0;//<data from elsewhere>;\nuint32 SourceBufferFrameCount = 0;//<# of frames - i.e.len(SourceFrames) / (sizeof(float) * 2) since stereo>;\nuint32 SourceBufferFloatsToRightChannel = SourceBufferFrameCount; // right channel directly after the left\nconst uint32 OutputChunkFrames = 512;\nwhile (SourceBufferFrameCount)\n{\n// stereo output chunk. Or pointer to wherever you're mixing to.\nfloat OutputFrames[OutputChunkFrames * 2];\n// find out how much input we need for the resampler to be able to generate\n// our chunk.\nuint32 SourceFramesNeeded = Resampler.SourceFramesNeeded(OutputChunkFrames, FixedSampleRate);\n// make sure we have that available.\nif (SourceFramesNeeded <= SourceBufferFrameCount)\n{\n// direct resample\nuint32 SourceFramesConsumed = Resampler.ResampleStereo(OutputChunkFrames, FixedSampleRate,\nSourceFrames, SourceBufferFloatsToRightChannel,\nOutputFrames, OutputChunkFrames);\n// do something with output_frames\n// advance the input\nSourceFrames += SourceFramesConsumed;\nSourceBufferFrameCount -= SourceFramesConsumed;\ncontinue;\n}\n// here we need to append zeroes as we don't have enough input to fill.\n// usually need a temp buffer unless you can make dramatic assumptions about\n// your source buffer.\nfloat* TempSource = FMemory::Malloc(sizeof(float) * 2 * SourceFramesNeeded);\nfloat* TempSourceLeft = TempSource;\nfloat* TempSourceRight = TempSource + SourceFramesNeeded;\nuint32 ZeroedFramesNeeded = SourceFramesNeeded - SourceBufferFrameCount;\n// left\nFMemory::Memcpy(TempSourceLeft, SourceFrames, SourceBufferFrameCount * sizeof(float));\n// left tail\nFMemory::Memset(TempSourceLeft + SourceBufferFrameCount, 0, ZeroedFramesNeeded * sizeof(float));\n// right\nFMemory::Memcpy(TempSourceRight, SourceFrames + SourceBufferFloatsToRightChannel, SourceBufferFrameCount * sizeof(float));\n// right tail\nFMemory::Memset(TempSourceRight + SourceBufferFrameCount, 0, ZeroedFramesNeeded * sizeof(float));\nResampler.ResampleStereo(OutputChunkFrames, FixedSampleRate,\nTempSource, SourceFramesNeeded,\nOutputFrames, OutputChunkFrames);\nFMemory::Free(TempSource);\nSourceBufferFrameCount = 0;\n}"
+    },
+    {
       "id": "resample-mono",
       "name": "ResampleMono",
       "category": "VectorLinearResampler",

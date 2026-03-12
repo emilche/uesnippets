@@ -1,0 +1,840 @@
+{
+  "id": "curve-model",
+  "label": "CurveModel",
+  "includepath": "CurveModel.h",
+  "includes": [
+    "Array",
+    "ArrayView",
+    "UnrealString",
+    "Map",
+    "CoreTypes",
+    "CurveEditorTypes",
+    "RichCurve",
+    "Delegate",
+    "IBufferedCurveModel",
+    "Text",
+    "Color",
+    "TransformCalculus2D",
+    "Attribute",
+    "Optional",
+    "Tuple",
+    "UniquePtr",
+    "UnrealType"
+  ],
+  "functions": [
+    {
+      "id": "draw-curve-to-cache-pool",
+      "name": "DrawCurveToCachePool",
+      "category": "CurveModel",
+      "signature": "DrawCurveToCachePool(Target, Curve Editor, Curve Draw Params Handle, Screen Space)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "Curve Editor",
+          "type": "TSharedRef<FCurveEditor>&"
+        },
+        {
+          "name": "Curve Draw Params Handle",
+          "type": "UE::CurveEditor::FCurveDrawParamsHandle&"
+        },
+        {
+          "name": "Screen Space",
+          "type": "FCurveEditorScreenSpace&"
+        }
+      ],
+      "returnType": "UE::CurveEditor::ICurveEditorCurveCachePool*",
+      "docs": "Draws curve draw params to a cache pool. Curves can implement this to improve performance over DrawCurve by caching their data.\n@param WeakCurveEditor\t\t\tWeak reference to the curve editor that is drawing the curve.\n@param CurveDrawParamsHandle\t\tA handle to the actual curve draw params.\n@param ScreenSpace\t\t\t\tThe screenspace of this curve\n@return\t\t\t\t\t\t\tReturns the cache pool or nullptr if the curve model does not implement a cache pool."
+    },
+    {
+      "id": "get-keys",
+      "name": "GetKeys",
+      "category": "CurveModel",
+      "signature": "GetKeys(Target, Curve Editor, Min Time, Max Time, Min Value, Max Value, Out Key Handles)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "Curve Editor",
+          "type": "FCurveEditor&"
+        },
+        {
+          "name": "Min Time",
+          "type": "Double"
+        },
+        {
+          "name": "Max Time",
+          "type": "Double"
+        },
+        {
+          "name": "Min Value",
+          "type": "Double"
+        },
+        {
+          "name": "Max Value",
+          "type": "Double"
+        },
+        {
+          "name": "Out Key Handles",
+          "type": "TArray<FKeyHandle>&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "remove-keys",
+      "name": "RemoveKeys",
+      "category": "CurveModel",
+      "signature": "RemoveKeys(Target, In Keys)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Keys",
+          "type": "TArrayView<FKeyHandle>"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-value-range",
+      "name": "GetValueRange",
+      "category": "CurveModel",
+      "signature": "GetValueRange(Target, In Min Time, In Max Time, Min Value, Max Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Min Time",
+          "type": "Double"
+        },
+        {
+          "name": "In Max Time",
+          "type": "Double"
+        },
+        {
+          "name": "Min Value",
+          "type": "Double&"
+        },
+        {
+          "name": "Max Value",
+          "type": "Double&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get range of output value based on specified input times. By default will just get the range\nwithout a specified time\n@param MinTime Minimum Time\n@param MaxTime Maximium Time\n@param MinValue Minimum Value\n@param MaxValue Minimum Value"
+    },
+    {
+      "id": "get-interpolation-mode",
+      "name": "GetInterpolationMode",
+      "category": "CurveModel",
+      "signature": "GetInterpolationMode(Target, In Time, Default Interpolation Mode, Default Tangent Mode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Time",
+          "type": "Double&"
+        },
+        {
+          "name": "Default Interpolation Mode",
+          "type": "ERichCurveInterpMode"
+        },
+        {
+          "name": "Default Tangent Mode",
+          "type": "ERichCurveTangentMode"
+        }
+      ],
+      "returnType": "TPair<ERichCurveInterpMode,ERichCurveTangentMode>",
+      "docs": "Get the interpolation mode to use at a specified time\n@param InTime\t\t\t\t\t\tThe time we are looking for an interpolation mode\n@param DefaultInterpolationMode\t\tCurrent default interpolation mode, returned if other keys not found or interpolation not supported\n@return Interpolation mode to use at that frame"
+    },
+    {
+      "id": "get-key-attributes",
+      "name": "GetKeyAttributes",
+      "category": "CurveModel",
+      "signature": "GetKeyAttributes(Target, In Keys, Out Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Keys",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "Out Attributes",
+          "type": "TArrayView<FKeyAttributes>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieve ALL key attributes that pertain to the specified input key handles.\nThis function is legacy. Prefer use of GetKeyAttributesIncludingAutoComputed or GetKeyAttributesExcludingAutoComputed.\n@see GetKeyAttributesIncludingAutoComputed (introduced 5.6).\n@param InKeys                Array of key handles to get attributes for\n@param OutAttributes         Array to receive key attributes, one per index of InKeys"
+    },
+    {
+      "id": "get-key-attributes-including-auto-computed",
+      "name": "GetKeyAttributesIncludingAutoComputed",
+      "category": "CurveModel",
+      "signature": "GetKeyAttributesIncludingAutoComputed(Target, In Keys, Out Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Keys",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "Out Attributes",
+          "type": "TArrayView<FKeyAttributes>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets the value of ALL attributes including those that are auto-computed.\nUse this version if you want to know values e.g. the tangents or weights. Useful for UI code that visualizes tangents.\nThe result is not intended to be passed to SetKeyAttributes; calling SetKeyAttributes would correct the passed in attributes to reflect the user settings.\nTypically, attributes reflect the settings that the user has manually configured for the keys, so certain attributes may remain unset.\nFor instance, when TangentMode == RCTM_Auto, tangents and weights are automatically computed, meaning attributes like ArriveTangent are not explicitly set.\nSetting ArriveTangent would imply a user-defined value, which is incompatible with TangentMode == RCTM_Auto.\nIn some situations, you don't want to know the values the user has set but the values as they would be used for evaluation, e.g. tangents,\nweights, etc. For these cases, you can use GetKeyAttributesIncludingAutoComputed."
+    },
+    {
+      "id": "get-key-attributes-excluding-auto-computed",
+      "name": "GetKeyAttributesExcludingAutoComputed",
+      "category": "CurveModel",
+      "signature": "GetKeyAttributesExcludingAutoComputed(Target, In Keys, Out Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Keys",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "Out Attributes",
+          "type": "TArrayView<FKeyAttributes>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Gets the attributes set by the user. This specifically excludes auto-computed values.\nUse this version if you want the \"true\" state of the keys. You can pass the result of this to SetKeyAttributes. Useful e.g. for copy-pasting keys.\nTypically, attributes reflect the settings that the user has manually configured for the keys, so certain attributes may remain unset.\nFor instance, when TangentMode == RCTM_Auto, tangents and weights are automatically computed, meaning attributes like ArriveTangent are not explicitly set.\nSetting ArriveTangent would imply a user-defined value, which is incompatible with TangentMode == RCTM_Auto.\nThis function returns only user-set values.\n@param InKeys                Array of key handles to get attributes for\n@param OutAttributes         Array to receive key attributes, one per index of InKeys"
+    },
+    {
+      "id": "set-key-attributes",
+      "name": "SetKeyAttributes",
+      "category": "CurveModel",
+      "signature": "SetKeyAttributes(Target, In Keys, In Attributes, Change Type)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Keys",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "In Attributes",
+          "type": "TArrayView<FKeyAttributes>"
+        },
+        {
+          "name": "Change Type",
+          "type": "EPropertyChangeType::Type",
+          "default": "EPropertyChangeType::Unspecified"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign key attributes for the specified key handles\n@param InKeys                 Array of key handles to set attributes for\n@param InAttributes           Array of desired key attributes to be applied to each of the corresponding key handles"
+    },
+    {
+      "id": "get-curve-attributes",
+      "name": "GetCurveAttributes",
+      "category": "CurveModel",
+      "signature": "GetCurveAttributes(Target, Out Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "Out Attributes",
+          "type": "FCurveAttributes&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieve curve attributes for this curve\n@param OutAttributes          Attributes structure to populate with attributes that are relevant for this curve"
+    },
+    {
+      "id": "set-curve-attributes",
+      "name": "SetCurveAttributes",
+      "category": "CurveModel",
+      "signature": "SetCurveAttributes(Target, In Attributes)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Attributes",
+          "type": "FCurveAttributes&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign curve attributes for this curve\n@param InAttributes           Attributes structure to assign to this curve"
+    },
+    {
+      "id": "get-input-display-offset",
+      "name": "GetInputDisplayOffset",
+      "category": "CurveModel",
+      "signature": "GetInputDisplayOffset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Double",
+      "docs": "Retrieve an option input display offset (in seconds) to apply to all this curve's drawing"
+    },
+    {
+      "id": "get-color",
+      "name": "GetColor",
+      "category": "CurveModel",
+      "signature": "GetColor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "FLinearColor",
+      "docs": "Retrieve this curve's color"
+    },
+    {
+      "id": "create-key-proxies",
+      "name": "CreateKeyProxies",
+      "category": "CurveModel",
+      "signature": "CreateKeyProxies(Target, In Key Handles, Out Objects)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Key Handles",
+          "type": "TArrayView<FKeyHandle>"
+        },
+        {
+          "name": "Out Objects",
+          "type": "TArrayView<UObject*>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Create key proxy objects for the specified key handles. One object should be assigned to OutObjects per index within InKeyHandles\n@param InKeyHandles           Array of key handles to create edit objects for\n@param OutObjects             (Out) Array to receive objects that should be used to edit each of the input key handles."
+    },
+    {
+      "id": "make-child-curves",
+      "name": "MakeChildCurves",
+      "category": "CurveModel",
+      "signature": "MakeChildCurves(Target, Out Child Curves)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "Out Child Curves",
+          "type": "TArray<TUniquePtr<FCurveModel>>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called when this curve model is added to a curve editor in order to construct additional 'child'\ncurves that are owned by this curve"
+    },
+    {
+      "id": "create-buffered-curve-copy",
+      "name": "CreateBufferedCurveCopy",
+      "category": "CurveModel",
+      "signature": "CreateBufferedCurveCopy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "TUniquePtr<IBufferedCurveModel>",
+      "docs": "Creates a copy of this curve, stored in a minimal buffered curve object.\nBuffered curves are used to cache the positions and attributes of a curve's keys. After creation, a buffered curve\ncan be applied to any curve to set it to its saved state. Each curve must implement its own buffered curve which\ninherits IBufferedCurve and implements the DrawCurve method in order for it to be drawn on screen.\nOptionally implemented"
+    },
+    {
+      "id": "get-curve-transform",
+      "name": "GetCurveTransform",
+      "category": "CurveModel",
+      "signature": "GetCurveTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "FTransform2d",
+      "docs": "Return a per-curve transform for this model, if used by the view"
+    },
+    {
+      "id": "is-read-only",
+      "name": "IsReadOnly",
+      "category": "CurveModel",
+      "signature": "IsReadOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the curve model should be edited or not"
+    },
+    {
+      "id": "get-owning-object",
+      "name": "GetOwningObject",
+      "category": "CurveModel",
+      "signature": "GetOwningObject(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "UObject*",
+      "docs": "Get the UObject that owns this CurveModel, for example for Sequencer this would be the UMovieSceneSection"
+    },
+    {
+      "id": "has-changed-and-reset-test",
+      "name": "HasChangedAndResetTest",
+      "category": "CurveModel",
+      "signature": "HasChangedAndResetTest(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Get if has changed and then reset it, this can be used for caching"
+    },
+    {
+      "id": "allocate-axes",
+      "name": "AllocateAxes",
+      "category": "CurveModel",
+      "signature": "AllocateAxes(Target, In Curve Editor, Out Horizontal Axis, Out Vertical Axis)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Curve Editor",
+          "type": "FCurveEditor*"
+        },
+        {
+          "name": "Out Horizontal Axis",
+          "type": "TSharedPtr<FCurveEditorAxis>&"
+        },
+        {
+          "name": "Out Vertical Axis",
+          "type": "TSharedPtr<FCurveEditorAxis>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Allocate and/or assign axes for the this curve"
+    },
+    {
+      "id": "get-curve-color-object-and-name",
+      "name": "GetCurveColorObjectAndName",
+      "category": "CurveModel",
+      "signature": "GetCurveColorObjectAndName(Target, Out Object, Out Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "Out Object",
+          "type": "UObject**"
+        },
+        {
+          "name": "Out Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Get the Object and the name to be used to store the curve model color (see UCurveEditorSettings). By default\nthis is the owning object and the intent name, but it can be overriden, for example for Sequencer it may be the bound object"
+    },
+    {
+      "id": "on-curve-modified",
+      "name": "OnCurveModified",
+      "category": "CurveModel",
+      "signature": "OnCurveModified(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "FSimpleMulticastDelegate&",
+      "docs": "Get a multicast delegate, fired when modifications are made to this curve"
+    },
+    {
+      "id": "get-owning-object-or-outer",
+      "name": "GetOwningObjectOrOuter",
+      "category": "CurveModel",
+      "signature": "GetOwningObjectOrOuter(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "template<T> T*",
+      "docs": "Get the owning object of this curve as the specified template type, or search is outer chain if it is not the specified type."
+    },
+    {
+      "id": "get-short-display-name",
+      "name": "GetShortDisplayName",
+      "category": "CurveModel",
+      "signature": "GetShortDisplayName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Access this curve's short display name. This is useful when there are other UI elements which describe\nenough context about the curve that a long name is not needed (ie: Showing just \"X\" because other\nUI elements give the object/group context)."
+    },
+    {
+      "id": "set-short-display-name",
+      "name": "SetShortDisplayName",
+      "category": "CurveModel",
+      "signature": "SetShortDisplayName(Target, In Display Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Display Name",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign a short display name for this curve"
+    },
+    {
+      "id": "get-long-display-name",
+      "name": "GetLongDisplayName",
+      "category": "CurveModel",
+      "signature": "GetLongDisplayName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Access this curve's long display name. This is useful when you want more context about\nthe curve, such as the object it belongs to, or the group (ie: \"Floor.Transform.X\") instead\nof just \"X\" or \"Transform.X\""
+    },
+    {
+      "id": "set-long-display-name",
+      "name": "SetLongDisplayName",
+      "category": "CurveModel",
+      "signature": "SetLongDisplayName(Target, In Long Display Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Long Display Name",
+          "type": "Text&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign a long display name for this curve used in contexts where additional context is useful."
+    },
+    {
+      "id": "get-intention-name",
+      "name": "GetIntentionName",
+      "category": "CurveModel",
+      "signature": "GetIntentionName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "String",
+      "docs": "This is an internal name used to try to match different curves with each other. When saving\nand later restoring curves on a different set of curves we need a name that gives enough context\nto match them up by intention, and not long or short name. For example, a curve might have a short\nname of \"X\", and a long name of \"Floor.Transform.Location.X\". If you wanted to copy a set of transform\ncurves and paste them onto another transform, we use this context to match the names together to ensure\nyour Transform.X gets applied to the other Transform.X - in this example the intention is\nfor the curve to represent a \"Location.X\" (so it should be pasteable on any other curve which says\ntheir context is a \"Location.X\" as well). This is more reliable and more flexible than relying on\nshort display names (not enough context in the case of seeing Location.X, and Scale.X) and better\nthan relying on long display names (too much context and no reliable way to substring them)."
+    },
+    {
+      "id": "set-intention-name",
+      "name": "SetIntentionName",
+      "category": "CurveModel",
+      "signature": "SetIntentionName(Target, In Intention Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Intention Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign an intention name for this curve which is used internally when applying one curve to another in situations where\nmultiple curves are visible."
+    },
+    {
+      "id": "set-long-intention-name",
+      "name": "SetLongIntentionName",
+      "category": "CurveModel",
+      "signature": "SetLongIntentionName(Target, In Intention Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Intention Name",
+          "type": "String&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-long-intention-name",
+      "name": "GetLongIntentionName",
+      "category": "CurveModel",
+      "signature": "GetLongIntentionName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "String"
+    },
+    {
+      "id": "set-channel-name",
+      "name": "SetChannelName",
+      "category": "CurveModel",
+      "signature": "SetChannelName(Target, In Channel Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Channel Name",
+          "type": "Name&"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-channel-name",
+      "name": "GetChannelName",
+      "category": "CurveModel",
+      "signature": "GetChannelName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Name"
+    },
+    {
+      "id": "set-color",
+      "name": "SetColor",
+      "category": "CurveModel",
+      "signature": "SetColor(Target, In Color, In Modify)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Color",
+          "type": "FLinearColor&"
+        },
+        {
+          "name": "In Modify",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-dash-length",
+      "name": "GetDashLength",
+      "category": "CurveModel",
+      "signature": "GetDashLength(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get the dash length used for rendering this curve (0 indicates a solid line should be used)"
+    },
+    {
+      "id": "set-dash-length",
+      "name": "SetDashLength",
+      "category": "CurveModel",
+      "signature": "SetDashLength(Target, In Dash Length Px)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Dash Length Px",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the dash length used for rendering this curve (0 indicates a solid line should be used)"
+    },
+    {
+      "id": "get-thickness",
+      "name": "GetThickness",
+      "category": "CurveModel",
+      "signature": "GetThickness(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get this curve's visual thickness in screen space"
+    },
+    {
+      "id": "set-thickness",
+      "name": "SetThickness",
+      "category": "CurveModel",
+      "signature": "SetThickness(Target, In Thickness)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Thickness",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set this curve's visual thickness in screen space"
+    },
+    {
+      "id": "is-key-draw-enabled",
+      "name": "IsKeyDrawEnabled",
+      "category": "CurveModel",
+      "signature": "IsKeyDrawEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Retrieves whether or not to disable drawing keys"
+    },
+    {
+      "id": "set-is-key-draw-enabled",
+      "name": "SetIsKeyDrawEnabled",
+      "category": "CurveModel",
+      "signature": "SetIsKeyDrawEnabled(Target, B In Key Draw Enabled)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "B In Key Draw Enabled",
+          "type": "TAttribute<bool>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Assign whether or not to disable drawing keys"
+    },
+    {
+      "id": "get-supported-views",
+      "name": "GetSupportedViews",
+      "category": "CurveModel",
+      "signature": "GetSupportedViews(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "ECurveEditorViewID",
+      "docs": "Retrieve this curve's supported views"
+    },
+    {
+      "id": "init-curve-id",
+      "name": "InitCurveId",
+      "category": "CurveModel",
+      "signature": "InitCurveId(Target, In Curve Model ID)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        },
+        {
+          "name": "In Curve Model ID",
+          "type": "FCurveModelID",
+          "default": "FCurveModelID::Unique()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Inits this curve with an optionally specified ID."
+    },
+    {
+      "id": "get-or-init-id",
+      "name": "GetOrInitId",
+      "category": "CurveModel",
+      "signature": "GetOrInitId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "FCurveModelID&",
+      "docs": "@return A valid curve ID"
+    },
+    {
+      "id": "get-id",
+      "name": "GetId",
+      "category": "CurveModel",
+      "signature": "GetId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCurveModel*"
+        }
+      ],
+      "returnType": "TOptional<FCurveModelID>&",
+      "docs": "@return The curve ID - can be unset."
+    }
+  ]
+}

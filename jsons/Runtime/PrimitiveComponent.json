@@ -39,6 +39,20 @@
   ],
   "functions": [
     {
+      "id": "to-stencil-mask",
+      "name": "ToStencilMask",
+      "category": "PrimitiveComponent",
+      "signature": "ToStencilMask(In Enum)",
+      "params": [
+        {
+          "name": "In Enum",
+          "type": "ERendererStencilMask"
+        }
+      ],
+      "returnType": "EStencilMask",
+      "docs": "Converts a stencil mask from the editor's USTRUCT version to the version the renderer uses."
+    },
+    {
       "id": "get-lightmap-type",
       "name": "GetLightmapType",
       "category": "PrimitiveComponent",
@@ -67,6 +81,20 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "is-attached-to-streaming-manager",
+      "name": "IsAttachedToStreamingManager",
+      "category": "PrimitiveComponent",
+      "signature": "IsAttachedToStreamingManager(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether this primitive is referenced by a FLevelRenderAssetManager"
     },
     {
       "id": "get-generate-overlap-events",
@@ -197,21 +225,60 @@
       "returnType": "Void"
     },
     {
-      "id": "set-exclude-for-specific-hlod-levels",
-      "name": "SetExcludeForSpecificHLODLevels",
-      "category": "HLOD",
-      "signature": "SetExcludeForSpecificHLODLevels(Target, In Exclude For Specific HLOD Levels)",
+      "id": "get-runtime-virtual-textures",
+      "name": "GetRuntimeVirtualTextures",
+      "category": "PrimitiveComponent",
+      "signature": "GetRuntimeVirtualTextures(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "In Exclude For Specific HLOD Levels",
-          "type": "TArray<int32>&"
         }
       ],
-      "returnType": "Void"
+      "returnType": "TArray<URuntimeVirtualTexture*>&",
+      "docs": "Get the array of runtime virtual textures into which we render the mesh for this actor."
+    },
+    {
+      "id": "get-virtual-texture-render-pass-type",
+      "name": "GetVirtualTextureRenderPassType",
+      "category": "PrimitiveComponent",
+      "signature": "GetVirtualTextureRenderPassType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "ERuntimeVirtualTextureMainPassType",
+      "docs": "Get the runtime virtual texture pass settings."
+    },
+    {
+      "id": "get-virtual-texture-main-pass-max-draw-distance",
+      "name": "GetVirtualTextureMainPassMaxDrawDistance",
+      "category": "PrimitiveComponent",
+      "signature": "GetVirtualTextureMainPassMaxDrawDistance(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Get the max draw distance to use in the main pass when also rendering to a runtime virtual texture. This is combined with the other max draw distance settings."
+    },
+    {
+      "id": "get-primitive-scene-id",
+      "name": "GetPrimitiveSceneId",
+      "category": "PrimitiveComponent",
+      "signature": "GetPrimitiveSceneId(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "FPrimitiveComponentId",
+      "docs": "Used by the renderer, to identify a component across re-registers."
     },
     {
       "id": "begin-play",
@@ -228,23 +295,17 @@
       "docs": "Used to detach physics objects before simulation begins. This is needed because at runtime we can't have simulated objects inside the attachment hierarchy"
     },
     {
-      "id": "are-all-collideable-descendants-relative",
-      "name": "AreAllCollideableDescendantsRelative",
+      "id": "get-attachment-counter",
+      "name": "GetAttachmentCounter",
       "category": "PrimitiveComponent",
-      "signature": "AreAllCollideableDescendantsRelative(Target, Allow Cached Value)",
+      "signature": "GetAttachmentCounter(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Allow Cached Value",
-          "type": "Bool",
-          "default": "true"
         }
       ],
-      "returnType": "Bool",
-      "docs": "Returns true if all descendant components that we can possibly overlap with use relative location and rotation."
+      "returnType": "FThreadSafeCounter*"
     },
     {
       "id": "get-ray-tracing-group-id",
@@ -357,6 +418,28 @@
       "docs": "Setup the parameter struct used to precache the PSOs used by this component.\nPrecaching uses certain component attributes to derive the shader or state used to render the component such as static lighting, cast shadows, ..."
     },
     {
+      "id": "collect-pso-precache-data",
+      "name": "CollectPSOPrecacheData",
+      "category": "PrimitiveComponent",
+      "signature": "CollectPSOPrecacheData(Target, Base Precache PSO Params, Out Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Base Precache PSO Params",
+          "type": "FPSOPrecacheParams&"
+        },
+        {
+          "name": "Out Params",
+          "type": "FMaterialInterfacePSOPrecacheParamsList&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Collect all the data required for PSO precaching"
+    },
+    {
       "id": "precache-ps-os",
       "name": "PrecachePSOs",
       "category": "PrimitiveComponent",
@@ -436,24 +519,6 @@
       "docs": "Check if PSOs are still precaching and boost priority if not done yet.\nPSOPrecachePriority specifies the new priority to boost to. calls that would reduce the current priority are ignored, highest pri is used for components that are actively rendering.\nReturns true if the PSOs are still precaching."
     },
     {
-      "id": "get-used-material-property-desc",
-      "name": "GetUsedMaterialPropertyDesc",
-      "category": "PrimitiveComponent",
-      "signature": "GetUsedMaterialPropertyDesc(Target, Feature Level)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Feature Level",
-          "type": "ERHIFeatureLevel::Type"
-        }
-      ],
-      "returnType": "FPrimitiveMaterialPropertyDescriptor",
-      "docs": "Examines the used materials (GetUsedMaterials) and returns a descriptor. This may be called when there is no proxy created\nwhich can be useful. But will use the information in the proxy if it is present."
-    },
-    {
       "id": "ignore-actor-when-moving",
       "name": "IgnoreActorWhenMoving",
       "category": "Collision",
@@ -488,6 +553,20 @@
       ],
       "returnType": "TArray<AActor*>",
       "docs": "Returns the list of actors we currently ignore when moving."
+    },
+    {
+      "id": "get-move-ignore-actors",
+      "name": "GetMoveIgnoreActors",
+      "category": "PrimitiveComponent",
+      "signature": "GetMoveIgnoreActors(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "TArray<AActor*>&",
+      "docs": "Returns the list of actors (as WeakObjectPtr) we currently ignore when moving."
     },
     {
       "id": "clear-move-ignore-actors",
@@ -540,6 +619,20 @@
       "docs": "Returns the list of actors we currently ignore when moving."
     },
     {
+      "id": "get-move-ignore-components",
+      "name": "GetMoveIgnoreComponents",
+      "category": "PrimitiveComponent",
+      "signature": "GetMoveIgnoreComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "TArray<UPrimitiveComponent*>&",
+      "docs": "Returns the list of components we currently ignore when moving."
+    },
+    {
       "id": "clear-move-ignore-components",
       "name": "ClearMoveIgnoreComponents",
       "category": "Collision",
@@ -572,6 +665,20 @@
       "docs": "Set the mask filter we use when moving."
     },
     {
+      "id": "get-move-ignore-mask",
+      "name": "GetMoveIgnoreMask",
+      "category": "PrimitiveComponent",
+      "signature": "GetMoveIgnoreMask(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "FMaskFilter",
+      "docs": "Get the mask filter we use when moving."
+    },
+    {
       "id": "should-component-ignore-hit-result",
       "name": "ShouldComponentIgnoreHitResult",
       "category": "PrimitiveComponent",
@@ -592,6 +699,42 @@
       ],
       "returnType": "Bool",
       "docs": "Should the hit result be ignored based on this component"
+    },
+    {
+      "id": "set-mask-filter-on-body-instance",
+      "name": "SetMaskFilterOnBodyInstance",
+      "category": "PrimitiveComponent",
+      "signature": "SetMaskFilterOnBodyInstance(Target, In Mask Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "In Mask Filter",
+          "type": "FMaskFilter"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the mask filter checked when others move into us."
+    },
+    {
+      "id": "get-mask-filter-on-body-instance",
+      "name": "GetMaskFilterOnBodyInstance",
+      "category": "PrimitiveComponent",
+      "signature": "GetMaskFilterOnBodyInstance(Target, In Mask Filter)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "In Mask Filter",
+          "type": "FMaskFilter"
+        }
+      ],
+      "returnType": "FMaskFilter",
+      "docs": "Get the mask filter checked when others move into us."
     },
     {
       "id": "get-custom-primitive-data-index-for-scalar-parameter",
@@ -850,6 +993,20 @@
       "docs": "Set custom primitive data, an array of floats at once, from index DataIndex to index DataIndex + Values.Num(). This sets the run-time data only, so it doesn't serialize."
     },
     {
+      "id": "get-custom-primitive-data",
+      "name": "GetCustomPrimitiveData",
+      "category": "PrimitiveComponent",
+      "signature": "GetCustomPrimitiveData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "FCustomPrimitiveData&",
+      "docs": "Get the custom primitive data for this primitive component.\n@return The payload of custom data that will be set on the primitive and accessible in the material through a material expression."
+    },
+    {
       "id": "reset-custom-primitive-data",
       "name": "ResetCustomPrimitiveData",
       "category": "PrimitiveComponent",
@@ -1084,26 +1241,18 @@
       "docs": "Set default custom primitive data, an array floats at once, from index DataIndex to index DataIndex + Values.Num(), and marks the render state dirty"
     },
     {
-      "id": "set-custom-primitive-data-internal",
-      "name": "SetCustomPrimitiveDataInternal",
+      "id": "get-default-custom-primitive-data",
+      "name": "GetDefaultCustomPrimitiveData",
       "category": "PrimitiveComponent",
-      "signature": "SetCustomPrimitiveDataInternal(Target, Data Index, Values)",
+      "signature": "GetDefaultCustomPrimitiveData(Target)",
       "params": [
         {
           "name": "Target",
           "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Data Index",
-          "type": "Int"
-        },
-        {
-          "name": "Values",
-          "type": "TConstArrayView<float>"
         }
       ],
-      "returnType": "Void",
-      "docs": "Insert an array of floats into the CustomPrimitiveData, starting at the given index"
+      "returnType": "FCustomPrimitiveData&",
+      "docs": "Get the default custom primitive data for this primitive component.\n@return The payload of custom data that will be set on the primitive and accessible in the material through a material expression."
     },
     {
       "id": "end-component-overlap",
@@ -1344,49 +1493,6 @@
       "docs": "Walks up the attachment tree until a primitive component with LightAttachmentsAsGroup enabled is found. This component will effectively act as the root of the attachment group.\nReturn nullptr if none is found."
     },
     {
-      "id": "component-overlap-multi-impl",
-      "name": "ComponentOverlapMultiImpl",
-      "category": "PrimitiveComponent",
-      "signature": "ComponentOverlapMultiImpl(Target, Out Overlaps, In World, Pos, Rot, Test Channel, Params, Object Query Params)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Out Overlaps",
-          "type": "TArray<FOverlapResult>&"
-        },
-        {
-          "name": "In World",
-          "type": "UWorld*"
-        },
-        {
-          "name": "Pos",
-          "type": "FVector&"
-        },
-        {
-          "name": "Rot",
-          "type": "FQuat&"
-        },
-        {
-          "name": "Test Channel",
-          "type": "ECollisionChannel"
-        },
-        {
-          "name": "Params",
-          "type": "FComponentQueryParams&"
-        },
-        {
-          "name": "Object Query Params",
-          "type": "FCollisionObjectQueryParams&",
-          "default": "FCollisionObjectQueryParams::DefaultObjectQueryParam"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Override this method for custom behavior for ComponentOverlapMulti()"
-    },
-    {
       "id": "set-bounds-scale",
       "name": "SetBoundsScale",
       "category": "Rendering",
@@ -1440,6 +1546,23 @@
       ],
       "returnType": "class UMaterialInterface*",
       "docs": "Returns the material to show in the editor details panel as being used. Skips Nanite Override materials."
+    },
+    {
+      "id": "get-material-index",
+      "name": "GetMaterialIndex",
+      "category": "Rendering",
+      "signature": "GetMaterialIndex(Target, Material Slot Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Material Slot Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "Int"
     },
     {
       "id": "get-material-slot-names",
@@ -3168,6 +3291,20 @@
       "docs": "Sets FirstPersonPrimitiveType property and marks the render state dirty."
     },
     {
+      "id": "get-scene-proxy",
+      "name": "GetSceneProxy",
+      "category": "PrimitiveComponent",
+      "signature": "GetSceneProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "FPrimitiveSceneProxy*",
+      "docs": "Count of all component overlap events (begin or end) ever generated for any components.\nChanges to this number within a scope can also be a simple way to know if any events were triggered.\nIt can also be useful for identifying performance issues due to high numbers of events."
+    },
+    {
       "id": "assign-scene-proxy",
       "name": "AssignSceneProxy",
       "category": "PrimitiveComponent",
@@ -3196,6 +3333,20 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "is-always-visible",
+      "name": "IsAlwaysVisible",
+      "category": "PrimitiveComponent",
+      "signature": "IsAlwaysVisible(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the primitive component's scene proxy is always visible."
     },
     {
       "id": "get-lod-parent-primitive",
@@ -3300,6 +3451,37 @@
       "docs": "Return true if primitive can skip getting texture streaming render asset info."
     },
     {
+      "id": "get-streaming-scale",
+      "name": "GetStreamingScale",
+      "category": "PrimitiveComponent",
+      "signature": "GetStreamingScale(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Float"
+    },
+    {
+      "id": "has-valid-settings-for-static-lighting",
+      "name": "HasValidSettingsForStaticLighting",
+      "category": "PrimitiveComponent",
+      "signature": "HasValidSettingsForStaticLighting(Target, Overlook Invalid Components)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Overlook Invalid Components",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the component is static and has the right static mesh setup to support lightmaps."
+    },
+    {
       "id": "uses-only-unlit-materials",
       "name": "UsesOnlyUnlitMaterials",
       "category": "PrimitiveComponent",
@@ -3336,6 +3518,20 @@
       "docs": "Returns the lightmap resolution used for this primitive instance in the case of it supporting texture light/ shadow maps.\n0 if not supported or no static shadowing.\n@param\tWidth\t[out]\tWidth of light/shadow map\n@param\tHeight\t[out]\tHeight of light/shadow map\n@return\tbool\t\t\ttrue if LightMap values are padded, false if not"
     },
     {
+      "id": "get-static-light-map-resolution",
+      "name": "GetStaticLightMapResolution",
+      "category": "PrimitiveComponent",
+      "signature": "GetStaticLightMapResolution(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the static lightmap resolution used for this primitive.\n0 if not supported or no static shadowing.\n@return\tint32\t\tThe StaticLightmapResolution for the component"
+    },
+    {
       "id": "get-light-and-shadow-map-memory-usage",
       "name": "GetLightAndShadowMapMemoryUsage",
       "category": "PrimitiveComponent",
@@ -3356,6 +3552,96 @@
       ],
       "returnType": "Void",
       "docs": "Returns the light and shadow map memory for this primitive in its out variables.\nShadow map memory usage is per light whereof lightmap data is independent of number of lights, assuming at least one.\n@param [out] LightMapMemoryUsage\t\tMemory usage in bytes for light map (either texel or vertex) data\n@param [out]\tShadowMapMemoryUsage\tMemory usage in bytes for shadow map (either texel or vertex) data"
+    },
+    {
+      "id": "get-static-lighting-info",
+      "name": "GetStaticLightingInfo",
+      "category": "PrimitiveComponent",
+      "signature": "GetStaticLightingInfo(Target, Out Primitive Info, In Relevant Lights, Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Out Primitive Info",
+          "type": "FStaticLightingPrimitiveInfo&"
+        },
+        {
+          "name": "In Relevant Lights",
+          "type": "TArray<ULightComponent*>&"
+        },
+        {
+          "name": "Options",
+          "type": "FLightingBuildOptions&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Requests the information about the component that the static lighting system needs.\n@param OutPrimitiveInfo - Upon return, contains the component's static lighting information.\n@param InRelevantLights - The lights relevant to the primitive.\n@param InOptions - The options for the static lighting build."
+    },
+    {
+      "id": "add-map-build-data-gui-ds",
+      "name": "AddMapBuildDataGUIDs",
+      "category": "PrimitiveComponent",
+      "signature": "AddMapBuildDataGUIDs(Target, In GUI Ds)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "In GUI Ds",
+          "type": "TSet<FGuid>&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add the used GUIDs from UMapBuildDataRegistry::MeshBuildData. Used to preserve hidden level data in lighting scenario."
+    },
+    {
+      "id": "remap-actor-texture-streaming-built-data-to-level",
+      "name": "RemapActorTextureStreamingBuiltDataToLevel",
+      "category": "PrimitiveComponent",
+      "signature": "RemapActorTextureStreamingBuiltDataToLevel(Target, In Actor Texture Build Data)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "In Actor Texture Build Data",
+          "type": "UActorTextureStreamingBuildDataComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Remaps the texture streaming built data that was built for the actor back to the level."
+    },
+    {
+      "id": "compute-hash-texture-streaming-built-data",
+      "name": "ComputeHashTextureStreamingBuiltData",
+      "category": "PrimitiveComponent",
+      "signature": "ComputeHashTextureStreamingBuiltData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Computes a hash of component's texture streaming built data."
+    },
+    {
+      "id": "get-static-lighting-type",
+      "name": "GetStaticLightingType",
+      "category": "PrimitiveComponent",
+      "signature": "GetStaticLightingType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "ELightMapInteractionType",
+      "docs": "Requests whether the component will use texture, vertex or no lightmaps.\n@return\tELightMapInteractionType\t\tThe type of lightmap interaction the component will use."
     },
     {
       "id": "get-streaming-render-asset-info",
@@ -3466,6 +3752,43 @@
       "docs": "Component type implementation of updating the streaming data of this component.\n@param\tBuildType\t\t[in]\t\tThe type of build. Affects what the build is allowed to do.\n@param\tQualityLevel\t[in]\t\tThe quality level being used in the texture streaming build.\n@param\tFeatureLevel\t[in]\t\tThe feature level being used in the texture streaming build.\n@param\tDependentResources [out]\tThe resource the build depends on.\n@return\t\t\t\t\t\t\t\tReturns false if some data needs rebuild but couldn't be rebuilt (because of the build type)."
     },
     {
+      "id": "get-static-depth-priority-group",
+      "name": "GetStaticDepthPriorityGroup",
+      "category": "PrimitiveComponent",
+      "signature": "GetStaticDepthPriorityGroup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "ESceneDepthPriorityGroup",
+      "docs": "Determines the DPG the primitive's primary elements are drawn in.\nEven if the primitive's elements are drawn in multiple DPGs, a primary DPG is needed for occlusion culling and shadow projection.\n@return The DPG the primitive's primary elements will be drawn in."
+    },
+    {
+      "id": "get-used-materials",
+      "name": "GetUsedMaterials",
+      "category": "PrimitiveComponent",
+      "signature": "GetUsedMaterials(Target, Out Materials, Get Debug Materials)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Out Materials",
+          "type": "TArray<UMaterialInterface*>&"
+        },
+        {
+          "name": "Get Debug Materials",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Retrieves the materials used in this component\n@param OutMaterials\tThe list of used materials."
+    },
+    {
       "id": "get-used-textures",
       "name": "GetUsedTextures",
       "category": "PrimitiveComponent",
@@ -3486,6 +3809,34 @@
       ],
       "returnType": "Void",
       "docs": "Returns the material textures used to render this primitive for the given platform.\nInternally calls GetUsedMaterials() and GetUsedTextures() for each material.\n@param OutTextures\t[out] The list of used textures."
+    },
+    {
+      "id": "get-body-setup",
+      "name": "GetBodySetup",
+      "category": "PrimitiveComponent",
+      "signature": "GetBodySetup(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "class UBodySetup*",
+      "docs": "Return the BodySetup to use for this PrimitiveComponent (single body case)"
+    },
+    {
+      "id": "sync-component-to-rb-physics",
+      "name": "SyncComponentToRBPhysics",
+      "category": "PrimitiveComponent",
+      "signature": "SyncComponentToRBPhysics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Move this component to match the physics rigid body pose. Note, a warning will be generated if you call this function on a component that is attached to something"
     },
     {
       "id": "get-render-matrix",
@@ -3600,6 +3951,28 @@
       "docs": "Returns The square of the distance to closest Body Instance surface.\n@param Point\t\t\t\tWorld 3D vector\n@param OutSquaredDistance The squared distance to closest Body Instance surface. 0 if inside of the body\n@param OutPointOnBody\tPoint on the surface of collision closest to Point\n@return\t\ttrue if a distance to the body was found and OutDistanceSquared has been populated"
     },
     {
+      "id": "get-distance-to-collision",
+      "name": "GetDistanceToCollision",
+      "category": "PrimitiveComponent",
+      "signature": "GetDistanceToCollision(Target, Point, Closest Point On Collision)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Point",
+          "type": "FVector&"
+        },
+        {
+          "name": "Closest Point On Collision",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Returns Distance to closest Body Instance surface.\n@param Point\t\t\t\tWorld 3D vector\n@param OutPointOnBody\tPoint on the surface of collision closest to Point\n@return\t\tSuccess if returns > 0.f, if returns 0.f, point is inside the geometry\nIf returns < 0.f, this primitive does not have collsion or if geometry is not supported"
+    },
+    {
       "id": "get-closest-point-on-collision",
       "name": "GetClosestPointOnCollision",
       "category": "Collision",
@@ -3627,34 +4000,68 @@
       "docs": "Returns the distance and closest point to the collision surface.\nComponent must have simple collision to be queried for closest point.\n@param Point\t\t\t\tWorld 3D vector\n@param OutPointOnBody\t\tPoint on the surface of collision closest to Point\n@param BoneName\t\t\tIf a SkeletalMeshComponent, name of body to set center of mass of. 'None' indicates root body.\n@return\t\tSuccess if returns > 0.f, if returns 0.f, it is either not convex or inside of the point\nIf returns < 0.f, this primitive does not have collsion"
     },
     {
-      "id": "receive-component-damage",
-      "name": "ReceiveComponentDamage",
+      "id": "create-scene-proxy",
+      "name": "CreateSceneProxy",
       "category": "PrimitiveComponent",
-      "signature": "ReceiveComponentDamage(Target, Damage Amount, Damage Event, Event Instigator, Damage Causer)",
+      "signature": "CreateSceneProxy(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "FPrimitiveSceneProxy*",
+      "docs": "Creates a proxy to represent the primitive to the scene manager in the rendering thread.\n@return The proxy object."
+    },
+    {
+      "id": "create-mesh-hit-proxy",
+      "name": "CreateMeshHitProxy",
+      "category": "PrimitiveComponent",
+      "signature": "CreateMeshHitProxy(Target, Section Index, Material Index)",
       "params": [
         {
           "name": "Target",
           "type": "UPrimitiveComponent*"
         },
         {
-          "name": "Damage Amount",
-          "type": "Float"
+          "name": "Section Index",
+          "type": "Int"
         },
         {
-          "name": "Damage Event",
-          "type": "FDamageEvent&"
-        },
-        {
-          "name": "Event Instigator",
-          "type": "AController*"
-        },
-        {
-          "name": "Damage Causer",
-          "type": "AActor*"
+          "name": "Material Index",
+          "type": "Int"
         }
       ],
-      "returnType": "Void",
-      "docs": "Event called when a component is 'damaged', allowing for component class specific behaviour"
+      "returnType": "HHitProxy*",
+      "docs": "Creates a HHitProxy to represent the component at SectionIndex / MaterialIndex\n@return The proxy object."
+    },
+    {
+      "id": "should-recreate-proxy-on-update-transform",
+      "name": "ShouldRecreateProxyOnUpdateTransform",
+      "category": "PrimitiveComponent",
+      "signature": "ShouldRecreateProxyOnUpdateTransform(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determines whether the proxy for this primitive type needs to be recreated whenever the primitive moves.\n@return true to recreate the proxy when UpdateTransform is called."
+    },
+    {
+      "id": "is-zero-extent",
+      "name": "IsZeroExtent",
+      "category": "PrimitiveComponent",
+      "signature": "IsZeroExtent(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This isn't bound extent, but for shape component to utilize extent is 0.\nFor normal primitive, this is 0, for ShapeComponent, this will have valid information"
     },
     {
       "id": "weld-to",
@@ -3823,6 +4230,20 @@
       "docs": "Would this primitive be shown with these rendering flags.\n@Note: Currently this only implemented properly for the editor selectable primitives."
     },
     {
+      "id": "supports-world-position-offset-velocity",
+      "name": "SupportsWorldPositionOffsetVelocity",
+      "category": "PrimitiveComponent",
+      "signature": "SupportsWorldPositionOffsetVelocity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns false if this primitive should never output velocity based on its WPO state."
+    },
+    {
       "id": "component-is-touching-selection-box",
       "name": "ComponentIsTouchingSelectionBox",
       "category": "PrimitiveComponent",
@@ -3873,20 +4294,6 @@
       ],
       "returnType": "Bool",
       "docs": "Determines whether the supplied frustum intersects with the component.\nUsed by the editor in perspective viewports.\n@param\tInFrustum\t\t\t\t\t\tFrustum to test against\n@param\tbConsiderOnlyBSP\t\t\t\tIf only BSP geometry should be tested\n@param\tbMustEncompassEntireComponent\tWhether the component bounding box must lay wholly within the supplied bounding box\n@return\ttrue if the supplied bounding box is determined to intersect the component (partially or wholly)"
-    },
-    {
-      "id": "batch-send-render-debug-physics",
-      "name": "BatchSendRenderDebugPhysics",
-      "category": "PrimitiveComponent",
-      "signature": "BatchSendRenderDebugPhysics(In Primitives)",
-      "params": [
-        {
-          "name": "In Primitives",
-          "type": "TArrayView<UPrimitiveComponent*>"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Only currently used for static mesh primitives, but could eventually be applied to other types"
     },
     {
       "id": "create-render-state-concurrent",
@@ -4190,46 +4597,6 @@
       "returnType": "Void"
     },
     {
-      "id": "update-physics-to-rb-channels",
-      "name": "UpdatePhysicsToRBChannels",
-      "category": "PrimitiveComponent",
-      "signature": "UpdatePhysicsToRBChannels(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Internal function that updates physics objects to match the component collision settings."
-    },
-    {
-      "id": "post-init-properties",
-      "name": "PostInitProperties",
-      "category": "PrimitiveComponent",
-      "signature": "PostInitProperties(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-load",
-      "name": "PostLoad",
-      "category": "PrimitiveComponent",
-      "signature": "PostLoad(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "post-duplicate",
       "name": "PostDuplicate",
       "category": "PrimitiveComponent",
@@ -4264,19 +4631,6 @@
       "returnType": "Void"
     },
     {
-      "id": "begin-destroy",
-      "name": "BeginDestroy",
-      "category": "PrimitiveComponent",
-      "signature": "BeginDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "finish-destroy",
       "name": "FinishDestroy",
       "category": "PrimitiveComponent",
@@ -4288,19 +4642,6 @@
         }
       ],
       "returnType": "Void"
-    },
-    {
-      "id": "is-ready-for-finish-destroy",
-      "name": "IsReadyForFinishDestroy",
-      "category": "PrimitiveComponent",
-      "signature": "IsReadyForFinishDestroy(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Bool"
     },
     {
       "id": "needs-load-for-client",
@@ -4329,40 +4670,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "PrimitiveComponent",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-chain-property",
-      "name": "PostEditChangeChainProperty",
-      "category": "PrimitiveComponent",
-      "signature": "PostEditChangeChainProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedChainEvent&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "can-edit-change",
       "name": "CanEditChange",
       "category": "PrimitiveComponent",
@@ -4388,36 +4695,6 @@
         {
           "name": "Target",
           "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-import",
-      "name": "PostEditImport",
-      "category": "PrimitiveComponent",
-      "signature": "PostEditImport(Target)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "pre-save",
-      "name": "PreSave",
-      "category": "PrimitiveComponent",
-      "signature": "PreSave(Target, Object Save Context)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Object Save Context",
-          "type": "FObjectPreSaveContext"
         }
       ],
       "returnType": "Void"
@@ -4789,6 +5066,32 @@
       "docs": "Return a CollisionShape that most closely matches this primitive."
     },
     {
+      "id": "are-symmetric-rotations",
+      "name": "AreSymmetricRotations",
+      "category": "PrimitiveComponent",
+      "signature": "AreSymmetricRotations(Target, A, B, Scale 3 D)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "A",
+          "type": "FQuat&"
+        },
+        {
+          "name": "B",
+          "type": "FQuat&"
+        },
+        {
+          "name": "Scale 3 D",
+          "type": "FVector&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns true if the given transforms result in the same bounds, due to rotational symmetry.\nFor example, this is true for a sphere with uniform scale undergoing any rotation.\nThis is NOT intended to detect every case where this is true, only the common cases to aid optimizations."
+    },
+    {
       "id": "push-selection-to-proxy",
       "name": "PushSelectionToProxy",
       "category": "PrimitiveComponent",
@@ -4855,6 +5158,70 @@
       ],
       "returnType": "Void",
       "docs": "Sends editor visibility updates to the render thread"
+    },
+    {
+      "id": "get-emissive-boost",
+      "name": "GetEmissiveBoost",
+      "category": "PrimitiveComponent",
+      "signature": "GetEmissiveBoost(Target, Element Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Element Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Gets the emissive boost for the primitive component."
+    },
+    {
+      "id": "get-diffuse-boost",
+      "name": "GetDiffuseBoost",
+      "category": "PrimitiveComponent",
+      "signature": "GetDiffuseBoost(Target, Element Index)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Element Index",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Gets the diffuse boost for the primitive component."
+    },
+    {
+      "id": "get-shadow-indirect-only",
+      "name": "GetShadowIndirectOnly",
+      "category": "PrimitiveComponent",
+      "signature": "GetShadowIndirectOnly(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Disable dynamic shadow casting if the primitive only casts indirect shadows, since dynamic shadows are always shadowing direct lighting"
+    },
+    {
+      "id": "is-compiling",
+      "name": "IsCompiling",
+      "category": "PrimitiveComponent",
+      "signature": "IsCompiling(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether this component is still being compiled or dependent on other objects being compiled."
     },
     {
       "id": "get-primitive-stats",
@@ -5673,25 +6040,6 @@
       "docs": "Changes the whole ResponseToChannels container for this PrimitiveComponent.\n@param       NewResponses  New set of responses for this component"
     },
     {
-      "id": "on-component-collision-settings-changed",
-      "name": "OnComponentCollisionSettingsChanged",
-      "category": "PrimitiveComponent",
-      "signature": "OnComponentCollisionSettingsChanged(Target, Update Overlaps)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Update Overlaps",
-          "type": "Bool",
-          "default": "true"
-        }
-      ],
-      "returnType": "Void",
-      "docs": "Called when the BodyInstance ResponseToChannels, CollisionEnabled or bNotifyRigidBodyCollision changes, in case subclasses want to use that information."
-    },
-    {
       "id": "register-as-focal-point-in-physics-replication-lod",
       "name": "RegisterAsFocalPointInPhysicsReplicationLOD",
       "category": "Replication",
@@ -5987,36 +6335,6 @@
       ],
       "returnType": "Bool",
       "docs": "Trace a shape against just this component.\n@param  OutHit          \tInformation about hit against this component, if true is returned\n@param  Start           \tStart location of the box\n@param  End             \tEnd location of the box\n@param  ShapeWorldRotation  The rotation applied to the collision shape in world space.\n@param  Geometry\t\t\tGeometry to sweep with.\n@param  TraceChannel    The 'channel' that this query is in, used to determine which components to hit\n@param  Params          Additional parameters used for the trace\n@param \tResponseParam\tResponseContainer to be used for this trace\n@param\tObjectQueryParams\tList of object types it's looking for\n@return true if a hit is found"
-    },
-    {
-      "id": "component-overlap-component-impl",
-      "name": "ComponentOverlapComponentImpl",
-      "category": "PrimitiveComponent",
-      "signature": "ComponentOverlapComponentImpl(Target, Prim Comp, Pos, Rot, Params)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Prim Comp",
-          "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "Pos",
-          "type": "FVector"
-        },
-        {
-          "name": "Rot",
-          "type": "FQuat&"
-        },
-        {
-          "name": "Params",
-          "type": "FCollisionQueryParams&"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Override this method for custom behavior for ComponentOverlapComponent()"
     },
     {
       "id": "overlap-component",
@@ -6460,22 +6778,46 @@
       "returnType": "Chaos::FPhysicsObjectId"
     },
     {
-      "id": "handle-post-migration-physics-state-changed",
-      "name": "HandlePostMigrationPhysicsStateChanged",
+      "id": "is-static-physics",
+      "name": "IsStaticPhysics",
       "category": "PrimitiveComponent",
-      "signature": "HandlePostMigrationPhysicsStateChanged(Target, Changed Component, State Change)",
+      "signature": "IsStaticPhysics(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Whether the physics is static for this component."
+    },
+    {
+      "id": "is-first-person-relevant",
+      "name": "IsFirstPersonRelevant",
+      "category": "PrimitiveComponent",
+      "signature": "IsFirstPersonRelevant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Wheter the component is relevant for first person"
+    },
+    {
+      "id": "f-primitive-component-instance-data",
+      "name": "FPrimitiveComponentInstanceData",
+      "category": "PrimitiveComponent",
+      "signature": "FPrimitiveComponentInstanceData(Target, Source Component)",
       "params": [
         {
           "name": "Target",
           "type": "UPrimitiveComponent*"
         },
         {
-          "name": "Changed Component",
+          "name": "Source Component",
           "type": "UPrimitiveComponent*"
-        },
-        {
-          "name": "State Change",
-          "type": "EComponentPhysicsStateChange"
         }
       ],
       "returnType": "Void"
@@ -6488,7 +6830,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FPrimitiveComponentInstanceData*"
+          "type": "UPrimitiveComponent*"
         }
       ],
       "returnType": "Bool"
@@ -6501,7 +6843,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FPrimitiveComponentInstanceData*"
+          "type": "UPrimitiveComponent*"
         },
         {
           "name": "Component",
@@ -6522,7 +6864,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FPrimitiveComponentInstanceData*"
+          "type": "UPrimitiveComponent*"
         },
         {
           "name": "Old To New Instance Map",
@@ -6532,21 +6874,229 @@
       "returnType": "Void"
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "get-component-transform",
+      "name": "GetComponentTransform",
       "category": "PrimitiveComponent",
-      "signature": "AddReferencedObjects(Target, Collector)",
+      "signature": "GetComponentTransform(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "FPrimitiveComponentInstanceData*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
+          "type": "UPrimitiveComponent*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "FTransform&"
+    },
+    {
+      "id": "component-overlap-multi",
+      "name": "ComponentOverlapMulti",
+      "category": "PrimitiveComponent",
+      "signature": "ComponentOverlapMulti(Target, Out Overlaps, In World, Pos, Rot, Test Channel, Params, Object Query Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Out Overlaps",
+          "type": "TArray<FOverlapResult>&"
+        },
+        {
+          "name": "In World",
+          "type": "UWorld*"
+        },
+        {
+          "name": "Pos",
+          "type": "FVector&"
+        },
+        {
+          "name": "Rot",
+          "type": "FQuat&"
+        },
+        {
+          "name": "Test Channel",
+          "type": "ECollisionChannel"
+        },
+        {
+          "name": "Params",
+          "type": "FComponentQueryParams&"
+        },
+        {
+          "name": "Object Query Params",
+          "type": "FCollisionObjectQueryParams&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "component-overlap-component",
+      "name": "ComponentOverlapComponent",
+      "category": "PrimitiveComponent",
+      "signature": "ComponentOverlapComponent(Target, Prim Comp, Pos, Rot, Params)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Prim Comp",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Pos",
+          "type": "FVector"
+        },
+        {
+          "name": "Rot",
+          "type": "FQuat&"
+        },
+        {
+          "name": "Params",
+          "type": "FCollisionQueryParams&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test the collision of the supplied component at the supplied location/rotation, and determine if it overlaps this component.\n@note This overload taking rotation as a FQuat is slightly faster than the version using FRotator.\n@note This simply calls the virtual ComponentOverlapComponentImpl() which can be overridden to implement custom behavior.\n@param  PrimComp        Component to use geometry from to test against this component. Transform of this component is ignored.\n@param  Pos             Location to place PrimComp geometry at\n@param  Rot             Rotation to place PrimComp geometry at\n@param  Params          Parameter for trace. TraceTag is only used.\n@return true if PrimComp overlaps this component at the specified location/rotation"
+    },
+    {
+      "id": "component-overlap-component-with-result",
+      "name": "ComponentOverlapComponentWithResult",
+      "category": "PrimitiveComponent",
+      "signature": "ComponentOverlapComponentWithResult(Target, Prim Comp, Pos, Rot, Params, Out Overlap)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Prim Comp",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Pos",
+          "type": "FVector&"
+        },
+        {
+          "name": "Rot",
+          "type": "FQuat&"
+        },
+        {
+          "name": "Params",
+          "type": "FCollisionQueryParams&"
+        },
+        {
+          "name": "Out Overlap",
+          "type": "TArray<FOverlapResult>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Test the collision of the supplied component at the supplied location/rotation, and determine if it overlaps this component.\n@note This overload taking rotation as a FQuat is slightly faster than the version using FRotator.\n@note This simply calls the virtual ComponentOverlapComponentImpl() which can be overridden to implement custom behavior.\n@param  PrimComp        Component to use geometry from to test against this component. Transform of this component is ignored.\n@param  Pos             Location to place PrimComp geometry at\n@param  Rot             Rotation to place PrimComp geometry at\n@param  Params          Parameter for trace. TraceTag is only used.\n@param  OutOverlap      Also returns all the sub-overlaps within the component.\n@return true if PrimComp overlaps this component at the specified location/rotation"
+    },
+    {
+      "id": "get-overlap-infos",
+      "name": "GetOverlapInfos",
+      "category": "PrimitiveComponent",
+      "signature": "GetOverlapInfos(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        }
+      ],
+      "returnType": "TArray<FOverlapInfo>&",
+      "docs": "Returns list of components this component is overlapping."
+    },
+    {
+      "id": "should-check-overlap-flag-to-queue-overlaps",
+      "name": "ShouldCheckOverlapFlagToQueueOverlaps",
+      "category": "PrimitiveComponent",
+      "signature": "ShouldCheckOverlapFlagToQueueOverlaps(Target, This Component)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "This Component",
+          "type": "UPrimitiveComponent&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "convert-swept-overlaps-to-current-overlaps",
+      "name": "ConvertSweptOverlapsToCurrentOverlaps",
+      "category": "PrimitiveComponent",
+      "signature": "ConvertSweptOverlapsToCurrentOverlaps(Target, Overlaps At End Location, Swept Overlaps, Swept Overlaps Index, End Location, End Rotation Quat)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Overlaps At End Location",
+          "type": "TArray<FOverlapInfo,AllocatorType>&"
+        },
+        {
+          "name": "Swept Overlaps",
+          "type": "TOverlapArrayView&"
+        },
+        {
+          "name": "Swept Overlaps Index",
+          "type": "Int"
+        },
+        {
+          "name": "End Location",
+          "type": "FVector&"
+        },
+        {
+          "name": "End Rotation Quat",
+          "type": "FQuat&"
+        }
+      ],
+      "returnType": "template<AllocatorType> bool"
+    },
+    {
+      "id": "convert-rotation-overlaps-to-current-overlaps",
+      "name": "ConvertRotationOverlapsToCurrentOverlaps",
+      "category": "PrimitiveComponent",
+      "signature": "ConvertRotationOverlapsToCurrentOverlaps(Target, Out Overlaps At End Location, Current Overlaps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Out Overlaps At End Location",
+          "type": "TArray<FOverlapInfo,AllocatorType>&"
+        },
+        {
+          "name": "Current Overlaps",
+          "type": "TOverlapArrayView&"
+        }
+      ],
+      "returnType": "template<AllocatorType> bool",
+      "docs": "Convert a set of overlaps from a symmetric change in rotation to a subset that includes only those at the end location (filling in OverlapsAtEndLocation)."
+    },
+    {
+      "id": "get-overlaps-with-actor-template",
+      "name": "GetOverlapsWithActor_Template",
+      "category": "PrimitiveComponent",
+      "signature": "GetOverlapsWithActor_Template(Target, Actor, Out Overlaps)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UPrimitiveComponent*"
+        },
+        {
+          "name": "Actor",
+          "type": "AActor*"
+        },
+        {
+          "name": "Out Overlaps",
+          "type": "TArray<FOverlapInfo,AllocatorType>&"
+        }
+      ],
+      "returnType": "template<AllocatorType> bool"
     }
   ]
 }

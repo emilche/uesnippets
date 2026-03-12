@@ -12,6 +12,20 @@
   ],
   "functions": [
     {
+      "id": "has-data",
+      "name": "HasData",
+      "category": "CompositeFont",
+      "signature": "HasData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFontFaceData*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "@return true if this instance has data set on it"
+    },
+    {
       "id": "set-data",
       "name": "SetData",
       "category": "CompositeFont",
@@ -48,6 +62,34 @@
       "docs": "Set the preprocessed font geometry data per sub-face for the given font data"
     },
     {
+      "id": "get-data",
+      "name": "GetData",
+      "category": "CompositeFont",
+      "signature": "GetData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFontFaceData*"
+        }
+      ],
+      "returnType": "TArray<uint8>&",
+      "docs": "@return The data set on this instance"
+    },
+    {
+      "id": "get-preprocessed-font-geometries",
+      "name": "GetPreprocessedFontGeometries",
+      "category": "CompositeFont",
+      "signature": "GetPreprocessedFontGeometries(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FFontFaceData*"
+        }
+      ],
+      "returnType": "TArrayView<UE::Slate::FPreprocessedFontGeometry>",
+      "docs": "@return The preprocessed font geometry per sub-face of the font represented by Data"
+    },
+    {
       "id": "get-allocated-size",
       "name": "GetAllocatedSize",
       "category": "CompositeFont",
@@ -62,36 +104,27 @@
       "docs": "@return the memory size of the raw font data and the associated preprocessed data"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "make-font-face-data-7f466d",
+      "name": "MakeFontFaceData",
       "category": "CompositeFont",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "FFontFaceData*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Serialize the data on this instance to/from an archive"
+      "signature": "MakeFontFaceData()",
+      "params": [],
+      "returnType": "FFontFaceDataRef",
+      "docs": "Helper function to construct a default font face data"
     },
     {
-      "id": "track-memory-usage",
-      "name": "TrackMemoryUsage",
+      "id": "make-font-face-data-f1bf71",
+      "name": "MakeFontFaceData",
       "category": "CompositeFont",
-      "signature": "TrackMemoryUsage(Target)",
+      "signature": "MakeFontFaceData(In Data)",
       "params": [
         {
-          "name": "Target",
-          "type": "FFontFaceData*"
+          "name": "In Data",
+          "type": "TArray<uint8>&&"
         }
       ],
-      "returnType": "Void",
-      "docs": "Memory stat tracking"
+      "returnType": "FFontFaceDataRef",
+      "docs": "Helper function to construct a font face data from an existing block of font data"
     },
     {
       "id": "has-font",
@@ -366,22 +399,231 @@
       "docs": "Upgrade v2 bulk data to v3 font face."
     },
     {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
       "category": "CompositeFont",
-      "signature": "AddReferencedObjects(Target, Collector)",
+      "signature": "GetTypeHash(Target, Key)",
       "params": [
         {
           "name": "Target",
           "type": "FFontData*"
         },
         {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
+          "name": "Key",
+          "type": "FFontData&"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Get the type hash for this font data"
+    },
+    {
+      "id": "f-typeface-entry-6d03b2",
+      "name": "FTypefaceEntry",
+      "category": "CompositeFont",
+      "signature": "FTypefaceEntry(Target, In Font Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        },
+        {
+          "name": "In Font Name",
+          "type": "FName& InFontName ) : Name ("
         }
       ],
       "returnType": "Void",
-      "docs": "Called by FStandaloneCompositeFont to prevent our objects from being GCd"
+      "docs": "Construct the entry from a name"
+    },
+    {
+      "id": "f-typeface-entry-85e7f2",
+      "name": "FTypefaceEntry",
+      "category": "CompositeFont",
+      "signature": "FTypefaceEntry(Target, In Font Name, In Font Filename, In Hinting, In Font Name, In Loading Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        },
+        {
+          "name": "In Font Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Font Filename",
+          "type": "String"
+        },
+        {
+          "name": "In Hinting",
+          "type": "EFontHinting"
+        },
+        {
+          "name": "In Font Name",
+          "type": "EFontLoadingPolicy InLoadingPolicy ) : Name ("
+        },
+        {
+          "name": "In Loading Policy",
+          "type": "Font ( MoveTemp ( InFontFilename ),InHinting,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Construct the entry from a filename and the font data attributes"
+    },
+    {
+      "id": "f-typeface",
+      "name": "FTypeface",
+      "category": "CompositeFont",
+      "signature": "FTypeface(Target, In Font Name, In Font Filename, In Hinting, In Loading Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        },
+        {
+          "name": "In Font Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Font Filename",
+          "type": "String"
+        },
+        {
+          "name": "In Hinting",
+          "type": "EFontHinting"
+        },
+        {
+          "name": "In Loading Policy",
+          "type": "EFontLoadingPolicy"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Convenience constructor for when your font family only contains a single font"
+    },
+    {
+      "id": "append-font",
+      "name": "AppendFont",
+      "category": "CompositeFont",
+      "signature": "AppendFont(Target, In Font Name, In Font Filename, In Hinting, In Loading Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        },
+        {
+          "name": "In Font Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Font Filename",
+          "type": "String"
+        },
+        {
+          "name": "In Hinting",
+          "type": "EFontHinting"
+        },
+        {
+          "name": "In Loading Policy",
+          "type": "EFontLoadingPolicy"
+        }
+      ],
+      "returnType": "FTypeface&",
+      "docs": "Append a new font into this family"
+    },
+    {
+      "id": "f-composite-font",
+      "name": "FCompositeFont",
+      "category": "CompositeFont",
+      "signature": "FCompositeFont(In Font Name, In Font Filename, In Hinting, In Loading Policy)",
+      "params": [
+        {
+          "name": "In Font Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Font Filename",
+          "type": "String"
+        },
+        {
+          "name": "In Hinting",
+          "type": "EFontHinting"
+        },
+        {
+          "name": "In Loading Policy",
+          "type": "EFontLoadingPolicy InLoadingPolicy ) : DefaultTypeface ( InFontName,MoveTemp ( InFontFilename ),InHinting,"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "make-dirty",
+      "name": "MakeDirty",
+      "category": "CompositeFont",
+      "signature": "MakeDirty(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Call this when the composite font is changed after its initial setup - this allows various caches to update as required"
+    },
+    {
+      "id": "is-ascent-descent-override-enabled",
+      "name": "IsAscentDescentOverrideEnabled",
+      "category": "CompositeFont",
+      "signature": "IsAscentDescentOverrideEnabled(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Transient value containing the current history ID of this composite font\nThis should be updated when the composite font is changed (which should happen infrequently as composite fonts are assumed to be mostly immutable) once they've been setup"
+    },
+    {
+      "id": "f-standalone-composite-font-a0b3db",
+      "name": "FStandaloneCompositeFont",
+      "category": "CompositeFont",
+      "signature": "FStandaloneCompositeFont(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "A version of FCompositeFont that should be used when it's not being embedded within another UObject\nThis derives from FGCObject to ensure that the bulk data objects are referenced correctly"
+    },
+    {
+      "id": "f-standalone-composite-font-82a6dd",
+      "name": "FStandaloneCompositeFont",
+      "category": "CompositeFont",
+      "signature": "FStandaloneCompositeFont(Target, In Font Name, In Font Filename, In Hinting, In Loading Policy)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FCompositeFont*"
+        },
+        {
+          "name": "In Font Name",
+          "type": "Name&"
+        },
+        {
+          "name": "In Font Filename",
+          "type": "String"
+        },
+        {
+          "name": "In Hinting",
+          "type": "EFontHinting"
+        },
+        {
+          "name": "In Loading Policy",
+          "type": "EFontLoadingPolicy InLoadingPolicy ) : FCompositeFont ( InFontName,MoveTemp ( InFontFilename ),InHinting,"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Convenience constructor for when your composite font only contains a single font"
     },
     {
       "id": "get-referencer-name",
@@ -391,7 +633,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FStandaloneCompositeFont*"
+          "type": "FCompositeFont*"
         }
       ],
       "returnType": "String"

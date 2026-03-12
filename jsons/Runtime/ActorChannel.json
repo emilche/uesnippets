@@ -14,6 +14,73 @@
   ],
   "functions": [
     {
+      "id": "get-skip-role-swap",
+      "name": "GetSkipRoleSwap",
+      "category": "ActorChannel",
+      "signature": "GetSkipRoleSwap(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "whether we should nullptr references to this channel's Actor in other channels' Recent data when this channel is closed\nset to false in cases where the Actor can't become relevant again (e.g. destruction) as it's unnecessary in that case"
+    },
+    {
+      "id": "set-skip-role-swap",
+      "name": "SetSkipRoleSwap",
+      "category": "ActorChannel",
+      "signature": "SetSkipRoleSwap(Target, Should Skip)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Should Skip",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "get-created-sub-objects",
+      "name": "GetCreatedSubObjects",
+      "category": "ActorChannel",
+      "signature": "GetCreatedSubObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "TArray<TObjectPtr<UObject>>&"
+    },
+    {
+      "id": "u-actor-channel-7149b7",
+      "name": "UActorChannel",
+      "category": "ActorChannel",
+      "signature": "UActorChannel(Object Initializer)",
+      "params": [
+        {
+          "name": "Object Initializer",
+          "type": "FObjectInitializer&",
+          "default": "FObjectInitializer::Get()"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Default constructor"
+    },
+    {
+      "id": "u-actor-channel-b40c31",
+      "name": "UActorChannel",
+      "category": "ActorChannel",
+      "signature": "UActorChannel()",
+      "params": [],
+      "returnType": "Void"
+    },
+    {
       "id": "init",
       "name": "Init",
       "category": "ActorChannel",
@@ -47,23 +114,6 @@
         {
           "name": "Target",
           "type": "UActorChannel*"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "received-bunch",
-      "name": "ReceivedBunch",
-      "category": "ActorChannel",
-      "signature": "ReceivedBunch(Target, Bunch)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorChannel*"
-        },
-        {
-          "name": "Bunch",
-          "type": "FInBunch&"
         }
       ],
       "returnType": "Void"
@@ -125,23 +175,6 @@
       "returnType": "Bool"
     },
     {
-      "id": "received-nak",
-      "name": "ReceivedNak",
-      "category": "ActorChannel",
-      "signature": "ReceivedNak(Target, Nak Packet Id)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorChannel*"
-        },
-        {
-          "name": "Nak Packet Id",
-          "type": "Int"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "close",
       "name": "Close",
       "category": "ActorChannel",
@@ -201,6 +234,20 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "get-actor",
+      "name": "GetActor",
+      "category": "ActorChannel",
+      "signature": "GetActor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "AActor*",
+      "docs": "UActorChannel interface and accessors."
     },
     {
       "id": "replicate-actor",
@@ -332,40 +379,6 @@
       "docs": "Append any \"must be mapped\" guids to front of bunch. These are guids that the client will wait on before processing this bunch."
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
-      "category": "ActorChannel",
-      "signature": "Serialize(Target, Ar)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "UActorChannel*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
-      "id": "add-referenced-objects",
-      "name": "AddReferencedObjects",
-      "category": "ActorChannel",
-      "signature": "AddReferencedObjects(In This, Collector)",
-      "params": [
-        {
-          "name": "In This",
-          "type": "UObject*"
-        },
-        {
-          "name": "Collector",
-          "type": "FReferenceCollector&"
-        }
-      ],
-      "returnType": "Void"
-    },
-    {
       "id": "queue-remote-function-bunch",
       "name": "QueueRemoteFunctionBunch",
       "category": "ActorChannel",
@@ -488,7 +501,7 @@
       "docs": "Writes the header for a content block of properties / RPCs for the given object (either the actor a subobject of the actor)"
     },
     {
-      "id": "write-content-block-for-sub-object-delete",
+      "id": "write-content-block-for-sub-object-delete-b55827",
       "name": "WriteContentBlockForSubObjectDelete",
       "category": "ActorChannel",
       "signature": "WriteContentBlockForSubObjectDelete(Target, Bunch, Guid To Delete)",
@@ -794,6 +807,92 @@
       "docs": "Replicates an ActorComponent subobject. Used to catch ActorChannels who are using the registration list while their Owner is not flagged to use it"
     },
     {
+      "id": "replicate-subobject-custom",
+      "name": "ReplicateSubobjectCustom",
+      "category": "ActorChannel",
+      "signature": "ReplicateSubobjectCustom(Target, Obj, Bunch, Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Custom implementation for ReplicateSubobject when RepFlags.bUseCustomSubobjectReplication is true"
+    },
+    {
+      "id": "replicate-subobject-list",
+      "name": "ReplicateSubobjectList",
+      "category": "ActorChannel",
+      "signature": "ReplicateSubobjectList(Target, Object List, Bunch, Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Object List",
+          "type": "TArray<Type*>&"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags&"
+        }
+      ],
+      "returnType": "template<Type> bool",
+      "docs": "utility template for replicating list of replicated subobjects"
+    },
+    {
+      "id": "set-forced-serialize-from-rpc",
+      "name": "SetForcedSerializeFromRPC",
+      "category": "ActorChannel",
+      "signature": "SetForcedSerializeFromRPC(Target, In From RPC)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "In From RPC",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-packet-rep-key-info",
+      "name": "FPacketRepKeyInfo",
+      "category": "ActorChannel",
+      "signature": "FPacketRepKeyInfo(Target, INDEX NONE)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "INDEX NONE",
+          "type": ") : PacketID ("
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "key-needs-to-replicate",
       "name": "KeyNeedsToReplicate",
       "category": "ActorChannel",
@@ -860,7 +959,29 @@
       "id": "find-replicator",
       "name": "FindReplicator",
       "category": "ActorChannel",
-      "signature": "FindReplicator(Target, Obj)",
+      "signature": "FindReplicator(Target, Obj, Out Found Invalid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Out Found Invalid",
+          "type": "Bool*"
+        }
+      ],
+      "returnType": "TSharedRef<FObjectReplicator>*",
+      "docs": "Attempts to find a valid, non-dormant replicator for the given object.\n@param Obj\t\t\t\tThe object whose replicator to find.\n@param bOutFoundInvalid\tIndicates we found a replicator, but it was invalid.\n@return A replicator, if one was found."
+    },
+    {
+      "id": "create-replicator-9a5964",
+      "name": "CreateReplicator",
+      "category": "ActorChannel",
+      "signature": "CreateReplicator(Target, Obj)",
       "params": [
         {
           "name": "Target",
@@ -871,8 +992,367 @@
           "type": "UObject*"
         }
       ],
-      "returnType": "TSharedRef<FObjectReplicator>*",
-      "docs": "Attempts to find a valid, non-dormant replicator for the given object."
+      "returnType": "TSharedRef<FObjectReplicator>&",
+      "docs": "Creates a new object replicator or reuses a replicator if it was stored for dormancy in the Connection."
+    },
+    {
+      "id": "create-replicator-715d51",
+      "name": "CreateReplicator",
+      "category": "ActorChannel",
+      "signature": "CreateReplicator(Target, Obj, Check Dormant Replicators)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Check Dormant Replicators",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "TSharedRef<FObjectReplicator>&",
+      "docs": "Creates a new object replicator.\nThis will replace any existing entries in the ReplicatorMap, so this should\nalways be preceeded by a call to FindReplicator.\n@param Obj\t\t\t\t\t\tThe object to create a replicator for.\n@param bCheckDormantReplicators\tWhen true, we will search the DormantReplicator map before actually\ncreating a new replicator. Even in this case, we will treat the\nreplicator as newly created.\n@return The newly created replicator."
+    },
+    {
+      "id": "find-or-create-replicator",
+      "name": "FindOrCreateReplicator",
+      "category": "ActorChannel",
+      "signature": "FindOrCreateReplicator(Target, Obj, Out Created)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Out Created",
+          "type": "Bool*",
+          "default": "nullptr"
+        }
+      ],
+      "returnType": "TSharedRef<FObjectReplicator>&",
+      "docs": "Convenience method for finding a replicator, and creating one if necessary, all at once.\n@param Obj\t\t\tThe object to find / create a replicator for.\n@param bOutCreated\tWhether or not the replicator was found or created.\n@return The found or created replicator."
+    },
+    {
+      "id": "object-has-replicator",
+      "name": "ObjectHasReplicator",
+      "category": "ActorChannel",
+      "signature": "ObjectHasReplicator(Target, Obj)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Obj",
+          "type": "TWeakObjectPtr<UObject>&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "move-mapped-object-to-unmapped",
+      "name": "MoveMappedObjectToUnmapped",
+      "category": "ActorChannel",
+      "signature": "MoveMappedObjectToUnmapped(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Object",
+          "type": "UObject*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Unmap all references to this object, so that if later we receive this object again, we can remap the original references"
+    },
+    {
+      "id": "destroy-actor-and-components",
+      "name": "DestroyActorAndComponents",
+      "category": "ActorChannel",
+      "signature": "DestroyActorAndComponents(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "clean-up",
+      "name": "CleanUp",
+      "category": "ActorChannel",
+      "signature": "CleanUp(Target, For Destroy, Close Reason)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "For Destroy",
+          "type": "Bool"
+        },
+        {
+          "name": "Close Reason",
+          "type": "EChannelCloseReason"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "become-dormant",
+      "name": "BecomeDormant",
+      "category": "ActorChannel",
+      "signature": "BecomeDormant(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Closes the actor channel but with a 'dormant' flag set so it can be reopened"
+    },
+    {
+      "id": "do-sub-object-replication",
+      "name": "DoSubObjectReplication",
+      "category": "ActorChannel",
+      "signature": "DoSubObjectReplication(Target, Bunch, Out Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Out Rep Flags",
+          "type": "FReplicationFlags&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Handle the replication of subobjects for this actor. Returns true if data was written into the Bunch."
+    },
+    {
+      "id": "write-content-block-for-sub-object-delete-79de07",
+      "name": "WriteContentBlockForSubObjectDelete",
+      "category": "ActorChannel",
+      "signature": "WriteContentBlockForSubObjectDelete(Target, Bunch, Guid To Delete, Delete Flag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Guid To Delete",
+          "type": "FNetworkGUID&"
+        },
+        {
+          "name": "Delete Flag",
+          "type": "ESubObjectDeleteFlag"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Writes the header for a content block specifically for deleting sub-objects"
+    },
+    {
+      "id": "to-string",
+      "name": "ToString",
+      "category": "ActorChannel",
+      "signature": "ToString(Target, Delete Flag)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Delete Flag",
+          "type": "UActorChannel::ESubObjectDeleteFlag"
+        }
+      ],
+      "returnType": "TCHAR*"
+    },
+    {
+      "id": "write-sub-object-in-bunch",
+      "name": "WriteSubObjectInBunch",
+      "category": "ActorChannel",
+      "signature": "WriteSubObjectInBunch(Target, Obj, Bunch, Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Obj",
+          "type": "UObject*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Write the replicated bits into the bunch data"
+    },
+    {
+      "id": "write-component-sub-objects",
+      "name": "WriteComponentSubObjects",
+      "category": "ActorChannel",
+      "signature": "WriteComponentSubObjects(Target, Component, Bunch, Rep Flags, Condition Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Component",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags"
+        },
+        {
+          "name": "Condition Map",
+          "type": "TStaticBitArray<COND_Max>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Find the replicated subobjects of the component and write them into the bunch"
+    },
+    {
+      "id": "write-sub-objects",
+      "name": "WriteSubObjects",
+      "category": "ActorChannel",
+      "signature": "WriteSubObjects(Target, Sub Object Owner, Sub Object List, Bunch, Rep Flags, Condition Map)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Sub Object Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Sub Object List",
+          "type": "UE::Net::FSubObjectRegistry&"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags"
+        },
+        {
+          "name": "Condition Map",
+          "type": "TStaticBitArray<COND_Max>&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Replicate a list of subobjects"
+    },
+    {
+      "id": "validate-replicated-sub-objects",
+      "name": "ValidateReplicatedSubObjects",
+      "category": "ActorChannel",
+      "signature": "ValidateReplicatedSubObjects(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "test-legacy-replicate-sub-objects-7fd8bf",
+      "name": "TestLegacyReplicateSubObjects",
+      "category": "ActorChannel",
+      "signature": "TestLegacyReplicateSubObjects(Target, Replicated Component, Bunch, Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Replicated Component",
+          "type": "UActorComponent*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "test-legacy-replicate-sub-objects-df389b",
+      "name": "TestLegacyReplicateSubObjects",
+      "category": "ActorChannel",
+      "signature": "TestLegacyReplicateSubObjects(Target, Bunch, Rep Flags)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        },
+        {
+          "name": "Rep Flags",
+          "type": "FReplicationFlags"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "update-deleted-sub-objects",
+      "name": "UpdateDeletedSubObjects",
+      "category": "ActorChannel",
+      "signature": "UpdateDeletedSubObjects(Target, Bunch)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UActorChannel*"
+        },
+        {
+          "name": "Bunch",
+          "type": "FOutBunch&"
+        }
+      ],
+      "returnType": "Bool"
     }
   ]
 }

@@ -1,0 +1,217 @@
+{
+  "id": "object-pool",
+  "label": "ObjectPool",
+  "includepath": "Chaos/ObjectPool.h",
+  "includes": [
+    "type_traits",
+    "UnrealMemory",
+    "UnrealMathUtility",
+    "AlignmentTemplates",
+    "UnrealTemplate",
+    "IsTriviallyDestructible"
+  ],
+  "functions": [
+    {
+      "id": "alloc",
+      "name": "Alloc",
+      "category": "ObjectPool",
+      "signature": "Alloc(Target, Args)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        },
+        {
+          "name": "Args",
+          "type": "TArgs&& . . ."
+        }
+      ],
+      "returnType": "template<. . . TArgs> FPtr",
+      "docs": "Allocate an object from the pool\nReturns an instance of the object type specified for this pool, either from the next available on the\nfinal block, the free list or by allocating a new block to continue providing objects. As this method\nmay defer to the runtime allocator it may sometimes run significantly slower when the pool is exhausted\nRequires that the object is default constructible\n@param Args - ObjectType constructor arguments\n@return The newly allocated object"
+    },
+    {
+      "id": "free",
+      "name": "Free",
+      "category": "ObjectPool",
+      "signature": "Free(Target, Object)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        },
+        {
+          "name": "Object",
+          "type": "FPtr"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Free a single object provided by this pool\nTakes an object previously allocated in this pool and frees it, accessing the pointer beyond a call\nto free is an undefined operation and could return garbage or an entirely different object. Avoiding this\ncase is the responsibility of the caller\nBehavior is also undefined if an object not owned by this pool is passed to Free. Outside of debug\nthis will not be asserted\n@param Object The object to free"
+    },
+    {
+      "id": "reset",
+      "name": "Reset",
+      "category": "ObjectPool",
+      "signature": "Reset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset the whole pool\nThis will invalidate every currently live object from the pool. If a pointer from this pool is\ndereferenced beyond a call to Reset then it may return garbage, or point to an entirely different\nobject. Avoiding this case is the responsibility of the caller."
+    },
+    {
+      "id": "get-num-allocated-blocks",
+      "name": "GetNumAllocatedBlocks",
+      "category": "ObjectPool",
+      "signature": "GetNumAllocatedBlocks(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of blocks currently allocated in the pool"
+    },
+    {
+      "id": "get-num-per-block",
+      "name": "GetNumPerBlock",
+      "category": "ObjectPool",
+      "signature": "GetNumPerBlock(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the max number of items per block"
+    },
+    {
+      "id": "get-allocated-size",
+      "name": "GetAllocatedSize",
+      "category": "ObjectPool",
+      "signature": "GetAllocatedSize(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the allocated (total) size of all blocks in the pool"
+    },
+    {
+      "id": "shrink-to",
+      "name": "ShrinkTo",
+      "category": "ObjectPool",
+      "signature": "ShrinkTo(Target, Num Desired Empty Blocks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        },
+        {
+          "name": "Num Desired Empty Blocks",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Shrinks the number of blocks\nAll blocks that are not empty are kept, plus a number of empty blocks specified by the caller\nPassing zero will remove all empty blocks, leaving any non-empty blocks behind\n@param NumDesiredEmptyBlocks - number of empty blocks to keep"
+    },
+    {
+      "id": "reserve-blocks",
+      "name": "ReserveBlocks",
+      "category": "ObjectPool",
+      "signature": "ReserveBlocks(Target, Num Blocks)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        },
+        {
+          "name": "Num Blocks",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Makes sure the pool has at least NumBlocks blocks allocated\nNote: This will never reduce the number of blocks, it will only make sure the pool has at least\nNumBlocks block allocated, empty or not.\n@param NumBlocks - Number of blocks to reserve"
+    },
+    {
+      "id": "reserve-items",
+      "name": "ReserveItems",
+      "category": "ObjectPool",
+      "signature": "ReserveItems(Target, Num Items)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        },
+        {
+          "name": "Num Items",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Makes sure the pool has at least enough blocks allocated to store NumItems\nNot: This isn't a number of free items, but total items. If a pool has 100 items in it and\nReserveItems(100); is called - no action will be taken.\nThis function will also never remove blocks from the pool - only ever increase. To reduce the number of\nblocks see ShrinkTo\n@see ShrinkTo\n@Param NumItems - Number of items to reserve"
+    },
+    {
+      "id": "get-ratio",
+      "name": "GetRatio",
+      "category": "ObjectPool",
+      "signature": "GetRatio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Calculates the storage/overhead ratio of the pool. Larger items that have a size close to the alignment\nboundary will be more efficient on space\n@return Ratio of storage to overhead"
+    },
+    {
+      "id": "get-num-allocated",
+      "name": "GetNumAllocated",
+      "category": "ObjectPool",
+      "signature": "GetNumAllocated(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Get the number of allocated items."
+    },
+    {
+      "id": "get-num-free",
+      "name": "GetNumFree",
+      "category": "ObjectPool",
+      "signature": "GetNumFree(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the number of free items the pool has remaining\n@return Number of free items"
+    },
+    {
+      "id": "get-capacity",
+      "name": "GetCapacity",
+      "category": "ObjectPool",
+      "signature": "GetCapacity(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TObjectPool*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Gets the total number of items the pool can currently stor\n@return The pool capacity"
+    }
+  ]
+}

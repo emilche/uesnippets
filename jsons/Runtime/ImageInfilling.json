@@ -1,0 +1,68 @@
+{
+  "id": "image-infilling",
+  "label": "ImageInfilling",
+  "includepath": "Image/ImageInfilling.h",
+  "includes": [
+    "IntVectorTypes",
+    "Tuple",
+    "IndexUtil",
+    "VectorTypes",
+    "ImageDimensions",
+    "ImageBuilder",
+    "IndexPriorityQueue"
+  ],
+  "functions": [
+    {
+      "id": "compute-infill",
+      "name": "ComputeInfill",
+      "category": "ImageInfilling",
+      "signature": "ComputeInfill(Target, Image, Missing Pixels, Missing Value, Normalize Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMarchingPixelInfill*"
+        },
+        {
+          "name": "Image",
+          "type": "TImageBuilder<PixelType>&"
+        },
+        {
+          "name": "Missing Pixels",
+          "type": "TArray<FVector2i>&"
+        },
+        {
+          "name": "Missing Value",
+          "type": "PixelType"
+        },
+        {
+          "name": "Normalize Func",
+          "type": "TFunctionRef<PixelType ( PixelType SumOfNbrValues,int NbrCount )>"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "TMarchingPixelInfill implements a very basic infilling strategy where the missing pixel with the most \"known\"\nneighbours is set to the average value of those neighbours, and this is iterated until all missing pixels are known.\nA Priority Queue is used to track the active front.\nThe infill sequence is tracked, which allows it to be \"replayed\" on multiple images. This is useful\nin cases where we have separate images with the same holes, which arises when baking textures from world sampling."
+    },
+    {
+      "id": "apply-infill",
+      "name": "ApplyInfill",
+      "category": "ImageInfilling",
+      "signature": "ApplyInfill(Target, Image, Normalize Func)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "TMarchingPixelInfill*"
+        },
+        {
+          "name": "Image",
+          "type": "TImageBuilder<OtherPixelType>&"
+        },
+        {
+          "name": "Normalize Func",
+          "type": "TFunctionRef<OtherPixelType ( OtherPixelType SumOfNbrValues,int NbrCount )>"
+        }
+      ],
+      "returnType": "template<OtherPixelType> void",
+      "docs": "Fill the missing values in Image by replaying the infill sequence computed by ComputeInfill()\n@param NormalizeFunc Implements an \"average\" operation for the template OtherPixelType, normally (SumOfNbrValues / NbrCount)"
+    }
+  ]
+}

@@ -34,6 +34,57 @@
       "returnType": "String"
     },
     {
+      "id": "lexical-less",
+      "name": "LexicalLess",
+      "category": "IAssetRegistry",
+      "signature": "LexicalLess(Target, Other)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        },
+        {
+          "name": "Other",
+          "type": "FAssetDependency&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "package-dependency",
+      "name": "PackageDependency",
+      "category": "IAssetRegistry",
+      "signature": "PackageDependency(Package Name, Properties)",
+      "params": [
+        {
+          "name": "Package Name",
+          "type": "Name"
+        },
+        {
+          "name": "Properties",
+          "type": "UE::AssetRegistry::EDependencyProperty"
+        }
+      ],
+      "returnType": "FAssetDependency"
+    },
+    {
+      "id": "get-type-hash",
+      "name": "GetTypeHash",
+      "category": "IAssetRegistry",
+      "signature": "GetTypeHash(Target, In Hash)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        },
+        {
+          "name": "In Hash",
+          "type": "FAssetDependency&"
+        }
+      ],
+      "returnType": "UInt"
+    },
+    {
       "id": "write-compact-binary",
       "name": "WriteCompactBinary",
       "category": "IAssetRegistry",
@@ -41,7 +92,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FAssetDependency*"
+          "type": "IAssetRegistry*"
         },
         {
           "name": "Writer",
@@ -49,6 +100,44 @@
         }
       ],
       "returnType": "Void"
+    },
+    {
+      "id": "load-from-compact-binary",
+      "name": "LoadFromCompactBinary",
+      "category": "IAssetRegistry",
+      "signature": "LoadFromCompactBinary(Target, Field, Dependency)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        },
+        {
+          "name": "Field",
+          "type": "FCbFieldView"
+        },
+        {
+          "name": "Dependency",
+          "type": "FAssetDependency&"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get",
+      "name": "Get",
+      "category": "IAssetRegistry",
+      "signature": "Get()",
+      "params": [],
+      "returnType": "IAssetRegistry*",
+      "docs": "Global singleton interface for accessing a catalog of all packages (and some other content file types) that are\nstored in any mounted directory. In editor this information is gathered from the package files on disk during a\ngather step at editor startup. In cooked runtimes this information was calculated during cook and is serialized out\nof a single file (after pruning information not necessary at runtime.)\nSome API notes:\nbIncludeOnlyOnDiskAssets\nMost query functions that return FAssetData take this argument. If true, only data collected from disk and\nstored in the AssetRegistry will be returned. If false, and the object is loaded in memory, the returned\nAssetData will be calculated from the object in memory because the InMemoryData is more likely to be\nup-to-date. The InMemory data will sometimes vary from the DiskGatheredData.\nWhen InMemoryData is returned some categories of data that are always missing from the object in memory (e.g.\nGetAssetRegistryTags(EAssetRegistryTagsCaller::SavePackage)) are read from the DiskGatheredData and added to\nthe InMemoryData.\nSetting this value to true will always be faster than setting it to false, because the same registry\nlookups are performed in either case, but the InMemoryData lookup is skipped in the true case.\nThe default is usually false."
+    },
+    {
+      "id": "get-checked",
+      "name": "GetChecked",
+      "category": "IAssetRegistry",
+      "signature": "GetChecked()",
+      "params": [],
+      "returnType": "IAssetRegistry&"
     },
     {
       "id": "has-assets",
@@ -271,34 +360,6 @@
         }
       ],
       "returnType": "FAssetData"
-    },
-    {
-      "id": "k-2-get-asset-by-object-path",
-      "name": "K2_GetAssetByObjectPath",
-      "category": "AssetRegistry",
-      "signature": "K2_GetAssetByObjectPath(Target, Object Path, Include Only On Disk Assets, Skip AR Filtered Assets)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "IAssetRegistry*"
-        },
-        {
-          "name": "Object Path",
-          "type": "FSoftObjectPath&"
-        },
-        {
-          "name": "Include Only On Disk Assets",
-          "type": "Bool",
-          "default": "false"
-        },
-        {
-          "name": "Skip AR Filtered Assets",
-          "type": "Bool",
-          "default": "true"
-        }
-      ],
-      "returnType": "FAssetData",
-      "docs": "Gets the asset data for the specified object path\n@param ObjectPath the path of the object to be looked up\n@param bIncludeOnlyOnDiskAssets If true, use only DiskGatheredData, do not calculate from UObjects.\n@see IAssetRegistry class header for bIncludeOnlyOnDiskAssets.\n@param bSkipARFilteredAssets If true, skips Objects that return true for IsAsset but are not assets in the current platform.\n@return the assets data;Will be invalid if object could not be found"
     },
     {
       "id": "get-asset-by-object-path-f98cf2",
@@ -748,6 +809,48 @@
       "returnType": "Void"
     },
     {
+      "id": "f-file-load-progress-update-data",
+      "name": "FFileLoadProgressUpdateData",
+      "category": "IAssetRegistry",
+      "signature": "FFileLoadProgressUpdateData(Target, In Num Total Assets, In Num Assets Processed By Asset Registry, In Num Assets Pending Data Load, In Num Total Assets, In Num Assets Processed By Asset Registry, In Num Assets Pending Data Load, In Is Discovering Asset Files)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        },
+        {
+          "name": "In Num Total Assets",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Assets Processed By Asset Registry",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Assets Pending Data Load",
+          "type": "Int"
+        },
+        {
+          "name": "In Num Total Assets",
+          "type": "bool InIsDiscoveringAssetFiles ) : NumTotalAssets ("
+        },
+        {
+          "name": "In Num Assets Processed By Asset Registry",
+          "type": "NumAssetsProcessedByAssetRegistry ("
+        },
+        {
+          "name": "In Num Assets Pending Data Load",
+          "type": "NumAssetsPendingDataLoad ("
+        },
+        {
+          "name": "In Is Discovering Asset Files",
+          "type": "bIsDiscoveringAssetFiles ("
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Payload data for a file progress update"
+    },
+    {
       "id": "is-loading-assets",
       "name": "IsLoadingAssets",
       "category": "AssetRegistry",
@@ -762,6 +865,64 @@
       "docs": "Returns true if the asset registry is currently loading files and does not yet know about all assets.\nThis is a legacy function that only returns true when the asset registry is performing its initial search for assets.\nPrefer using IsGathering() to know if the asset registry is currently loading files."
     },
     {
+      "id": "f-load-package-registry-data-31037f",
+      "name": "FLoadPackageRegistryData",
+      "category": "IAssetRegistry",
+      "signature": "FLoadPackageRegistryData(Target, In Get Dependencies)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        },
+        {
+          "name": "In Get Dependencies",
+          "type": "Bool",
+          "default": "false"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-load-package-registry-data-3bc409",
+      "name": "FLoadPackageRegistryData",
+      "category": "IAssetRegistry",
+      "signature": "FLoadPackageRegistryData(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "f-pause-background-processing-scope",
+      "name": "FPauseBackgroundProcessingScope",
+      "category": "IAssetRegistry",
+      "signature": "FPauseBackgroundProcessingScope(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Request to pause background processing of scan results while this object is in scope\nThis can be used to allow a priority thread to perform along sequence of operations\nwithout having to contend with the background thread for data access"
+    },
+    {
+      "id": "request-resume-background-processing",
+      "name": "RequestResumeBackgroundProcessing",
+      "category": "IAssetRegistry",
+      "signature": "RequestResumeBackgroundProcessing(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IAssetRegistry*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "do-serialize-bd6d61",
       "name": "DoSerialize",
       "category": "IAssetRegistry",
@@ -769,7 +930,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDeserializePackageData*"
+          "type": "IAssetRegistry*"
         },
         {
           "name": "Binary Archive",
@@ -794,7 +955,7 @@
       "params": [
         {
           "name": "Target",
-          "type": "FDeserializeObjectPackageData*"
+          "type": "IAssetRegistry*"
         },
         {
           "name": "Binary Archive",

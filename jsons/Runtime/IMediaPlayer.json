@@ -1,0 +1,276 @@
+{
+  "id": "i-media-player",
+  "label": "IMediaPlayer",
+  "includepath": "IMediaPlayer.h",
+  "includes": [
+    "UnrealString",
+    "Array",
+    "Map",
+    "Text",
+    "Interval",
+    "IntPoint",
+    "MathFwd",
+    "Paths",
+    "Timespan",
+    "Variant"
+  ],
+  "functions": [
+    {
+      "id": "open",
+      "name": "Open",
+      "category": "IMediaPlayer",
+      "signature": "Open(Target, Url, Options, Player Options)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Url",
+          "type": "String&"
+        },
+        {
+          "name": "Options",
+          "type": "IMediaOptions*"
+        },
+        {
+          "name": "Player Options",
+          "type": "FMediaPlayerOptions*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Open a media source from a URL with optional asset and player parameters."
+    },
+    {
+      "id": "get-media-info",
+      "name": "GetMediaInfo",
+      "category": "IMediaPlayer",
+      "signature": "GetMediaInfo(Target, Info Name)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Info Name",
+          "type": "Name"
+        }
+      ],
+      "returnType": "FVariant",
+      "docs": "Get information about the media that is playing.\n@param\tInfoName\t\tName of the information we want.\n@returns\t\t\t\t\tRequested information, or empty if not available.\n@see\t\t\t\t\t\tUMediaPlayer::GetMediaInfo."
+    },
+    {
+      "id": "get-media-metadata",
+      "name": "GetMediaMetadata",
+      "category": "IMediaPlayer",
+      "signature": "GetMediaMetadata(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "TSharedPtr<TMap<FString,TArray<TUniquePtr<IMediaMetadataItem>>>,ESPMode::ThreadSafe>",
+      "docs": "Gets the current metadata of the media source.\nMetadata is optional and if present is typically a collection of key/value items without a\nwell defined meaning. It may contain information on copyright, album name, artist and such,\nbut the availability of any item is not mandatory and the representation will vary with the\ntype of media.\nInterpretation therefor requires the application to be aware of the type of media being loaded\nand the possible metadata it may carry.\nMetadata may change over time. Its presence or change is reported by a MetadataChanged event."
+    },
+    {
+      "id": "get-media-name",
+      "name": "GetMediaName",
+      "category": "IMediaPlayer",
+      "signature": "GetMediaName(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "Text",
+      "docs": "Get the human readable name of the currently loaded media source.\nDepending on the type of media source, this might be the name of a file,\nthe display name of a capture device, or some other identifying string.\nIf the player does not provide a specialized implementation for this\nmethod, the media name will be derived from the current media URL.\n@return Media source name, or empty text if no media is opened\n@see GetPlayerName, GetUrl"
+    },
+    {
+      "id": "set-guid",
+      "name": "SetGuid",
+      "category": "IMediaPlayer",
+      "signature": "SetGuid(Target, Guid)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Guid",
+          "type": "FGuid&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Set the player's globally unique identifier.\n@param Guid The GUID to set."
+    },
+    {
+      "id": "set-native-volume",
+      "name": "SetNativeVolume",
+      "category": "IMediaPlayer",
+      "signature": "SetNativeVolume(Target, Volume)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Volume",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set the player's native volume if supported.\n@param Volume The volume to set.\n@return true on success, false otherwise."
+    },
+    {
+      "id": "set-last-audio-rendered-sample-time",
+      "name": "SetLastAudioRenderedSampleTime",
+      "category": "IMediaPlayer",
+      "signature": "SetLastAudioRenderedSampleTime(Target, Sample Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Sample Time",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Notify player of last sample time of audio used.\n@param SampleTime The last audio sample dequeued by one of the audio sinks."
+    },
+    {
+      "id": "tick-audio",
+      "name": "TickAudio",
+      "category": "IMediaPlayer",
+      "signature": "TickAudio(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick the player's audio related code.\nThis is a high-frequency tick function. Media players override this method\nto fetch and process audio samples, or to perform other time critical tasks.\n@see TickInput, TickFetch"
+    },
+    {
+      "id": "tick-fetch",
+      "name": "TickFetch",
+      "category": "IMediaPlayer",
+      "signature": "TickFetch(Target, Delta Time, Timecode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Timecode",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick the player in the Fetch phase.\nMedia players may override this method to fetch newly decoded input\nsamples before they are rendered on textures or audio components.\n@param DeltaTime Time since last tick.\n@param Timecode The current media time code.\n@see TickAudio, TickInput"
+    },
+    {
+      "id": "tick-input",
+      "name": "TickInput",
+      "category": "IMediaPlayer",
+      "signature": "TickInput(Target, Delta Time, Timecode)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "FTimespan"
+        },
+        {
+          "name": "Timecode",
+          "type": "FTimespan"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Tick the player in the Input phase.\nMedia players may override this method to update their state before the\nEngine is being ticked, or to initiate the processing of input samples.\n@param DeltaTime Time since last tick.\n@param Timecode The current media time code.\n@see TickAudio, TickFetch"
+    },
+    {
+      "id": "flush-on-seek-started",
+      "name": "FlushOnSeekStarted",
+      "category": "IMediaPlayer",
+      "signature": "FlushOnSeekStarted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Flush sinks when seek begins\n@return true if sinks should be flushed when a seek starts"
+    },
+    {
+      "id": "flush-on-seek-completed",
+      "name": "FlushOnSeekCompleted",
+      "category": "IMediaPlayer",
+      "signature": "FlushOnSeekCompleted(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Flush sinks when seek ends\n@return true if sinks should be flushed when a seek finishes"
+    },
+    {
+      "id": "get-player-feature-flag",
+      "name": "GetPlayerFeatureFlag",
+      "category": "IMediaPlayer",
+      "signature": "GetPlayerFeatureFlag(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "set-async-resource-release-notification",
+      "name": "SetAsyncResourceReleaseNotification",
+      "category": "IMediaPlayer",
+      "signature": "SetAsyncResourceReleaseNotification(Target, Async Destruct Notification)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        },
+        {
+          "name": "Async Destruct Notification",
+          "type": "IAsyncResourceReleaseNotificationRef"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Set async resource release notification for use with IMediaPlayerLifecycleManagerDelegate"
+    },
+    {
+      "id": "get-new-resources-on-open",
+      "name": "GetNewResourcesOnOpen",
+      "category": "IMediaPlayer",
+      "signature": "GetNewResourcesOnOpen(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "IMediaPlayer*"
+        }
+      ],
+      "returnType": "UInt",
+      "docs": "Return IMediaPlayerLifecycleManagerDelegate::ResourceFlags bitmask to indicate resource types recreated on a open call"
+    }
+  ]
+}

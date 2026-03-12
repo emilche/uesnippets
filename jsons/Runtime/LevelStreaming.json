@@ -18,6 +18,19 @@
   ],
   "functions": [
     {
+      "id": "invalidate-client-pending-request",
+      "name": "InvalidateClientPendingRequest",
+      "category": "LevelStreaming",
+      "signature": "InvalidateClientPendingRequest(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FNetLevelVisibilityState*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
       "id": "make-safe-level-name",
       "name": "MakeSafeLevelName",
       "category": "LevelStreaming",
@@ -154,51 +167,30 @@
       "returnType": "TCHAR*"
     },
     {
-      "id": "post-load",
-      "name": "PostLoad",
+      "id": "is-default",
+      "name": "IsDefault",
       "category": "LevelStreaming",
-      "signature": "PostLoad(Target)",
+      "signature": "IsDefault(Target)",
       "params": [
         {
           "name": "Target",
-          "type": "ULevelStreaming*"
+          "type": "FLevelAnnotation*"
         }
       ],
-      "returnType": "Void"
+      "returnType": "Bool"
     },
     {
-      "id": "serialize",
-      "name": "Serialize",
+      "id": "get-world-partition-cell",
+      "name": "GetWorldPartitionCell",
       "category": "LevelStreaming",
-      "signature": "Serialize(Target, Ar)",
+      "signature": "GetWorldPartitionCell(Target)",
       "params": [
         {
           "name": "Target",
           "type": "ULevelStreaming*"
-        },
-        {
-          "name": "Ar",
-          "type": "FArchive&"
         }
       ],
-      "returnType": "Void"
-    },
-    {
-      "id": "post-edit-change-property",
-      "name": "PostEditChangeProperty",
-      "category": "LevelStreaming",
-      "signature": "PostEditChangeProperty(Target, Property Changed Event)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "ULevelStreaming*"
-        },
-        {
-          "name": "Property Changed Event",
-          "type": "FPropertyChangedEvent&"
-        }
-      ],
-      "returnType": "Void"
+      "returnType": "IWorldPartitionCell*"
     },
     {
       "id": "remove-streaming-volume-duplicates",
@@ -215,22 +207,31 @@
       "docs": "Remove duplicates in EditorStreamingVolumes list"
     },
     {
-      "id": "set-current-state",
-      "name": "SetCurrentState",
+      "id": "get-current-state",
+      "name": "GetCurrentState",
       "category": "LevelStreaming",
-      "signature": "SetCurrentState(Target, New State)",
+      "signature": "GetCurrentState(Target)",
       "params": [
         {
           "name": "Target",
           "type": "ULevelStreaming*"
-        },
-        {
-          "name": "New State",
-          "type": "ELevelStreamingState"
         }
       ],
-      "returnType": "Void",
-      "docs": "Updates the current state of the streaming level and notifies any observers."
+      "returnType": "PRAGMA_DISABLE_DEPRECATION_WARNINGS ECurrentState",
+      "docs": "Returns the current loaded/visible state of the streaming level."
+    },
+    {
+      "id": "get-level-streaming-state",
+      "name": "GetLevelStreamingState",
+      "category": "LevelStreaming",
+      "signature": "GetLevelStreamingState(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "PRAGMA_ENABLE_DEPRECATION_WARNINGS ELevelStreamingState"
     },
     {
       "id": "is-waiting-for-net-visibility-transaction-ack",
@@ -274,6 +275,20 @@
       "docs": "Set the current state of the current visibility/streaming transaction"
     },
     {
+      "id": "get-should-be-visible-flag",
+      "name": "GetShouldBeVisibleFlag",
+      "category": "LevelStreaming",
+      "signature": "GetShouldBeVisibleFlag(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns the value of bShouldBeVisible. Use ShouldBeVisible to query whether a streaming level should be visible based on its own criteria."
+    },
+    {
       "id": "set-should-be-visible",
       "name": "SetShouldBeVisible",
       "category": "LevelStreaming",
@@ -290,6 +305,34 @@
       ],
       "returnType": "Void",
       "docs": "Sets the should be visible flag and marks the streaming level as requiring consideration."
+    },
+    {
+      "id": "should-require-full-visibility-to-render",
+      "name": "ShouldRequireFullVisibilityToRender",
+      "category": "LevelStreaming",
+      "signature": "ShouldRequireFullVisibilityToRender(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether level should start to render only when it will be fully added to the world or not."
+    },
+    {
+      "id": "can-replicate-streaming-status",
+      "name": "CanReplicateStreamingStatus",
+      "category": "LevelStreaming",
+      "signature": "CanReplicateStreamingStatus(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether level status can be replicated from the server to the client"
     },
     {
       "id": "set-should-be-loaded",
@@ -310,6 +353,20 @@
       "docs": "Virtual that can be overridden to change whether a streaming level should be loaded.\nDoesn't do anything at the base level as should be loaded defaults to true"
     },
     {
+      "id": "get-level-lod-index",
+      "name": "GetLevelLODIndex",
+      "category": "LevelStreaming",
+      "signature": "GetLevelLODIndex(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Returns the world composition level LOD index."
+    },
+    {
       "id": "set-level-lod-index",
       "name": "SetLevelLODIndex",
       "category": "LevelStreaming",
@@ -326,6 +383,20 @@
       ],
       "returnType": "Void",
       "docs": "Sets the world composition level LOD index and marks the streaming level as requiring consideration."
+    },
+    {
+      "id": "get-priority",
+      "name": "GetPriority",
+      "category": "LevelStreaming",
+      "signature": "GetPriority(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Int",
+      "docs": "Sets the relative priority of considering the streaming level. Changing the priority will not interrupt the currently considered level, but will affect the next time a level is being selected for evaluation."
     },
     {
       "id": "set-priority",
@@ -378,6 +449,48 @@
       "docs": "Restore the original streaming level priority after a call to SetPriorityOverride()."
     },
     {
+      "id": "has-load-request-pending",
+      "name": "HasLoadRequestPending",
+      "category": "LevelStreaming",
+      "signature": "HasLoadRequestPending(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the streaming level is in the loading state."
+    },
+    {
+      "id": "has-loaded-level",
+      "name": "HasLoadedLevel",
+      "category": "LevelStreaming",
+      "signature": "HasLoadedLevel(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether the streaming level has loaded a level."
+    },
+    {
+      "id": "get-async-request-i-ds",
+      "name": "GetAsyncRequestIDs",
+      "category": "LevelStreaming",
+      "signature": "GetAsyncRequestIDs(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "TArray<int32>&",
+      "docs": "Returns the RequestIDs for the async load requests required to load the level. These IDs are cleared during OnLoadingFinished"
+    },
+    {
       "id": "get-is-requesting-unload-and-removal",
       "name": "GetIsRequestingUnloadAndRemoval",
       "category": "LevelStreaming",
@@ -410,6 +523,20 @@
       "docs": "Sets if the streaming level should be unloaded and removed."
     },
     {
+      "id": "get-should-be-visible-in-editor",
+      "name": "GetShouldBeVisibleInEditor",
+      "category": "LevelStreaming",
+      "signature": "GetShouldBeVisibleInEditor(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the streaming level should be visible in the editor."
+    },
+    {
       "id": "set-should-be-visible-in-editor",
       "name": "SetShouldBeVisibleInEditor",
       "category": "LevelStreaming",
@@ -426,6 +553,48 @@
       ],
       "returnType": "Void",
       "docs": "Sets if the streaming level should be visible in the editor."
+    },
+    {
+      "id": "show-in-level-collection",
+      "name": "ShowInLevelCollection",
+      "category": "LevelStreaming",
+      "signature": "ShowInLevelCollection(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the streaming level is visible in LevelCollectionModel"
+    },
+    {
+      "id": "is-user-managed",
+      "name": "IsUserManaged",
+      "category": "LevelStreaming",
+      "signature": "IsUserManaged(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns if the streaming level can be modified by user"
+    },
+    {
+      "id": "get-world-asset",
+      "name": "GetWorldAsset",
+      "category": "LevelStreaming",
+      "signature": "GetWorldAsset(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "TSoftObjectPtr<UWorld>&",
+      "docs": "Returns a constant reference to the world asset this streaming level object references"
     },
     {
       "id": "set-world-asset",
@@ -543,6 +712,32 @@
       "docs": "Return whether this level should be visible/ associated with the world if it is\nloaded.\n@return true if the level should be visible, false otherwise"
     },
     {
+      "id": "should-block-on-unload",
+      "name": "ShouldBlockOnUnload",
+      "category": "LevelStreaming",
+      "signature": "ShouldBlockOnUnload(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "should-be-always-loaded",
+      "name": "ShouldBeAlwaysLoaded",
+      "category": "LevelStreaming",
+      "signature": "ShouldBeAlwaysLoaded(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "ULevelStreaming*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
       "id": "get-streaming-volume-bounds",
       "name": "GetStreamingVolumeBounds",
       "category": "LevelStreaming",
@@ -571,10 +766,10 @@
       "docs": "Gets a pointer to the LoadedLevel value"
     },
     {
-      "id": "post-edit-undo",
-      "name": "PostEditUndo",
+      "id": "clear-loaded-level",
+      "name": "ClearLoadedLevel",
       "category": "LevelStreaming",
-      "signature": "PostEditUndo(Target)",
+      "signature": "ClearLoadedLevel(Target)",
       "params": [
         {
           "name": "Target",
@@ -582,7 +777,7 @@
         }
       ],
       "returnType": "Void",
-      "docs": "Override Pre/PostEditUndo functions to handle editor transform"
+      "docs": "Sets the LoadedLevel value to NULL"
     },
     {
       "id": "get-world",
@@ -928,32 +1123,6 @@
         }
       ],
       "returnType": "Void"
-    },
-    {
-      "id": "request-level",
-      "name": "RequestLevel",
-      "category": "LevelStreaming",
-      "signature": "RequestLevel(Target, Persistent World, Allow Level Load Requests, Block Policy)",
-      "params": [
-        {
-          "name": "Target",
-          "type": "ULevelStreaming*"
-        },
-        {
-          "name": "Persistent World",
-          "type": "UWorld*"
-        },
-        {
-          "name": "Allow Level Load Requests",
-          "type": "Bool"
-        },
-        {
-          "name": "Block Policy",
-          "type": "EReqLevelBlock"
-        }
-      ],
-      "returnType": "Bool",
-      "docs": "Try to find loaded level in memory, issue a loading request otherwise\n@param\tPersistentWorld\t\t\tPersistent world\n@param\tbAllowLevelLoadRequests\tWhether to allow level load requests\n@param\tBlockPolicy\t\t\t\tWhether loading operation should block\n@return\t\t\t\t\t\t\ttrue if the load request was issued or a package was already loaded"
     }
   ]
 }
