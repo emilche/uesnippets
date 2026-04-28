@@ -9,7 +9,7 @@
   ],
   "functions": [
     {
-      "id": "convert",
+      "id": "convert-8c8371",
       "name": "Convert",
       "category": "TransformCalculus",
       "signature": "Convert(Transform)",
@@ -23,10 +23,24 @@
       "docs": "Provides default logic (used by TransformCast) to convert one transform type to another via a conversion ctor."
     },
     {
-      "id": "decltype-9c6f80",
+      "id": "convert-0f7967",
+      "name": "Convert",
+      "category": "TransformCalculus",
+      "signature": "Convert<OtherTransformType>(Transform)",
+      "params": [
+        {
+          "name": "Transform",
+          "type": "OtherTransformType&"
+        }
+      ],
+      "returnType": "template<OtherTransformType> TransformType",
+      "docs": "Default Conversion via a conversion ctor.\nNote we are not using perfect forwarding here. Our types don't generally support move operations, nor do they make sense.\nVS 2013 seems to have trouble resolving the specializations below in the presence of perfect forwarding semantics."
+    },
+    {
+      "id": "decltype-5187fe",
       "name": "decltype",
       "category": "TransformCalculus",
-      "signature": "decltype(Transform)",
+      "signature": "decltype<ResultType, TransformType>(Transform)",
       "params": [
         {
           "name": "Transform",
@@ -37,10 +51,10 @@
       "docs": "Casts one TransformType to ResultType using rules laid out by TransformConverter<>::Convert<>().\nReturn type uses decltype to support classes that can return by const-ref more efficiently than returning a new value."
     },
     {
-      "id": "concatenate",
+      "id": "concatenate-24bcab",
       "name": "Concatenate",
       "category": "TransformCalculus",
-      "signature": "Concatenate(LHS, RHS)",
+      "signature": "Concatenate<TransformTypeA, TransformTypeB>(LHS, RHS)",
       "params": [
         {
           "name": "LHS",
@@ -55,10 +69,46 @@
       "docs": "Provides default rules defining the result of concatenating two types. By default, nothing is supported\nbecause the code cannot know in general what two types result in after concatenation."
     },
     {
-      "id": "decltype-94c7a8",
+      "id": "concatenate-cf819e",
+      "name": "Concatenate",
+      "category": "TransformCalculus",
+      "signature": "Concatenate<ReturnType, LHSType, RHSType>(LHS, RHS)",
+      "params": [
+        {
+          "name": "LHS",
+          "type": "LHSType&"
+        },
+        {
+          "name": "RHS",
+          "type": "RHSType&"
+        }
+      ],
+      "returnType": "template<ReturnType,LHSType,RHSType> [ [ nodiscard ] ] ReturnType",
+      "docs": "Special overload that allows one to explicitly define the result type, which applies TransformCast on each argument first."
+    },
+    {
+      "id": "concatenate-903f48",
+      "name": "Concatenate",
+      "category": "TransformCalculus",
+      "signature": "Concatenate<TransformType>(LHS, RHS)",
+      "params": [
+        {
+          "name": "LHS",
+          "type": "TransformType&"
+        },
+        {
+          "name": "RHS",
+          "type": "TransformType& RHS ) -> decltype ( LHS . Concatenate ("
+        }
+      ],
+      "returnType": "template<TransformType> [ [ nodiscard ] ] auto",
+      "docs": "Specialization for concatenating two transforms of the same type.\nBy default we try to use a member function on the type.\n@param LHS Transformation that goes from space A to space B\n@param RHS Transformation that goes from space B to space C.\n@return a new transform representing the transformation from the input space of LHS to the output space of RHS."
+    },
+    {
+      "id": "decltype-b0d9e1",
       "name": "decltype",
       "category": "TransformCalculus",
-      "signature": "decltype(Transform C To Rest)",
+      "signature": "decltype<TransformType1, TransformType2>(Transform C To Rest)",
       "params": [
         {
           "name": "Transform C To Rest",
@@ -72,7 +122,7 @@
       "id": "inverse",
       "name": "Inverse",
       "category": "TransformCalculus",
-      "signature": "Inverse(Inverse)",
+      "signature": "Inverse<TransformType>(Inverse)",
       "params": [
         {
           "name": "Inverse",
@@ -83,10 +133,10 @@
       "docs": "Inverts a transform from space A to space B so it transforms from space B to space A.\nBy default attempts to call a member function on the transform type.\n@param Transform Input transform from space A to space B.\n@return Inverted transform from space B to space A."
     },
     {
-      "id": "transform-point",
+      "id": "transform-point-b44e98",
       "name": "TransformPoint",
       "category": "TransformCalculus",
-      "signature": "TransformPoint(Transform, Point)",
+      "signature": "TransformPoint<TransformType, PositionType>(Transform, Point)",
       "params": [
         {
           "name": "Transform",
@@ -101,10 +151,10 @@
       "docs": "Generic implementation of TransformPoint. Attempts to use a member function of the TransformType."
     },
     {
-      "id": "transform-vector",
+      "id": "transform-vector-26fbf6",
       "name": "TransformVector",
       "category": "TransformCalculus",
-      "signature": "TransformVector(Transform, Vector)",
+      "signature": "TransformVector<TransformType, VectorType>(Transform, Vector)",
       "params": [
         {
           "name": "Transform",
@@ -117,6 +167,42 @@
       ],
       "returnType": "template<TransformType,VectorType> [ [ nodiscard ] ] VectorType",
       "docs": "Generic implementation of TransformVector. Attempts to use a member function of the TransformType."
+    },
+    {
+      "id": "transform-point-8d6f70",
+      "name": "TransformPoint",
+      "category": "TransformCalculus",
+      "signature": "TransformPoint<PositionType>(Transform, Point)",
+      "params": [
+        {
+          "name": "Transform",
+          "type": "Float"
+        },
+        {
+          "name": "Point",
+          "type": "UE::Math::TVector<PositionType>&"
+        }
+      ],
+      "returnType": "template<PositionType> [ [ nodiscard ] ] UE::Math::TVector<PositionType>",
+      "docs": "Specialization for uniform Scale."
+    },
+    {
+      "id": "transform-vector-ad751d",
+      "name": "TransformVector",
+      "category": "TransformCalculus",
+      "signature": "TransformVector<VectorType>(Transform, Vector)",
+      "params": [
+        {
+          "name": "Transform",
+          "type": "Float"
+        },
+        {
+          "name": "Vector",
+          "type": "UE::Math::TVector<VectorType>&"
+        }
+      ],
+      "returnType": "template<VectorType> [ [ nodiscard ] ] UE::Math::TVector<VectorType>",
+      "docs": "Specialization for uniform Scale."
     }
   ]
 }

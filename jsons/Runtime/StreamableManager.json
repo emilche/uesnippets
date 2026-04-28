@@ -41,7 +41,7 @@
       "id": "create",
       "name": "Create",
       "category": "StreamableManager",
-      "signature": "Create(Debug Name Or Location)",
+      "signature": "Create<DebugNameType>(Debug Name Or Location)",
       "params": [
         {
           "name": "Debug Name Or Location",
@@ -125,7 +125,7 @@
       "id": "is-type",
       "name": "IsType",
       "category": "StreamableManager",
-      "signature": "IsType(Target)",
+      "signature": "IsType<SubClassType>(Target)",
       "params": [
         {
           "name": "Target",
@@ -571,7 +571,7 @@
       "docs": "Gets list of assets references this load was started with. This will be the paths before redirectors, and not all of these are guaranteed to be loaded\n@param AssetList  Output array for requested assets. Array is Reset before adding values.\n@param bIncludeChildren Whether the child handles should be included in the search."
     },
     {
-      "id": "get-loaded-assets",
+      "id": "get-loaded-assets-76cc5d",
       "name": "GetLoadedAssets",
       "category": "StreamableManager",
       "signature": "GetLoadedAssets(Target, Loaded Assets)",
@@ -587,6 +587,24 @@
       ],
       "returnType": "Void",
       "docs": "Adds all loaded assets if load has succeeded. Some entries will be null if loading failed"
+    },
+    {
+      "id": "get-loaded-assets-f71242",
+      "name": "GetLoadedAssets",
+      "category": "StreamableManager",
+      "signature": "GetLoadedAssets<T>(Target, Loaded Assets)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStreamableHandle*"
+        },
+        {
+          "name": "Loaded Assets",
+          "type": "TArray<T*>&"
+        }
+      ],
+      "returnType": "template<class T> void",
+      "docs": "Templated version of above. Entries that fail to cast will also be null."
     },
     {
       "id": "get-loaded-asset",
@@ -777,7 +795,7 @@
       "id": "find-or-add-context-data",
       "name": "FindOrAddContextData",
       "category": "StreamableManager",
-      "signature": "FindOrAddContextData(Target)",
+      "signature": "FindOrAddContextData<T>(Target)",
       "params": [
         {
           "name": "Target",
@@ -791,7 +809,7 @@
       "id": "add-context-data",
       "name": "AddContextData",
       "category": "StreamableManager",
-      "signature": "AddContextData(Target, New Data)",
+      "signature": "AddContextData<T>(Target, New Data)",
       "params": [
         {
           "name": "Target",
@@ -809,7 +827,7 @@
       "id": "find-first-context-data-of-type",
       "name": "FindFirstContextDataOfType",
       "category": "StreamableManager",
-      "signature": "FindFirstContextDataOfType(Target)",
+      "signature": "FindFirstContextDataOfType<T>(Target)",
       "params": [
         {
           "name": "Target",
@@ -823,7 +841,7 @@
       "id": "get-context-data-of-type",
       "name": "GetContextDataOfType",
       "category": "StreamableManager",
-      "signature": "GetContextDataOfType(Target)",
+      "signature": "GetContextDataOfType<T>(Target)",
       "params": [
         {
           "name": "Target",
@@ -862,7 +880,7 @@
       "docs": "This is the primary streamable operation. Requests streaming of one or more target objects. When complete, a delegate function is called. Returns a Streamable Handle.\n@param Params\t\t\t\tLoad Parameters\n@param DebugName\t\t\t\t[optional] Name of this handle, either FString or anything that can construct FString, will be reported in debug tools\n@param Location\t\t\t\t[optional] Is not intended for direct use, the parameter catches call site source location. That location is used for debug tools output."
     },
     {
-      "id": "load-synchronous",
+      "id": "load-synchronous-257881",
       "name": "LoadSynchronous",
       "category": "StreamableManager",
       "signature": "LoadSynchronous(Target, Target, Manage Active Handle, Request Handle Pointer, Location)",
@@ -893,6 +911,38 @@
       ],
       "returnType": "UObject*",
       "docs": "Synchronously load the referred asset and return the loaded object, or nullptr if it can't be found. This can be very slow and may stall the game thread for several seconds.\n@param Target\t\t\t\tSpecific asset to load off disk\n@param bManageActiveHandle\t[optional] If true, the manager will keep the streamable handle active until explicitly released\n@param RequestHandlePointer\t[optional] If non-null, this will set the handle to the handle used to make this request. This useful for later releasing the handle\n@param Location\t\t\t\t[optional] Is not intended for direct use, the parameter catches call site source location. That location is used for debug tools output."
+    },
+    {
+      "id": "load-synchronous-5209bf",
+      "name": "LoadSynchronous",
+      "category": "StreamableManager",
+      "signature": "LoadSynchronous<T>(Target, Target, Manage Active Handle, Request Handle Pointer, Location)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "FStreamableManager*"
+        },
+        {
+          "name": "Target",
+          "type": "TSoftObjectPtr<T>&"
+        },
+        {
+          "name": "Manage Active Handle",
+          "type": "Bool",
+          "default": "false"
+        },
+        {
+          "name": "Request Handle Pointer",
+          "type": "TSharedPtr<FStreamableHandle>*",
+          "default": "nullptr"
+        },
+        {
+          "name": "Location",
+          "type": "UE::FSourceLocation",
+          "default": "UE::FSourceLocation::Current()"
+        }
+      ],
+      "returnType": "template<T> T*"
     },
     {
       "id": "create-combined-handle-aee98d",
@@ -1129,7 +1179,7 @@
       "id": "for-each-loaded-asset",
       "name": "ForEachLoadedAsset",
       "category": "StreamableManager",
-      "signature": "ForEachLoadedAsset(Target, Callable)",
+      "signature": "ForEachLoadedAsset<CallableT>(Target, Callable)",
       "params": [
         {
           "name": "Target",
@@ -1144,10 +1194,10 @@
       "docs": "Invokes a callable for each loaded asset if load has succeeded. Some entries will be null if loading failed\n@param Callable\tCallable object"
     },
     {
-      "id": "request-async-load-19e459",
+      "id": "request-async-load-436173",
       "name": "RequestAsyncLoad",
       "category": "StreamableManager",
-      "signature": "RequestAsyncLoad(Target, Targets To Stream, Callback, Priority, Manage Active Handle, Start Stalled, Debug Name, Location)",
+      "signature": "RequestAsyncLoad<PathContainerType, FuncType>(Target, Targets To Stream, Callback, Priority, Manage Active Handle, Start Stalled, Debug Name, Location)",
       "params": [
         {
           "name": "Target",
@@ -1188,7 +1238,7 @@
       "id": "request-sync-load",
       "name": "RequestSyncLoad",
       "category": "StreamableManager",
-      "signature": "RequestSyncLoad(Target, Targets To Stream, Manage Active Handle, Debug Name, Location)",
+      "signature": "RequestSyncLoad<PathContainerType>(Target, Targets To Stream, Manage Active Handle, Debug Name, Location)",
       "params": [
         {
           "name": "Target",

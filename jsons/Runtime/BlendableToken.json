@@ -10,10 +10,10 @@
   ],
   "functions": [
     {
-      "id": "blend-value-6a5207",
+      "id": "blend-value-c35f09",
       "name": "BlendValue",
       "category": "BlendableToken",
-      "signature": "BlendValue(Target, Out Blend, In Value, Weight, Blend Type, Initial Value Store)",
+      "signature": "BlendValue<InType, WorkingDataType, SourceDataType>(Target, Out Blend, In Value, Weight, Blend Type, Initial Value Store)",
       "params": [
         {
           "name": "Target",
@@ -44,10 +44,10 @@
       "docs": "Implementation of custom blend logic should be as follows (using doubles as an example).\nSpecializing TBlendableTokenTraits for a particular input data type causes WorkingDataType to be used during the blending operation.\nWhere WorkingDataType belongs to a namespace, ADL will be employed to discover any relevant overloads for BlendValue that match the necessary types.\nThis allows blending of any arbitrary type into the WorkingDataType.\nnamespace MovieScene\n{\n// Define a custom namespaced type that will be used to calculate blends between doubles\nstruct FBlendableDouble\n{\nFBlendableDouble()\n: AbsoluteTotal(0.0), AdditiveTotal(0.0)\n{}\ndouble AbsoluteTotal;\ndouble AdditiveTotal;\nTOptional<float> TotalWeight;\ndouble Resolve(TMovieSceneInitialValueStore<int32>& InitialValueStore)\n{\nif (TotalWeight.IsSet())\n{\nif (TotalWeight.GetValue() == 0.f)\n{\nAbsoluteTotal = InitialValueStore.GetInitialValue();\n}\nelse\n{\nAbsoluteTotal /= TotalWeight.GetValue();\n}\n}\nreturn AbsoluteTotal + AdditiveTotal;\n}\n};\nvoid BlendValue(FBlendableDouble& OutBlend, double InValue, float Weight, EMovieSceneBlendType BlendType, TMovieSceneInitialValueStore<double>& InitialValueStore)\n{\nif (BlendType == EMovieSceneBlendType::Absolute || BlendType == EMovieSceneBlendType::Relative)\n{\nif (BlendType == EMovieSceneBlendType::Relative)\n{\nOutBlend.AbsoluteTotal += (InitialValueStore.GetInitialValue() + InValue) * Weight;\n}\nelse\n{\nOutBlend.AbsoluteTotal += InValue * Weight;\n}\nOutBlend.TotalWeight = OutBlend.TotalWeight.Get(0.f) + Weight;\n}\nelse if (BlendType == EMovieSceneBlendType::Additive)\n{\nOutBlend.AdditiveTotal += InValue * Weight;\n}\n}\n}\ntemplate<> struct TBlendableTokenTraits<double> { typedef UE::MovieScene::FBlendableDouble WorkingDataType; };"
     },
     {
-      "id": "blend-value-af0882",
+      "id": "blend-value-14b8c6",
       "name": "BlendValue",
       "category": "BlendableToken",
-      "signature": "BlendValue(Target, Out Blend, In Value, Weight, Blend Type, Blending Order, Initial Value Store)",
+      "signature": "BlendValue<InType, WorkingDataType, SourceDataType>(Target, Out Blend, In Value, Weight, Blend Type, Blending Order, Initial Value Store)",
       "params": [
         {
           "name": "Target",
