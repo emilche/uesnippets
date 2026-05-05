@@ -1,0 +1,184 @@
+{
+  "id": "anim-curve-compression-codec",
+  "label": "AnimCurveCompressionCodec",
+  "includepath": "Animation/AnimCurveCompressionCodec.h",
+  "includes": [
+    "CoreMinimal",
+    "AnimTypes",
+    "AnimCompressionTypes",
+    "AnimCurveCompressionCodec.generated"
+  ],
+  "functions": [
+    {
+      "id": "validate-compressed-data",
+      "name": "ValidateCompressedData",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "ValidateCompressedData(Target, Data Owner, Anim Seq)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Data Owner",
+          "type": "UObject*"
+        },
+        {
+          "name": "Anim Seq",
+          "type": "FCompressedAnimSequence&"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Called on load and when cooking to validate that the compressed data is good.\nCodecs should perform necessary validation and emit an error when appropriate.\ne.g: UE_LOG(LogAnimationCompression, Error, TEXT(\"Bad data!\"));\nReturns true when the data is valid, false otherwise."
+    },
+    {
+      "id": "is-codec-valid",
+      "name": "IsCodecValid",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "IsCodecValid(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Returns whether or not we can use this codec to compress."
+    },
+    {
+      "id": "compress",
+      "name": "Compress",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "Compress(Target, Anim Seq, False)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Anim Seq",
+          "type": "FCompressibleAnimData&"
+        },
+        {
+          "name": "False",
+          "type": "FAnimCurveCompressionResult& OutResult ) PURE_VIRTUAL ( UAnimCurveCompressionCodec::Compress,return"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Compresses the curve data from an animation sequence."
+    },
+    {
+      "id": "estimate-compression-memory-usage",
+      "name": "EstimateCompressionMemoryUsage",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "EstimateCompressionMemoryUsage(Target, Anim Sequence)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Anim Sequence",
+          "type": "UAnimSequence&"
+        }
+      ],
+      "returnType": "Int64",
+      "docs": "Estimates the peak memory usage in bytes needed to compress the given data with this codec.\nThis is used to make informed scheduling decisions during asset cooking. Estimates that are too low may cause\nout-of-memory conditions. Estimates that are too high can unnecessarily limit the number of concurrent cook\nprocesses.\nValues below zero indicate that no estimate has been given and high memory usage is hence assumed.\n@param AnimSequence\tThe Animation Sequence to estimate the memory usage for.\n@returns Estimated peak memory usage in bytes. Values < 0 indicate maximum memory usage."
+    },
+    {
+      "id": "populate-ddc-key",
+      "name": "PopulateDDCKey",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "PopulateDDCKey(Target, Ar)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Ar",
+          "type": "FArchive&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Called to generate a unique DDC key for this codec instance.\nA suitable key should be generated from: the InstanceGuid, a codec version, and all relevant properties that drive the behavior."
+    },
+    {
+      "id": "decompress-curves",
+      "name": "DecompressCurves",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "DecompressCurves(Target, Anim Seq, Curves, Decompress Curves)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Anim Seq",
+          "type": "FCompressedAnimSequence&"
+        },
+        {
+          "name": "Curves",
+          "type": "FBlendedCurve&"
+        },
+        {
+          "name": "Decompress Curves",
+          "type": "float CurrentTime ) PURE_VIRTUAL ( UAnimCurveCompressionCodec::"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Decompresses all the active blended curves.\nNote: Codecs should _NOT_ rely on any member properties during decompression. Decompression\nbehavior should entirely be driven by code and the compressed data."
+    },
+    {
+      "id": "decompress-curve-4783b7",
+      "name": "DecompressCurve",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "DecompressCurve(Target, Anim Seq, Curve Name, F)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Anim Seq",
+          "type": "FCompressedAnimSequence&"
+        },
+        {
+          "name": "Curve Name",
+          "type": "Name"
+        },
+        {
+          "name": "F",
+          "type": "float CurrentTime ) PURE_VIRTUAL ( UAnimCurveCompressionCodec::DecompressCurve,return 0 . 0"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Decompress a single curve.\nNote: Codecs should _NOT_ rely on any member properties during decompression. Decompression\nbehavior should entirely be driven by code and the compressed data."
+    },
+    {
+      "id": "decompress-curve-0e1ab5",
+      "name": "DecompressCurve",
+      "category": "AnimCurveCompressionCodec",
+      "signature": "DecompressCurve(Target, Anim Seq, Curve UID, Current Time)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UAnimCurveCompressionCodec*"
+        },
+        {
+          "name": "Anim Seq",
+          "type": "FCompressedAnimSequence&"
+        },
+        {
+          "name": "Curve UID",
+          "type": "SmartName::UID_Type"
+        },
+        {
+          "name": "Current Time",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Float"
+    }
+  ]
+}

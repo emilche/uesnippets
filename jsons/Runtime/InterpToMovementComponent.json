@@ -1,0 +1,909 @@
+{
+  "id": "interp-to-movement-component",
+  "label": "InterpToMovementComponent",
+  "includepath": "Components/InterpToMovementComponent.h",
+  "includes": [
+    "CoreMinimal",
+    "HitResult",
+    "MovementComponent",
+    "ObjectMacros",
+    "InterpToMovementComponent.generated"
+  ],
+  "functions": [
+    {
+      "id": "tick-component",
+      "name": "TickComponent",
+      "category": "InterpToMovementComponent",
+      "signature": "TickComponent(Target, Delta Time, Tick Type, This Tick Function)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Delta Time",
+          "type": "Float"
+        },
+        {
+          "name": "Tick Type",
+          "type": "ELevelTick"
+        },
+        {
+          "name": "This Tick Function",
+          "type": "FActorComponentTickFunction*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "begin-play",
+      "name": "BeginPlay",
+      "category": "InterpToMovementComponent",
+      "signature": "BeginPlay(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "apply-world-offset",
+      "name": "ApplyWorldOffset",
+      "category": "InterpToMovementComponent",
+      "signature": "ApplyWorldOffset(Target, In Offset, World Shift)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "In Offset",
+          "type": "FVector&"
+        },
+        {
+          "name": "World Shift",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "stop-movement-immediately",
+      "name": "StopMovementImmediately",
+      "category": "InterpToMovementComponent",
+      "signature": "StopMovementImmediately(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Void"
+    },
+    {
+      "id": "check-still-in-world",
+      "name": "CheckStillInWorld",
+      "category": "InterpToMovementComponent",
+      "signature": "CheckStillInWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "This will check to see if the InterpTo is still in the world.  It will check things like\nthe KillZ, outside world bounds, etc. and handle the situation."
+    },
+    {
+      "id": "stop-simulating",
+      "name": "StopSimulating",
+      "category": "Game",
+      "signature": "StopSimulating(Target, Hit Result)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Hit Result",
+          "type": "FHitResult&"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clears the reference to UpdatedComponent, fires stop event, and stops ticking."
+    },
+    {
+      "id": "has-stopped-simulation",
+      "name": "HasStoppedSimulation",
+      "category": "InterpToMovementComponent",
+      "signature": "HasStoppedSimulation(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool"
+    },
+    {
+      "id": "get-simulation-time-step",
+      "name": "GetSimulationTimeStep",
+      "category": "InterpToMovementComponent",
+      "signature": "GetSimulationTimeStep(Target, Remaining Time, Iterations)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Remaining Time",
+          "type": "Float"
+        },
+        {
+          "name": "Iterations",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Float",
+      "docs": "Compute remaining time step given remaining time and current iterations.\nThe last iteration (limited by MaxSimulationIterations) always returns the remaining time, which may violate MaxSimulationTimeStep.\n@param RemainingTime\t\tRemaining time in the tick.\n@param Iterations\t\tCurrent iteration of the tick (starting at 1).\n@return The remaining time step to use for the next sub-step of iteration.\n@see MaxSimulationTimeStep, MaxSimulationIterations\n@see ShouldUseSubStepping()"
+    },
+    {
+      "id": "should-use-sub-stepping",
+      "name": "ShouldUseSubStepping",
+      "category": "InterpToMovementComponent",
+      "signature": "ShouldUseSubStepping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "docs": "Determine whether or not to use substepping in the InterpTo motion update.\nIf true, GetSimulationTimeStep() will be used to time-slice the update. If false, all remaining time will be used during the tick.\n@return Whether or not to use substepping in the InterpTo motion update.\n@see GetSimulationTimeStep()"
+    },
+    {
+      "id": "add-control-point-position",
+      "name": "AddControlPointPosition",
+      "category": "Control",
+      "signature": "AddControlPointPosition(Target, Pos, Position Is Relative)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Pos",
+          "type": "FVector"
+        },
+        {
+          "name": "Position Is Relative",
+          "type": "Bool",
+          "default": "true"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Add a control point that represents a position."
+    },
+    {
+      "id": "restart-movement",
+      "name": "RestartMovement",
+      "category": "Control",
+      "signature": "RestartMovement(Target, Initial Direction)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Initial Direction",
+          "type": "Float",
+          "default": "1.0f"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Reset to start. Sets time to zero and direction to 1."
+    },
+    {
+      "id": "finalise-control-points",
+      "name": "FinaliseControlPoints",
+      "category": "Control",
+      "signature": "FinaliseControlPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Initialise the control points array. Call after adding control points if they are add after begin play ."
+    },
+    {
+      "id": "reset-control-points",
+      "name": "ResetControlPoints",
+      "category": "Control",
+      "signature": "ResetControlPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Void",
+      "docs": "Clear the control points array and set to stopped."
+    },
+    {
+      "id": "get-duration",
+      "name": "GetDuration",
+      "category": "InterpToMovementComponent",
+      "signature": "GetDuration(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Float",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "Duration"
+      },
+      "docs": "Get public field UInterpToMovementComponent::Duration."
+    },
+    {
+      "id": "set-duration",
+      "name": "SetDuration",
+      "category": "InterpToMovementComponent",
+      "signature": "SetDuration(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "Duration"
+      },
+      "docs": "Set public field UInterpToMovementComponent::Duration."
+    },
+    {
+      "id": "get-pause-on-impact",
+      "name": "GetPauseOnImpact",
+      "category": "InterpToMovementComponent",
+      "signature": "GetPauseOnImpact(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "bPauseOnImpact"
+      },
+      "docs": "Get public field UInterpToMovementComponent::bPauseOnImpact."
+    },
+    {
+      "id": "set-pause-on-impact",
+      "name": "SetPauseOnImpact",
+      "category": "InterpToMovementComponent",
+      "signature": "SetPauseOnImpact(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "bPauseOnImpact"
+      },
+      "docs": "Set public field UInterpToMovementComponent::bPauseOnImpact."
+    },
+    {
+      "id": "get-sweep",
+      "name": "GetSweep",
+      "category": "InterpToMovementComponent",
+      "signature": "GetSweep(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "bSweep"
+      },
+      "docs": "Get public field UInterpToMovementComponent::bSweep."
+    },
+    {
+      "id": "set-sweep",
+      "name": "SetSweep",
+      "category": "InterpToMovementComponent",
+      "signature": "SetSweep(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "bSweep"
+      },
+      "docs": "Set public field UInterpToMovementComponent::bSweep."
+    },
+    {
+      "id": "get-teleport-type",
+      "name": "GetTeleportType",
+      "category": "InterpToMovementComponent",
+      "signature": "GetTeleportType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "ETeleportType",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "TeleportType"
+      },
+      "docs": "Get public field UInterpToMovementComponent::TeleportType."
+    },
+    {
+      "id": "set-teleport-type",
+      "name": "SetTeleportType",
+      "category": "InterpToMovementComponent",
+      "signature": "SetTeleportType(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "ETeleportType"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "TeleportType"
+      },
+      "docs": "Set public field UInterpToMovementComponent::TeleportType."
+    },
+    {
+      "id": "get-behaviour-type",
+      "name": "GetBehaviourType",
+      "category": "InterpToMovementComponent",
+      "signature": "GetBehaviourType(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "EInterpToBehaviourType",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "BehaviourType"
+      },
+      "docs": "Get public field UInterpToMovementComponent::BehaviourType."
+    },
+    {
+      "id": "set-behaviour-type",
+      "name": "SetBehaviourType",
+      "category": "InterpToMovementComponent",
+      "signature": "SetBehaviourType(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "EInterpToBehaviourType"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "BehaviourType"
+      },
+      "docs": "Set public field UInterpToMovementComponent::BehaviourType."
+    },
+    {
+      "id": "get-check-if-still-in-world",
+      "name": "GetCheckIfStillInWorld",
+      "category": "InterpToMovementComponent",
+      "signature": "GetCheckIfStillInWorld(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "bCheckIfStillInWorld"
+      },
+      "docs": "Get public field UInterpToMovementComponent::bCheckIfStillInWorld."
+    },
+    {
+      "id": "set-check-if-still-in-world",
+      "name": "SetCheckIfStillInWorld",
+      "category": "InterpToMovementComponent",
+      "signature": "SetCheckIfStillInWorld(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "bCheckIfStillInWorld"
+      },
+      "docs": "Set public field UInterpToMovementComponent::bCheckIfStillInWorld."
+    },
+    {
+      "id": "get-force-sub-stepping",
+      "name": "GetForceSubStepping",
+      "category": "InterpToMovementComponent",
+      "signature": "GetForceSubStepping(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Bool",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "bForceSubStepping"
+      },
+      "docs": "Get public field UInterpToMovementComponent::bForceSubStepping."
+    },
+    {
+      "id": "set-force-sub-stepping",
+      "name": "SetForceSubStepping",
+      "category": "InterpToMovementComponent",
+      "signature": "SetForceSubStepping(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Bool"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "bForceSubStepping"
+      },
+      "docs": "Set public field UInterpToMovementComponent::bForceSubStepping."
+    },
+    {
+      "id": "get-on-interp-to-reverse",
+      "name": "GetOnInterpToReverse",
+      "category": "InterpToMovementComponent",
+      "signature": "GetOnInterpToReverse(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "FOnInterpToReverseDelegate",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnInterpToReverse"
+      },
+      "docs": "Get public field UInterpToMovementComponent::OnInterpToReverse."
+    },
+    {
+      "id": "set-on-interp-to-reverse",
+      "name": "SetOnInterpToReverse",
+      "category": "InterpToMovementComponent",
+      "signature": "SetOnInterpToReverse(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "FOnInterpToReverseDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnInterpToReverse"
+      },
+      "docs": "Set public field UInterpToMovementComponent::OnInterpToReverse."
+    },
+    {
+      "id": "get-on-interp-to-stop",
+      "name": "GetOnInterpToStop",
+      "category": "InterpToMovementComponent",
+      "signature": "GetOnInterpToStop(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "FOnInterpToStopDelegate",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnInterpToStop"
+      },
+      "docs": "Get public field UInterpToMovementComponent::OnInterpToStop."
+    },
+    {
+      "id": "set-on-interp-to-stop",
+      "name": "SetOnInterpToStop",
+      "category": "InterpToMovementComponent",
+      "signature": "SetOnInterpToStop(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "FOnInterpToStopDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnInterpToStop"
+      },
+      "docs": "Set public field UInterpToMovementComponent::OnInterpToStop."
+    },
+    {
+      "id": "get-on-wait-begin-delegate",
+      "name": "GetOnWaitBeginDelegate",
+      "category": "InterpToMovementComponent",
+      "signature": "GetOnWaitBeginDelegate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "FOnInterpToWaitBeginDelegate",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnWaitBeginDelegate"
+      },
+      "docs": "Get public field UInterpToMovementComponent::OnWaitBeginDelegate."
+    },
+    {
+      "id": "set-on-wait-begin-delegate",
+      "name": "SetOnWaitBeginDelegate",
+      "category": "InterpToMovementComponent",
+      "signature": "SetOnWaitBeginDelegate(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "FOnInterpToWaitBeginDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnWaitBeginDelegate"
+      },
+      "docs": "Set public field UInterpToMovementComponent::OnWaitBeginDelegate."
+    },
+    {
+      "id": "get-on-wait-end-delegate",
+      "name": "GetOnWaitEndDelegate",
+      "category": "InterpToMovementComponent",
+      "signature": "GetOnWaitEndDelegate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "FOnInterpToWaitEndDelegate",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnWaitEndDelegate"
+      },
+      "docs": "Get public field UInterpToMovementComponent::OnWaitEndDelegate."
+    },
+    {
+      "id": "set-on-wait-end-delegate",
+      "name": "SetOnWaitEndDelegate",
+      "category": "InterpToMovementComponent",
+      "signature": "SetOnWaitEndDelegate(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "FOnInterpToWaitEndDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnWaitEndDelegate"
+      },
+      "docs": "Set public field UInterpToMovementComponent::OnWaitEndDelegate."
+    },
+    {
+      "id": "get-on-reset-delegate",
+      "name": "GetOnResetDelegate",
+      "category": "InterpToMovementComponent",
+      "signature": "GetOnResetDelegate(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "FOnInterpToResetDelegate",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnResetDelegate"
+      },
+      "docs": "Get public field UInterpToMovementComponent::OnResetDelegate."
+    },
+    {
+      "id": "set-on-reset-delegate",
+      "name": "SetOnResetDelegate",
+      "category": "InterpToMovementComponent",
+      "signature": "SetOnResetDelegate(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "FOnInterpToResetDelegate"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "OnResetDelegate"
+      },
+      "docs": "Set public field UInterpToMovementComponent::OnResetDelegate."
+    },
+    {
+      "id": "get-max-simulation-time-step",
+      "name": "GetMaxSimulationTimeStep",
+      "category": "InterpToMovementComponent",
+      "signature": "GetMaxSimulationTimeStep(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Float",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "MaxSimulationTimeStep"
+      },
+      "docs": "Get public field UInterpToMovementComponent::MaxSimulationTimeStep."
+    },
+    {
+      "id": "set-max-simulation-time-step",
+      "name": "SetMaxSimulationTimeStep",
+      "category": "InterpToMovementComponent",
+      "signature": "SetMaxSimulationTimeStep(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "MaxSimulationTimeStep"
+      },
+      "docs": "Set public field UInterpToMovementComponent::MaxSimulationTimeStep."
+    },
+    {
+      "id": "get-speed-multiplier",
+      "name": "GetSpeedMultiplier",
+      "category": "InterpToMovementComponent",
+      "signature": "GetSpeedMultiplier(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Float",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "SpeedMultiplier"
+      },
+      "docs": "Get public field UInterpToMovementComponent::SpeedMultiplier."
+    },
+    {
+      "id": "set-speed-multiplier",
+      "name": "SetSpeedMultiplier",
+      "category": "InterpToMovementComponent",
+      "signature": "SetSpeedMultiplier(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Float"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "SpeedMultiplier"
+      },
+      "docs": "Set public field UInterpToMovementComponent::SpeedMultiplier."
+    },
+    {
+      "id": "get-max-simulation-iterations",
+      "name": "GetMaxSimulationIterations",
+      "category": "InterpToMovementComponent",
+      "signature": "GetMaxSimulationIterations(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "Int",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "MaxSimulationIterations"
+      },
+      "docs": "Get public field UInterpToMovementComponent::MaxSimulationIterations."
+    },
+    {
+      "id": "set-max-simulation-iterations",
+      "name": "SetMaxSimulationIterations",
+      "category": "InterpToMovementComponent",
+      "signature": "SetMaxSimulationIterations(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "Int"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "MaxSimulationIterations"
+      },
+      "docs": "Set public field UInterpToMovementComponent::MaxSimulationIterations."
+    },
+    {
+      "id": "get-control-points",
+      "name": "GetControlPoints",
+      "category": "InterpToMovementComponent",
+      "signature": "GetControlPoints(Target)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        }
+      ],
+      "returnType": "TArray<FInterpControlPoint>",
+      "fieldAccessor": {
+        "kind": "get",
+        "owner": "UInterpToMovementComponent",
+        "field": "ControlPoints"
+      },
+      "docs": "Get public field UInterpToMovementComponent::ControlPoints."
+    },
+    {
+      "id": "set-control-points",
+      "name": "SetControlPoints",
+      "category": "InterpToMovementComponent",
+      "signature": "SetControlPoints(Target, Value)",
+      "params": [
+        {
+          "name": "Target",
+          "type": "UInterpToMovementComponent*"
+        },
+        {
+          "name": "Value",
+          "type": "TArray<FInterpControlPoint>"
+        }
+      ],
+      "returnType": "Void",
+      "fieldAccessor": {
+        "kind": "set",
+        "owner": "UInterpToMovementComponent",
+        "field": "ControlPoints"
+      },
+      "docs": "Set public field UInterpToMovementComponent::ControlPoints."
+    }
+  ]
+}
